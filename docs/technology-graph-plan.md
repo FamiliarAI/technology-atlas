@@ -2,6 +2,8 @@
 
 Status: planning only. Consolidated October 31, 2026. This document authorizes no implementation, migration, deployment, account creation, or research run.
 
+This plan supersedes the deprecated paid-report plan in `archive/AI_Takeoff_Project_Plan.md` (dated forecasts, PDF product, blog/thread funnel). That plan is history only and is not a goal, input, or constraint for this project.
+
 ## Product and immediate objective
 
 Build a **Technology Graph** for exploring proposed capabilities, their relationships, and dated evidence of progress. Fields and branches organize navigation. Milestones replace the idea of leaves: a milestone can have multiple upstream inputs, cross-field connections, and alternative research routes. The product is not constrained to a strict tree.

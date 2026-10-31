@@ -1,0 +1,13 @@
+import {cp,mkdir,rm,readFile,readdir} from 'node:fs/promises';
+import {validateTree} from '../web/tree-model.js';
+import {validateCollection} from '../web/collection-model.js';
+import {validateEvidence} from '../web/evidence-model.js';
+const data=JSON.parse(await readFile(new URL('../web/data/evidence.json',import.meta.url)));
+validateEvidence(data);
+const collection=JSON.parse(await readFile(new URL('../web/data/milestones.json',import.meta.url)));
+validateCollection(collection,data);
+const tree=JSON.parse(await readFile(new URL('../web/data/tree.json',import.meta.url)));
+validateTree(tree,collection,data);
+if((await readdir('web/data')).some(f=>!['evidence.json','milestones.json','tree.json'].includes(f)))throw Error('Unreviewed data must stay outside the served website');
+await rm('dist',{recursive:true,force:true}); await mkdir('dist'); await cp('web','dist',{recursive:true,filter:source=>source!=='web/data'&&!source.startsWith('web/data/')});
+console.log(`Built dist: ${collection.milestones.length} original milestones / ${collection.fields.length} fields; ${data.results.length} scoped studies, ${collection.evidenceAssociations.length} evidence attachments, ${tree.edges.length} proposed tree arrows; zero established prerequisite claims or forecast windows.`);
