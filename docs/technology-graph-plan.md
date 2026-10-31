@@ -1,6 +1,6 @@
 # Technology Graph plan
 
-Status: planning only. Consolidated October 31, 2026. This document authorizes no implementation, migration, deployment, account creation, or research run.
+Status: in progress. Updated October 31, 2026. The Atlas research pipeline below is adopted and has run on Biomedical Engineering and Robotics. Hosted deployment and account creation still require separate authorization.
 
 This plan supersedes the deprecated paid-report plan in `archive/AI_Takeoff_Project_Plan.md` (dated forecasts, PDF product, blog/thread funnel). That plan is history only and is not a goal, input, or constraint for this project.
 
@@ -10,7 +10,7 @@ Build a **Technology Graph** for exploring proposed capabilities, their relation
 
 Connections are directed and typed, with a mechanism, rationale, source support where available, and explicit uncertainty. A possible enabling component, accelerator, alternative approach, or feedback relationship is not proof of necessity or sufficiency. Prerequisite groups should express multiple inputs and alternative routes without implying that satisfying the group automatically completes a milestone.
 
-The highest-priority delivery is one complete workflow: **source intake and archiving → milestone or progress proposal → review → accepted change visible in an attractive graph**. Build the graph, progress model, intake, and frontend first. Keep future collaboration possible without building a public CMS now.
+The highest-priority delivery is one complete workflow: **source intake and archiving → milestone or progress proposal → machine acceptance → accepted change visible in an attractive graph**. Build the graph, progress model, intake, and frontend first. Keep future collaboration possible without building a public CMS now.
 
 ## Starting point and provenance
 
@@ -23,9 +23,30 @@ Consequences for the product:
 - Treat the 660 entries as generated candidates, not validated scientific consensus or a canonical list of open problems. Importing them does not validate them.
 - Preserve original wording, stable IDs, supplied references, audit findings, and revision history. The supplied references are field-level bibliographies; exact innovation-specific proposal attribution remains unconfirmed. Some pages are dead, and public archives do not always contain a copy.
 - The existing partial-progress audit checks narrower findings. It is not complete verification that each original proposal is well-defined, unresolved, revolutionary, correctly attributed, or supported by consensus.
-- A later editorial pass may keep, rewrite, merge by reference, or set aside a candidate after actual source reading. A rewrite preserves the original wording and records the reason and attribution for the change. There is no obligation to retain ten milestones per field.
+- The Atlas research pipeline (below) replaces the editorial pass: each field's problems are researched afresh from sources, and every original entry receives an explicit decision (covered, added or not added). Original wording is preserved alongside. There is no obligation to retain ten milestones per field.
+- A source re-check of Biomedical Engineering found that 4 of its 5 original citation links appear fabricated (no live page, no archive copy, unregistered DOI) and the fifth is a real document at a different URL (`research/source-recheck/field-09/existence.json`). The original bibliographies should be treated as unreliable across all fields.
 
-No new research or corpus-wide revalidation is initiated by this plan.
+## Atlas research pipeline (adopted October 31, 2026)
+
+The new Atlas is a separate project in `Atlas/`, with its own database (`Atlas/db/atlasdb.sqlite3`, not yet populated). The existing TechTree app and its database are unchanged. Current pipeline: `Atlas/research/fields_v5/` (`prompts/`, `tools/run_pipeline.py`, `tools/archive_and_accept.py`); `fields_v3/` and `fields_v4/` hold the experiments that led to it, including failed runs, kept as records.
+
+| Step | Model | What it does |
+|---|---|---|
+| 1a Research | Grok 4.7, high (`~/.grok/bin/grok`), web search and fetch, no schema | Finds the field's open problems from primary sources and writes plain-text notes with citations, completion criteria, current state, dependencies and approaches. |
+| 1b Format | GPT-6.1 Terra, high (Codex CLI bundled in ChatGPT.app), strict JSON schema, no web | Converts the notes to JSON without adding content. |
+| 2 Reconcile and merge | GPT-6.1 Sol, medium (Codex), web search, strict JSON schema | Decides each original entry (V2-ids) as COVERED, ADDED or NOT_ADDED, adds sourced problems the research missed, and adds dependencies from existing problems to added ones. Existing problems are otherwise copied unchanged. |
+| 3 Archive and machine acceptance | Script, no model | Saves every cited source and runs the acceptance rules below. |
+
+Design decisions:
+
+- Schemas follow OpenAI strict structured-output rules, so key presence, types, enums, id/URL/DOI/PMID patterns, word limits, item counts and conditional rules (for example, a `sourced` claim needs 1–5 citations) are enforced at generation time rather than validated afterwards. Grok's `--json-schema` constrains every intermediate message, so Grok is used only for unstructured research and Codex does all schema-bound steps.
+- Each problem records `identified_dependencies` (on problems already in the list, by id), `unidentified_dependencies` (described in words with free-text likely fields, to be matched later) and `approaches` (routes to solving it, not dependencies). Dependencies within a field are as important as those across fields.
+- The 66 fields are arbitrary navigation labels, not matching keys. Unidentified dependencies will be resolved later by semantic search across all problems (embeddings to shortlist candidates, a model to judge them); unmatched clusters indicate shared capabilities nobody has listed. This runs once more fields are done.
+- There is no human review. Each final list records a `review_process` (researched_by, formatted_by, reconciled_by, accepted_by) naming the model and effort behind each step. Sol is not described as a reviewer because it does not re-check content it copies.
+- Machine acceptance accepts a problem only if: the list passes its schema; identified dependencies resolve; there is no placeholder text; every cited source is reachable live or archived; every DOI and PMID is registered; and no quote is missing from a readable copy of its source. Unreadable copies are recorded as warnings.
+- Model runs vary: research for the same field produced substantially different problem lists across runs, and merge decisions on borderline originals can change between runs.
+
+Status: Biomedical Engineering has a final list in the current format (14 problems; 13 machine-accepted, 1 rejected because its only source was blocked and unarchived; 55 of 57 quotes verified in saved copies). Robotics has final lists in the earlier `related_problems` format and needs a re-run. CLI cost estimates for Grok research are about $2–2.60 per field; Codex steps run on the ChatGPT plan.
 
 ## Scope now and later
 
@@ -73,7 +94,7 @@ Editorial review status and scientific achievement status are independent. “Ac
 4. **Verify scope.** Check the actual source, distinguish its statements from interpretation, and identify unsupported qualifiers. Keep a planned experiment, research goal or background discussion separate from a demonstrated result.
 5. **Deduplicate and match.** Compare against existing proposals, progress events and sources. Offer candidate matches with reasons; do not silently overwrite, merge, or attach a result to every related milestone.
 6. **Propose graph changes.** Prepare inspectable milestone, progress-link and connection changes. State remaining gaps and any proposed completion decision explicitly.
-7. **Review.** Accept, request changes, reject, or set aside with a reason. Record the actor/time and preserve the proposal and supporting material. Acceptance does not turn a hypothesis into an established prerequisite.
+7. **Machine acceptance.** Accept or reject automatically against the acceptance rules, recording the reasons, the rules, and the models behind each step. There is no human review step. Acceptance does not turn a hypothesis into an established prerequisite.
 8. **Publish the accepted revision.** Make the accepted change visible in the graph, detail panel and chronological progress view. Preserve history and a path to revert.
 
 Processing must be retryable and idempotent: repeated submission, capture, extraction or import attempts must not create duplicate accepted events or apply the same change twice. Failed and incomplete stages remain visible and resumable.
@@ -94,7 +115,7 @@ Keep these roles distinct at claim level:
 
 “From the original notes” versus “newly found” is source origin, not source role. The same source may serve several roles only where separate passages or findings justify those uses.
 
-Store available PDFs and webpage captures in R2 where permitted. Link each capture in D1 to its original/resolved URL, authorship and publication metadata, retrieval time, hash, and exact supporting passage/locator. Distinguish publication, event and retrieval dates. Do not fabricate unavailable metadata. The UI should offer both **original source** and **saved source** access, with the version and any capture limitations visible.
+Every cited source is now captured locally in `Atlas/archive/` (`sources/<sha256>.<ext>`, with one `captures.jsonl` line per attempt), as private research copies not for redistribution or public display, falling back to an Internet Archive copy when the live page is unreadable. Which saved copies may be shown publicly is decided only if the Atlas is published. Later, store captures in R2. Link each capture in D1 to its original/resolved URL, authorship and publication metadata, retrieval time, hash, and exact supporting passage/locator. Distinguish publication, event and retrieval dates. Do not fabricate unavailable metadata. The UI should offer both **original source** and **saved source** access, with the version and any capture limitations visible.
 
 A successful capture does not establish evidence validity; a failed capture does not disprove a claim. Record blocked, incomplete and failed attempts separately from the scope assessment, and retain those outcomes in intake/review. A public archive may corroborate a source version but must not be the sole retained copy. A hash establishes the integrity of the retained bytes, not the authenticity or truth of the original source.
 
@@ -116,6 +137,9 @@ Provide a usable mobile/list alternative with access to the same milestones, sou
 | 2. Full-corpus migration and exploration | Repeatable import and graph/list usability on the real 660-entry corpus. | IDs, originals, source roles and history reconcile; generated candidates are not promoted to consensus; navigation, focus and labels remain usable across fields and on mobile. Renderer choice is supported by this evaluation. |
 | 3. Broader intake reliability and evidence | Milestone proposals and multi-milestone progress links, matching, capture recovery and review decisions. | Duplicate/match ambiguity is visible; partial versus completed criteria are explicit; suggestions cannot bypass review; unsupported claims and incomplete captures remain inspectable. |
 | 4. Hosted deployment readiness | Workers/D1/R2 configuration, migration rehearsal, recovery and operational checks. | Structured records and object references reconcile after import and restore; accepted changes remain attributable and reversible; hosted permissions and processing behavior are verified before release. Deployment requires later authorization. |
+| Atlas A. Research all fields | Run the v5 pipeline on all 66 fields, with archive and machine acceptance. | Every field has a final list, a review_process record and an acceptance report; failed runs are recorded, not repaired by hand. |
+| Atlas B. atlasdb import | Tables for problems, criteria, claims, sources, citations, dependencies, approaches, originals and decisions, runs; repeatable import keyed by run. | Re-import of the same run changes nothing; every identified dependency resolves; every citation links to its capture. |
+| Atlas C. Cross-field matching | Semantic search over all problems to resolve unidentified dependencies; cluster the rest into shared capabilities. | Each unidentified dependency is matched, partly matched or left unresolved with candidates recorded. |
 | Later | Wikipedia-like collaboration and richer presentation. | Scope separately after graph, progress and intake prove useful. No public accounts/CMS/reputation/discussion work is included now. |
 
 Testing should be proportional to these outcomes: migration/preservation and references; matching and idempotency; claim/source-role boundaries; completion decisions and reversible revisions; graph scale, navigation and mobile/list access; and database-plus-object backup/restore. Use meaningful end-to-end checks for the first slice rather than building a large workflow framework before the product works.
