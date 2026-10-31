@@ -1,225 +1,84 @@
 # Field Onboarding Runbook
 
-Instructions for an agent onboarding fields into the Atlas, one field at a time. Pipeline version: `fields_v5`. Updated October 31, 2026.
+Updated October 31, 2026. Scope: one field first.
 
-All paths are relative to the repository root, `/Users/prakashnarayanan/Documents/2026_Takeoff`.
+This is the workflow for the rebuild. The former `fields_v5` scripts remain in Git history at `7bc3997`; they have not been restored or updated to implement this workflow. Restore only the pieces needed for the next step. The [project plan](../plans/technology-graph-plan.md) retains historical implementation details.
 
-## Your job
+## Outcome
 
-For each field you are given (or each field not yet done):
+Produce a useful, source-supported list of open problems for one selected field. Each included problem should explain what remains unsolved, why it matters, what would count as solving it, and what the cited evidence actually supports. Someone should be able to inspect the supporting passages and saved sources.
 
-1. Run the research pipeline, producing the field's final list of open problems.
-2. Archive every cited source and run machine acceptance.
-3. Check the outputs against the checklist below.
-4. Commit the field.
-5. Report the result in the format at the end of this document.
+Do not require ten problems, exhaustive coverage, or reconciliation with all historical entries. Use old research as candidate material when useful, and reassess its claims. Complete and inspect this field before expanding to others.
 
-You run commands and read their output. You do not write or edit research content.
+## 1. Choose the field and research it
 
-## Ground rules
+Record the field, its boundaries, and the research date. If no field has been selected, ask which one to start with.
 
-**Do**
+Research candidates using primary sources where available. Compare candidates for importance, overlap, and obvious omissions. Distinguish an open problem from an already demonstrated result or a speculative aspiration. Keep uncertainty explicit; a source describing a goal does not establish field-wide consensus.
 
-- Run the commands exactly as given, from the directory given.
-- Run long steps in the background and wait for them to finish; do not start a second run of the same field while one is running.
-- Record every failure. A failed or stopped run stays on disk with its `.FAILED.md` or `.STOPPED.md` note.
-- Re-run a failed step rather than fixing its output.
+For each candidate, keep a short problem statement, completion criteria, current state, significance, and citations. Record the research tool/model used. Keep raw research outputs so later corrections can be traced.
 
-**Do not**
+Use the already authorized tool/account configuration. Do not introduce paid API use or switch accounts implicitly. If Grok access or credits run out, stop that step and ask the user to switch accounts; never request credentials.
 
-- Edit any file the pipeline produces (`*.json`, `*.notes.md`, `*.jsonl`, logs). There is no hand repair.
-- Edit prompts, schemas or scripts. If something seems wrong with them, stop and report it.
-- Use any API key, change CLI login, or switch a step to a different model.
-- Obtain papers from unauthorised sources (for example Sci-Hub) or get around a site's bot protection. A blocked source is an exception to record, not a problem to work around.
-- Commit `Atlas/archive/sources/` (it is git-ignored and must stay so) or push to any remote.
+## 2. Save the evidence
 
-## Before you start
+First exercise capture and review on one problem, including a failed download and recovery. Then apply it to the rest of the field. One problem tests capture; the complete field tests research quality.
 
-Run these checks once per session. Stop and report if any fails.
+For each source used to support a claim:
 
-```bash
-~/.grok/bin/grok models                    # must list grok-4.7; says "logged in with grok.com"
-/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex --version
-test -x "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" && echo chrome ok
-python3 -c "import jsonschema, pypdf; print('python ok')"
-git status --short                         # note anything already uncommitted
-```
+- Record its title, authors/date when available, original and resolved URL, DOI/other identifier when present, and retrieval date.
+- Save the best available original artifact: the paper PDF when available, otherwise usable HTML or XML. Record its path and content hash. Do not manufacture a PDF merely to satisfy a format requirement.
+- Open the saved artifact and check that it is the intended source and contains the relevant material. A PDF header, filename, or successful HTTP response is insufficient.
+- Link the claim to the supporting passage and page/section in that specific saved artifact. State limits on what the passage establishes.
 
-Use the Codex CLI inside ChatGPT.app, never the `codex` on PATH: the PATH copy cannot reach the GPT-6.x models with a ChatGPT login.
+Label publisher PDFs, webpage snapshots, abstracts, and locally rendered documents accurately. An abstract is a partial copy; a rendering that omits figures or tables is incomplete. Retain original XML/HTML when making a derivative rendering.
 
-## Step 0. Pick the field
+A Wayback snapshot is a best-effort additional backup. Its absence does not block a supported claim. Keep source copies private and excluded from Git; verify the ignore rule before adding any. Use legitimate access and record blocks rather than bypassing them.
 
-List every field, its abbreviation and whether it is done:
+## 3. Assess support separately from capture
 
-```bash
-python3 - <<'EOF'
-import json, glob
-m = json.load(open('web/data/milestones.json')); m = m['milestones'] if isinstance(m, dict) else m
-fields = {}
-for x in m: fields.setdefault(x['field'], x['id'].rsplit('-', 1)[0])
-for f, ab in fields.items():
-    finals = sorted(p for p in glob.glob(f'Atlas/research/fields_v5/{ab}/02_merge__*.json')
-                    if not p.endswith(('.schema.json', '.acceptance.json', '.review_process.json')))
-    current = finals and 'identified_dependencies' in open(finals[-1]).read()
-    accepted = current and glob.glob(finals[-1][:-5] + '.acceptance.json')
-    print(f"{ab:5} {'DONE' if accepted else 'merge done, not accepted' if current else 'TODO':26} {f}")
-EOF
-```
+Assess each material claim by reading its evidence in context. Automated quote matching and identifier checks are aids, not scientific judgments.
 
-Use the field name **exactly** as printed (it must match `web/data/milestones.json`) and its abbreviation. A field is done only when its newest final list uses `identified_dependencies` and has an `.acceptance.json`. Older final lists in the earlier `related_problems` format count as TODO.
+| Dimension | States | Meaning |
+|---|---|---|
+| Evidence support | Supported / Contradicted / Unresolved | Record a short reason. Supported means the inspected evidence supports the stated scope; it does not certify scientific truth. |
+| Source capture | Saved / Partial / Missing | Record what was retained and any missing material or failed operation. |
 
-## Step 1. Run the pipeline (research, format, merge)
+A saved paper can contradict a claim. A supported claim can still have an outstanding capture task. Missing evidence or failed extraction means unresolved, not contradicted.
 
-```bash
-cd Atlas/research/fields_v5/tools
-python3 -B run_pipeline.py "<Field Name>" <ABBR> --as-of <today, YYYY-MM-DD>
-```
+Compare duplicate candidates and inspect obvious gaps in the field list. Narrow or correct claims where the evidence warrants it. One bad optional citation does not invalidate adequate support from another source; remove or flag the bad citation with a reason.
 
-Takes 15–25 minutes. Run it in the background. Progress is in `Atlas/research/fields_v5/<ABBR>/pipeline.log`:
+Keep unresolved candidates visible separately. Include a problem in the supported list only when its material claims have adequate support. Do not silently promote candidates because a script finished.
 
-| Log line | Meaning |
+## 4. Recover only what failed
+
+Keep a brief issue entry beside the affected source or claim: what failed, what was tried, and the next action. Preserve usable earlier captures. A failed retry must not replace the best saved copy.
+
+| Failure | Recovery |
 |---|---|
-| `01a_research__… started` / `done` | Grok 4.7 (high) researching the field with web tools, 10–12 min |
-| `01b_format__… started` / `done` | GPT-6.1 Terra (high) converting notes to JSON, about 2 min |
-| `02_merge__… started` / `done` | GPT-6.1 Sol (medium) deciding each original entry and adding missed problems, 4–6 min |
-| `pipeline complete: <path>.json` | Success. `<path>.json` is the field's final list |
-| `… FAILED: <reason>` | The step returned nothing usable; see below |
+| Timeout, rate limit, or temporary server failure | Retry the failed operation once after the indicated wait. If it still fails, record the next action and continue with other sources. |
+| Paywall, bot block, or dead URL | Look for a legitimate repository/author copy or existing archive. Use a relevant provider such as Europe PMC when appropriate. If unavailable, request a legitimate manual copy or find an alternative supporting source. |
+| Paper PDF download fails | Record that failure even if a landing-page snapshot exists. Keep usable HTML/XML; mark capture partial if relevant full text is missing. |
+| Rendering fails | Keep usable original HTML/XML. Retry rendering only if a readable derivative is actually needed. |
+| Wayback save fails | Keep the local artifact; record the backup failure and continue. |
+| Quote, identifier, or extraction check fails | Inspect source identity, version, passage, and extraction. Leave support unresolved until assessed; correct the citation or claim when justified. |
+| Research, formatting, or another pipeline step fails | Preserve successful outputs and resume only the failed step. Confirm the earlier process has stopped before retrying. |
 
-If a step fails:
+Manual copies may be linked by URL or another source identifier; a DOI is not required. Verify identity and relevant content, then reassess only the affected claims. Corrected claims and replacement citations form a new revision with a short explanation; preserve the raw outputs and previous evidence.
 
-| Failed step | Do |
-|---|---|
-| `01a_research` | Re-run the whole command once. If it fails again, stop and report. |
-| `01b_format` or `02_merge` | Re-run once. If research succeeded and only the merge failed, use `--merge-only` (below). If it fails again, stop and report. |
+Do not build a scheduler, extensive queues, OCR, or a catalog of fallback providers until a real case requires them. After the bounded retry, the issue remains open until an explicit next action is taken.
 
-```bash
-python3 -B run_pipeline.py "<Field Name>" <ABBR> --merge-only
-```
+## 5. Inspect the field and stop
 
-If the process is still running after 60 minutes with no new `pipeline.log` line, stop it, write a one-line `<run>.STOPPED.md` explaining why, and re-run once.
+The field review is complete when:
 
-## Step 2. Archive sources and run machine acceptance
+- The supported list explains each problem, its completion criteria, current state, and significance, with inspectable supporting passages.
+- Duplicates and obvious omissions have been considered; unresolved and excluded candidates have short reasons.
+- Capture status and remaining recovery actions are visible independently of evidence support.
+- Saved evidence for included claims can be reopened. Copy the field outputs and source files to a backup outside the project, then verify their hashes and reopen a source from that backup.
 
-```bash
-cd Atlas/research/fields_v5/tools
-python3 -B archive_and_accept.py ../<ABBR>/02_merge__gpt-6.1-sol-medium__<time>.json
-python3 -B archive_and_accept.py --report
-```
+Report the result briefly: the field, supported and unresolved problem counts, where the outputs are, and remaining issues. A completed review does not mean every candidate is supported or every source is fully captured. If the result is empty or inadequate, state that and identify what is missing before expanding.
 
-Use the exact path from the `pipeline complete` line. Takes 20–40 minutes (the Internet Archive rate-limits saves). Run it in the background. It prints one line per source, then a summary.
+No prescribed report template or commit per field is required. When committing, inspect the staged changes and exclude private source copies. Do not push or publish without authorization.
 
-For every cited URL it saves under `Atlas/archive/` (private research copies, not for redistribution): the page as served, a local PDF snapshot, the paper's PDF when the page offers one, a legal open copy from Europe PMC (record, abstract, and for open-access papers the full text rendered locally to PDF) when the publisher page fails or no PDF could be made, and a fresh Internet Archive snapshot. The script identifies itself honestly as an archiving tool; sources that block it are queued, not worked around. Every failure is classified and queued in `Atlas/archive/exceptions.json`.
-
-## Step 3. Check the outputs
-
-All of these must be true. If one is not, stop and report it; do not fix it.
-
-- [ ] `pipeline.log` ends with `pipeline complete`.
-- [ ] The final list `02_merge__…json` exists, with `….review_process.json` and `….acceptance.json` beside it.
-- [ ] `review_process.json` shows `accepted_by.status` = `run`.
-- [ ] The acceptance summary has no problem in `rejected` for a reason starting `final list fails its schema`, `identified dependencies point to missing ids` or `placeholder text`. (These mean a pipeline fault, not a source problem.)
-- [ ] Every original entry of the field appears once in the final list's `decisions`.
-
-Rejections for content problems and `pending` problems are normal results, not faults. Report them.
-
-## Step 4. Commit
-
-```bash
-cd /Users/prakashnarayanan/Documents/2026_Takeoff
-git add Atlas/research/fields_v5/<ABBR> Atlas/archive/captures.jsonl Atlas/archive/exceptions.json
-git add Atlas/archive/manual_copies.json 2>/dev/null
-git status --short Atlas/archive/sources   # must print nothing
-git commit -m "atlas: onboard <Field Name> (<ABBR>)
-
-<accepted> accepted, <accepted_with_exceptions> accepted with exceptions,
-<pending> pending, <rejected> rejected; <open_exceptions> open exceptions.
-
-Co-Authored-By: <your model name> <noreply@anthropic.com>"
-```
-
-Fill the counts from the acceptance summary. Do not push.
-
-## Step 5. Report
-
-Report each field in this form:
-
-```
-<ABBR> <Field Name>: <n> problems — <a> accepted, <b> accepted with exceptions, <c> pending, <d> rejected
-Originals: <x> covered, <y> added, <z> not added
-Open exceptions: <n> (<by queue>); blocking: <n>
-Runs: research <run id>, format <run id>, merge <run id>; Grok CLI cost estimate $<n>
-Problems found: <anything that failed a check, or "none">
-Commit: <hash>
-```
-
-## Reference
-
-### Acceptance statuses
-
-| Status | Meaning |
-|---|---|
-| `accepted` | Every claim has at least one citation whose quote was found in a local copy, and a recognized-as-goal citation has a local PDF and an Internet Archive link. |
-| `accepted_with_exceptions` | The recognized-as-goal claim is verified with an Internet Archive link, but either it has only a saved HTML copy (no PDF snapshot yet), or another claim (current state, significance) is only `registered` (DOI or PMID confirms the paper exists, no copy) or `unverified`. |
-| `pending` | The recognized-as-goal claim is not yet verified, but its failures are in an access queue that may resolve. |
-| `rejected` | Schema failure, unresolved dependency, placeholder text, a content problem, or a recognized-as-goal claim that nothing can fix. |
-
-The recognized-as-goal claim answers "why is this a major item in this field?". Its citation must have a local PDF, an Internet Archive link and a quote verified in a local copy.
-
-### Exception categories and queues
-
-| Category | Detected by | Queue | What happens next |
-|---|---|---|---|
-| `rate_limited` | HTTP 429 | retry | `--retry` re-attempts |
-| `transient` | 5xx, timeout, connection error | retry | `--retry` re-attempts |
-| `render_failed` | no PDF of the source: Chrome could not render it (often a bot check) and no paper PDF was found | retry, then manual_copy | Europe PMC is checked by DOI/PMID; for open-access papers its official API supplies the full text, rendered locally to PDF. If nothing is found, it moves to manual_copy. Recorded even when the quote is verified. |
-| `archive_failed` | Internet Archive save failed | retry | `--retry` re-attempts |
-| `paywalled` | 401, 402, or 403 with a login/subscription page | find_legal_copy | Europe PMC is checked automatically; if that finds nothing usable it moves to manual_copy |
-| `bot_blocked` | 403 or a robot-check page | find_legal_copy | as above |
-| `archive_refused` | Internet Archive will not save the site | find_legal_copy | as above |
-| `dead_link` | 404 or 410 with no Internet Archive copy | dead | Needs a different source; reported only |
-| `quote_mismatch` | readable copy, quote not in it | content_problem | Suspect citation; the problem is rejected |
-| `unregistered_id` | DOI not at Crossref or PMID not in PubMed | content_problem | Likely fabricated; the problem is rejected |
-
-An exception **blocks acceptance** when it is on the recognized-as-goal claim or is a content problem.
-
-### Working the queues later (operator, not routine)
-
-```bash
-cd Atlas/research/fields_v5/tools
-python3 -B archive_and_accept.py --report                                  # open exceptions, blocking first
-python3 -B archive_and_accept.py ../<ABBR>/02_merge__…json --retry          # re-capture sources in the retry, find_legal_copy and manual_copy queues
-python3 -B archive_and_accept.py --attach-pdf <DOI> /path/to/paper.pdf      # attach a copy obtained through legitimate access
-python3 -B archive_and_accept.py ../<ABBR>/02_merge__…json                 # re-check after attaching
-```
-
-Exceptions that no longer occur on a re-check are marked `resolved` with how they were resolved. Re-checks move problems from `pending` to `accepted` automatically.
-
-### Files per field
-
-`Atlas/research/fields_v5/<ABBR>/` holds every run, named `<step>__<model>-<effort>__<UTC time>.<kind>`; re-runs never overwrite. The newest `02_merge__…json` is the field's current final list.
-
-| File | Contents |
-|---|---|
-| `01a_research__….prompt.txt`, `.raw.json`, `.notes.md`, `.finished_at` | Research prompt, Grok's full response, its notes, finish time |
-| `01b_format__….prompt.txt`, `.schema.json`, `.json`, `.events.jsonl` | Format prompt, schema sent, structured notes, Codex event log |
-| `02_merge__….json` | **Final list** |
-| `02_merge__….review_process.json` | Model and effort behind each step, and the acceptance summary |
-| `02_merge__….acceptance.json` | Per-problem status, reasons, warnings, `selection_evidence`, per-citation results |
-| `pipeline.log` | One line per step started, finished, failed or stopped |
-
-### Pipeline files
-
-| Path | Purpose |
-|---|---|
-| `prompts/01a_research.md`, `01b_format.md`, `02_reconcile_merge.md` | Templated prompts |
-| `prompts/*.schema.json` | OpenAI strict schemas; regenerate with `tools/build_schemas.py`, never edit the JSON |
-| `tools/run_pipeline.py` | Steps 1a, 1b, 2 |
-| `tools/archive_and_accept.py` | Archive, exception queues, machine acceptance |
-| `Atlas/archive/captures.jsonl`, `exceptions.json`, `manual_copies.json` | Capture log, exception queue, attached copies (tracked in git) |
-| `Atlas/archive/sources/` | Saved copies (private, git-ignored; back up separately) |
-
-### Known behaviour
-
-- Research varies between runs; the same field can produce substantially different lists. Merge decisions on borderline originals can also change between runs.
-- Grok CLI cost estimate is about $2.00–2.60 per field. Codex steps run on the ChatGPT plan.
-- Grok is used only for unstructured research: its `--json-schema` constrains every intermediate message and produced placeholder drafts. Codex does every schema-bound step.
+Before automating further, use this field to check three behaviors: a source supports the actual claim, a failed download can be recovered without losing earlier work, and repeating a completed step does not duplicate results. Add tests for those behaviors when implementing the tools; documentation-only changes need a consistency check.
