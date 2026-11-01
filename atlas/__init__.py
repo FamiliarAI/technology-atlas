@@ -1,0 +1,1 @@
+"""Local Technology Atlas prototype."""
