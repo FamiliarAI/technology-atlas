@@ -28,6 +28,18 @@ Open **http://127.0.0.1:8765**. The server binds only to this computer. It is no
 
 The graph is a map of explicit discussion references, **not a dependency graph**. No cross-field semantic matching pass has been performed. Connections do not establish causality, prerequisites, or achievement. Reviewed concepts are proposals, not completed breakthroughs or forecasts.
 
+## Adding progress
+
+```bash
+python3 -m atlas.add https://arxiv.org/abs/2408.13687
+python3 -m atlas.add <url> --innovation CSC-02   # also judge every milestone of CSC-02
+```
+
+1. Saves the source into `atlas/data/added/` (page plus any declared PDF, using the ingestion capture code) and registers the saved copy in `assets`. A URL already saved by the research reuses that copy. A Wayback save is requested; the archive copy is at `https://web.archive.org/web/<url>`.
+2. Ranks every milestone against the source's opening text by IDF-weighted word overlap, in memory, and keeps the top 20 (plus all of `--innovation`'s milestones).
+3. Makes one model call (the ingestion `format` model, strict JSON schema) that returns a row per milestone the source bears on: verdict `advances`/`meets`/`contradicts` and an exact quote. Prompt, schema, logs and response are kept in `atlas/data/added/calls/`.
+4. Stores rows whose milestone was a candidate and whose quote is found in the saved copy; prints the rest as rejected. Re-adding a URL replaces its earlier rows.
+
 ## Data and integrity
 
 `atlas/data/atlas.sqlite3` is generated locally and ignored by Git. Tables:

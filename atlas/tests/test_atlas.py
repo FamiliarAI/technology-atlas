@@ -9,6 +9,7 @@ from urllib.error import HTTPError
 from http.server import ThreadingHTTPServer
 from atlas.store import import_fields, completed_fields, connect, catalog, progress, sha
 from atlas.server import Handler
+from atlas.add import add
 
 class AtlasTests(unittest.TestCase):
     def setUp(self):
@@ -79,5 +80,24 @@ class AtlasTests(unittest.TestCase):
             rows,status=progress(db,'SWE-01',1)
             self.assertEqual(len(rows),2);self.assertEqual(status,['met'])
             self.assertEqual(db.execute("SELECT COUNT(*) FROM progress WHERE id LIKE 'research:%'").fetchone()[0],2)
+
+    def test_added_source_stores_only_verified_candidate_rows_and_replaces_on_readd(self):
+        self.load()
+        text='Results: we demonstrate a proposed capability at full scale in a working system.'
+        reply={'source_date':'2026-11','rows':[
+            {'innovation':'SWE-01','criterion':1,'verdict':'advances','quote':'we demonstrate a proposed capability at full scale'},
+            {'innovation':'SWE-02','criterion':1,'verdict':'meets','quote':'a sentence the source never contains anywhere'},
+            {'innovation':'SWE-09','criterion':1,'verdict':'meets','quote':'we demonstrate a proposed capability at full scale'}]}
+        saver=lambda url:('f'*64,str(self.source),text)
+        stored,rejected=add('https://arxiv.org/abs/1',call=lambda prompt:reply,saver=saver,path=self.db)
+        self.assertEqual([(r['innovation'],r['criterion']) for r in stored],[('SWE-01',1)])
+        self.assertEqual(sorted(why for _,why in rejected),['not a candidate milestone','quote not found in saved copy'])
+        with connect(self.db) as db:
+            rows,status=progress(db,'SWE-01',1)
+            added=[r for r in rows if r['id'].startswith('added:')]
+            self.assertEqual((added[0]['verdict'],added[0]['source_date'],added[0]['asset']),('advances','2026-11','f'*64));self.assertEqual(status,['in_progress'])
+        reply['rows']=[]
+        add('https://arxiv.org/abs/1',call=lambda prompt:reply,saver=saver,path=self.db)
+        with connect(self.db) as db:self.assertEqual(db.execute("SELECT COUNT(*) FROM progress WHERE id LIKE 'added:%'").fetchone()[0],0)
 
 if __name__=='__main__':unittest.main()
