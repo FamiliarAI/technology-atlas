@@ -111,6 +111,14 @@ def progress(db, identifier, criteria):
         status.append('met' if 'meets' in verdicts else 'in_progress' if 'advances' in verdicts else 'none')
     return rows, status
 
+def progress_summary(db):
+    """Per innovation: milestone status list and progress row count, for the tree."""
+    out = {}
+    for r in db.execute('SELECT id, payload FROM innovations'):
+        rows, status = progress(db, r['id'], len(json.loads(r['payload'])['completion_criteria']))
+        out[r['id']] = {'status': status, 'count': len(rows)}
+    return out
+
 def catalog(db):
     counts = dict(db.execute('SELECT innovation, COUNT(*) FROM progress GROUP BY innovation').fetchall())
     fields = [dict(r) for r in db.execute('SELECT * FROM fields ORDER BY name')]

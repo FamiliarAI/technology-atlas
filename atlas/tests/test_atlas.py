@@ -7,7 +7,7 @@ from pathlib import Path
 from urllib.request import urlopen
 from urllib.error import HTTPError
 from http.server import ThreadingHTTPServer
-from atlas.store import import_fields, completed_fields, connect, catalog, progress, sha
+from atlas.store import import_fields, completed_fields, connect, catalog, progress, progress_summary, sha
 from atlas.server import Handler
 from atlas.add import add
 
@@ -99,5 +99,10 @@ class AtlasTests(unittest.TestCase):
         reply['rows']=[]
         add('https://arxiv.org/abs/1',call=lambda prompt:reply,saver=saver,path=self.db)
         with connect(self.db) as db:self.assertEqual(db.execute("SELECT COUNT(*) FROM progress WHERE id LIKE 'added:%'").fetchone()[0],0)
+
+    def test_progress_summary_lists_every_innovation(self):
+        self.load()
+        with connect(self.db) as db:
+            self.assertEqual(progress_summary(db),{'SWE-01':{'status':['none'],'count':1},'SWE-02':{'status':['none'],'count':1}})
 
 if __name__=='__main__':unittest.main()

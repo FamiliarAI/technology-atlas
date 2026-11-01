@@ -15,6 +15,21 @@ Open **http://127.0.0.1:8765**. The server binds only to this computer. It is no
 
 `python3 -m atlas.store` reads `ingestion/runs/all-fields/batch.json` and imports each field with status `complete` from its manifest `root` (Chemistry lives in `ingestion/runs/CHEMREV/`). Re-run it as more fields complete; unchanged fields are skipped. The private runtime data is intentionally excluded from Git. Restore it from the verified field backups if moving to another computer.
 
+## Tech tree (React)
+
+The tech tree lives in `atlas/web` (React, Vite, Framer Motion; type and palette from the Silicon Data pitch, fonts bundled locally). Build it once, then open **http://127.0.0.1:8765/tree/**:
+
+```bash
+cd atlas/web && npm install && npm run build
+```
+
+The build goes to `atlas/static/tree/` (ignored by Git) and is served by `atlas.server`. For live editing, run `npm run dev` with the server on port 8765; Vite proxies `/api`.
+
+- Desktop: one lane per field, read left to right; each innovation is a card with a segmented bar (one segment per milestone: met, in progress, none). Cards within a lane are ordered by progress. Hovering a card draws its `related_concepts` links. These are not prerequisites; prerequisite order is deferred (see the project plan).
+- Phone (≤ 760px): one field at a time as a vertical path; swipe sideways or use the field chips to change field.
+- Detail panel (bottom sheet on phones): milestones with their status and the progress rows judged against each, research sources not yet tied to a milestone, related innovations, and a link to the full record at `/#ID`.
+- API addition: `GET /api/progress` returns each innovation's milestone status list and progress row count.
+
 ## Included
 
 - Field filters, full-text search, graph overview, and a mobile-friendly library.

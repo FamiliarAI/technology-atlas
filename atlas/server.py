@@ -4,9 +4,11 @@ import json
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
-from .store import DB, ROOT, catalog, connect, progress, sha
+from .store import DB, ROOT, catalog, connect, progress, progress_summary, sha
 
 STATIC = ROOT / 'atlas/static'
+TREE = STATIC / 'tree'  # built React tech tree (atlas/web)
+TYPES = {'.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.woff2': 'font/woff2', '.woff': 'font/woff', '.svg': 'image/svg+xml'}
 
 class Handler(BaseHTTPRequestHandler):
     def reply(self, data, content_type='application/json', status=200, filename=None):
@@ -24,6 +26,7 @@ class Handler(BaseHTTPRequestHandler):
         path = unquote(urlsplit(self.path).path)
         with connect(self.server.db_path) as db:
             if path == '/api/catalog': return self.reply(catalog(db))
+            if path == '/api/progress': return self.reply(progress_summary(db))
             if path.startswith('/api/innovations/'):
                 identifier = path.removeprefix('/api/innovations/')
                 row = db.execute('SELECT payload,field FROM innovations WHERE id=?', (identifier,)).fetchone()
@@ -49,6 +52,13 @@ class Handler(BaseHTTPRequestHandler):
                 data = p.read_bytes()
                 if sha(data) != row['hash']: return self.reply({'error':'Saved file changed; import and verify again'}, status=409)
                 return self.reply(data, 'application/octet-stream', filename=p.name)
+        if path == '/tree' or path.startswith('/tree/'):
+            rel = path.removeprefix('/tree').lstrip('/') or 'index.html'
+            target = (TREE / rel).resolve()
+            if not target.is_relative_to(TREE.resolve()) or not target.is_file() or target.suffix not in TYPES:
+                target = TREE / 'index.html'  # client-side routes fall back to the app
+            if not target.is_file(): return self.reply({'error':'Tree not built; run npm run build in atlas/web'}, status=404)
+            return self.reply(target.read_bytes(), TYPES[target.suffix])
         files = {'/':('index.html','text/html; charset=utf-8'), '/app.js':('app.js','text/javascript; charset=utf-8'), '/style.css':('style.css','text/css; charset=utf-8')}
         if path in files:
             name, mime = files[path]; return self.reply((STATIC/name).read_bytes(),mime)
