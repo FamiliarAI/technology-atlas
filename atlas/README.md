@@ -37,6 +37,7 @@ The graph is a map of explicit discussion references, **not a dependency graph**
 - `innovations`: complete final records, unchanged from the ingestion outputs.
 - `assets`: allowlisted saved source files and their hashes.
 - `documents`: allowlisted research, structured-record, and review provenance files.
+- `progress`: one row per source per milestone it bears on (innovation, criterion number, URL, saved-copy hash, source date, verdict `advances`/`meets`/`contradicts`, quote, model, date added). On import, each `current_state` paragraph's cited sources are copied in with criterion and verdict left empty (`research:` IDs, replaced when a field is re-imported); rows added later are kept. Milestone status is computed from rows: `meets` → met, `advances` → in progress.
 
 Imported source artifacts must exist inside their field directory and match their saved hash. Every subsequent download checks the bytes again. Downloads use attachment disposition and `nosniff`, including saved HTML, so source-page scripts are not executed as application content. The API never accepts arbitrary filesystem paths. Local paths in records are redacted from browser API responses.
 

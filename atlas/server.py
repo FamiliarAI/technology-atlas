@@ -4,7 +4,7 @@ import json
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
-from .store import DB, ROOT, catalog, connect, sha
+from .store import DB, ROOT, catalog, connect, progress, sha
 
 STATIC = ROOT / 'atlas/static'
 
@@ -31,6 +31,7 @@ class Handler(BaseHTTPRequestHandler):
                 item = json.loads(row['payload'])
                 f = db.execute('SELECT run_hash FROM fields WHERE id=?', (row['field'],)).fetchone()
                 item['run'] = dict(db.execute('SELECT hash, imported_at FROM runs WHERE hash=?', (f['run_hash'],)).fetchone())
+                item['progress'], item['milestone_status'] = progress(db, identifier, len(item['completion_criteria']))
                 item['documents'] = [r['id'].split(':',1)[1] for r in db.execute('SELECT id FROM documents WHERE id LIKE ?', (identifier + ':%',))]
                 # Do not expose filesystem paths through the browser API.
                 item.pop('provenance', None)

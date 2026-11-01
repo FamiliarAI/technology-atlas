@@ -9,6 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DB = ROOT / 'atlas/data/atlas.sqlite3'
 MANIFEST = ROOT / 'ingestion/runs/all-fields/batch.json'
+CONFIG = ROOT / 'ingestion/config.json'
 FIELDS = ['SWE', 'CSC', 'CPE', 'ROB']
 COLORS = dict(zip(FIELDS, ['#c5ed91', '#97b9ff', '#e8b77d', '#d8a6e4']))
 
@@ -33,16 +34,32 @@ def initialize(db):
     CREATE TABLE IF NOT EXISTS innovations (id TEXT PRIMARY KEY, field TEXT NOT NULL REFERENCES fields(id), payload TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS assets (id TEXT PRIMARY KEY, path TEXT NOT NULL, hash TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS documents (id TEXT PRIMARY KEY, path TEXT NOT NULL, hash TEXT NOT NULL);
+    -- One row per source per milestone it bears on. criterion and verdict stay NULL until judged.
+    CREATE TABLE IF NOT EXISTS progress (id TEXT PRIMARY KEY, innovation TEXT NOT NULL, criterion INTEGER, url TEXT NOT NULL, asset TEXT, source_date TEXT, verdict TEXT CHECK (verdict IN ('advances','meets','contradicts')), quote TEXT NOT NULL, model TEXT NOT NULL, added_at TEXT NOT NULL);
+    CREATE INDEX IF NOT EXISTS progress_innovation ON progress(innovation);
     ''')
     db.execute('PRAGMA foreign_keys = ON')
 
 def sha(data):
     return hashlib.sha256(data).hexdigest()
 
+def rewrite_model(config=CONFIG):
+    # Final records are written by the review model's post-review rewrite.
+    try: return json.loads(Path(config).read_text())['review']['model']
+    except (OSError, KeyError, ValueError): return 'unknown'
+
+def backfill_progress(db, value, model):
+    """Copy each current-state paragraph's cited sources into progress, with no criterion or verdict."""
+    for item in value['innovations']:
+        saved = {s['url']: next((a['sha256'] for a in s.get('artifacts', []) if a.get('kind') == 'source'), None) or next((a['sha256'] for a in s.get('artifacts', [])), None) for s in item.get('sources', [])}
+        for n, paragraph in enumerate(item['current_state']):
+            for url in paragraph.get('source_urls', []):
+                db.execute('INSERT OR REPLACE INTO progress VALUES (?,?,?,?,?,?,?,?,?,?)', (f"research:{item['id']}:{n}:{url}", item['id'], None, url, saved.get(url), None, None, paragraph['text'], model, value.get('created_at') or datetime.now(timezone.utc).isoformat()))
+
 def import_fields(base=ROOT / 'ingestion/runs/all-fields', path=DB, prefixes=FIELDS, roots=None):
     path = Path(path); path.parent.mkdir(parents=True, exist_ok=True)
     db = connect(path); initialize(db)
-    changed = []
+    changed = []; model = rewrite_model()
     try:
         with db:
             for n, prefix in enumerate(prefixes):
@@ -60,9 +77,13 @@ def import_fields(base=ROOT / 'ingestion/runs/all-fields', path=DB, prefixes=FIE
                             raise ValueError('Missing final section: ' + key)
                 existing = db.execute('SELECT run_hash FROM fields WHERE id=?', (prefix,)).fetchone()
                 if existing and existing['run_hash'] == fingerprint:
+                    if not db.execute("SELECT 1 FROM progress WHERE id LIKE 'research:%' AND innovation IN (SELECT id FROM innovations WHERE field=?) LIMIT 1", (prefix,)).fetchone():
+                        backfill_progress(db, value, model)
                     continue
                 db.execute('INSERT OR IGNORE INTO runs VALUES (?,?,?,?)', (fingerprint, prefix, datetime.now(timezone.utc).isoformat(), raw.decode()))
                 db.execute('INSERT INTO fields VALUES (?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,color=excluded.color,run_hash=excluded.run_hash', (prefix, value['field']['field'], color(prefix, n), fingerprint))
+                # Research-derived progress follows the current run; progress added later is kept.
+                db.execute("DELETE FROM progress WHERE id LIKE 'research:%' AND innovation IN (SELECT id FROM innovations WHERE field=?)", (prefix,))
                 db.execute('DELETE FROM innovations WHERE field=?', (prefix,))
                 for item in items:
                     db.execute('INSERT INTO innovations VALUES (?,?,?)', (item['id'], prefix, json.dumps(item)))
@@ -76,17 +97,27 @@ def import_fields(base=ROOT / 'ingestion/runs/all-fields', path=DB, prefixes=FIE
                         p = Path(loc).resolve()
                         if p.is_relative_to(folder.resolve()) and p.is_file():
                             db.execute('INSERT OR REPLACE INTO documents VALUES (?,?,?)', (item['id'] + ':' + kind, str(p), sha(p.read_bytes())))
+                backfill_progress(db, value, model)
                 changed.append(prefix)
     finally:
         db.close()
     return changed
 
+def progress(db, identifier, criteria):
+    rows = [dict(r) for r in db.execute('SELECT * FROM progress WHERE innovation=? ORDER BY criterion IS NULL, criterion, added_at, id', (identifier,))]
+    status = []
+    for n in range(1, criteria + 1):
+        verdicts = {r['verdict'] for r in rows if r['criterion'] == n}
+        status.append('met' if 'meets' in verdicts else 'in_progress' if 'advances' in verdicts else 'none')
+    return rows, status
+
 def catalog(db):
+    counts = dict(db.execute('SELECT innovation, COUNT(*) FROM progress GROUP BY innovation').fetchall())
     fields = [dict(r) for r in db.execute('SELECT * FROM fields ORDER BY name')]
     items = []
     for r in db.execute('SELECT * FROM innovations ORDER BY id'):
         i = json.loads(r['payload'])
-        items.append({'id': i['id'], 'field': r['field'], 'title': i['title'], 'summary': i['concept'][0]['text'], 'source_count': len(i.get('sources', [])), 'milestone_count': len(i['completion_criteria']), 'issue_count': len(i.get('unresolved_issues', [])), 'search_text': ' '.join(p['text'] for key in ['concept','significance','missing_breakthrough','current_state','completion_criteria'] for p in i[key])})
+        items.append({'id': i['id'], 'field': r['field'], 'title': i['title'], 'summary': i['concept'][0]['text'], 'source_count': len(i.get('sources', [])), 'milestone_count': len(i['completion_criteria']), 'progress_count': counts.get(i['id'], 0), 'issue_count': len(i.get('unresolved_issues', [])), 'search_text': ' '.join(p['text'] for key in ['concept','significance','missing_breakthrough','current_state','completion_criteria'] for p in i[key])})
     known = {i['id'] for i in items}; edges = {}
     for r in db.execute('SELECT id,payload FROM innovations'):
         for p in json.loads(r['payload'])['related_concepts']:

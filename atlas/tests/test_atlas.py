@@ -7,7 +7,7 @@ from pathlib import Path
 from urllib.request import urlopen
 from urllib.error import HTTPError
 from http.server import ThreadingHTTPServer
-from atlas.store import import_fields, completed_fields, connect, catalog, sha
+from atlas.store import import_fields, completed_fields, connect, catalog, progress, sha
 from atlas.server import Handler
 
 class AtlasTests(unittest.TestCase):
@@ -66,5 +66,18 @@ class AtlasTests(unittest.TestCase):
         roots=completed_fields(manifest);self.assertEqual(roots,{'SWE':moved})
         self.assertEqual(import_fields(self.root,self.db,sorted(roots),roots),['SWE'])
         with connect(self.db) as db:self.assertEqual(catalog(db)['innovations'][0]['milestone_count'],1)
+
+    def test_current_state_sources_backfill_progress_without_status(self):
+        self.load()
+        with connect(self.db) as db:
+            rows,status=progress(db,'SWE-01',1)
+            self.assertEqual(len(rows),1);self.assertEqual((rows[0]['url'],rows[0]['asset'],rows[0]['criterion'],rows[0]['verdict']),('https://example.org',self.hash,None,None))
+            self.assertEqual(status,['none'])
+            db.execute("INSERT INTO progress VALUES ('added:1','SWE-01',1,'https://example.org/new',NULL,'2026-12-01','meets','quote','model','2026-12-02')");db.commit()
+        self.record['title']='Revised';self.write();self.load()
+        with connect(self.db) as db:
+            rows,status=progress(db,'SWE-01',1)
+            self.assertEqual(len(rows),2);self.assertEqual(status,['met'])
+            self.assertEqual(db.execute("SELECT COUNT(*) FROM progress WHERE id LIKE 'research:%'").fetchone()[0],2)
 
 if __name__=='__main__':unittest.main()
