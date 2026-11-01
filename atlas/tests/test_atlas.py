@@ -7,7 +7,7 @@ from pathlib import Path
 from urllib.request import urlopen
 from urllib.error import HTTPError
 from http.server import ThreadingHTTPServer
-from atlas.store import import_fields, connect, catalog, sha
+from atlas.store import import_fields, completed_fields, connect, catalog, sha
 from atlas.server import Handler
 
 class AtlasTests(unittest.TestCase):
@@ -59,5 +59,12 @@ class AtlasTests(unittest.TestCase):
             with urlopen(base+'/api/innovations/SWE-01') as res:
                 item=json.load(res);self.assertNotIn('provenance',item);self.assertNotIn('path',item['sources'][0]['artifacts'][0])
         finally:server.shutdown();server.server_close();thread.join()
+
+    def test_manifest_selects_completed_fields_from_their_roots(self):
+        moved=self.root/'elsewhere'/'SWE';moved.parent.mkdir();self.folder.rename(moved)
+        manifest=self.root/'batch.json';manifest.write_text(json.dumps({'fields':[{'prefix':'SWE','root':str(moved),'status':'complete'},{'prefix':'CSC','root':str(self.root/'CSC'),'status':'pending'}]}))
+        roots=completed_fields(manifest);self.assertEqual(roots,{'SWE':moved})
+        self.assertEqual(import_fields(self.root,self.db,sorted(roots),roots),['SWE'])
+        with connect(self.db) as db:self.assertEqual(catalog(db)['innovations'][0]['milestone_count'],1)
 
 if __name__=='__main__':unittest.main()

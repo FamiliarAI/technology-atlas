@@ -1,4 +1,4 @@
-"""Lossless, repeatable import of the four reviewed prototype fields."""
+"""Lossless, repeatable import of every completed ingestion field."""
 import hashlib
 import json
 import re
@@ -8,8 +8,18 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DB = ROOT / 'atlas/data/atlas.sqlite3'
+MANIFEST = ROOT / 'ingestion/runs/all-fields/batch.json'
 FIELDS = ['SWE', 'CSC', 'CPE', 'ROB']
 COLORS = dict(zip(FIELDS, ['#c5ed91', '#97b9ff', '#e8b77d', '#d8a6e4']))
+
+def color(prefix, n):
+    # Prototype colors stay fixed; other fields step round the hue circle.
+    return COLORS.get(prefix) or f'hsl({(n * 137.5) % 360:.0f} 60% 74%)'
+
+def completed_fields(manifest=MANIFEST):
+    """Prefix -> field folder for every field the ingestion batch marks complete."""
+    fields = json.loads(Path(manifest).read_text())['fields']
+    return {f['prefix']: Path(f['root']) for f in fields if f.get('status') == 'complete'}
 
 def connect(path=DB):
     db = sqlite3.connect(path)
@@ -29,14 +39,14 @@ def initialize(db):
 def sha(data):
     return hashlib.sha256(data).hexdigest()
 
-def import_fields(base=ROOT / 'ingestion/runs/all-fields', path=DB, prefixes=FIELDS):
+def import_fields(base=ROOT / 'ingestion/runs/all-fields', path=DB, prefixes=FIELDS, roots=None):
     path = Path(path); path.parent.mkdir(parents=True, exist_ok=True)
     db = connect(path); initialize(db)
     changed = []
     try:
         with db:
-            for prefix in prefixes:
-                folder = Path(base) / prefix
+            for n, prefix in enumerate(prefixes):
+                folder = Path((roots or {}).get(prefix) or Path(base) / prefix)
                 raw = (folder / 'final-innovations.json').read_bytes()
                 value = json.loads(raw); fingerprint = sha(raw)
                 if value['field']['prefix'] != prefix:
@@ -52,7 +62,7 @@ def import_fields(base=ROOT / 'ingestion/runs/all-fields', path=DB, prefixes=FIE
                 if existing and existing['run_hash'] == fingerprint:
                     continue
                 db.execute('INSERT OR IGNORE INTO runs VALUES (?,?,?,?)', (fingerprint, prefix, datetime.now(timezone.utc).isoformat(), raw.decode()))
-                db.execute('INSERT INTO fields VALUES (?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,color=excluded.color,run_hash=excluded.run_hash', (prefix, value['field']['field'], COLORS.get(prefix, '#aaa'), fingerprint))
+                db.execute('INSERT INTO fields VALUES (?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,color=excluded.color,run_hash=excluded.run_hash', (prefix, value['field']['field'], color(prefix, n), fingerprint))
                 db.execute('DELETE FROM innovations WHERE field=?', (prefix,))
                 for item in items:
                     db.execute('INSERT INTO innovations VALUES (?,?,?)', (item['id'], prefix, json.dumps(item)))
@@ -72,11 +82,11 @@ def import_fields(base=ROOT / 'ingestion/runs/all-fields', path=DB, prefixes=FIE
     return changed
 
 def catalog(db):
-    fields = [dict(r) for r in db.execute('SELECT * FROM fields ORDER BY rowid')]
+    fields = [dict(r) for r in db.execute('SELECT * FROM fields ORDER BY name')]
     items = []
     for r in db.execute('SELECT * FROM innovations ORDER BY id'):
         i = json.loads(r['payload'])
-        items.append({'id': i['id'], 'field': r['field'], 'title': i['title'], 'summary': i['concept'][0]['text'], 'source_count': len(i.get('sources', [])), 'issue_count': len(i.get('unresolved_issues', [])), 'search_text': ' '.join(p['text'] for key in ['concept','significance','missing_breakthrough','current_state','completion_criteria'] for p in i[key])})
+        items.append({'id': i['id'], 'field': r['field'], 'title': i['title'], 'summary': i['concept'][0]['text'], 'source_count': len(i.get('sources', [])), 'milestone_count': len(i['completion_criteria']), 'issue_count': len(i.get('unresolved_issues', [])), 'search_text': ' '.join(p['text'] for key in ['concept','significance','missing_breakthrough','current_state','completion_criteria'] for p in i[key])})
     known = {i['id'] for i in items}; edges = {}
     for r in db.execute('SELECT id,payload FROM innovations'):
         for p in json.loads(r['payload'])['related_concepts']:
@@ -86,4 +96,5 @@ def catalog(db):
     return {'fields': fields, 'innovations': items, 'connections': [{'source': a, 'target': b, 'kind': 'discussed together', 'explanations': notes} for (a,b), notes in edges.items()], 'as_of': '2026-11-01'}
 
 if __name__ == '__main__':
-    print('Imported:', ', '.join(import_fields()) or 'already current')
+    roots = completed_fields()
+    print('Imported:', ', '.join(import_fields(prefixes=sorted(roots), roots=roots)) or 'already current')

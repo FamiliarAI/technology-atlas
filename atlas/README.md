@@ -1,6 +1,6 @@
 # Technology Atlas v1
 
-Local, read-only exploration of **39 reviewed revolutionary innovations** across Software Engineering (11), Computer Science (10), Computer Engineering (8), and Robotics (10). Existing research is imported unchanged; no new model calls or research reruns are required.
+Local, read-only exploration of the reviewed innovations from **every field the ingestion batch marks complete** (31 fields, 334 innovations as of November 1, 2026). Existing research is imported unchanged; no new model calls or research reruns are required.
 
 ## Run
 
@@ -13,11 +13,12 @@ python3 -m atlas.server --port 8765
 
 Open **http://127.0.0.1:8765**. The server binds only to this computer. It is not a hosted service and is not accessible from another device through that localhost address.
 
-The current checkout must contain the completed field outputs in `ingestion/runs/all-fields/{SWE,CSC,CPE,ROB}/`. The private runtime data is intentionally excluded from Git. Restore it from the verified field backups if moving to another computer.
+`python3 -m atlas.store` reads `ingestion/runs/all-fields/batch.json` and imports each field with status `complete` from its manifest `root` (Chemistry lives in `ingestion/runs/CHEMREV/`). Re-run it as more fields complete; unchanged fields are skipped. The private runtime data is intentionally excluded from Git. Restore it from the verified field backups if moving to another computer.
 
 ## Included
 
-- Four field filters, full-text search, graph overview, and a mobile-friendly library.
+- Field filters, full-text search, graph overview, and a mobile-friendly library.
+- Each record's completion criteria shown as numbered milestones.
 - Every innovation's six final sections, source references, unresolved issues, and review change history.
 - Deep links such as `http://127.0.0.1:8765/#SWE-01`.
 - Explicit related-concept references from the reviewed material, with the original explanations accessible in the detail view. Hover or keyboard-focus a map node to reveal its references; click or press Enter for its record. Drag the map to pan and use the zoom controls to inspect it.
@@ -32,7 +33,7 @@ The graph is a map of explicit discussion references, **not a dependency graph**
 `atlas/data/atlas.sqlite3` is generated locally and ignored by Git. Tables:
 
 - `runs`: immutable full field snapshots, content hash, and import timestamp. These retain original dispositions and all final metadata.
-- `fields`: four navigation groups and their current snapshot.
+- `fields`: navigation groups (one per completed field) and their current snapshot.
 - `innovations`: complete final records, unchanged from the ingestion outputs.
 - `assets`: allowlisted saved source files and their hashes.
 - `documents`: allowlisted research, structured-record, and review provenance files.
