@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { loadInnovation } from './api.js';
+import { loadBreakthrough } from './api.js';
 import MilestoneBar from './MilestoneBar.jsx';
 import { EASE } from './motion.js';
 
@@ -19,7 +19,7 @@ export default function Detail({ atlas, id, narrow, onOpen, onClose }) {
   useEffect(() => {
     let live = true;
     setRecord(null); setError(null);
-    loadInnovation(id).then((r) => live && setRecord(r), (e) => live && setError(e.message));
+    loadBreakthrough(id).then((r) => live && setRecord(r), (e) => live && setError(e.message));
     return () => { live = false; };
   }, [id]);
   useEffect(() => {

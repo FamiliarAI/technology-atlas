@@ -42,5 +42,5 @@ async (page) => {
   await page.reload();
   await page.waitForSelector('.node');
   await page.screenshot({path:'/tmp/atlas-overview-verified.png',fullPage:true,animations:'disabled'});
-  return {passed:true,innovations:39,fields:4,checks:['filters','search','empty state','details','related navigation','source download','deep link','mobile layout','Escape','no JS errors']};
+  return {passed:true,breakthroughs:39,fields:4,checks:['filters','search','empty state','details','related navigation','source download','deep link','mobile layout','Escape','no JS errors']};
 }

@@ -6,19 +6,19 @@ Status: in progress. Updated November 1, 2026. **The "Current plan" section belo
 
 ### Goals
 
-- a) Lists of innovations we may see in the future, the milestones that say they have been achieved, and attribution of where each came from.
+- a) Lists of breakthroughs we may see in the future, the milestones that say they have been achieved, and attribution of where each came from.
 - b) Progress towards them that we add to over time, as papers and links.
 - c) A UI to view it all, modelled on a strategy-game tech tree.
 - d) A polished UI that works on mobile, with motion, in the style of the Silicon Data pitch in am-live (`docs/sponsor-segments/silicon-data/silicon-data-segment.html`).
-- e) An arbitrary paper (for example from arXiv) can be added once and count as progress for several innovations.
+- e) An arbitrary paper (for example from arXiv) can be added once and count as progress for several breakthroughs.
 
 ### Terms
 
-- **Breakthrough**: a leaf of the tree, one proposed future capability (ID like `CSC-02`). Stored in the `innovations` table and API under that older name; the code keeps it.
+- **Breakthrough**: a leaf of the tree, one proposed future capability (ID like `CSC-02`). Stored in the `breakthroughs` table and served at `/api/breakthroughs/<ID>`. The ingestion pipeline still writes `final-innovations.json` with an `innovations` list; the atlas reads that format unchanged.
 - **Milestone**: one of a breakthrough's completion criteria, numbered 1…n.
 - **Progress**: one source (paper or link) judged against a milestone, one row in `progress`.
 
-Below, "innovation" means breakthrough. Older sections use "milestone" for what is now a breakthrough.
+Older sections use "milestone" for what is now a breakthrough.
 
 ### Cost rule
 
@@ -26,19 +26,19 @@ Reuse existing data and structures. This plan adds **one new table (`progress`)*
 
 ### Starting point
 
-- `ingestion/` produces each field's `final-innovations.json`: 31 of 66 fields are complete (334 innovations); see `docs/ingestion-status-2026-11-01.md`.
-- `atlas/` is the v1 prototype: SQLite importer (`runs`, `fields`, `innovations`, `assets`, `documents`), read-only server and API, and a static UI loading 4 fields (SWE, CSC, CPE, ROB). See `atlas/README.md`.
+- `ingestion/` produces each field's `final-innovations.json`: 31 of 66 fields are complete (334 breakthroughs); see `docs/ingestion-status-2026-11-01.md`.
+- `atlas/` is the v1 prototype: SQLite importer (`runs`, `fields`, `breakthroughs`, `assets`, `documents`), read-only server and API, and a static UI loading 4 fields (SWE, CSC, CPE, ROB). See `atlas/README.md`.
 
 ### Steps
 
 1. **Load all completed fields (goal a).** Point the existing importer at every completed field and remove the hard-coded four-field copy. Milestones are each record's existing `completion_criteria` items, numbered 1…n and served as-is. Sources are each record's existing `sources` and saved copies. New fields are imported the same way as ingestion finishes them.
-2. **Add the `progress` table and backfill it (goal b).** Columns: innovation ID; criterion number (nullable); URL; saved-copy SHA-256 (row in the existing `assets` table); source date; verdict `advances` / `meets` / `contradicts` (nullable); quote; model; date added. Backfill by copying, with no model calls: each `current_state` paragraph and its cited `source_urls` becomes one row with criterion and verdict left empty, attributed to the research model and research date. Criterion status is computed from rows: `meets` → met, `advances` → in progress. Tests sit with the existing ones in `atlas/tests`.
-3. **`atlas add <url>` (goals b and e).** (1) Save the paper into `assets` with a local PDF and a Wayback link; skip the download if the URL or hash already exists. (2) Rank all criteria against the abstract by word-overlap scoring computed in memory (nothing stored, no model) and keep the top ~20. (3) One model call (Codex, GPT-6.1 Terra, strict JSON schema) returns a `progress` row for each criterion the paper touches; code checks that each quote appears in the paper and rejects rows that fail. One paper touching three innovations is three rows. `--innovation ID` forces a target the ranking missed.
-4. **Tech-tree UI (goals c and d).** React + Vite + Framer Motion, reading the existing server API plus one progress endpoint. Style from the Silicon Data pitch: Outfit, DM Sans and JetBrains Mono, self-drawing SVG lines, the same easing. One lane per field; each innovation is a node with a segmented bar per criterion (met / in progress / none); lines from the existing `related_concepts` references; nodes within a lane ordered by progress. Node detail is the existing record view plus a timeline of progress rows with their papers and quotes. Mobile: a vertical path per field, swiped between fields, tap to open. An original design in the strategy-game genre, not a copy of any game's artwork.
+2. **Add the `progress` table and backfill it (goal b).** Columns: breakthrough ID; criterion number (nullable); URL; saved-copy SHA-256 (row in the existing `assets` table); source date; verdict `advances` / `meets` / `contradicts` (nullable); quote; model; date added. Backfill by copying, with no model calls: each `current_state` paragraph and its cited `source_urls` becomes one row with criterion and verdict left empty, attributed to the research model and research date. Criterion status is computed from rows: `meets` → met, `advances` → in progress. Tests sit with the existing ones in `atlas/tests`.
+3. **`atlas add <url>` (goals b and e).** (1) Save the paper into `assets` with a local PDF and a Wayback link; skip the download if the URL or hash already exists. (2) Rank all criteria against the abstract by word-overlap scoring computed in memory (nothing stored, no model) and keep the top ~20. (3) One model call (Codex, GPT-6.1 Terra, strict JSON schema) returns a `progress` row for each criterion the paper touches; code checks that each quote appears in the paper and rejects rows that fail. One paper touching three breakthroughs is three rows. `--breakthrough ID` forces a target the ranking missed.
+4. **Tech-tree UI (goals c and d).** React + Vite + Framer Motion, reading the existing server API plus one progress endpoint. Style from the Silicon Data pitch: Outfit, DM Sans and JetBrains Mono, self-drawing SVG lines, the same easing. One lane per field; each breakthrough is a node with a segmented bar per criterion (met / in progress / none); lines from the existing `related_concepts` references; nodes within a lane ordered by progress. Node detail is the existing record view plus a timeline of progress rows with their papers and quotes. Mobile: a vertical path per field, swiped between fields, tap to open. An original design in the strategy-game genre, not a copy of any game's artwork.
 
 ### Deferred: prerequisite order
 
-True prerequisite order ("A must be achieved before B") is wanted but not in this plan. The existing data records only that innovations are related, not which comes first. The proposed design, for when it is scheduled: a `prerequisites` list inside each innovation record (other innovation ID, one-sentence reason, model), filled by one model call per field (31 now, one per new field) that sees the field's innovations in full and a one-line catalog of all innovations, returning both what each innovation requires and what requires it. Code rejects unknown IDs and any link that closes a loop, and computes tree columns from the longest prerequisite chain. Until then the tree orders nodes by progress, not prerequisites.
+True prerequisite order ("A must be achieved before B") is wanted but not in this plan. The existing data records only that breakthroughs are related, not which comes first. The proposed design, for when it is scheduled: a `prerequisites` list inside each breakthrough record (other breakthrough ID, one-sentence reason, model), filled by one model call per field (31 now, one per new field) that sees the field's breakthroughs in full and a one-line catalog of all breakthroughs, returning both what each breakthrough requires and what requires it. Code rejects unknown IDs and any link that closes a loop, and computes tree columns from the longest prerequisite chain. Until then the tree orders nodes by progress, not prerequisites.
 
 This plan supersedes the deprecated paid-report plan in `archive/AI_Takeoff_Project_Plan.md` (dated forecasts, PDF product, blog/thread funnel). That plan is history only and is not a goal, input, or constraint for this project.
 

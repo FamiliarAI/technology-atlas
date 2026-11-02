@@ -26,20 +26,20 @@ class AtlasTests(unittest.TestCase):
         self.assertEqual(self.load(),['SWE']);self.assertEqual(self.load(),[])
         with connect(self.db) as db:
             self.assertEqual(db.execute('SELECT count(*) FROM runs').fetchone()[0],1)
-            self.assertEqual(db.execute('SELECT count(*) FROM innovations').fetchone()[0],2)
-            self.assertEqual(json.loads(db.execute('SELECT payload FROM innovations WHERE id=?', ('SWE-01',)).fetchone()[0]),self.record)
+            self.assertEqual(db.execute('SELECT count(*) FROM breakthroughs').fetchone()[0],2)
+            self.assertEqual(json.loads(db.execute('SELECT payload FROM breakthroughs WHERE id=?', ('SWE-01',)).fetchone()[0]),self.record)
             self.assertEqual(json.loads(db.execute('SELECT payload FROM runs').fetchone()[0]),self.value)
     def test_new_revision_keeps_prior_snapshot(self):
         self.load();self.value['innovations'][0]['title']='Revised title';self.write();self.load()
         with connect(self.db) as db:
             self.assertEqual(db.execute('SELECT count(*) FROM runs').fetchone()[0],2)
-            self.assertEqual(db.execute('SELECT count(*) FROM innovations').fetchone()[0],2)
+            self.assertEqual(db.execute('SELECT count(*) FROM breakthroughs').fetchone()[0],2)
     def test_tampered_artifact_rolls_back_revision(self):
         self.load();self.value['innovations'][0]['title']='Bad revision';self.write();self.source.write_text('changed')
         with self.assertRaises(ValueError):self.load()
         with connect(self.db) as db:
             self.assertEqual(db.execute('SELECT count(*) FROM runs').fetchone()[0],1)
-            self.assertEqual(json.loads(db.execute('SELECT payload FROM innovations WHERE id=?', ('SWE-01',)).fetchone()[0])['title'],'First breakthrough')
+            self.assertEqual(json.loads(db.execute('SELECT payload FROM breakthroughs WHERE id=?', ('SWE-01',)).fetchone()[0])['title'],'First breakthrough')
     def test_connections_are_explicit_mentions_with_preserved_explanation(self):
         self.load()
         with connect(self.db) as db:d=catalog(db)
@@ -57,7 +57,7 @@ class AtlasTests(unittest.TestCase):
             self.source.write_text('tampered')
             with self.assertRaises(HTTPError) as error:urlopen(base+'/api/assets/'+self.hash)
             self.assertEqual(error.exception.code,409)
-            with urlopen(base+'/api/innovations/SWE-01') as res:
+            with urlopen(base+'/api/breakthroughs/SWE-01') as res:
                 item=json.load(res);self.assertNotIn('provenance',item);self.assertNotIn('path',item['sources'][0]['artifacts'][0])
         finally:server.shutdown();server.server_close();thread.join()
 
@@ -66,7 +66,7 @@ class AtlasTests(unittest.TestCase):
         manifest=self.root/'batch.json';manifest.write_text(json.dumps({'fields':[{'prefix':'SWE','root':str(moved),'status':'complete'},{'prefix':'CSC','root':str(self.root/'CSC'),'status':'pending'}]}))
         roots=completed_fields(manifest);self.assertEqual(roots,{'SWE':moved})
         self.assertEqual(import_fields(self.root,self.db,sorted(roots),roots),['SWE'])
-        with connect(self.db) as db:self.assertEqual(catalog(db)['innovations'][0]['milestone_count'],1)
+        with connect(self.db) as db:self.assertEqual(catalog(db)['breakthroughs'][0]['milestone_count'],1)
 
     def test_current_state_sources_backfill_progress_without_status(self):
         self.load()
@@ -85,12 +85,12 @@ class AtlasTests(unittest.TestCase):
         self.load()
         text='Results: we demonstrate a proposed capability at full scale in a working system.'
         reply={'source_date':'2026-11','rows':[
-            {'innovation':'SWE-01','criterion':1,'verdict':'advances','quote':'we demonstrate a proposed capability at full scale'},
-            {'innovation':'SWE-02','criterion':1,'verdict':'meets','quote':'a sentence the source never contains anywhere'},
-            {'innovation':'SWE-09','criterion':1,'verdict':'meets','quote':'we demonstrate a proposed capability at full scale'}]}
+            {'breakthrough':'SWE-01','criterion':1,'verdict':'advances','quote':'we demonstrate a proposed capability at full scale'},
+            {'breakthrough':'SWE-02','criterion':1,'verdict':'meets','quote':'a sentence the source never contains anywhere'},
+            {'breakthrough':'SWE-09','criterion':1,'verdict':'meets','quote':'we demonstrate a proposed capability at full scale'}]}
         saver=lambda url:('f'*64,str(self.source),text)
         stored,rejected=add('https://arxiv.org/abs/1',call=lambda prompt:reply,saver=saver,path=self.db)
-        self.assertEqual([(r['innovation'],r['criterion']) for r in stored],[('SWE-01',1)])
+        self.assertEqual([(r['breakthrough'],r['criterion']) for r in stored],[('SWE-01',1)])
         self.assertEqual(sorted(why for _,why in rejected),['not a candidate milestone','quote not found in saved copy'])
         with connect(self.db) as db:
             rows,status=progress(db,'SWE-01',1)
@@ -100,7 +100,7 @@ class AtlasTests(unittest.TestCase):
         add('https://arxiv.org/abs/1',call=lambda prompt:reply,saver=saver,path=self.db)
         with connect(self.db) as db:self.assertEqual(db.execute("SELECT COUNT(*) FROM progress WHERE id LIKE 'added:%'").fetchone()[0],0)
 
-    def test_progress_summary_lists_every_innovation(self):
+    def test_progress_summary_lists_every_breakthrough(self):
         self.load()
         with connect(self.db) as db:
             self.assertEqual(progress_summary(db),{'SWE-01':{'status':['none'],'count':1},'SWE-02':{'status':['none'],'count':1}})

@@ -31,12 +31,12 @@ def initialize(db):
     db.executescript('''
     CREATE TABLE IF NOT EXISTS runs (hash TEXT PRIMARY KEY, field TEXT NOT NULL, imported_at TEXT NOT NULL, payload TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS fields (id TEXT PRIMARY KEY, name TEXT NOT NULL, color TEXT NOT NULL, run_hash TEXT NOT NULL REFERENCES runs(hash));
-    CREATE TABLE IF NOT EXISTS innovations (id TEXT PRIMARY KEY, field TEXT NOT NULL REFERENCES fields(id), payload TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS breakthroughs (id TEXT PRIMARY KEY, field TEXT NOT NULL REFERENCES fields(id), payload TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS assets (id TEXT PRIMARY KEY, path TEXT NOT NULL, hash TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS documents (id TEXT PRIMARY KEY, path TEXT NOT NULL, hash TEXT NOT NULL);
     -- One row per source per milestone it bears on. criterion and verdict stay NULL until judged.
-    CREATE TABLE IF NOT EXISTS progress (id TEXT PRIMARY KEY, innovation TEXT NOT NULL, criterion INTEGER, url TEXT NOT NULL, asset TEXT, source_date TEXT, verdict TEXT CHECK (verdict IN ('advances','meets','contradicts')), quote TEXT NOT NULL, model TEXT NOT NULL, added_at TEXT NOT NULL);
-    CREATE INDEX IF NOT EXISTS progress_innovation ON progress(innovation);
+    CREATE TABLE IF NOT EXISTS progress (id TEXT PRIMARY KEY, breakthrough TEXT NOT NULL, criterion INTEGER, url TEXT NOT NULL, asset TEXT, source_date TEXT, verdict TEXT CHECK (verdict IN ('advances','meets','contradicts')), quote TEXT NOT NULL, model TEXT NOT NULL, added_at TEXT NOT NULL);
+    CREATE INDEX IF NOT EXISTS progress_breakthrough ON progress(breakthrough);
     ''')
     db.execute('PRAGMA foreign_keys = ON')
 
@@ -70,23 +70,23 @@ def import_fields(base=ROOT / 'ingestion/runs/all-fields', path=DB, prefixes=FIE
                     raise ValueError('Field ID mismatch')
                 items = value['innovations']; ids = [i['id'] for i in items]
                 if not items or len(ids) != len(set(ids)) or any(not i.startswith(prefix + '-') for i in ids):
-                    raise ValueError('Invalid innovation IDs')
+                    raise ValueError('Invalid breakthrough IDs')
                 for item in items:
                     for key in ['concept', 'significance', 'missing_breakthrough', 'current_state', 'completion_criteria', 'related_concepts']:
                         if not isinstance(item[key], list) or not item[key]:
                             raise ValueError('Missing final section: ' + key)
                 existing = db.execute('SELECT run_hash FROM fields WHERE id=?', (prefix,)).fetchone()
                 if existing and existing['run_hash'] == fingerprint:
-                    if not db.execute("SELECT 1 FROM progress WHERE id LIKE 'research:%' AND innovation IN (SELECT id FROM innovations WHERE field=?) LIMIT 1", (prefix,)).fetchone():
+                    if not db.execute("SELECT 1 FROM progress WHERE id LIKE 'research:%' AND breakthrough IN (SELECT id FROM breakthroughs WHERE field=?) LIMIT 1", (prefix,)).fetchone():
                         backfill_progress(db, value, model)
                     continue
                 db.execute('INSERT OR IGNORE INTO runs VALUES (?,?,?,?)', (fingerprint, prefix, datetime.now(timezone.utc).isoformat(), raw.decode()))
                 db.execute('INSERT INTO fields VALUES (?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,color=excluded.color,run_hash=excluded.run_hash', (prefix, value['field']['field'], color(prefix, n), fingerprint))
                 # Research-derived progress follows the current run; progress added later is kept.
-                db.execute("DELETE FROM progress WHERE id LIKE 'research:%' AND innovation IN (SELECT id FROM innovations WHERE field=?)", (prefix,))
-                db.execute('DELETE FROM innovations WHERE field=?', (prefix,))
+                db.execute("DELETE FROM progress WHERE id LIKE 'research:%' AND breakthrough IN (SELECT id FROM breakthroughs WHERE field=?)", (prefix,))
+                db.execute('DELETE FROM breakthroughs WHERE field=?', (prefix,))
                 for item in items:
-                    db.execute('INSERT INTO innovations VALUES (?,?,?)', (item['id'], prefix, json.dumps(item)))
+                    db.execute('INSERT INTO breakthroughs VALUES (?,?,?)', (item['id'], prefix, json.dumps(item)))
                     for source in item.get('sources', []):
                         for a in source.get('artifacts', []):
                             p = Path(a.get('absolute_path') or folder / a['path']).resolve()
@@ -104,7 +104,7 @@ def import_fields(base=ROOT / 'ingestion/runs/all-fields', path=DB, prefixes=FIE
     return changed
 
 def progress(db, identifier, criteria):
-    rows = [dict(r) for r in db.execute('SELECT * FROM progress WHERE innovation=? ORDER BY criterion IS NULL, criterion, added_at, id', (identifier,))]
+    rows = [dict(r) for r in db.execute('SELECT * FROM progress WHERE breakthrough=? ORDER BY criterion IS NULL, criterion, added_at, id', (identifier,))]
     status = []
     for n in range(1, criteria + 1):
         verdicts = {r['verdict'] for r in rows if r['criterion'] == n}
@@ -112,27 +112,27 @@ def progress(db, identifier, criteria):
     return rows, status
 
 def progress_summary(db):
-    """Per innovation: milestone status list and progress row count, for the tree."""
+    """Per breakthrough: milestone status list and progress row count, for the tree."""
     out = {}
-    for r in db.execute('SELECT id, payload FROM innovations'):
+    for r in db.execute('SELECT id, payload FROM breakthroughs'):
         rows, status = progress(db, r['id'], len(json.loads(r['payload'])['completion_criteria']))
         out[r['id']] = {'status': status, 'count': len(rows)}
     return out
 
 def catalog(db):
-    counts = dict(db.execute('SELECT innovation, COUNT(*) FROM progress GROUP BY innovation').fetchall())
+    counts = dict(db.execute('SELECT breakthrough, COUNT(*) FROM progress GROUP BY breakthrough').fetchall())
     fields = [dict(r) for r in db.execute('SELECT * FROM fields ORDER BY name')]
     items = []
-    for r in db.execute('SELECT * FROM innovations ORDER BY id'):
+    for r in db.execute('SELECT * FROM breakthroughs ORDER BY id'):
         i = json.loads(r['payload'])
         items.append({'id': i['id'], 'field': r['field'], 'title': i['title'], 'summary': i['concept'][0]['text'], 'source_count': len(i.get('sources', [])), 'milestone_count': len(i['completion_criteria']), 'progress_count': counts.get(i['id'], 0), 'issue_count': len(i.get('unresolved_issues', [])), 'search_text': ' '.join(p['text'] for key in ['concept','significance','missing_breakthrough','current_state','completion_criteria'] for p in i[key])})
     known = {i['id'] for i in items}; edges = {}
-    for r in db.execute('SELECT id,payload FROM innovations'):
+    for r in db.execute('SELECT id,payload FROM breakthroughs'):
         for p in json.loads(r['payload'])['related_concepts']:
             for target in set(re.findall(r'\b[A-Z]{2,6}-\d{2}\b', p['text'])) & known - {r['id']}:
                 key = tuple(sorted((r['id'], target)))
                 edges.setdefault(key, []).append({'from': r['id'], 'text': p['text'], 'source_urls': p.get('source_urls', [])})
-    return {'fields': fields, 'innovations': items, 'connections': [{'source': a, 'target': b, 'kind': 'discussed together', 'explanations': notes} for (a,b), notes in edges.items()], 'as_of': '2026-11-01'}
+    return {'fields': fields, 'breakthroughs': items, 'connections': [{'source': a, 'target': b, 'kind': 'discussed together', 'explanations': notes} for (a,b), notes in edges.items()], 'as_of': '2026-11-01'}
 
 if __name__ == '__main__':
     roots = completed_fields()

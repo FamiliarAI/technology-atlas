@@ -27,9 +27,9 @@ class Handler(BaseHTTPRequestHandler):
         with connect(self.server.db_path) as db:
             if path == '/api/catalog': return self.reply(catalog(db))
             if path == '/api/progress': return self.reply(progress_summary(db))
-            if path.startswith('/api/innovations/'):
-                identifier = path.removeprefix('/api/innovations/')
-                row = db.execute('SELECT payload,field FROM innovations WHERE id=?', (identifier,)).fetchone()
+            if path.startswith('/api/breakthroughs/'):
+                identifier = path.removeprefix('/api/breakthroughs/')
+                row = db.execute('SELECT payload,field FROM breakthroughs WHERE id=?', (identifier,)).fetchone()
                 if not row: return self.reply({'error':'Not found'}, status=404)
                 item = json.loads(row['payload'])
                 f = db.execute('SELECT run_hash FROM fields WHERE id=?', (row['field'],)).fetchone()
