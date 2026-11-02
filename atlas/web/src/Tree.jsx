@@ -49,7 +49,7 @@ export default function Tree({ atlas, matches, selected, onOpen }) {
               <div className="lane-label">
                 <span className="lane-code">{f.id}</span>
                 <strong>{f.name}</strong>
-                <small>{f.items.length} innovations</small>
+                <small>{f.items.length} breakthroughs</small>
               </div>
             </motion.div>
           ))}

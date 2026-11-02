@@ -43,7 +43,7 @@ export default function Detail({ atlas, id, narrow, onOpen, onClose }) {
         onDragEnd={(_, info) => { if (info.offset.y > 120) onClose(); }}>
         {narrow && <div className="grip" aria-hidden="true" />}
         <div className="detail-top">
-          <span className="lane-code">{field.name} / {id}</span>
+          <span className="lane-code">Breakthrough · {field.name} / {id}</span>
           <button ref={close} className="close" onClick={onClose} aria-label="Close">✕</button>
         </div>
         <h2 id="detail-title">{summary.title}</h2>

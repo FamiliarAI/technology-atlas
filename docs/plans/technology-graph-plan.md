@@ -12,6 +12,14 @@ Status: in progress. Updated November 1, 2026. **The "Current plan" section belo
 - d) A polished UI that works on mobile, with motion, in the style of the Silicon Data pitch in am-live (`docs/sponsor-segments/silicon-data/silicon-data-segment.html`).
 - e) An arbitrary paper (for example from arXiv) can be added once and count as progress for several innovations.
 
+### Terms
+
+- **Breakthrough**: a leaf of the tree, one proposed future capability (ID like `CSC-02`). Stored in the `innovations` table and API under that older name; the code keeps it.
+- **Milestone**: one of a breakthrough's completion criteria, numbered 1…n.
+- **Progress**: one source (paper or link) judged against a milestone, one row in `progress`.
+
+Below, "innovation" means breakthrough. Older sections use "milestone" for what is now a breakthrough.
+
 ### Cost rule
 
 Reuse existing data and structures. This plan adds **one new table (`progress`)**, **no model passes over existing data**, and **one model call per paper added**. Any further table or model pass needs an explicit decision.
@@ -36,7 +44,7 @@ This plan supersedes the deprecated paid-report plan in `archive/AI_Takeoff_Proj
 
 ## Product and immediate objective
 
-Build a **Technology Graph** for exploring proposed capabilities, their relationships, and dated evidence of progress. Fields and branches organize navigation. Milestones replace the idea of leaves: a milestone can have multiple upstream inputs, cross-field connections, and alternative research routes. The product is not constrained to a strict tree.
+Build a **Technology Graph** for exploring proposed capabilities, their relationships, and dated evidence of progress. Fields and branches organize navigation. Milestones replace the idea of leaves (superseded: a leaf is now a *breakthrough*, and *milestone* means one of its completion criteria; see Terms above): a milestone can have multiple upstream inputs, cross-field connections, and alternative research routes. The product is not constrained to a strict tree.
 
 Connections are directed and typed, with a mechanism, rationale, source support where available, and explicit uncertainty. A possible enabling component, accelerator, alternative approach, or feedback relationship is not proof of necessity or sufficiency. Prerequisite groups should express multiple inputs and alternative routes without implying that satisfying the group automatically completes a milestone.
 

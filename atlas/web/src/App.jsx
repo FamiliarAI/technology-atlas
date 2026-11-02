@@ -61,14 +61,14 @@ export default function App() {
           </div>
         </motion.div>
         <div className="stats">
-          <Stat value={Object.keys(atlas.items).length} label="innovations" />
+          <Stat value={Object.keys(atlas.items).length} label="breakthroughs" />
           <Stat value={atlas.fields.length} label="fields" />
           <Stat value={totals.met || 0} label="milestones met" tone="met" />
           <Stat value={totals.in_progress || 0} label="in progress" tone="moving" />
         </div>
         <label className="search">
           <span aria-hidden="true">⌕</span>
-          <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search capabilities, ideas, IDs…" aria-label="Search innovations" />
+          <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search capabilities, ideas, IDs…" aria-label="Search breakthroughs" />
           {matches && <span className="hits">{matches.size}</span>}
         </label>
       </header>
@@ -94,7 +94,7 @@ function Legend() {
       <span><i className="seg met" /> Milestone met</span>
       <span><i className="seg in_progress" /> In progress</span>
       <span><i className="seg none" /> No progress linked</span>
-      <span className="legend-note">Each bar segment is one milestone. Lines show innovations discussed together, not prerequisites.</span>
+      <span className="legend-note">Each bar segment is one milestone. Lines show breakthroughs discussed together, not prerequisites.</span>
     </div>
   );
 }
