@@ -10,6 +10,7 @@ from http.server import ThreadingHTTPServer
 from atlas.store import import_fields, completed_fields, connect, catalog, progress, progress_summary, sha
 from atlas.server import Handler
 from atlas.add import add
+from atlas.prerequisites import run as prerequisites
 
 class AtlasTests(unittest.TestCase):
     def setUp(self):
@@ -104,5 +105,25 @@ class AtlasTests(unittest.TestCase):
         self.load()
         with connect(self.db) as db:
             self.assertEqual(progress_summary(db),{'SWE-01':{'status':['none'],'count':1},'SWE-02':{'status':['none'],'count':1}})
+
+    def test_prerequisites_keep_checked_links_on_the_dependent_record(self):
+        other=self.root/'CSC';other.mkdir();(other/'paper.html').write_bytes(self.source.read_bytes())
+        value=copy.deepcopy(self.value);value['field']={'prefix':'CSC','field':'Computer Science'}
+        for n,i in enumerate(value['innovations'],1):i['id']=f'CSC-0{n}'
+        (other/'final-innovations.json').write_text(json.dumps(value));import_fields(self.root,self.db,['SWE','CSC'])
+        reply={'breakthroughs':[
+            {'breakthrough':'SWE-01','needs':[{'id':'SWE-09','reason':'SWE-09 does not exist in the catalog at all.'}],'needed_by':[{'id':'SWE-02','reason':'SWE-02 builds directly on the SWE-01 capability.'}]},
+            {'breakthrough':'SWE-02','needs':[{'id':'SWE-01','reason':'Repeated from the other side of the same link.'}],'needed_by':[{'id':'CSC-01','reason':'CSC-01 needs the SWE-02 system to exist first.'},{'id':'SWE-01','reason':'This link would close a loop with SWE-02.'}]},
+            {'breakthrough':'CSC-02','needs':[{'id':'CSC-01','reason':'Neither side of this link is in this field.'}],'needed_by':[]}]}
+        stored,rejected=prerequisites('SWE',call=lambda prompt:reply,path=self.db)
+        self.assertEqual(len(stored),2);self.assertEqual(sorted(why for _,why in rejected),['closes a loop','neither side in this field','unknown ID'])
+        with connect(self.db) as db:
+            items={i['id']:i['prerequisites'] for i in catalog(db)['breakthroughs']}
+            self.assertEqual(items,{'SWE-01':[],'SWE-02':['SWE-01'],'CSC-01':['SWE-02'],'CSC-02':[]})
+            self.assertEqual(json.loads(db.execute("SELECT payload FROM breakthroughs WHERE id='CSC-01'").fetchone()[0])['prerequisites'][0]['field'],'SWE')
+        prerequisites('CSC',call=lambda prompt:{'breakthroughs':[{'breakthrough':'CSC-02','needs':[{'id':'CSC-01','reason':'CSC-02 extends the CSC-01 result directly.'}],'needed_by':[]}]},path=self.db)
+        prerequisites('SWE',call=lambda prompt:{'breakthroughs':[]},path=self.db)
+        with connect(self.db) as db:
+            self.assertEqual({i['id']:i['prerequisites'] for i in catalog(db)['breakthroughs']},{'SWE-01':[],'SWE-02':[],'CSC-01':[],'CSC-02':['CSC-01']})
 
 if __name__=='__main__':unittest.main()

@@ -22,7 +22,7 @@ Older sections use "milestone" for what is now a breakthrough.
 
 ### Cost rule
 
-Reuse existing data and structures. This plan adds **one new table (`progress`)**, **no model passes over existing data**, and **one model call per paper added**. Any further table or model pass needs an explicit decision.
+Reuse existing data and structures. This plan adds **one new table (`progress`)**, **no model passes over existing data**, and **one model call per paper added**. Any further table or model pass needs an explicit decision. (Since added by decision: one prerequisite call per field.)
 
 ### Starting point
 
@@ -36,9 +36,41 @@ Reuse existing data and structures. This plan adds **one new table (`progress`)*
 3. **`atlas add <url>` (goals b and e).** (1) Save the paper into `assets` with a local PDF and a Wayback link; skip the download if the URL or hash already exists. (2) Rank all criteria against the abstract by word-overlap scoring computed in memory (nothing stored, no model) and keep the top ~20. (3) One model call (Codex, GPT-6.1 Terra, strict JSON schema) returns a `progress` row for each criterion the paper touches; code checks that each quote appears in the paper and rejects rows that fail. One paper touching three breakthroughs is three rows. `--breakthrough ID` forces a target the ranking missed.
 4. **Tech-tree UI (goals c and d).** React + Vite + Framer Motion, reading the existing server API plus one progress endpoint. Style from the Silicon Data pitch: Outfit, DM Sans and JetBrains Mono, self-drawing SVG lines, the same easing. One lane per field; each breakthrough is a node with a segmented bar per criterion (met / in progress / none); lines from the existing `related_concepts` references; nodes within a lane ordered by progress. Node detail is the existing record view plus a timeline of progress rows with their papers and quotes. Mobile: a vertical path per field, swiped between fields, tap to open. An original design in the strategy-game genre, not a copy of any game's artwork.
 
-### Deferred: prerequisite order
+### Core architecture: a fixed core, and edits over time (November 2, 2026)
 
-True prerequisite order ("A must be achieved before B") is wanted but not in this plan. The existing data records only that breakthroughs are related, not which comes first. The proposed design, for when it is scheduled: a `prerequisites` list inside each breakthrough record (other breakthrough ID, one-sentence reason, model), filled by one model call per field (31 now, one per new field) that sees the field's breakthroughs in full and a one-line catalog of all breakthroughs, returning both what each breakthrough requires and what requires it. Code rejects unknown IDs and any link that closes a loop, and computes tree columns from the longest prerequisite chain. Until then the tree orders nodes by progress, not prerequisites.
+The atlas must change over time the way a wiki does: every part can be corrected or extended, and every change is attributed and can be undone. The design separates a small core that never changes from everything else, which changes only through edits.
+
+**The core (fixed):**
+
+1. **Permanent IDs.** A field, breakthrough or milestone keeps its ID forever. Records are retired or merged, never deleted, and IDs are never reused. Links, progress and history all refer to IDs.
+2. **A small set of record kinds:** field; breakthrough; milestone; link between breakthroughs (`needs`, `discussed together`); progress (a source judged against a milestone); source (saved copy and its SHA-256). A new kind is a rare, deliberate decision.
+3. **Saved, fingerprinted sources.** Every claim points to a saved source or to an edit.
+4. **Every change is an edit.** An edit records the record ID, what changed, the author (a person, or a model with its prompt and call record), the time, the reason, and the evidence. The current state of any record is its first version plus its edits in order.
+
+**Everything else changes through edits:**
+
+- Content: titles, descriptions, milestones, verdicts.
+- Structure: new fields and breakthroughs, splits and merges, adding or removing links.
+- Process: prompts, models, and the rules for what counts as a link. Because each edit names its model and prompt, a process change never corrupts history: edits made under an old rule can be found and redone on their own.
+
+**How the existing pieces fit:**
+
+- Ingestion research is the first edit to each breakthrough, by the research model.
+- `atlas.add` writes progress edits; `atlas.prerequisites` writes link edits; a person's corrections are edits recorded the same way.
+- The SQLite database is a view rebuilt from the core, as it already is from the ingestion files. It is not the source of truth.
+
+**Open decision: where the core lives.**
+
+- **Git files** (one JSON file per record, edits as commits): history, diff, attribution and revert come from git, with no new table. Suits one editor or a few trusted ones.
+- **An edits table:** needed if people will edit through a website, together with accounts, permissions and review, which the later-collaboration scope below still defers.
+
+The answer depends on who edits. Until it is decided, new derived data (such as prerequisite links) is not treated as final.
+
+### Prerequisite order (started November 2, 2026)
+
+True prerequisite order ("A must be achieved before B") is wanted. `atlas/prerequisites.py` (`python3 -m atlas.prerequisites FIELD … | --all`) makes one model call per field that sees the field's breakthroughs in full and a one-line catalog of all breakthroughs, and returns, per breakthrough, what it needs and what needs it, from any field. A link means B is expected to come first on the way to A (A builds on B, uses it as a component, assumes its result, or B is the expected route); merely helpful, topical, or same-capability pairs are not links. Code rejects unknown IDs, self-links, links with neither side in the field, and links that close a loop. Each call's prompt and response are kept under `atlas/data/prerequisites/`.
+
+Status: run on Quantum Computing (5 links, including from CPE-01 and CSC-02) and Computer Science (no new links). Links are currently stored inside the dependent breakthrough's record, so a changed re-import of that field drops them; under the core architecture they become link edits. Remaining: decide where the core lives, run the other fields, and compute tree columns from the longest prerequisite chain. Until then the tree orders nodes by progress.
 
 This plan supersedes the deprecated paid-report plan in `archive/AI_Takeoff_Project_Plan.md` (dated forecasts, PDF product, blog/thread funnel). That plan is history only and is not a goal, input, or constraint for this project.
 

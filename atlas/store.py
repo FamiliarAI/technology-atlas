@@ -125,7 +125,7 @@ def catalog(db):
     items = []
     for r in db.execute('SELECT * FROM breakthroughs ORDER BY id'):
         i = json.loads(r['payload'])
-        items.append({'id': i['id'], 'field': r['field'], 'title': i['title'], 'summary': i['concept'][0]['text'], 'source_count': len(i.get('sources', [])), 'milestone_count': len(i['completion_criteria']), 'progress_count': counts.get(i['id'], 0), 'issue_count': len(i.get('unresolved_issues', [])), 'search_text': ' '.join(p['text'] for key in ['concept','significance','missing_breakthrough','current_state','completion_criteria'] for p in i[key])})
+        items.append({'id': i['id'], 'field': r['field'], 'title': i['title'], 'summary': i['concept'][0]['text'], 'source_count': len(i.get('sources', [])), 'milestone_count': len(i['completion_criteria']), 'progress_count': counts.get(i['id'], 0), 'issue_count': len(i.get('unresolved_issues', [])), 'prerequisites': [l['id'] for l in i.get('prerequisites', [])], 'search_text': ' '.join(p['text'] for key in ['concept','significance','missing_breakthrough','current_state','completion_criteria'] for p in i[key])})
     known = {i['id'] for i in items}; edges = {}
     for r in db.execute('SELECT id,payload FROM breakthroughs'):
         for p in json.loads(r['payload'])['related_concepts']:
