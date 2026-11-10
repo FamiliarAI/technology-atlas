@@ -59,18 +59,13 @@ The atlas must change over time the way a wiki does: every part can be corrected
 - `atlas.add` writes progress edits; `atlas.prerequisites` writes link edits; a person's corrections are edits recorded the same way.
 - The SQLite database is a view rebuilt from the core, as it already is from the ingestion files. It is not the source of truth.
 
-**Open decision: where the core lives.**
-
-- **Git files** (one JSON file per record, edits as commits): history, diff, attribution and revert come from git, with no new table. Suits one editor or a few trusted ones.
-- **An edits table:** needed if people will edit through a website, together with accounts, permissions and review, which the later-collaboration scope below still defers.
-
-The answer depends on who edits. Until it is decided, new derived data (such as prerequisite links) is not treated as final.
+**Decided November 9, 2026: the core lives in git files.** The owner and the owner's agents edit; everyone else reads. Records are files under `atlas/core/`, edits are commits, and the database is rebuilt from them. Record kinds, layout, the one-time import of existing data and the growth flow are in the [core design](2026-11-09-atlas-core-design.md). An edits table, accounts and web editing are not built.
 
 ### Prerequisite order (started November 2, 2026)
 
 True prerequisite order ("A must be achieved before B") is wanted. `atlas/prerequisites.py` (`python3 -m atlas.prerequisites FIELD … | --all`) makes one model call per field that sees the field's breakthroughs in full and a one-line catalog of all breakthroughs, and returns, per breakthrough, what it needs and what needs it, from any field. A link means B is expected to come first on the way to A (A builds on B, uses it as a component, assumes its result, or B is the expected route); merely helpful, topical, or same-capability pairs are not links. Code rejects unknown IDs, self-links, links with neither side in the field, and links that close a loop. Each call's prompt and response are kept under `atlas/data/prerequisites/`.
 
-Status: run on Quantum Computing (5 links, including from CPE-01 and CSC-02) and Computer Science (no new links). Links are currently stored inside the dependent breakthrough's record, so a changed re-import of that field drops them; under the core architecture they become link edits. Remaining: decide where the core lives, run the other fields, and compute tree columns from the longest prerequisite chain. Until then the tree orders nodes by progress.
+Status: run on Quantum Computing (5 links, including from CPE-01 and CSC-02) and Computer Science (no new links). Links are currently stored inside the dependent breakthrough's record, so a changed re-import of that field drops them; under the core design they move into the breakthrough's file in `atlas/core/`. Remaining: build the core, run the other fields, and compute tree columns from the longest prerequisite chain. Until then the tree orders nodes by progress.
 
 This plan supersedes the deprecated paid-report plan in `archive/AI_Takeoff_Project_Plan.md` (dated forecasts, PDF product, blog/thread funnel). That plan is history only and is not a goal, input, or constraint for this project.
 
