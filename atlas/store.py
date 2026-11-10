@@ -1,4 +1,4 @@
-"""Lossless, repeatable import of every completed ingestion field."""
+"""The SQLite view, rebuilt from atlas/core/: python3 -m atlas.store."""
 import hashlib
 import json
 import re
@@ -10,6 +10,8 @@ ROOT = Path(__file__).resolve().parents[1]
 DB = ROOT / 'atlas/data/atlas.sqlite3'
 MANIFEST = ROOT / 'ingestion/runs/all-fields/batch.json'
 CONFIG = ROOT / 'ingestion/config.json'
+CORE = ROOT / 'atlas/core'
+SOURCES = [ROOT / 'ingestion/runs', ROOT / 'atlas/data/added']
 FIELDS = ['SWE', 'CSC', 'CPE', 'ROB']
 COLORS = dict(zip(FIELDS, ['#c5ed91', '#97b9ff', '#e8b77d', '#d8a6e4']))
 
@@ -56,52 +58,61 @@ def backfill_progress(db, value, model):
             for url in paragraph.get('source_urls', []):
                 db.execute('INSERT OR REPLACE INTO progress VALUES (?,?,?,?,?,?,?,?,?,?)', (f"research:{item['id']}:{n}:{url}", item['id'], None, url, saved.get(url), None, None, paragraph['text'], model, value.get('created_at') or datetime.now(timezone.utc).isoformat()))
 
-def import_fields(base=ROOT / 'ingestion/runs/all-fields', path=DB, prefixes=FIELDS, roots=None):
+def resolver(roots=SOURCES):
+    """sha256 -> saved copy, for files named <sha256>.<ext> in any sources/ folder under roots."""
+    found = {}
+    for root in roots:
+        for p in sorted(Path(root).glob('**/sources/*')):
+            if p.is_file(): found.setdefault(p.stem, p.resolve())
+    return found
+
+def rebuild(core=CORE, path=DB, roots=SOURCES):
+    """Build the database afresh from atlas/core/ and swap it in. Returns row counts and missing copies."""
+    from . import core as records  # core imports this module
+    data = records.load(core); problems = records.check(data)
+    if problems:
+        raise ValueError('atlas/core check failed:\n' + '\n'.join(problems))
     path = Path(path); path.parent.mkdir(parents=True, exist_ok=True)
-    db = connect(path); initialize(db)
-    changed = []; model = rewrite_model()
+    temp = path.with_name(path.name + '.rebuild'); temp.unlink(missing_ok=True)
+    files = resolver(roots); model = rewrite_model(); missing = 0; criteria = {}
+    db = connect(temp)
     try:
         with db:
-            for n, prefix in enumerate(prefixes):
-                folder = Path((roots or {}).get(prefix) or Path(base) / prefix)
-                raw = (folder / 'final-innovations.json').read_bytes()
-                value = json.loads(raw); fingerprint = sha(raw)
-                if value['field']['prefix'] != prefix:
-                    raise ValueError('Field ID mismatch')
-                items = value['innovations']; ids = [i['id'] for i in items]
-                if not items or len(ids) != len(set(ids)) or any(not i.startswith(prefix + '-') for i in ids):
-                    raise ValueError('Invalid breakthrough IDs')
-                for item in items:
-                    for key in ['concept', 'significance', 'missing_breakthrough', 'current_state', 'completion_criteria', 'related_concepts']:
-                        if not isinstance(item[key], list) or not item[key]:
-                            raise ValueError('Missing final section: ' + key)
-                existing = db.execute('SELECT run_hash FROM fields WHERE id=?', (prefix,)).fetchone()
-                if existing and existing['run_hash'] == fingerprint:
-                    if not db.execute("SELECT 1 FROM progress WHERE id LIKE 'research:%' AND breakthrough IN (SELECT id FROM breakthroughs WHERE field=?) LIMIT 1", (prefix,)).fetchone():
-                        backfill_progress(db, value, model)
-                    continue
-                db.execute('INSERT OR IGNORE INTO runs VALUES (?,?,?,?)', (fingerprint, prefix, datetime.now(timezone.utc).isoformat(), raw.decode()))
-                db.execute('INSERT INTO fields VALUES (?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,color=excluded.color,run_hash=excluded.run_hash', (prefix, value['field']['field'], color(prefix, n), fingerprint))
-                # Research-derived progress follows the current run; progress added later is kept.
-                db.execute("DELETE FROM progress WHERE id LIKE 'research:%' AND breakthrough IN (SELECT id FROM breakthroughs WHERE field=?)", (prefix,))
-                db.execute('DELETE FROM breakthroughs WHERE field=?', (prefix,))
-                for item in items:
-                    db.execute('INSERT INTO breakthroughs VALUES (?,?,?)', (item['id'], prefix, json.dumps(item)))
-                    for source in item.get('sources', []):
-                        for a in source.get('artifacts', []):
-                            p = Path(a.get('absolute_path') or folder / a['path']).resolve()
-                            if not p.is_relative_to(folder.resolve()) or not p.is_file() or sha(p.read_bytes()) != a['sha256']:
-                                raise ValueError('Source artifact is missing, outside field, or changed: ' + str(p))
-                            db.execute('INSERT OR IGNORE INTO assets VALUES (?,?,?)', (a['sha256'], str(p), a['sha256']))
+            initialize(db)
+            for prefix, field in sorted(data['fields'].items()):
+                run = field['imported_from']
+                db.execute('INSERT INTO runs VALUES (?,?,?,?)', (run['run_hash'], prefix, run['imported_at'], (Path(core) / prefix / 'field.json').read_text(encoding='utf-8')))
+                db.execute('INSERT INTO fields VALUES (?,?,?,?)', (prefix, field['name'], field['color'], run['run_hash']))
+                items = []
+                for identifier, item in sorted(data['breakthroughs'].items()):
+                    if item['field'] != prefix or item.get('status') == 'retired': continue
+                    item = dict(item, sources=[{k: s[k] for k in ('url', 'title', 'status')} | {'artifacts': s['copies']} for s in map(data['sources'].get, item.get('sources', []))])
+                    db.execute('INSERT INTO breakthroughs VALUES (?,?,?)', (identifier, prefix, json.dumps(item)))
+                    items.append(item); criteria[identifier] = {c['id']: n for n, c in enumerate(item['completion_criteria'], 1)}
                     for kind, loc in item.get('provenance', {}).items():
-                        p = Path(loc).resolve()
-                        if p.is_relative_to(folder.resolve()) and p.is_file():
-                            db.execute('INSERT OR REPLACE INTO documents VALUES (?,?,?)', (item['id'] + ':' + kind, str(p), sha(p.read_bytes())))
-                backfill_progress(db, value, model)
-                changed.append(prefix)
-    finally:
+                        p = (ROOT / loc).resolve()
+                        if p.is_relative_to(ROOT) and p.is_file():
+                            db.execute('INSERT OR REPLACE INTO documents VALUES (?,?,?)', (identifier + ':' + kind, str(p), sha(p.read_bytes())))
+                backfill_progress(db, {'innovations': items, 'created_at': field.get('created_at') or run['imported_at']}, model)
+            for source in data['sources'].values():
+                for copy in source['copies']:
+                    p = files.get(copy['sha256'])
+                    if p is None:
+                        missing += 1; continue
+                    if sha(p.read_bytes()) != copy['sha256']:
+                        raise ValueError('Saved copy changed: ' + str(p))
+                    db.execute('INSERT OR IGNORE INTO assets VALUES (?,?,?)', (copy['sha256'], str(p), copy['sha256']))
+            for row in data['progress']:
+                if row['breakthrough'] not in criteria: continue  # retired
+                n = criteria[row['breakthrough']][row['milestone']]
+                db.execute('INSERT OR REPLACE INTO progress VALUES (?,?,?,?,?,?,?,?,?,?)', (f"added:{row.get('copy')}:{row['breakthrough']}:{n}", row['breakthrough'], n, row['url'], row.get('copy'), row.get('source_date'), row['verdict'], row['quote'], row['by'], row['added_at']))
+            counts = {t: db.execute(f'SELECT count(*) FROM {t}').fetchone()[0] for t in ['runs', 'fields', 'breakthroughs', 'assets', 'documents', 'progress']}
         db.close()
-    return changed
+        temp.replace(path)
+    except BaseException:
+        db.close(); temp.unlink(missing_ok=True)
+        raise
+    return counts | {'missing': missing}
 
 def progress(db, identifier, criteria):
     rows = [dict(r) for r in db.execute('SELECT * FROM progress WHERE breakthrough=? ORDER BY criterion IS NULL, criterion, added_at, id', (identifier,))]
@@ -135,5 +146,5 @@ def catalog(db):
     return {'fields': fields, 'breakthroughs': items, 'connections': [{'source': a, 'target': b, 'kind': 'discussed together', 'explanations': notes} for (a,b), notes in edges.items()], 'as_of': '2026-11-01'}
 
 if __name__ == '__main__':
-    roots = completed_fields()
-    print('Imported:', ', '.join(import_fields(prefixes=sorted(roots), roots=roots)) or 'already current')
+    counts = rebuild()
+    print(', '.join(f'{v} {k}' for k, v in counts.items() if k != 'missing') + f"; {counts['missing']} saved copies missing (skipped)")

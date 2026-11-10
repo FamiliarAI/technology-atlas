@@ -13,7 +13,9 @@ python3 -m atlas.server --port 8765
 
 Open **http://127.0.0.1:8765**. The server binds only to this computer. It is not a hosted service and is not accessible from another device through that localhost address.
 
-`python3 -m atlas.store` reads `ingestion/runs/all-fields/batch.json` and imports each field with status `complete` from its manifest `root` (Chemistry lives in `ingestion/runs/CHEMREV/`). Re-run it as more fields complete; unchanged fields are skipped. The private runtime data is intentionally excluded from Git. Restore it from the verified field backups if moving to another computer.
+`python3 -m atlas.store` rebuilds `atlas/data/atlas.sqlite3` from the records in `atlas/core/` (files in Git; see the [core design](../docs/plans/2026-11-09-atlas-core-design.md)). It runs `python3 -m atlas.core check` first and stops on any problem, leaving the existing database in place; otherwise it builds a new database beside the old one and swaps it in. Deleting the database and rebuilding gives the same contents. New completed fields enter the core with `python3 -m atlas.core import`, then rebuild.
+
+Saved source copies are not in Git. The rebuild finds each copy by its SHA-256 file name under any `sources/` folder in `ingestion/runs/` or `atlas/data/added/`, verifies its hash, and prints how many copies are missing; a missing copy is skipped (its download is unavailable), a changed one stops the rebuild.
 
 ## Tech tree (React)
 
@@ -39,7 +41,7 @@ The build goes to `atlas/static/tree/` (ignored by Git) and is served by `atlas.
 - Explicit related-concept references from the reviewed material, with the original explanations accessible in the detail view. Hover or keyboard-focus a map node to reveal its references; click or press Enter for its record. Drag the map to pan and use the zoom controls to inspect it.
 - Original publisher/repository links and local saved-copy downloads. Copies may be partial; the interface preserves capture status and evidence limitations.
 - Review and research provenance downloads, import timestamps, and final-set SHA-256 fingerprints.
-- SQLite import with exact original JSON snapshots, stable IDs, preserved earlier versions, atomic updates, and no duplicate records when the same run is imported again.
+- A SQLite view rebuilt atomically from `atlas/core/`, with stable IDs; Git holds the history of every record.
 
 The graph is a map of explicit discussion references, **not a dependency graph**. No cross-field semantic matching pass has been performed. Connections do not establish causality, prerequisites, or achievement. Reviewed concepts are proposals, not completed breakthroughs or forecasts.
 
@@ -59,14 +61,16 @@ python3 -m atlas.add <url> --breakthrough CSC-02   # also judge every milestone 
 
 `atlas/data/atlas.sqlite3` is generated locally and ignored by Git. Tables:
 
-- `runs`: immutable full field snapshots, content hash, and import timestamp. These retain original dispositions and all final metadata.
-- `fields`: navigation groups (one per completed field) and their current snapshot.
-- `breakthroughs`: complete final records, unchanged from the ingestion outputs.
-- `assets`: allowlisted saved source files and their hashes.
-- `documents`: allowlisted research, structured-record, and review provenance files.
-- `progress`: one row per source per milestone it bears on (breakthrough, criterion number, URL, saved-copy hash, source date, verdict `advances`/`meets`/`contradicts`, quote, model, date added). On import, each `current_state` paragraph's cited sources are copied in with criterion and verdict left empty (`research:` IDs, replaced when a field is re-imported); rows added later are kept. Milestone status is computed from rows: `meets` → met, `advances` → in progress.
+- `runs`: one row per field: the hash and import time of the ingestion output it was imported from, and its `field.json`.
+- `fields`: navigation groups (one per field), with the colour fixed at import.
+- `breakthroughs`: the core records of active breakthroughs (retired ones are left out), with each source URL expanded back to `{url, title, status, artifacts}` from `sources.jsonl`.
+- `assets`: saved source copies found on this computer, and their hashes.
+- `documents`: research, structured-record, and review provenance files inside the repository.
+- `progress`: one row per source per milestone it bears on (breakthrough, criterion number, URL, saved-copy hash, source date, verdict `advances`/`meets`/`contradicts`, quote, model, date added). Each `current_state` paragraph's cited sources are derived with criterion and verdict left empty (`research:` IDs); each line of `atlas/core/progress.jsonl` becomes an `added:` row. Milestone status is computed from rows: `meets` → met, `advances` → in progress.
 
-Imported source artifacts must exist inside their field directory and match their saved hash. Every subsequent download checks the bytes again. Downloads use attachment disposition and `nosniff`, including saved HTML, so source-page scripts are not executed as application content. The API never accepts arbitrary filesystem paths. Local paths in records are redacted from browser API responses.
+The database is a disposable view. Until `atlas.add` and `atlas.prerequisites` write to `atlas/core/`, rows they add directly to the database are lost on the next rebuild.
+
+Saved copies must match their hash at rebuild. Every subsequent download checks the bytes again. Downloads use attachment disposition and `nosniff`, including saved HTML, so source-page scripts are not executed as application content. The API never accepts arbitrary filesystem paths. Local paths in records are redacted from browser API responses.
 
 The database references original private files rather than copying all source documents again. Keep the database and the referenced ingestion directories together when backing up or moving this prototype. The existing per-field backups remain the authoritative recovery copies for research. The app does not modify those files.
 
@@ -86,7 +90,7 @@ python3 -m unittest discover -s atlas/tests -v
 node --check atlas/static/app.js
 ```
 
-Five behavioral tests cover lossless/idempotent import, retained prior revisions, transactional rollback on altered source bytes, provenance-preserving relationship extraction, and download allowlisting/integrity.
+`test_core.py` covers importing into and checking `atlas/core/`; `test_atlas.py` covers the rebuild (identical tables after deleting and rebuilding, a check problem or changed copy leaving the old database in place, missing copies skipped), relationship extraction, download allowlisting/integrity, progress, and the add and prerequisite passes.
 
 `tests/browser-smoke.js` contains a Playwright function that can be supplied as the `code` argument to the connected browser's `browser_run_code_unsafe` tool. Its file loader may restrict paths outside the browser workspace. It exercises filtering, searching, empty-state reset, six-section details, related-record navigation, source downloads, deep links, mobile overflow, and keyboard dismissal against the running local app. It is not required to run the application.
 

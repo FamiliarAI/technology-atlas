@@ -134,10 +134,11 @@ class CoreTests(unittest.TestCase):
         with self.assertRaises(ValueError):core.load(self.core)
 
     def test_cli_import_carries_database_links_and_judgements_once_without_changing_database(self):
-        store.import_fields(self.root,self.db,['SWE'])
         with closing(store.connect(self.db)) as db, db:
+            # A database as the old ingestion import left it.
+            store.initialize(db);db.execute("INSERT INTO runs VALUES ('r','SWE','2026-11-01','{}')");db.execute("INSERT INTO fields VALUES ('SWE','Software Engineering','#fff','r')")
             record=copy.deepcopy(self.record);record['prerequisites']=[{'id':'SWE-02','reason':'Needed','model':'test-model','field':'SWE'}]
-            db.execute('UPDATE breakthroughs SET payload=? WHERE id=?',(json.dumps(record),'SWE-01'))
+            db.execute('INSERT INTO breakthroughs VALUES (?,?,?)',('SWE-01','SWE',json.dumps(record)))
             db.execute('INSERT INTO assets VALUES (?,?,?)',('b'*64,str(self.folder/'added.pdf'),'b'*64))
             for n,verdict in enumerate(['advances','meets'],1):db.execute('INSERT INTO progress VALUES (?,?,?,?,?,?,?,?,?,?)',(f'added:{n}','SWE-01',1,'https://new.example','b'*64,'2024-08-27',verdict,'Exact quote','test-model',f'2026-11-0{n}'))
         before=self.db.read_bytes()
