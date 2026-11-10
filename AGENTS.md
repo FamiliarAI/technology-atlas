@@ -1,6 +1,7 @@
 # Project documentation
 
 - [Project plan](docs/plans/technology-graph-plan.md)
+- [Atlas core design](docs/plans/2026-11-09-atlas-core-design.md): the record kinds and `atlas/core/` files that are the source of truth
 - [Field onboarding runbook](docs/runbooks/Field_Onboarding_Runbook.md)
 - [Ingestion pipeline](ingestion/README.md)
 - [Detailed ingestion status and recovery report](docs/ingestion-status-2026-11-01.md)

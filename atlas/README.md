@@ -50,12 +50,26 @@ The graph is a map of explicit discussion references, **not a dependency graph**
 ```bash
 python3 -m atlas.add https://arxiv.org/abs/2408.13687
 python3 -m atlas.add <url> --breakthrough CSC-02   # also judge every milestone of CSC-02
+python3 -m atlas.add <url> --no-commit            # write and rebuild, leave changes uncommitted
 ```
 
-1. Saves the source into `atlas/data/added/` (page plus any declared PDF, using the ingestion capture code) and registers the saved copy in `assets`. A URL already saved by the research reuses that copy. A Wayback save is requested; the archive copy is at `https://web.archive.org/web/<url>`.
+1. Saves the source into `atlas/data/added/sources/<sha256>.<ext>` (page plus any declared PDF, using the ingestion capture code). A URL already saved by the research reuses that copy. A Wayback save is requested; the archive copy is at `https://web.archive.org/web/<url>`.
 2. Ranks every milestone against the source's opening text by IDF-weighted word overlap, in memory, and keeps the top 20 (plus all of `--breakthrough`'s milestones).
 3. Makes one model call (the ingestion `format` model, strict JSON schema) that returns a row per milestone the source bears on: verdict `advances`/`meets`/`contradicts` and an exact quote. Prompt, schema, logs and response are kept in `atlas/data/added/calls/`.
-4. Stores rows whose milestone was a candidate and whose quote is found in the saved copy; prints the rest as rejected. Re-adding a URL replaces its earlier rows.
+4. Writes the URL and saved-copy hash to `atlas/core/sources.jsonl`, merging copies by hash and keeping existing source metadata. Writes rows whose milestone was a candidate and whose quote is found in the saved copy to `atlas/core/progress.jsonl`, using stable milestone IDs; prints the rest as rejected. Re-adding a URL replaces all its earlier judgement lines, including when the new result is empty.
+5. Rebuilds the database from core, including saved-copy assets, then commits `atlas/core/` with the URL, model and call-record folder in the message. `--no-commit` skips Git while still writing core and rebuilding.
+
+## Prerequisite order
+
+```bash
+python3 -m atlas.prerequisites SWE CSC
+python3 -m atlas.prerequisites --all
+python3 -m atlas.prerequisites SWE --no-commit
+```
+
+Each field gets one model call using its database records and a catalog of every active breakthrough. Checked links are written through the core writer to the dependent breakthrough's JSON file as `prerequisites: [{id, reason, model, field}]`. Unknown IDs, self-links, duplicates, links outside the requested field and loops are rejected. Re-running a field replaces links produced by that field's earlier call, preserving links from other fields. Source lists in these files remain URL lists.
+
+The database is rebuilt after each field. The command then commits `atlas/core/` once, with the fields, model and call-record folders (`atlas/data/prerequisites/`) in the message. `--no-commit` skips Git while keeping the file writes and rebuilds. The library functions `atlas.add.add` and `atlas.prerequisites.run` accept `core=` and `path=` and never run Git.
 
 ## Data and integrity
 
@@ -68,7 +82,7 @@ python3 -m atlas.add <url> --breakthrough CSC-02   # also judge every milestone 
 - `documents`: research, structured-record, and review provenance files inside the repository.
 - `progress`: one row per source per milestone it bears on (breakthrough, criterion number, URL, saved-copy hash, source date, verdict `advances`/`meets`/`contradicts`, quote, model, date added). Each `current_state` paragraph's cited sources are derived with criterion and verdict left empty (`research:` IDs); each line of `atlas/core/progress.jsonl` becomes an `added:` row. Milestone status is computed from rows: `meets` → met, `advances` → in progress.
 
-The database is a disposable view. Until `atlas.add` and `atlas.prerequisites` write to `atlas/core/`, rows they add directly to the database are lost on the next rebuild.
+The database is a disposable view. Progress judgements and prerequisite links are saved in `atlas/core/` and survive deleting and rebuilding the database.
 
 Saved copies must match their hash at rebuild. Every subsequent download checks the bytes again. Downloads use attachment disposition and `nosniff`, including saved HTML, so source-page scripts are not executed as application content. The API never accepts arbitrary filesystem paths. Local paths in records are redacted from browser API responses.
 

@@ -9,12 +9,15 @@ import math
 import re
 import urllib.request
 from collections import Counter
+from contextlib import closing
 from datetime import datetime, timezone
 from pathlib import Path
 
 from ingestion.pipeline import Models, passage_matches
 from ingestion.sources import UA, Archive, request_url
-from .store import CONFIG, DB, ROOT, connect, initialize
+from . import core as records, store
+from .core import CORE
+from .store import CONFIG, DB, ROOT, connect
 
 ADDED = ROOT / 'atlas/data/added'
 CANDIDATES = 20
@@ -76,10 +79,9 @@ def rank(db, opening, forced=None, limit=CANDIDATES):
     return chosen
 
 
-def save(url):
+def save(url, path=DB):
     """Saved copy for url: (sha256, path, text). Reuses an existing asset when the URL was already saved."""
-    with connect(DB) as db:
-        initialize(db)
+    with closing(connect(path)) as db:
         known = db.execute('SELECT a.id, a.path FROM progress p JOIN assets a ON a.id = p.asset WHERE p.url=? LIMIT 1', (url,)).fetchone()
     if known and Path(known['path']).is_file():
         from ingestion.sources import extract
@@ -110,23 +112,25 @@ def judge(url, text, candidates, call):
     return call(PROMPT.format(candidates=listing, url=url, text=text[:TEXT_LIMIT]))
 
 
-def add(url, forced=None, call=None, saver=save, path=DB):
+def _call(config):
+    calls = ADDED / 'calls' / datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
+    calls.mkdir(parents=True)
+    return calls, lambda prompt: Models(config).call('format', prompt, SCHEMA, calls)
+
+
+def add(url, forced=None, call=None, saver=None, path=DB, core=CORE):
     """Save url, judge it against ranked milestones, and store verified rows. Returns (stored, rejected)."""
-    sha, file, text = saver(url)
+    sha, file, text = saver(url) if saver else save(url, path)
     if not text.strip():
         raise SystemExit('Saved copy has no extractable text; attach a readable copy')
-    with connect(path) as db:
-        initialize(db)
+    with closing(connect(path)) as db:
         if forced and not db.execute('SELECT 1 FROM breakthroughs WHERE id=?', (forced,)).fetchone():
             raise SystemExit('Unknown breakthrough ' + forced)
-        db.execute('INSERT OR IGNORE INTO assets VALUES (?,?,?)', (sha, file, sha))
         candidates = rank(db, text[:4000], forced)
         config = json.loads(CONFIG.read_text())
         model = config['format']['model']
         if call is None:
-            calls = ADDED / 'calls' / datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
-            calls.mkdir(parents=True)
-            call = lambda prompt: Models(config).call('format', prompt, SCHEMA, calls)
+            _, call = _call(config)
         result = judge(url, text, candidates, call)
         allowed = {(m['breakthrough'], m['criterion']) for m in candidates}
         stored, rejected = [], []
@@ -138,11 +142,18 @@ def add(url, forced=None, call=None, saver=save, path=DB):
             else:
                 stored.append(r)
         added_at = datetime.now(timezone.utc).isoformat()
-        with db:
-            # Re-adding a source replaces its earlier judgement.
-            db.execute("DELETE FROM progress WHERE id LIKE 'added:%' AND url=?", (url,))
-            for r in stored:
-                db.execute('INSERT OR REPLACE INTO progress VALUES (?,?,?,?,?,?,?,?,?,?)', (f"added:{sha}:{r['breakthrough']}:{r['criterion']}", r['breakthrough'], r['criterion'], url, sha, result['source_date'], r['verdict'], r['quote'], model, added_at))
+    data = records.load(core)
+    source = data['sources'].setdefault(url, {'url': url, 'title': url, 'status': 'saved', 'copies': []})
+    if sha not in {c['sha256'] for c in source['copies']}:
+        source['copies'].append({'sha256': sha, 'format': Path(file).suffix.lstrip('.').lower(), 'kind': 'source'})
+    records.write_sources(data['sources'], core)
+    # Re-adding a source replaces its earlier judgement; milestone IDs stay stable.
+    rows = [r for r in data['progress'] if r['url'] != url]
+    for r in stored:
+        milestone = data['breakthroughs'][r['breakthrough']]['completion_criteria'][r['criterion'] - 1]['id']
+        rows.append({'breakthrough': r['breakthrough'], 'milestone': milestone, 'url': url, 'copy': sha, 'source_date': result['source_date'], 'verdict': r['verdict'], 'quote': r['quote'], 'by': model, 'added_at': added_at})
+    records.write_progress(rows, core)
+    store.rebuild(core=core, path=path)
     return stored, rejected
 
 
@@ -150,8 +161,10 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('url')
     p.add_argument('--breakthrough', help='also judge every milestone of this breakthrough')
+    p.add_argument('--no-commit', action='store_true', help='write core and rebuild without committing')
     a = p.parse_args()
-    stored, rejected = add(a.url, a.breakthrough)
+    config = json.loads(CONFIG.read_text()); calls, call = _call(config)
+    stored, rejected = add(a.url, a.breakthrough, call=call)
     print('Wayback save requested' if request_wayback(a.url) else 'Wayback save failed; retry later')
     for r in stored:
         print(f"stored  {r['breakthrough']} milestone {r['criterion']}: {r['verdict']}")
@@ -159,6 +172,9 @@ def main():
         print(f"rejected {r['breakthrough']} milestone {r['criterion']}: {why}")
     if not stored:
         print('No progress rows stored.')
+    if not a.no_commit:
+        message = f"Add source {a.url} ({len(stored)} progress rows)\n\nModel: {config['format']['model']}\nCall: {calls.relative_to(ROOT) if calls.is_relative_to(ROOT) else calls}"
+        records.commit(message)
 
 
 if __name__ == '__main__':

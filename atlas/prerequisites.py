@@ -4,14 +4,16 @@ One model call per field sees that field's breakthroughs in full and a one-line 
 every breakthrough, and returns what each of the field's breakthroughs needs and what needs it.
 Links are stored inside the dependent breakthrough's record as
 prerequisites: [{id, reason, model, field}], where field is the call that produced the link.
-Re-running a field replaces that field's links; a changed field re-import drops the links
-stored on its records, so re-run it.
+Re-running a field replaces that field's links in atlas/core/, then rebuilds the database.
 """
 import argparse
 import json
+from contextlib import closing
 from datetime import datetime, timezone
 
 from ingestion.pipeline import Models
+from . import core as records, store
+from .core import CORE
 from .store import CONFIG, DB, ROOT, connect
 
 CALLS = ROOT / 'atlas/data/prerequisites'
@@ -67,25 +69,32 @@ def reaches(graph, start, target):
     return False
 
 
-def run(prefix, call=None, path=DB):
+def _call(prefix, config):
+    calls = CALLS / f"{prefix}-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')}"
+    calls.mkdir(parents=True)
+    return calls, lambda prompt: Models(config).call('format', prompt, SCHEMA, calls)
+
+
+def run(prefix, call=None, path=DB, core=CORE):
     """One model call for one field; stores links that pass the checks. Returns (stored, rejected)."""
-    with connect(path) as db:
+    with closing(connect(path)) as db:
         field = db.execute('SELECT name FROM fields WHERE id=?', (prefix,)).fetchone()
         if not field:
             raise SystemExit('Unknown field ' + prefix)
         names = dict(db.execute('SELECT id, name FROM fields').fetchall())
         rows = {r['id']: (r['field'], json.loads(r['payload'])) for r in db.execute('SELECT id, field, payload FROM breakthroughs ORDER BY id')}
-        before = {i: json.dumps(item) for i, (_, item) in rows.items()}
         catalog = '\n'.join(f"- {i} [{names[f]}] {item['title']}: {item['concept'][0]['text'][:200]}" for i, (f, item) in rows.items())
         mine = '\n\n'.join(describe(item) for f, item in rows.values() if f == prefix)
         config = json.loads(CONFIG.read_text())
         model = config['format']['model']
         if call is None:
-            calls = CALLS / f"{prefix}-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')}"
-            calls.mkdir(parents=True)
-            call = lambda prompt: Models(config).call('format', prompt, SCHEMA, calls)
+            _, call = _call(prefix, config)
         result = call(PROMPT.format(name=field['name'], prefix=prefix, field=mine, catalog=catalog))
 
+        # Edit file records, whose sources are URLs, rather than expanded DB payloads.
+        data = records.load(core)
+        rows = {i: (f, data['breakthroughs'][i]) for i, (f, _) in rows.items()}
+        before = {i: json.dumps(item) for i, (_, item) in rows.items()}
         # This field's earlier links are replaced; links from other fields' calls stay.
         for _, item in rows.values():
             if 'prerequisites' in item:
@@ -108,10 +117,10 @@ def run(prefix, call=None, path=DB):
                 rows[a][1].setdefault('prerequisites', []).append({'id': b, 'reason': reason, 'model': model, 'field': prefix})
                 stored.append(link); continue
             rejected.append((link, why))
-        with db:
-            for i, (_, item) in rows.items():
-                if json.dumps(item) != before[i]:
-                    db.execute('UPDATE breakthroughs SET payload=? WHERE id=?', (json.dumps(item), i))
+        for i, (_, item) in rows.items():
+            if json.dumps(item) != before[i]:
+                records.write_breakthrough(item, core)
+    store.rebuild(core=core, path=path)
     return stored, rejected
 
 
@@ -119,18 +128,24 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('fields', nargs='*')
     p.add_argument('--all', action='store_true', help='every imported field, one call each')
+    p.add_argument('--no-commit', action='store_true', help='write core and rebuild without committing')
     a = p.parse_args()
-    with connect(DB) as db:
+    with closing(connect(DB)) as db:
         prefixes = [r['id'] for r in db.execute('SELECT id FROM fields ORDER BY id')] if a.all else a.fields
     if not prefixes:
         p.error('name a field or pass --all')
+    config = json.loads(CONFIG.read_text()); calls = []; total = 0
     for prefix in prefixes:
-        stored, rejected = run(prefix)
+        folder, call = _call(prefix, config); calls.append(str(folder.relative_to(ROOT) if folder.is_relative_to(ROOT) else folder))
+        stored, rejected = run(prefix, call=call); total += len(stored)
         print(f'{prefix}: {len(stored)} stored, {len(rejected)} rejected')
         for l in stored:
             print(f"  stored   {l['breakthrough']} needs {l['needs']}: {l['reason']}")
         for l, why in rejected:
             print(f"  rejected {l['breakthrough']} needs {l['needs']}: {why}")
+    if not a.no_commit:
+        message = f"Update prerequisites for {', '.join(prefixes)} ({total} links)\n\nModel: {config['format']['model']}\nCalls:\n" + '\n'.join(calls)
+        records.commit(message)
 
 
 if __name__ == '__main__':

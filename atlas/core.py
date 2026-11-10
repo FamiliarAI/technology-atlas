@@ -3,6 +3,7 @@ import argparse
 import json
 import os
 import sqlite3
+import subprocess
 from contextlib import closing
 from datetime import datetime, timezone
 from pathlib import Path
@@ -41,6 +42,13 @@ def write_sources(sources, core=CORE):
 def write_progress(rows, core=CORE):
     core = Path(core); core.mkdir(parents=True, exist_ok=True)
     (core / 'progress.jsonl').write_text(''.join(json.dumps(row, ensure_ascii=False) + '\n' for row in rows), encoding='utf-8')
+
+
+def commit(message):
+    """Commit atlas/core and nothing else; no change is not an error."""
+    subprocess.run(['git', 'add', 'atlas/core'], cwd=ROOT, check=True)
+    if subprocess.run(['git', 'diff', '--cached', '--quiet', '--', 'atlas/core'], cwd=ROOT).returncode:
+        subprocess.run(['git', 'commit', '-m', message, '--', 'atlas/core'], cwd=ROOT, check=True)
 
 
 def load(core=CORE):

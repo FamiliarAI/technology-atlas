@@ -4,14 +4,17 @@ import tempfile
 import threading
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 from urllib.request import urlopen
 from urllib.error import HTTPError
 from http.server import ThreadingHTTPServer
 from atlas import core
-from atlas.store import rebuild, completed_fields, connect, catalog, progress, progress_summary, sha
+from atlas.store import rebuild, resolver, completed_fields, connect, catalog, progress, progress_summary, sha
 from atlas.server import Handler
 from atlas.add import add
+from atlas.add import main as add_main
 from atlas.prerequisites import run as prerequisites
+from atlas.prerequisites import main as prerequisites_main
 
 TABLES=['runs','fields','breakthroughs','assets','documents','progress']
 
@@ -115,23 +118,42 @@ class AtlasTests(unittest.TestCase):
             self.assertEqual(db.execute("SELECT COUNT(*) FROM progress WHERE id LIKE 'research:%'").fetchone()[0],2)
 
     def test_added_source_stores_only_verified_candidate_rows_and_replaces_on_readd(self):
-        self.load()
+        self.load();self.judged()
+        data=core.load(self.core);item=data['breakthroughs']['SWE-01'];item['completion_criteria'][0]['id']='m7';core.write_breakthrough(item,self.core)
+        data['progress'][0]['breakthrough']='SWE-02';core.write_progress(data['progress'],self.core);self.load()
         text='Results: we demonstrate a proposed capability at full scale in a working system.'
+        added=self.root/'added/sources';added.mkdir(parents=True);digest=sha(text.encode());saved=added/(digest+'.html');saved.write_text(text)
+        capture=patch('atlas.store.resolver',side_effect=lambda roots:resolver([self.root]));capture.start();self.addCleanup(capture.stop)
         reply={'source_date':'2026-11','rows':[
             {'breakthrough':'SWE-01','criterion':1,'verdict':'advances','quote':'we demonstrate a proposed capability at full scale'},
             {'breakthrough':'SWE-02','criterion':1,'verdict':'meets','quote':'a sentence the source never contains anywhere'},
             {'breakthrough':'SWE-09','criterion':1,'verdict':'meets','quote':'we demonstrate a proposed capability at full scale'}]}
-        saver=lambda url:('f'*64,str(self.source),text)
-        stored,rejected=add('https://arxiv.org/abs/1',call=lambda prompt:reply,saver=saver,path=self.db)
+        saver=lambda url:(digest,str(saved),text)
+        stored,rejected=add('https://arxiv.org/abs/1',call=lambda prompt:reply,saver=saver,core=self.core,path=self.db)
         self.assertEqual([(r['breakthrough'],r['criterion']) for r in stored],[('SWE-01',1)])
         self.assertEqual(sorted(why for _,why in rejected),['not a candidate milestone','quote not found in saved copy'])
+        data=core.load(self.core);source=data['sources']['https://arxiv.org/abs/1'];judgement=data['progress'][-1]
+        self.assertEqual((source['status'],source['copies']),('saved',[{'sha256':digest,'format':'html','kind':'source'}]))
+        self.assertEqual((judgement['breakthrough'],judgement['milestone'],judgement['url'],judgement['copy']),('SWE-01','m7','https://arxiv.org/abs/1',digest))
+        self.assertEqual((judgement['verdict'],judgement['source_date'],judgement['quote']),('advances','2026-11',reply['rows'][0]['quote']))
+        self.assertTrue(judgement['by']);self.assertTrue(judgement['added_at']);self.assertEqual(core.check(data),[])
         with connect(self.db) as db:
             rows,status=progress(db,'SWE-01',1)
-            added=[r for r in rows if r['id'].startswith('added:')]
-            self.assertEqual((added[0]['verdict'],added[0]['source_date'],added[0]['asset']),('advances','2026-11','f'*64));self.assertEqual(status,['in_progress'])
+            rows=[r for r in rows if r['url']=='https://arxiv.org/abs/1']
+            self.assertEqual((rows[0]['verdict'],rows[0]['source_date'],rows[0]['asset']),('advances','2026-11',digest));self.assertEqual(status,['in_progress'])
+            self.assertEqual(db.execute('SELECT path FROM assets WHERE id=?',(digest,)).fetchone()[0],str(saved.resolve()))
+        add('https://arxiv.org/abs/1',call=lambda prompt:reply,saver=saver,core=self.core,path=self.db)
+        data=core.load(self.core);self.assertEqual(len(data['progress']),2);self.assertEqual(len(data['sources']['https://arxiv.org/abs/1']['copies']),1)
+        self.db.unlink();self.load()
+        with connect(self.db) as db:self.assertEqual(db.execute("SELECT COUNT(*) FROM progress WHERE url='https://arxiv.org/abs/1'").fetchone()[0],1)
         reply['rows']=[]
-        add('https://arxiv.org/abs/1',call=lambda prompt:reply,saver=saver,path=self.db)
-        with connect(self.db) as db:self.assertEqual(db.execute("SELECT COUNT(*) FROM progress WHERE id LIKE 'added:%'").fetchone()[0],0)
+        add('https://arxiv.org/abs/1',call=lambda prompt:reply,saver=saver,core=self.core,path=self.db)
+        self.assertEqual([r['url'] for r in core.load(self.core)['progress']],['https://example.org/new'])
+        with connect(self.db) as db:self.assertEqual(db.execute("SELECT COUNT(*) FROM progress WHERE url='https://arxiv.org/abs/1'").fetchone()[0],0)
+        add('https://example.org',call=lambda prompt:reply,saver=lambda url:(self.hash,str(self.source),text),core=self.core,path=self.db)
+        self.assertEqual(len(core.load(self.core)['sources']['https://example.org']['copies']),1)
+        add('https://example.org',call=lambda prompt:reply,saver=saver,core=self.core,path=self.db)
+        source=core.load(self.core)['sources']['https://example.org'];self.assertEqual(source['title'],'Paper');self.assertEqual(len(source['copies']),2)
 
     def test_progress_summary_lists_every_breakthrough(self):
         self.load()
@@ -147,15 +169,39 @@ class AtlasTests(unittest.TestCase):
             {'breakthrough':'SWE-01','needs':[{'id':'SWE-09','reason':'SWE-09 does not exist in the catalog at all.'}],'needed_by':[{'id':'SWE-02','reason':'SWE-02 builds directly on the SWE-01 capability.'}]},
             {'breakthrough':'SWE-02','needs':[{'id':'SWE-01','reason':'Repeated from the other side of the same link.'}],'needed_by':[{'id':'CSC-01','reason':'CSC-01 needs the SWE-02 system to exist first.'},{'id':'SWE-01','reason':'This link would close a loop with SWE-02.'}]},
             {'breakthrough':'CSC-02','needs':[{'id':'CSC-01','reason':'Neither side of this link is in this field.'}],'needed_by':[]}]}
-        stored,rejected=prerequisites('SWE',call=lambda prompt:reply,path=self.db)
+        capture=patch('atlas.store.resolver',side_effect=lambda roots:resolver([self.root]));capture.start();self.addCleanup(capture.stop)
+        before=core.load(self.core)['breakthroughs']
+        stored,rejected=prerequisites('SWE',call=lambda prompt:reply,core=self.core,path=self.db)
         self.assertEqual(len(stored),2);self.assertEqual(sorted(why for _,why in rejected),['closes a loop','neither side in this field','unknown ID'])
+        data=core.load(self.core);self.assertEqual(core.check(data),[])
+        for identifier,item in data['breakthroughs'].items():
+            self.assertEqual({k:v for k,v in item.items() if k!='prerequisites'},before[identifier])
+        self.assertEqual(data['breakthroughs']['SWE-02']['prerequisites'][0]['id'],'SWE-01')
+        self.assertEqual(data['breakthroughs']['CSC-01']['prerequisites'][0]['field'],'SWE')
+        self.db.unlink();self.load()
         with connect(self.db) as db:
             items={i['id']:i['prerequisites'] for i in catalog(db)['breakthroughs']}
             self.assertEqual(items,{'SWE-01':[],'SWE-02':['SWE-01'],'CSC-01':['SWE-02'],'CSC-02':[]})
             self.assertEqual(json.loads(db.execute("SELECT payload FROM breakthroughs WHERE id='CSC-01'").fetchone()[0])['prerequisites'][0]['field'],'SWE')
-        prerequisites('CSC',call=lambda prompt:{'breakthroughs':[{'breakthrough':'CSC-02','needs':[{'id':'CSC-01','reason':'CSC-02 extends the CSC-01 result directly.'}],'needed_by':[]}]},path=self.db)
-        prerequisites('SWE',call=lambda prompt:{'breakthroughs':[]},path=self.db)
+        prerequisites('CSC',call=lambda prompt:{'breakthroughs':[{'breakthrough':'CSC-02','needs':[{'id':'CSC-01','reason':'CSC-02 extends the CSC-01 result directly.'}],'needed_by':[]}]},core=self.core,path=self.db)
+        prerequisites('SWE',call=lambda prompt:{'breakthroughs':[]},core=self.core,path=self.db)
+        data=core.load(self.core)
+        self.assertEqual(data['breakthroughs']['SWE-02']['prerequisites'],[]);self.assertEqual(data['breakthroughs']['CSC-01']['prerequisites'],[])
+        self.assertEqual(data['breakthroughs']['CSC-02']['prerequisites'][0]['id'],'CSC-01')
         with connect(self.db) as db:
             self.assertEqual({i['id']:i['prerequisites'] for i in catalog(db)['breakthroughs']},{'SWE-01':[],'SWE-02':[],'CSC-01':[],'CSC-02':['CSC-01']})
+
+    def test_writer_commands_commit_core_unless_no_commit(self):
+        self.load();calls=self.root/'calls'
+        for module,main,args,writer in [('atlas.add',add_main,['https://example.org'],'add'),('atlas.prerequisites',prerequisites_main,['SWE'],'run')]:
+            for flag in [[],['--no-commit']]:
+                with self.subTest(module=module,flag=flag),patch('sys.argv',[module]+args+flag),patch(module+'.DB',self.db),patch(module+'._call',return_value=(calls,lambda prompt:{})),patch(module+'.'+writer,return_value=([],[])),patch('subprocess.run') as git,patch('atlas.add.request_wayback',return_value=True),patch('builtins.print'):
+                    main()
+                    if flag:git.assert_not_called()
+                    else:
+                        self.assertEqual(git.call_count,3)
+                        self.assertEqual(git.call_args_list[0].args[0],['git','add','atlas/core'])
+                        command=git.call_args_list[2].args[0];self.assertEqual(command[:3],['git','commit','-m']);self.assertEqual(command[4:],['--','atlas/core'])
+                        self.assertIn(args[0],command[3]);self.assertIn('\nModel: ',command[3]);self.assertIn(str(calls),command[3])
 
 if __name__=='__main__':unittest.main()
