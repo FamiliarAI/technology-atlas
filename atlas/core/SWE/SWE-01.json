@@ -1,0 +1,288 @@
+{
+ "id": "SWE-01",
+ "title": "Push-button verifying compilation for practical systems",
+ "concept": [
+  {
+   "text": "The proposed innovation is a toolchain that turns practical systems code and a stated functional specification into an executable accompanied by a machine-checked proof that it meets that specification. Developers would describe both the implementation and its required behavior; the toolchain would automatically discharge the resulting proof obligations and connect the proof to the emitted binary. Functional correctness here means implementing the specified behavior, rather than establishing only a narrower property such as memory safety or crash freedom. The underlying verifying-compiler idea includes generating verification conditions from programs, specifications and a programming methodology.",
+   "source_urls": [
+    "https://www.microsoft.com/en-us/research/wp-content/uploads/2007/01/AVerifyingCompilerMarktoberdorf2006.pdf"
+   ]
+  },
+  {
+   "text": "Proposed scope: a useful language and execution envelope capable of expressing systems such as operating-system services, compilers, databases and networked services, with total development effort comparable to ordinary development. The distinctive combination is rich functional assurance, automatic proof production, executable-level coverage and sustainable cost. A tool that conservatively rejects difficult programs can remain sound, but successful compilation of representative practical systems is essential to this proposal. It does not require an algorithm that decides every property of every possible program.",
+   "source_urls": []
+  }
+ ],
+ "significance": [
+  {
+   "text": "Much software assurance relies on reviews and tests, although some systems already have machine-checked correctness proofs. If the proposed automation, scope and cost were achieved, specification-relative assurance could become a routine compilation result. For properties actually proved, violations would be ruled out throughout the supported execution model under the stated assumptions, rather than merely remaining undiscovered by testing. seL4’s binary-correctness statements illustrate this relationship between a specification and an executable for configurations supporting that proof.",
+   "source_urls": [
+    "https://sel4.systems/Verification/proofs.html"
+   ]
+  },
+  {
+   "text": "Conditional downstream synthesis: making such assurance affordable to ordinary teams could extend strong correctness guarantees beyond exceptional verification projects. Teams could spend less effort searching for violations already excluded by proof and more effort reviewing requirements, interfaces and environmental assumptions. Wider adoption could improve confidence in infrastructure assembled from verified components, but adoption, composition across organizations and inexpensive maintenance would require additional capabilities and evidence.",
+   "source_urls": []
+  },
+  {
+   "text": "The guarantee would remain conditional. A proof can establish faithful implementation of an inadequate specification; it cannot by itself show that the specification captures user intent. Hardware behavior, instruction-set and operating-environment models, trusted checking components and the underlying logic also bound what follows in physical execution. seL4 explicitly identifies hardware faults and unexpected memory changes as circumstances outside its correctness predictions. Consequently, the proposed advance would not establish unconditional freedom from every kind of failure.",
+   "source_urls": [
+    "https://sel4.systems/Verification/proofs.html",
+    "https://sel4.systems/Verification/assumptions.html"
+   ]
+  },
+  {
+   "text": "The comparison with an ordinary compiler concerns workflow: assurance would become a required toolchain output. Proof search has limits that ordinary translation does not remove. General semantic questions are undecidable, so a useful verifier must operate within a declared envelope and may fail to establish a true property. The transformative claim is therefore practical breadth and affordability, not a universal correctness decision procedure.",
+   "source_urls": [
+    "https://compcert.inria.fr/doc/index.html"
+   ]
+  }
+ ],
+ "missing_breakthrough": [
+  {
+   "text": "The target capability combines expressive systems programming with automatic discharge of rich functional proof obligations at an ordinary development burden. Existing evidence shows substantial proof engineering and increasingly capable automation, rather than a simple divide between manual proofs and fully automatic verification. Verus, for example, combines general semi-automated techniques with full automation for restricted cases. The challenge is to broaden successful automation without weakening the properties established or requiring specialist intervention whenever a program becomes difficult.",
+   "source_urls": [
+    "https://www.andrew.cmu.edu/user/bparno/papers/verus-sys.pdf"
+   ]
+  },
+  {
+   "text": "Engineering synthesis: proof generation must handle the invariants, abstraction boundaries and interactions that practical systems create, including concurrency and specified failure behavior. It must also connect source-level reasoning through compilation to the actual executable. These are distinct obligations: proving that a compiler preserves source semantics does not establish that the source satisfies its application specification, while proving a source program correct leaves a gap unless translation and execution assumptions are covered. Success must combine these links within a manageable trusted base.",
+   "source_urls": [
+    "https://compcert.inria.fr/doc/index.html",
+    "https://sel4.systems/Verification/proofs.html",
+    "https://sel4.systems/Verification/assumptions.html"
+   ]
+  },
+  {
+   "text": "The remaining practical barriers include non-expert usability, predictable proof-search cost, understandable feedback when verification fails and the effort required to express specifications and supporting invariants. DARPA PROVERS explicitly targets accessibility for traditional developers and reduced proof-repair workload. Restricted autonomous binary proofs reported in October 2026 show why it would be too broad to claim that interactive annotation dominates every relevant verification task. The supplied evidence neither demonstrates the complete proposed combination nor establishes its exhaustive absence as of 1 November 2026.",
+   "source_urls": [
+    "https://www.darpa.mil/research/programs/pipelined-reasoning-of-verifiers-enabling-robust-systems",
+    "https://www.anthropic.com/research/formal-verification"
+   ]
+  }
+ ],
+ "current_state": [
+  {
+   "text": "Leino and Schulte’s 2006 verifying-compiler text describes establishing source-program correctness before compilation, using automatically generated verification conditions derived from programs, specifications and a programming methodology. The supplied review had access to the introduction, although the retained extraction was truncated later in the document. The research also attributes the grand-challenge formulation to C. A. R. Hoare’s January 2003 JACM article, but no retained Hoare artifact was available to verify its exact wording or bibliographic attribution. The executable-proof and cost requirements in this record are explicit extensions of the historical goal.",
+   "source_urls": [
+    "https://www.microsoft.com/en-us/research/wp-content/uploads/2007/01/AVerifyingCompilerMarktoberdorf2006.pdf",
+    "https://dl.acm.org/doi/10.1145/602382.602403"
+   ]
+  },
+  {
+   "text": "seL4 demonstrates functional correctness for verified kernel configurations and binary correctness for configurations supporting that additional property. Its project proofs page reports no functional-correctness defects in verified code since completion of the 2009 proof, while acknowledging that user expectations may be absent from the specification and that unverified parts can contain defects. This is a substantial project-reported achievement with configuration-specific scope; the supplied evidence does not establish a comparative ranking among deployed kernels.",
+   "source_urls": [
+    "https://sel4.systems/Verification/proofs.html"
+   ]
+  },
+  {
+   "text": "Historical seL4 project statistics place design, documentation, implementation and verification at approximately 25 person-years through first proof completion in 2009, including research, tools and libraries. Anthropic’s 22 October 2026 article separately reports approximately two person-years of implementation and 20 of verification, citing the verification work. These figures have different accounting scopes and should not be treated as present-day marginal verification costs. The research additionally reports approximately 10,000 source lines for the verified 64-bit RISC-V kernel as of April 2025 and ongoing multicore verification. Those two FAQ-specific assertions remain unconfirmed because the supplied review found the retained FAQ extraction unreadable.",
+   "source_urls": [
+    "https://trustworthy.systems/projects/OLD/l4.verified/numbers",
+    "https://www.anthropic.com/research/formal-verification",
+    "https://sel4.systems/About/FAQ.html"
+   ]
+  },
+  {
+   "text": "CompCert’s documentation identifies version 3.18, dated 31 August 2026, and describes verified compilation from a large subset of C to assembly. Its semantic-preservation result can carry separately established source-level correctness through compilation; it does not itself prove that an arbitrary source program meets an application specification. Preservation must also be read with its treatment of undefined behavior and permitted nondeterminism: it is inaccurate to say that every incorrect source behavior must be preserved, since compilation can eliminate behaviors classified as going wrong.",
+   "source_urls": [
+    "https://compcert.inria.fr/doc/index.html"
+   ]
+  },
+  {
+   "text": "The SOSP 2024 Verus paper, DOI 10.1145/3694715.3695952, reports case studies totaling 6.1K implementation lines and 31K proof lines. It reports faster verification and reduced developer effort in its evaluated comparisons, combining general semi-automation with full proof automation for special cases. Those results demonstrate progress in systems verification, while retaining substantial proof content and trusting the verifier, solvers and Rust compiler. They do not establish general automatic functional verification of emitted binaries at the proposed cost.",
+   "source_urls": [
+    "https://www.andrew.cmu.edu/user/bparno/papers/verus-sys.pdf",
+    "https://www.microsoft.com/en-us/research/publication/verus-a-practical-foundation-for-systems-verification/"
+   ]
+  },
+  {
+   "text": "The research describes IronFleet, attributed to SOSP 2015, as proving safety and liveness for a Paxos-based replicated state machine and a sharded store while requiring substantial developer assistance. The supplied review could inspect only a GitHub viewer shell, rather than the paper. These paper-specific findings and the reported assistance characterization therefore remain unverified in this record; no evaluation line counts or verified DOI are asserted. This access limitation does not establish that the reported results are false.",
+   "source_urls": [
+    "https://github.com/papers-we-love/papers-we-love/blob/main/distributed_systems/ironFleet-proving-practical-distributed-systems-correct.pdf"
+   ]
+  },
+  {
+   "text": "On 22 October 2026, Anthropic and Theorem reported Claude-produced, Rocq-checked no-crash proofs for 239 entry points across 123 OSS-Fuzz libraries. The demonstrations concern single-threaded static RISC-V binaries executing as modeled Linux processes with fixed memory budgets. The appendix specifies inputs under 64 MiB, refining the article’s looser 64 MB wording. The reported successful proofs total approximately 180 million lines, with typical proofs around 600,000 lines and a median binary length of approximately 18,000 instructions. These are attributed results from the article and appendix; the proof corpus was not independently checked in the supplied review.",
+   "source_urls": [
+    "https://www.anthropic.com/research/formal-verification"
+   ]
+  },
+  {
+   "text": "The October 2026 result establishes narrower properties than full functional correctness. Crash freedom does not establish termination, and coverage of selected entry points does not imply that entire libraries contain no bugs. The appendix explains limitations of the behavioral equivalence used in the development, including its treatment of crashes and nontermination, alongside the additional no-crash theorem. The article describes releasing trusted components, complete proofs for tests requiring no patch and specifications for tests it could not prove. That release description should not be read as independently checked access to every reported proof.",
+   "source_urls": [
+    "https://www.anthropic.com/research/formal-verification"
+   ]
+  },
+  {
+   "text": "Proofcraft reported on 2 September 2025 that seL4’s proofs covered all Arm platforms then supported by the kernel, including a newly added 23rd platform requiring no additional proof work. This is evidence of proof reuse across platform additions for one kernel. It does not establish unrestricted configuration coverage, multicore verification or a general-purpose verifying compiler.",
+   "source_urls": [
+    "https://proofcraft.systems/news-2025"
+   ]
+  },
+  {
+   "text": "DARPA describes PROVERS as a 42-month, three-phase program pursuing non-expert usability and reduced proof-repair effort. Its account credits PEARLS with demonstrations of AI support and automation for proof generation and maintenance. The completed PEARLS page is an unmaintained historical description; program completion alone does not show that its full ambitions, or this record’s target, were achieved. NSF’s Software and Hardware Foundations synopsis under NSF 25-543 funds work including analysis, synthesis, compositionality, verifiability and adaptability. It describes research scope rather than a completed toolchain.",
+   "source_urls": [
+    "https://www.darpa.mil/research/programs/pipelined-reasoning-of-verifiers-enabling-robust-systems",
+    "https://www.darpa.mil/research/programs/proof-engineering-adaptation-repair-and-learning-for-software",
+    "https://www.nsf.gov/funding/opportunities/shf-software-hardware-foundations"
+   ]
+  },
+  {
+   "text": "The research cites Brun and colleagues’ September 2026 roadmap as treating automatic proof synthesis and its integration with other capabilities as open challenges. The supplied review had no readable retained roadmap text: the ACM PDF was unavailable and the author bibliography capture contained an error message. That particular characterization remains unconfirmed. More broadly, the supplied material contains no bounded freshness search establishing the complete state of the field on 1 November 2026. Its dated achievements remain informative without proving either availability or absence of the full proposed capability.",
+   "source_urls": [
+    "https://dl.acm.org/doi/pdf/10.1145/3779132",
+    "https://people.cs.umass.edu/~brun/pubs.php?key=Brun26tosem"
+   ]
+  }
+ ],
+ "completion_criteria": [
+  {
+   "text": "Proposed demonstration: a team without specialist formal-methods expertise develops a concurrent multicore operating-system service, a small compiler or a replicated store in the supported language, together with an independently reviewable external functional specification. The successful demonstration must emit a working binary and a machine-checked proof that it refines that specification, including crash and recovery behavior where specified. A tool that rejects every submission would not satisfy this criterion.",
+   "source_urls": [],
+   "id": "m1",
+   "label": "Proposed demonstration"
+  },
+  {
+   "text": "Proposed verification contract: the toolchain must withhold certified output when it cannot discharge the obligations, while distinguishing failure to find a proof from a demonstrated specification violation. The evaluation should identify which functional properties were established, whether termination or liveness was included and which concurrency, failure and environmental behaviors were modeled. The emitted proof must be demonstrably connected to the exact executable being evaluated.",
+   "source_urls": [],
+   "id": "m2",
+   "label": "Proposed verification contract"
+  },
+  {
+   "text": "Proposed cost criterion: total additional specification and verification effort should be on the order of writing and testing the system once. Reporting should include human effort, computation, specialist assistance and work performed outside the nominal development team, so that automation does not merely conceal displaced labor. This is a proposed threshold, not an established standard; it imposes neither an hour-count limit nor an all-bug-classes requirement. Keeping assurance costs proportional across later changes is a separate target associated with SWE-05.",
+   "source_urls": [],
+   "id": "m3",
+   "label": "Proposed cost criterion"
+  },
+  {
+   "text": "Proposed reproducibility criterion: independent teams should be able to reproduce the builds and proof checks using the disclosed artifacts and repeat the development exercise on additional representative systems. Results should report both successful cases and verification failures, along with practical limits on program size, language features, concurrency, runtime, memory and proof-search resources. A finite evaluation would establish demonstrated breadth within that envelope, not literal universality.",
+   "source_urls": [],
+   "id": "m4",
+   "label": "Proposed reproducibility criterion"
+  },
+  {
+   "text": "Proposed trust disclosure: enumerate the trusted checker, logic, toolchain components, instruction-set and environment models, libraries, environmental assumptions and excluded physical faults. Explain how each affects the conclusion and how difficult it is to review. Their significance should be assessed by scope and trust burden rather than simply comparing their size with the program’s line count.",
+   "source_urls": [],
+   "id": "m5",
+   "label": "Proposed trust disclosure"
+  }
+ ],
+ "related_concepts": [
+  {
+   "text": "Roster-based distinction: SWE-02, Certified synthesis of system-scale programs from reviewable specifications, overlaps in producing an implementation with correctness evidence. SWE-01 starts with systems code supplied by developers and automates its verification and compilation; SWE-02 additionally concerns generating the implementation from a specification. Proof automation could support both, but successful verification of supplied code would not by itself demonstrate system-scale synthesis.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based distinction: SWE-03, Demonstrable adequacy of a specification against intent and the environment, concerns whether the specification asks for the right behavior. SWE-01 concerns whether an executable implements that specification. SWE-06, Sound behavioral recovery of legacy systems, concerns recovering trustworthy descriptions of existing behavior that might supply inputs to later verification. Neither proving conformance nor recovering existing behavior alone establishes that the behavior is desirable.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based distinction: SWE-04, A compositional calculus for concurrent systems that fail, could provide reasoning principles for concurrency, crashes and recovery within SWE-01’s practical envelope. SWE-08, Sequential meaning for fault-tolerant distributed execution, concerns the behavioral meaning offered by distributed execution despite failures. SWE-09, Observable determinism as the default for parallel systems code, concerns controlling externally visible variation in parallel execution. These could make particular specifications or proofs easier to express, but verifying compilation does not automatically supply any of those execution semantics.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based distinction: SWE-05, Assurance that stays proportional to each behavioral change, concerns the cost of preserving assurance as software evolves. SWE-01’s proposed initial-development cost bar does not establish that later modifications remain inexpensive. Proof reuse and repair are relevant to both, but SWE-05 is a distinct maintenance objective rather than an established prerequisite or the only possible route to sustainable evolution.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based distinction: SWE-07, Practical confinement of general untrusted programs, concerns restricting what untrusted code can do. SWE-01 concerns establishing specified functional behavior for code in a supported verification envelope. A verified confinement mechanism could enforce a boundary around unverified applications without proving those applications functionally correct.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based distinction: SWE-10, Proof-carrying behavioral composition across trust boundaries, overlaps with SWE-01’s production of executable-associated proof evidence, while adding the problem of accepting and composing behavioral guarantees from separately trusted parties. Producing a proof for one program does not automatically settle cross-party specification compatibility, composition or independent checking arrangements.",
+   "source_urls": []
+  },
+  {
+   "text": "SWE-11, Proved semantics-preserving transformation of practical systems, supplies a distinct link: preserving established behavior through transformations such as compilation. CompCert illustrates this distinction. A preservation theorem can transport separately proved source properties to compiled code under its conditions, while SWE-01 additionally requires automatic establishment of the application’s functional obligations at practical cost. This relationship preserves both entries rather than treating a verified compiler implementation as the complete verifying-compilation breakthrough.",
+   "source_urls": [
+    "https://compcert.inria.fr/doc/index.html"
+   ]
+  }
+ ],
+ "change_log": [
+  {
+   "change": "Preserved SWE-01’s identity while describing the full capability as a proposed combination whose present-day availability remains unresolved.",
+   "reason": "The evidence supports the research target and partial achievements, but supplies neither a demonstration of the whole target nor an exhaustive search establishing its absence."
+  },
+  {
+   "change": "Qualified the description of current assurance practice and removed the blanket claim that interactive proof and annotation dominate all relevant work.",
+   "reason": "Existing machine-checked systems and the restricted autonomous proofs reported in October 2026 make those generalizations too broad."
+  },
+  {
+   "change": "Separated functional correctness, crash freedom, termination, compilation preservation and physical execution assumptions.",
+   "reason": "These properties have different meanings and evidence; conflating them would exaggerate demonstrated coverage and the proposed guarantee."
+  },
+  {
+   "change": "Corrected CompCert’s characterization, including undefined-behavior and nondeterminism qualifications.",
+   "reason": "Semantic preservation does not establish arbitrary application correctness or require preservation of every incorrect source behavior."
+  },
+  {
+   "change": "Retained seL4’s dated achievements and effort figures with attribution, configuration boundaries and historical accounting context; removed the unsupported deployed-kernel superlative.",
+   "reason": "The project reports substantiate important achievements without establishing a comparative ranking or present-day marginal proof cost."
+  },
+  {
+   "change": "Preserved the FAQ’s approximate 10,000-line RISC-V and multicore claims as unconfirmed research assertions.",
+   "reason": "The review found the retained FAQ extraction unreadable; this limits verification of those details without disproving them."
+  },
+  {
+   "change": "Integrated Verus’s automation strategy, trusted components and evaluated proof burden alongside its quantitative case-study results.",
+   "reason": "The 6.1K implementation and 31K proof lines need the distinction between general semi-automation, restricted full automation and executable-level assurance."
+  },
+  {
+   "change": "Refined the October 2026 report to inputs under 64 MiB and retained entry-point counts, proof sizes, execution restrictions and release boundaries.",
+   "reason": "The appendix supplies the precise unit and explains why crash freedom does not establish termination; the proof corpus was not independently checked in the supplied review."
+  },
+  {
+   "change": "Qualified Hoare, IronFleet and the Brun roadmap attributions rather than treating unavailable text as established evidence or as refutation.",
+   "reason": "Missing artifacts, a viewer-only capture and an error response prevent confirmation of those particular assertions."
+  },
+  {
+   "change": "Distinguished research-program goals, partial accomplishments and completion notices.",
+   "reason": "PROVERS, PEARLS and NSF funding descriptions do not establish achievement of the complete proposed toolchain."
+  },
+  {
+   "change": "Strengthened the proposed demonstration with successful compilation, explicit cost accounting, reproducibility and meaningful trust disclosure.",
+   "reason": "An always-rejecting verifier must not pass; failed proof search is not a counterexample, and trust burden cannot be assessed simply by relative code size."
+  },
+  {
+   "change": "Explained overlap with every other supplied roster entry while retaining their separate identities.",
+   "reason": "The roster supplies useful conceptual boundaries, although full records for SWE-02 through SWE-11 were unavailable for detailed comparison."
+  }
+ ],
+ "unresolved_issues": [
+  "Whether any toolchain meets the complete scope, automation, executable-assurance and cost target as of 1 November 2026 remains unresolved without a bounded freshness assessment.",
+  "The seL4 FAQ’s approximate April 2025 RISC-V size and exact multicore-verification statement remain unconfirmed because its retained extraction was unreadable.",
+  "Hoare’s exact wording and bibliographic attribution, IronFleet’s reported paper-specific findings and developer burden, and the Brun roadmap characterization remain unverified in the supplied review.",
+  "The reported October 2026 proof corpus was not independently checked; the supplied article and appendix establish what was reported, not independent reproduction of every proof.",
+  "The proposed development-cost threshold still requires an operational evaluation protocol, including baseline development effort, team expertise and accounting for specification work, computation and outside assistance.",
+  "Detailed boundaries among the related concepts remain provisional because only their roster titles and limited cross-references were supplied."
+ ],
+ "sources": [
+  "https://dl.acm.org/doi/10.1145/602382.602403",
+  "https://www.microsoft.com/en-us/research/wp-content/uploads/2007/01/AVerifyingCompilerMarktoberdorf2006.pdf",
+  "https://sel4.systems/About/FAQ.html",
+  "https://sel4.systems/Verification/proofs.html",
+  "https://sel4.systems/Verification/assumptions.html",
+  "https://trustworthy.systems/projects/OLD/l4.verified/numbers",
+  "https://www.anthropic.com/research/formal-verification",
+  "https://compcert.inria.fr/doc/index.html",
+  "https://dl.acm.org/doi/10.1145/1538788.1538814",
+  "https://www.microsoft.com/en-us/research/publication/verus-a-practical-foundation-for-systems-verification/",
+  "https://www.andrew.cmu.edu/user/bparno/papers/verus-sys.pdf",
+  "https://github.com/papers-we-love/papers-we-love/blob/main/distributed_systems/ironFleet-proving-practical-distributed-systems-correct.pdf",
+  "https://proofcraft.systems/news-2025",
+  "https://dl.acm.org/doi/pdf/10.1145/3779132",
+  "https://people.cs.umass.edu/~brun/pubs.php?key=Brun26tosem",
+  "https://www.darpa.mil/research/programs/pipelined-reasoning-of-verifiers-enabling-robust-systems",
+  "https://www.darpa.mil/research/programs/proof-engineering-adaptation-repair-and-learning-for-software",
+  "https://www.nsf.gov/funding/opportunities/shf-software-hardware-foundations"
+ ],
+ "provenance": {
+  "research": "ingestion/runs/all-fields/SWE/reconciled-research.md",
+  "structured_record": "ingestion/runs/all-fields/SWE/reconciled-structured.json",
+  "review": "ingestion/runs/all-fields/SWE/attempts/review-SWE-01-da5eab415e9e44ba88354912dc9f8dfb/validated.json"
+ },
+ "field": "SWE",
+ "status": "active"
+}

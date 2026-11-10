@@ -1,0 +1,233 @@
+{
+ "id": "CRY-08",
+ "title": "Metadata-private messaging at ordinary cost",
+ "concept": [
+  {
+   "text": "The proposed innovation is a population-scale messenger that protects who communicates with whom while retaining interactive delivery and ordinary client bandwidth. Its central security target is negligible sender–receiver linking advantage: a computationally bounded observer watching the entire network should gain only a cryptographically negligible advantage in distinguishing the protected communication relationships, under an explicitly defined security experiment. The system would achieve this without secure enclaves or dependence on an individually trusted mix server. This is a target capability, not an achievement established by the supplied evidence.",
+   "source_urls": []
+  },
+  {
+   "text": "Content encryption alone does not guarantee this relationship privacy. An observer may infer relationships from when clients send and receive traffic, how much traffic they exchange, and how those patterns correlate. Metadata-private messaging must make observable traffic patterns uninformative about the relationships it promises to protect. Timing and volume need not disappear from observation altogether; their observable patterns must avoid revealing the protected relationships.",
+   "source_urls": [
+    "https://www.usenix.org/system/files/osdi22-barman.pdf"
+   ]
+  },
+  {
+   "text": "The intended combination also includes practical flexibility: mobile clients, multiple devices, asynchronous access, and contact graphs that are not restricted to a fixed small number of buddies. Groove provides a concrete historical reference for these goals. Its 2022 paper describes earlier scalable approaches that required users to remain online, use a single device, or incur substantial bandwidth costs, and develops a more flexible design using differential privacy and a mixnet.",
+   "source_urls": [
+    "https://www.usenix.org/conference/osdi22/presentation/barman",
+    "https://www.usenix.org/system/files/osdi22-barman.pdf"
+   ]
+  }
+ ],
+ "significance": [
+  {
+   "text": "Achieving the proposed combination would make strong protection of communication relationships practical for a large population. The direct advance beyond content encryption would be to prevent the modeled network observer from reliably reconstructing protected sender–receiver links through traffic analysis. The revolutionary element is the combination of privacy, scale, responsiveness, and manageable resource use; the supplied evidence does not establish that this combination has been achieved.",
+   "source_urls": [
+    "https://www.usenix.org/system/files/osdi22-barman.pdf"
+   ]
+  },
+  {
+   "text": "Conditional downstream possibilities include reducing the exposure of sensitive personal, professional, and organizational relationships through routine messaging. Such benefits would depend on adoption, usable clients, and operational practices that preserve the security assumptions. These are reasoned possibilities arising from the proposed capability, rather than demonstrated social outcomes.",
+   "source_urls": []
+  },
+  {
+   "text": "The protection would remain bounded by its threat model. It would not make an entire communication graph inaccessible to every adversary: compromised devices can expose address books and messages, and people may disclose contacts or supply outside information. Auxiliary information and permitted leakage must therefore be addressed explicitly. Groove itself distinguishes network privacy from the information available after device compromise.",
+   "source_urls": [
+    "https://www.usenix.org/system/files/osdi22-barman.pdf"
+   ]
+  },
+  {
+   "text": "Ordinary client bandwidth would make the system more accessible, but would not by itself establish ordinary total operating cost. Server computation, aggregate network traffic, storage, and the resources consumed while users are idle could remain substantial. A persuasive practical advance would need to report these costs alongside client bandwidth and delivery latency.",
+   "source_urls": []
+  }
+ ],
+ "missing_breakthrough": [
+  {
+   "text": "The capability sought is an end-to-end construction that simultaneously provides negligible linking advantage against a global network observer, interactive delivery, population-scale operation, flexible contact graphs, and modest resource use without trusted hardware. The supplied evidence establishes a historical gap between Groove's evaluated operating point and this stronger target. It does not establish whether the combined target remains unavailable as of November 1, 2026.",
+   "source_urls": [
+    "https://www.usenix.org/system/files/osdi22-barman.pdf"
+   ]
+  },
+  {
+   "text": "A central engineering barrier is controlling traffic-analysis leakage without paying prohibitive costs in cover traffic, batching delay, or server work. Client schedules must preserve relationship privacy even when users have different activity patterns. Supporting offline users and multiple devices also requires storing and retrieving messages without allowing those operations to reveal protected relationships. Groove illustrates the interaction among scheduling, asynchronous access, bandwidth, and latency; optimizing one measurement in isolation does not solve the combined problem.",
+   "source_urls": [
+    "https://www.usenix.org/system/files/osdi22-barman.pdf"
+   ]
+  },
+  {
+   "text": "Private information retrieval can protect which stored item a client retrieves, but it does not alone establish sender–receiver unlinkability across an entire messaging system. Traffic surrounding retrieval, message submission, storage growth, and server processing still matter. Groove's 2022 discussion identifies increasing database-server work as messages accumulate as a scalability concern for the PIR approaches it considers. That historical observation does not establish the limitations of later PIR constructions.",
+   "source_urls": [
+    "https://www.usenix.org/system/files/osdi22-barman.pdf"
+   ]
+  },
+  {
+   "text": "The security target also needs precise scientific definition. A proposal must specify the security parameter, permitted leakage, observation duration, auxiliary information, endpoint assumptions, and server-corruption model. Excluding an individually trusted mix server does not automatically eliminate collective assumptions, such as requiring some servers to remain honest. Likewise, differential privacy is not disqualified because its budget is visible: the relevant question is whether the resulting guarantee implies the required negligible linking advantage. A fixed non-negligible privacy budget alone would not establish that stronger target.",
+   "source_urls": []
+  },
+  {
+   "text": "Supporting arbitrary contact graphs introduces a further scaling obligation: costs and privacy must remain characterized as contact counts and graph structure vary. This cannot mean infinite contact lists or resource use independent of an unbounded workload. The useful target is a construction without a fixed small buddy cap, with explicit resource scaling and clearly stated practical limits.",
+   "source_urls": []
+  }
+ ],
+ "current_state": [
+  {
+   "text": "Groove: Flexible Metadata-Private Messaging, by Ludovic Barman, Moshe Kol, David Lazar, Yossi Gilad, and Nickolai Zeldovich, appeared at OSDI 2022. It is the only distinct messaging result supplied for this record. Its reported security guarantee is differential privacy, and its design advances client flexibility relative to the earlier systems discussed in the paper. The landing page supplies an abstract; the quantitative qualifications below come from the paper passages identified in the supplied review.",
+   "source_urls": [
+    "https://www.usenix.org/conference/osdi22/presentation/barman",
+    "https://www.usenix.org/system/files/osdi22-barman.pdf"
+   ]
+  },
+  {
+   "text": "The prototype evaluation used 100 mixnet servers. Servers generated extra circuits to simulate population-equivalent load, rather than operating a deployment with one million real clients. The paper reports approximately 32 seconds of messaging latency—32.4 seconds for 100 million circuits—corresponding to one million users with 50 buddies. The 50-buddy configuration is an evaluated operating point, not evidence of a universal design limit.",
+   "source_urls": [
+    "https://www.usenix.org/system/files/osdi22-barman.pdf"
+   ]
+  },
+  {
+   "text": "The reported latency excludes additional delays from client schedules and network round trips to the service provider. Pixel 4 measurements report 54–106 MB per month depending on the client schedule. Consequently, the earlier shorthand of roughly 100 MB per month should not be combined with the 32-second figure as though both described a single complete end-to-end operating point. Scheduling affects bandwidth and additional delivery delay.",
+   "source_urls": [
+    "https://www.usenix.org/system/files/osdi22-barman.pdf"
+   ]
+  },
+  {
+   "text": "These measurements demonstrate a dated prototype under differential privacy; they do not demonstrate the proposed negligible-advantage guarantee at interactive latency and population scale. Nor does the supplied evidence support ranking Groove as the current strongest system. No bounded freshness search record was supplied, so the state of the frontier as of November 1, 2026 remains unestablished.",
+   "source_urls": [
+    "https://www.usenix.org/system/files/osdi22-barman.pdf"
+   ]
+  },
+  {
+   "text": "The earlier research mentions recent doubly efficient PIR constructions, batch-query implementation papers, and enclave-based messengers, but supplies no corresponding sources establishing those results. Their dates, performance, and implications therefore remain unverified here. This evidence gap is not evidence that the results do not exist. As a conceptual distinction, relying on an enclave would introduce a trusted-hardware assumption outside the proposed target.",
+   "source_urls": []
+  },
+  {
+   "text": "The supplied source index records the PDF extraction as untruncated, with 17 pages reported in the review, but also records a numeric parsing warning. The review consequently treats the capture as partial while identifying readable prose supporting the measurements above; it says graph-image inspection was unnecessary for those particular findings. The landing page is limited to its abstract and associated publication information. This record relies on that supplied review and does not imply a fresh inspection of either document.",
+   "source_urls": [
+    "https://www.usenix.org/conference/osdi22/presentation/barman",
+    "https://www.usenix.org/system/files/osdi22-barman.pdf"
+   ]
+  }
+ ],
+ "completion_criteria": [
+  {
+   "text": "Proposed performance demonstration: support at least 10^8 users, without a fixed small contact-list cap, while delivering messages between online endpoints with 99th-percentile latency below 2 seconds. Measure per-user bandwidth at no more than 5× that of a specified non-private messenger under the same declared workload and measurement interval. Include cover traffic, idle periods, and relevant protocol overhead. These numerical thresholds are proposed targets, not established standards or reported results.",
+   "source_urls": [],
+   "id": "m1",
+   "label": "Proposed performance demonstration"
+  },
+  {
+   "text": "Proposed security demonstration: provide an explicit cryptographic experiment and analysis showing negligible sender–receiver linking advantage for a computationally bounded global passive network observer. State the security parameter, protected relationship changes, permitted leakage, observation duration, auxiliary information, endpoint assumptions, and server-corruption assumptions. Explain how the proof covers traffic scheduling and message retrieval as well as message contents. A differential-privacy guarantee would qualify only if its parameters and interpretation establish the required linking bound.",
+   "source_urls": [],
+   "id": "m2",
+   "label": "Proposed security demonstration"
+  },
+  {
+   "text": "Proposed trust boundary: require no secure enclave and no individually trusted mix server. Disclose any remaining collective honesty, non-collusion, setup, or provider assumptions. A passive network-observer guarantee must not be presented as automatically covering active traffic manipulation or every form of server compromise; any such protections require their own stated model and evidence.",
+   "source_urls": [],
+   "id": "m3",
+   "label": "Proposed trust boundary"
+  },
+  {
+   "text": "Proposed reproducibility demonstration: release enough protocol detail, implementation material, workload definitions, and measurement procedures for independent reproduction. Distinguish real clients from generated load, measured results from projections, and internal processing latency from full endpoint-to-endpoint latency. Report client scheduling policies, hardware, server resources, network conditions, aggregate network traffic, storage, and total operating costs. Independent reproduction should confirm both performance and consistency between the implemented behavior and the security model.",
+   "source_urls": [],
+   "id": "m4",
+   "label": "Proposed reproducibility demonstration"
+  },
+  {
+   "text": "Proposed breadth demonstration: evaluate varied contact counts, graph structures, traffic distributions, idle users, multiple devices, and offline-to-online transitions, with explicit resource limits. Separate online-endpoint latency from delays caused by endpoints being offline. Finite experiments would establish demonstrated breadth across those workloads; they would not prove literal universality over all possible contact graphs. Any general claim requires a supporting analysis of security and resource scaling.",
+   "source_urls": [],
+   "id": "m5",
+   "label": "Proposed breadth demonstration"
+  }
+ ],
+ "related_concepts": [
+  {
+   "text": "Within the supplied roster, CRY-04, General-purpose private computation at near-plaintext cost, has the closest practical overlap: both seek strong privacy with resource costs approaching ordinary systems. Private computation or private retrieval could contribute components to messaging, but protecting computation inputs does not by itself prevent network traffic from revealing communication relationships. CRY-08 remains a distinct end-to-end communication problem involving schedules, delivery, and observable traffic.",
+   "source_urls": []
+  },
+  {
+   "text": "CRY-01, A proof that an explicit one-way function exists, and CRY-02, Public-key encryption from one-way functions, concern cryptographic foundations and the construction of encryption. Such primitives could underlie a messenger, but neither roster title entails metadata privacy or practical traffic-analysis resistance. CRY-03, Practically efficient post-quantum indistinguishability obfuscation, could overlap as a source of powerful cryptographic components, while addressing a different capability. These relationships are conceptual inferences from the roster, not supplied construction results.",
+   "source_urls": []
+  },
+  {
+   "text": "CRY-09, Post-quantum timed release with a sequentiality theorem, concerns when information becomes available; CRY-08 concerns what an observer learns about communication relationships during delivery. Delivery delay used for privacy is therefore distinct from cryptographically enforced timed release. CRY-10, A conclusive quantum classification of deployed lattice encryption, concerns the security of an encryption family. It could inform the choice of underlying primitives, but would not establish messaging unlinkability. CRY-08's stated target does not itself specify post-quantum security.",
+   "source_urls": []
+  },
+  {
+   "text": "CRY-05, Publicly verifiable unclonable money and copy-protected programs; CRY-06, Practical classical verification of quantum computation; and CRY-07, Position verification that works in physical spacetime, address different capabilities involving copying, verification, or physical location. Location and communication metadata may interact in a broader threat model, but proving location differs from hiding communication relationships. The supplied material establishes no specific construction-level dependency between these entries and CRY-08; each remains a separate innovation.",
+   "source_urls": []
+  },
+  {
+   "text": "Outside the numbered roster, anonymous communication, mixnets, private information retrieval, traffic-analysis resistance, and mobile messaging are directly relevant. Mixnets and PIR are possible ingredients; mobile messaging supplies the flexibility and resource constraints. Groove illustrates their interaction, but success in one ingredient does not establish the combined CRY-08 guarantee.",
+   "source_urls": [
+    "https://www.usenix.org/system/files/osdi22-barman.pdf"
+   ]
+  }
+ ],
+ "change_log": [
+  {
+   "change": "Preserved CRY-08's identity and integrated the population-scale, interactive, flexible-client target into a single end-to-end concept.",
+   "reason": "The useful research goals survive the evidence corrections; limitations in supporting claims do not invalidate the innovation."
+  },
+  {
+   "change": "Replaced absolute communication-graph secrecy with relationship privacy bounded by an explicit threat model.",
+   "reason": "Device compromise, disclosed contacts, and outside information can expose relationships despite network privacy."
+  },
+  {
+   "change": "Corrected the million-user description to simulated population-equivalent circuit load on 100 mixnet servers.",
+   "reason": "The supplied review identifies generated circuits rather than a deployment with one million real clients."
+  },
+  {
+   "change": "Retained approximately 32 seconds and added the 32.4-second, 100-million-circuit measurement and excluded-delay qualifications.",
+   "reason": "The reported processing measurement does not include all client scheduling and network delays."
+  },
+  {
+   "change": "Replaced the approximate 100 MB/month shorthand with the schedule-dependent 54–106 MB/month Pixel 4 range.",
+   "reason": "Bandwidth and additional latency vary with schedule and should not imply one common end-to-end operating point."
+  },
+  {
+   "change": "Clarified that 50 buddies is an evaluated configuration rather than a universal design cap.",
+   "reason": "The historical measurement does not establish a general contact-list limit."
+  },
+  {
+   "change": "Removed the current-frontier ranking and qualified present-day nonexistence and recent PIR/enclave assertions.",
+   "reason": "Only one distinct messaging paper and no freshness search record or supporting recent-result sources were supplied."
+  },
+  {
+   "change": "Reframed the differential-privacy distinction around the resulting linking guarantee rather than budget visibility.",
+   "reason": "The relevant issue is whether the guarantee implies negligible advantage, not whether its parameters are public."
+  },
+  {
+   "change": "Expanded proposed benchmarks to define workloads, trust assumptions, full latency, idle traffic, reproducibility, graph breadth, and aggregate costs.",
+   "reason": "The original numerical targets require operational definitions, and low client bandwidth alone does not establish ordinary total cost."
+  },
+  {
+   "change": "Preserved the source extraction warning and distinguished it from truncation.",
+   "reason": "The source index reports an untruncated extraction with a numeric parsing issue, while the review treats capture completeness as partial."
+  },
+  {
+   "change": "Added explicit distinctions across all other supplied roster entries.",
+   "reason": "Related foundations and privacy capabilities should be explained without merging their identities or inventing dependencies."
+  }
+ ],
+ "unresolved_issues": [
+  "Whether any system available as of November 1, 2026 achieves the combined target remains unverified because no freshness search record was supplied.",
+  "The referenced recent doubly efficient PIR, batch-query implementation, and enclave-messenger results lack supplied supporting sources; their existence and implications are not resolved here.",
+  "The target still needs a concrete security experiment specifying permitted leakage, observation duration, auxiliary information, endpoint assumptions, corruption assumptions, and security parameter.",
+  "Remaining collective honesty or non-collusion requirements are unspecified; excluding an individually trusted mix server does not resolve them.",
+  "The non-private baseline, workload, measurement interval, graph families, and acceptable aggregate operating costs remain to be chosen. The proposed client-bandwidth threshold alone cannot settle the title's ordinary-cost claim.",
+  "Post-quantum security and protection against active network attacks are not specified by the proposed global passive observer target.",
+  "The PDF's numeric extraction warning remains recorded. The supplied review supports the cited prose measurements but does not resolve every possible extraction issue."
+ ],
+ "sources": [
+  "https://www.usenix.org/conference/osdi22/presentation/barman",
+  "https://www.usenix.org/system/files/osdi22-barman.pdf"
+ ],
+ "provenance": {
+  "research": "ingestion/runs/all-fields/CRY/reconciled-research.md",
+  "structured_record": "ingestion/runs/all-fields/CRY/reconciled-structured.json",
+  "review": "ingestion/runs/all-fields/CRY/attempts/review-CRY-08-e06497fdc3594c6fb27ca4be23979174/validated.json"
+ },
+ "field": "CRY",
+ "status": "active"
+}

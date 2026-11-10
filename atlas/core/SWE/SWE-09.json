@@ -1,0 +1,200 @@
+{
+ "id": "SWE-09",
+ "title": "Observable determinism as the default for parallel systems code",
+ "concept": [
+  {
+   "text": "The proposed innovation is a programming language and runtime in which parallel systems code produces schedule-independent observable results by default. For the same external inputs and explicitly declared choices, changing how threads are interleaved would not change the program’s defined observations. The distinguishing target is to combine this guarantee with the expressiveness needed for kernels, browsers, and databases, and performance competitive with expert lock-based and lock-free implementations. Existing deterministic programming models provide building blocks; determinism alone is not the proposed breakthrough.",
+   "source_urls": [
+    "https://arxiv.org/pdf/2210.15202"
+   ]
+  },
+  {
+   "text": "Instead of requiring programmers to anticipate every possible interaction between shared-state operations, the model would reject unordered conflicting effects or give them a determined meaning through its semantics and communication rules. Deliberate nondeterminism would remain available through explicit operations, such as selecting whichever request arrives first. Once such a choice is fixed, the remaining behavior would again obey the model’s determinism guarantee. Changing a choice could legitimately change later computations and outputs, rather than affecting only the immediate choice operation.",
+   "source_urls": [
+    "https://arxiv.org/pdf/2210.15202"
+   ]
+  },
+  {
+   "text": "The guarantee must specify what counts as observable behavior. Obtaining the same final answer is weaker than producing the same sequence of externally visible events, and confluence of results does not by itself guarantee identical execution traces or progress. A useful systems model therefore needs explicit boundaries for outputs, external events, termination, and ongoing service behavior. It can constrain program semantics without controlling operating-system preemption.",
+   "source_urls": [
+    "https://arxiv.org/pdf/2210.15202"
+   ]
+  }
+ ],
+ "significance": [
+  {
+   "text": "If achieved at the proposed breadth and efficiency, this capability could substantially change systems programming by removing implicit scheduling as a source of differences in defined results. Parallelism is often needed for performance, but schedule-sensitive operations can make failures difficult to reproduce. For fixed inputs and explicit choices, deterministic observations would make tests reproducible within the guarantee’s scope and make failures easier to investigate. Schedule-dependent differences would enter through declared nondeterminism rather than incidental thread interleavings.",
+   "source_urls": [
+    "https://arxiv.org/pdf/2210.15202"
+   ]
+  },
+  {
+   "text": "Verification could reason about deterministic program semantics plus explicit choice points, abstracting away implementation schedules after establishing that the compiler and runtime preserve those semantics. This could reduce the burden of reasoning about accidental interleavings. It would still leave substantial obligations: whether the computation is functionally correct, whether it makes progress, whether external events are modeled adequately, and whether explicit choices have acceptable consequences. A deterministic result can still be incorrect or fail to match user intent.",
+   "source_urls": [
+    "https://arxiv.org/pdf/2210.15202"
+   ]
+  },
+  {
+   "text": "Conditional synthesis: broader adoption could make parallel implementations easier to maintain and could support more dependable regression testing and verification workflows. Those benefits would depend on usable programming restrictions, practical integration with external systems, and acceptable resource costs. The analogy to a sequential specification is useful only when the language supplies a suitable specification relationship; schedule-independent results alone do not establish sequential equivalence, identical timing, or progress under arbitrary scheduling.",
+   "source_urls": []
+  }
+ ],
+ "missing_breakthrough": [
+  {
+   "text": "The target capability is the combination of broad systems expressiveness, explicit nondeterministic choices, and efficient parallel execution under a precise observable-determinism guarantee. The supplied evidence motivates this target but does not establish that no existing system achieves it as of November 1, 2026. The central documented tension is between concurrent conflicting effects and schedule-independent behavior: a model must constrain their interaction, order them, or otherwise define their meaning without losing the parallelism and programming patterns that make systems implementations practical.",
+   "source_urls": [
+    "https://arxiv.org/pdf/2210.15202"
+   ]
+  },
+  {
+   "text": "Existing deterministic models illustrate the engineering tradeoff. The survey describes restricted programming patterns and parallelism in its discussion of Kahn process networks, and identifies challenges in efficient parallel execution. Extending deterministic semantics across the intended systems scope requires useful ways to express communication and shared effects while preserving the guarantee. The supplied sources do not quantify the cost of adapting existing race-sensitive programs or establish a general performance penalty for deterministic execution.",
+   "source_urls": [
+    "https://arxiv.org/pdf/2210.15202"
+   ]
+  },
+  {
+   "text": "A further challenge is defining and preserving the guarantee for long-running, externally interacting systems. The semantics must distinguish fixed external inputs from declared choices, identify which observations must remain invariant, and state the scheduling assumptions needed for progress. Compiler and runtime enforcement must preserve those commitments. Otherwise, a guarantee about final results could be mistaken for a stronger guarantee about event traces or service behavior.",
+   "source_urls": [
+    "https://arxiv.org/pdf/2210.15202"
+   ]
+  },
+  {
+   "text": "Synthesis of the remaining engineering goal: restrictions and enforcement mechanisms must remain usable and efficient across representative systems workloads, including workloads conventionally implemented with locks or lock-free algorithms. A convincing solution would need evidence about both what programmers can express and what it costs to execute. Neither a deterministic toy program nor data-race freedom alone would establish that combined capability.",
+   "source_urls": []
+  }
+ ],
+ "current_state": [
+  {
+   "text": "Gonnord, Henrio, Morel, and Radanne’s A Survey on Parallelism and Determinism is identified in the supplied review as ACM Computing Surveys 55(10), Article 210, October 2022, DOI 10.1145/3564529. Its supplied author version compares deterministic programming models and mechanisms for the narrower property of data-race freedom. It documents existing deterministic approaches, their restrictions, and mechanisms for controlling nondeterminism, including an explicit nondeterministic choice in its discussion of CAL. That example does not establish that CAL satisfies the proposed combined systems capability.",
+   "source_urls": [
+    "https://arxiv.org/pdf/2210.15202"
+   ]
+  },
+  {
+   "text": "The survey emphasizes safety more than comparative performance. It therefore provides a technical foundation and a comparison of models, rather than a demonstration that broadly expressive systems code achieves observable determinism at competitive speed. It also distinguishes confluence from identical monitoring traces: executions can agree on results while producing different traces. Its discussions of protected data access should not be read as establishing whole-program determinism merely from linear types or ownership mechanisms.",
+   "source_urls": [
+    "https://arxiv.org/pdf/2210.15202"
+   ]
+  },
+  {
+   "text": "The supplied Rustonomicon chapter explains that Safe Rust prevents data races while permitting general race conditions. Its atomic-operation example illustrates how scheduling can affect behavior even when accesses are free of data races. This is an existing safety achievement with a narrower scope than observable determinism. The chapter’s statement about the impossibility of preventing general races without scheduler control belongs to the context of programs that permit schedule-sensitive synchronization; it is not a universal impossibility theorem for languages whose semantics constrain such interactions.",
+   "source_urls": [
+    "https://doc.rust-lang.org/rustonomicon/races.html"
+   ]
+  },
+  {
+   "text": "The supplied review reports complete, untruncated coverage of the 29-page survey and the Rustonomicon chapter, with verified source identities and no recorded extraction issues. These descriptions rely on that review rather than a new inspection of the documents. No specific deterministic-runtime overhead or broad systems-performance benchmark is established by this evidence. The supplied freshness record contains no searches, so whether the combined capability remains unavailable as of November 1, 2026 is unresolved; the age and scope of these sources cannot establish present-day absence.",
+   "source_urls": [
+    "https://arxiv.org/pdf/2210.15202",
+    "https://doc.rust-lang.org/rustonomicon/races.html"
+   ]
+  }
+ ],
+ "completion_criteria": [
+  {
+   "text": "Proposed milestone: implement a multicore storage engine or browser subsystem in the deterministic-by-default language. Pre-register the workloads, external input traces, observable outputs, termination and progress requirements, conventional baseline, machine configuration, and measurement procedure. Run the implementation under two schedulers, including an adversarial scheduler, and require identical defined observations for fixed inputs and explicit choices. This would demonstrate behavior across the tested workloads and schedules, rather than establish literal universality.",
+   "source_urls": [],
+   "id": "m1",
+   "label": "Proposed milestone"
+  },
+  {
+   "text": "Proposed guarantee evidence: provide a semantic argument covering all schedules permitted by the model, with explicit assumptions about fairness, external inputs, and progress where relevant. Explain how compilation and runtime execution preserve that guarantee, and support enforcement claims with rejection tests for forbidden interference. Data races or atomicity errors that could alter guaranteed observations must be ruled out by the model’s enforcement or represented through declared nondeterministic operations with defined scope.",
+   "source_urls": [],
+   "id": "m2",
+   "label": "Proposed guarantee evidence"
+  },
+  {
+   "text": "Proposed explicit-choice test: introduce one declared nondeterministic choice and document its permitted downstream consequences. Changing the choice may alter those consequences; fixing the choice must restore schedule-independent observations. Check that any observed variation is accounted for by the declared semantics. Requiring differences to remain confined to the immediate choice operation would be too restrictive because later computations may legitimately depend on it.",
+   "source_urls": [],
+   "id": "m3",
+   "label": "Proposed explicit-choice test"
+  },
+  {
+   "text": "Proposed performance and reproducibility criterion: achieve throughput of at least half that of a respected conventional implementation under the stated protocol. This numerical threshold is a proposed milestone, not an established standard or evidence of achieved performance. Publish the implementation, workload definitions, scheduler configurations, and measurement procedure so independent groups can reproduce the result. Report resource costs and practical limitations alongside throughput. A single subsystem would establish a useful milestone; broader claims across kernels, browsers, and databases would require additional representative demonstrations.",
+   "source_urls": [],
+   "id": "m4",
+   "label": "Proposed performance and reproducibility criterion"
+  }
+ ],
+ "related_concepts": [
+  {
+   "text": "Existing technical overlap includes deterministic dataflow and synchronous languages, which provide ways to constrain concurrent behavior; dependency-preserving parallel compilation, which seeks parallel execution without changing a program’s meaning; and ownership systems, which regulate access to data. These are relevant building blocks but do not individually establish the proposed combination of systems breadth, observable determinism, and competitive performance. Deterministic replay has a different emphasis: reproducing a selected execution does not by itself make every permitted execution produce the same observations.",
+   "source_urls": [
+    "https://arxiv.org/pdf/2210.15202",
+    "https://doc.rust-lang.org/rustonomicon/races.html"
+   ]
+  },
+  {
+   "text": "Roster-based synthesis: SWE-01, Push-button verifying compilation for practical systems, and SWE-11, Proved semantics-preserving transformation of practical systems, could provide assurance that compilation and optimization preserve SWE-09’s deterministic semantics. Their focus is proof and preservation across implementation steps; SWE-09 defines a particular behavioral guarantee for parallel execution. SWE-02, Certified synthesis of system-scale programs from reviewable specifications, could generate programs targeting such a model, but synthesis correctness and deterministic execution remain distinct capabilities.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis: SWE-03, Demonstrable adequacy of a specification against intent and the environment, addresses whether deterministic behavior is the behavior users need. SWE-05, Assurance that stays proportional to each behavioral change, concerns maintaining confidence as programs evolve. SWE-06, Sound behavioral recovery of legacy systems, could help identify existing schedule-sensitive behavior before migration. None of these goals follows automatically from eliminating implicit scheduling differences.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis: SWE-04, A compositional calculus for concurrent systems that fail, overlaps in reasoning about concurrency, while also addressing composition and failure behavior. SWE-08, Sequential meaning for fault-tolerant distributed execution, shares an interest in understandable execution semantics but focuses on distribution and fault tolerance. SWE-09 concerns parallel systems code and its defined observations; it does not by itself supply distributed agreement, failure recovery, or sequential meaning for distributed execution.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis: SWE-07, Practical confinement of general untrusted programs, concerns limiting what untrusted code can affect, whereas deterministic code can still perform harmful actions within its permissions. SWE-10, Proof-carrying behavioral composition across trust boundaries, concerns evidence that components satisfy behavioral contracts when combined. SWE-09 could contribute a determinism contract to such composition, but it does not independently establish confinement or compatible behavior across trust boundaries.",
+   "source_urls": []
+  }
+ ],
+ "change_log": [
+  {
+   "change": "Preserved SWE-09’s identity while defining the breakthrough as the combination of observable determinism, systems expressiveness, explicit choices, and competitive performance.",
+   "reason": "Existing deterministic models mean that determinism alone is not the distinguishing innovation."
+  },
+  {
+   "change": "Replaced the assertion of a currently missing capability with a proposed target whose present-day availability remains unresolved.",
+   "reason": "The supplied historical sources and empty freshness record do not establish absence as of November 1, 2026."
+  },
+  {
+   "change": "Qualified reproducibility by fixed external inputs, explicit choices, defined observations, and the model’s guarantee boundaries.",
+   "reason": "Confluence of results does not automatically establish identical traces, termination, or progress."
+  },
+  {
+   "change": "Retained the benefits for testing and verification while stating the remaining functional-correctness, progress, and semantic-preservation obligations.",
+   "reason": "Removing implicit schedule dependence simplifies some reasoning without proving correctness or adequacy to user intent."
+  },
+  {
+   "change": "Corrected the treatment of Safe Rust and the Rustonomicon’s scheduler-impossibility statement.",
+   "reason": "Data-race freedom permits broader race conditions, and the chapter’s scheduling discussion is not a universal impossibility result for deterministic programming models."
+  },
+  {
+   "change": "Removed the implication of a quantified migration or enforcement cost and clarified the survey’s safety emphasis.",
+   "reason": "The evidence documents restrictions and efficiency challenges but supplies neither a general migration-cost estimate nor the required broad performance comparison."
+  },
+  {
+   "change": "Expanded the proposed demonstration with fixed input traces, defined observations, progress requirements, reproducibility materials, and semantic coverage of permitted schedules.",
+   "reason": "A two-scheduler experiment demonstrates tested behavior but cannot prove an all-schedule guarantee."
+  },
+  {
+   "change": "Allowed an explicit nondeterministic choice to have documented downstream consequences and retained the half-throughput threshold as a proposal.",
+   "reason": "Choices can affect later outputs, and the numerical threshold is neither a published result nor a consensus standard."
+  },
+  {
+   "change": "Integrated the supplied review’s source-coverage limitations and mapped relationships to every other supplied roster entry.",
+   "reason": "The record must distinguish reviewed evidence from new inspection and preserve related concepts as separate innovations."
+  }
+ ],
+ "unresolved_issues": [
+  "Whether an existing language or runtime already meets the combined target as of November 1, 2026 remains unresolved because the supplied freshness record contains no searches.",
+  "The intended observation model, treatment of external events, and scheduling assumptions for progress still need a concrete definition.",
+  "No supplied evidence establishes competitive performance across the intended kernel, browser, and database scope, or quantifies migration costs for existing race-sensitive code.",
+  "The proposed half-throughput milestone requires a selected baseline and workload protocol; meeting it would not by itself establish broadly competitive performance.",
+  "A storage engine or browser subsystem demonstration would leave applicability to the rest of the intended systems scope unestablished."
+ ],
+ "sources": [
+  "https://arxiv.org/pdf/2210.15202",
+  "https://doc.rust-lang.org/rustonomicon/races.html"
+ ],
+ "provenance": {
+  "research": "ingestion/runs/all-fields/SWE/reconciled-research.md",
+  "structured_record": "ingestion/runs/all-fields/SWE/reconciled-structured.json",
+  "review": "ingestion/runs/all-fields/SWE/repairs/swe09-review-8b2f0668a8774278ae9076657813c94d/validated.json"
+ },
+ "field": "SWE",
+ "status": "active"
+}

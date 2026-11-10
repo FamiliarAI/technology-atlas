@@ -1,0 +1,221 @@
+{
+ "id": "CSC-04",
+ "title": "Industrial-cost proof-carrying software",
+ "concept": [
+  {
+   "text": "The innovation would make rigorous software assurance practical at ordinary development costs: a team would specify what a large production system must do, implement it in a usable programming language, and deliver executable machine code together with machine-checkable evidence that it satisfies stated functional-correctness, memory-safety, and information-flow properties. The intended advance includes affordable development and maintenance, so that changing the software and repairing its proofs becomes a routine engineering activity.",
+   "source_urls": [
+    "http://www.cs.cmu.edu/~15811/papers/grand-challenge.pdf"
+   ]
+  },
+  {
+   "text": "Three distinct achievements must connect. Application verification establishes that a program meets its specification. Compiler verification establishes that compilation preserves the relevant program behavior. Proof-carrying delivery supplies evidence about the delivered artifact that a trusted checker can independently validate. A verified compiler does not automatically prove an application's requirements, and a proof about source code does not automatically cover the final binary. The proposed capability would connect these layers while making their remaining assumptions explicit.",
+   "source_urls": [
+    "https://compcert.inria.fr/doc/index.html"
+   ]
+  }
+ ],
+ "significance": [
+  {
+   "text": "Machine-checked proofs can exclude entire specified classes of unwanted behavior under explicit models and assumptions. If this assurance became affordable for large systems, developers could routinely ship artifacts with checked evidence for their stated safety and security properties before execution. Operating systems, compilers, cryptographic stacks, and controllers are plausible beneficiaries. Hoare's 2003 verifying-compiler challenge provides the underlying vision; extending it across these domains at ordinary costs remains a conditional impact judgment.",
+   "source_urls": [
+    "http://www.cs.cmu.edu/~15811/papers/grand-challenge.pdf",
+    "https://sel4.systems/Verification/proofs.html"
+   ]
+  },
+  {
+   "text": "seL4 supplies a concrete basis for taking this prospect seriously. Its project reports no functional-correctness defects in verified code since the first functional-correctness proof completed in 2009, across more than fifteen years of testing, use, and deployment. This is a reported observation about the verified code within its proof scope and assumptions. It does not independently certify every configuration, surrounding component, or aspect of system behavior.",
+   "source_urls": [
+    "https://sel4.systems/Verification/proofs.html"
+   ]
+  },
+  {
+   "text": "The impact depends on choosing adequate specifications and models. A program can faithfully implement an inadequate specification; a software proof also depends on assumptions about its execution environment. Functional correctness alone does not establish that a controller meets deadlines or that a physical system remains safe. Timing, device behavior, and relevant environmental constraints need their own specifications and supporting guarantees. These boundaries matter when projecting benefits into medicine, vehicles, or infrastructure.",
+   "source_urls": [
+    "https://sel4.systems/Verification/proofs.html",
+    "https://trustworthy.systems/publications/papers/Sillitoe_BGH_26.slides.pdf"
+   ]
+  },
+  {
+   "text": "Scientific scope clarification: the proposal would not provide a general decision procedure for termination or all nontrivial semantic properties of unrestricted programs. Its practical route is to work with explicit specifications, suitable languages and abstractions, and proof obligations that may require human guidance or remain unproved. One successful large-system demonstration would establish feasibility within its scope; routine use across many domains would require broader evidence.",
+   "source_urls": []
+  }
+ ],
+ "missing_breakthrough": [
+  {
+   "text": "The target is an integrated specification-to-executable process whose total effort is comparable to ordinary implementation and testing. The supplied evidence establishes substantial component achievements and motivates this target, but it does not establish that the complete capability is absent everywhere as of November 1, 2026. The open engineering question supported by this record is how to combine strong specifications, scalable verification, trustworthy compilation, independently checkable evidence, and affordable maintenance in realistic production development.",
+   "source_urls": [
+    "http://www.cs.cmu.edu/~15811/papers/grand-challenge.pdf",
+    "https://sel4.systems/Verification/proofs.html",
+    "https://compcert.inria.fr/doc/index.html"
+   ]
+  },
+  {
+   "text": "The historical seL4 effort illustrates why cost is central. At its first proof completion in 2009, approximately 7,500 of 8,700 lines of C were verified using about 200,000 lines of Isabelle proof script. Design, documentation, implementation, and verification together required about 25 person-years, including research, tool development, and libraries. That total is not a measurement of proof labor alone, nor a controlled estimate of the overhead relative to ordinary development. Assembly and kernel boot code were outside that verified coverage.",
+   "source_urls": [
+    "https://trustworthy.systems/projects/OLD/l4.verified/numbers"
+   ]
+  },
+  {
+   "text": "Concrete scope barriers include concurrency, kernel initialization, hardware abstractions, and the connection between software behavior and execution time. The July 2026 seL4 slides report multicore verification in progress, unverified initialization code, and abstract models of the MMU and caches. Abstract cache modeling is different from having no cache model, but it limits which hardware-level conclusions follow. CompCert addresses another layer by proving semantic preservation for compilation of a large C subset to assembly; that result does not itself prove an operating system's application-level specification or every subsequent step to a deployed binary.",
+   "source_urls": [
+    "https://trustworthy.systems/publications/papers/Sillitoe_BGH_26.slides.pdf",
+    "https://compcert.inria.fr/doc/index.html"
+   ]
+  },
+  {
+   "text": "Engineering synthesis: an affordable integrated process would need reusable specifications and proof components, automation that handles common obligations, manageable interfaces between components, and proof repair that keeps pace with software changes. It would also need to expose unsupported features and unproved obligations clearly. Lowering the cost by weakening the specification would not establish the intended combination of functional correctness, memory safety, and information-flow assurance.",
+   "source_urls": []
+  }
+ ],
+ "current_state": [
+  {
+   "text": "The supplied seL4 materials document an achieved verified microkernel component. Its kernel implementation is approximately 10,000 lines of C, depending on configuration. Functional-correctness proofs establish that the C code of verified configurations behaves according to the seL4 specification; binary-correctness and security guarantees depend on the configuration and available proofs. These are substantial results, but they do not establish verification of an entire commodity operating system, browser, or million-line application.",
+   "source_urls": [
+    "https://sel4.systems/Verification/proofs.html"
+   ]
+  },
+  {
+   "text": "The 2009 proof statistics provide a dated baseline: 8,700 C lines, 7,500 verified C lines, roughly 200,000 Isabelle proof-script lines, and about 25 person-years for the combined design-through-verification effort. A 2015 note reports that related proof files had grown to approximately 500,000 lines. Those later files have a different scope from the original proof-script count, so the two figures should not be treated as directly comparable measures of productivity or proof complexity.",
+   "source_urls": [
+    "https://trustworthy.systems/projects/OLD/l4.verified/numbers"
+   ]
+  },
+  {
+   "text": "The July 2026 OSPERT slides list initialization code as unverified, describe MMU and cache models as abstract, and state that multicore verification is in progress. Separately, the seL4 proofs page describes verified user-level system initialization in supported configurations: an initializer configures a system to conform to a supplied description. This does not establish verification of kernel boot code. Distinguishing these components reconciles the apparent tension between the initialization statements.",
+   "source_urls": [
+    "https://trustworthy.systems/publications/papers/Sillitoe_BGH_26.slides.pdf",
+    "https://sel4.systems/Verification/proofs.html"
+   ]
+  },
+  {
+   "text": "The supplied CompCert documentation identifies version 3.18, dated August 31, 2026. It describes compilation from CompCert C, a large subset of C, to ARM, PowerPC, RISC-V, and x86 assembly, with a semantic-preservation guarantee. This is a compiler achievement with a defined language and target scope. It is distinct from proving application requirements, supporting every C feature, or establishing a complete proof through assembly and linking to a deployed executable. The retained documentation is an introduction and index, rather than the complete proof development.",
+   "source_urls": [
+    "https://compcert.inria.fr/doc/index.html"
+   ]
+  },
+  {
+   "text": "Hoare's January 2003 paper articulates the verifying-compiler goal, including large-scale use and independently checked proofs. The supplied source collection does not establish how widely such methods are adopted in industry, which verified systems are largest or strongest across the field, or whether the complete cost target had been achieved by November 2026. The July and August 2026 materials support statements at their documented dates; the supplied review contains no broader freshness search establishing an exhaustive November picture.",
+   "source_urls": [
+    "http://www.cs.cmu.edu/~15811/papers/grand-challenge.pdf",
+    "https://trustworthy.systems/publications/papers/Sillitoe_BGH_26.slides.pdf",
+    "https://compcert.inria.fr/doc/index.html"
+   ]
+  },
+  {
+   "text": "The original 2009 SOSP page was not captured in the supplied evidence. Its precise original compiler and hardware assumption wording therefore cannot be confirmed from that artifact here. The retained seL4 proofs page supports the broader need to state trusted assumptions. The linked seL4 manual also has truncated text and extraction gaps, so it is not used here to infer additional configuration coverage. These access limitations leave details unresolved; they do not show that the underlying results are false.",
+   "source_urls": [
+    "https://www.cse.unsw.edu.au/~kleing/papers/sosp09.html",
+    "https://sel4.systems/Verification/proofs.html"
+   ]
+  }
+ ],
+ "completion_criteria": [
+  {
+   "text": "Proposed scale demonstration: build a production-scale system containing at least one million implementation lines, concurrency, and a real device interface. Compile it through a verified toolchain to a deployed binary and provide machine-checked evidence for a published specification explicitly covering functional correctness, memory safety, and information flow. Publish a reproducible line-count method and identify generated code, libraries, excluded components, and verified configurations. The million-line threshold is a proposed scale proxy, not an established community standard.",
+   "source_urls": [],
+   "id": "m1",
+   "label": "Proposed scale demonstration"
+  },
+  {
+   "text": "Proposed assurance demonstration: publish the source, specifications, proof artifacts, toolchain versions, checker, and reproducible build instructions. Independent teams should be able to rebuild the executable and check the evidence. Document the trusted computing base, concurrency semantics, device and hardware models, initialization coverage, and every unverified transformation between source and deployed code. State precisely which claims reach the binary and which depend on external assumptions. If timing or physical safety is claimed, require corresponding models and proofs.",
+   "source_urls": [],
+   "id": "m2",
+   "label": "Proposed assurance demonstration"
+  },
+  {
+   "text": "Proposed cost demonstration: define an ordinary unverified development baseline and the permitted small multiple of its effort before evaluating success. Count specification work, implementation, testing, proof construction, tool adaptation, integration, and proof repair. Include maintenance over a stated interval with representative feature changes and defect fixes. Report performance, resource use, and supported language features so that low verification cost cannot conceal impractical runtime behavior or an artificially restricted workload.",
+   "source_urls": [],
+   "id": "m3",
+   "label": "Proposed cost demonstration"
+  },
+  {
+   "text": "Proposed breadth demonstration: repeat the process with independent teams and materially different systems, such as a systems component, cryptographic stack, and controller, while reporting where automation fails and how much expert intervention is required. A first successful system would demonstrate feasibility; repeated affordable development and maintenance would support a claim of industrial routine. Finite demonstrations establish the breadth actually tested, never literal universality.",
+   "source_urls": [],
+   "id": "m4",
+   "label": "Proposed breadth demonstration"
+  }
+ ],
+ "related_concepts": [
+  {
+   "text": "Roster-based synthesis — CSC-10, Machine-checked behavioral guarantees for frontier learned models, has the closest assurance overlap. Both can use specifications, proof infrastructure, and verified toolchains. CSC-04 concerns the correctness of software against explicit requirements; it does not by itself establish the behavioral adequacy of a learned model. The roster supplies no fuller CSC-10 definition, so the exact boundary remains provisional.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis — CSC-07, Reliable machine-checked mathematical discovery, could contribute proof search, reusable mathematics, or proof-assistant infrastructure. Its central object is mathematical discovery, whereas CSC-04 includes executable software, compilation, deployment assumptions, and lifecycle cost. CSC-01, Practical polynomial-time algorithms for NP-complete problems, could potentially affect some verification subproblems, but CSC-04 neither requires nor establishes that algorithmic breakthrough. Faster search would not automatically supply adequate specifications.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis — CSC-05, Routine-cost general computation on encrypted data, and CSC-09, Practical indistinguishability obfuscation, address different forms of confidentiality. CSC-04 could help establish that implementations of those techniques meet specified requirements, including relevant information-flow properties. Verifying an implementation would not itself create efficient encrypted computation or establish the cryptographic assumptions behind obfuscation.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis — CSC-03, Competent general machine intelligence, could potentially assist specification, implementation, and proof construction; CSC-04's criterion would still be independently checkable evidence and measured engineering cost. CSC-06, A predictive theory of generalization for modern learning systems, concerns learned behavior beyond training experience. Such a theory could inform model specifications, but ordinary software correctness does not supply it.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis — CSC-08, General-purpose physical autonomy in unmodified environments, could benefit from verified controllers and supporting software, while still requiring adequate perception, environment models, timing guarantees, and physical validation. CSC-02, Application-scale fault-tolerant quantum computation, could use verification methods for supporting software and toolchains, but proving classical software properties does not establish fault-tolerant quantum hardware or application-scale quantum performance.",
+   "source_urls": []
+  }
+ ],
+ "change_log": [
+  {
+   "change": "Preserved CSC-04's identity and integrated application verification, compiler verification, and independently checkable proof-carrying delivery as distinct parts of the proposed capability.",
+   "reason": "These achievements support one coherent innovation but do not imply one another."
+  },
+  {
+   "change": "Replaced categorical claims of field-wide absence, strongest completed artifacts, and lack of industrial adoption with bounded statements about the supplied evidence.",
+   "reason": "The source collection and empty freshness search do not establish an exhaustive November 2026 assessment."
+  },
+  {
+   "change": "Retained the 2009 seL4 quantitative figures and clarified the scope of the 25 person-years; added the separately scoped 2015 proof-file figure.",
+   "reason": "The historical statistics are supported, but total project effort is not proof-only overhead, and differently scoped line counts should not be compared directly."
+  },
+  {
+   "change": "Distinguished verified user-level system initialization from unverified kernel initialization and boot code, and described MMU and cache models as abstract.",
+   "reason": "The sources concern different initialization components; abstraction is not the absence of modeling."
+  },
+  {
+   "change": "Reported CompCert version 3.18 at its documented August 31, 2026 date and limited its guarantee to the supported C subset and compilation scope.",
+   "reason": "The saved introduction does not prove latest-release status, full C coverage, application correctness, or every step to deployment."
+  },
+  {
+   "change": "Attributed seL4's defect history to the project and removed unsupported claims about present-day testing prevalence and microkernel performance.",
+   "reason": "The supplied evidence supports the reported history within verified-code scope, rather than those broader assertions."
+  },
+  {
+   "change": "Expanded the proposed demonstration to include explicit property coverage, reproducibility, trusted assumptions, lifecycle costs, baseline definitions, and independent replication.",
+   "reason": "Scale and an undefined small effort multiple alone would not establish the intended assurance or practical affordability."
+  },
+  {
+   "change": "Broadened the relationship with CSC-10 and mapped other relevant roster entries without merging them.",
+   "reason": "Shared specifications, proof infrastructure, and toolchain methods create more overlap than a machine-checked claim alone."
+  },
+  {
+   "change": "Preserved missing-artifact, partial-documentation, extraction, and freshness limitations where they affect interpretation.",
+   "reason": "Those limitations constrain conclusions without invalidating the documented component achievements."
+  }
+ ],
+ "unresolved_issues": [
+  "Whether any system had achieved the complete integrated capability and cost target by November 1, 2026 is not established by the supplied evidence.",
+  "The precise original compiler and hardware assumptions in the uncaptured 2009 SOSP artifact remain unconfirmed here.",
+  "The July 2026 limitations do not establish subsequent multicore or kernel-initialization progress, and the supplied materials do not enumerate every verified configuration.",
+  "The ordinary-development baseline, permitted effort multiple, maintenance interval, and line-count conventions remain choices to define before evaluating the proposed demonstration.",
+  "The exact boundary with CSC-10 remains provisional because only its title, rather than a detailed concept definition, was supplied."
+ ],
+ "sources": [
+  "http://www.cs.cmu.edu/~15811/papers/grand-challenge.pdf",
+  "https://sel4.systems/Verification/proofs.html",
+  "https://trustworthy.systems/projects/OLD/l4.verified/numbers",
+  "https://www.cse.unsw.edu.au/~kleing/papers/sosp09.html",
+  "https://trustworthy.systems/publications/papers/Sillitoe_BGH_26.slides.pdf",
+  "https://compcert.inria.fr/doc/index.html"
+ ],
+ "provenance": {
+  "research": "ingestion/runs/all-fields/CSC/reconciled-research.md",
+  "structured_record": "ingestion/runs/all-fields/CSC/reconciled-structured.json",
+  "review": "ingestion/runs/all-fields/CSC/attempts/review-CSC-04-02a59a706120448e9e858aaa95139bdd/validated.json"
+ },
+ "field": "CSC",
+ "status": "active"
+}

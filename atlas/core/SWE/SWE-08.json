@@ -1,0 +1,238 @@
+{
+ "id": "SWE-08",
+ "title": "Sequential meaning for fault-tolerant distributed execution",
+ "concept": [
+  {
+   "text": "The proposed innovation is a compiler or runtime that takes ordinary sequential application code, together with explicit consistency, availability, and fault-tolerance requirements, and derives a distributed implementation with machine-checked correctness. A programmer would describe how a single logical copy of a payment, inventory, or auction service should behave. The generated system would distribute that behavior across machines while providing a proof that its committed histories correspond to legal executions of the sequential specification. This is a proposed integrated capability, not an achievement established by the supplied evidence.",
+   "source_urls": []
+  },
+  {
+   "text": "Its central task is to choose distributed representations and place coordination where the specified behavior requires it. Monotonic computations retain their conclusions as more information arrives; non-monotonic decisions can depend on knowing that relevant information is complete, as when an auction closes and selects one winner. CALM provides a foundation for recognizing computations that can produce consistent results without coordination under its execution model. However, translating sequential programs, handling faults, and proving the stronger application semantics require additional machinery beyond that classification.",
+   "source_urls": [
+    "https://arxiv.org/abs/1901.01930",
+    "https://arxiv.org/html/1805.06358v1"
+   ]
+  },
+  {
+   "text": "The intended guarantee must identify what correspondence to sequential behavior means. A proof that committed operations fit some legal sequential history is distinct from a guarantee that their order respects real-time observations. The construction must state its chosen ordering requirements, which failures it tolerates, and when operations may stop making progress. It must also distinguish a sound but conservative coordination analysis from a stronger proof that no implementation meeting the same requirements could coordinate less.",
+   "source_urls": [
+    "https://arxiv.org/abs/1901.01930"
+   ]
+  }
+ ],
+ "significance": [
+  {
+   "text": "Coordination can limit performance, scale, and availability in distributed applications. If the proposed construction worked across a useful class of applications, programmers could reason about one logical copy while receiving a distributed implementation whose behavior was justified by proof. Its direct benefit would be to connect application semantics, replication choices, coordination, and failure behavior in one derivation, reducing the gap between a simple application model and its operational implementation.",
+   "source_urls": [
+    "https://arxiv.org/abs/1901.01930"
+   ]
+  },
+  {
+   "text": "Conditional downstream possibilities include making verified distributed services accessible to teams without specialist protocol expertise and allowing alternative deployment strategies to be generated from the same application specification. Such benefits would depend on language coverage, proof automation, understandable diagnostics, and competitive runtime costs. These are implications of the proposed capability rather than demonstrated outcomes in the supplied sources.",
+   "source_urls": []
+  },
+  {
+   "text": "The single-copy programming analogy has important limits. CALM's consistency criterion is confluence: different admissible executions agree on their results. It does not by itself provide recency guarantees, operation-order guarantees, linearizability, serializability, or refinement to the proposed sequential specification. A compiler could exploit coordination-free computation where its assumptions apply, but coordinated operations spanning a partition may stall. The construction would have to expose that behavior rather than promise uninterrupted availability under incompatible requirements.",
+   "source_urls": [
+    "https://arxiv.org/abs/1901.01930"
+   ]
+  },
+  {
+   "text": "Identifying conservative coordination sites would already be useful, but it would not establish globally minimal coordination or maximal availability. An analysis may fail to prove confluence even when a different representation or implementation could avoid coordination. Claims that availability is surrendered exactly where necessary therefore require a separate necessity argument under a specified model. As a scope distinction, using consensus protocols or a blockchain platform could supply components of an implementation; their use alone would not demonstrate automatic derivation from sequential code with the proposed proofs.",
+   "source_urls": [
+    "https://arxiv.org/abs/1901.01930"
+   ]
+  }
+ ],
+ "missing_breakthrough": [
+  {
+   "text": "The target is an integrated construction for a declared class of practical applications: synthesize distributed execution from sequential code and explicit requirements, then establish machine-checked refinement and separate progress guarantees. The historical CALM discussion identifies monotonic program synthesis and verification of coordinated non-monotonic code as research questions. CALM itself is not constructive: its characterization does not supply a method for finding the required monotonic implementation. The supplied historical evidence motivates this target but does not establish its continued absence as of 1 November 2026.",
+   "source_urls": [
+    "https://arxiv.org/abs/1901.01930"
+   ]
+  },
+  {
+   "text": "A concrete barrier is selecting representations and concurrency semantics that preserve the application's intended behavior. Replica convergence alone cannot decide what concurrent assignments should mean or guarantee arbitrary application invariants. Nevertheless, conflict-free replicated data types can preserve some global invariants. Escrow and bounded-counter techniques allocate decrement rights so that replicas can maintain a nonnegative global counter without coordinating every decrement. The challenge is therefore to discover and verify suitable representations where they exist, while identifying operations whose required semantics need agreement.",
+   "source_urls": [
+    "https://arxiv.org/html/1805.06358v1"
+   ]
+  },
+  {
+   "text": "Another barrier is connecting several different proof obligations. The generated implementation must preserve the sequential specification under its stated fault model; coordination protocols must correctly implement non-monotonic decisions; and progress must be established under explicit assumptions about communication and available inputs. Confluence does not fully characterize coordinated non-monotonic behavior, so verifying those parts cannot simply reuse a confluence test as the entire correctness argument.",
+   "source_urls": [
+    "https://arxiv.org/abs/1901.01930"
+   ]
+  },
+  {
+   "text": "Coordination placement and requirement diagnosis also need bounded, reviewable claims. A sound analysis can conservatively add coordination when it cannot prove a computation safe without it, but that does not prove the coordination necessary. Likewise, a tool that explains incompatible consistency and availability demands must delimit the specification class for which its conclusions are valid. A proposed implementation should distinguish a proved conflict from a case its analysis cannot decide.",
+   "source_urls": [
+    "https://arxiv.org/abs/1901.01930"
+   ]
+  }
+ ],
+ "current_state": [
+  {
+   "text": "Hellerstein and Alvaro's Keeping CALM: When Distributed Consistency is Easy, arXiv version 2 dated 26 January 2019, explains the correspondence between consistent coordination-free distributed implementations and programs expressible in monotonic logic. The supplied review identifies a complete nine-page paper in addition to its abstract page. The result concerns confluence under a specified model; it is not a theorem that arbitrary sequential applications can be compiled into fault-tolerant implementations with their ordering and availability requirements preserved.",
+   "source_urls": [
+    "https://arxiv.org/abs/1901.01930"
+   ]
+  },
+  {
+   "text": "That paper also describes existing Bloom analyses and transformation libraries that add coordination to programs that cannot be statically shown confluent. It observes that coordination can arise from a design choice rather than an intrinsic requirement. These are substantive predecessors to the proposed capability: analysis and coordination insertion already existed in the historical account. The same account leaves synthesis of suitable monotonic programs and verification of coordinated non-monotonic behavior as research questions, so the remaining ambition is broader integration and stronger guarantees rather than the invention of coordination analysis itself.",
+   "source_urls": [
+    "https://arxiv.org/abs/1901.01930"
+   ]
+  },
+  {
+   "text": "Preguiça, Baquero, and Shapiro's CRDT article, arXiv version 1 dated 16 May 2018, describes replicas that deterministically reach the same state after receiving the same updates. It explains why concurrent assignments require chosen semantics: convergence does not supply an inherently correct interpretation of simultaneously assigning different values. Its limitations discussion gives closing an auction and choosing one winner as an operation requiring global agreement, while also describing escrow techniques that preserve some global invariants without per-operation coordination.",
+   "source_urls": [
+    "https://arxiv.org/html/1805.06358v1"
+   ]
+  },
+  {
+   "text": "The supplied review reports that the retained CRDT HTML includes the limitations section and continues through the references without truncation, supporting both the auction example and the escrow qualification. A separately retained PDF associated with that source is instead Vitor Enes Duarte's November 2017 dissertation, Efficient Synchronization of State-based CRDTs; it is not a copy of the cited article. Some dissertation pages lack extractable text and its original figures were not inspected. Those limitations prevent treating that PDF as authentication of the article, but do not undermine the independently identified HTML.",
+   "source_urls": [
+    "https://arxiv.org/html/1805.06358v1"
+   ]
+  },
+  {
+   "text": "Lamport's highly abridged version of the April 2015 CACM account of Amazon's formal-methods work documents model checking of system designs. It explicitly leaves unproved whether executable code implements the verified design. The retained page is complete as an abridgment, but supplies only part of the original article. It supports the distinction between checking a design and proving the behavior of a running implementation, rather than an end-to-end code-correctness claim.",
+   "source_urls": [
+    "https://lamport.azurewebsites.net/tla/amazon-excerpt.html"
+   ]
+  },
+  {
+   "text": "The research notes identify IronFleet as a 2015 comparison involving a handwritten distributed implementation and expert-assisted proofs. However, the supplied review found only a GitHub file wrapper at the retained link, without the paper body or enough identifying scientific content to assess those claims. IronFleet therefore remains a relevant comparison to investigate, while its implementation and proof details cannot be established from this retained artifact.",
+   "source_urls": [
+    "https://github.com/papers-we-love/papers-we-love/blob/main/distributed_systems/ironFleet-proving-practical-distributed-systems-correct.pdf"
+   ]
+  },
+  {
+   "text": "The supplied material documents historical foundations and partial capabilities. It contains no freshness search record establishing whether the complete proposed construction is available as of 1 November 2026. Its present availability consequently remains unresolved; the evidence supports neither declaring the integrated innovation achieved nor asserting a comprehensive present-day absence.",
+   "source_urls": []
+  }
+ ],
+ "completion_criteria": [
+  {
+   "text": "Proposed demonstration: implement a payment, inventory, or auction service in a declared supported sequential language, accompanied by explicit consistency, availability, and fault requirements. Generate and run its distributed implementation across multiple data centers under reproducible crashes and partitions. Publish the input specification, generated code, assumptions, proof artifacts, and experiment procedures. These are proposed acceptance criteria, not established standards.",
+   "source_urls": [],
+   "id": "m1",
+   "label": "Proposed demonstration"
+  },
+  {
+   "text": "Proposed correctness criterion: a machine-checked proof should establish that every committed history admitted by the generated implementation refines a legal sequential history under the stated model. It should specify how incomplete or failed operations are treated and whether real-time ordering is required. Separate proofs should establish progress under named assumptions. The trusted compiler, runtime, proof-checking, and environmental boundaries should be explicit so that readers can identify what the guarantee covers.",
+   "source_urls": [],
+   "id": "m2",
+   "label": "Proposed correctness criterion"
+  },
+  {
+   "text": "Proposed coordination criterion: show that coordination is confined to sites identified by a sound analysis and explain what that classification guarantees. Any claim of necessity, global minimality, or maximal availability should receive its own proof relative to a defined class of alternative implementations. A monotonic subset should demonstrate its specified progress during partitions only where the required inputs and dependencies permit it. This proposal extends the documented CALM and Bloom mechanisms with stronger, separately stated obligations.",
+   "source_urls": [
+    "https://arxiv.org/abs/1901.01930"
+   ],
+   "id": "m3",
+   "label": "Proposed coordination criterion"
+  },
+  {
+   "text": "Proposed diagnostic criterion: within a declared supported specification class, the tool should reject incompatible requirements and explain the conflict. Cases outside that class, or beyond the analysis's ability to decide, should be reported as unknown rather than impossible. The demonstration should include both accepted applications and deliberately incompatible requirements, making the boundary of the tool's claims visible.",
+   "source_urls": [],
+   "id": "m4",
+   "label": "Proposed diagnostic criterion"
+  },
+  {
+   "text": "Proposed reproducibility and practicality criterion: independent users should be able to regenerate the implementation, recheck the proofs, and reproduce fault experiments. Evaluation should report supported language constructs, workload and fault coverage, proof effort, compilation cost, runtime overhead, and coordination behavior. Several materially different applications would establish demonstrated breadth; finite benchmarks would not establish literal universality. Experiments would complement the proof by testing deployment assumptions and practical costs.",
+   "source_urls": [],
+   "id": "m5",
+   "label": "Proposed reproducibility and practicality criterion"
+  }
+ ],
+ "related_concepts": [
+  {
+   "text": "Roster-based synthesis: SWE-01, Push-button verifying compilation for practical systems, overlaps in automatic implementation assurance; SWE-08 specializes that ambition to distributed execution, failure assumptions, and coordination. SWE-02, Certified synthesis of system-scale programs from reviewable specifications, overlaps in generating implementations from stated behavior; SWE-08 specifically begins with sequential application code and adds distributed-system requirements. SWE-11, Proved semantics-preserving transformation of practical systems, overlaps in preserving behavior through transformation; SWE-08 adds replication, faults, and explicit availability obligations.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis: SWE-03, Demonstrable adequacy of a specification against intent and the environment, addresses whether the starting specification expresses the right behavior and assumptions. SWE-08 would prove correspondence to that specification, leaving its adequacy as a distinct question. SWE-04, A compositional calculus for concurrent systems that fail, could provide reasoning principles for generated components and their failures; SWE-08 additionally requires an executable derivation from sequential code.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis: SWE-09, Observable determinism as the default for parallel systems code, shares concern with predictable observable results across concurrent executions. SWE-08 additionally addresses replication, network partitions, and committed histories, and need not require every legal execution to choose the same sequential order. SWE-10, Proof-carrying behavioral composition across trust boundaries, overlaps in composing components with behavioral evidence; SWE-08 concerns deriving and proving the distributed application itself.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis: SWE-05, Assurance that stays proportional to each behavioral change, concerns maintaining assurance as systems evolve; it could reduce the cost of revising generated distributed implementations and proofs. SWE-06, Sound behavioral recovery of legacy systems, could help recover a sequential specification from an existing service, while SWE-08 assumes an explicit starting behavior. SWE-07, Practical confinement of general untrusted programs, addresses isolation rather than sequential equivalence or distributed progress. These remain separate capabilities with potential complementary roles.",
+   "source_urls": []
+  },
+  {
+   "text": "Among the documented technical predecessors, CALM and Bloom contribute confluence analysis and coordination transformations, CRDTs contribute convergent representations and some invariant-preserving techniques, and Amazon's design checking illustrates the value and limits of verifying a model. SWE-08's distinctive proposed contribution is integrating derivation from sequential code with implementation-level refinement, explicit fault and progress guarantees, and justified coordination placement.",
+   "source_urls": [
+    "https://arxiv.org/abs/1901.01930",
+    "https://arxiv.org/html/1805.06358v1",
+    "https://lamport.azurewebsites.net/tla/amazon-excerpt.html"
+   ]
+  }
+ ],
+ "change_log": [
+  {
+   "change": "Preserved SWE-08's identity and integrated the sequential-code derivation, explicit distributed requirements, proof obligations, and application examples into a standalone concept.",
+   "reason": "The integrated capability remains coherent even though individual supporting assertions required correction."
+  },
+  {
+   "change": "Replaced the blanket claim that conflict-free objects cannot preserve cross-replica invariants with the narrower limitation on arbitrary invariants and sequential semantics.",
+   "reason": "The CRDT article describes escrow and bounded-counter techniques that preserve some global invariants."
+  },
+  {
+   "change": "Distinguished CALM confluence from sequential refinement, ordering guarantees, fault tolerance, and progress.",
+   "reason": "The reviewed CALM source does not supply those stronger guarantees merely through monotonicity."
+  },
+  {
+   "change": "Added existing Bloom analyses and coordination transformations, together with the historical synthesis and verification questions.",
+   "reason": "The earlier account understated existing tooling and could make the proposed advance appear to start from an empty field."
+  },
+  {
+   "change": "Separated conservative coordination placement from necessity, global minimality, and availability optimality.",
+   "reason": "Failure to prove confluence does not establish that coordination is intrinsically necessary."
+  },
+  {
+   "change": "Refined the proposed demonstration to distinguish history refinement from progress, require explicit assumptions, and permit unknown results outside supported diagnostic scope.",
+   "reason": "This makes the proposal assessable without implying an unrestricted decision procedure or partition-progress guarantee."
+  },
+  {
+   "change": "Corrected the CRDT access account and identified the separately retained PDF as Duarte's dissertation.",
+   "reason": "The review found complete relevant HTML, while the associated PDF was a different work with extraction limitations."
+  },
+  {
+   "change": "Qualified the IronFleet comparison and preserved the scope of Amazon's abridged design-checking account.",
+   "reason": "The retained IronFleet wrapper does not support its scientific claims, and Amazon's model checking does not establish executable-code correspondence."
+  },
+  {
+   "change": "Replaced categorical present-day absence with an unresolved availability statement dated 1 November 2026.",
+   "reason": "The supplied freshness record is empty; historical research questions do not establish current absence."
+  },
+  {
+   "change": "Explained overlap and distinctions across the supplied roster without combining entries, and framed consensus or blockchain use as a scope distinction.",
+   "reason": "Related capabilities and implementation components do not by themselves demonstrate SWE-08's integrated derivation."
+  }
+ ],
+ "unresolved_issues": [
+  "Whether any construction available as of 1 November 2026 meets the integrated target remains unresolved because the supplied material contains no freshness search record.",
+  "The supported application language, consistency model, fault model, and precise sequential-refinement relation remain to be specified.",
+  "No supplied evidence establishes a general coordination-minimality theorem, maximal-availability guarantee, or unrestricted procedure for detecting incompatible requirements.",
+  "IronFleet's implementation and proof details require an accessible, identified paper body; the retained GitHub wrapper cannot resolve them.",
+  "The retained Duarte dissertation has pages without extractable text and uninspected figures. No conclusion here relies on those unavailable details.",
+  "Practical performance, proof automation, application breadth, and maintenance costs of the proposed integrated construction remain unmeasured in the supplied evidence."
+ ],
+ "sources": [
+  "https://github.com/papers-we-love/papers-we-love/blob/main/distributed_systems/ironFleet-proving-practical-distributed-systems-correct.pdf",
+  "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
+  "https://arxiv.org/abs/1901.01930",
+  "https://arxiv.org/html/1805.06358v1"
+ ],
+ "provenance": {
+  "research": "ingestion/runs/all-fields/SWE/reconciled-research.md",
+  "structured_record": "ingestion/runs/all-fields/SWE/reconciled-structured.json",
+  "review": "ingestion/runs/all-fields/SWE/attempts/review-SWE-08-636f7c5922d340f191b9ccfe961075e7/validated.json"
+ },
+ "field": "SWE",
+ "status": "active"
+}

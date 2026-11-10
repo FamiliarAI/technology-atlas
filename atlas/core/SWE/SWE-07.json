@@ -1,0 +1,242 @@
+{
+ "id": "SWE-07",
+ "title": "Practical confinement of general untrusted programs",
+ "concept": [
+  {
+   "text": "The proposed innovation is a practical execution environment that lets an untrusted program process private information while enforcing limits on where that information can go. Under a stated platform and threat model, ordinary storage and communication paths would be controlled, legitimate outputs would follow the caller’s policy, and covert channels would either be eliminated or have proved leakage bounds. The target includes general mainstream-language programs, supplied binaries and generated code, with enough useful execution and sufficiently low cost for ordinary services.",
+   "source_urls": [
+    "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf"
+   ]
+  },
+  {
+   "text": "A covert channel communicates through effects outside the intended output interface, such as changes in execution timing or shared-resource availability. Declaring an output interface is therefore insufficient: enforcement must also account for information visible through the surrounding system. A confinement theorem would state what information release is permitted, through which modeled channels, and under which software and hardware assumptions.",
+   "source_urls": [
+    "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
+    "https://sel4.systems/Verification/assumptions.html"
+   ]
+  },
+  {
+   "text": "General confinement does not require every program to retain its original behavior or finish successfully. A program that depends on forbidden communication may stop working when confined. The practical ambition is to enforce a general boundary while allowing substantial useful workloads to run within it; preserving every program’s behavior would be a separate and stronger requirement.",
+   "source_urls": [
+    "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf"
+   ]
+  }
+ ],
+ "significance": [
+  {
+   "text": "Lampson distinguished two harms from an untrusted service: performing the wrong computation and leaking the customer’s information without leaving an observable indication. Confinement addresses the second. Achieving the proposed capability at service-scale cost would let organizations entrust data to useful untrusted components with a proved limit on their information release, rather than depending solely on confidence in each component’s implementation.",
+   "source_urls": [
+    "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf"
+   ]
+  },
+  {
+   "text": "The direct benefit would be an enforceable information-flow boundary around code that need not itself be trusted. As a conditional downstream possibility, this could make supplied software, plugins and generated code easier to deploy for sensitive processing. Such deployment would still depend on suitable caller policies, useful permitted outputs and acceptable leakage budgets. An allowed output can itself reveal sensitive information if the policy permits it.",
+   "source_urls": [
+    "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf"
+   ]
+  },
+  {
+   "text": "Preserving the boundary across multiple components requires more than placing each component in a separate container. Untrusted callees must also be confined, their policies must be compatible, trusted services must satisfy their assumed behavior, and residual leakage must be accounted for across components and repeated executions. Otherwise, individually acceptable channels or leakage allowances could combine into an unacceptable disclosure.",
+   "source_urls": [
+    "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf"
+   ]
+  },
+  {
+   "text": "The impact has important limits. A confined program can still compute an incorrect answer. Memory safety alone does not establish confidentiality across all permitted and covert channels, and confidentiality confinement alone does not establish general authorization guarantees or eliminate common implementation vulnerabilities. Its revolutionary contribution would be the practical information-flow guarantee within explicit assumptions, rather than a guarantee of correct or universally secure software.",
+   "source_urls": [
+    "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
+    "https://sel4.systems/Verification/assumptions.html"
+   ]
+  }
+ ],
+ "missing_breakthrough": [
+  {
+   "text": "The capability to be established is general enforcement of caller-controlled information-flow policies, including proved bounds on residual covert leakage, at a cost suitable for ordinary services. The supplied evidence identifies substantial obstacles to this target, but does not establish that every mainstream platform lacks it as of November 1, 2026. The gap described here is the capability whose achievement needs convincing evidence, not a verified field-wide absence claim.",
+   "source_urls": [
+    "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
+    "https://sel4.systems/Verification/assumptions.html"
+   ]
+  },
+  {
+   "text": "A central barrier is identifying and controlling every relevant information path in a realistic system. Files, persistent state and interprocess communication are only part of the problem. Timing and resource-dependent effects can transmit information even when intended communication interfaces are restricted. Lampson emphasized the difficulty of exhaustive channel identification in systems of moderate complexity; the seL4 assumptions illustrate the distinction between proving confidentiality for modeled storage channels and covering timing behavior.",
+   "source_urls": [
+    "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
+    "https://sel4.systems/Verification/assumptions.html"
+   ]
+  },
+  {
+   "text": "A second barrier is enforcement cost on shared hardware. Masking resource-dependent behavior or otherwise preventing it from carrying information may be expensive. Allowing bounded leakage can offer an alternative, but a meaningful capacity bound needs a defined leakage metric, observation period, receiver capability and accounting for channels used together. A bound for an isolated channel or execution is insufficient unless its scope matches the intended deployment.",
+   "source_urls": [
+    "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf"
+   ]
+  },
+  {
+   "text": "A third barrier is connecting a checked mathematical model to the actual machine. A proof can establish consequences only for modeled behavior and declared assumptions. Hardware behavior, device access and relevant driver behavior therefore need explicit contracts and evidence that those contracts hold. Hardware assistance for timing enforcement could be part of the solution, but a software proof cannot by itself establish every physical assumption on which that assistance depends.",
+   "source_urls": [
+    "https://sel4.systems/Verification/assumptions.html"
+   ]
+  }
+ ],
+ "current_state": [
+  {
+   "text": "In October 1973, Butler W. Lampson published “A Note on the Confinement Problem” in Communications of the ACM, volume 16, issue 10, pages 613–615. He formulated confinement as preventing a program from communicating information to programs other than its caller and sought enforcement for arbitrary programs, while allowing that some programs would cease to work under confinement. He described enforcement as conceptually straightforward but potentially costly, and discussed bounding covert-channel capacity when the customer accepts some leakage. This establishes the historical goal and its reasoning, rather than a modern implementation result.",
+   "source_urls": [
+    "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf"
+   ]
+  },
+  {
+   "text": "The seL4 verification-assumptions page, as characterized in the supplied review, states that its confidentiality proof covers in-kernel storage channels and excludes timing channels. It also explains that the hardware model omits relevant information channels, so the confidentiality conclusion applies only to channels visible in that model. These are meaningful kernel-level guarantees under assumptions; they do not amount to a blanket confinement proof for arbitrary applications running above the kernel.",
+   "source_urls": [
+    "https://sel4.systems/Verification/assumptions.html"
+   ]
+  },
+  {
+   "text": "The same seL4 page assumes that DMA devices are absent or behave appropriately, including not overwriting the kernel. Relevant device and driver behavior requires separate assurance, such as verification or suitable verified wrappers. The readable assumptions page supports these qualifications. The supplied review found the saved FAQ copy unreadable, so that copy provides no additional assessable support; its limitation does not invalidate the readable assumptions page.",
+   "source_urls": [
+    "https://sel4.systems/Verification/assumptions.html",
+    "https://sel4.systems/About/FAQ.html"
+   ]
+  },
+  {
+   "text": "Another supplied artifact was identified by the review as the seL4 Reference Manual, version 17.0.0, dated October 30, 2026, rather than a PDF reproduction of the assumptions page. Its extracted introduction describes kernel functional-correctness proofs across multiple architectures and platforms, with security-proof coverage depending on the platform. The extraction was truncated and reported problems, including pages without extractable text. It therefore supports limited statements about kernel-proof scope, not comprehensive manual coverage or a new whole-system confinement result.",
+   "source_urls": [
+    "https://sel4.systems/Verification/assumptions.html"
+   ]
+  },
+  {
+   "text": "The research attributed a CHERI/Morello study to Xiaoyang Sun, Jeremy Singer and Zheng Wang at IISWC 2025, with DOI 10.1109/IISWC66894.2025.00042, and described capability-based memory-safety experiments with overhead ranging from small amounts to approximately 1.65× depending on workload and ABI. The supplied review found only a generic site label in the saved IEEE page, with no substantive article text. Consequently, that copy does not verify the article identity, experimental platform, workload scope, interpretation of the performance ratio or numerical range. The figure remains an unverified research-note claim, not an established measurement in this record; the extraction limitation is not evidence that the study or result is false.",
+   "source_urls": [
+    "https://www.computer.org/csdl/proceedings-article/iiswc/2025/491700a423/2bNw7H0xFJu"
+   ]
+  },
+  {
+   "text": "The supplied freshness record is empty. Neither the historical formulation nor the documented limitations of a particular seL4 proof establish whether a mainstream platform meets the full proposed target as of November 1, 2026. Present-day availability, deployment breadth and ordinary-service cost therefore remain unresolved on this evidence.",
+   "source_urls": []
+  }
+ ],
+ "completion_criteria": [
+  {
+   "text": "Proposed feasibility demonstration: run a database engine, build system or document renderer on a shared machine under a published platform description, threat model and caller-controlled channel policy. Specify protected information, authorized outputs, attacker access, receiver capabilities and the relevant storage, interprocess communication, file and timing paths. State which program behaviors may be blocked and which useful operations the demonstration must preserve.",
+   "source_urls": [],
+   "id": "m1",
+   "label": "Proposed feasibility demonstration"
+  },
+  {
+   "text": "Proposed leakage criterion: before testing, register the leakage metric, observation interval and permitted aggregate bound. Machine-check the enforcement argument and relevant channel bounds against the system model, including how bounds compose across channels and repeated activity. Separately justify the modeled channel inventory and document the connection between the model, implementation and hardware. A checked proof would establish its conclusion under those assumptions; it would not by itself prove that the model captures every physical information path.",
+   "source_urls": [],
+   "id": "m2",
+   "label": "Proposed leakage criterion"
+  },
+  {
+   "text": "Proposed adversarial evaluation: give a red team the binary and chosen-input access, plant a secret, and have the team attempt disclosure through the specified channels. Make attack procedures and observations reproducible within the declared threat model. Failure to exceed the bound would provide experimental evidence alongside the proof, rather than prove a universal capacity bound through unsuccessful attacks.",
+   "source_urls": [],
+   "id": "m3",
+   "label": "Proposed adversarial evaluation"
+  },
+  {
+   "text": "Proposed performance criterion: on a stated workload, require confined throughput to reach at least half the unconfined baseline under comparable resource allocations. This is a chosen feasibility threshold, not an established standard. Publish the workload, baseline, configurations and measurement method so others can reproduce the comparison. Hardware-dependent timing enforcement is acceptable if its contract, proof assumptions and independent validation are explicit.",
+   "source_urls": [],
+   "id": "m4",
+   "label": "Proposed performance criterion"
+  },
+  {
+   "text": "Proposed breadth and reproducibility criterion: release enough implementation, proof and configuration material for independent reproduction, and evaluate materially different workloads and allowed program interactions. A single application would demonstrate feasibility within its stated boundaries. A finite suite would establish demonstrated breadth; arbitrary-program coverage would require a general enforcement argument specifying the supported execution model, restrictions and treatment of programs that cannot complete under confinement.",
+   "source_urls": [],
+   "id": "m5",
+   "label": "Proposed breadth and reproducibility criterion"
+  }
+ ],
+ "related_concepts": [
+  {
+   "text": "Roster-based synthesis: SWE-01, “Push-button verifying compilation for practical systems,” and SWE-02, “Certified synthesis of system-scale programs from reviewable specifications,” concern routes to obtaining programs with guarantees. SWE-07 concerns enforcing an information-flow boundary around code that may remain untrusted or functionally incorrect. Verification or synthesis could support a confinement implementation, but the roster titles do not establish their detailed guarantees or make either a prerequisite for confinement.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis: SWE-03, “Demonstrable adequacy of a specification against intent and the environment,” overlaps with the need to show that a confinement policy and threat model capture the intended privacy boundary and relevant environment. SWE-05, “Assurance that stays proportional to each behavioral change,” concerns maintaining assurance as systems evolve. SWE-07 supplies a particular security property whose model, channel inventory and proof assumptions would need that ongoing care.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis: SWE-04, “A compositional calculus for concurrent systems that fail,” and SWE-10, “Proof-carrying behavioral composition across trust boundaries,” overlap with reasoning about interacting components. SWE-07 specifically requires compatible information-flow policies, confinement of untrusted callees and aggregate leakage accounting. Neither general behavioral composition nor reasoning about concurrent failures automatically establishes those confidentiality properties.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis: SWE-06, “Sound behavioral recovery of legacy systems,” could help characterize existing software before confinement, while SWE-11, “Proved semantics-preserving transformation of practical systems,” concerns transformations that retain program meaning. SWE-07 can impose restrictions that change observable behavior or prevent completion. It therefore remains distinct from recovering behavior or preserving all original semantics.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis: SWE-08, “Sequential meaning for fault-tolerant distributed execution,” and SWE-09, “Observable determinism as the default for parallel systems code,” concern execution semantics. Confinement concerns which information an observer may learn. Predictable logical results do not by themselves establish confidentiality of timing or resource use, while a confined program need not have deterministic or sequential behavior.",
+   "source_urls": []
+  },
+  {
+   "text": "Operating-system isolation, capability security, formal verification and information-flow control are closely related foundations. Memory safety restricts invalid memory access; confinement additionally concerns disclosure through allowed interfaces and covert effects. seL4 illustrates how strong formal guarantees can have explicitly bounded channel coverage. The unverified CHERI/Morello study cannot establish achieved confinement or performance in this record.",
+   "source_urls": [
+    "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
+    "https://sel4.systems/Verification/assumptions.html"
+   ]
+  }
+ ],
+ "change_log": [
+  {
+   "change": "Preserved SWE-07 and its title while defining the target through caller policy, controlled storage paths, covert-leakage bounds and practical execution cost.",
+   "reason": "Maintains the concept identity and integrates its substantive requirements without presenting the proposed capability as achieved."
+  },
+  {
+   "change": "Clarified that arbitrary-program confinement can block behavior or prevent completion.",
+   "reason": "The reviewed Lampson text does not require every confined program to continue working."
+  },
+  {
+   "change": "Replaced categorical claims of present-day absence with an explicit evidence boundary.",
+   "reason": "The empty freshness record and source-specific limitations do not establish field-wide unavailability as of November 1, 2026."
+  },
+  {
+   "change": "Qualified compositional benefits with compatible policies, trusted-service assumptions, confinement of callees and aggregate leakage accounting.",
+   "reason": "Separate component boundaries do not automatically compose into an end-to-end confidentiality guarantee."
+  },
+  {
+   "change": "Separated confidentiality from functional correctness, general authorization, memory safety and broad vulnerability elimination.",
+   "reason": "The original significance text implied guarantees beyond those established by confinement."
+  },
+  {
+   "change": "Retained the seL4 storage-channel result, timing exclusion and DMA assumptions, and distinguished kernel proofs from arbitrary-application guarantees.",
+   "reason": "These are supported achievements and limitations whose scope matters to the concept."
+  },
+  {
+   "change": "Explained the unreadable FAQ, the limited IEEE landing-page copy and the truncated, separately identified seL4 manual.",
+   "reason": "Saved-source metadata does not eliminate the access and extraction limitations reported by the review."
+  },
+  {
+   "change": "Preserved the approximately 1.65× CHERI/Morello figure as an explicitly unverified attribution rather than deleting it or asserting it as a result.",
+   "reason": "The quantitative claim remains unresolved; lack of substantive article text does not show that it is false."
+  },
+  {
+   "change": "Expanded the proposed demonstration with leakage definitions, proof-to-hardware obligations, reproducibility and generality boundaries.",
+   "reason": "Red-team testing cannot prove universal channel capacity, and the half-throughput threshold is a proposed criterion rather than a consensus standard."
+  },
+  {
+   "change": "Added distinct relationships to the supplied roster and removed the asserted necessity of combining SWE-07 with SWE-01.",
+   "reason": "Only roster titles were supplied for the other concepts, so their detailed guarantees and mandatory dependencies cannot be established."
+  }
+ ],
+ "unresolved_issues": [
+  "Whether any mainstream platform meets the complete confinement target as of November 1, 2026 remains unresolved because the supplied freshness record is empty.",
+  "The attributed IISWC 2025 CHERI/Morello study’s identity, experimental scope, ABI-dependent results and approximately 1.65× performance figure require substantive article evidence.",
+  "The saved seL4 FAQ was unreadable in the supplied review; the manual extraction was truncated and incomplete. Neither supports conclusions beyond the scope described here.",
+  "No specific target platform, supported program model, channel inventory, leakage metric, observation interval, receiver model or aggregate leakage budget has been selected.",
+  "The practical cost of enforcing the full proposed boundary across useful workloads, and the hardware assumptions needed to do so, remain to be demonstrated.",
+  "The other roster entries have titles but no supplied definitions or evidence; their relationships are conceptual synthesis rather than validated dependency claims.",
+  "The review recommended removing the unverifiable numerical performance result from the current-state account. Its rejection as an established result is adopted, but the number is retained as an explicitly unresolved research attribution to preserve quantitative detail without inventing a resolution."
+ ],
+ "sources": [
+  "https://sel4.systems/About/FAQ.html",
+  "https://sel4.systems/Verification/assumptions.html",
+  "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
+  "https://www.computer.org/csdl/proceedings-article/iiswc/2025/491700a423/2bNw7H0xFJu"
+ ],
+ "provenance": {
+  "research": "ingestion/runs/all-fields/SWE/reconciled-research.md",
+  "structured_record": "ingestion/runs/all-fields/SWE/reconciled-structured.json",
+  "review": "ingestion/runs/all-fields/SWE/attempts/review-SWE-07-60fde88ecaa64019a742caba2ad04a39/validated.json"
+ },
+ "field": "SWE",
+ "status": "active"
+}

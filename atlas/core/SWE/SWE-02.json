@@ -1,0 +1,238 @@
+{
+ "id": "SWE-02",
+ "title": "Certified synthesis of system-scale programs from reviewable specifications",
+ "concept": [
+  {
+   "text": "The proposed innovation is a synthesizer that takes a compact, reviewable formal specification and produces both a substantial systems program and a machine-checkable proof that the program implements the specified behavior. An independent checker would validate the proof. The input would describe required behavior precisely while leaving substantial implementation choices to the synthesizer. Program synthesis already has the underlying goal of finding programs that satisfy specifications; this concept adds a demanding combination of system scale, specification compactness, human reviewability, independently checked correctness and practical performance.",
+   "source_urls": [
+    "https://explore.openaire.eu/search/publication?pid=10.1561%2F2500000010",
+    "https://www.anthropic.com/research/formal-verification"
+   ]
+  },
+  {
+   "text": "Conceptual synthesis: a file-system specification might define permitted operations, observable results and crash behavior while leaving data structures, storage layouts and recovery mechanisms open. The synthesizer would resolve those choices and prove that the resulting implementation refines the specification: its modeled behavior remains within what the specification permits. The intended input is already formal enough to support that proof. Establishing that it expresses stakeholder intent and adequately models the operating environment belongs to SWE-03.",
+   "source_urls": []
+  },
+  {
+   "text": "This target cannot be distinguished from current work simply by saying that existing tools verify code while the proposed tool generates it. Anthropic's October 2026 report includes a generated and verified interpreter. The relevant question is whether a demonstration combines substantial scale with a genuinely compact, auditable specification, independent proof checking and useful performance. The supplied evidence does not settle whether that complete combination has been achieved.",
+   "source_urls": [
+    "https://www.anthropic.com/research/formal-verification"
+   ]
+  }
+ ],
+ "significance": [
+  {
+   "text": "Conditional impact synthesis: achieving this capability could make the reviewed formal specification the main artifact engineers maintain, while automating substantial implementation and proof work. For protocols, storage systems, schedulers and compiler components, this could remove considerable work on representations, error paths and concurrency mechanisms wherever the specification leaves those choices open. Changes to required behavior could then drive regeneration of a conforming implementation rather than repeated manual reconstruction of implementation details.",
+   "source_urls": []
+  },
+  {
+   "text": "The assurance would be stronger than evidence from successful tests alone, but would remain bounded by the actual theorem. Behavior excluded by the proved specification would be ruled out within the modeled scope, conditional on sound checking components and semantics. Deployment would also need to preserve the correspondence between the checked artifact and the running program. A proof does not establish that the specification captures reality, and a partial-correctness proof does not by itself establish termination. Anthropic's reported interpreter result illustrates this distinction: it establishes agreement with formal semantics whenever the interpreter returns.",
+   "source_urls": [
+    "https://www.anthropic.com/research/formal-verification"
+   ]
+  },
+  {
+   "text": "Conditional impact synthesis: the analogy with compilation is useful because both processes turn a higher-level artifact into executable detail. Here, however, the specification may permit many implementations, and the synthesizer must choose among them while producing evidence of conformance. The potential revolution is removal of a large avoidable gap between a reviewable behavioral description and working code. Essential problem complexity remains; some requirements cannot be compressed much further. This does not imply universal synthesis, elimination of human decisions, competitive performance in every domain or automatic generation of a specified share of all software. Wider adoption and downstream productivity gains would require separate evidence.",
+   "source_urls": []
+  }
+ ],
+ "missing_breakthrough": [
+  {
+   "text": "The target capability is the reliable integration of program search, implementation construction and proof production at substantial systems scale. Gulwani, Polozov and Singh's 2017 survey identifies ambiguity of user intent and the enormous space of possible programs as inherent synthesis challenges. Its account of successful applications in particular domains motivates the target, but neither establishes the present-day absence of the proposed combination nor shows that restricted-domain synthesis cannot itself transform engineering practice.",
+   "source_urls": [
+    "https://explore.openaire.eu/search/publication?pid=10.1561%2F2500000010"
+   ]
+  },
+  {
+   "text": "Engineering synthesis: a compact specification must leave enough freedom to avoid reproducing the implementation, yet constrain behavior sufficiently for a meaningful proof. The synthesizer must select representations, algorithms and mechanisms whose interactions satisfy that specification. For concurrent or failure-prone systems, the specification and proof must explicitly address whichever scheduling, communication, persistence and failure behaviors fall within the guarantee. A short specification cannot earn its compactness by hiding essential decisions in uncounted libraries, scaffolding or informal assumptions.",
+   "source_urls": []
+  },
+  {
+   "text": "Proof generation must also scale without making the independently checked evidence impractically expensive. The Verus publication abstract reports 6.1K implementation lines and 31K proof lines across its case studies, illustrating that verification artifacts can be much larger than the implementation. That aggregate does not measure synthesis difficulty directly, but it shows why automatically producing usable implementations and their proofs is a substantial combined objective.",
+   "source_urls": [
+    "https://www.microsoft.com/en-us/research/publication/verus-a-practical-foundation-for-systems-verification/"
+   ]
+  },
+  {
+   "text": "Engineering synthesis: correctness, synthesis cost and runtime performance must be reconciled. A system that eventually discovers a conforming but unusably slow implementation would satisfy only part of the target. Failure reporting is another barrier: an unsuccessful search may reflect insufficient resources or inability to construct a proof, rather than an impossible specification or a missing human decision. The tool must expose these different outcomes without claiming more than it has established.",
+   "source_urls": []
+  }
+ ],
+ "current_state": [
+  {
+   "text": "The retained OpenAIRE abstract identifies Program Synthesis by Gulwani, Polozov and Singh, dated 11 July 2017, DOI 10.1561/2500000010, in Foundations and Trends in Programming Languages 4(1–2):1–119. It describes synthesis as automatically finding a program satisfying intent expressed through a specification, identifies intent ambiguity and a large program search space as challenges, and reports industrial deployment of programming-by-examples applications. Only the abstract is available in the supplied review; the publisher page was not captured. These findings provide historical context rather than a complete account of the November 2026 frontier.",
+   "source_urls": [
+    "https://explore.openaire.eu/search/publication?pid=10.1561%2F2500000010"
+   ]
+  },
+  {
+   "text": "The retained publication abstract for Verus: A Practical Foundation for Systems Verification, listed with a November 2024 venue entry, reports case studies totaling 6.1K implementation lines and 31K proof lines, or roughly five proof lines per implementation line in aggregate. This supports the significance of verification effort. The landing-page abstract does not establish the sizes of relational specifications or the proportions of implementation and proof written by humans, so those stronger claims cannot be retained as demonstrated findings.",
+   "source_urls": [
+    "https://www.microsoft.com/en-us/research/publication/verus-a-practical-foundation-for-systems-verification/"
+   ]
+  },
+  {
+   "text": "Anthropic's 22 October 2026 report describes checked no-crash proofs for 239 entry points across 123 OSS-Fuzz libraries, for inputs up to 64 MB. The reported scope includes assertions and is conditional on stated assumptions, including a single-threaded, static RISC-V/Linux execution model. It concerns selected entry points rather than complete functional correctness of whole libraries. The report describes generated proofs checked against specifications, including checking by the Rocq kernel, but the proofs were not supplied for independent rechecking in this review.",
+   "source_urls": [
+    "https://www.anthropic.com/research/formal-verification"
+   ]
+  },
+  {
+   "text": "The same report and its appendix describe generating a Rust interpreter for a Python fragment, completing all 17 tiers of the reported task and proving agreement with formal semantics using Verus. The theorem is partial correctness: whenever the interpreter returns, its result agrees with those semantics. Correspondence between the formal semantics and CPython was tested empirically. This is relevant progress in generating verified code, so a blanket claim that language-model-generated code is uncertified would be misleading. The supplied evidence does not establish the interpreter's specification-to-implementation size ratio, specification review time or comparative runtime performance, and therefore does not establish that it meets this concept's combined criteria. The appendix's awkward whitespace extraction did not prevent the reviewer from reading these distinctions.",
+   "source_urls": [
+    "https://www.anthropic.com/research/formal-verification"
+   ]
+  },
+  {
+   "text": "The research attributes substantial specification-writing effort and unfavorable annotation-inference comparisons to Lathouwers and Huisman's May 2024 Survey of annotation generators for deductive verifiers. Its text was not retained in the supplied review, so the detailed claims about minority coverage of a human baseline and Daikon annotations being mostly unnecessary or wrong remain unverified here. Likewise, the retained IronFleet item is a GitHub viewer shell without paper text; it cannot substantiate claims about specification compactness, proof volume or human authorship. These access limitations do not establish that the attributed findings are false.",
+   "source_urls": [
+    "https://www.sciencedirect.com/science/article/pii/S0164121224000153",
+    "https://github.com/papers-we-love/papers-we-love/blob/main/distributed_systems/ironFleet-proving-practical-distributed-systems-correct.pdf"
+   ]
+  },
+  {
+   "text": "The research also attributes to Brun and coauthors' September 2026 roadmap a separation of requirements elicitation, source-code synthesis and proof synthesis, with their integration remaining a research challenge. The roadmap text was not captured, so that attribution cannot be independently supported by the supplied review. Separately, the supplied freshness-search record is empty. Consequently, the evidence establishes several relevant achievements and limitations, but does not establish whether the complete proposed capability remained undemonstrated as of 1 November 2026.",
+   "source_urls": [
+    "https://dl.acm.org/doi/pdf/10.1145/3779132"
+   ]
+  }
+ ],
+ "completion_criteria": [
+  {
+   "text": "Proposed demonstration: fix a formal specification that a skilled engineer can read and audit in one day, then have the synthesizer produce a substantial file system, consensus implementation or compiler pass together with a refinement proof accepted by a checker independent of the synthesizer. Record the review procedure and what the reviewer understood, including assumptions and permitted behaviors. The input must already be formal enough to refine; deriving an adequate specification from stakeholder language remains a separate SWE-03 task. These are proposed evaluation choices, not established standards.",
+   "source_urls": [],
+   "id": "m1",
+   "label": "Proposed demonstration"
+  },
+  {
+   "text": "Proposed compactness and performance criteria: the specification should be at most about one tenth of the generated implementation's length under a declared counting convention. Account explicitly for imported definitions, supplied implementation scaffolding and other material that could conceal essential complexity. Require runtime performance within a declared small factor of a named, respected handwritten implementation on stated workloads. The ratio and performance factor are proposed thresholds, and the baseline, hardware, configurations and measured resource use must be disclosed.",
+   "source_urls": [],
+   "id": "m2",
+   "label": "Proposed compactness and performance criteria"
+  },
+  {
+   "text": "Proposed reproducibility and assurance criteria: release the fixed specification, generated implementation, proof artifacts, tool versions and checking instructions so independent parties can rerun proof checking and performance measurements. Document supported languages, synthesis resources, manual interventions, trusted checking components, formal semantics and environmental assumptions. State whether the proof covers termination, functional results, crashes, concurrency, persistence or other properties, and show how the checked artifact corresponds to the evaluated executable. Repeated generation runs should report success rates and resource costs rather than only a selected success.",
+   "source_urls": [],
+   "id": "m3",
+   "label": "Proposed reproducibility and assurance criteria"
+  },
+  {
+   "text": "Proposed failure and breadth criteria: report a checked impossibility result only within its declared language or search space, request a missing decision when one has been identified, and explicitly allow inconclusive outcomes such as resource exhaustion or inability to prove a candidate correct. Reproduce the result on several materially different systems tasks to demonstrate breadth. Finite successes would establish capability across those tasks and assumptions, not literal universality or a guarantee that every valid specification can be synthesized.",
+   "source_urls": [],
+   "id": "m4",
+   "label": "Proposed failure and breadth criteria"
+  }
+ ],
+ "related_concepts": [
+  {
+   "text": "Roster-based synthesis — SWE-01, Push-button verifying compilation for practical systems: both seek automatically checked assurance for practical code. SWE-01 centers on verifying compilation and implementation correctness; SWE-02 additionally asks the tool to construct the substantial implementation from a compact behavioral specification. They share checking infrastructure, while imposing different demands on program generation.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis — SWE-03, Demonstrable adequacy of a specification against intent and the environment: SWE-02 begins with a formal specification suitable for refinement. SWE-03 addresses whether that specification expresses the intended behavior and sufficiently captures the environment. Success at synthesis cannot substitute for adequacy, and adequacy alone does not produce an implementation.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis — SWE-04, A compositional calculus for concurrent systems that fail: such a calculus could supply specifications and proof rules for synthesizing systems with concurrency and failures. SWE-04 concerns reasoning compositionally about those behaviors; SWE-02 concerns constructing programs that satisfy the resulting specifications.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis — SWE-05, Assurance that stays proportional to each behavioral change: maintaining specifications and regenerating implementations could create demand for efficient incremental assurance. SWE-05 addresses the cost of preserving assurance after changes; SWE-02's initial generation and proof capability does not by itself establish proportional update costs.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis — SWE-06, Sound behavioral recovery of legacy systems: recovered legacy behavior could help inform a specification for subsequent synthesis. The distinction is direction: SWE-06 recovers behavior from an existing system, while SWE-02 constructs an implementation from a supplied specification. Recovery also does not automatically establish that the recovered behavior is desirable.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis — SWE-07, Practical confinement of general untrusted programs: confinement could be a specified property of generated software or an operating boundary around it. SWE-07 targets restrictions on untrusted execution; SWE-02 targets construction of implementations with checked conformance. A proof of confinement would cover only one part of a broader behavioral specification.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis — SWE-08, Sequential meaning for fault-tolerant distributed execution: a sequential behavioral model could give a synthesizer a compact target for a distributed implementation. SWE-08 concerns providing that meaning under distributed faults; SWE-02 would additionally need to construct and certify an implementation against it.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis — SWE-09, Observable determinism as the default for parallel systems code: determinism could simplify the observable behavior that a generated parallel system must satisfy. SWE-09 concerns the execution model and programming guarantees; SWE-02 concerns generating implementations and proofs, whether the specification requires determinism or permits nondeterminism.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis — SWE-10, Proof-carrying behavioral composition across trust boundaries: synthesized components could carry proofs used when they are combined with other components. SWE-10 addresses assurance across composition and trust boundaries. A proof that one generated component refines its specification does not alone establish that a larger assembly satisfies its obligations.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis — SWE-11, Proved semantics-preserving transformation of practical systems: verified transformations could optimize a synthesized implementation while retaining its established behavior. SWE-11 begins with a program whose semantics must be preserved; SWE-02 begins with a specification that may admit many implementations. Their proof machinery could overlap without making the advances identical.",
+   "source_urls": []
+  }
+ ],
+ "change_log": [
+  {
+   "change": "Preserved SWE-02's identity and integrated its scale, compactness, reviewability, independent checking and performance requirements into one coherent target.",
+   "reason": "The distinguishing innovation is the combined capability, rather than program generation or verification alone."
+  },
+  {
+   "change": "Replaced an asserted present-day absence with an unresolved assessment of whether the combined capability has been demonstrated.",
+   "reason": "The supplied freshness-search record is empty, and the retained evidence cannot establish the complete frontier through 1 November 2026."
+  },
+  {
+   "change": "Removed the categorical dismissal of restricted-domain synthesis as incapable of becoming a new engineering medium.",
+   "reason": "The historical survey supports domain-specific successes and synthesis barriers, but not that broader judgment."
+  },
+  {
+   "change": "Added Anthropic's generated, verified Python-fragment interpreter and its 17-tier scope; corrected the blanket description of language-model output as uncertified.",
+   "reason": "The reviewed report includes code generation with checked semantic conformance as well as verification of existing entry points."
+  },
+  {
+   "change": "Separated interpreter partial correctness from termination and empirical agreement with CPython from proved agreement with formal semantics.",
+   "reason": "These distinctions define what the reported theorem establishes."
+  },
+  {
+   "change": "Preserved the reported 239 entry points, 123 libraries and 64 MB input bound with execution-model and independent-rechecking limitations.",
+   "reason": "The quantitative result is relevant, but does not imply whole-library functional correctness or assumption-free crash freedom."
+  },
+  {
+   "change": "Replaced broad Verus specification-size and authorship claims with the supported 6.1K implementation-line and 31K proof-line aggregate.",
+   "reason": "The retained abstract supports proof volume, but not specification compactness or human authorship proportions."
+  },
+  {
+   "change": "Qualified the annotation-survey, IronFleet and Brun-roadmap claims and preserved their access limitations.",
+   "reason": "Missing source text and a viewer-only artifact prevent verification of those details without establishing that the findings are false."
+  },
+  {
+   "change": "Qualified the implementation guarantee and the compilation analogy while retaining the conditional engineering impact.",
+   "reason": "Assurance depends on theorem scope, specification adequacy, trusted components and correspondence between checked and deployed artifacts."
+  },
+  {
+   "change": "Expanded the proposed demonstration with counting rules, baseline disclosure, reproducibility, trust boundaries and honest inconclusive outcomes.",
+   "reason": "The original thresholds were proposals, and unsuccessful synthesis does not necessarily prove impossibility or missing intent."
+  },
+  {
+   "change": "Explained overlap and distinctions with every other supplied roster entry.",
+   "reason": "Related advances can supply inputs, proof machinery or deployment capabilities without being merged into SWE-02."
+  }
+ ],
+ "unresolved_issues": [
+  "Whether any demonstration available by 1 November 2026 meets the combined scale, specification compactness, reviewability, independent-checking and performance criteria remains unresolved because no freshness searches were supplied.",
+  "The reported interpreter's specification-to-implementation ratio, specification review burden, comparative performance and full checking trust boundary are not established by the supplied review.",
+  "The reported OSS-Fuzz proofs were not supplied for independent rechecking; the record supports the dated report rather than a fresh replication.",
+  "The annotation survey's detailed baseline and Daikon findings, IronFleet's specification and proof characteristics, and the Brun roadmap's attributed decomposition remain unverified from the retained materials.",
+  "A useful counting convention for specification compactness, treatment of shared libraries and scaffolding, and a concrete acceptable performance factor still need to be chosen for an actual evaluation.",
+  "A one-day specification review and a finite set of systems tasks would require a defined review protocol and task-selection rationale; neither would establish universal auditability or synthesis capability."
+ ],
+ "sources": [
+  "https://www.anthropic.com/research/formal-verification",
+  "https://www.microsoft.com/en-us/research/publication/verus-a-practical-foundation-for-systems-verification/",
+  "https://github.com/papers-we-love/papers-we-love/blob/main/distributed_systems/ironFleet-proving-practical-distributed-systems-correct.pdf",
+  "https://dl.acm.org/doi/pdf/10.1145/3779132",
+  "https://www.nowpublishers.com/article/Details/PGL-010",
+  "https://explore.openaire.eu/search/publication?pid=10.1561%2F2500000010",
+  "https://www.sciencedirect.com/science/article/pii/S0164121224000153"
+ ],
+ "provenance": {
+  "research": "ingestion/runs/all-fields/SWE/reconciled-research.md",
+  "structured_record": "ingestion/runs/all-fields/SWE/reconciled-structured.json",
+  "review": "ingestion/runs/all-fields/SWE/attempts/review-SWE-02-c0ffc47098ed483b8c533330aa8303a1/validated.json"
+ },
+ "field": "SWE",
+ "status": "active"
+}

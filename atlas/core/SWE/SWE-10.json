@@ -1,0 +1,250 @@
+{
+ "id": "SWE-10",
+ "title": "Proof-carrying behavioral composition across trust boundaries",
+ "concept": [
+  {
+   "text": "The proposed innovation is a software supply chain in which third-party executable components arrive with machine-checkable proofs of explicit behavioral contracts. A contract describes what a component requires from its callers and environment and what it guarantees in return. The consumer checks a proof bound to the exact binary being installed, then uses a sound composition rule to derive specified application properties from compatible component contracts. This would extend the producer-supplied proof mechanism of proof-carrying code into behavioral assurance across independently developed components.",
+   "source_urls": [
+    "https://people.eecs.berkeley.edu/~necula/Papers/certcomp_retrospective.pdf",
+    "https://deepspec.org/page/Research/"
+   ]
+  },
+  {
+   "text": "The target combines compact proofs, checking at a cost comparable to ordinary linking, and composition without repeating each supplier’s source-level verification. For example, a component’s guarantee could be used only after the checker establishes that its callers satisfy its preconditions and that the relevant execution models agree. The intended result is a proof of a chosen whole-application property under explicit assumptions. This combination is the proposed capability; the supplied evidence does not establish that it has been achieved.",
+   "source_urls": []
+  }
+ ],
+ "significance": [
+  {
+   "text": "Software commonly combines components supplied by organizations that do not share a verification environment. If this capability were practical, consumers could establish specified behavior by checking evidence supplied with those components, reducing their reliance on the producers’ assurances and avoiding repeated source-level verification. The direct advance would be transferable behavioral assurance: a supplier’s proof could become a usable premise in a consumer’s application proof once the component’s assumptions and interfaces had been checked.",
+   "source_urls": [
+    "https://people.eecs.berkeley.edu/~necula/Papers/certcomp_retrospective.pdf",
+    "https://deepspec.org/page/Research/"
+   ]
+  },
+  {
+   "text": "Conditional downstream possibilities include accepting generated code through the same evidence interface as human-written code, exchanging suppliers while preserving an application contract, and distributing verified components without requiring every consumer to reproduce the producer’s proof search. These are potential consequences of inexpensive checking and interoperable contracts, not demonstrated outcomes or predictions of adoption. They would also depend on usable specifications, proof formats, tooling and incentives for suppliers.",
+   "source_urls": []
+  },
+  {
+   "text": "The assurance would remain relative to the chosen contracts, the composition theorem and the trusted execution models. Correctly checking a proof cannot establish behavior that the contract never specifies, nor can it repair an inaccurate model of the operating system or hardware. The 2026 Anthropic–Theorem report illustrates this boundary: a library guarantee can leave caller misuse uncovered unless the public functions’ requirements are specified and callers satisfy them. Broad security would therefore require substantially more than attaching proofs to individual binaries.",
+   "source_urls": [
+    "https://www.anthropic.com/research/formal-verification",
+    "https://deepspec.org/page/Research/"
+   ]
+  },
+  {
+   "text": "Reproducible builds and hashes provide a useful comparison but establish different facts. Reproducibility concerns whether independent builds produce identical artifacts; a hash establishes bit identity relative to a reference. Neither fact alone entails that the program satisfies a behavioral contract, because identical artifacts can preserve incorrect or malicious behavior. This distinction follows from the property being measured, rather than from a failure of reproducible builds.",
+   "source_urls": [
+    "https://arxiv.org/abs/2501.15919"
+   ]
+  }
+ ],
+ "missing_breakthrough": [
+  {
+   "text": "The target capability is practical consumer-side composition of functional and security proofs for independently supplied binaries. Its demanding combination is compact evidence, inexpensive checking and an application-level theorem whose premises can be discharged from component contracts. The sources document obstacles to this combination, but they do not establish its ecosystem-wide absence as of 1 November 2026. In particular, one approach’s proof costs and historical research agendas cannot prove that no other ecosystem supplies the capability.",
+   "source_urls": [
+    "https://www.anthropic.com/research/formal-verification",
+    "https://deepspec.org/page/Research/",
+    "https://www.darpa.mil/research/programs/verified-security-and-performance-enhancement-of-large-legacy-software"
+   ]
+  },
+  {
+   "text": "Proof production, proof size and checking cost must become manageable for behavioral properties beyond ordinary type safety. A type-correct program can still compute the wrong answer: Necula and Lee use reversed subtraction operands to illustrate that distinction. Their retrospective also describes subsequent translation validation beyond type safety, so the obstacle is not that behavioral verification has never existed. It is making sufficiently expressive evidence practical to produce, transfer and check at the proposed supply-chain scale. In the 2026 Anthropic–Theorem approach, typical proofs contain roughly 600,000 lines and individual checks take 30 minutes to several CPU hours, documenting substantial costs without establishing a lower bound for other methods.",
+   "source_urls": [
+    "https://people.eecs.berkeley.edu/~necula/Papers/certcomp_retrospective.pdf",
+    "https://www.anthropic.com/research/formal-verification"
+   ]
+  },
+  {
+   "text": "The composition barrier is semantic as well as computational. Independently verified components must agree on both sides of an interface: what one component assumes must follow from what its callers and environment provide. DeepSpec gives a concrete example in which the C semantics assumed by a CertiKOS proof did not match those delivered by CompCert. Shared terminology or separately successful proofs do not close such a gap. Binary, linking, operating-system and hardware assumptions must also line up before component guarantees can support a whole-system conclusion.",
+   "source_urls": [
+    "https://deepspec.org/page/Research/",
+    "https://www.anthropic.com/research/formal-verification"
+   ]
+  },
+  {
+   "text": "Proof packaging must support distribution and combination of verified programs without becoming fragile when components are replaced or transformed. V-SPELLS explicitly identified granular, robust representations, packaging and transformation rules for composable verification proofs as research goals. For this proposed innovation, those mechanisms would additionally need to preserve the connection between each proof, its contract and the exact shipped binary. The historical program description motivates the engineering problem; it does not establish which parts remain unresolved today.",
+   "source_urls": [
+    "https://www.darpa.mil/research/programs/verified-security-and-performance-enhancement-of-large-legacy-software"
+   ]
+  }
+ ],
+ "current_state": [
+  {
+   "text": "Necula and Lee’s 2003 retrospective describes proof-carrying code as allowing the receiver of untrusted compiled code to check a producer-supplied safety proof. It explains why type safety misses some behavioral errors, including reversed subtraction operands, and reports subsequent translation-validation work checking correspondence between source and output code beyond type safety. The research also identifies Necula’s POPL 1997 paper as foundational, but the supplied evidence review had no retained artifact for that original paper. Its exact abstract wording, original case studies and the claim about dispensing with a cryptographic authority therefore remain unverified here; that access limitation does not negate the retrospective’s support for the underlying mechanism.",
+   "source_urls": [
+    "https://people.eecs.berkeley.edu/~necula/Papers/certcomp_retrospective.pdf",
+    "https://dl.acm.org/doi/10.1145/263699.263712"
+   ]
+  },
+  {
+   "text": "Anthropic and Theorem’s report dated 22 October 2026 states that the Rocq kernel checks proofs for 239 fuzzing entry points across 123 libraries. It reports approximately 180 million lines of Rocq in total, with a typical proof around 600,000 lines for binaries whose median length is 18,000 RISC-V instructions. These are proofs about compiled binaries under bounded inputs and modeled execution conditions for single-threaded, statically linked RISC-V Linux programs, including fixed-memory assumptions. Some checked assertions express higher-level behavior, so describing the entire result solely as a crash check would understate its scope.",
+   "source_urls": [
+    "https://www.anthropic.com/research/formal-verification"
+   ]
+  },
+  {
+   "text": "The report’s appendix gives checking costs of 30 minutes to several CPU hours per proof. It describes repeated verification of execution rather than importing and composing already-proved component contracts. The report also identifies a caller boundary: a library proof may not cover memory corruption caused by callers that misuse the library, and closing that gap requires explicit requirements for public functions and caller compliance. Checking by a separate Rocq kernel provides separation from proof generation, but the supplied assessment does not independently reproduce the results. These reported achievements do not demonstrate the proposed link-time consumer workflow, and no conventional-link timing comparison is supplied.",
+   "source_urls": [
+    "https://www.anthropic.com/research/formal-verification"
+   ]
+  },
+  {
+   "text": "DeepSpec’s undated research overview describes connecting independently verified components through compatible, two-sided specifications and closing specification gaps to obtain end-to-end guarantees. DARPA’s V-SPELLS page describes safely composable replacements and proof-packaging goals, but explicitly states that the program is complete and the page is no longer maintained. These sources establish documented research objectives and concrete compatibility problems. They cannot establish present-day ecosystem completeness or incompleteness, and the supplied review contains no bounded freshness-search record supporting the earlier claim that no consumer ecosystem exists.",
+   "source_urls": [
+    "https://deepspec.org/page/Research/",
+    "https://www.darpa.mil/research/programs/verified-security-and-performance-enhancement-of-large-legacy-software"
+   ]
+  },
+  {
+   "text": "At distribution scale, the Debian reproducibility dashboard snapshot updated on 1 November 2026 at 16:02 UTC reports 38,094 of 39,770 forky/amd64 source packages reproducible, or 95.8%, and 39,439 of 41,664 unstable/amd64 source packages reproducible, or 94.7%. These are results under the dashboard’s tests and environments, rather than unconditional guarantees across all build environments. They demonstrate substantial deployment of bit-correspondence testing, not consumer verification of behavioral contracts.",
+   "source_urls": [
+    "https://tests.reproducible-builds.org/debian/index_dashboard.html"
+   ]
+  },
+  {
+   "text": "Malka, Zacchiroli and Zimmermann’s study, whose arXiv version 2 was revised on 7 May 2025, reports 709,816 package builds across 17 sampled nixpkgs revisions from 2017–2023, using 14,296 hours of build time. The count is package builds across snapshots, not distinct packages. The authors report bitwise reproducibility between 69% and 91%, with an upward trend apart from a reported regression, and rebuildability above 99%. Their experiment used cached sources and dependencies, so these rates do not establish equivalent results for rebuilding every dependency from scratch. The review includes full-paper evidence as well as a partial landing-page artifact; the numerical findings come from the paper, while the landing page supports the revision date and related DOI.",
+   "source_urls": [
+    "https://arxiv.org/abs/2501.15919"
+   ]
+  },
+  {
+   "text": "The same study’s date heuristic found dates in 12,831 of 86,317 analyzed packages with generated diffoscopes, or 14.8%, and achieved 97.8% precision in its validation sample. This is narrower than claiming that embedded build dates caused about 15% of all failures: the denominator is the analyzed packages with diffoscopes, and the figure comes from a validated heuristic. The supplied artifacts do not verify the earlier proceedings page range or the alleged corruption of percentages in an IEEE abstract. Neither uncertainty changes the study’s distinction between reproducible outputs and behavioral correctness.",
+   "source_urls": [
+    "https://arxiv.org/abs/2501.15919"
+   ]
+  }
+ ],
+ "completion_criteria": [
+  {
+   "text": "Proposed demonstration: assemble a browser, database or control application from third-party binaries whose producers are independent of the consumer. Each binary should ship an explicit behavioral contract and a proof bound to its exact bytes. A sound composition rule should discharge mutual assumptions and derive a pre-registered, nontrivial end-to-end functional or security property from those contracts, without re-proving vendor source. All application components and any trusted platform exclusions should be enumerated so that the claimed boundary is unambiguous. These are proposed criteria, not established standards or achieved results.",
+   "source_urls": [],
+   "id": "m1",
+   "label": "Proposed demonstration"
+  },
+  {
+   "text": "Proposed trust disclosure: publish the complete trusted computing base, covering the proof checker and its execution dependencies, logical foundations, contract language, binary and linking semantics, and hardware and operating-system models. Distinguish assumptions about the modeled program from assumptions needed to execute the checker reliably. This disclosure should make clear what the resulting theorem covers and where assurance stops. The need for such disclosure is illustrated by the 2026 report’s explicit dependence on the hardware, operating system and OCaml compiler used by its Rocq checker.",
+   "source_urls": [
+    "https://www.anthropic.com/research/formal-verification"
+   ],
+   "id": "m2",
+   "label": "Proposed trust disclosure"
+  },
+  {
+   "text": "Proposed performance test: on a pre-registered machine, application and workload, measure the total time needed to check all required proofs, exact-binary bindings and composition obligations. Require that total to be no greater than a specified conventional-link baseline for the same application. Publish proof sizes, resource use, caching assumptions and the work included in both measurements. Supplier proof-generation cost should be reported separately, because cheap consumer checking would not establish cheap proof production. This timing threshold is a proposed practical target, not a consensus requirement.",
+   "source_urls": [],
+   "id": "m3",
+   "label": "Proposed performance test"
+  },
+  {
+   "text": "Proposed validation: publish binaries, contracts, proofs, checker versions and reproducible checking instructions so independent consumers can repeat the result. Include pre-registered contract-violating binary mutations and incompatible component combinations that the checker must reject. Such negative controls test binding and compatibility enforcement; they do not prove checker soundness, which requires its own justification. Matching a hash or reproducing a build alone would not satisfy the behavioral demonstration.",
+   "source_urls": [],
+   "id": "m4",
+   "label": "Proposed validation"
+  },
+  {
+   "text": "Proposed breadth test: repeat the workflow with multiple independent suppliers and component substitutions that preserve the exposed application contract. Report which properties, architectures, operating-system assumptions and forms of component interaction are covered, together with practical limits on proof size and checking resources. Successful finite demonstrations would establish breadth across the tested cases, not literal universality over arbitrary programs, contracts or execution environments.",
+   "source_urls": [],
+   "id": "m5",
+   "label": "Proposed breadth test"
+  }
+ ],
+ "related_concepts": [
+  {
+   "text": "Roster-based synthesis: SWE-01, “Push-button verifying compilation for practical systems,” could help producers obtain proofs for compiled components. SWE-02, “Certified synthesis of system-scale programs from reviewable specifications,” could produce programs together with correctness evidence. SWE-10 concerns how a separate consumer accepts and composes such evidence across supplier boundaries. Neither automated verifying compilation nor certified synthesis alone supplies that consumer-side composition rule.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis: SWE-03, “Demonstrable adequacy of a specification against intent and the environment,” addresses whether the stated contract captures the intended requirement and relevant reality. SWE-10 addresses whether supplied binaries satisfy compatible contracts and support a composed conclusion. Specification adequacy remains a separate prerequisite for interpreting that conclusion as useful assurance.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis: SWE-04, “A compositional calculus for concurrent systems that fail,” could supply semantic rules needed when components interact concurrently or experience failures. SWE-08, “Sequential meaning for fault-tolerant distributed execution,” concerns the meaning of distributed behavior despite faults, while SWE-09, “Observable determinism as the default for parallel systems code,” concerns predictable observable behavior under parallel execution. SWE-10 would transport and check evidence using whichever execution semantics its contracts require; it does not itself solve concurrency, distribution or nondeterminism.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis: SWE-05, “Assurance that stays proportional to each behavioral change,” concerns maintaining evidence efficiently as software evolves. SWE-10 concerns distributing and composing evidence across trust boundaries. Incremental assurance could make component updates practical, but an efficiently updated proof still needs exact-binary binding and compatibility checks before a consumer can reuse it.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis: SWE-06, “Sound behavioral recovery of legacy systems,” could help obtain behavioral descriptions or evidence for existing components whose original specifications are unavailable. SWE-11, “Proved semantics-preserving transformation of practical systems,” could support changes to binaries while retaining a behavioral relationship. SWE-10 would still require the recovered or transformed component’s evidence to match the shipped artifact and the contracts expected by other components.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis: SWE-07, “Practical confinement of general untrusted programs,” controls the effects of code through enforced boundaries. SWE-10 establishes specified properties through proof checking. The two could complement each other: confinement could be an explicit environmental assumption or provide protection around components outside a proof’s coverage. Their guarantees and mechanisms remain distinct. Reproducible builds and hashes are additional complementary mechanisms for artifact correspondence, rather than substitutes for behavioral composition.",
+   "source_urls": []
+  }
+ ],
+ "change_log": [
+  {
+   "change": "Preserved SWE-10 and its title while replacing the categorical claim of a missing ecosystem with a proposed combined capability whose present-day availability is unestablished.",
+   "reason": "The supplied sources document technical obstacles and particular achievements, but no bounded freshness-search record establishes ecosystem-wide absence."
+  },
+  {
+   "change": "Made whole-application assurance conditional on discharged component assumptions, compatible interfaces and aligned execution semantics.",
+   "reason": "Separately proved components imply a whole-system property only through an applicable sound composition theorem."
+  },
+  {
+   "change": "Retained the behavioral limits of type safety and added the retrospective’s subsequent work on translation validation beyond type safety.",
+   "reason": "The original account omitted achieved progress and could imply that earlier verification remained confined to type safety."
+  },
+  {
+   "change": "Attributed proof-carrying-code mechanisms to the retained 2003 retrospective and qualified details attributed to the uncaptured 1997 paper.",
+   "reason": "The supplied review could not inspect the original abstract, case studies or cryptographic-authority claim."
+  },
+  {
+   "change": "Expanded the October 2026 result with its date, entry-point and library counts, total and typical proof sizes, instruction count, checking costs, execution restrictions and caller boundary.",
+   "reason": "These details distinguish a substantial binary-verification achievement from the proposed consumer-side composition workflow."
+  },
+  {
+   "change": "Replaced the narrow crash-only characterization with a description that includes some higher-level assertions, and distinguished kernel checking from independent reproduction.",
+   "reason": "The review supports broader assertions within bounded modeled conditions, but does not report independent reproduction."
+  },
+  {
+   "change": "Treated DeepSpec as an undated research plan and V-SPELLS as a completed program with an unmaintained reference page.",
+   "reason": "Their documented goals cannot establish the current state of an entire ecosystem."
+  },
+  {
+   "change": "Preserved Debian’s dated counts and corrected the nixpkgs study’s unit, methodology and date-heuristic denominator.",
+   "reason": "The study counts package builds across revisions, uses cached dependencies and sources, and reports a heuristic over analyzed diffoscopes rather than a causal percentage of all failures."
+  },
+  {
+   "change": "Strengthened the proposed demonstration with exact-byte binding, a complete trust inventory, explicit composition obligations, a defined timing baseline, independent repeatability and bounded breadth claims.",
+   "reason": "These additions make success assessable without presenting proposed thresholds as standards or finite testing as universal proof."
+  },
+  {
+   "change": "Used the supplied roster to explain all neighboring concepts while marking the relationships as synthesis.",
+   "reason": "The roster resolves the review’s lack of numbered concept titles, but titles alone do not establish detailed capabilities. SWE-01 is therefore described as verifying compilation rather than reduced to cheap proof search."
+  },
+  {
+   "change": "Separated conditional downstream benefits from direct assurance and omitted unsupported historical ranking and IEEE-rendering details.",
+   "reason": "The evidence supports a substantial enabling capability, but not guaranteed adoption, universal security, a historical ranking or the disputed bibliographic details."
+  }
+ ],
+ "unresolved_issues": [
+  "Whether any ecosystem already combines independent binary suppliers, expressive behavioral contracts, sound consumer-side composition and checking comparable to linking remains unestablished by the supplied evidence.",
+  "The original POPL 1997 paper has no retained artifact in the supplied record; its precise demonstrated scope and the claim about requiring no cryptographic authority remain unverified.",
+  "The October 2026 results are source-reported and kernel-checked, without independent reproduction in the supplied assessment or a measured comparison against conventional linking.",
+  "The current outcomes of DeepSpec’s specification-integration goals and V-SPELLS’s proof-packaging goals cannot be inferred from the supplied historical pages.",
+  "A demonstration still needs concrete choices of contracts, end-to-end property, binary format, execution models, application boundary and timing baseline. The proposed criteria do not resolve those engineering choices.",
+  "The claimed MSR proceedings page range and alleged corruption of an IEEE abstract are not verified by the retained artifacts and are not relied upon.",
+  "The roster supports named conceptual comparisons but supplies no full definitions or evidence for the neighboring innovations; those relationships remain title-based synthesis."
+ ],
+ "sources": [
+  "https://www.anthropic.com/research/formal-verification",
+  "https://deepspec.org/page/Research/",
+  "https://www.darpa.mil/research/programs/verified-security-and-performance-enhancement-of-large-legacy-software",
+  "https://dl.acm.org/doi/10.1145/263699.263712",
+  "https://people.eecs.berkeley.edu/~necula/Papers/certcomp_retrospective.pdf",
+  "https://tests.reproducible-builds.org/debian/index_dashboard.html",
+  "https://arxiv.org/abs/2501.15919"
+ ],
+ "provenance": {
+  "research": "ingestion/runs/all-fields/SWE/reconciled-research.md",
+  "structured_record": "ingestion/runs/all-fields/SWE/reconciled-structured.json",
+  "review": "ingestion/runs/all-fields/SWE/attempts/review-SWE-10-d3f04de7ea8a4f68849ab1f73829d56e/validated.json"
+ },
+ "field": "SWE",
+ "status": "active"
+}

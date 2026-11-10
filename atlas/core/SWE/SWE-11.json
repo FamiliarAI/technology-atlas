@@ -1,0 +1,237 @@
+{
+ "id": "SWE-11",
+ "title": "Proved semantics-preserving transformation of practical systems",
+ "concept": [
+  {
+   "text": "The proposed capability would let engineers refactor, optimize, or move a practical software system to another language or architecture while obtaining a machine-checked proof that the transformation preserves its specified observable behavior. The input would include the program and stated source and target semantics; the output would include the transformed artifact and a proof accepted by a checker independent of the translator. When preservation cannot be established, the tool would reject the transformation. The ambition is to make this assurance routine within a declared range of practical systems and transformations, with recurring transformation and checking costs comparable to compilation.",
+   "source_urls": []
+  },
+  {
+   "text": "The preservation relation is central to the claim. Exact observable equivalence requires the source and target to permit the same modeled observations. Refinement can instead allow the target to eliminate some source nondeterminism or replace undefined behavior with more defined behavior. CompCert demonstrates an important form of semantic preservation with this latitude; its guarantee should not be described as exact equality of all source and target behavior sets. A practical transformation tool must state which relation it proves and what counts as an observation.",
+   "source_urls": [
+    "https://www.absint.com/compcert/structure.htm"
+   ]
+  },
+  {
+   "text": "Two established approaches provide foundations. A verified compiler proves preservation for its compilation process, while translation validation checks the result of an individual translation against its source. Proof-producing translation can make the latter check an independently checked certificate. SWE-11 extends this ambition to practical modernization, including substantial refactors and language migrations, rather than treating an existing verified compiler or a successful subset translator as completion of the broader capability.",
+   "source_urls": [
+    "https://compcert.inria.fr/doc/index.html",
+    "https://weizmann.elsevierpure.com/en/publications/translation-validation-2/"
+   ]
+  }
+ ],
+ "significance": [
+  {
+   "text": "Conditional on broad practical coverage and manageable total adoption cost, this capability would change the assurance available during modernization. Engineers could change accumulated program structure, implementation language, or execution architecture while retaining a checked account of the behavior being preserved. If passing a sound preservation check were required for acceptance, a transformation that violated the proved relation could not pass that check. This consequence depends on the modeled semantics, checker soundness, and trusted execution chain; it is not an unconditional guarantee about every behavior of the deployed system.",
+   "source_urls": [
+    "https://compcert.inria.fr/doc/index.html"
+   ]
+  },
+  {
+   "text": "As a conditional downstream possibility, reducing uncertainty about behavioral regressions could make costly migrations and optimizations easier to undertake, permit more frequent structural improvements, and reduce reliance on testing alone to establish preservation. These benefits would depend on coverage, preparation effort, output quality, and integration into engineering practice. Neither a preservation theorem nor the supplied case studies establish adoption rates, universal portability, or a quantified reduction in maintenance costs.",
+   "source_urls": []
+  },
+  {
+   "text": "Preservation does not establish that the original behavior was desirable. Exact equivalence preserves defects represented in the chosen observations, while refinement may permit some source behaviors to disappear. Neither relation by itself demonstrates that a specification captures user intentions or that the software meets those intentions. Likewise, a compiler analogy has limits: a proved compilation pipeline is evidence that substantial semantic preservation is feasible, but it does not automatically supply proofs for arbitrary refactors, language pairs, runtime interfaces, or concurrent systems.",
+   "source_urls": [
+    "https://www.absint.com/compcert/structure.htm",
+    "https://compcert.inria.fr/doc/index.html"
+   ]
+  }
+ ],
+ "missing_breakthrough": [
+  {
+   "text": "The target is an integrated capability that combines useful transformation coverage, sufficiently expressive semantics, automatic proof production, independent checking, and affordable recurring cost for practical systems. Existing verified compilation and translation validation establish important parts of this architecture. The supplied evidence does not demonstrate the entire proposed modernization envelope, but it also does not establish that no other system had achieved it by 1 November 2026.",
+   "source_urls": [
+    "https://compcert.inria.fr/doc/index.html",
+    "https://weizmann.elsevierpure.com/en/publications/translation-validation-2/"
+   ]
+  },
+  {
+   "text": "General program equivalence is undecidable, so there cannot be a terminating procedure that correctly decides every equivalence question for arbitrary programs. This does not prevent complete validation for a restricted transformation or family of transformations. The engineering challenge is therefore to define a useful envelope, prove preservation within it, and reject or explicitly exclude cases that exceed it. Rejection can reflect an inability to prove a valid transformation, rather than evidence that the transformation is wrong.",
+   "source_urls": [
+    "https://compcert.inria.fr/doc/index.html"
+   ]
+  },
+  {
+   "text": "The concrete barriers include aliasing, unsafe pointers, undefined behavior, runtime interfaces, and concurrency. A cross-language proof needs a defensible correspondence between the source and target treatments of these features. Translating C pointers into Rust references, for example, requires more than producing code that compiles: it must reconcile source behavior with the target's safety constraints without silently changing modeled observations. The documented C-to-Rust work illustrates both useful progress through restricted subsets and the distance between compilation or test success and a formal preservation guarantee.",
+   "source_urls": [
+    "https://arxiv.org/abs/2505.04852",
+    "https://arxiv.org/pdf/2412.15042"
+   ]
+  },
+  {
+   "text": "A further engineering requirement is to keep proof obligations and preparation effort manageable as systems grow. Independent checking reduces dependence on the translator's correctness, but assurance still rests on the semantics and trusted components that connect formal artifacts to executed code. As a proposed design requirement, the tool should expose these assumptions and residuals rather than hiding difficult runtime, environmental, or unsupported-language behavior outside an apparently comprehensive theorem.",
+   "source_urls": [
+    "https://compcert.inria.fr/doc/index.html"
+   ]
+  }
+ ],
+ "current_state": [
+  {
+   "text": "The supplied review identifies CompCert documentation for version 3.18, dated 31 August 2026. It describes a compiler from a large subset of C to assembly with correctness proved in Coq, including whole-compiler semantic-preservation theorems. AbsInt's explanation describes a refinement relation: target observable behaviors must correspond to allowed source behavior, with latitude to replace undefined behavior with more defined behavior. This is a substantial demonstrated verified-compilation capability, not evidence of exact behavior-set equality or general cross-language modernization. The reviewed documentation index identifies the proofs and compiler structure; it does not amount to an inspection of every linked proof.",
+   "source_urls": [
+    "https://compcert.inria.fr/doc/index.html",
+    "https://www.absint.com/compcert/structure.htm"
+   ]
+  },
+  {
+   "text": "Leroy's 2009 overview explains verified compilation and translation validation, including the incompleteness imposed by general undecidability. A separately retained compiler-back-end manuscript adds the important qualification that a validator can be complete for a particular transformation family and discusses compiler-generated proofs checked after translation. The review also records a historical compilation-time result within a factor of two of the comparison compilers; that supports the feasibility of compilation-like costs in an established setting, not the recurring proof-production cost of the broader proposed capability. The retained back-end manuscript is truncated at page 47, although the relevant discussion occurs before the truncation. The original ACM HTML was not retained; these findings come from the separately retained Leroy documents associated with the supplied CompCert source entry.",
+   "source_urls": [
+    "https://compcert.inria.fr/doc/index.html"
+   ]
+  },
+  {
+   "text": "Pnueli, Siegel, and Singerman's 1998 Translation Validation work describes checking each individual compiler run and reports a SIGNAL-to-sequential-C application. This establishes the per-run validation approach at its documented scope. The supplied review had an abstract and publication metadata rather than the full paper for this source. The separate DBLP response was a bot challenge and provides no additional bibliographic confirmation.",
+   "source_urls": [
+    "https://weizmann.elsevierpure.com/en/publications/translation-validation-2/",
+    "https://dblp.org/rec/conf/tacas/PnueliSS98"
+   ]
+  },
+  {
+   "text": "The original research attributes to Emre and colleagues an April 2023 C-to-Rust result increasing the share of pointers translated to safe references from 12% to 21% of all pointers. If those figures hold, the change is nine percentage points, or a 75% relative increase. However, neither cited ACM entry supplied an inspectable paper or abstract in the review materials, so the figures, denominator, evaluation scope, and explanation involving safety-checker precision remain unverified here. This access limitation does not show that the result is false. Even if confirmed, a safe-reference conversion rate would measure a narrower achievement than independently proved observable equivalence.",
+   "source_urls": [
+    "https://dl.acm.org/doi/10.1145/3586046",
+    "https://dl.acm.org/doi/pdf/10.1145/3586046"
+   ]
+  },
+  {
+   "text": "Gao and colleagues' PR2 preprint, arXiv version 3 revised on 18 April 2026, reports rewriting C2Rust-generated Rust using gpt-4o-mini, compilation feedback, and test failures. Across 28 projects, it reports an average local raw-pointer elimination rate of 18.57%, an average transformation time of 5.02 hours per project, and average prompting cost of $1.13 per project. The percentage is an average across the evaluation, not an established pooled fraction of all pointers; the dollar figure is prompting cost rather than total engineering cost. Although the initial research relied on the abstract, the supplied review includes the full text and its explicit statement that PR2 lacks a theoretical correctness guarantee. Compilation and passing tests can coexist with broken equivalence, so these results demonstrate practical rewriting progress without a machine-checked preservation theorem.",
+   "source_urls": [
+    "https://arxiv.org/abs/2505.04852"
+   ]
+  },
+  {
+   "text": "Fromherz and Protzenko's Scylla work translates an applicative subset of C into safe Rust after programmer restructuring, using type-directed translation and static analyses. The supplied materials identify arXiv version 2 revised on 25 February 2026 and publication in April 2026 as OOPSLA Article 121, DOI 10.1145/3798229. Its case studies include cryptographic code, parsers, and compression, with reported small refactors and similar performance characteristics on the studied workloads. The bzip2 translation covers compression rather than the complete library. The work also reports finding undefined behavior in bzip2 and a FrodoKEM implementation. These results show useful subset coverage; they do not establish equivalent performance across arbitrary systems.",
+   "source_urls": [
+    "https://arxiv.org/abs/2412.15042",
+    "https://arxiv.org/pdf/2412.15042"
+   ]
+  },
+  {
+   "text": "The supplied review extends the initial Scylla reading beyond its introduction: the full paper's conclusion explicitly states that translation correctness currently has no formal guarantees. This is stronger evidence about Scylla's assurance boundary than merely failing to find an arbitrary-C equivalence theorem in an introductory reading. Taken together, the dated examples demonstrate verified compilation, per-run validation, and useful C-to-Rust modernization with differing guarantees. They do not demonstrate the complete proposed capability. Whether that broader capability remained unavailable on 1 November 2026 is unresolved because the supplied freshness search record is empty.",
+   "source_urls": [
+    "https://arxiv.org/pdf/2412.15042",
+    "https://compcert.inria.fr/doc/index.html",
+    "https://arxiv.org/abs/2505.04852"
+   ]
+  }
+ ],
+ "completion_criteria": [
+  {
+   "text": "Proposed demonstration: use the tool to refactor or port a production storage engine, compiler component, or network service within a declared envelope of mainstream languages, architectures, and transformations. Produce the transformed artifact and a preservation proof accepted by a checker independent of the translator, or reject the transformation. Publish the source and target artifacts, proof material, checker configuration, and reproduction procedure so another team can repeat the demonstration.",
+   "source_urls": [],
+   "id": "m1",
+   "label": "Proposed demonstration"
+  },
+  {
+   "text": "Proposed semantic requirements: explicitly identify whether the theorem establishes exact observable equivalence or refinement, and define the observations it covers. Address specified error and crash behavior, nondeterminism, runtime interactions, and concurrency wherever relevant. Give undefined behavior an explicit treatment or identify the excluded residual and its consequences. State assumptions about trusted tools, runtime components, hardware, and the execution environment. A system without semantics strong enough to express the required relation falls outside the demonstrated envelope.",
+   "source_urls": [],
+   "id": "m2",
+   "label": "Proposed semantic requirements"
+  },
+  {
+   "text": "Proposed cost and performance requirements: report initial preparation, restructuring, annotations, and human proof effort separately from recurring transformation, proof production, and checking. Before evaluation, declare numerical acceptance limits for recurring cost relative to an ordinary optimizing build and for output performance relative to the original on stated workloads. The intended ambition is build-like recurring cost and performance within a declared small factor. Neither the supplied material nor this proposal establishes a consensus numerical threshold, and low recurring cost alone would not establish affordable adoption.",
+   "source_urls": [],
+   "id": "m3",
+   "label": "Proposed cost and performance requirements"
+  },
+  {
+   "text": "Proposed breadth requirements: evaluate representative systems and transformation families, report failures and rejections alongside successes, and distinguish unsupported inputs from valid transformations that the prover cannot establish. Include independent reproduction and evidence that the acceptance process rejects deliberately invalid transformations within the modeled relation. A single compiler pass or architecture translation can establish a useful instance; a finite evaluation establishes demonstrated breadth rather than literal universality. Completion claims should remain bounded by that evidence and should not imply that preservation establishes the adequacy of the source behavior.",
+   "source_urls": [],
+   "id": "m4",
+   "label": "Proposed breadth requirements"
+  }
+ ],
+ "related_concepts": [
+  {
+   "text": "Roster-based synthesis: SWE-01, Push-button verifying compilation for practical systems, overlaps in automatic machine-checked assurance and practical coverage. SWE-11 specifically proves a relation between an existing program and its transformed version. SWE-02, Certified synthesis of system-scale programs from reviewable specifications, instead starts from a specification and constructs an implementation. Preservation can support a synthesis pipeline, but preserving an existing program does not show that it satisfies a separately reviewed specification.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis: SWE-03, Demonstrable adequacy of a specification against intent and the environment, concerns whether the formal target captures what people need. SWE-06, Sound behavioral recovery of legacy systems, concerns obtaining a sound behavioral account when legacy semantics or specifications are missing. SWE-11 assumes a sufficiently stated source semantics and preservation relation; it does not by itself supply either intent adequacy or behavioral recovery.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis: SWE-05, Assurance that stays proportional to each behavioral change, addresses maintaining assurance when behavior intentionally changes. SWE-11 addresses preservation under transformation. A modernization project may require both: preservation proofs for unchanged behavior and separate assurance for intended changes. The distinction prevents a behavior-changing repair from being described as exact preservation.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis: SWE-04, A compositional calculus for concurrent systems that fail, could supply reasoning needed to preserve concurrent and failure behavior during transformation. SWE-08, Sequential meaning for fault-tolerant distributed execution, concerns the relationship between distributed execution and a sequential meaning. SWE-09, Observable determinism as the default for parallel systems code, concerns deterministic observations despite parallel execution. These capabilities can help define or prove the behaviors SWE-11 must preserve, but none is interchangeable with a source-to-target preservation theorem.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis: SWE-07, Practical confinement of general untrusted programs, addresses restrictions on what an untrusted program can affect. Preserving a program's behavior does not automatically confine it, and confinement can intentionally restrict behavior. SWE-10, Proof-carrying behavioral composition across trust boundaries, overlaps with independently checked evidence and explicit assumptions, but focuses on composing behavior across boundaries rather than proving a transformation of an existing system. These distinctions use the supplied roster titles and research context; full definitions for the other entries were not provided.",
+   "source_urls": []
+  }
+ ],
+ "change_log": [
+  {
+   "change": "Preserved SWE-11's identity while expressing the broad capability as a proposed target rather than an established present-day absence.",
+   "reason": "The documented examples do not demonstrate the full envelope, but the empty freshness search record cannot establish field-wide absence as of 1 November 2026."
+  },
+  {
+   "change": "Separated exact observable equivalence from refinement, including reduced nondeterminism and more defined behavior after source undefined behavior.",
+   "reason": "CompCert's documented guarantee does not require exact equality of all source and target behavior sets."
+  },
+  {
+   "change": "Qualified the inference from undecidability by retaining completeness for restricted transformation families.",
+   "reason": "The reviewed Leroy back-end discussion explicitly permits complete validators for particular transformations."
+  },
+  {
+   "change": "Replaced the unconditional shipping claim with acceptance conditional on sound required checking, modeled observations, and trusted components.",
+   "reason": "A formal preservation result does not cover behavior outside its semantics or eliminate trust in the execution chain."
+  },
+  {
+   "change": "Retained the Emre pointer-conversion figures as an attributed, unverified report and clarified percentage points versus relative increase.",
+   "reason": "The cited ACM materials were unavailable for inspection; the evidence gap warrants uncertainty rather than deletion or a finding of falsity."
+  },
+  {
+   "change": "Clarified PR2's average pointer-elimination rate, per-project time, prompting-only cost, preprint date, and explicit lack of a correctness guarantee.",
+   "reason": "The full-text review supports more precise interpretation than the original abstract-only account."
+  },
+  {
+   "change": "Integrated Scylla's explicit absence of formal translation-correctness guarantees and limited bzip2 coverage to compression.",
+   "reason": "The full-paper review provides direct evidence of the guarantee boundary and narrows the case-study scope."
+  },
+  {
+   "change": "Added dated CompCert documentation and preserved limitations of the documentation index, truncated back-end manuscript, abstract-only translation-validation source, and challenged DBLP response.",
+   "reason": "These details distinguish supported findings from broader inspection or verification that the supplied review did not perform."
+  },
+  {
+   "change": "Separated initial adoption effort from recurring cost and expanded the proposed demonstrations to include reproducibility, rejection reporting, and representative coverage.",
+   "reason": "A narrow successful example or inexpensive recurring run alone would not establish broad, affordable modernization."
+  },
+  {
+   "change": "Mapped all other supplied roster entries through explicitly labeled synthesis without treating their titles as complete specifications.",
+   "reason": "The roster supports useful distinctions, while the review correctly notes the absence of full definitions."
+  }
+ ],
+ "unresolved_issues": [
+  "The supplied material does not establish whether the full proposed modernization envelope remained unavailable as of 1 November 2026; no freshness search results were supplied.",
+  "The Emre result, including the reported 12%-to-21% safe-reference conversion figures and evaluation scope, remains unverified because the cited ACM sources had no inspectable retained artifacts.",
+  "The exact breadth of languages, architectures, transformations, runtime behavior, and concurrency semantics required for a convincing broad capability remains to be specified.",
+  "The review's recommendation to quantify cost and performance thresholds is incorporated as a requirement to declare numerical limits before evaluation. Specific values are not selected because the supplied evidence establishes no justified acceptance threshold.",
+  "Full definitions of the related SWE concepts were not supplied; overlap explanations are bounded by their roster titles and the research context."
+ ],
+ "sources": [
+  "https://compcert.inria.fr/doc/index.html",
+  "https://dl.acm.org/doi/fullHtml/10.1145/1538788.1538814",
+  "https://www.absint.com/compcert/structure.htm",
+  "https://weizmann.elsevierpure.com/en/publications/translation-validation-2/",
+  "https://dblp.org/rec/conf/tacas/PnueliSS98",
+  "https://dl.acm.org/doi/10.1145/3586046",
+  "https://dl.acm.org/doi/pdf/10.1145/3586046",
+  "https://arxiv.org/abs/2505.04852",
+  "https://www.conference-publishing.com/toc/OOPSLAA26/abs",
+  "https://arxiv.org/abs/2412.15042",
+  "https://arxiv.org/pdf/2412.15042"
+ ],
+ "provenance": {
+  "research": "ingestion/runs/all-fields/SWE/reconciled-research.md",
+  "structured_record": "ingestion/runs/all-fields/SWE/reconciled-structured.json",
+  "review": "ingestion/runs/all-fields/SWE/attempts/review-SWE-11-04d4c0e8b25f45eb88beb0eb38b08247/validated.json"
+ },
+ "field": "SWE",
+ "status": "active"
+}
