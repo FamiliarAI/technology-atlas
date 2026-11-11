@@ -87,8 +87,8 @@ python3 -m atlas.labels SWE --no-commit
 ```
 
 Each ID selects one breakthrough; a field prefix selects its active breakthroughs. Overlapping
-arguments are deduplicated. One Grok 4.7 call per breakthrough writes short pass-condition labels,
-with at most four calls running at once. Only milestone `label` strings change; all other file
+arguments are deduplicated. One Codex Sol (`gpt-6.1-sol`) call per breakthrough writes short pass-condition labels,
+with three calls running at once by default (`--workers N`); `--missing` labels only breakthroughs this tool has not labelled before. Only milestone `label` strings change; all other file
 bytes stay intact. Invalid answers leave that breakthrough untouched, while others continue.
 Failures are printed and the command exits non-zero.
 

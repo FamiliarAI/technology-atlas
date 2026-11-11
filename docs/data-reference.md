@@ -36,7 +36,7 @@ Counts on November 11: 66 fields, 742 breakthroughs, 2,800 milestones, 77 `needs
 
 **Label.** A milestone's short pass condition, such as "Universal encoded gates whose error per operation falls with code distance". At import, code takes the criterion's text before its first colon (or its first eight words if that is over 80 characters), which often yields a phrase like "Proposed demonstration" (`NEP-01.m1`). `python3 -m atlas.labels` replaces these with model-written labels; that rewrite is in progress across all fields.
 
-**Link.** A `needs` link, also called a *prerequisite*: "A needs B" means B is expected to come first on the way to A. A builds on B, uses it as a component, assumes its result, or B is the expected route. Merely helpful, topical or same-capability pairs are not links. Each link is stored on the dependent breakthrough (A) in its `prerequisites` list. **Unlocks** is the inverse, computed and never stored: B unlocks A. Example: `AER-05` (space-to-Earth solar power) needs `ELE-07`. The plan also names `related` links (mentioned together); no code derives or stores them today (see section 8).
+**Link.** A `needs` link, also called a *prerequisite*: "A needs B" means B is expected to come first on the way to A. A builds on B, uses it as a component, assumes its result, or B is the expected route. Merely helpful, topical or same-capability pairs are not links. Each link is stored on the dependent breakthrough (A) in its `prerequisites` list. **Unlocks** is the inverse, computed and never stored: B unlocks A. Example: `AER-05` (space-to-Earth solar power) needs `ELE-07`. It is the only kind of link; `related_concepts` stays as text.
 
 **Claim.** In the atlas, a falsifiable prediction: a *recognition* claim (a breakthrough's milestones) or an *order* claim (a `needs` link). Inside the pipeline, "claim" means something else: one cited statement in the research record (`candidates.problems[].claims[]`), which the review then checks.
 
@@ -316,12 +316,4 @@ python3 -m atlas.export OUT [--base-url https://example.org] [--db PATH]
 
 ## 8. Where the documents and the code differ
 
-This page follows the code on each point.
-
-- **`related` links.** The plan's Terms and the core design describe `related` links derived at rebuild from IDs in `related_concepts`. No code derives or stores them; the only links are `needs`.
-- **Retired IDs.** The core design says the check catches a reused retired ID. `check` does not test this; it checks only that `merged_into` resolves.
-- **`progress.jsonl` is not append-only.** The core design calls it append-only; `atlas.add` rewrites the file and drops earlier rows for a re-added URL.
-- **Source identity.** The core design gives sources an ID "hash of the URL" and a date. Sources are keyed by the URL itself and have no date; the date is on each progress row (`source_date`).
-- **Field contents.** The core design lists a field as name and colour; field files also hold `as_of`, `boundaries`, `created_at`, `imported_from`, `original_dispositions`, `reconciliation_change_log` and `withheld`. The `fields` table also has `boundaries` (`atlas/README.md` lists only `id, name, color`).
-- **Label model.** `atlas/README.md` says labels use Grok 4.7 with at most four calls at once. `atlas.labels` uses `gpt-6.1-sol` through Codex, three workers by default, and has a `--missing` option the README does not mention.
-- **Research split.** The plan says Grok researched 38 fields and Terra 28; the records' `models.research` gives 39 and 27.
+The differences found when this page was written (on `related` links, retired IDs, `progress.jsonl`, source identity, field contents, the label model and the research split) were corrected in the other documents on November 11. If you find a new one, trust the code, fix the document, and note it here until it is fixed.

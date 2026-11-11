@@ -24,7 +24,7 @@ There are no dates in v1.
 
 - **Breakthrough:** one proposed future capability, with a permanent ID such as `CSC-02`.
 - **Milestone:** one of a breakthrough's completion criteria, with a permanent ID such as `CSC-02.m1`, a short label and the full criterion text.
-- **Link:** `needs` (a prerequisite, checked by a model call) or `related` (mentioned together).
+- **Link:** `needs`, a prerequisite, proposed by a model call and checked by code. It is the only kind of link.
 - **Source:** a paper or page, identified by URL, with saved copies identified by SHA-256.
 - **Progress:** one source judged against one milestone: `advances`, `meets` or `contradicts`, with an exact quote.
 
