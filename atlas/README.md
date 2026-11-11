@@ -11,34 +11,33 @@ python3 -m atlas.store
 python3 -m atlas.server --port 8765
 ```
 
-Open **http://127.0.0.1:8765** (redirects to `/tree/`). The server binds only to this computer. It is not a hosted service and is not accessible from another device through that localhost address.
+Open **http://127.0.0.1:8765**. The server binds only to this computer. It is not a hosted service and is not accessible from another device through that localhost address.
 
 `python3 -m atlas.store` rebuilds `atlas/data/atlas.sqlite3` from the records in `atlas/core/` (files in Git; see the [core design](../docs/plans/2026-11-09-atlas-core-design.md)). It runs `python3 -m atlas.core check` first and stops on any problem, leaving the existing database in place; otherwise it builds a new database beside the old one and swaps it in. Deleting the database and rebuilding gives the same contents. New completed fields enter the core with `python3 -m atlas.core import`, then rebuild.
 
 Saved source copies are not in Git. The rebuild finds each copy by its SHA-256 file name under any `sources/` folder in `ingestion/runs/` or `atlas/data/added/`, verifies its hash, and prints how many copies are missing; a missing copy is skipped (its download is unavailable), a changed one stops the rebuild.
 
-## Tech tree (React)
+## Website (React)
 
-The tech tree lives in `atlas/web` (React, Vite, Framer Motion; type and palette from the Silicon Data pitch, fonts bundled locally). Build it once, then open **http://127.0.0.1:8765/tree/**:
+The site lives in `atlas/web` (React, Vite, React Router, Motion; Jura, Newsreader and JetBrains Mono bundled locally). It follows the [site design](../docs/plans/2026-11-11-site-design.md). Build it once, then open **http://127.0.0.1:8765/**:
 
 ```bash
 cd atlas/web && npm install && npm run build
 ```
 
-The build goes to `atlas/static/tree/` (ignored by Git) and is served by `atlas.server`. For live editing, run `npm run dev` with the server on port 8765; Vite proxies `/api`.
+The build goes to `atlas/static/site/` (ignored by Git) and is served by `atlas.server` at `/`; any path without a file extension outside `/api/` falls back to `index.html` so client routes load directly. For live editing, run `npm run dev` with the server on port 8765; Vite proxies `/api`.
 
-- Desktop: one lane per field, read left to right; each breakthrough is a card with a segmented bar (one segment per milestone: met, in progress, none). Cards within a lane are ordered by progress. Hovering a card draws its `related_concepts` links. These are not prerequisites; prerequisite order is deferred (see the project plan).
-- Phone (≤ 760px): one field at a time as a vertical path; swipe sideways or use the field chips to change field.
-- The detail panel (bottom sheet on phones) shows milestones with their status and the progress rows judged against each, research sources not yet tied to a milestone, and related breakthroughs. The panel holds the full record, with collapsed sections for significance, missing breakthrough, current state, related-concept paragraphs, unresolved issues, review changes, sources and saved copies, and provenance downloads.
-- API addition: `GET /api/progress` returns each breakthrough's milestone status list and progress row count.
+- `/` Home, `/atlas` the star chart (`?field=QUA` focuses a constellation, `&star=QUA-01` selects a star), `/b/QUA-01` a breakthrough. `/field/…`, `/claims` and `/about` are placeholders for now.
+- Star positions are computed in the browser from field and breakthrough IDs and prerequisite depth (`src/sky.js`), so the sky is the same on every load.
+- `GET /api/catalog` carries each breakthrough's `milestones` (`id`, `label`, `status`) and `moved_at`, and a top-level `recent` list of judged progress rows, newest first.
+- `atlas/web/public/deep-field*.webp` is the Home background plate, generated with GPT Image through the Codex CLI.
 
 ## Included
 
-- Full-text search, a field-lane tree on desktop, and a mobile-friendly vertical path.
+- Full-text search, a star chart on desktop, and list-first pages on phones.
 - Each record's completion criteria shown as numbered milestones.
 - Every breakthrough's six final sections, source references, unresolved issues, and review change history.
-- Deep links such as `http://127.0.0.1:8765/tree/#SWE-01`.
-- Explicit related-concept references from the reviewed material, with the original explanations accessible in the detail panel. Hover a tree card to reveal its references; select a card for its record.
+- Deep links such as `http://127.0.0.1:8765/b/SWE-01`.
 - Original publisher/repository links and local saved-copy downloads. Copies may be partial; the interface preserves capture status and evidence limitations.
 - Review and research provenance downloads, with import history and record revisions in Git.
 - A SQLite view rebuilt atomically from `atlas/core/`, with stable IDs; Git holds the history of every record.

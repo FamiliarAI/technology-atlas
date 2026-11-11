@@ -261,9 +261,33 @@ def catalog(db):
         db.execute('SELECT breakthrough, COUNT(*) FROM progress GROUP BY breakthrough').fetchall()
     )
     fields = [dict(row) for row in db.execute('SELECT * FROM fields ORDER BY name')]
+    # Judged rows only: they give milestone status, the latest movement and recent changes.
+    judged = [
+        dict(row)
+        for row in db.execute(
+            'SELECT breakthrough, criterion, verdict, url, source_date, quote, added_at '
+            'FROM progress WHERE verdict IS NOT NULL ORDER BY added_at DESC, id'
+        )
+    ]
     items = []
     for row in db.execute('SELECT * FROM breakthroughs ORDER BY id'):
         item = json.loads(row['payload'])
+        mine = [entry for entry in judged if entry['breakthrough'] == item['id']]
+        milestones = []
+        for criterion_number, criterion in enumerate(item['completion_criteria'], 1):
+            verdicts = {
+                entry['verdict'] for entry in mine if entry['criterion'] == criterion_number
+            }
+            status = (
+                'met'
+                if 'meets' in verdicts
+                else 'in_progress'
+                if 'advances' in verdicts
+                else 'none'
+            )
+            milestones.append(
+                {'id': criterion['id'], 'label': criterion.get('label'), 'status': status}
+            )
         items.append(
             {
                 'id': item['id'],
@@ -275,6 +299,8 @@ def catalog(db):
                 'progress_count': counts.get(item['id'], 0),
                 'issue_count': len(item.get('unresolved_issues', [])),
                 'prerequisites': [link['id'] for link in item.get('prerequisites', [])],
+                'milestones': milestones,
+                'moved_at': max((entry['added_at'] for entry in mine), default=None),
                 'search_text': ' '.join(
                     paragraph['text']
                     for key in [
@@ -315,6 +341,7 @@ def catalog(db):
             }
             for (source_id, target_id), notes in edges.items()
         ],
+        'recent': judged[:12],
         'as_of': '2026-11-01',
     }
 

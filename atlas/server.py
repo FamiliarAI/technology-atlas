@@ -7,7 +7,7 @@ from pathlib import Path
 from urllib.parse import unquote, urlsplit
 from .store import DB, ROOT, catalog, connect, progress, progress_summary, sha
 
-TREE = ROOT / 'atlas/static/tree'  # built React tech tree (atlas/web)
+SITE = ROOT / 'atlas/static/site'  # built React site (atlas/web)
 TYPES = {
     '.html': 'text/html; charset=utf-8',
     '.js': 'text/javascript; charset=utf-8',
@@ -15,6 +15,10 @@ TYPES = {
     '.woff2': 'font/woff2',
     '.woff': 'font/woff',
     '.svg': 'image/svg+xml',
+    '.webp': 'image/webp',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.ico': 'image/x-icon',
 }
 
 
@@ -41,12 +45,6 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         path = unquote(urlsplit(self.path).path)
-        if path == '/':
-            self.send_response(302)
-            self.send_header('Location', '/tree/')
-            self.send_header('Content-Length', '0')
-            self.end_headers()
-            return
         with connect(self.server.db_path) as db:
             if path == '/api/catalog':
                 return self.reply(catalog(db))
@@ -91,21 +89,24 @@ class Handler(BaseHTTPRequestHandler):
                         {'error': 'Saved file changed; import and verify again'}, status=409
                     )
                 return self.reply(data, 'application/octet-stream', filename=saved_path.name)
-        if path == '/tree' or path.startswith('/tree/'):
-            rel = path.removeprefix('/tree').lstrip('/') or 'index.html'
-            target = (TREE / rel).resolve()
-            if (
-                not target.is_relative_to(TREE.resolve())
-                or not target.is_file()
-                or target.suffix not in TYPES
-            ):
-                target = TREE / 'index.html'  # client-side routes fall back to the app
-            if not target.is_file():
-                return self.reply(
-                    {'error': 'Tree not built; run npm run build in atlas/web'}, status=404
-                )
+        if path.startswith('/api/'):
+            return self.reply({'error': 'Not found'}, status=404)
+        return self.site(path)
+
+    def site(self, path):
+        """Built files by path; any other path without a file extension is a client route."""
+        root = SITE.resolve()
+        target = (root / path.lstrip('/')).resolve()
+        if target.is_relative_to(root) and target.is_file() and target.suffix in TYPES:
             return self.reply(target.read_bytes(), TYPES[target.suffix])
-        return self.reply({'error': 'Not found'}, status=404)
+        if Path(path).suffix:
+            return self.reply({'error': 'Not found'}, status=404)
+        index = root / 'index.html'
+        if not index.is_file():
+            return self.reply(
+                {'error': 'Site not built; run npm run build in atlas/web'}, status=404
+            )
+        return self.reply(index.read_bytes(), TYPES['.html'])
 
     def log_message(self, *args):
         pass

@@ -1,5 +1,4 @@
 import copy
-import io
 import json
 import tempfile
 import threading
@@ -183,17 +182,46 @@ class AtlasTests(unittest.TestCase):
         self.load()
         self.assertEqual(self.tables(), before)
 
-    def test_root_redirects_to_tree(self):
-        handler = Handler.__new__(Handler)
-        handler.path = '/'
-        handler.wfile = io.BytesIO()
-        with patch.object(handler, 'send_response') as response:
-            with patch.object(handler, 'send_header') as header:
-                with patch.object(handler, 'end_headers'):
-                    handler.do_GET()
-        response.assert_called_once_with(302)
-        self.assertIn(unittest.mock.call('Location', '/tree/'), header.call_args_list)
-        self.assertEqual(handler.wfile.getvalue(), b'')
+    def test_site_routes_fall_back_to_the_app(self):
+        self.load()
+        site = self.root / 'site'
+        (site / 'assets').mkdir(parents=True)
+        (site / 'index.html').write_text('<div id="root"></div>')
+        (site / 'assets' / 'app.js').write_text('run()')
+        server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
+        server.db_path = self.db
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        base = f'http://127.0.0.1:{server.server_port}'
+        try:
+            with patch('atlas.server.SITE', site):
+                for path in ['/', '/atlas', '/b/SWE-01', '/field/SWE']:
+                    with urlopen(base + path) as res:
+                        self.assertEqual(res.headers['Content-Type'], 'text/html; charset=utf-8')
+                        self.assertEqual(res.read(), b'<div id="root"></div>')
+                with urlopen(base + '/assets/app.js') as res:
+                    self.assertEqual(res.read(), b'run()')
+                for path in ['/assets/missing.js', '/api/unknown', '/../atlas.sqlite3']:
+                    with self.assertRaises(HTTPError) as error:
+                        urlopen(base + path)
+                    self.assertEqual(error.exception.code, 404)
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join()
+
+    def test_catalog_carries_milestone_labels_and_status(self):
+        core.import_field(self.folder, self.core)
+        self.judged()
+        self.load()
+        with connect(self.db) as db:
+            data = catalog(db)
+        for item in data['breakthroughs']:
+            self.assertEqual(
+                [milestone['status'] for milestone in item['milestones']],
+                progress_summary(db)[item['id']]['status'],
+            )
+        self.assertTrue(all(row['verdict'] for row in data['recent']))
 
     def test_retired_breakthroughs_are_not_loaded(self):
         core.import_field(self.folder, self.core)
@@ -280,7 +308,7 @@ class AtlasTests(unittest.TestCase):
                 self.assertNotIn('run', item)
                 self.assertNotIn('provenance', item)
                 self.assertNotIn('path', item['sources'][0]['artifacts'][0])
-            for path in ['/app.js', '/style.css', '/index.html']:
+            for path in ['/app.js', '/style.css', '/api/documents/../../x']:
                 with self.assertRaises(HTTPError) as error:
                     urlopen(base + path)
                 self.assertEqual(error.exception.code, 404)
