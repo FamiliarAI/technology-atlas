@@ -33,11 +33,11 @@ A `needs` link means B is expected to come first on the way to A: A builds on B,
 ## Where things stand
 
 - **Core.** `atlas/core/` (files in git) is the source of truth; the SQLite database is rebuilt from it. See the [core design](2026-11-09-atlas-core-design.md).
-- **Content.** 34 of 66 fields are in the core (369 breakthroughs), with two withheld concepts (CLM-02 and VIR-01). 32 fields are unfinished. See `ingestion/runs/all-fields/batch.json` for live status.
+- **Content.** All 66 fields are in the core (742 breakthroughs), with two withheld concepts (CLM-02 and VIR-01). Grok researched 38 fields; Codex Terra researched 28 after Grok's quota ran out, and its records cite fewer sources (median 1 per breakthrough against 3).
 - **Labels.** Short milestone labels exist for 5 fields (QUA, CSC, CPE, SWE, ROB).
 - **Links.** 5 `needs` links, from 2 fields.
 - **Progress.** 4 judged rows.
-- **UI.** One React page at `/tree/` with the full record in its detail panel.
+- **UI.** A three-screen mock (home, atlas, breakthrough) in `atlas/web`, awaiting the owner's approval.
 - **Remote.** `github.com/FamiliarAI/technology-atlas`, private.
 
 ## Plan to v1
