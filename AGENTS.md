@@ -1,6 +1,7 @@
 # Project documentation
 
 - [Project plan](docs/plans/technology-graph-plan.md)
+- [Data reference](docs/data-reference.md): the terms (breakthrough, milestone, link…) and every data field, where it is written and where it is used
 - [Atlas core design](docs/plans/2026-11-09-atlas-core-design.md): the record kinds and `atlas/core/` files that are the source of truth
 - [Site design](docs/plans/2026-11-11-site-design.md): pages, reading rules and look of the v1 website
 - [Field onboarding runbook](docs/runbooks/Field_Onboarding_Runbook.md)

@@ -33,7 +33,7 @@ A `needs` link means B is expected to come first on the way to A: A builds on B,
 ## Where things stand
 
 - **Core.** `atlas/core/` (files in git) is the source of truth; the SQLite database is rebuilt from it. See the [core design](2026-11-09-atlas-core-design.md).
-- **Content.** All 66 fields are in the core (742 breakthroughs), with two withheld concepts (CLM-02 and VIR-01). Grok researched 38 fields; Codex Terra researched 28 after Grok's quota ran out, and its records cite fewer sources (median 1 per breakthrough against 3).
+- **Content.** All 66 fields are in the core (742 breakthroughs), with two withheld concepts (CLM-02 and VIR-01). Grok researched 39 fields; Codex Terra researched 27 after Grok's quota ran out, and its records cite fewer sources (median 1 per breakthrough against 3).
 - **Labels.** Short milestone labels exist for 5 fields (QUA, CSC, CPE, SWE, ROB).
 - **Links.** 77 `needs` links (61 across fields, 16 within one), from one call per field on November 11. 31 fields' calls proposed none.
 - **Progress.** 4 judged rows.
