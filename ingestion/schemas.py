@@ -63,33 +63,3 @@ REVIEW = obj(
         )
     )
 )
-FIELD_REVIEW = obj(assessment=S, duplicates=arr(S), gaps=arr(S), next_actions=arr(S))
-
-# Explicit URL handoff and a bounded recent-literature check, not a completeness guarantee.
-LEDGER = obj(
-    sources=arr(
-        obj(
-            url=S,
-            title=S,
-            authors=N,
-            publisher=N,
-            published=N,
-            identifier=N,
-            claim_ids=arr(S),
-            passage=S,
-            locator=S,
-            access=S,
-        )
-    ),
-    gaps=arr(obj(claim_id=S, reason=S)),
-    freshness=arr(
-        obj(
-            problem_id=S,
-            checked_at=S,
-            queries=arr(S),
-            latest_source_date=N,
-            finding=S,
-            limitations=S,
-        )
-    ),
-)

@@ -1,4 +1,3 @@
-import json
 from pathlib import Path
 import tempfile
 import threading
@@ -6,7 +5,7 @@ import time
 import unittest
 from unittest.mock import patch
 
-from ingestion.batch import group_fields, backup_valid, run, finish_field, write_aggregate
+from ingestion.batch import group_fields, backup_valid, run, finish_field
 from ingestion.sources import digest, write_json
 
 
@@ -77,6 +76,26 @@ class BatchTests(unittest.TestCase):
             self.assertEqual(peak, 3)
             self.assertEqual(result['status'], 'incomplete')
             self.assertEqual(sum(e['status'] == 'complete' for e in result['fields']), 6)
+            self.assertNotIn('aggregate', result)
+            self.assertFalse((root / 'final-innovations.json').exists())
+            self.assertFalse((root / 'final-innovations.next.json').exists())
+
+    def test_smaller_batch_completes_per_field_without_aggregate(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.make_manifest(root, 2)
+            with patch(
+                'ingestion.batch.finish_field',
+                return_value={'concepts': 10, 'backup': 'fake', 'final_sha256': 'fake'},
+            ) as finish:
+                result = run(root, root / 'outside', runner=lambda *args: None)
+            self.assertEqual(finish.call_count, 2)
+            self.assertEqual(result['status'], 'complete')
+            self.assertTrue(all(e['status'] == 'complete' for e in result['fields']))
+            self.assertNotIn('aggregate', result)
+            self.assertNotIn('aggregate_error', result)
+            self.assertFalse((root / 'final-innovations.json').exists())
+            self.assertFalse((root / 'final-innovations.next.json').exists())
 
     def test_account_exhaustion_stops_new_fields(self):
         from ingestion.field_workflow import AccountExhausted
@@ -115,38 +134,3 @@ class BatchTests(unittest.TestCase):
             }
             with self.assertRaises(ValueError):
                 finish_field(entry, '2026-11-01', root / 'backup', lambda *args: None)
-
-    def test_aggregate_requires_all_66_and_preserves_field_boundaries(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            entries = []
-            for i in range(66):
-                field = root / str(i)
-                field.mkdir()
-                output = {
-                    'innovations': [{'id': f'F{i}-01'}],
-                    'original_dispositions': [{'original_number': 1}],
-                }
-                write_json(field / 'final-innovations.json', output)
-                entries.append(
-                    {
-                        'field': f'Field{i}',
-                        'prefix': f'F{i}',
-                        'root': str(field),
-                        'status': 'complete',
-                        'backup': 'verified-backup',
-                        'final_sha256': digest((field / 'final-innovations.json').read_bytes()),
-                    }
-                )
-            manifest = {'fields': entries, 'revision': 'original', 'as_of': '2026-11-01'}
-            aggregate = write_aggregate(root, manifest)
-            self.assertEqual(aggregate['field_count'], 66)
-            self.assertEqual(aggregate['innovation_count'], 66)
-            self.assertEqual(aggregate['fields'][3]['innovations'][0]['id'], 'F3-01')
-            entries[2]['status'] = 'failed'
-            with self.assertRaises(ValueError):
-                write_aggregate(root, manifest)
-            entries[2]['status'] = 'complete'
-            (root / '2/final-innovations.json').write_text('{}')
-            with self.assertRaises(ValueError):
-                write_aggregate(root, manifest)

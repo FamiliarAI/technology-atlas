@@ -7,7 +7,6 @@ import json
 import logging
 import re
 import time
-import uuid
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -38,13 +37,6 @@ def write_json(path, data):
 def read_json(path, default=None):
     path = Path(path)
     return json.loads(path.read_text()) if path.exists() else default
-
-
-def invalidate_summaries(root):
-    for path in Path(root).glob('summary*.json'):
-        history = Path(root) / 'history'
-        history.mkdir(exist_ok=True)
-        path.rename(history / f'{path.stem}-{uuid.uuid4().hex}.json')
 
 
 def web_url(url):
@@ -146,6 +138,10 @@ def extract(body, content_type):
             reader = PdfReader(io.BytesIO(body))
             pages = [p.extract_text() or '' for p in reader.pages]
             text = '\n\n'.join(f'[Page {i}]\n{value}' for i, value in enumerate(pages, 1))
+            # Decode UTF-16 pairs and replace lone surrogates emitted by PDF extraction.
+            text = text.encode('utf-16-le', errors='surrogatepass').decode(
+                'utf-16-le', errors='replace'
+            )
             issues = (
                 []
                 if all(value.strip() for value in pages) and pages
@@ -200,7 +196,6 @@ class Archive:
         return self.state.setdefault(web_url(url), {'artifacts': [], 'operations': {}})
 
     def save(self):
-        invalidate_summaries(self.root)
         write_json(self.path, self.state)
 
     def retain(self, url, body, content_type, resolved, kind):

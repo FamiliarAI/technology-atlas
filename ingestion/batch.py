@@ -215,41 +215,6 @@ def finish_field(entry, as_of, backups, runner, backup_fn=backup):
     return result
 
 
-def write_aggregate(root, manifest):
-    """Publish a deterministic collection only after every canonical field is complete."""
-    entries = manifest['fields']
-    if len(entries) != 66 or any(e['status'] != 'complete' for e in entries):
-        raise ValueError('All 66 fields must be complete before aggregation')
-    fields = []
-    for entry in entries:
-        path = Path(entry['root']) / 'final-innovations.json'
-        if digest(path.read_bytes()) != entry['final_sha256']:
-            raise ValueError(f'{entry["field"]}: final output changed before aggregation')
-        value = read_json(path)
-        fields.append(
-            {
-                'field': entry['field'],
-                'prefix': entry['prefix'],
-                'final_output': str(path),
-                'final_sha256': entry['final_sha256'],
-                'verified_backup': entry['backup'],
-                'innovations': value['innovations'],
-                'original_dispositions': value['original_dispositions'],
-            }
-        )
-    aggregate = {
-        'original_git_revision': manifest['revision'],
-        'as_of': manifest['as_of'],
-        'field_count': len(fields),
-        'innovation_count': sum(len(f['innovations']) for f in fields),
-        'fields': fields,
-    }
-    temporary = Path(root) / 'final-innovations.next.json'
-    write_json(temporary, aggregate)
-    temporary.replace(Path(root) / 'final-innovations.json')
-    return aggregate
-
-
 def run(root=DEFAULT_ROOT, backups=DEFAULT_BACKUPS, runner=None):
     root = Path(root).resolve()
     backups = Path(backups).resolve()
@@ -322,15 +287,6 @@ def run(root=DEFAULT_ROOT, backups=DEFAULT_BACKUPS, runner=None):
                 if all(e['status'] == 'complete' for e in manifest['fields'])
                 else 'incomplete'
             )
-        if manifest['status'] == 'complete':
-            try:
-                aggregate = write_aggregate(root, manifest)
-                manifest['aggregate'] = {
-                    'path': str(root / 'final-innovations.json'),
-                    'innovations': aggregate['innovation_count'],
-                }
-            except Exception as error:
-                manifest.update(status='incomplete', aggregate_error=str(error))
         save_manifest(root, manifest)
         return manifest
 

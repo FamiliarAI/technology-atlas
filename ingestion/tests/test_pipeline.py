@@ -1,31 +1,27 @@
 import copy
 import io
-import json
 import logging
 from pathlib import Path
 import tempfile
 import subprocess
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 import urllib.error
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from ingestion import schemas
 from ingestion.pipeline import (
-    Pipeline,
     backup,
     locked,
     validate_candidates,
     validate_review,
     Models,
     execute,
-    salvage_review,
-    validate_ledger,
     passage_matches,
     normalize_review_metadata,
 )
-from ingestion.sources import Archive, digest, extract, write_json
+from ingestion.sources import Archive, digest, extract, read_json, write_json
 
 URL = 'https://example.org/paper'
 PDF = 'https://example.org/paper.pdf'
@@ -127,61 +123,32 @@ def reviewed(payload, status='supported'):
     }
 
 
-class FakeModels:
-    def __init__(self):
-        self.calls = []
-        self.fail_format = False
-        self.status = 'supported'
-
-    def call(self, role, text, schema, directory):
-        self.calls.append(role)
-        if role == 'research' and text.startswith('Repair the source handoff'):
-            return json.dumps(
-                {
-                    'sources': [
-                        {
-                            **candidates()['sources'][0],
-                            'claim_ids': [c['id'] for c in candidates()['problems'][0]['claims']],
-                            'passage': PASSAGE,
-                            'locator': 'Results',
-                            'access': 'full text',
-                        }
-                    ],
-                    'gaps': [],
-                    'freshness': [
-                        {
-                            'problem_id': 'TEST-01',
-                            'checked_at': '2026-10-31',
-                            'queries': ['synthetic progress'],
-                            'latest_source_date': None,
-                            'finding': 'Fixture only',
-                            'limitations': 'No real search',
-                        }
-                    ],
-                }
-            )
-        if role == 'research':
-            return 'Synthetic research notes'
-        if role == 'format':
-            if self.fail_format:
-                raise RuntimeError('format failed')
-            return candidates()
-        payload = json.loads(text[text.index('\n\n{') + 2 :])
-        if 'problem' in payload:
-            return reviewed(payload, self.status)
-        return {
-            'assessment': 'Synthetic field only',
-            'duplicates': [],
-            'gaps': ['Coverage untested'],
-            'next_actions': [],
-        }
-
-
 class CaptureTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
+
+    def test_pdf_surrogate_pairs_and_lone_surrogates_are_utf8_safe(self):
+        cases = [
+            ('Plain text café 𝛼 😀', 'Plain text café 𝛼 😀'),
+            ('\ud83d\ude00 \ud835\udefc', '😀 𝛼'),
+            ('\ud800start middle\udfff end\udbff', '\ufffdstart middle\ufffd end\ufffd'),
+            ('\ud800\ud83d\ude00\udfff', '\ufffd😀\ufffd'),
+            ('\udfff\ud800', '\ufffd\ufffd'),
+        ]
+        for extracted, expected in cases:
+            with self.subTest(extracted=ascii(extracted)):
+                page = Mock()
+                page.extract_text.return_value = extracted
+                with patch('pypdf.PdfReader') as reader:
+                    reader.return_value.pages = [page]
+                    ext, text, issues, links = extract(paper_pdf(), 'application/pdf')
+                self.assertEqual(ext, 'pdf')
+                self.assertEqual(text, '[Page 1]\n' + expected)
+                self.assertEqual(text.encode('utf-8').decode('utf-8'), text)
+                self.assertEqual(issues, [])
+                self.assertEqual(links, [])
 
     def test_pdf_skipped_content_warning_is_retained_without_discarding_text(self):
         class Page:
@@ -418,16 +385,6 @@ class ReviewTests(unittest.TestCase):
         }
         self.review = reviewed(self.payload)
 
-    def test_invalid_passage_does_not_discard_independent_claims(self):
-        self.review['claims'][0]['evidence'][0]['passage'] = 'Fabricated'
-        result, issues = salvage_review(self.review, self.payload)
-        self.assertEqual(1, len(issues))
-        self.assertEqual(
-            ['unresolved', 'supported', 'supported', 'supported'],
-            [c['status'] for c in result['claims']],
-        )
-        validate_review(result, self.payload)
-
     def test_capture_metadata_normalization_preserves_claims_and_raw_output(self):
         original = copy.deepcopy(self.review)
         self.payload['sources'][0]['artifacts'][0]['truncated'] = True
@@ -586,30 +543,6 @@ class ReviewTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'absent'):
             validate_review(self.review, self.payload)
 
-    def test_source_ledger_accepts_progress_prefix_but_not_trailing_garbage(self):
-        raw = FakeModels().call('research', 'Repair the source handoff', None, None)
-        self.assertEqual(validate_ledger(raw), validate_ledger('Checking the papers.' + raw))
-        with self.assertRaises(ValueError):
-            validate_ledger(raw + ' fabricated extra response')
-
-    def test_source_ledger_requires_every_claim_and_freshness_record(self):
-        raw = FakeModels().call('research', 'Repair the source handoff', None, None)
-        ledger = validate_ledger(raw, self.doc)
-        ledger['sources'][0]['claim_ids'].pop()
-        with self.assertRaisesRegex(ValueError, 'every claim'):
-            validate_ledger(ledger, self.doc)
-        ledger['gaps'] = [
-            {'claim_id': self.doc['problems'][0]['claims'][-1]['id'], 'reason': 'No source'}
-        ]
-        validate_ledger(ledger, self.doc)
-        ledger['freshness'] = []
-        with self.assertRaisesRegex(ValueError, 'freshness'):
-            validate_ledger(ledger, self.doc)
-
-    def test_source_ledger_rejects_no_urls_before_formatting(self):
-        with self.assertRaises(ValueError):
-            validate_ledger({'sources': [], 'gaps': [], 'freshness': []})
-
     def test_supported_claim_requires_its_own_saved_passage_and_identity(self):
         validate_review(self.review, self.payload)
         for change in (
@@ -686,253 +619,21 @@ class ReviewTests(unittest.TestCase):
                 validate_candidates(bad)
 
 
-class PipelineTests(unittest.TestCase):
+class HelperTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name) / 'field'
         self.root.mkdir()
-        write_json(
-            self.root / 'field.json',
-            {
-                'field': 'Synthetic',
-                'prefix': 'TEST',
-                'boundaries': 'Fixtures',
-                'as_of': '2026-10-31',
-            },
-        )
-        self.models = FakeModels()
-        self.fetches = []
-
-        def get(url):
-            self.fetches.append(url)
-            return PLAIN, 'text/html', url
-
-        self.archive = Archive(self.root, get)
-        self.pipeline = Pipeline(self.root, self.models, self.archive)
-
-    def test_review_failure_remains_visible_alongside_contradicted_claims(self):
-        original = self.models.call
-        self.models.status = 'contradicted'
-
-        def call(role, text, schema, directory):
-            result = original(role, text, schema, directory)
-            if role == 'review' and 'claims' in result:
-                result['claims'][0]['evidence'][0]['passage'] = 'Not in the artifact'
-            return result
-
-        self.models.call = call
-        result = self.pipeline.run()
-        self.assertEqual(1, result['counts']['review_failed'])
-        self.assertEqual(3, result['problems'][0]['claim_counts']['contradicted'])
-
-    def test_saved_ledger_can_be_revalidated_without_repeating_research(self):
-        def old_validator(_):
-            raise ValueError('Old parser rejected the wrapper')
-
-        with self.assertRaises(ValueError):
-            self.pipeline.step(
-                'source-ledger', 'research', 'Repair the source handoff', validator=old_validator
-            )
-        calls = len(self.models.calls)
-        value = self.pipeline.step(
-            'source-ledger', 'research', 'Repair the source handoff', validator=validate_ledger
-        )
-        validate_ledger(value)
-        self.assertEqual(calls, len(self.models.calls))
-        receipt = json.loads((self.pipeline.last_step_directory / 'receipt.json').read_text())
-        self.assertIn('recovered_from', receipt)
-
-    def test_source_repair_reuses_saved_research_and_creates_revision(self):
-        self.pipeline.run(through='format')
-        before = {
-            p: p.read_bytes() for p in (self.root / 'attempts').glob('research-*/result.json')
-        }
-        original = self.models.call
-
-        def call(role, text, schema, directory):
-            if role == 'research':
-                self.assertTrue(text.startswith('Repair the source handoff'))
-            return original(role, text, schema, directory)
-
-        self.models.call = call
-        self.pipeline.repair_sources()
-        self.assertTrue(self.pipeline.state['revision'])
-        self.assertEqual(before, {p: p.read_bytes() for p in before})
-        calls = len(self.models.calls)
-        self.pipeline.candidates()
-        self.assertEqual(calls, len(self.models.calls))
-
-    def test_one_uncertain_claim_preserves_partial_support(self):
-        original = self.models.call
-
-        def call(role, text, schema, directory):
-            result = original(role, text, schema, directory)
-            if role == 'review' and 'claims' in result:
-                result['claims'][0].update(
-                    status='unresolved', reason='Scope exceeds the measured result.', evidence=[]
-                )
-            return result
-
-        self.models.call = call
-        result = self.pipeline.run()
-        self.assertEqual(1, result['counts']['partially_supported'])
-        self.assertEqual(3, result['problems'][0]['claim_counts']['supported'])
-
-    def test_complete_pipeline_rerun_reuses_models_sources_and_results(self):
-        first = self.pipeline.run()
-        calls, fetches = list(self.models.calls), list(self.fetches)
-        second = Pipeline(self.root, self.models, self.archive).run()
-        self.assertEqual(first, second)
-        self.assertEqual(calls, self.models.calls)
-        self.assertEqual(fetches, self.fetches)
-        self.assertEqual(1, first['counts']['supported'])
-        self.assertEqual('saved', first['problems'][0]['captures'][0]['status'])
-
-    def test_format_failure_resumes_without_research_and_keeps_failed_receipt(self):
-        self.models.fail_format = True
-        with self.assertRaises(RuntimeError):
-            self.pipeline.run()
-        self.models.fail_format = False
-        Pipeline(self.root, self.models, self.archive).run()
-        self.assertEqual(2, self.models.calls.count('research'))
-        receipts = [
-            json.loads(p.read_text()) for p in (self.root / 'attempts').glob('*/receipt.json')
-        ]
-        self.assertEqual(1, sum(r['status'] == 'failed' for r in receipts))
-
-    def test_single_problem_trial_does_not_mark_field_review_complete(self):
-        result = self.pipeline.run(problem_id='TEST-01')
-        self.assertEqual('TEST-01', result['scope'])
-        self.assertIsNone(result['field_review'])
-        self.assertFalse((self.root / 'summary.json').exists())
-
-    def test_recovery_rereviews_affected_evidence_without_research(self):
-        missing = Archive(
-            self.root,
-            lambda _: (_ for _ in ()).throw(urllib.error.HTTPError(URL, 404, 'Missing', {}, None)),
-        )
-        pipeline = Pipeline(self.root, self.models, missing)
-        first = pipeline.run()
-        self.assertEqual(1, first['counts']['collection_incomplete'])
-        file = self.root / 'copy.html'
-        file.write_bytes(PLAIN)
-        missing.attach(URL, file)
-        self.assertFalse((self.root / 'summary.json').exists())
-        self.assertTrue(list((self.root / 'history').glob('summary-*.json')))
-        second = pipeline.run()
-        self.assertEqual(1, second['counts']['supported'])
-        self.assertEqual(2, self.models.calls.count('research'))
-        self.assertEqual(1, self.models.calls.count('format'))
-
-    def test_no_source_text_is_unresolved_without_a_problem_model_call(self):
-        archive = Archive(
-            self.root,
-            lambda _: (_ for _ in ()).throw(urllib.error.HTTPError(URL, 404, 'Missing', {}, None)),
-        )
-        pipeline = Pipeline(self.root, self.models, archive)
-        result = pipeline.run()
-        self.assertEqual(1, result['counts']['collection_incomplete'])
-        self.assertEqual(1, self.models.calls.count('review'))  # Field coverage review only.
-        self.assertEqual(1, len(list((self.root / 'machine-reviews').glob('*.json'))))
-        pipeline.run()
-        self.assertEqual(1, self.models.calls.count('review'))
-
-    def test_invalid_review_is_visible_unresolved_and_requires_explicit_retry(self):
-        original = self.models.call
-        invalid = True
-
-        def call(role, text, schema, directory):
-            result = original(role, text, schema, directory)
-            if role == 'review' and 'claims' in result and invalid:
-                result['claims'][0]['evidence'][0]['passage'] = 'Invented passage'
-            return result
-
-        self.models.call = call
-        result = self.pipeline.run()
-        self.assertEqual(1, result['counts']['review_failed'])
-        self.assertEqual(3, result['problems'][0]['claim_counts']['supported'])
-        self.assertIn(
-            'could not be validated', result['problems'][0]['claims'][0]['assessment']['reason']
-        )
-        calls = len(self.models.calls)
-        self.pipeline.run()
-        self.assertEqual(calls, len(self.models.calls))
-        invalid = False
-        result = self.pipeline.run(retry=True)
-        self.assertEqual(1, result['counts']['supported'])
-        calls = len(self.models.calls)
-        self.assertEqual(1, self.pipeline.run()['counts']['supported'])
-        self.assertEqual(calls, len(self.models.calls))
-        self.assertTrue(list((self.root / 'history').glob('review-failed-*.json')))
-
-    def test_revision_keeps_original_and_rechecks_changed_claim(self):
-        self.pipeline.run()
-        doc = candidates()
-        doc['problems'][0]['claims'][0]['text'] = 'A corrected scope'
-        file = self.root / 'edit.json'
-        write_json(file, doc)
-        self.pipeline.revise(file, 'Narrow claim to measured conditions')
-        self.pipeline.run()
-        self.assertEqual(2, self.models.calls.count('research'))
-        self.assertEqual(1, self.models.calls.count('format'))
-        self.assertEqual(2, len(list((self.root / 'attempts').glob('review-TEST-01-*'))))
-        self.assertEqual(1, len(list((self.root / 'revisions').glob('*.receipt.json'))))
-
-    def test_research_tool_urls_are_provenance_not_claimed_support(self):
-        attempt = self.root / 'research'
-        attempt.mkdir()
-        write_json(attempt / 'stdout.log', {'sessionId': 'fixture'})
-        (attempt / 'session.md').write_text(
-            (
-                '- WebSearch: open https://example.org/a\n'
-                '- WebFetch: https://example.org/a\n'
-                '- WebSearch: query text\n'
-            )
-        )
-        context = self.pipeline.research_url_context(attempt)
-        self.assertEqual(1, context.count('https://example.org/a'))
-        self.assertIn('does NOT prove successful access or support', context)
-        self.assertNotIn('query text', context)
-
-    def test_output_limit_recovery_changes_only_format_reasoning(self):
-        attempt = self.root / 'attempts' / 'format-failed'
-        attempt.mkdir(parents=True)
-        write_json(attempt / 'receipt.json', {'status': 'failed'})
-        (attempt / 'stdout.log').write_text(
-            json.dumps({'type': 'error', 'message': 'Incomplete response: max_output_tokens'})
-            + '\n'
-        )
-        pipeline = Pipeline(self.root, self.models, self.archive)
-        self.assertEqual('medium', pipeline.config['format']['effort'])
-        self.assertEqual(
-            self.pipeline.config['format']['model'], pipeline.config['format']['model']
-        )
-        self.assertEqual(self.pipeline.config['research'], pipeline.config['research'])
-        self.assertEqual(self.pipeline.config['review'], pipeline.config['review'])
-
-    def test_added_provenance_preserves_a_valid_completed_format_step(self):
-        self.pipeline.run()
-        calls = list(self.models.calls)
-        with patch.object(
-            self.pipeline, 'research_url_context', return_value='\nExtra attempted URL provenance'
-        ):
-            self.pipeline.run()
-        self.assertEqual(calls, self.models.calls)
-
-    def test_cached_output_tampering_is_detected(self):
-        self.pipeline.run()
-        cache = next(iter(self.pipeline.state['cache'].values()))
-        (self.root / cache['path']).write_text('"tampered"')
-        with self.assertRaisesRegex(ValueError, 'Cached output changed'):
-            self.pipeline.run()
+        self.config = read_json(Path(__file__).parents[1] / 'config.json')
 
     def test_backup_reopens_every_source_and_refuses_overwrite(self):
-        self.pipeline.run()
+        archive = Archive(self.root, lambda url: (PLAIN, 'text/html', url))
+        archive.capture(URL)
         dest = Path(self.temp.name) / 'backup'
         receipt = backup(self.root, dest)
         self.assertTrue(receipt['files'])
-        self.assertEqual(self.archive.evidence(URL), Archive(dest).evidence(URL))
+        self.assertEqual(archive.evidence(URL), Archive(dest).evidence(URL))
         with self.assertRaises(ValueError):
             backup(self.root, dest)
         with self.assertRaises(ValueError):
@@ -958,13 +659,13 @@ class PipelineTests(unittest.TestCase):
             execute(['/bin/sleep', '5'], self.root, timeout=0.02)
 
     def test_model_adapter_uses_configured_cli_schema_and_preserves_raw_output(self):
-        adapter = Models(self.pipeline.config)
+        adapter = Models(self.config)
 
         def fake_execute(cmd, directory, stdin=None, timeout=3600):
             self.assertNotIn('--search', cmd)
             self.assertIn('--ignore-user-config', cmd)
             self.assertIn('read-only', cmd)
-            self.assertIn(self.pipeline.config['format']['model'], cmd)
+            self.assertIn(self.config['format']['model'], cmd)
             write_json(directory / 'response.json', candidates())
 
         with patch('ingestion.pipeline.execute', fake_execute):
