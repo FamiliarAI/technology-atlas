@@ -87,7 +87,10 @@ The existing `research`, `format`, `review`, `grok` and `codex` keys stay until 
 ## Refused and deferred
 
 - Refused: narrowing, filtering or re-routing CLM-02 or VIR-01; falling back on unclassified failures.
-- Deferred, owner's call: deleting old run folders (about 190 MB, ignored by git); backfilling `models` into the 31 imported fields; whether the pipeline commits `atlas/core` itself after an import.
+- Decided by the owner on November 11:
+  - **Old run folders removed.** `BIO`, `CE`, `CHE`, `CHEM`, `CPE`, `EE`, `MATH`, `MATSCI`, `ME`, `PHY` and `batch-20261101T050201Z` under `ingestion/runs/` (189 MB) were moved to the Trash after checking that no field root, saved copy or record refers to them. `all-fields/` and `CHEMREV/` remain.
+  - **Model names are backfilled** into the 31 imported fields as part of step 6, from each attempt's `model.json` (Codex) and `stdout.log` `modelUsage` (Grok). This is an attributed edit to `atlas/core`, not a content change.
+  - **The pipeline commits `atlas/core` after each import** (step 5), using `atlas.core.commit`, with the field and the models in the message.
 
 ## Not verified
 
