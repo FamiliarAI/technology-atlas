@@ -1,9 +1,10 @@
 """The static v1 site: python3 -m atlas.export OUT.
 
 Writes the built site (atlas/static/site), the data files of the site's data contract and one
-HTML file per route, each with its own title, description and share tags. Saved source copies
-and working documents are not exported. The result is served from a site root by any static
-host: /atlas loads atlas/index.html, /b/QUA-01 loads b/QUA-01/index.html.
+HTML file per route, each with its own title, description and share tags. Share images are
+made separately by python3 -m atlas.share and copied in with --share. Saved source copies and
+working documents are not exported. The result is served from a site root by any static host:
+/atlas loads atlas/index.html, /b/QUA-01 loads b/QUA-01/index.html.
 """
 
 import argparse
@@ -43,7 +44,11 @@ TITLE = re.compile(r'<title>.*?</title>', re.DOTALL)
 
 
 def routes(files):
-    """(route, title, description, share image name) for every page."""
+    """(route, title, description, share image name) for every page.
+
+    The share cards (/share/...) are not pages: they exist to be screenshotted by atlas.share,
+    so they get no HTML file here and mark themselves noindex in the browser.
+    """
     catalog = files['catalog.json']
     total = len(catalog['breakthroughs'])
     yield '/', HOME_TITLE, HOME_TEXT, 'default'
@@ -64,7 +69,7 @@ def routes(files):
             f'{field["name"]} · {NAME}',
             f'{count} proposed {noun} in {field["name"]}, each with milestones that say how we '
             'will know it has happened.',
-            'default',
+            'field-' + field['id'],
         )
     for item in catalog['breakthroughs']:
         record = files[f'b/{item["id"]}.json']
@@ -118,8 +123,20 @@ def prepare(out):
     out.mkdir(parents=True)
 
 
-def export(out, db_path=DB, site=SITE, base_url=''):
-    """Write the static site to out. Returns {'pages': n, 'data': n, 'bytes': {...}}."""
+def share_images(source):
+    """The PNG files in source/share (as atlas.share writes them), or in source itself."""
+    source = Path(source)
+    folder = source / 'share' if (source / 'share').is_dir() else source
+    if not folder.is_dir():
+        raise SystemExit(f'{source} is not a folder of share images')
+    return sorted(folder.glob('*.png'))
+
+
+def export(out, db_path=DB, site=SITE, base_url='', share=None):
+    """Write the static site to out, with share images from share (an atlas.share folder).
+
+    Returns {'pages': n, 'data': n, 'bytes': {...}, 'images': n, 'without_image': [route, ...]}.
+    """
     out = Path(out)
     site = Path(site)
     index_path = site / 'index.html'
@@ -127,8 +144,13 @@ def export(out, db_path=DB, site=SITE, base_url=''):
         raise SystemExit('Site not built; run npm run build in atlas/web')
     if not Path(db_path).exists():
         raise SystemExit('Run python3 -m atlas.store first')
+    images = share_images(share) if share else []
     prepare(out)
     shutil.copytree(site, out, dirs_exist_ok=True)
+    if images:
+        (out / 'share').mkdir(exist_ok=True)
+        for path in images:
+            shutil.copyfile(path, out / 'share' / path.name)
     db = connect(db_path)
     try:
         files = dict(site_files(db))
@@ -143,7 +165,10 @@ def export(out, db_path=DB, site=SITE, base_url=''):
         sizes[name] = len(data)
     index = index_path.read_text()
     pages = 0
+    without = []
     for route, title, description, image in routes(files):
+        if not (out / 'share' / f'{image}.png').is_file():
+            without.append(route)
         path = target(out, route)
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(page(index, route, title, description, image, base_url))
@@ -151,7 +176,13 @@ def export(out, db_path=DB, site=SITE, base_url=''):
     missing = page(index, '/404', 'Off the chart · ' + NAME, HOME_TEXT, 'default', base_url)
     (out / '404.html').write_text(missing)
     (out / MARKER).write_text('Written by python3 -m atlas.export; safe to replace.\n')
-    return {'pages': pages, 'data': len(files), 'bytes': sizes}
+    return {
+        'pages': pages,
+        'data': len(files),
+        'bytes': sizes,
+        'images': len(images),
+        'without_image': without,
+    }
 
 
 def main(argv=None):
@@ -163,8 +194,13 @@ def main(argv=None):
         default='',
         help='public origin such as https://example.org, for absolute share URLs',
     )
+    parser.add_argument(
+        '--share',
+        type=Path,
+        help='folder written by python3 -m atlas.share; its share/*.png are copied in',
+    )
     args = parser.parse_args(argv)
-    result = export(args.out, args.db, base_url=args.base_url)
+    result = export(args.out, args.db, base_url=args.base_url, share=args.share)
     sizes = result['bytes']
     largest = {
         kind: max((size, name) for name, size in sizes.items() if name.startswith(kind))
@@ -177,6 +213,11 @@ def main(argv=None):
         f'largest field {largest["field/"][1]} {largest["field/"][0]} B, '
         f'largest breakthrough {largest["b/"][1]} {largest["b/"][0]} B'
     )
+    without = result['without_image']
+    line = f'{result["images"]} share images; {len(without)} pages have none'
+    if without:
+        line += ': ' + ', '.join(without[:8]) + (' …' if len(without) > 8 else '')
+    print(line)
 
 
 if __name__ == '__main__':

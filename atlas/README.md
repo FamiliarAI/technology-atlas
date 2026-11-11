@@ -48,10 +48,15 @@ The graph is a map of explicit discussion references, **not a dependency graph**
 
 ```bash
 python3 -m atlas.store && (cd atlas/web && npm run build)
-python3 -m atlas.export OUT [--base-url https://example.org]
+python3 -m atlas.share atlas/data/share-out          # needs atlas.server running on port 8765
+python3 -m atlas.export OUT --share atlas/data/share-out [--base-url https://example.org]
 ```
 
-Writes the built site, every data file, and one `index.html` per route (`/`, `/atlas`, `/claims`, `/about`, `/field/<ID>/`, `/b/<ID>/`, plus `404.html`), each with its own title, description and Open Graph tags (`og:image` is `share/<ID>.png` for breakthroughs, `share/default.png` otherwise; absolute when `--base-url` is given). Serve OUT from a site root. Saved source copies and provenance documents are not exported. OUT must be empty or an earlier export.
+Writes the built site, every data file, and one `index.html` per route (`/`, `/atlas`, `/claims`, `/about`, `/field/<ID>/`, `/b/<ID>/`, plus `404.html`), each with its own title, description and Open Graph tags (`og:image` is `share/<ID>.png` for breakthroughs, `share/field-<ID>.png` for fields, `share/default.png` otherwise; absolute when `--base-url` is given). `--share DIR` copies `DIR/share/*.png` into `OUT/share/`; the export prints how many pages have no image. Serve OUT from a site root. Saved source copies and provenance documents are not exported. OUT must be empty or an earlier export.
+
+### Share images
+
+The site draws its own share cards at 1200×630: `/share/default`, `/share/field/QUA` and `/share/b/QUA-01` (`atlas/web/src/Share.jsx`). They show only the card, in its final state, set `<html data-share-ready>` once fonts, data and the plate have loaded and the title is fitted, and carry `noindex`; they are not exported as pages. `python3 -m atlas.share OUT_DIR [--only ID ...] [--base http://127.0.0.1:8765] [--force] [--workers 4]` screenshots them with Playwright (one Chromium, several pages at once) into `OUT_DIR/share/`, quantizes them with Pillow when installed (about 60 KB each), and skips images newer than both the database and the built site unless `--force`. `--only` takes `default`, field IDs and breakthrough IDs. Playwright is imported only by this command; the rest of `atlas` needs nothing beyond the standard library.
 
 ## Adding progress
 

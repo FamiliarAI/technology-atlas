@@ -74,6 +74,7 @@ Science fiction through depth, precision and light. No neon, no fake terminal te
   - `data/search.json`: titles and short summaries, loaded when the search box is first used. Search ranks whole-word and title-prefix matches above substrings.
   - `data/claims.json`: every `needs` link with its stated reason and the model that proposed it, for the Claims page.
 - v1 is exported as static files by `python3 -m atlas.export OUT`: the built site, the data files above, and one HTML file per route with its own title, description and share image. Saved source copies and working documents are not exported.
+- **Share images** are drawn by the site itself and photographed. `/share/default`, `/share/field/QUA` and `/share/b/QUA-01` draw only a 1200×630 card (wordmark, ID, title fitted to at most four lines, field and region, milestone meter in words, the star on a graduated dial and a locator; for a field its constellation; for the default the motto and the whole sky), in their final state, marked `noindex` and never exported as pages. `python3 -m atlas.share DIR` screenshots every card with Playwright (a build-time tool; the rest of atlas stays standard-library only) to `DIR/share/<ID>.png`, `field-<ID>.png` and `default.png`, about 60 KB each; `atlas.export --share DIR` copies them in and reports pages without one.
 - First load shows text within one second on a normal connection; the chart arrives after.
 
 ## Build status

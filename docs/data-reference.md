@@ -313,12 +313,16 @@ python3 -m atlas.labels --missing
 
 **Correct a record by hand.** Edit the file, run the check, rebuild, commit with the reason. Before v1 only non-editorial fixes are allowed.
 
-**Export the site.** OUT must be empty or an earlier export. `--db` picks another database.
+**Export the site.** OUT must be empty or an earlier export. `--db` picks another database. Share images are made first from the running site, then copied in.
 
 ```bash
 python3 -m atlas.store && (cd atlas/web && npm run build)
-python3 -m atlas.export OUT [--base-url https://example.org] [--db PATH]
+python3 -m atlas.server --port 8765 &        # the share step photographs the running site
+python3 -m atlas.share atlas/data/share-out [--only QUA QUA-01 default] [--force]
+python3 -m atlas.export OUT --share atlas/data/share-out [--base-url https://example.org] [--db PATH]
 ```
+
+`atlas.share` needs Playwright with Chromium (installed for `/opt/homebrew/Caskroom/miniforge/base/bin/python`) and uses Pillow when present. It writes `share/<ID>.png` per breakthrough, `share/field-<ID>.png` per field and `share/default.png`, and skips any image newer than both the database and the built site unless `--force`; all 809 take a few minutes. The export prints how many pages have no share image.
 
 ## 8. Where the documents and the code differ
 

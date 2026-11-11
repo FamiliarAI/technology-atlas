@@ -27,6 +27,7 @@ from atlas.store import (
     region,
     search_index,
     sha,
+    site_files,
 )
 
 BUDGET = 300_000
@@ -273,12 +274,58 @@ class SiteTests(unittest.TestCase):
         self.assertIn(
             'content="https://atlas.example/share/default.png"', (out / 'index.html').read_text()
         )
+        self.assertIn(
+            'content="https://atlas.example/share/field-QUA.png"',
+            (out / 'field/QUA/index.html').read_text(),
+        )
+        # The share cards are drawn for atlas.share to screenshot; they are not pages.
+        self.assertFalse((out / 'share').exists())
+        self.assertEqual(result['images'], 0)
+        self.assertEqual(len(result['without_image']), result['pages'])
         description = re.search(r'name="description" content="([^"]*)"', page).group(1)
         self.assertTrue(description.startswith('Milestone text for QUA-01'))
         self.assertTrue((out / '404.html').is_file())
         exported = [path.name for path in out.rglob('*')]
         self.assertNotIn(self.hash + '.html', exported)
         self.assertNotIn('atlas.sqlite3', exported)
+
+    def test_export_copies_share_images_and_reports_pages_without_one(self):
+        cards = self.root / 'cards'
+        (cards / 'share').mkdir(parents=True)
+        for name in ['default', 'field-QUA', 'QUA-01']:
+            (cards / 'share' / f'{name}.png').write_bytes(b'png ' + name.encode())
+        (cards / 'share' / 'notes.txt').write_text('not an image')
+        out = self.root / 'out'
+        result = export(out, self.db, self.site, share=cards)
+        self.assertEqual(result['images'], 3)
+        self.assertEqual((out / 'share/QUA-01.png').read_bytes(), b'png QUA-01')
+        self.assertFalse((out / 'share/notes.txt').exists())
+        self.assertEqual(
+            result['without_image'], ['/field/ZZZ', '/b/QUA-02', '/b/ZZZ-01', '/b/ZZZ-02']
+        )
+        self.assertEqual([p.name for p in (out / 'share').iterdir() if p.is_dir()], [])
+        with self.assertRaises(SystemExit):
+            export(self.root / 'again', self.db, self.site, share=self.root / 'nowhere')
+        self.assertFalse((self.root / 'again').exists())
+
+    def test_share_cards_cover_every_page_image(self):
+        from atlas.export import routes
+        from atlas.share import cards
+
+        with connect(self.db) as db:
+            files = dict(site_files(db))
+        names = {name for _, name in cards(files['catalog.json'])}
+        self.assertEqual({f'{image}.png' for *_, image in routes(files)}, names)
+        self.assertEqual(
+            cards(files['catalog.json'], ['default', 'QUA', 'QUA-01']),
+            [
+                ('/share/default', 'default.png'),
+                ('/share/field/QUA', 'field-QUA.png'),
+                ('/share/b/QUA-01', 'QUA-01.png'),
+            ],
+        )
+        with self.assertRaises(SystemExit):
+            cards(files['catalog.json'], ['NOPE-01'])
 
     def test_export_replaces_its_own_output_only(self):
         out = self.root / 'out'

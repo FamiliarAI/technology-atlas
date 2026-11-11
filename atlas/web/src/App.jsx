@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { MotionConfig } from 'framer-motion';
 import Layout from './Layout.jsx';
@@ -10,9 +11,22 @@ import Claims from './pages/claims.jsx';
 import About from './pages/About.jsx';
 import NotFound from './pages/NotFound.jsx';
 
+// Share cards (/share/...) are images for link previews: drawn alone, outside the layout, and
+// loaded only when asked for (python3 -m atlas.share screenshots them).
+const Share = lazy(() => import('./Share.jsx'));
+
 // Each page sets its own document.title (pages/common.jsx useTitle; Atlas.jsx sets its own).
 export default function App() {
   const location = useLocation();
+  if (location.pathname.startsWith('/share/')) {
+    return (
+      <AtlasProvider>
+        <Suspense fallback={null}>
+          <Share />
+        </Suspense>
+      </AtlasProvider>
+    );
+  }
   return (
     <MotionConfig reducedMotion="user">
       <AtlasProvider>
