@@ -34,13 +34,19 @@ Every page has the same header (wordmark, Atlas, Claims, Method, search) and foo
 
 ## The star atlas
 
-- **Star:** one breakthrough. Size by number of milestones. A segmented ring around it, one segment per milestone: empty, in progress, met.
-- **Brightness:** a star with nothing met is a dim point; it warms as milestones advance and ignites white-gold when all are met.
-- **Constellation:** one field. Its stars sit in one sector of the sky, in a stable shape (positions are computed once from the IDs, so the sky never reshuffles).
-- **Rings:** faint concentric rings are prerequisite depth. The inner ring is what could happen now; each ring out needs something further in.
-- **Lines:** `needs` links, drawn from the prerequisite outward. Hidden at rest across fields, drawn when a star or constellation is focused.
-- **Levels of detail:** far out, the sky and constellation names; nearer, stars and their rings; nearest, titles. Selecting a star glides the view to it and opens a summary card that links to its page.
-- **Desktop:** drag to pan, wheel or buttons to zoom, click a constellation name to fly there. **Phone:** the chart is not interactive; a locator shows where the current field sits.
+Revised November 11 after the full atlas landed (66 fields, 742 breakthroughs, 77 `needs` links). The first mock placed stars on concentric rings by prerequisite depth. With links this sparse almost every star sat on one ring and 66 radial names made a sunburst: a dial, not a sky. The chart is now a flat sky map.
+
+- **The sky** is a wide rectangular chart, about 16:10, that pans and zooms. A faint graticule with coordinate ticks in mono gives it the feel of an instrument. Every star has a stable chart coordinate, shown on its page, so "where is it" has an answer.
+- **Regions.** The 66 fields are grouped into eight regions of neighbouring disciplines, each a broad labelled area of the sky: Computing and Information; Mathematics and Physics; Chemistry and Materials; Engineering and Energy; Earth and Space; Life Sciences; Medicine; Mind and Society. Region names are large, wide-tracked and very faint, like the names of oceans on a map.
+- **Constellation:** one field. A compact figure with its own recognisable shape, computed once from its IDs so the sky never reshuffles. Its name is set horizontally beneath it. No rotated text anywhere.
+- **Star:** one breakthrough. Size by number of milestones. At close zoom a segmented ring, one segment per milestone: empty, in progress, met.
+- **Brightness:** a star with nothing met is a dim point; it warms as milestones advance and ignites white-gold when all are met. Today's sky is mostly dim, which is the honest picture, so the rare warm stars must be findable at a glance from the widest view.
+- **Two kinds of line, never confused.**
+  - *Figure lines* join the stars of one constellation. They mean "same field" and nothing more: hairline, low contrast, no arrowhead.
+  - *Claim lines* are `needs` links: curved, in the structure accent, brighter at the end that must come first, with a small arrowhead towards what it unlocks. Across the whole sky they are shown faintly at rest (there are only 77, and they are the predictions), and drawn in full when a star or constellation is focused. The legend says what each kind means.
+- **Levels of detail:** widest, regions, constellation figures and names, warm stars; nearer, every star and its ring; nearest, titles. Selecting a star glides the view to it and opens a summary card that links to its page. Selecting a constellation frames it and lists its breakthroughs beside the chart.
+- **Desktop:** drag to pan, wheel or buttons to zoom, click a constellation or pick it from the list to fly there. **Phone:** list-first. A small, non-interactive locator shows where the current field sits in the sky.
+- **Home** uses the same sky, slowly drifting behind the hero, not a separate drawing.
 
 ## Look
 
@@ -60,16 +66,15 @@ Science fiction through depth, precision and light. No neon, no fake terminal te
 
 ## Technical
 
-- React and Vite in `atlas/web`, with a client-side router, reading the existing API. No new tables.
-- The catalog response gains what the chart needs and already exists in the data: milestone labels and status per breakthrough.
-- v1 is exported as static files: one HTML file per route, data as JSON, images optimised. Saved source copies are not exported; the site links to originals.
+- React and Vite in `atlas/web`, with a client-side router. No new tables.
+- **One data contract, the same in development and in the export.** The site reads only these files, which the server builds on request and the export writes to disk:
+  - `data/catalog.json`: what every page and the chart need, and no more. Fields (`id`, `name`, `region`, counts) and breakthroughs (`id`, `field`, `title`, milestone statuses, `prerequisites`, `moved_at`), plus recent movement. Budget: under 300 KB before compression.
+  - `data/field/QUA.json`: one field's scope and its breakthroughs with summaries and milestone labels.
+  - `data/b/QUA-01.json`: one breakthrough's full record, sources as links to the originals, and its evidence.
+  - `data/search.json`: titles and short summaries, loaded when the search box is first used. Search ranks whole-word and title-prefix matches above substrings.
+- v1 is exported as static files by `python3 -m atlas.export OUT`: the built site, the data files above, and one HTML file per route with its own title, description and share image. Saved source copies and working documents are not exported.
+- First load shows text within one second on a normal connection; the chart arrives after.
 
-## The mock (the approval gate)
+## Build status
 
-Three screens, built for real in `atlas/web` on the live data, at desktop (1440) and phone (390) widths:
-
-1. Home.
-2. The atlas, with one constellation focused.
-3. A breakthrough page (QUA-01).
-
-The mock is judged on: is the purpose clear in five seconds; can a milestone be read in three; does it look like something worth putting a name on. Nothing else is built until the owner approves it.
+The three-screen mock was built on November 11. On the same day the owner authorized building the whole site to the best design without a further approval gate. The standing rules still apply: every screen is reviewed from screenshots at desktop (1440) and phone (390) widths, and checked for contrast, keyboard use and load size before it is called done. Publishing still needs the owner's authorization.
