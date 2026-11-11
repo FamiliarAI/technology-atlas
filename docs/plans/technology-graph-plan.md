@@ -1,68 +1,82 @@
-# Technology Graph plan
+# Technology Atlas plan
 
-Status: in progress. Updated November 11, 2026. Earlier designs (the hosted architecture, the v5 research pipeline, the 660-entry migration) were removed from this file on November 11; they are in git history before that date. Hosted deployment and account creation still require separate authorization.
+Updated November 11, 2026. This is the plan of record. Earlier versions are in git history. Hosting and account creation need the owner's authorization when reached.
 
-## Current plan (November 1, 2026)
+## Purpose
 
-### Goals
+Predict the AI takeoff towards the Singularity by naming the expected wonders in advance, each with a test for recognising it, so the predictions can be proven wrong.
 
-- a) Lists of breakthroughs we may see in the future, the milestones that say they have been achieved, and attribution of where each came from.
-- b) Progress towards them that we add to over time, as papers and links.
-- c) A UI to view it all, modelled on a strategy-game tech tree.
-- d) A polished UI that works on mobile, with motion, in the style of the Silicon Data pitch in am-live (`docs/sponsor-segments/silicon-data/silicon-data-segment.html`).
-- e) An arbitrary paper (for example from arXiv) can be added once and count as progress for several breakthroughs.
+The atlas makes two kinds of falsifiable claim:
 
-### Terms
+- **Recognition:** "this breakthrough counts as achieved when these milestones are met."
+- **Order:** "B needs A first." Falsified if B arrives before A.
 
-- **Breakthrough**: a leaf of the tree, one proposed future capability (ID like `CSC-02`). Stored in the `breakthroughs` table and served at `/api/breakthroughs/<ID>`. The ingestion pipeline still writes `final-innovations.json` with an `innovations` list; the atlas reads that format unchanged.
-- **Milestone**: one of a breakthrough's completion criteria, numbered 1…n.
-- **Progress**: one source (paper or link) judged against a milestone, one row in `progress`.
+There are no dates in v1.
 
-### Cost rule
+## Rules
 
-Reuse existing data and structures. This plan adds **one new table (`progress`)**, **no model passes over existing data**, and **one model call per paper added**. Any further table or model pass needs an explicit decision. (Since added by decision: one prerequisite call per field.)
+- **No editorial changes before v1 is published.** Content ships as the research pipeline produced it. Renames, merges, splits, curation and milestone restructuring come after v1, as tracked edits.
+- **Cost rule.** Reuse existing data and structures. A new table, record kind or kind of model pass needs an explicit decision. Decided so far: one prerequisite call per field; one call per paper added; one label call per breakthrough.
+- **Model routing.** Cheapest capable model first: Grok, then Codex GPT-6.1 Sol, then Opus. Fable is for design, architecture and review.
+- **Code style.** See `AGENTS.md`.
 
-### Starting point
+## Terms
 
-- `ingestion/` produces each field's `final-innovations.json`: 31 of 66 fields are complete (334 breakthroughs); see `docs/ingestion-status-2026-11-01.md`.
-- `atlas/` is the v1 prototype: SQLite importer (`runs`, `fields`, `breakthroughs`, `assets`, `documents`), read-only server and API, and a static UI loading 4 fields (SWE, CSC, CPE, ROB). See `atlas/README.md`.
+- **Breakthrough:** one proposed future capability, with a permanent ID such as `CSC-02`.
+- **Milestone:** one of a breakthrough's completion criteria, with a permanent ID such as `CSC-02.m1`, a short label and the full criterion text.
+- **Link:** `needs` (a prerequisite, checked by a model call) or `related` (mentioned together).
+- **Source:** a paper or page, identified by URL, with saved copies identified by SHA-256.
+- **Progress:** one source judged against one milestone: `advances`, `meets` or `contradicts`, with an exact quote.
 
-### Steps
+A `needs` link means B is expected to come first on the way to A: A builds on B, uses it as a component, assumes its result, or B is the expected route. Merely helpful, topical or same-capability pairs are not links.
 
-1. **Load all completed fields (goal a).** Point the existing importer at every completed field and remove the hard-coded four-field copy. Milestones are each record's existing `completion_criteria` items, numbered 1…n and served as-is. Sources are each record's existing `sources` and saved copies. New fields are imported the same way as ingestion finishes them.
-2. **Add the `progress` table and backfill it (goal b).** Columns: breakthrough ID; criterion number (nullable); URL; saved-copy SHA-256 (row in the existing `assets` table); source date; verdict `advances` / `meets` / `contradicts` (nullable); quote; model; date added. Backfill by copying, with no model calls: each `current_state` paragraph and its cited `source_urls` becomes one row with criterion and verdict left empty, attributed to the research model and research date. Criterion status is computed from rows: `meets` → met, `advances` → in progress. Tests sit with the existing ones in `atlas/tests`.
-3. **`atlas add <url>` (goals b and e).** (1) Save the paper into `assets` with a local PDF and a Wayback link; skip the download if the URL or hash already exists. (2) Rank all criteria against the abstract by word-overlap scoring computed in memory (nothing stored, no model) and keep the top ~20. (3) One model call (Codex, GPT-6.1 Terra, strict JSON schema) returns a `progress` row for each criterion the paper touches; code checks that each quote appears in the paper and rejects rows that fail. One paper touching three breakthroughs is three rows. `--breakthrough ID` forces a target the ranking missed.
-4. **Tech-tree UI (goals c and d).** React + Vite + Framer Motion, reading the existing server API plus one progress endpoint. Style from the Silicon Data pitch: Outfit, DM Sans and JetBrains Mono, self-drawing SVG lines, the same easing. One lane per field; each breakthrough is a node with a segmented bar per criterion (met / in progress / none); lines from the existing `related_concepts` references; nodes within a lane ordered by progress. Node detail is the existing record view plus a timeline of progress rows with their papers and quotes. Mobile: a vertical path per field, swiped between fields, tap to open. An original design in the strategy-game genre, not a copy of any game's artwork.
+## Where things stand
 
-### Core architecture: a fixed core, and edits over time (November 2, 2026)
+- **Core.** `atlas/core/` (files in git) is the source of truth; the SQLite database is rebuilt from it. See the [core design](2026-11-09-atlas-core-design.md).
+- **Content.** 31 of 66 fields are in the core (334 breakthroughs). 3 fields are blocked by one refused concept each (Clinical Medicine, Virology, Machine Learning); 32 are not finished. See `docs/ingestion-status-2026-11-01.md`.
+- **Labels.** Short milestone labels exist for 5 fields (QUA, CSC, CPE, SWE, ROB).
+- **Links.** 5 `needs` links, from 2 fields.
+- **Progress.** 4 judged rows.
+- **UI.** One React page at `/tree/` with the full record in its detail panel.
+- **Remote.** `github.com/FamiliarAI/technology-atlas`, private.
 
-The atlas must change over time the way a wiki does: every part can be corrected or extended, and every change is attributed and can be undone. The design separates a small core that never changes from everything else, which changes only through edits.
+## Plan to v1
 
-**The core (fixed):**
+Two tracks run in parallel. They touch different code (`ingestion/` and `atlas/web/`), so they do not block each other.
 
-1. **Permanent IDs.** A field, breakthrough or milestone keeps its ID forever. Records are retired or merged, never deleted, and IDs are never reused. Links, progress and history all refer to IDs.
-2. **A small set of record kinds:** field; breakthrough; milestone; link between breakthroughs (`needs`, `discussed together`); progress (a source judged against a milestone); source (saved copy and its SHA-256). A new kind is a rare, deliberate decision.
-3. **Saved, fingerprinted sources.** Every claim points to a saved source or to an edit.
-4. **Every change is an edit.** An edit records the record ID, what changed, the author (a person, or a model with its prompt and call record), the time, the reason, and the evidence. The current state of any record is its first version plus its edits in order.
+### Track A: content
 
-**Everything else changes through edits:**
+1. **Review and clean up the ingestion pipeline.** Read all of `ingestion/` and its documents first and write down what is found. Then remove dead and one-off code, drop the "all 66 complete" gate, let a field finish without a concept the provider refused to review (the refusal guard is never bypassed), and import each finished field into `atlas/core/` automatically.
+2. **Make the pipeline use several agents.** Each stage names an ordered list of models instead of one. Grok does research while its quota lasts; when it is exhausted or slow, the stage falls back to another web-capable agent (Codex GPT-6.1 Sol with search, then Opus) instead of stopping the batch. Every record keeps the name of the model that produced it. The design of the fallback comes out of the review in step 1.
+3. **Finish the fields.** Machine Learning first, then the other blocked fields, then the 32 unfinished ones. Fields arrive in the atlas one at a time.
+4. **Prerequisite links for every field in the core**, using the existing per-field call.
+5. **Milestone labels for every field in the core**, using the existing per-breakthrough call.
 
-- Content: titles, descriptions, milestones, verdicts.
-- Structure: new fields and breakthroughs, splits and merges, adding or removing links.
-- Process: prompts, models, and the rules for what counts as a link. Because each edit names its model and prompt, a process change never corrupts history: edits made under an old rule can be found and redone on their own.
+### Track B: UI
 
-**How the existing pieces fit:**
+Readable first, good-looking second, on desktop and phone.
 
-- Ingestion research is the first edit to each breakthrough, by the research model.
-- `atlas.add` writes progress edits; `atlas.prerequisites` writes link edits; a person's corrections are edits recorded the same way.
-- The SQLite database is a view rebuilt from the core, as it already is from the ingestion files. It is not the source of truth.
+1. **Design.** A written spec and one static mock of the home and breakthrough screens at desktop and phone sizes, for the owner's approval. Each screen answers one question:
 
-**Decided November 9, 2026: the core lives in git files.** The owner and the owner's agents edit; everyone else reads. Records are files under `atlas/core/`, edits are commits, and the database is rebuilt from them. Record kinds, layout, the one-time import of existing data and the growth flow are in the [core design](2026-11-09-atlas-core-design.md). An edits table, accounts and web editing are not built. Built November 9: `python3 -m atlas.core import` slotted the 31 complete fields in, `python3 -m atlas.store` rebuilds the database from the files, and `atlas.add` and `atlas.prerequisites` write to the files and commit ([implementation plan](2026-11-09-atlas-core-implementation.md)).
+   | Screen | Question | What leads |
+   |---|---|---|
+   | Home | What is this, and what moved? | Purpose, recent movement, then the map |
+   | Map | What comes before what? | Breakthroughs placed by prerequisite depth |
+   | Field | What is in this area? | A list in prerequisite order |
+   | Breakthrough | How will we know, and how close is it? | Milestone checklist, "needs first" and "unlocks", evidence, full record |
+   | Claims | What exactly are we predicting? | Every `needs` claim, standing or falsified |
 
-### Prerequisite order (started November 2, 2026)
+   The map is for overview; lists do the reading. Everything is reachable by search, list, keyboard and screen reader. Phone is list-first. Colour means progress state and nothing else.
+2. **Visual direction: open.** Either a star atlas (breakthroughs as stars, fields as constellations, rings for prerequisite depth) or a literal tech tree (columns by depth). Motion with the Motion library for React, respecting reduced-motion settings. Hand-made SVG for the chart, icons and emblems. Generated images used sparingly, after a pilot.
+3. **Build** in `atlas/web`, React and Vite, reading the existing API. No new tables.
+4. **Static export.** The atlas is read-only, so v1 is exported to plain files. Saved source copies stay private; the public site links to originals.
 
-True prerequisite order ("A must be achieved before B") is wanted. `atlas/prerequisites.py` (`python3 -m atlas.prerequisites FIELD … | --all`) makes one model call per field that sees the field's breakthroughs in full and a one-line catalog of all breakthroughs, and returns, per breakthrough, what it needs and what needs it, from any field. A link means B is expected to come first on the way to A (A builds on B, uses it as a component, assumes its result, or B is the expected route); merely helpful, topical, or same-capability pairs are not links. Code rejects unknown IDs, self-links, links with neither side in the field, and links that close a loop. Each call's prompt and response are kept under `atlas/data/prerequisites/`.
+### Publish
 
-Status: run on Quantum Computing (5 links, including from CPE-01 and CSC-02) and Computer Science (no new links). Links are stored in the dependent breakthrough's file in `atlas/core/` and survive a rebuild. Remaining: run the other fields, and compute tree columns from the longest prerequisite chain. Until then the tree orders nodes by progress.
+When both tracks are done: the owner authorizes hosting, the static site goes up, and editorial changes open.
 
-This plan supersedes the deprecated paid-report plan in `archive/AI_Takeoff_Project_Plan.md` (dated forecasts, PDF product, blog/thread funnel). That plan is history only and is not a goal, input, or constraint for this project.
+## After v1
+
+Parked, not forgotten: curating the breakthrough list and merging duplicates across fields; rebuilding milestones as ordered steps; a weekly paper finder; re-importing a field whose pages have been edited; removing saved PDFs from early git history before the repository could be made public.
+
+The deprecated paid-report plan (dated forecasts, PDF product) is history only and is not a goal, input or constraint.
