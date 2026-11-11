@@ -1,15 +1,10 @@
 """Resumable five-stage field workflow; three independent concept calls per field."""
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from contextlib import contextmanager
 import copy
-import fcntl
 import json
-import os
 from pathlib import Path
 import re
-import signal
-import subprocess
 import urllib.parse
 import urllib.request
 import uuid
@@ -17,12 +12,21 @@ import uuid
 import jsonschema
 from . import schemas
 from .pipeline import (
-    Models,
     fingerprint,
+    locked,
     prompt,
     validate_candidates,
     validate_review,
     normalize_review_metadata,
+)
+from .providers import (
+    Models,
+    ProviderState,
+    ProviderUnavailable,
+    attempt_model,
+    cache_model,
+    describe,
+    stage_entries,
 )
 from .sources import Archive, digest, now, read_json, write_json
 
@@ -185,11 +189,14 @@ def build_review_input(payload, max_prompt_bytes=MAX_REVIEW_PROMPT_BYTES):
 
 
 class AccountExhausted(RuntimeError):
-    """The signed-in Grok account needs user action; never switch accounts."""
+    """Every entry in a stage's fallback list is exhausted; the batch stops scheduling."""
 
 
 class SafetyReviewBlocked(RuntimeError):
     """A provider safety refusal requires resolution; never auto-retry this input."""
+
+
+REFUSAL_PREFIX = "Invalid prompt: we've limited access to this content for safety reasons"
 
 
 def provider_safety_refusal(folder):
@@ -197,7 +204,15 @@ def provider_safety_refusal(folder):
     path = Path(folder) / 'stdout.log'
     if not path.exists():
         return None
-    for line in path.read_text().splitlines():
+    text = path.read_text(errors='replace')
+    try:
+        envelope = json.loads(text)
+    except ValueError:
+        envelope = None
+    # Claude reports a safety refusal as the stop reason of its result envelope.
+    if isinstance(envelope, dict) and envelope.get('stop_reason') == 'refusal':
+        return 'Claude stopped with stop_reason refusal'
+    for line in text.splitlines():
         try:
             event = json.loads(line)
         except ValueError:
@@ -209,9 +224,7 @@ def provider_safety_refusal(folder):
             message = event.get('message')
         elif event.get('type') == 'turn.failed' and isinstance(event.get('error'), dict):
             message = event['error'].get('message')
-        if isinstance(message, str) and message.startswith(
-            "Invalid prompt: we've limited access to this content for safety reasons"
-        ):
+        if isinstance(message, str) and message.startswith(REFUSAL_PREFIX):
             return message
     return None
 
@@ -240,34 +253,21 @@ def persist_safety_block(root, name, key, folder, message):
     return path
 
 
-def account_exhausted(message):
-    # Provider billing failure is distinct from a publisher's HTTP 402 paywall.
-    return bool(
-        re.search(
-            (
-                '(?i)(?:credits? (?:exhausted|depleted)|insufficient credits|usage '
-                'limit|quota (?:exceeded|exhausted)|rate limit exceeded|not logged '
-                'in|authentication (?:failed|required)|unauthorized|subscription '
-                'required|\\bsubscription:free-usage-exhausted\\b|\\bGrok Build usage '
-                'balance (?:exhausted|depleted)\\b|\\bresponses API '
-                'error[^\\n]*\\bstatus=402\\b)'
-            ),
-            message,
-        )
-    )
+def blocked_marker(root, name):
+    """The recorded safety refusal for a stage, whatever its input hash, or None."""
+    for path in sorted((Path(root) / 'workflow-blocked').glob(name + '-*.json')):
+        marker = read_json(path)
+        if marker.get('stage') == name and marker.get('status') == 'safety_blocked':
+            return path
+    return None
 
 
-@contextmanager
+def refusal_reason(marker):
+    return 'Provider safety refusal: ' + str(read_json(marker).get('provider_message', ''))
+
+
 def workflow_lock(root):
-    with (root / '.workflow.lock').open('w') as handle:
-        try:
-            fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError:
-            raise RuntimeError('This field workflow is already running') from None
-        try:
-            yield
-        finally:
-            fcntl.flock(handle, fcntl.LOCK_UN)
+    return locked(root, '.workflow.lock')
 
 
 def concept_headings(notes, prefix=None):
@@ -382,49 +382,101 @@ def normalize_and_validate_review(value, payload):
     return result, audit
 
 
+FRESH_RECONCILE = (
+    '\n'
+    'This is a new conversation: the preceding turn is not available. The FIRST-PASS LIST '
+    'above is the complete output of that independent research pass. Treat it as the '
+    'preceding turn and continue from it.\n'
+)
+
+
 class FieldWorkflow:
-    def __init__(self, root, config=None, models=None):
+    def __init__(self, root, config=None, models=None, state=None):
         self.root = Path(root).resolve()
         self.config = config or read_json(HERE / 'config.json')
         self.models = models or Models(self.config)
+        self.state = state or ProviderState()
         (self.root / 'attempts').mkdir(parents=True, exist_ok=True)
         self.cache = self.root / 'workflow-cache'
         self.cache.mkdir(exist_ok=True)
 
-    def stage(self, name, inputs, call, validate, retries=0):
-        """Per-stage immutable attempts and content-verified success cache."""
-        key = fingerprint(inputs)
+    def stage(self, name, inputs, call, validate, retries=0, entries=None):
+        """Per-stage immutable attempts and content-verified success cache.
+
+        With `entries`, an ordered fallback list, each entry has its own cache key: the
+        inputs plus that entry's {model, effort}, so keys made before fallback lists still
+        match. `inputs` may instead be a function of the entry. Every entry's cache is
+        checked before any call. The next entry is tried only after its provider reports
+        exhaustion or the call times out; any other failure keeps the same-model retry.
+        `call(folder, error, entry)` makes one attempt; `entry` is None without entries.
+        """
         # A metadata or source-capture change must not silently resend content
         # already refused by the provider. A recorded refusal blocks this stage
-        # until explicitly resolved, independently of the current input hash.
-        for blocked_path in (self.root / 'workflow-blocked').glob(name + '-*.json'):
-            blocked = read_json(blocked_path)
-            if blocked.get('stage') == name and blocked.get('status') == 'safety_blocked':
-                raise SafetyReviewBlocked(
-                    (
-                        'Provider safety refusal remains unresolved for this stage; no '
-                        'model call made, even if input metadata changed. See '
-                    )
-                    + str(blocked_path)
+        # for every model until explicitly resolved, whatever the current input hash.
+        blocked_path = blocked_marker(self.root, name)
+        if blocked_path:
+            raise SafetyReviewBlocked(
+                (
+                    'Provider safety refusal remains unresolved for this stage; no '
+                    'model call made, even if input metadata changed. See '
                 )
+                + str(blocked_path)
+            )
+        options = []
+        for entry in entries or [None]:
+            if entry is None:
+                key_inputs = inputs
+            elif callable(inputs):
+                key_inputs = inputs(entry)
+            else:
+                key_inputs = {**inputs, 'model': cache_model(entry)}
+            options.append((entry, fingerprint(key_inputs)))
+        for entry, key in options:
+            cached_path = self.cache / (name + '-' + key + '.json')
+            if cached_path.exists():
+                cached = read_json(cached_path)
+                result = read_json(Path(cached['path']))
+                if fingerprint(result) != cached['hash']:
+                    raise ValueError('Cached stage output changed: ' + name)
+                validate(result)
+                return result, Path(cached['path']).parent
+        unavailable = []
+        last_error = None
+        for entry, key in options:
+            provider = entry.get('provider') if entry else None
+            if provider and not self.state.available(provider):
+                unavailable.append(describe(entry) + ': exhausted earlier, cooling down')
+                continue
+            try:
+                return self.attempts(name, key, entry, call, validate, retries)
+            except ProviderUnavailable as error:
+                if error.reason == 'exhausted':
+                    self.state.exhausted(error.provider)
+                unavailable.append(str(error))
+                last_error = error
+        raise AccountExhausted(
+            'No provider could run ' + name + ': ' + '; '.join(unavailable)
+        ) from last_error
+
+    def attempts(self, name, key, entry, call, validate, retries):
+        """Immutable attempt folders for one entry, with its same-model retries."""
         cached_path = self.cache / (name + '-' + key + '.json')
-        if cached_path.exists():
-            cached = read_json(cached_path)
-            result = read_json(Path(cached['path']))
-            if fingerprint(result) != cached['hash']:
-                raise ValueError('Cached stage output changed: ' + name)
-            validate(result)
-            return result, Path(cached['path']).parent
         last = None
         for attempt in range(retries + 1):
             folder = self.root / 'attempts' / (name + '-' + uuid.uuid4().hex)
             folder.mkdir()
             receipt = {'stage': name, 'input_hash': key, 'status': 'running', 'started_at': now()}
+            for field in ('provider', 'model', 'effort', 'search', 'mode'):
+                if entry and field in entry:
+                    receipt[field] = entry[field]
             write_json(folder / 'receipt.json', receipt)
             try:
-                result = call(folder, last)
+                result = call(folder, last, entry)
                 write_json(folder / 'result.json', result)
                 validate(result)
+                served = attempt_model(folder)
+                if entry and served and served != entry.get('model'):
+                    receipt['served_model'] = served
                 receipt.update(status='complete', finished_at=now())
                 write_json(folder / 'receipt.json', receipt)
                 write_json(
@@ -451,11 +503,19 @@ class FieldWorkflow:
                         + str(marker)
                     ) from error
                 receipt.update(status='failed', finished_at=now(), error=str(error))
+                if isinstance(error, ProviderUnavailable):
+                    receipt['failure_kind'] = 'provider_' + error.reason
                 write_json(folder / 'receipt.json', receipt)
                 if (
                     isinstance(
                         error,
-                        (AccountExhausted, SafetyReviewBlocked, KeyboardInterrupt, SystemExit),
+                        (
+                            ProviderUnavailable,
+                            AccountExhausted,
+                            SafetyReviewBlocked,
+                            KeyboardInterrupt,
+                            SystemExit,
+                        ),
                     )
                     or attempt == retries
                 ):
@@ -463,79 +523,8 @@ class FieldWorkflow:
                 last = str(error)
         raise RuntimeError('Unreachable stage state')
 
-    def grok(self, text, folder, session, resume):
-        workdir = self.root / 'grok-workspace'
-        workdir.mkdir(exist_ok=True)
-        (folder / 'prompt.md').write_text(text)
-        command = [
-            str(Path(self.config['grok']).expanduser()),
-            '--resume' if resume else '--session-id',
-            session,
-            '-m',
-            self.config['research']['model'],
-            '--reasoning-effort',
-            self.config['research']['effort'],
-            '--tools',
-            'web_search,web_fetch',
-            '--no-subagents',
-            '--no-plan',
-            '--max-turns',
-            '150',
-            '--output-format',
-            'json',
-            '--prompt-file',
-            str(folder / 'prompt.md'),
-        ]
-        env = dict(os.environ)
-        for key in ('OPENAI_API_KEY', 'CODEX_API_KEY', 'XAI_API_KEY', 'GROK_API_KEY'):
-            env.pop(key, None)
-        with (folder / 'stdout.log').open('w') as out, (folder / 'stderr.log').open('w') as err:
-            process = subprocess.Popen(
-                command, cwd=workdir, env=env, stdout=out, stderr=err, start_new_session=True
-            )
-            try:
-                process.wait(timeout=3600)
-            except BaseException:
-                os.killpg(process.pid, signal.SIGTERM)
-                try:
-                    process.wait(timeout=5)
-                except subprocess.TimeoutExpired:
-                    os.killpg(process.pid, signal.SIGKILL)
-                    process.wait()
-                raise
-        stdout = (folder / 'stdout.log').read_text()
-        stderr = (folder / 'stderr.log').read_text()
-        if process.returncode:
-            if account_exhausted(stdout + '\n' + stderr):
-                raise AccountExhausted(
-                    'Grok account access/credits exhausted; ask the user to switch accounts.'
-                )
-            raise RuntimeError('Grok exited unsuccessfully; inspect ' + str(folder / 'stderr.log'))
-        try:
-            raw = json.loads(stdout)
-        except ValueError:
-            if account_exhausted(stdout + '\n' + stderr):
-                raise AccountExhausted(
-                    'Grok account access/credits exhausted; ask the user to switch accounts.'
-                ) from None
-            raise
-        if account_exhausted(str(raw.get('text', ''))) and not re.search(
-            r'\*\*[A-Z][A-Z0-9_-]*-\d+\.', str(raw.get('text', ''))
-        ):
-            raise AccountExhausted(
-                'Grok account access/credits exhausted; ask the user to switch accounts.'
-            )
-        if raw.get('sessionId') != session:
-            raise ValueError('Grok returned a different conversation ID')
-        if raw.get('stopReason') != 'end_turn' or not str(raw.get('text', '')).strip():
-            if account_exhausted(stdout + '\n' + stderr):
-                raise AccountExhausted(
-                    'Grok account access/credits exhausted; ask the user to switch accounts.'
-                )
-            raise ValueError('Grok did not finish with usable research')
-        return {'session_id': session, 'text': raw['text']}
-
     def research(self, spec, original):
+        entries = stage_entries(self.config, 'research')
         text = (
             prompt(
                 'research',
@@ -546,17 +535,24 @@ class FieldWorkflow:
             )
             + HEADER_RULE
         )
-        # A new ID belongs to each independent research attempt. Only successful
-        # research supplies the ID used for same-conversation reconciliation.
-        first, _ = self.stage(
+        workdir = self.root / 'grok-workspace'
+        workdir.mkdir(exist_ok=True)
+
+        def research_call(folder, error, entry):
+            # A new conversation ID belongs to each independent research attempt.
+            session = str(uuid.uuid4())
+            return self.models.research(entry, text, folder, session, False, workdir)
+
+        first, folder = self.stage(
             'independent-research',
-            {'prompt': text, 'model': self.config['research']},
-            lambda folder, error: self.grok(text, folder, str(uuid.uuid4()), False),
+            {'prompt': text},
+            research_call,
             lambda v: validate_research(v['text'], spec['prefix']),
+            entries=entries,
         )
         (self.root / 'research-notes.md').write_text(first['text'])
         ids = concept_ids(first['text'], spec['prefix'])
-        text = (
+        reconcile_text = (
             prompt(
                 'reconcile',
                 FIELD=spec['field'],
@@ -568,11 +564,33 @@ class FieldWorkflow:
             )
             + HEADER_RULE
         )
+        # Only a Grok first pass leaves a conversation to continue, and only Grok can
+        # continue it. Every other entry starts a new conversation with the extra wording.
+        session = first.get('session_id')
+        reconcile_entries = []
+        for entry in stage_entries(self.config, 'reconcile'):
+            resume = entry['provider'] == 'grok' and session is not None
+            reconcile_entries.append({**entry, 'mode': 'resume' if resume else 'fresh'})
+
+        def reconcile_inputs(entry):
+            if entry['mode'] == 'resume':
+                return {'prompt': reconcile_text, 'model': cache_model(entry), 'session': session}
+            return {'prompt': reconcile_text + FRESH_RECONCILE, 'model': cache_model(entry)}
+
+        def reconcile_call(folder, error, entry):
+            if entry['mode'] == 'resume':
+                return self.models.research(entry, reconcile_text, folder, session, True, workdir)
+            fresh = str(uuid.uuid4())
+            return self.models.research(
+                entry, reconcile_text + FRESH_RECONCILE, folder, fresh, False, workdir
+            )
+
         reconciled, _ = self.stage(
             'reconcile',
-            {'prompt': text, 'model': self.config['research'], 'session': first['session_id']},
-            lambda folder, error: self.grok(text, folder, first['session_id'], True),
+            reconcile_inputs,
+            reconcile_call,
             lambda v: validate_research(v['text'], spec['prefix'], ids),
+            entries=reconcile_entries,
         )
         (self.root / 'reconciled-research.md').write_text(reconciled['text'])
         return reconciled['text']
@@ -590,22 +608,22 @@ class FieldWorkflow:
             'actual passage is supplied; never invent one.\n'
         )
 
-        def call(folder, error):
-            settings = copy.deepcopy(self.config)
-            # A bounded formatting recovery: same model, lower reasoning after output exhaustion.
-            if error and 'max_output_tokens' in error:
-                settings['format']['effort'] = 'medium'
+        def call(folder, error, entry):
+            settings = dict(entry)
+            # A bounded formatting recovery: same model, lower reasoning after output
+            # exhaustion. The cache key keeps the configured entry.
+            if error and 'max_output_tokens' in error and settings['provider'] == 'codex':
+                settings['effort'] = 'medium'
             try:
-                return (
-                    Models(settings).call(
-                        'format',
-                        text + ('\nPrevious validation failed: ' + error if error else ''),
-                        FORMAT_SCHEMA,
-                        folder,
-                    )
-                    if self.models.__class__ is Models
-                    else self.models.call('format', text, FORMAT_SCHEMA, folder)
+                return self.models.call(
+                    'format',
+                    text + ('\nPrevious validation failed: ' + error if error else ''),
+                    FORMAT_SCHEMA,
+                    folder,
+                    entry=settings,
                 )
+            except ProviderUnavailable:
+                raise
             except Exception as failure:
                 log = folder / 'stdout.log'
                 if log.exists() and 'max_output_tokens' in log.read_text():
@@ -616,10 +634,11 @@ class FieldWorkflow:
 
         value, _ = self.stage(
             'format-reconciled',
-            {'prompt': text, 'schema': FORMAT_SCHEMA, 'model': self.config['format']},
+            {'prompt': text, 'schema': FORMAT_SCHEMA},
             call,
             lambda v: validate_format(v, expected, original_numbers),
             retries=1,
+            entries=stage_entries(self.config, 'format'),
         )
         write_json(self.root / 'reconciled-structured.json', value)
         write_json(self.root / 'reconciled-candidates.json', value['candidates'])
@@ -745,7 +764,7 @@ class FieldWorkflow:
             }
             payload, text = build_review_input(payload)
 
-            def call(folder, error):
+            def call(folder, error, entry):
                 write_json(folder / 'input.json', payload)
                 retry_error = (
                     error.encode('utf-8')[:2048].decode('utf-8', errors='ignore') if error else ''
@@ -767,14 +786,15 @@ class FieldWorkflow:
                         'maximum_prompt_bytes': MAX_REVIEW_PROMPT_BYTES,
                     },
                 )
-                return self.models.call('review', model_text, REVIEW_SCHEMA, folder)
+                return self.models.call('review', model_text, REVIEW_SCHEMA, folder, entry=entry)
 
             raw, folder = self.stage(
                 'review-' + candidate['id'],
-                {'prompt': text, 'schema': REVIEW_SCHEMA, 'model': self.config['review']},
+                {'prompt': text, 'schema': REVIEW_SCHEMA},
                 call,
                 lambda v: normalize_and_validate_review(v, payload),
                 retries=1,
+                entries=stage_entries(self.config, 'review'),
             )
             value, audit = normalize_and_validate_review(raw, payload)
             write_json(folder / 'validated.json', value)
@@ -786,24 +806,44 @@ class FieldWorkflow:
             return candidate['id'], {'status': 'complete', 'path': str(folder), 'review': value}
 
         failures = []
+        exhausted = None
         with ThreadPoolExecutor(max_workers=3) as pool:
             futures = {pool.submit(one, p): p['id'] for p in doc['problems']}
             for future in as_completed(futures):
+                identifier = futures[future]
                 try:
                     identifier, result = future.result()
                     results[identifier] = result
+                except SafetyReviewBlocked:
+                    # Only a recorded refusal withholds a concept. It is never narrowed,
+                    # filtered, retried or sent to another model.
+                    stage = 'review-' + identifier
+                    marker = blocked_marker(self.root, stage)
+                    if marker is None:
+                        raise
+                    results[identifier] = {
+                        'status': 'withheld',
+                        'stage': stage,
+                        'reason': refusal_reason(marker),
+                    }
                 except Exception as error:
-                    identifier = futures[future]
                     results[identifier] = {'status': 'failed', 'error': str(error)}
                     failures.append(identifier)
+                    if isinstance(error, AccountExhausted):
+                        exhausted = error
                 write_json(self.root / 'reconciled-reviews.json', results)
+        if exhausted:
+            raise AccountExhausted(str(exhausted))
         if failures:
             raise ValueError('Final rewrite blocked by failed reviews: ' + ', '.join(failures))
         return results
 
 
-def run_field(root, original_path, field, prefix, as_of, boundaries):
-    """Execute one field, resuming validated stages and preserving every attempt."""
+def run_field(root, original_path, field, prefix, as_of, boundaries, state=None):
+    """Execute one field, resuming validated stages and preserving every attempt.
+
+    `state` is the batch's shared provider exhaustion record.
+    """
     root = Path(root).resolve()
     root.mkdir(parents=True, exist_ok=True)
     spec = {'field': field, 'prefix': prefix, 'as_of': as_of, 'boundaries': boundaries}
@@ -820,7 +860,7 @@ def run_field(root, original_path, field, prefix, as_of, boundaries):
             {'path': str(Path(original_path).resolve()), 'sha256': digest(original.encode())},
         )
         write_json(root / 'field.json', spec)
-        workflow = FieldWorkflow(root)
+        workflow = FieldWorkflow(root, state=state)
         receipt = {'started_at': now(), 'status': 'running', 'stage': 'research'}
 
         def status(stage):
@@ -839,10 +879,16 @@ def run_field(root, original_path, field, prefix, as_of, boundaries):
             status('final_rewrite')
             from .final_rewrite import run
 
-            run(root, workers=3)
+            run(root, workers=3, state=workflow.state)
             if not (root / 'final-innovations.json').is_file():
                 raise ValueError('Final rewrite returned without a consolidated output')
-            receipt.update(status='complete', finished_at=now(), concepts=len(doc['problems']))
+            final = read_json(root / 'final-innovations.json')
+            receipt.update(
+                status='complete',
+                finished_at=now(),
+                concepts=len(final['innovations']),
+                withheld=[item['id'] for item in final.get('withheld', [])],
+            )
             write_json(root / 'workflow-receipt.json', receipt)
             return read_json(root / 'final-innovations.json')
         except BaseException as error:

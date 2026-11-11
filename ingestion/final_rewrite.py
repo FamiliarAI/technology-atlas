@@ -10,8 +10,25 @@ import uuid
 
 import jsonschema
 from . import schemas
-from .field_workflow import concept_headings
-from .pipeline import Models, fingerprint, locked, prompt, validate_candidates
+from .field_workflow import (
+    AccountExhausted,
+    SafetyReviewBlocked,
+    blocked_marker,
+    concept_headings,
+    persist_safety_block,
+    provider_safety_refusal,
+    refusal_reason,
+)
+from .pipeline import fingerprint, locked, prompt, validate_candidates
+from .providers import (
+    Models,
+    ProviderState,
+    ProviderUnavailable,
+    attempt_model,
+    cache_model,
+    stage_entries,
+    stage_model,
+)
 from .sources import digest, now, read_json, write_json
 
 SECTIONS = (
@@ -212,10 +229,25 @@ def render(document):
             '</details>',
             '',
         ]
+    if document.get('withheld'):
+        lines += ['## Withheld concepts', '']
+        for item in document['withheld']:
+            lines += [f'- {item["id"]}: {item["title"]} ({item["stage"]}). {item["reason"]}']
+        lines.append('')
     return '\n'.join(lines)
 
 
-def run(root, workers=3, prepare_only=False):
+def set_aside(folder, label):
+    """Keep an unavailable provider's call logs before the next entry reuses the folder."""
+    kept = folder / label
+    kept.mkdir()
+    for name in ('prompt.md', 'model.json', 'schema.json', 'stdout.log', 'stderr.log'):
+        if (folder / name).exists():
+            (folder / name).rename(kept / name)
+    return kept
+
+
+def run(root, workers=3, prepare_only=False, state=None):
     root = Path(root).resolve()
     with locked(root):
         doc = validate_candidates(read_json(root / 'reconciled-candidates.json'))
@@ -223,9 +255,23 @@ def run(root, workers=3, prepare_only=False):
         reviews = read_json(root / 'reconciled-reviews.json')
         index = read_json(root / 'source-file-index.json')
         config = read_json(Path(__file__).parent / 'config.json')
+        entries = stage_entries(config, 'rewrite')
+        state = state or ProviderState()
         roster = [{'id': p['id'], 'title': p['title']} for p in doc['problems']]
+        withheld = {}
         prepared = []
         for candidate in doc['problems']:
+            review = reviews.get(candidate['id'], {})
+            if review.get('status') == 'withheld':
+                # Only a recorded safety refusal withholds a concept.
+                marker = blocked_marker(root, review.get('stage', ''))
+                if marker is None:
+                    raise ValueError(f'{candidate["id"]}: withheld without a recorded refusal')
+                withheld[candidate['id']] = {
+                    'stage': review['stage'],
+                    'reason': refusal_reason(marker),
+                }
+                continue
             payload = make_input(root, candidate, roster, research, reviews, index)
             text = prompt('final_rewrite', INPUT=json.dumps(payload, ensure_ascii=False))
             prepared.append((payload, text))
@@ -245,9 +291,14 @@ def run(root, workers=3, prepare_only=False):
             json.dumps(
                 {
                     'prepared': len(sizes),
+                    'withheld': sorted(withheld),
                     'estimated_tokens_total': sum(s['estimated_input_tokens'] for s in sizes),
-                    'estimated_tokens_min': min(s['estimated_input_tokens'] for s in sizes),
-                    'estimated_tokens_max': max(s['estimated_input_tokens'] for s in sizes),
+                    'estimated_tokens_min': min(
+                        (s['estimated_input_tokens'] for s in sizes), default=0
+                    ),
+                    'estimated_tokens_max': max(
+                        (s['estimated_input_tokens'] for s in sizes), default=0
+                    ),
                 }
             ),
             flush=True,
@@ -262,53 +313,135 @@ def run(root, workers=3, prepare_only=False):
         (root / 'current-final-rewrite.txt').write_text(str(batch))
         cache = root / 'final-rewrite-cache'
         cache.mkdir(exist_ok=True)
+        # The models behind the shared research, reconcile and format results.
+        field_models = {
+            stage: stage_model(root, stage) for stage in ('research', 'reconcile', 'format')
+        }
 
         def rewrite(payload, text):
-            key = fingerprint({'prompt': text, 'schema': FINAL_SCHEMA, 'model': config['review']})
-            path = cache / (key + '.json')
-            folder = batch / payload['candidate']['id']
+            identifier = payload['candidate']['id']
+            stage = 'final-rewrite-' + identifier
+            marker = blocked_marker(root, stage)
+            if marker:
+                raise SafetyReviewBlocked(
+                    'Provider safety refusal remains unresolved: ' + str(marker)
+                )
+            keys = [
+                (
+                    entry,
+                    fingerprint(
+                        {'prompt': text, 'schema': FINAL_SCHEMA, 'model': cache_model(entry)}
+                    ),
+                )
+                for entry in entries
+            ]
+            folder = batch / identifier
             folder.mkdir()
             write_json(folder / 'input.json', payload)
-            receipt = {
-                'status': 'running',
-                'started_at': now(),
-                'input_hash': key,
-                'model': config['review'],
-            }
+            receipt = {'status': 'running', 'started_at': now()}
             write_json(folder / 'receipt.json', receipt)
             try:
-                if path.exists():
-                    cached = read_json(path)
-                    if fingerprint(cached['record']) != cached['record_hash']:
-                        raise ValueError('Cached rewrite changed')
-                    record = cached['record']
-                    receipt['reused'] = True
-                else:
-                    record, recovered_from, prior_error = recover_previous(root, payload, key)
-                    if recovered_from:
-                        receipt['recovered_from'] = recovered_from
-                    if record is None:
+                record = None
+                # Every entry's saved result is checked before any call.
+                for entry, key in keys:
+                    path = cache / (key + '.json')
+                    if path.exists():
+                        cached = read_json(path)
+                        if fingerprint(cached['record']) != cached['record_hash']:
+                            raise ValueError('Cached rewrite changed')
+                        record, used, served = cached['record'], (entry, key), cached.get('model')
+                        receipt['reused'] = True
+                        break
+                prior_errors = {}
+                if record is None:
+                    for entry, key in keys:
+                        prior, recovered_from, prior_errors[key] = recover_previous(
+                            root, payload, key
+                        )
+                        if recovered_from:
+                            record, used = prior, (entry, key)
+                            served = attempt_model(Path(recovered_from).parent)
+                            receipt['recovered_from'] = recovered_from
+                            break
+                if record is None:
+                    unavailable = []
+                    for entry, key in keys:
+                        if not state.available(entry['provider']):
+                            unavailable.append(
+                                entry['provider'] + ': exhausted earlier, cooling down'
+                            )
+                            continue
+                        receipt.update(
+                            input_hash=key,
+                            **{k: entry[k] for k in ('provider', 'model', 'effort') if k in entry},
+                        )
+                        write_json(folder / 'receipt.json', receipt)
                         retry_text = text
-                        if prior_error:
-                            receipt['prior_validation_error'] = prior_error
+                        if prior_errors.get(key):
+                            receipt['prior_validation_error'] = prior_errors[key]
                             retry_text += (
                                 '\n\nA prior attempt failed output validation: '
-                                + prior_error
+                                + prior_errors[key]
                                 + (
                                     '\nReturn a fresh complete record satisfying the schema '
                                     'and supplied source references.'
                                 )
                             )
-                        record = Models(config).call('review', retry_text, FINAL_SCHEMA, folder)
+                        try:
+                            record = Models(config).call(
+                                'rewrite', retry_text, FINAL_SCHEMA, folder, entry=entry
+                            )
+                        except ProviderUnavailable as error:
+                            if error.reason == 'exhausted':
+                                state.exhausted(error.provider)
+                            label = f'unavailable-{len(unavailable) + 1}-{error.provider}'
+                            unavailable.append(str(error))
+                            receipt.setdefault('unavailable', []).append(
+                                {'error': str(error), 'logs': str(set_aside(folder, label))}
+                            )
+                            continue
+                        except Exception as error:
+                            message = provider_safety_refusal(folder)
+                            if message:
+                                marker = persist_safety_block(root, stage, key, folder, message)
+                                receipt.update(
+                                    failure_kind='provider_safety_refusal',
+                                    blocked_marker=str(marker),
+                                )
+                                raise SafetyReviewBlocked(
+                                    'Provider refused this rewrite; see ' + str(marker)
+                                ) from error
+                            raise
+                        used, served = (entry, key), attempt_model(folder)
+                        break
+                    if record is None:
+                        raise AccountExhausted(
+                            'No provider could run ' + stage + ': ' + '; '.join(unavailable)
+                        )
                     write_json(folder / 'result.json', record)
+                entry, key = used
+                served = served or entry['model']
+                receipt.update(input_hash=key, provider=entry['provider'], model=entry['model'])
+                if served != entry['model']:
+                    receipt['served_model'] = served
                 record = normalize_source_aliases(record, payload)
                 validate_record(record, payload)
-                write_json(path, {'record': record, 'record_hash': fingerprint(record)})
+                write_json(
+                    cache / (key + '.json'),
+                    {'record': record, 'record_hash': fingerprint(record), 'model': served},
+                )
                 receipt.update(status='complete', finished_at=now())
                 write_json(folder / 'receipt.json', receipt)
                 print(record['id'] + ' complete', flush=True)
+                review = reviews.get(identifier, {}).get('path')
+                models = {
+                    **field_models,
+                    'review': attempt_model(review) if review else None,
+                    'rewrite': served,
+                }
                 return {
                     **record,
+                    'models': {step: name for step, name in models.items() if name},
                     'sources': payload['source_index'],
                     'provenance': payload['provenance'],
                 }
@@ -319,24 +452,43 @@ def run(root, workers=3, prepare_only=False):
 
         records = []
         failures = []
+        exhausted = None
         with ThreadPoolExecutor(max_workers=workers) as pool:
             futures = {pool.submit(rewrite, p, t): p['candidate']['id'] for p, t in prepared}
             for future in as_completed(futures):
+                identifier = futures[future]
                 try:
                     records.append(future.result())
+                except SafetyReviewBlocked:
+                    stage = 'final-rewrite-' + identifier
+                    marker = blocked_marker(root, stage)
+                    if marker is None:
+                        raise
+                    withheld[identifier] = {'stage': stage, 'reason': refusal_reason(marker)}
                 except Exception as error:
-                    failures.append({'id': futures[future], 'error': str(error)})
+                    failures.append({'id': identifier, 'error': str(error)})
+                    if isinstance(error, AccountExhausted):
+                        exhausted = error
         if failures:
             write_json(
                 batch / 'receipt.json',
                 {'status': 'failed', 'finished_at': now(), 'failures': failures},
             )
+            if exhausted:
+                raise AccountExhausted(f'Final merge withheld: {failures}')
             raise ValueError(f'Final merge withheld: {failures}')
-        records = merge_records(records, [p['id'] for p in doc['problems']])
+        records = merge_records(
+            records, [p['id'] for p in doc['problems'] if p['id'] not in withheld]
+        )
         result = {
             'field': read_json(root / 'field.json'),
             'created_at': now(),
             'innovations': records,
+            'withheld': [
+                {'id': p['id'], 'title': p['title'], **withheld[p['id']]}
+                for p in doc['problems']
+                if p['id'] in withheld
+            ],
             'original_dispositions': read_json(root / 'reconciled-structured.json')[
                 'original_dispositions'
             ],
@@ -354,6 +506,7 @@ def run(root, workers=3, prepare_only=False):
                 'status': 'complete',
                 'finished_at': now(),
                 'count': len(records),
+                'withheld': [item['id'] for item in result['withheld']],
                 'output_sha256': digest((root / 'final-innovations.json').read_bytes()),
             },
         )
@@ -369,6 +522,6 @@ if __name__ == '__main__':
     parser.add_argument('--workers', type=int, default=3)
     parser.add_argument('--prepare-only', action='store_true')
     args = parser.parse_args()
-    if not 1 <= args.workers <= 13:
-        parser.error('--workers must be between 1 and 13')
+    if args.workers < 1:
+        parser.error('--workers must be at least 1')
     run(args.directory, args.workers, args.prepare_only)

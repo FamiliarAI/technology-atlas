@@ -1,4 +1,36 @@
 {
+  "providers": {
+    "grok": {"bin": "~/.grok/bin/grok"},
+    "codex": {"bin": "/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex"},
+    "claude": {"bin": "claude"}
+  },
+  "stages": {
+    "research": [
+      {"provider": "grok", "model": "grok-4.7", "effort": "high", "timeout_s": 2400},
+      {"provider": "codex", "model": "gpt-6.1-terra", "effort": "high", "search": true},
+      {"provider": "codex", "model": "gpt-6.1-sol", "effort": "high", "search": true},
+      {"provider": "claude", "model": "opus", "search": true}
+    ],
+    "reconcile": [
+      {"provider": "grok", "model": "grok-4.7", "effort": "high", "timeout_s": 2400},
+      {"provider": "codex", "model": "gpt-6.1-terra", "effort": "high", "search": true},
+      {"provider": "codex", "model": "gpt-6.1-sol", "effort": "high", "search": true},
+      {"provider": "claude", "model": "opus", "search": true}
+    ],
+    "format": [
+      {"provider": "codex", "model": "gpt-6.1-terra", "effort": "high"},
+      {"provider": "codex", "model": "gpt-6.1-sol", "effort": "high"},
+      {"provider": "claude", "model": "opus"}
+    ],
+    "review": [
+      {"provider": "codex", "model": "gpt-6.1-sol", "effort": "medium"},
+      {"provider": "claude", "model": "opus"}
+    ],
+    "rewrite": [
+      {"provider": "codex", "model": "gpt-6.1-sol", "effort": "medium"},
+      {"provider": "claude", "model": "opus"}
+    ]
+  },
   "research": {"model": "grok-4.7", "effort": "high"},
   "format": {"model": "gpt-6.1-terra", "effort": "high"},
   "review": {"model": "gpt-6.1-sol", "effort": "medium"},

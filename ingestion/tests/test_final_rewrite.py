@@ -1,4 +1,5 @@
 import copy
+import json
 import tempfile
 from pathlib import Path
 import unittest
@@ -129,7 +130,10 @@ class FinalRewriteTests(unittest.TestCase):
 
         text = prompt('final_rewrite', INPUT=json.dumps(payload, ensure_ascii=False))
         config = read_json(Path(module.__file__).parent / 'config.json')
-        key = fingerprint({'prompt': text, 'schema': FINAL_SCHEMA, 'model': config['review']})
+        # The first rewrite entry keeps the key made when the rewrite borrowed `review`.
+        first = module.cache_model(module.stage_entries(config, 'rewrite')[0])
+        self.assertEqual(first, config['review'])
+        key = fingerprint({'prompt': text, 'schema': FINAL_SCHEMA, 'model': first})
         write_json(prior / 'receipt.json', {'status': 'failed', 'input_hash': key})
         write_json(prior / 'result.json', raw or record)
         (root / 'reconciled-research.md').write_text('Research')
@@ -234,3 +238,130 @@ class FinalRewriteTests(unittest.TestCase):
                 [],
             )['research']
             self.assertNotIn('Audit notes', last)
+
+    def test_withheld_review_is_listed_not_rewritten_and_records_name_their_models(self):
+        from unittest.mock import patch
+        from ingestion.final_rewrite import run
+        from ingestion.sources import read_json
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            payload, valid, prior, key = self.rewrite_fixture(root, {'bad': 'schema'})
+            review_folder = root / 'attempts/review-X-01-1'
+            review_folder.mkdir()
+            write_json(review_folder / 'model.json', {'provider': 'codex', 'model': 'gpt-6.1-sol'})
+            research_folder = root / 'attempts/independent-research-1'
+            research_folder.mkdir()
+            write_json(research_folder / 'result.json', {'text': 'Research notes'})
+            (research_folder / 'stdout.log').write_text(
+                json.dumps({'modelUsage': {'grok-4.7-build': {'outputTokens': 5}}})
+            )
+            (root / 'research-notes.md').write_text('Research notes')
+            write_json(
+                root / 'reconciled-candidates.json',
+                {
+                    'problems': [
+                        {'id': 'X-01', 'title': 'Concept'},
+                        {'id': 'X-02', 'title': 'Refused concept'},
+                    ]
+                },
+            )
+            reviews = {
+                'X-01': {'status': 'complete', 'path': str(review_folder)},
+                'X-02': {'status': 'withheld', 'stage': 'review-X-02', 'reason': 'refused'},
+            }
+            write_json(root / 'reconciled-reviews.json', reviews)
+            with (
+                patch('ingestion.final_rewrite.validate_candidates', side_effect=lambda x: x),
+                patch('ingestion.final_rewrite.make_input', return_value=payload),
+                patch('ingestion.final_rewrite.Models.call', return_value=valid),
+            ):
+                # A withheld status without a recorded refusal is not accepted.
+                with self.assertRaisesRegex(ValueError, 'without a recorded refusal'):
+                    run(root, workers=1)
+                (root / 'workflow-blocked').mkdir()
+                write_json(
+                    root / 'workflow-blocked/review-X-02-abc.json',
+                    {
+                        'stage': 'review-X-02',
+                        'status': 'safety_blocked',
+                        'provider_message': 'limited access',
+                    },
+                )
+                run(root, workers=1)
+            final = read_json(root / 'final-innovations.json')
+            self.assertEqual([r['id'] for r in final['innovations']], ['X-01'])
+            self.assertEqual(
+                final['withheld'],
+                [
+                    {
+                        'id': 'X-02',
+                        'title': 'Refused concept',
+                        'stage': 'review-X-02',
+                        'reason': 'Provider safety refusal: limited access',
+                    }
+                ],
+            )
+            self.assertEqual(
+                final['innovations'][0]['models'],
+                {'research': 'grok-4.7-build', 'review': 'gpt-6.1-sol', 'rewrite': 'gpt-6.1-sol'},
+            )
+            self.assertIn('Withheld concepts', (root / 'final-innovations.md').read_text())
+
+    def test_rewrite_falls_back_on_exhaustion_but_a_refusal_is_terminal(self):
+        from unittest.mock import patch
+        from ingestion.final_rewrite import run
+        from ingestion.providers import ProviderExhausted
+        from ingestion.sources import read_json
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            payload, valid, prior, key = self.rewrite_fixture(root, {'bad': 'schema'})
+            used = []
+
+            def exhausted_then_valid(role, text, schema, folder, entry=None):
+                used.append(entry['provider'])
+                if entry['provider'] == 'codex':
+                    raise ProviderExhausted('codex', 'usage limit')
+                return valid
+
+            with (
+                patch('ingestion.final_rewrite.validate_candidates', side_effect=lambda x: x),
+                patch('ingestion.final_rewrite.make_input', return_value=payload),
+                patch('ingestion.final_rewrite.Models.call', side_effect=exhausted_then_valid),
+            ):
+                run(root, workers=1)
+            self.assertEqual(used, ['codex', 'claude'])
+            self.assertEqual(
+                read_json(root / 'final-innovations.json')['innovations'][0]['models']['rewrite'],
+                'opus',
+            )
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            payload, valid, prior, key = self.rewrite_fixture(root, {'bad': 'schema'})
+            used = []
+
+            def refused(role, text, schema, folder, entry=None):
+                used.append(entry['provider'])
+                event = {
+                    'type': 'turn.failed',
+                    'error': {
+                        'message': "Invalid prompt: we've limited access to this content for "
+                        'safety reasons.'
+                    },
+                }
+                (folder / 'stdout.log').write_text(json.dumps(event) + '\n')
+                raise RuntimeError('Codex exited 1')
+
+            with (
+                patch('ingestion.final_rewrite.validate_candidates', side_effect=lambda x: x),
+                patch('ingestion.final_rewrite.make_input', return_value=payload),
+                patch('ingestion.final_rewrite.Models.call', side_effect=refused),
+            ):
+                run(root, workers=1)
+                run(root, workers=1)
+            self.assertEqual(used, ['codex'])
+            final = read_json(root / 'final-innovations.json')
+            self.assertEqual(final['innovations'], [])
+            self.assertEqual(final['withheld'][0]['stage'], 'final-rewrite-X-01')

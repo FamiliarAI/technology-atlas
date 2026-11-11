@@ -107,6 +107,21 @@ def _merge_source(sources, source):
             known.add(artifact['sha256'])
 
 
+def next_color(prefix, core=CORE):
+    """A colour no imported field uses. Existing fields are never recoloured.
+
+    store.color steps round the hue circle by position; the new field takes the first
+    position whose colour is still free, so the result does not depend on import order.
+    """
+    used = set()
+    for path in Path(core).glob('*/field.json'):
+        used.add(json.loads(path.read_text(encoding='utf-8')).get('color'))
+    position = 0
+    while store.color(prefix, position) in used and position < 1000:
+        position += 1
+    return store.color(prefix, position)
+
+
 def import_field(folder, core=CORE, color=None):
     folder, core = Path(folder), Path(core)
     raw = (folder / 'final-innovations.json').read_bytes()
@@ -158,7 +173,7 @@ def import_field(folder, core=CORE, color=None):
     field = {
         'id': prefix,
         'name': value['field']['field'],
-        'color': color if color is not None else store.color(prefix, 0),
+        'color': color if color is not None else next_color(prefix, core),
     }
     field.update(
         {
@@ -175,6 +190,7 @@ def import_field(folder, core=CORE, color=None):
         },
         original_dispositions=value.get('original_dispositions', []),
         reconciliation_change_log=value.get('reconciliation_change_log', []),
+        withheld=value.get('withheld', []),
     )
     _json(core / prefix / 'field.json', field)
     for item in items:
@@ -266,9 +282,9 @@ def main(argv=None, core=CORE):
         if args.command == 'import':
             roots = store.completed_fields()
             imported = []
-            for n, prefix in enumerate(sorted(roots)):
+            for prefix in sorted(roots):
                 if not (Path(core) / prefix).exists():
-                    import_field(roots[prefix], core, color=store.color(prefix, n))
+                    import_field(roots[prefix], core)
                     imported.append(prefix)
             print('Imported:', ', '.join(imported) or 'already current')
         else:

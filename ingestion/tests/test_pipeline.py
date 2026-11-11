@@ -658,17 +658,24 @@ class HelperTests(unittest.TestCase):
         with self.assertRaises(subprocess.TimeoutExpired):
             execute(['/bin/sleep', '5'], self.root, timeout=0.02)
 
+    def test_model_cli_failure_message_names_no_provider_account(self):
+        with self.assertRaises(RuntimeError) as caught:
+            execute(['/bin/sh', '-c', 'exit 3'], self.root)
+        self.assertNotIn('Grok', str(caught.exception))
+        self.assertNotIn('credits', str(caught.exception))
+
     def test_model_adapter_uses_configured_cli_schema_and_preserves_raw_output(self):
         adapter = Models(self.config)
 
-        def fake_execute(cmd, directory, stdin=None, timeout=3600):
+        def fake_execute(cmd, directory, stdin=None, timeout=3600, cwd=None, check=True):
             self.assertNotIn('--search', cmd)
             self.assertIn('--ignore-user-config', cmd)
             self.assertIn('read-only', cmd)
             self.assertIn(self.config['format']['model'], cmd)
             write_json(directory / 'response.json', candidates())
+            return 0
 
-        with patch('ingestion.pipeline.execute', fake_execute):
+        with patch('ingestion.providers.execute', fake_execute):
             result = adapter.call('format', 'Format only', schemas.CANDIDATES, self.root)
         self.assertEqual(candidates(), result)
         self.assertTrue((self.root / 'schema.json').exists())

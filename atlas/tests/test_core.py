@@ -383,6 +383,53 @@ class CoreTests(unittest.TestCase):
         self.assertFalse(self.db.exists())
         self.assertEqual(core.check(core.load(self.core)), [])
 
+    def test_import_carries_withheld_concepts_and_model_names(self):
+        self.value['withheld'] = [
+            {
+                'id': 'SWE-03',
+                'title': 'Refused concept',
+                'stage': 'review-SWE-03',
+                'reason': 'Provider safety refusal: limited access',
+            }
+        ]
+        models = {
+            'research': 'grok-4.7-build',
+            'reconcile': 'grok-4.7-build',
+            'format': 'gpt-6.1-terra',
+            'review': 'gpt-6.1-sol',
+            'rewrite': 'gpt-6.1-sol',
+        }
+        self.record['models'] = models
+        self.write()
+        data = self.imported()
+        self.assertEqual(data['fields']['SWE']['withheld'], self.value['withheld'])
+        self.assertEqual(data['breakthroughs']['SWE-01']['models'], models)
+        self.assertNotIn('SWE-03', data['breakthroughs'])
+        self.assertEqual(core.check(data), [])
+        broken = copy.deepcopy(data)
+        broken['fields']['SWE']['withheld'][0]['reason'] = '/Users/someone/attempt'
+        self.assertTrue(any('Absolute path' in problem for problem in core.check(broken)))
+
+    def test_new_field_takes_a_free_colour_and_existing_colours_never_change(self):
+        self.imported()
+        swe = (self.core / 'SWE/field.json').read_bytes()
+        prefixes = ['AAA', 'BBB', 'CCC']
+        for prefix in prefixes:
+            folder = self.root / prefix
+            folder.mkdir()
+            value = copy.deepcopy(self.value)
+            value['field'].update(prefix=prefix, field=prefix)
+            for n, record in enumerate(value['innovations'], 1):
+                record['id'] = f'{prefix}-{n:02}'
+            (folder / 'final-innovations.json').write_text(json.dumps(value))
+            core.import_field(folder, self.core)
+        colors = [core.load(self.core)['fields'][prefix]['color'] for prefix in prefixes]
+        self.assertEqual(colors, [store.color('', 0), store.color('', 1), store.color('', 2)])
+        self.assertEqual((self.core / 'SWE/field.json').read_bytes(), swe)
+        # A field imported later skips every colour already in use, whatever its position.
+        (self.core / 'BBB').rename(self.root / 'BBB-removed')
+        self.assertEqual(core.next_color('ZZZ', self.core), store.color('', 1))
+
     def test_cli_import_adds_newly_completed_fields_and_preserves_existing_records(self):
         self.imported()
         item = core.load(self.core)['breakthroughs']['SWE-01']

@@ -5,17 +5,14 @@ import copy
 from contextlib import contextmanager
 import fcntl
 import json
-import os
 from pathlib import Path
 import re
 import shutil
-import signal
-import subprocess
-import tempfile
 
 import jsonschema
 from . import schemas
-from .sources import Archive, digest, now, read_json, web_url, write_json
+from .providers import Models, execute  # noqa: F401  (atlas/add.py and prerequisites.py)
+from .sources import Archive, digest, now, web_url, write_json
 
 HERE = Path(__file__).resolve().parent
 PROJECT = HERE.parent
@@ -33,12 +30,15 @@ def prompt(name, **values):
 
 
 @contextmanager
-def locked(directory):
-    with open(Path(directory) / '.lock', 'a') as handle:
+def locked(directory, name='.lock'):
+    """One writer per directory and lock name; a second process fails at once."""
+    with open(Path(directory) / name, 'a') as handle:
         try:
             fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError:
-            raise ValueError('This field is already running; wait for it to finish') from None
+            raise ValueError(
+                f'Another process is already running in {directory}; wait for it to finish'
+            ) from None
         try:
             yield
         finally:
@@ -194,78 +194,6 @@ def _validate_review(review, payload):
                 'Conclusive assessment requires inspected evidence with verified identity'
             )
     return review
-
-
-def execute(cmd, directory, stdin=None, timeout=3600):
-    """Keep logs, stop child processes on timeout/interrupt, never use API-key env auth."""
-    env = dict(os.environ)
-    for key in ('OPENAI_API_KEY', 'CODEX_API_KEY', 'XAI_API_KEY', 'GROK_API_KEY'):
-        env.pop(key, None)
-    with (
-        tempfile.TemporaryDirectory(prefix='atlas-model-') as cwd,
-        open(directory / 'stdout.log', 'w') as out,
-        open(directory / 'stderr.log', 'w') as err,
-    ):
-        process = subprocess.Popen(
-            cmd,
-            cwd=cwd,
-            env=env,
-            stdin=subprocess.PIPE if stdin is not None else subprocess.DEVNULL,
-            stdout=out,
-            stderr=err,
-            text=True,
-            start_new_session=True,
-        )
-        try:
-            process.communicate(stdin, timeout=timeout)
-        except BaseException:
-            try:
-                os.killpg(process.pid, signal.SIGTERM)
-                process.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                os.killpg(process.pid, signal.SIGKILL)
-                process.wait()
-            except ProcessLookupError:
-                pass
-            raise
-    if process.returncode:
-        raise RuntimeError(
-            f'Model CLI exited {process.returncode}; inspect {directory / "stderr.log"}. '
-            'If Grok access/credits are exhausted, stop and ask the user to switch accounts.'
-        )
-
-
-class Models:
-    def __init__(self, config):
-        self.config = config
-
-    def call(self, role, text, schema, directory):
-        settings = self.config[role]
-        (directory / 'prompt.md').write_text(text)
-        write_json(directory / 'model.json', settings)
-        write_json(directory / 'schema.json', schema)
-        output = directory / 'response.json'
-        cmd = [
-            str(Path(self.config['codex']).expanduser()),
-            'exec',
-            '--ignore-user-config',
-            '--skip-git-repo-check',
-            '--ephemeral',
-            '-s',
-            'read-only',
-            '-m',
-            settings['model'],
-            '-c',
-            f'model_reasoning_effort="{settings["effort"]}"',
-            '--output-schema',
-            str(directory / 'schema.json'),
-            '-o',
-            str(output),
-            '--json',
-            '-',
-        ]
-        execute(cmd, directory, text)
-        return read_json(output)
 
 
 def backup(directory, destination):

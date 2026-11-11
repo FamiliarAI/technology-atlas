@@ -9,7 +9,6 @@ from ingestion.field_workflow import (
     AccountExhausted,
     SafetyReviewBlocked,
     FieldWorkflow,
-    account_exhausted,
     concept_ids,
     normalize_and_validate_review,
     validate_format,
@@ -18,6 +17,31 @@ from ingestion.field_workflow import (
     build_review_input,
     REVIEW_INSTRUCTIONS,
 )
+from ingestion.providers import exhausted, grok
+
+
+def account_exhausted(message):
+    return exhausted('grok', message)
+
+
+GROK = {'provider': 'grok', 'model': 'grok-4.7', 'effort': 'high'}
+
+
+def fake_cli(stdout='', stderr='', code=0, response=None):
+    """Stand in for providers.execute: write the logs a CLI would, record the command."""
+
+    def execute(cmd, directory, stdin=None, timeout=3600, cwd=None, check=True):
+        execute.commands.append(cmd)
+        execute.cwds.append(cwd)
+        (directory / 'stdout.log').write_text(stdout)
+        (directory / 'stderr.log').write_text(stderr)
+        if response is not None:
+            (Path(cmd[cmd.index('-o') + 1])).write_text(response)
+        return code
+
+    execute.commands = []
+    execute.cwds = []
+    return execute
 
 
 class FieldWorkflowTests(unittest.TestCase):
@@ -36,7 +60,7 @@ class FieldWorkflowTests(unittest.TestCase):
             flow = FieldWorkflow(directory, config={})
             calls = []
 
-            def call(folder, error):
+            def call(folder, error, entry):
                 calls.append(folder)
                 return {'good': 1}
 
@@ -54,7 +78,7 @@ class FieldWorkflowTests(unittest.TestCase):
             flow = FieldWorkflow(directory, config={})
             calls = []
 
-            def call(folder, error):
+            def call(folder, error, entry):
                 calls.append(error)
                 if error is None:
                     raise ValueError('bad quote')
@@ -75,7 +99,7 @@ class FieldWorkflowTests(unittest.TestCase):
             flow = FieldWorkflow(directory, config={})
             calls = []
 
-            def call(folder, error):
+            def call(folder, error, entry):
                 calls.append(1)
                 raise AccountExhausted('switch account')
 
@@ -94,39 +118,29 @@ class FieldWorkflowTests(unittest.TestCase):
         self.assertFalse(account_exhausted('Publisher download returned HTTP 402 Payment Required'))
         self.assertFalse(account_exhausted('responses API error status=500 Internal Server Error'))
         with tempfile.TemporaryDirectory() as directory:
-            flow = FieldWorkflow(
-                directory, config={'grok': 'grok', 'research': {'model': 'test', 'effort': 'high'}}
-            )
-            launches = []
-
-            class Process:
-                returncode = 1
-
-                def __init__(self, cmd, **kw):
-                    launches.append(cmd)
-                    kw['stderr'].write(message)
-                    kw['stderr'].flush()
-
-                def wait(self, timeout):
-                    return 1
-
-            with patch('ingestion.field_workflow.subprocess.Popen', Process):
-                with self.assertRaisesRegex(AccountExhausted, 'switch accounts'):
+            flow = FieldWorkflow(directory, config={'grok': 'grok'})
+            launches = fake_cli(stderr=message, code=1)
+            with patch('ingestion.providers.execute', launches):
+                with self.assertRaisesRegex(AccountExhausted, 'Grok usage exhausted'):
                     flow.stage(
                         'reconcile',
                         {},
-                        lambda folder, error: flow.grok('prompt', folder, 'test-session', True),
+                        lambda folder, error, entry: grok(
+                            {'grok': 'grok'}, GROK, 'prompt', folder, 'test-session', True, None, 60
+                        ),
                         lambda v: None,
                         retries=1,
                     )
-            self.assertEqual(len(launches), 1)
+            self.assertEqual(len(launches.commands), 1)
             receipt = json.loads(
                 next(Path(directory).glob('attempts/reconcile-*/receipt.json')).read_text()
             )
             self.assertEqual(receipt['status'], 'failed')
-            self.assertIn('switch accounts', receipt['error'])
+            self.assertEqual(receipt['failure_kind'], 'provider_exhausted')
 
-    def test_free_usage_exhaustion_code_raises_account_exhausted(self):
+    def test_free_usage_exhaustion_code_is_grok_exhaustion(self):
+        from ingestion.providers import ProviderExhausted
+
         message = (
             'API error (status 429 Too Many Requests): subscription:free-usage-exhausted: '
             'Included free usage exhausted'
@@ -135,32 +149,17 @@ class FieldWorkflowTests(unittest.TestCase):
         self.assertTrue(account_exhausted('subscription:free-usage-exhausted'))
         self.assertFalse(account_exhausted('Publisher returned HTTP 429 Too Many Requests'))
         with tempfile.TemporaryDirectory() as directory:
-            flow = FieldWorkflow(
-                directory, config={'grok': 'grok', 'research': {'model': 'test', 'effort': 'high'}}
-            )
-            folder = Path(directory) / 'attempt'
-            folder.mkdir()
-
-            class Process:
-                returncode = 1
-
-                def __init__(self, command, **kwargs):
-                    kwargs['stderr'].write(message)
-                    kwargs['stderr'].flush()
-
-                def wait(self, timeout):
-                    return 1
-
-            with patch('ingestion.field_workflow.subprocess.Popen', Process):
-                with self.assertRaises(AccountExhausted):
-                    flow.grok('test', folder, 'test-session', True)
+            folder = Path(directory)
+            with patch('ingestion.providers.execute', fake_cli(stderr=message, code=1)):
+                with self.assertRaises(ProviderExhausted):
+                    grok({'grok': 'grok'}, GROK, 'test', folder, 'test-session', True, None, 60)
 
     def test_provider_safety_refusal_is_not_retried_or_resent_on_resume(self):
         with tempfile.TemporaryDirectory() as directory:
             flow = FieldWorkflow(directory, config={})
             calls = []
 
-            def call(folder, error):
+            def call(folder, error, entry):
                 calls.append(folder)
                 event = {
                     'type': 'turn.failed',
@@ -202,7 +201,7 @@ class FieldWorkflowTests(unittest.TestCase):
             flow = FieldWorkflow(directory, config={})
             calls = []
 
-            def call(folder, error):
+            def call(folder, error, entry):
                 calls.append(folder)
                 (folder / 'stdout.log').write_text(
                     json.dumps(
@@ -228,33 +227,20 @@ class FieldWorkflowTests(unittest.TestCase):
 
     def test_same_session_resume_uses_persistent_directory(self):
         with tempfile.TemporaryDirectory() as directory:
-            config = {'grok': 'grok', 'research': {'model': 'test', 'effort': 'high'}}
-            flow = FieldWorkflow(directory, config=config)
             folder = Path(directory) / 'attempt'
             folder.mkdir()
-            calls = []
-
-            class Process:
-                returncode = 0
-
-                def __init__(self, cmd, **kw):
-                    calls.append((cmd, kw['cwd']))
-                    kw['stdout'].write(
-                        json.dumps(
-                            {'sessionId': 'test-session', 'stopReason': 'end_turn', 'text': 'notes'}
-                        )
-                    )
-                    kw['stdout'].flush()
-
-                def wait(self, timeout):
-                    return 0
-
-            with patch('ingestion.field_workflow.subprocess.Popen', Process):
-                value = flow.grok('prompt', folder, 'test-session', True)
+            workdir = Path(directory) / 'grok-workspace'
+            workdir.mkdir()
+            output = {'sessionId': 'test-session', 'stopReason': 'end_turn', 'text': 'notes'}
+            launches = fake_cli(stdout=json.dumps(output))
+            with patch('ingestion.providers.execute', launches):
+                value = grok(
+                    {'grok': 'grok'}, GROK, 'prompt', folder, 'test-session', True, workdir, 60
+                )
             self.assertEqual(value['session_id'], 'test-session')
-            self.assertIn('--resume', calls[0][0])
-            self.assertNotIn('--fork-session', calls[0][0])
-            self.assertTrue(calls[0][1].is_dir())
+            self.assertIn('--resume', launches.commands[0])
+            self.assertNotIn('--fork-session', launches.commands[0])
+            self.assertEqual(launches.cwds[0], workdir)
 
     def test_empty_extraction_limitation_can_move_without_status_change(self):
         payload = {
@@ -366,7 +352,7 @@ class FieldWorkflowTests(unittest.TestCase):
         calls = {}
 
         class FakeModels:
-            def call(self, role, text, schema, folder):
+            def call(self, role, text, schema, folder, entry=None):
                 nonlocal active, peak
                 payload = json.loads((folder / 'input.json').read_text())
                 identifier = payload['problem']['id']
@@ -699,7 +685,7 @@ class FieldWorkflowTests(unittest.TestCase):
     def test_workflow_lock_prevents_same_field_writers(self):
         with tempfile.TemporaryDirectory() as directory:
             with workflow_lock(Path(directory)):
-                with self.assertRaisesRegex(RuntimeError, 'already running'):
+                with self.assertRaisesRegex(ValueError, 'already running'):
                     with workflow_lock(Path(directory)):
                         pass
 

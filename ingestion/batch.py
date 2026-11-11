@@ -5,10 +5,12 @@ from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from datetime import date
 import json
 from pathlib import Path
+import shutil
 import subprocess
 import uuid
 
 from .pipeline import PROJECT, backup, locked
+from .providers import ProviderState
 from .sources import digest, now, read_json, write_json
 
 DEFAULT_ROOT = PROJECT / 'ingestion/runs/all-fields'
@@ -139,6 +141,7 @@ def save_manifest(root, manifest):
 
 def validate_final(root):
     """Check completion artifacts rather than trusting a worker's success return."""
+    from .field_workflow import blocked_marker
     from .final_rewrite import FINAL_SCHEMA, validate_record, merge_records
 
     root = Path(root)
@@ -147,7 +150,11 @@ def validate_final(root):
         raise ValueError('Final JSON and readable document are required')
     candidates = read_json(root / 'reconciled-candidates.json')
     reviews = read_json(root / 'reconciled-reviews.json')
-    expected = [p['id'] for p in candidates['problems']]
+    withheld = {item['id'] for item in output.get('withheld', [])}
+    for item in output.get('withheld', []):
+        if blocked_marker(root, item['stage']) is None:
+            raise ValueError(f'{item["id"]}: withheld without a recorded safety refusal')
+    expected = [p['id'] for p in candidates['problems'] if p['id'] not in withheld]
     records = merge_records(output['innovations'], expected)
     for record in records:
         identifier = record['id']
@@ -170,6 +177,7 @@ def validate_final(root):
         raise ValueError('Original-entry dispositions were not preserved')
     return {
         'concepts': len(records),
+        'withheld': sorted(withheld),
         'final_sha256': digest((root / 'final-innovations.json').read_bytes()),
     }
 
@@ -189,9 +197,9 @@ def backup_valid(entry):
     return receipt['files'].get('final-innovations.json') == entry.get('final_sha256')
 
 
-def finish_field(entry, as_of, backups, runner, backup_fn=backup):
+def finish_field(entry, as_of, backups, runner, backup_fn=backup, state=None):
     root = Path(entry['root'])
-    # Existing Chemistry can bypass fresh research only when all final artifacts validate.
+    # A field whose final artifacts all validate needs no model call.
     try:
         validation = validate_final(root)
     except (ValueError, KeyError, TypeError, FileNotFoundError):
@@ -202,6 +210,7 @@ def finish_field(entry, as_of, backups, runner, backup_fn=backup):
             entry['prefix'],
             as_of,
             entry['boundaries'],
+            state=state,
         )
         validation = validate_final(root)
     if digest(Path(entry['original_path']).read_bytes()) != entry['original_sha256']:
@@ -215,7 +224,64 @@ def finish_field(entry, as_of, backups, runner, backup_fn=backup):
     return result
 
 
-def run(root=DEFAULT_ROOT, backups=DEFAULT_BACKUPS, runner=None):
+def import_to_atlas(entry, core=None):
+    """Import one finished field into atlas/core, check it, rebuild the database and commit.
+
+    Runs only in the batch controller thread: every import rewrites sources.jsonl. A field
+    already in atlas/core is left alone. A failed check or rebuild undoes the import.
+    """
+    from atlas import core as records, store
+
+    core = Path(core or records.CORE)
+    prefix = entry['prefix']
+    if (core / prefix).exists():
+        return None
+    shared = {name: core / name for name in ('sources.jsonl', 'progress.jsonl')}
+    saved = {name: path.read_bytes() for name, path in shared.items() if path.exists()}
+    try:
+        records.import_field(Path(entry['root']), core)
+        problems = records.check(records.load(core))
+        if problems:
+            raise ValueError(
+                f'atlas/core check failed after importing {prefix}: ' + '; '.join(problems[:5])
+            )
+        store.rebuild(core=core)
+    except BaseException:
+        shutil.rmtree(core / prefix, ignore_errors=True)
+        for name, path in shared.items():
+            if name in saved:
+                path.write_bytes(saved[name])
+            else:
+                path.unlink(missing_ok=True)
+        raise
+    message = import_message(entry, core / prefix)
+    records.commit(message)
+    return message
+
+
+def import_message(entry, folder):
+    items = [
+        json.loads(path.read_text())
+        for path in sorted(folder.glob('*.json'))
+        if path.name != 'field.json'
+    ]
+    field = json.loads((folder / 'field.json').read_text())
+    lines = [
+        f'Import {entry["field"]} ({entry["prefix"]}) into atlas/core',
+        '',
+        f'{len(items)} breakthroughs, {len(field.get("withheld", []))} withheld.',
+        'Models:',
+    ]
+    for stage in ('research', 'reconcile', 'format', 'review', 'rewrite'):
+        names = sorted({item.get('models', {}).get(stage) for item in items} - {None})
+        lines.append(f'  {stage}: {", ".join(names) or "unknown"}')
+    for item in field.get('withheld', []):
+        lines.append(f'Withheld: {item["id"]} at {item["stage"]}')
+    return '\n'.join(lines)
+
+
+def run(root=DEFAULT_ROOT, backups=DEFAULT_BACKUPS, runner=None, importer=None, only=None):
+    """Run pending fields three at a time; `only` limits the run to those prefixes."""
     root = Path(root).resolve()
     backups = Path(backups).resolve()
     if backups.is_relative_to(PROJECT):
@@ -223,18 +289,42 @@ def run(root=DEFAULT_ROOT, backups=DEFAULT_BACKUPS, runner=None):
     from .field_workflow import run_field, AccountExhausted
 
     runner = runner or run_field
+    importer = importer or import_to_atlas
     with locked(root):
         manifest = read_json(root / 'batch.json')
         if not manifest:
             raise ValueError('Prepare the canonical roster first')
+        if only:
+            unknown = set(only) - {entry['prefix'] for entry in manifest['fields']}
+            if unknown:
+                raise ValueError('Unknown field prefixes: ' + ', '.join(sorted(unknown)))
+        state = ProviderState(manifest.get('providers'))
+
+        def save():
+            manifest['providers'] = state.snapshot()
+            save_manifest(root, manifest)
+
+        def settle(entry):
+            # In the controller thread only, one field at a time.
+            try:
+                if importer(entry):
+                    print('IMPORTED ' + entry['field'], flush=True)
+                entry.pop('import_error', None)
+            except Exception as error:
+                entry['import_error'] = str(error)
+                print('IMPORT FAILED ' + entry['field'] + ': ' + str(error), flush=True)
+
         pending = []
         for entry in manifest['fields']:
+            if only and entry['prefix'] not in only:
+                continue
             if entry['status'] == 'complete':
                 try:
                     validation = validate_final(entry['root'])
                     if validation['final_sha256'] == entry.get('final_sha256') and backup_valid(
                         entry
                     ):
+                        settle(entry)
                         continue
                 except (ValueError, KeyError, TypeError, FileNotFoundError):
                     pass
@@ -242,7 +332,8 @@ def run(root=DEFAULT_ROOT, backups=DEFAULT_BACKUPS, runner=None):
             entry.pop('error', None)
             pending.append(entry)
         manifest['status'] = 'running'
-        save_manifest(root, manifest)
+        manifest.pop('action', None)
+        save()
         halted = False
         with ThreadPoolExecutor(max_workers=3) as pool:
             futures = {}
@@ -252,10 +343,17 @@ def run(root=DEFAULT_ROOT, backups=DEFAULT_BACKUPS, runner=None):
                     entry = pending.pop(0)
                     entry.update(status='running', started_at=now())
                     futures[
-                        pool.submit(finish_field, entry, manifest['as_of'], backups, runner)
+                        pool.submit(
+                            finish_field,
+                            entry,
+                            manifest['as_of'],
+                            backups,
+                            runner,
+                            state=state,
+                        )
                     ] = entry
                     print('START ' + entry['field'], flush=True)
-                save_manifest(root, manifest)
+                save()
 
             refill()
             while futures:
@@ -266,14 +364,16 @@ def run(root=DEFAULT_ROOT, backups=DEFAULT_BACKUPS, runner=None):
                         entry.update(future.result())
                         entry['status'] = 'complete'
                         print('COMPLETE ' + entry['field'], flush=True)
+                        settle(entry)
                     except AccountExhausted as error:
                         entry.update(status='account_required', error=str(error))
                         halted = True
                         manifest.update(
                             status='account_required',
                             action=(
-                                'Grok access exhausted. Ask the user to switch to the '
-                                'second account; never request credentials.'
+                                'Every model in a stage fallback list is exhausted; see the '
+                                'field error. Wait for a reset or add capacity; never request '
+                                'credentials.'
                             ),
                         )
                         print(manifest['action'], flush=True)
@@ -287,7 +387,7 @@ def run(root=DEFAULT_ROOT, backups=DEFAULT_BACKUPS, runner=None):
                 if all(e['status'] == 'complete' for e in manifest['fields'])
                 else 'incomplete'
             )
-        save_manifest(root, manifest)
+        save()
         return manifest
 
 
@@ -302,12 +402,13 @@ def main():
     p = sub.add_parser('run')
     p.add_argument('--root', type=Path, default=DEFAULT_ROOT)
     p.add_argument('--backups', type=Path, default=DEFAULT_BACKUPS)
+    p.add_argument('--fields', nargs='+', metavar='PREFIX', help='run only these fields')
     args = parser.parse_args()
     if args.command == 'prepare':
         result = prepare(args.root, args.revision, args.as_of, args.chemistry_root)
         print(f'Prepared {len(result["fields"])} fields: {args.root / "progress.md"}')
     else:
-        result = run(args.root, args.backups)
+        result = run(args.root, args.backups, only=args.fields)
         print(
             json.dumps(
                 {
@@ -316,8 +417,11 @@ def main():
                 }
             )
         )
-        if result['status'] != 'complete':
-            raise SystemExit(2 if result['status'] == 'account_required' else 1)
+        if result['status'] == 'account_required':
+            raise SystemExit(2)
+        selected = [e for e in result['fields'] if not args.fields or e['prefix'] in args.fields]
+        if any(e['status'] != 'complete' or e.get('import_error') for e in selected):
+            raise SystemExit(1)
 
 
 if __name__ == '__main__':

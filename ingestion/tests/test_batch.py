@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 import tempfile
 import threading
@@ -57,7 +58,7 @@ class BatchTests(unittest.TestCase):
             peak = 0
             seen = []
 
-            def work(entry, *args):
+            def work(entry, *args, **kwargs):
                 nonlocal active, peak
                 with guard:
                     active += 1
@@ -71,7 +72,12 @@ class BatchTests(unittest.TestCase):
                 return {'concepts': 10, 'backup': 'fake', 'final_sha256': 'fake'}
 
             with patch('ingestion.batch.finish_field', side_effect=work):
-                result = run(root, root / 'outside', runner=lambda *args: None)
+                result = run(
+                    root,
+                    root / 'outside',
+                    runner=lambda *args, **kwargs: None,
+                    importer=lambda entry: None,
+                )
             self.assertEqual(len(seen), 7)
             self.assertEqual(peak, 3)
             self.assertEqual(result['status'], 'incomplete')
@@ -88,7 +94,12 @@ class BatchTests(unittest.TestCase):
                 'ingestion.batch.finish_field',
                 return_value={'concepts': 10, 'backup': 'fake', 'final_sha256': 'fake'},
             ) as finish:
-                result = run(root, root / 'outside', runner=lambda *args: None)
+                result = run(
+                    root,
+                    root / 'outside',
+                    runner=lambda *args, **kwargs: None,
+                    importer=lambda entry: None,
+                )
             self.assertEqual(finish.call_count, 2)
             self.assertEqual(result['status'], 'complete')
             self.assertTrue(all(e['status'] == 'complete' for e in result['fields']))
@@ -105,7 +116,7 @@ class BatchTests(unittest.TestCase):
             self.make_manifest(root, 7)
             seen = []
 
-            def work(entry, *args):
+            def work(entry, *args, **kwargs):
                 seen.append(entry['field'])
                 if entry['field'] == 'Field0':
                     raise AccountExhausted('switch account')
@@ -113,7 +124,12 @@ class BatchTests(unittest.TestCase):
                 return {'concepts': 10}
 
             with patch('ingestion.batch.finish_field', side_effect=work):
-                result = run(root, root / 'outside', runner=lambda *args: None)
+                result = run(
+                    root,
+                    root / 'outside',
+                    runner=lambda *args, **kwargs: None,
+                    importer=lambda entry: None,
+                )
             self.assertLessEqual(len(seen), 3)
             self.assertEqual(result['status'], 'account_required')
             self.assertEqual(sum(e['status'] == 'pending' for e in result['fields']), 4)
@@ -133,4 +149,164 @@ class BatchTests(unittest.TestCase):
                 'original_prefix': 'TEST',
             }
             with self.assertRaises(ValueError):
-                finish_field(entry, '2026-11-01', root / 'backup', lambda *args: None)
+                finish_field(entry, '2026-11-01', root / 'backup', lambda *args, **kwargs: None)
+
+
+def final_document(prefix, text='A proposed capability.'):
+    paragraph = [{'text': text, 'source_urls': ['https://example.org']}]
+    record = {
+        'id': prefix + '-01',
+        'title': 'Breakthrough',
+        'change_log': [],
+        'unresolved_issues': [],
+        'sources': [{'url': 'https://example.org', 'title': 'Paper', 'status': 'saved'}],
+        'provenance': {},
+        'models': {'research': 'grok-4.7-build', 'rewrite': 'gpt-6.1-sol'},
+    }
+    for section in (
+        'concept',
+        'significance',
+        'missing_breakthrough',
+        'current_state',
+        'completion_criteria',
+        'related_concepts',
+    ):
+        record[section] = paragraph
+    return {
+        'field': {'prefix': prefix, 'field': 'Field ' + prefix},
+        'created_at': '2026-11-11',
+        'innovations': [record],
+        'withheld': [
+            {
+                'id': prefix + '-02',
+                'title': 'Refused',
+                'stage': 'review-' + prefix + '-02',
+                'reason': 'Provider safety refusal',
+            }
+        ],
+    }
+
+
+class ImportTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.core = self.root / 'core'
+        self.core.mkdir()
+        (self.core / 'sources.jsonl').write_text('')
+        fields = []
+        for prefix in ('AAA', 'BBB', 'CCC', 'DDD'):
+            folder = self.root / prefix
+            folder.mkdir()
+            write_json(folder / 'final-innovations.json', final_document(prefix))
+            fields.append(
+                {
+                    'field': 'Field ' + prefix,
+                    'prefix': prefix,
+                    'root': str(folder),
+                    'status': 'pending',
+                }
+            )
+        write_json(
+            self.root / 'batch.json',
+            {'fields': fields, 'status': 'prepared', 'revision': 'test', 'as_of': '2026-11-01'},
+        )
+
+    def run_batch(self, importer, only=None, work=None):
+        def finish(entry, *args, **kwargs):
+            time.sleep(0.01)
+            if work:
+                work(entry, kwargs['state'])
+            return {'concepts': 1, 'backup': 'fake', 'final_sha256': 'fake'}
+
+        with patch('ingestion.batch.finish_field', side_effect=finish):
+            return run(
+                self.root,
+                self.root / 'outside',
+                runner=lambda *args, **kwargs: None,
+                importer=importer,
+                only=only,
+            )
+
+    def test_import_runs_in_controller_one_field_at_a_time_and_is_idempotent(self):
+        from atlas import core as records
+        from ingestion.batch import import_to_atlas
+
+        active = 0
+        seen = []
+        messages = []
+
+        def importer(entry):
+            nonlocal active
+            active += 1
+            self.assertEqual(active, 1)
+            self.assertIs(threading.current_thread(), threading.main_thread())
+            try:
+                return import_to_atlas(entry, self.core)
+            finally:
+                active -= 1
+                seen.append(entry['prefix'])
+
+        with (
+            patch('atlas.store.rebuild') as rebuild,
+            patch('atlas.core.commit', side_effect=messages.append) as commit,
+        ):
+            self.run_batch(importer)
+            self.assertEqual(sorted(seen), ['AAA', 'BBB', 'CCC', 'DDD'])
+            self.assertEqual(commit.call_count, 4)
+            self.assertEqual(rebuild.call_count, 4)
+            snapshot = {p: p.read_bytes() for p in self.core.rglob('*') if p.is_file()}
+            # Already imported is not an error and changes nothing.
+            for entry in json.loads((self.root / 'batch.json').read_text())['fields']:
+                self.assertIsNone(import_to_atlas(entry, self.core))
+            self.assertEqual(commit.call_count, 4)
+        self.assertEqual({p: p.read_bytes() for p in self.core.rglob('*') if p.is_file()}, snapshot)
+        data = records.load(self.core)
+        self.assertEqual(records.check(data), [])
+        self.assertEqual(data['breakthroughs']['AAA-01']['models']['rewrite'], 'gpt-6.1-sol')
+        self.assertEqual(data['fields']['AAA']['withheld'][0]['id'], 'AAA-02')
+        self.assertEqual(len({field['color'] for field in data['fields'].values()}), 4)
+        self.assertIn('Import Field AAA (AAA) into atlas/core', '\n'.join(messages))
+        self.assertIn('rewrite: gpt-6.1-sol', messages[0])
+        self.assertIn('Withheld: ', messages[0])
+
+    def test_failed_check_undoes_the_import_and_keeps_the_batch_going(self):
+        from ingestion.batch import import_to_atlas
+
+        write_json(self.root / 'BBB/final-innovations.json', final_document('BBB', '/Users/x'))
+        before = (self.core / 'sources.jsonl').read_bytes()
+        with patch('atlas.store.rebuild'), patch('atlas.core.commit') as commit:
+            result = self.run_batch(lambda entry: import_to_atlas(entry, self.core), only=['BBB'])
+        entry = next(e for e in result['fields'] if e['prefix'] == 'BBB')
+        self.assertEqual(entry['status'], 'complete')
+        self.assertIn('Absolute path', entry['import_error'])
+        self.assertFalse((self.core / 'BBB').exists())
+        self.assertEqual((self.core / 'sources.jsonl').read_bytes(), before)
+        commit.assert_not_called()
+
+    def test_only_runs_the_named_fields(self):
+        result = self.run_batch(lambda entry: None, only=['CCC', 'AAA'])
+        statuses = {e['prefix']: e['status'] for e in result['fields']}
+        self.assertEqual(
+            statuses, {'AAA': 'complete', 'BBB': 'pending', 'CCC': 'complete', 'DDD': 'pending'}
+        )
+        with self.assertRaisesRegex(ValueError, 'Unknown field'):
+            self.run_batch(lambda entry: None, only=['ZZZ'])
+
+    def test_grok_exhaustion_is_saved_in_the_manifest_and_honoured_next_run(self):
+        from ingestion.providers import ProviderState
+
+        self.run_batch(
+            lambda entry: None, only=['AAA'], work=lambda entry, state: state.exhausted('grok')
+        )
+        saved = json.loads((self.root / 'batch.json').read_text())['providers']
+        self.assertIn('exhausted_at', saved['grok'])
+        seen = []
+        self.run_batch(
+            lambda entry: None,
+            only=['BBB'],
+            work=lambda entry, state: seen.append(state.available('grok')),
+        )
+        self.assertEqual(seen, [False])
+        self.assertTrue(ProviderState(saved).available('codex'))
