@@ -54,7 +54,7 @@ Two tracks run in parallel. They touch different code (`ingestion/` and `atlas/w
 
 ### Track B: UI
 
-Readable first, good-looking second, on desktop and phone.
+Readable first, good-looking second, on desktop and phone. A full website with the star atlas as its centrepiece; the pages, reading rules, look and mock are in the [site design](2026-11-11-site-design.md).
 
 1. **Design.** A written spec and one static mock of the home and breakthrough screens at desktop and phone sizes, for the owner's approval. Each screen answers one question:
 
