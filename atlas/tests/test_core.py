@@ -3,7 +3,7 @@ import io
 import json
 import tempfile
 import unittest
-from contextlib import closing, redirect_stdout
+from contextlib import redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
@@ -133,34 +133,39 @@ class CoreTests(unittest.TestCase):
         page.write_bytes((other/page.name).read_bytes())
         with self.assertRaises(ValueError):core.load(self.core)
 
-    def test_cli_import_carries_database_links_and_judgements_once_without_changing_database(self):
-        with closing(store.connect(self.db)) as db, db:
-            # A database as the old ingestion import left it.
-            store.initialize(db);db.execute("INSERT INTO runs VALUES ('r','SWE','2026-11-01','{}')");db.execute("INSERT INTO fields VALUES ('SWE','Software Engineering','#fff','r')")
-            record=copy.deepcopy(self.record);record['prerequisites']=[{'id':'SWE-02','reason':'Needed','model':'test-model','field':'SWE'}]
-            db.execute('INSERT INTO breakthroughs VALUES (?,?,?)',('SWE-01','SWE',json.dumps(record)))
-            db.execute('INSERT INTO assets VALUES (?,?,?)',('b'*64,str(self.folder/'added.pdf'),'b'*64))
-            for n,verdict in enumerate(['advances','meets'],1):db.execute('INSERT INTO progress VALUES (?,?,?,?,?,?,?,?,?,?)',(f'added:{n}','SWE-01',1,'https://new.example','b'*64,'2024-08-27',verdict,'Exact quote','test-model',f'2026-11-0{n}'))
-        before=self.db.read_bytes()
-        with patch.object(store,'completed_fields',return_value={'SWE':self.folder}),redirect_stdout(io.StringIO()):
-            core.main(['import'],core=self.core,path=self.db)
-            first=self.snapshot();core.main(['import'],core=self.core,path=self.db)
-        data=core.load(self.core);self.assertEqual(self.snapshot(),first);self.assertEqual(self.db.read_bytes(),before)
-        self.assertEqual(data['breakthroughs']['SWE-01']['prerequisites'],record['prerequisites'])
-        self.assertEqual(len(data['progress']),2);row=data['progress'][0]
-        self.assertEqual((row['milestone'],row['by'],row['copy']),('m1','test-model','b'*64));self.assertEqual(row['quote'],'Exact quote')
-        self.assertEqual(data['sources']['https://new.example']['copies'][0]['sha256'],'b'*64)
-        self.assertEqual(core.check(data),[])
-        out=io.StringIO()
-        with redirect_stdout(out):self.assertEqual(core.main(['check'],core=self.core,path=self.db),0)
-        self.assertEqual(out.getvalue(),'')
-        row['verdict']='maybe';core.write_progress(data['progress'],self.core)
-        with redirect_stdout(out):self.assertNotEqual(core.main(['check'],core=self.core,path=self.db),0)
-        self.assertIn('verdict',out.getvalue())
-
     def test_cli_import_works_without_database(self):
-        with patch.object(store,'completed_fields',return_value={'SWE':self.folder}),redirect_stdout(io.StringIO()):core.main(['import'],core=self.core,path=self.db)
-        self.assertFalse(self.db.exists());self.assertEqual(core.check(core.load(self.core)),[])
+        with patch.object(store, 'completed_fields', return_value={'SWE': self.folder}):
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(core.main(['import'], core=self.core), 0)
+                first = self.snapshot()
+                self.assertEqual(core.main(['import'], core=self.core), 0)
+        self.assertEqual(self.snapshot(), first)
+        self.assertFalse(self.db.exists())
+        self.assertEqual(core.check(core.load(self.core)), [])
+
+    def test_cli_import_adds_newly_completed_fields_and_preserves_existing_records(self):
+        self.imported()
+        item = core.load(self.core)['breakthroughs']['SWE-01']
+        item['title'] = 'Edited in core'
+        core.write_breakthrough(item, self.core)
+        before = self.snapshot()
+        folder = self.root / 'CSC'
+        folder.mkdir()
+        value = copy.deepcopy(self.value)
+        value['field'].update(prefix='CSC', field='Computer Science')
+        for n, record in enumerate(value['innovations'], 1):
+            record['id'] = f'CSC-{n:02}'
+        (folder / 'final-innovations.json').write_text(json.dumps(value))
+        roots = {'SWE': self.folder, 'CSC': folder}
+        with patch.object(store, 'completed_fields', return_value=roots):
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(core.main(['import'], core=self.core), 0)
+        after = self.snapshot()
+        for name, raw in before.items():
+            self.assertEqual(after[name], raw)
+        self.assertEqual(set(core.load(self.core)['fields']), {'SWE', 'CSC'})
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(core.main(['check'], core=self.core), 0)
 
 
 if __name__=='__main__':unittest.main()

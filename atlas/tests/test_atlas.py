@@ -1,4 +1,5 @@
 import copy
+import io
 import json
 import tempfile
 import threading
@@ -16,7 +17,7 @@ from atlas.add import main as add_main
 from atlas.prerequisites import run as prerequisites
 from atlas.prerequisites import main as prerequisites_main
 
-TABLES=['runs','fields','breakthroughs','assets','documents','progress']
+TABLES = ['fields', 'breakthroughs', 'assets', 'documents', 'progress']
 
 class AtlasTests(unittest.TestCase):
     def setUp(self):
@@ -41,16 +42,45 @@ class AtlasTests(unittest.TestCase):
 
     def test_rebuild_loads_core_records_with_sources_expanded(self):
         counts=self.load();self.assertEqual((counts['breakthroughs'],counts['assets'],counts['missing']),(2,1,0))
-        field=(self.core/'SWE/field.json').read_text()
+        field = json.loads((self.core / 'SWE/field.json').read_text())
+        self.assertNotIn('runs', counts)
         with connect(self.db) as db:
-            self.assertEqual(db.execute('SELECT count(*) FROM runs').fetchone()[0],1)
-            run=db.execute('SELECT * FROM runs').fetchone();self.assertEqual((run['hash'],run['payload']),(json.loads(field)['imported_from']['run_hash'],field))
-            self.assertEqual(tuple(db.execute('SELECT id,name,run_hash FROM fields').fetchone()),('SWE','Software Engineering',run['hash']))
+            self.assertIsNone(db.execute(
+                "SELECT name FROM sqlite_master WHERE name='runs'"
+            ).fetchone())
+            columns = [r['name'] for r in db.execute('PRAGMA table_info(fields)')]
+            self.assertEqual(columns, ['id', 'name', 'color'])
+            self.assertEqual(
+                tuple(db.execute('SELECT * FROM fields').fetchone()),
+                ('SWE', 'Software Engineering', field['color']),
+            )
             item=json.loads(db.execute('SELECT payload FROM breakthroughs WHERE id=?',('SWE-01',)).fetchone()[0])
             self.assertEqual(db.execute('SELECT path FROM assets').fetchone()[0],str(self.source.resolve()))
         for key in ['title','concept','current_state','unresolved_issues','change_log']:self.assertEqual(item[key],self.record[key])
         self.assertEqual(item['sources'],[{'url':'https://example.org','title':'Paper','status':'saved','artifacts':[{'sha256':self.hash,'format':'html','kind':'source'}]}])
         self.assertEqual((item['field'],item['status'],item['completion_criteria'][0]['id']),('SWE','active','m1'))
+
+    def test_rebuild_does_not_read_imported_from(self):
+        self.load()
+        before = self.tables()
+        path = self.core / 'SWE/field.json'
+        field = json.loads(path.read_text())
+        field.pop('imported_from')
+        path.write_text(json.dumps(field))
+        self.load()
+        self.assertEqual(self.tables(), before)
+
+    def test_root_redirects_to_tree(self):
+        handler = Handler.__new__(Handler)
+        handler.path = '/'
+        handler.wfile = io.BytesIO()
+        with patch.object(handler, 'send_response') as response:
+            with patch.object(handler, 'send_header') as header:
+                with patch.object(handler, 'end_headers'):
+                    handler.do_GET()
+        response.assert_called_once_with(302)
+        self.assertIn(unittest.mock.call('Location', '/tree/'), header.call_args_list)
+        self.assertEqual(handler.wfile.getvalue(), b'')
 
     def test_retired_breakthroughs_are_not_loaded(self):
         core.import_field(self.folder,self.core);data=core.load(self.core);item=data['breakthroughs']['SWE-02'];item.update(status='retired',merged_into='SWE-01');core.write_breakthrough(item,self.core)
@@ -94,7 +124,14 @@ class AtlasTests(unittest.TestCase):
             with self.assertRaises(HTTPError) as error:urlopen(base+'/api/assets/'+self.hash)
             self.assertEqual(error.exception.code,409)
             with urlopen(base+'/api/breakthroughs/SWE-01') as res:
-                item=json.load(res);self.assertNotIn('provenance',item);self.assertNotIn('path',item['sources'][0]['artifacts'][0])
+                item = json.load(res)
+                self.assertNotIn('run', item)
+                self.assertNotIn('provenance', item)
+                self.assertNotIn('path', item['sources'][0]['artifacts'][0])
+            for path in ['/app.js', '/style.css', '/index.html']:
+                with self.assertRaises(HTTPError) as error:
+                    urlopen(base + path)
+                self.assertEqual(error.exception.code, 404)
         finally:server.shutdown();server.server_close();thread.join()
 
     def test_manifest_selects_completed_fields_from_their_roots(self):

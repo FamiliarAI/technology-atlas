@@ -2,9 +2,7 @@
 import argparse
 import json
 import os
-import sqlite3
 import subprocess
-from contextlib import closing
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -181,45 +179,18 @@ def check(data):
     return problems
 
 
-def _carry_database(core, path, imported):
-    """Read the old view without creating or changing it."""
-    if not Path(path).exists():
-        return
-    data = load(core)
-    with closing(sqlite3.connect(Path(path).resolve().as_uri() + '?mode=ro', uri=True)) as db:
-        db.row_factory = sqlite3.Row
-        for row in db.execute('SELECT id, field, payload FROM breakthroughs ORDER BY id'):
-            if row['field'] in imported and row['id'] in data['breakthroughs']:
-                old = json.loads(row['payload'])
-                if 'prerequisites' in old:
-                    item = data['breakthroughs'][row['id']]; item['prerequisites'] = old['prerequisites']
-                    write_breakthrough(item, core)
-        for old in db.execute('SELECT * FROM progress WHERE verdict IS NOT NULL ORDER BY added_at, id'):
-            row = {'breakthrough': old['breakthrough'], 'milestone': f'm{old["criterion"]}', 'url': old['url'], 'copy': old['asset'], 'source_date': old['source_date'], 'verdict': old['verdict'], 'quote': old['quote'], 'by': old['model'], 'added_at': old['added_at']}
-            if row not in data['progress']:
-                data['progress'].append(row)
-            artifacts = []
-            if old['asset']:
-                asset = db.execute('SELECT path FROM assets WHERE id=?', (old['asset'],)).fetchone()
-                artifact = {'sha256': old['asset'], 'kind': 'source', 'resolved_url': old['url'], 'retrieved_at': old['added_at']}
-                if asset:
-                    artifact['format'] = Path(asset['path']).suffix.lstrip('.')
-                artifacts.append(artifact)
-            _merge_source(data['sources'], {'url': old['url'], 'title': old['url'], 'status': 'saved' if artifacts else 'unknown', 'artifacts': artifacts})
-    write_sources(data['sources'], core); write_progress(data['progress'], core)
-
-
-def main(argv=None, core=CORE, path=store.DB):
+def main(argv=None, core=CORE):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('command', choices=['import', 'check'])
     args = parser.parse_args(argv)
     try:
         if args.command == 'import':
-            roots = store.completed_fields(); imported = []
+            roots = store.completed_fields()
+            imported = []
             for n, prefix in enumerate(sorted(roots)):
                 if not (Path(core) / prefix).exists():
-                    import_field(roots[prefix], core, color=store.color(prefix, n)); imported.append(prefix)
-            _carry_database(core, path, imported)
+                    import_field(roots[prefix], core, color=store.color(prefix, n))
+                    imported.append(prefix)
             print('Imported:', ', '.join(imported) or 'already current')
         else:
             problems = check(load(core))

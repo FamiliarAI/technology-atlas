@@ -6,8 +6,7 @@ from pathlib import Path
 from urllib.parse import unquote, urlsplit
 from .store import DB, ROOT, catalog, connect, progress, progress_summary, sha
 
-STATIC = ROOT / 'atlas/static'
-TREE = STATIC / 'tree'  # built React tech tree (atlas/web)
+TREE = ROOT / 'atlas/static/tree'  # built React tech tree (atlas/web)
 TYPES = {'.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.woff2': 'font/woff2', '.woff': 'font/woff', '.svg': 'image/svg+xml'}
 
 class Handler(BaseHTTPRequestHandler):
@@ -24,16 +23,20 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         path = unquote(urlsplit(self.path).path)
+        if path == '/':
+            self.send_response(302)
+            self.send_header('Location', '/tree/')
+            self.send_header('Content-Length', '0')
+            self.end_headers()
+            return
         with connect(self.server.db_path) as db:
             if path == '/api/catalog': return self.reply(catalog(db))
             if path == '/api/progress': return self.reply(progress_summary(db))
             if path.startswith('/api/breakthroughs/'):
                 identifier = path.removeprefix('/api/breakthroughs/')
-                row = db.execute('SELECT payload,field FROM breakthroughs WHERE id=?', (identifier,)).fetchone()
+                row = db.execute('SELECT payload FROM breakthroughs WHERE id=?', (identifier,)).fetchone()
                 if not row: return self.reply({'error':'Not found'}, status=404)
                 item = json.loads(row['payload'])
-                f = db.execute('SELECT run_hash FROM fields WHERE id=?', (row['field'],)).fetchone()
-                item['run'] = dict(db.execute('SELECT hash, imported_at FROM runs WHERE hash=?', (f['run_hash'],)).fetchone())
                 item['progress'], item['milestone_status'] = progress(db, identifier, len(item['completion_criteria']))
                 item['documents'] = [r['id'].split(':',1)[1] for r in db.execute('SELECT id FROM documents WHERE id LIKE ?', (identifier + ':%',))]
                 # Do not expose filesystem paths through the browser API.
@@ -59,9 +62,6 @@ class Handler(BaseHTTPRequestHandler):
                 target = TREE / 'index.html'  # client-side routes fall back to the app
             if not target.is_file(): return self.reply({'error':'Tree not built; run npm run build in atlas/web'}, status=404)
             return self.reply(target.read_bytes(), TYPES[target.suffix])
-        files = {'/':('index.html','text/html; charset=utf-8'), '/app.js':('app.js','text/javascript; charset=utf-8'), '/style.css':('style.css','text/css; charset=utf-8')}
-        if path in files:
-            name, mime = files[path]; return self.reply((STATIC/name).read_bytes(),mime)
         return self.reply({'error':'Not found'},status=404)
 
     def log_message(self, *args): pass

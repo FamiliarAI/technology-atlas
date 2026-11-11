@@ -31,8 +31,7 @@ def connect(path=DB):
 
 def initialize(db):
     db.executescript('''
-    CREATE TABLE IF NOT EXISTS runs (hash TEXT PRIMARY KEY, field TEXT NOT NULL, imported_at TEXT NOT NULL, payload TEXT NOT NULL);
-    CREATE TABLE IF NOT EXISTS fields (id TEXT PRIMARY KEY, name TEXT NOT NULL, color TEXT NOT NULL, run_hash TEXT NOT NULL REFERENCES runs(hash));
+    CREATE TABLE IF NOT EXISTS fields (id TEXT PRIMARY KEY, name TEXT NOT NULL, color TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS breakthroughs (id TEXT PRIMARY KEY, field TEXT NOT NULL REFERENCES fields(id), payload TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS assets (id TEXT PRIMARY KEY, path TEXT NOT NULL, hash TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS documents (id TEXT PRIMARY KEY, path TEXT NOT NULL, hash TEXT NOT NULL);
@@ -80,9 +79,10 @@ def rebuild(core=CORE, path=DB, roots=SOURCES):
         with db:
             initialize(db)
             for prefix, field in sorted(data['fields'].items()):
-                run = field['imported_from']
-                db.execute('INSERT INTO runs VALUES (?,?,?,?)', (run['run_hash'], prefix, run['imported_at'], (Path(core) / prefix / 'field.json').read_text(encoding='utf-8')))
-                db.execute('INSERT INTO fields VALUES (?,?,?,?)', (prefix, field['name'], field['color'], run['run_hash']))
+                db.execute(
+                    'INSERT INTO fields VALUES (?,?,?)',
+                    (prefix, field['name'], field['color']),
+                )
                 items = []
                 for identifier, item in sorted(data['breakthroughs'].items()):
                     if item['field'] != prefix or item.get('status') == 'retired': continue
@@ -93,7 +93,7 @@ def rebuild(core=CORE, path=DB, roots=SOURCES):
                         p = (ROOT / loc).resolve()
                         if p.is_relative_to(ROOT) and p.is_file():
                             db.execute('INSERT OR REPLACE INTO documents VALUES (?,?,?)', (identifier + ':' + kind, str(p), sha(p.read_bytes())))
-                backfill_progress(db, {'innovations': items, 'created_at': field.get('created_at') or run['imported_at']}, model)
+                backfill_progress(db, {'innovations': items, 'created_at': field.get('created_at')}, model)
             for source in data['sources'].values():
                 for copy in source['copies']:
                     p = files.get(copy['sha256'])
@@ -106,7 +106,7 @@ def rebuild(core=CORE, path=DB, roots=SOURCES):
                 if row['breakthrough'] not in criteria: continue  # retired
                 n = criteria[row['breakthrough']][row['milestone']]
                 db.execute('INSERT OR REPLACE INTO progress VALUES (?,?,?,?,?,?,?,?,?,?)', (f"added:{row.get('copy')}:{row['breakthrough']}:{n}", row['breakthrough'], n, row['url'], row.get('copy'), row.get('source_date'), row['verdict'], row['quote'], row['by'], row['added_at']))
-            counts = {t: db.execute(f'SELECT count(*) FROM {t}').fetchone()[0] for t in ['runs', 'fields', 'breakthroughs', 'assets', 'documents', 'progress']}
+            counts = {t: db.execute(f'SELECT count(*) FROM {t}').fetchone()[0] for t in ['fields', 'breakthroughs', 'assets', 'documents', 'progress']}
         db.close()
         temp.replace(path)
     except BaseException:

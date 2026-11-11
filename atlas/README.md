@@ -11,7 +11,7 @@ python3 -m atlas.store
 python3 -m atlas.server --port 8765
 ```
 
-Open **http://127.0.0.1:8765**. The server binds only to this computer. It is not a hosted service and is not accessible from another device through that localhost address.
+Open **http://127.0.0.1:8765** (redirects to `/tree/`). The server binds only to this computer. It is not a hosted service and is not accessible from another device through that localhost address.
 
 `python3 -m atlas.store` rebuilds `atlas/data/atlas.sqlite3` from the records in `atlas/core/` (files in Git; see the [core design](../docs/plans/2026-11-09-atlas-core-design.md)). It runs `python3 -m atlas.core check` first and stops on any problem, leaving the existing database in place; otherwise it builds a new database beside the old one and swaps it in. Deleting the database and rebuilding gives the same contents. New completed fields enter the core with `python3 -m atlas.core import`, then rebuild.
 
@@ -29,18 +29,18 @@ The build goes to `atlas/static/tree/` (ignored by Git) and is served by `atlas.
 
 - Desktop: one lane per field, read left to right; each breakthrough is a card with a segmented bar (one segment per milestone: met, in progress, none). Cards within a lane are ordered by progress. Hovering a card draws its `related_concepts` links. These are not prerequisites; prerequisite order is deferred (see the project plan).
 - Phone (≤ 760px): one field at a time as a vertical path; swipe sideways or use the field chips to change field.
-- Detail panel (bottom sheet on phones): milestones with their status and the progress rows judged against each, research sources not yet tied to a milestone, related breakthroughs, and a link to the full record at `/#ID`.
+- The detail panel (bottom sheet on phones) shows milestones with their status and the progress rows judged against each, research sources not yet tied to a milestone, and related breakthroughs. The panel holds the full record, with collapsed sections for significance, missing breakthrough, current state, related-concept paragraphs, unresolved issues, review changes, sources and saved copies, and provenance downloads.
 - API addition: `GET /api/progress` returns each breakthrough's milestone status list and progress row count.
 
 ## Included
 
-- Field filters, full-text search, graph overview, and a mobile-friendly library.
+- Full-text search, a field-lane tree on desktop, and a mobile-friendly vertical path.
 - Each record's completion criteria shown as numbered milestones.
 - Every breakthrough's six final sections, source references, unresolved issues, and review change history.
-- Deep links such as `http://127.0.0.1:8765/#SWE-01`.
-- Explicit related-concept references from the reviewed material, with the original explanations accessible in the detail view. Hover or keyboard-focus a map node to reveal its references; click or press Enter for its record. Drag the map to pan and use the zoom controls to inspect it.
+- Deep links such as `http://127.0.0.1:8765/tree/#SWE-01`.
+- Explicit related-concept references from the reviewed material, with the original explanations accessible in the detail panel. Hover a tree card to reveal its references; select a card for its record.
 - Original publisher/repository links and local saved-copy downloads. Copies may be partial; the interface preserves capture status and evidence limitations.
-- Review and research provenance downloads, import timestamps, and final-set SHA-256 fingerprints.
+- Review and research provenance downloads, with import history and record revisions in Git.
 - A SQLite view rebuilt atomically from `atlas/core/`, with stable IDs; Git holds the history of every record.
 
 The graph is a map of explicit discussion references, **not a dependency graph**. No cross-field semantic matching pass has been performed. Connections do not establish causality, prerequisites, or achievement. Reviewed concepts are proposals, not completed breakthroughs or forecasts.
@@ -95,8 +95,7 @@ tests can supply a stub `call(prompt)` returning the parsed answer.
 
 `atlas/data/atlas.sqlite3` is generated locally and ignored by Git. Tables:
 
-- `runs`: one row per field: the hash and import time of the ingestion output it was imported from, and its `field.json`.
-- `fields`: navigation groups (one per field), with the colour fixed at import.
+- `fields(id, name, color)` holds navigation groups (one per field), with the colour fixed at import. `imported_from` remains in core field files and is unused by the database.
 - `breakthroughs`: the core records of active breakthroughs (retired ones are left out), with each source URL expanded back to `{url, title, status, artifacts}` from `sources.jsonl`.
 - `assets`: saved source copies found on this computer, and their hashes.
 - `documents`: research, structured-record, and review provenance files inside the repository.
@@ -121,11 +120,8 @@ No write/intake endpoints, authentication system, public redistribution, or host
 
 ```bash
 python3 -m unittest discover -s atlas/tests -v
-node --check atlas/static/app.js
+python3 -m atlas.core check
+(cd atlas/web && npm run build)
 ```
 
 `test_core.py` covers importing into and checking `atlas/core/`; `test_atlas.py` covers the rebuild (identical tables after deleting and rebuilding, a check problem or changed copy leaving the old database in place, missing copies skipped), relationship extraction, download allowlisting/integrity, progress, and the add and prerequisite passes.
-
-`tests/browser-smoke.js` contains a Playwright function that can be supplied as the `code` argument to the connected browser's `browser_run_code_unsafe` tool. Its file loader may restrict paths outside the browser workspace. It exercises filtering, searching, empty-state reset, six-section details, related-record navigation, source downloads, deep links, mobile overflow, and keyboard dismissal against the running local app. It is not required to run the application.
-
-Manual visual inspection was performed at 1440px desktop and 390px mobile widths. All 39 imported breakthrough objects were compared with their source final JSON, and a repeat import returned no changes.
