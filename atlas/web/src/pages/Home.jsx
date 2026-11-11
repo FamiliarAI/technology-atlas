@@ -151,13 +151,12 @@ function Moved() {
                 </h3>
                 <ul className="moved-rows">
                   {g.rows.map((row, n) => {
-                    const milestone = item.milestones[row.criterion - 1];
                     return (
                       <li key={n}>
                         <div className="moved-row-head">
                           <StatusLabel status={VERDICT[row.verdict]} />
                           <span className="mono muted">M{row.criterion}</span>
-                          <span className="milestone-label">{milestone?.label}</span>
+                          <span className="milestone-label">{row.label}</span>
                         </div>
                         <blockquote>
                           <p>“{row.quote}”</p>

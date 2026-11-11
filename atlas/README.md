@@ -29,7 +29,7 @@ The build goes to `atlas/static/site/` (ignored by Git) and is served by `atlas.
 
 - `/` Home, `/atlas` the star chart (`?field=QUA` focuses a constellation, `&star=QUA-01` selects a star), `/b/QUA-01` a breakthrough. `/field/…`, `/claims` and `/about` are placeholders for now.
 - Star positions are computed in the browser from field and breakthrough IDs and prerequisite depth (`src/sky.js`), so the sky is the same on every load.
-- `GET /api/catalog` carries each breakthrough's `milestones` (`id`, `label`, `status`) and `moved_at`, and a top-level `recent` list of judged progress rows, newest first.
+- The site reads only the data contract (`atlas/store.py`: `catalog`, `field_data`, `breakthrough_data`, `search_index`), served under `/data/` and written to disk by the export: `data/catalog.json` (fields with `region` and milestone counts; breakthroughs with `milestones` as a status list, `prerequisites`, `moved_at`; `recent`; under 300 KB), `data/field/<ID>.json`, `data/b/<ID>.json` (sources as links to originals only) and `data/search.json` (loaded on first search focus). Regions are a constant (`REGIONS`) in `atlas/store.py`.
 - `atlas/web/public/deep-field*.webp` is the Home background plate, generated with GPT Image through the Codex CLI.
 
 ## Included
@@ -43,6 +43,15 @@ The build goes to `atlas/static/site/` (ignored by Git) and is served by `atlas.
 - A SQLite view rebuilt atomically from `atlas/core/`, with stable IDs; Git holds the history of every record.
 
 The graph is a map of explicit discussion references, **not a dependency graph**. No cross-field semantic matching pass has been performed. Connections do not establish causality, prerequisites, or achievement. Reviewed concepts are proposals, not completed breakthroughs or forecasts.
+
+## Static export
+
+```bash
+python3 -m atlas.store && (cd atlas/web && npm run build)
+python3 -m atlas.export OUT [--base-url https://example.org]
+```
+
+Writes the built site, every data file, and one `index.html` per route (`/`, `/atlas`, `/claims`, `/about`, `/field/<ID>/`, `/b/<ID>/`, plus `404.html`), each with its own title, description and Open Graph tags (`og:image` is `share/<ID>.png` for breakthroughs, `share/default.png` otherwise; absolute when `--base-url` is given). Serve OUT from a site root. Saved source copies and provenance documents are not exported. OUT must be empty or an earlier export.
 
 ## Adding progress
 
@@ -108,8 +117,7 @@ The database references original private files rather than copying all source do
 
 API:
 
-- `GET /api/catalog`
-- `GET /api/breakthroughs/<ID>`
+- `GET /data/catalog.json`, `/data/search.json`, `/data/field/<ID>.json`, `/data/b/<ID>.json`
 - `GET /api/assets/<SHA256>` — verified attachment download
 - `GET /api/documents/<ID>:<provenance-kind>` — verified attachment download
 

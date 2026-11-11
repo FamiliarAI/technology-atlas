@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { formatDate, search, useAtlas } from './data.jsx';
+import { formatDate, loadSearch, search, useAtlas } from './data.jsx';
 import { SharedDefs, StarGlyph, Wordmark } from './glyphs.jsx';
 import Starfield from './Starfield.jsx';
 import { EASE } from './motion.js';
@@ -10,10 +10,15 @@ function Search({ open, onClose }) {
   const { atlas } = useAtlas();
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
+  const [index, setIndex] = useState(null);
   const navigate = useNavigate();
   const input = useRef(null);
   const listId = useId();
-  const results = atlas ? search(atlas, query) : [];
+  const results = atlas ? search(atlas, index, query) : [];
+  // The summaries index loads on first use; until then titles and IDs are searched.
+  const prime = () => {
+    if (!index) loadSearch().then(setIndex, () => {});
+  };
   useEffect(() => {
     const key = (e) => {
       if (e.key === '/' && !/input|textarea/i.test(document.activeElement?.tagName)) {
@@ -49,6 +54,7 @@ function Search({ open, onClose }) {
         aria-expanded={results.length > 0}
         aria-controls={listId}
         aria-activedescendant={results.length ? `${listId}-${active}` : undefined}
+        onFocus={prime}
         onChange={(e) => {
           setQuery(e.target.value);
           setActive(0);

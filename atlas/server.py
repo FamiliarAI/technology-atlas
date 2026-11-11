@@ -5,7 +5,17 @@ import json
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
-from .store import DB, ROOT, catalog, connect, progress, progress_summary, sha
+from .store import (
+    DB,
+    ROOT,
+    breakthrough_data,
+    catalog,
+    connect,
+    encode,
+    field_data,
+    search_index,
+    sha,
+)
 
 SITE = ROOT / 'atlas/static/site'  # built React site (atlas/web)
 TYPES = {
@@ -46,34 +56,9 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         path = unquote(urlsplit(self.path).path)
         with connect(self.server.db_path) as db:
-            if path == '/api/catalog':
-                return self.reply(catalog(db))
-            if path == '/api/progress':
-                return self.reply(progress_summary(db))
-            if path.startswith('/api/breakthroughs/'):
-                identifier = path.removeprefix('/api/breakthroughs/')
-                row = db.execute(
-                    'SELECT payload FROM breakthroughs WHERE id=?', (identifier,)
-                ).fetchone()
-                if not row:
-                    return self.reply({'error': 'Not found'}, status=404)
-                item = json.loads(row['payload'])
-                item['progress'], item['milestone_status'] = progress(
-                    db, identifier, len(item['completion_criteria'])
-                )
-                item['documents'] = [
-                    row['id'].split(':', 1)[1]
-                    for row in db.execute(
-                        'SELECT id FROM documents WHERE id LIKE ?', (identifier + ':%',)
-                    )
-                ]
-                # Do not expose filesystem paths through the browser API.
-                item.pop('provenance', None)
-                for source in item.get('sources', []):
-                    for artifact in source.get('artifacts', []):
-                        artifact.pop('path', None)
-                        artifact.pop('absolute_path', None)
-                return self.reply(item)
+            if path.startswith('/data/'):
+                return self.data(db, path.removeprefix('/data/'))
+            # Local-only verified downloads; the site and the export do not use them.
             if path.startswith('/api/assets/') or path.startswith('/api/documents/'):
                 table = 'assets' if path.startswith('/api/assets/') else 'documents'
                 identifier = path.split('/', 3)[3]
@@ -92,6 +77,21 @@ class Handler(BaseHTTPRequestHandler):
         if path.startswith('/api/'):
             return self.reply({'error': 'Not found'}, status=404)
         return self.site(path)
+
+    def data(self, db, name):
+        """The site's data contract, built on request (the export writes the same files)."""
+        value = None
+        if name == 'catalog.json':
+            value = catalog(db)
+        elif name == 'search.json':
+            value = search_index(db)
+        elif name.startswith('field/') and name.endswith('.json'):
+            value = field_data(db, name[len('field/') : -len('.json')])
+        elif name.startswith('b/') and name.endswith('.json'):
+            value = breakthrough_data(db, name[len('b/') : -len('.json')])
+        if value is None:
+            return self.reply({'error': 'Not found'}, status=404)
+        return self.reply(encode(value), 'application/json; charset=utf-8')
 
     def site(self, path):
         """Built files by path; any other path without a file extension is a client route."""

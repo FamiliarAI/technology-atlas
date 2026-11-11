@@ -157,7 +157,7 @@ export default function Breakthrough() {
           </motion.header>
 
           <motion.section className="concept" aria-label="Concept" {...fade(1)}>
-            <p className={'lead' + (open ? ' open' : '')}>{record ? record.concept[0].text : item.summary}</p>
+            <p className={'lead' + (open ? ' open' : '')}>{record?.concept[0]?.text}</p>
             {!open && (
               <button type="button" className="read-on" onClick={() => setOpen(true)}>
                 Read the whole paragraph
@@ -179,7 +179,8 @@ export default function Breakthrough() {
               This counts as achieved when all {item.status.length} milestones are met.
             </p>
             <ol>
-              {item.milestones.map((m, n) => {
+              {item.status.map((status, n) => {
+                const m = record?.milestones[n] || { id: n, label: null, status };
                 const criterion = record?.completion_criteria[n];
                 const rows = judged.filter((r) => r.criterion === n + 1);
                 return (
@@ -244,8 +245,8 @@ export default function Breakthrough() {
                 listed in the full record below.
               </p>
             )}
-            {judged.map((r) => (
-              <figure key={r.id} className={'quote ' + r.verdict} id={`evidence-m${r.criterion}`}>
+            {judged.map((r, n) => (
+              <figure key={n} className={'quote ' + r.verdict} id={`evidence-m${r.criterion}`}>
                 <figcaption>
                   <span className={'verdict ' + r.verdict}>{VERDICT[r.verdict]}</span>
                   <span className="mono">milestone {r.criterion}</span>
@@ -260,12 +261,6 @@ export default function Breakthrough() {
                   <span className="mono muted">
                     {r.source_date ? `published ${formatDate(r.source_date)}` : 'date not stated'} · judged by{' '}
                     {r.model} · {formatDate(r.added_at)}
-                    {r.asset && (
-                      <>
-                        {' · '}
-                        <a href={`/api/assets/${r.asset}`}>saved copy</a>
-                      </>
-                    )}
                   </span>
                 </p>
               </figure>
@@ -275,7 +270,7 @@ export default function Breakthrough() {
           {record && (
             <section className="full-record" aria-labelledby="record-title">
               <h2 id="record-title">Full record</h2>
-              <Record id={item.id} record={record} />
+              <Record record={record} />
             </section>
           )}
         </div>
@@ -302,7 +297,7 @@ export default function Breakthrough() {
               </div>
               <div>
                 <dt>Sources</dt>
-                <dd className="mono">{item.source_count}</dd>
+                <dd className="mono">{record ? record.sources.length : '…'}</dd>
               </div>
               <div>
                 <dt>Last moved</dt>

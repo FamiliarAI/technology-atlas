@@ -79,7 +79,11 @@ class AtlasTests(unittest.TestCase):
         other = copy.deepcopy(self.record)
         other.update(id='SWE-02', title='Second breakthrough')
         self.value = {
-            'field': {'prefix': 'SWE', 'field': 'Software Engineering'},
+            'field': {
+                'prefix': 'SWE',
+                'field': 'Software Engineering',
+                'boundaries': 'Software Engineering: how software is built.',
+            },
             'created_at': '2026-11-01T00:00:00+00:00',
             'innovations': [self.record, other],
             'original_dispositions': [{'original_id': 'old-1', 'decision': 'covered'}],
@@ -141,10 +145,10 @@ class AtlasTests(unittest.TestCase):
                 db.execute("SELECT name FROM sqlite_master WHERE name='runs'").fetchone()
             )
             columns = [row['name'] for row in db.execute('PRAGMA table_info(fields)')]
-            self.assertEqual(columns, ['id', 'name', 'color'])
+            self.assertEqual(columns, ['id', 'name', 'color', 'boundaries'])
             self.assertEqual(
                 tuple(db.execute('SELECT * FROM fields').fetchone()),
-                ('SWE', 'Software Engineering', field['color']),
+                ('SWE', 'Software Engineering', field['color'], field['boundaries']),
             )
             item = json.loads(
                 db.execute('SELECT payload FROM breakthroughs WHERE id=?', ('SWE-01',)).fetchone()[
@@ -217,11 +221,13 @@ class AtlasTests(unittest.TestCase):
         with connect(self.db) as db:
             data = catalog(db)
         for item in data['breakthroughs']:
-            self.assertEqual(
-                [milestone['status'] for milestone in item['milestones']],
-                progress_summary(db)[item['id']]['status'],
-            )
+            self.assertEqual(item['milestones'], progress_summary(db)[item['id']]['status'])
+        self.assertEqual(data['breakthroughs'][0]['milestones'], ['met'])
+        self.assertEqual(data['breakthroughs'][0]['moved_at'], '2026-12-02')
         self.assertTrue(all(row['verdict'] for row in data['recent']))
+        self.assertEqual(
+            data['recent'][0]['label'], 'A proposed capability, discussed with SWE-02.'
+        )
 
     def test_retired_breakthroughs_are_not_loaded(self):
         core.import_field(self.folder, self.core)
@@ -273,18 +279,6 @@ class AtlasTests(unittest.TestCase):
         counts = self.load()
         self.assertEqual((counts['assets'], counts['missing']), (0, 1))
 
-    def test_connections_are_explicit_mentions_with_preserved_explanation(self):
-        self.load()
-        with connect(self.db) as db:
-            data = catalog(db)
-        self.assertEqual(len(data['connections']), 1)
-        edge = data['connections'][0]
-        self.assertEqual(edge['kind'], 'discussed together')
-        self.assertEqual((edge['source'], edge['target']), ('SWE-01', 'SWE-02'))
-        self.assertEqual(
-            edge['explanations'][0]['text'], self.record['related_concepts'][0]['text']
-        )
-
     def test_http_source_downloads_are_allowlisted_and_integrity_checked(self):
         self.load()
         server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
@@ -303,12 +297,22 @@ class AtlasTests(unittest.TestCase):
             with self.assertRaises(HTTPError) as error:
                 urlopen(base + '/api/assets/' + self.hash)
             self.assertEqual(error.exception.code, 409)
-            with urlopen(base + '/api/breakthroughs/SWE-01') as res:
+            with urlopen(base + '/data/b/SWE-01.json') as res:
                 item = json.load(res)
-                self.assertNotIn('run', item)
                 self.assertNotIn('provenance', item)
-                self.assertNotIn('path', item['sources'][0]['artifacts'][0])
-            for path in ['/app.js', '/style.css', '/api/documents/../../x']:
+                self.assertEqual(
+                    item['sources'],
+                    [{'url': 'https://example.org', 'title': 'Paper', 'status': 'saved'}],
+                )
+                self.assertNotIn('asset', item['progress'][0])
+            for path in [
+                '/app.js',
+                '/style.css',
+                '/api/documents/../../x',
+                '/api/catalog',
+                '/data/b/SWE-99.json',
+                '/data/field/../atlas.sqlite3',
+            ]:
                 with self.assertRaises(HTTPError) as error:
                     urlopen(base + path)
                 self.assertEqual(error.exception.code, 404)
@@ -336,7 +340,7 @@ class AtlasTests(unittest.TestCase):
         self.assertEqual(roots, {'SWE': moved})
         self.load(roots['SWE'])
         with connect(self.db) as db:
-            self.assertEqual(catalog(db)['breakthroughs'][0]['milestone_count'], 1)
+            self.assertEqual(len(catalog(db)['breakthroughs'][0]['milestones']), 1)
 
     def test_current_state_sources_backfill_progress_without_status(self):
         self.load()

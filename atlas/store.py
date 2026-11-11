@@ -2,7 +2,6 @@
 
 import hashlib
 import json
-import re
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
@@ -43,7 +42,7 @@ def initialize(db):
         (
             '\n'
             '    CREATE TABLE IF NOT EXISTS fields (id TEXT PRIMARY KEY, name TEXT NOT '
-            'NULL, color TEXT NOT NULL);\n'
+            'NULL, color TEXT NOT NULL, boundaries TEXT);\n'
             '    CREATE TABLE IF NOT EXISTS breakthroughs (id TEXT PRIMARY KEY, field TEXT '
             'NOT NULL REFERENCES fields(id), payload TEXT NOT NULL);\n'
             '    CREATE TABLE IF NOT EXISTS assets (id TEXT PRIMARY KEY, path TEXT NOT '
@@ -146,8 +145,8 @@ def rebuild(core=CORE, path=DB, roots=SOURCES):
             initialize(db)
             for prefix, field in sorted(data['fields'].items()):
                 db.execute(
-                    'INSERT INTO fields VALUES (?,?,?)',
-                    (prefix, field['name'], field['color']),
+                    'INSERT INTO fields VALUES (?,?,?,?)',
+                    (prefix, field['name'], field['color'], field.get('boundaries')),
                 )
                 items = []
                 for identifier, item in sorted(data['breakthroughs'].items()):
@@ -256,11 +255,84 @@ def progress_summary(db):
     return out
 
 
-def catalog(db):
+# The site's data contract (docs/plans/2026-11-11-site-design.md, Technical): the same files are
+# served by atlas.server under /data/ and written to disk by atlas.export.
+AS_OF = '2026-11-01'
+
+# Eight regions of neighbouring disciplines, in sky order. A constant, not core data.
+REGIONS = {
+    'Computing and Information': ['CSC', 'SWE', 'CPE', 'MLC', 'HCI', 'CRY', 'QUA'],
+    'Mathematics and Physics': ['MAT', 'PHY', 'OPT', 'THR'],
+    'Chemistry and Materials': ['CHEMREV', 'CHE', 'CRX', 'CRM', 'MAS', 'MET', 'RHE'],
+    'Engineering and Energy': [
+        'AER',
+        'BME',
+        'CIV',
+        'ELE',
+        'IND',
+        'MEC',
+        'MNE',
+        'NUC',
+        'PET',
+        'PWR',
+        'ROB',
+        'STR',
+    ],
+    'Earth and Space': ['AST', 'GEO', 'OCE', 'ROC', 'AGR'],
+    'Life Sciences': ['BIO', 'BCH', 'BIF', 'BOT', 'GEN', 'IMM', 'LON', 'MIC', 'NEU', 'VIR', 'ZOO'],
+    'Medicine': [
+        'ANS',
+        'CAR',
+        'CLM',
+        'DER',
+        'EMR',
+        'END',
+        'INF',
+        'NEP',
+        'NRL',
+        'OBG',
+        'ONC',
+        'OPH',
+        'ORT',
+        'PED',
+        'PHA',
+        'SUR',
+    ],
+    'Mind and Society': ['ACT', 'ECO', 'FIN', 'PSY'],
+}
+REGION = {field: region for region, fields in REGIONS.items() for field in fields}
+DEFAULT_REGION = 'Engineering and Energy'
+STATUSES = ['none', 'in_progress', 'met']
+SUMMARY_CUT = 160
+
+
+def region(field):
+    return REGION.get(field, DEFAULT_REGION)
+
+
+def cut(text, limit=SUMMARY_CUT):
+    """Text shortened at a word boundary to about limit characters."""
+    text = ' '.join(text.split())
+    if len(text) <= limit:
+        return text
+    head = text[: limit + 1].rsplit(' ', 1)[0].rstrip(' ,;:.-–—')
+    return head + '…'
+
+
+def status_of(verdicts):
+    if 'meets' in verdicts:
+        return 'met'
+    if 'advances' in verdicts:
+        return 'in_progress'
+    return 'none'
+
+
+def site_view(db):
+    """Everything the data files are built from, read once."""
+    fields = {row['id']: dict(row) for row in db.execute('SELECT * FROM fields ORDER BY id')}
     counts = dict(
         db.execute('SELECT breakthrough, COUNT(*) FROM progress GROUP BY breakthrough').fetchall()
     )
-    fields = [dict(row) for row in db.execute('SELECT * FROM fields ORDER BY name')]
     # Judged rows only: they give milestone status, the latest movement and recent changes.
     judged = [
         dict(row)
@@ -269,81 +341,211 @@ def catalog(db):
             'FROM progress WHERE verdict IS NOT NULL ORDER BY added_at DESC, id'
         )
     ]
-    items = []
-    for row in db.execute('SELECT * FROM breakthroughs ORDER BY id'):
+    mine = {}
+    for row in judged:
+        mine.setdefault(row['breakthrough'], []).append(row)
+    items = {}
+    for row in db.execute('SELECT id, field, payload FROM breakthroughs ORDER BY id'):
         item = json.loads(row['payload'])
-        mine = [entry for entry in judged if entry['breakthrough'] == item['id']]
+        rows = mine.get(row['id'], [])
         milestones = []
-        for criterion_number, criterion in enumerate(item['completion_criteria'], 1):
-            verdicts = {
-                entry['verdict'] for entry in mine if entry['criterion'] == criterion_number
-            }
-            status = (
-                'met'
-                if 'meets' in verdicts
-                else 'in_progress'
-                if 'advances' in verdicts
-                else 'none'
-            )
+        for number, criterion in enumerate(item['completion_criteria'], 1):
+            verdicts = {entry['verdict'] for entry in rows if entry['criterion'] == number}
             milestones.append(
-                {'id': criterion['id'], 'label': criterion.get('label'), 'status': status}
+                {
+                    'id': criterion['id'],
+                    'label': criterion.get('label'),
+                    'status': status_of(verdicts),
+                }
             )
-        items.append(
+        item['field'] = row['field']
+        item['milestones'] = milestones
+        item['moved_at'] = max((entry['added_at'] for entry in rows), default=None)
+        item['progress_count'] = counts.get(row['id'], 0)
+        item['prerequisite_ids'] = [link['id'] for link in item.get('prerequisites', [])]
+        items[row['id']] = item
+    unlocks = {identifier: [] for identifier in items}
+    for identifier, item in items.items():
+        for prerequisite in item['prerequisite_ids']:
+            if prerequisite in unlocks:
+                unlocks[prerequisite].append(identifier)
+    return {'fields': fields, 'items': items, 'unlocks': unlocks, 'judged': judged}
+
+
+def catalog(db, view=None):
+    """data/catalog.json: what every page and the chart need, and no more."""
+    view = view or site_view(db)
+    items = view['items']
+    fields = []
+    for prefix, field in sorted(view['fields'].items(), key=lambda pair: pair[1]['name']):
+        mine = [item for item in items.values() if item['field'] == prefix]
+        statuses = [milestone['status'] for item in mine for milestone in item['milestones']]
+        fields.append(
             {
-                'id': item['id'],
-                'field': row['field'],
-                'title': item['title'],
-                'summary': item['concept'][0]['text'],
-                'source_count': len(item.get('sources', [])),
-                'milestone_count': len(item['completion_criteria']),
-                'progress_count': counts.get(item['id'], 0),
-                'issue_count': len(item.get('unresolved_issues', [])),
-                'prerequisites': [link['id'] for link in item.get('prerequisites', [])],
-                'milestones': milestones,
-                'moved_at': max((entry['added_at'] for entry in mine), default=None),
-                'search_text': ' '.join(
-                    paragraph['text']
-                    for key in [
-                        'concept',
-                        'significance',
-                        'missing_breakthrough',
-                        'current_state',
-                        'completion_criteria',
-                    ]
-                    for paragraph in item[key]
-                ),
+                'id': prefix,
+                'name': field['name'],
+                'region': region(prefix),
+                'breakthroughs': len(mine),
+                'milestones': {status: statuses.count(status) for status in STATUSES},
             }
         )
-    known = {item['id'] for item in items}
-    edges = {}
-    for row in db.execute('SELECT id,payload FROM breakthroughs'):
-        for paragraph in json.loads(row['payload'])['related_concepts']:
-            for target in set(re.findall(r'\b[A-Z]{2,6}-\d{2}\b', paragraph['text'])) & known - {
-                row['id']
-            }:
-                key = tuple(sorted((row['id'], target)))
-                edges.setdefault(key, []).append(
-                    {
-                        'from': row['id'],
-                        'text': paragraph['text'],
-                        'source_urls': paragraph.get('source_urls', []),
-                    }
-                )
+    breakthroughs = [
+        {
+            'id': identifier,
+            'field': item['field'],
+            'title': item['title'],
+            'milestones': [milestone['status'] for milestone in item['milestones']],
+            'prerequisites': item['prerequisite_ids'],
+            'moved_at': item['moved_at'],
+        }
+        for identifier, item in sorted(items.items())
+    ]
+    recent = []
+    for row in view['judged'][:12]:
+        milestones = items.get(row['breakthrough'], {}).get('milestones', [])
+        label = None
+        if row['criterion'] and row['criterion'] <= len(milestones):
+            label = milestones[row['criterion'] - 1]['label']
+        recent.append(row | {'label': label})
     return {
+        'as_of': AS_OF,
+        'regions': list(REGIONS),
         'fields': fields,
-        'breakthroughs': items,
-        'connections': [
-            {
-                'source': source_id,
-                'target': target_id,
-                'kind': 'discussed together',
-                'explanations': notes,
-            }
-            for (source_id, target_id), notes in edges.items()
-        ],
-        'recent': judged[:12],
-        'as_of': '2026-11-01',
+        'breakthroughs': breakthroughs,
+        'recent': recent,
     }
+
+
+def field_data(db, prefix, view=None):
+    """data/field/<ID>.json: one field's scope and its breakthroughs, or None."""
+    view = view or site_view(db)
+    field = view['fields'].get(prefix)
+    if field is None:
+        return None
+    breakthroughs = [
+        {
+            'id': identifier,
+            'title': item['title'],
+            'summary': item['concept'][0]['text'] if item['concept'] else '',
+            'milestones': item['milestones'],
+            'prerequisites': item['prerequisite_ids'],
+            'unlocks': view['unlocks'][identifier],
+            'source_count': len(item.get('sources', [])),
+            'progress_count': item['progress_count'],
+            'issue_count': len(item.get('unresolved_issues', [])),
+            'moved_at': item['moved_at'],
+        }
+        for identifier, item in sorted(view['items'].items())
+        if item['field'] == prefix
+    ]
+    return {
+        'id': prefix,
+        'name': field['name'],
+        'region': region(prefix),
+        'boundaries': field.get('boundaries'),
+        'as_of': AS_OF,
+        'breakthroughs': breakthroughs,
+    }
+
+
+def link(view, identifier, reason=None):
+    item = view['items'][identifier]
+    out = {
+        'id': identifier,
+        'title': item['title'],
+        'field': item['field'],
+        'field_name': view['fields'][item['field']]['name'],
+    }
+    if reason is not None:
+        out['reason'] = reason
+    return out
+
+
+def reason(view, dependent, prerequisite):
+    """Why dependent needs prerequisite, as written on the dependent's link."""
+    for entry in view['items'][dependent].get('prerequisites', []):
+        if entry['id'] == prerequisite:
+            return entry.get('reason')
+    return None
+
+
+def breakthrough_data(db, identifier, view=None):
+    """data/b/<ID>.json: one breakthrough's record, sources as links, and its evidence."""
+    view = view or site_view(db)
+    item = view['items'].get(identifier)
+    if item is None:
+        return None
+    sections = [
+        'concept',
+        'significance',
+        'missing_breakthrough',
+        'current_state',
+        'completion_criteria',
+        'related_concepts',
+        'unresolved_issues',
+        'change_log',
+    ]
+    rows, _ = progress(db, identifier, len(item['completion_criteria']))
+    # Saved-copy hashes stay out: the site links to originals only.
+    keys = ['criterion', 'url', 'source_date', 'verdict', 'quote', 'model', 'added_at']
+    evidence = [{key: row[key] for key in keys} for row in rows]
+    field = view['fields'][item['field']]
+    unlocked = view['unlocks'][identifier]
+    return {
+        'id': identifier,
+        'field': item['field'],
+        'field_name': field['name'],
+        'region': region(item['field']),
+        'title': item['title'],
+        'status': item.get('status'),
+        'models': item.get('models', {}),
+        **{key: item.get(key, []) for key in sections},
+        'milestones': item['milestones'],
+        'moved_at': item['moved_at'],
+        # Links to the originals only: no saved copies, no local paths.
+        'sources': [
+            {'url': source['url'], 'title': source.get('title'), 'status': source.get('status')}
+            for source in item.get('sources', [])
+        ],
+        'progress': evidence,
+        'prerequisites': item['prerequisite_ids'],
+        'needs': [
+            link(view, entry['id'], entry.get('reason'))
+            for entry in item.get('prerequisites', [])
+            if entry['id'] in view['items']
+        ],
+        'unlocks': [link(view, other, reason(view, other, identifier)) for other in unlocked],
+    }
+
+
+def search_index(db, view=None):
+    """data/search.json: titles and short summaries, loaded when search is first used."""
+    view = view or site_view(db)
+    return [
+        {
+            'id': identifier,
+            'field': item['field'],
+            'title': item['title'],
+            'summary': cut(item['concept'][0]['text']) if item['concept'] else '',
+        }
+        for identifier, item in sorted(view['items'].items())
+    ]
+
+
+def site_files(db):
+    """Every data file of the contract: (path under data/, value)."""
+    view = site_view(db)
+    yield 'catalog.json', catalog(db, view)
+    yield 'search.json', search_index(db, view)
+    for prefix in view['fields']:
+        yield f'field/{prefix}.json', field_data(db, prefix, view)
+    for identifier in view['items']:
+        yield f'b/{identifier}.json', breakthrough_data(db, identifier, view)
+
+
+def encode(value):
+    """Compact UTF-8 JSON, as served and exported."""
+    return json.dumps(value, ensure_ascii=False, separators=(',', ':')).encode()
 
 
 if __name__ == '__main__':

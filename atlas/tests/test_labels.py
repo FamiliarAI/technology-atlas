@@ -137,10 +137,14 @@ class LabelTests(unittest.TestCase):
             self.write(item)
         (self.core / 'SWE/field.json').write_text('{"id": "SWE"}')
         factory = self.start_patch('atlas.labels._call')
-        factory.side_effect = lambda identifier: (
-            self.calls / identifier,
-            Mock(return_value=self.reply),
-        )
+
+        def factory_call(identifier):
+            folder = self.calls / f'{identifier}-test'
+            folder.mkdir(parents=True, exist_ok=True)
+            return folder, Mock(return_value=self.reply)
+
+        factory.side_effect = factory_call
+        self.start_patch('atlas.labels.CALLS', new=self.calls)
         self.start_patch('atlas.labels.ROOT', new=self.root)
         rebuild = self.start_patch('atlas.labels.store.rebuild')
         git = self.start_patch('subprocess.run')
@@ -168,10 +172,10 @@ class LabelTests(unittest.TestCase):
             (
                 'Relabel milestones for SWE (2 breakthroughs)\n'
                 '\n'
-                'Model: grok-4.7\n'
+                'Model: gpt-6.1-sol\n'
                 'Calls:\n'
-                'atlas/data/labels/SWE-01\n'
-                'atlas/data/labels/SWE-03'
+                'atlas/data/labels/SWE-01-test\n'
+                'atlas/data/labels/SWE-03-test'
             )
         )
         self.assertEqual(git.call_count, 3)
@@ -179,10 +183,14 @@ class LabelTests(unittest.TestCase):
 
     def test_main_reports_failure_continues_and_rebuilds_once(self):
         factory, rebuild, git = self.prepare_main()
-        factory.side_effect = lambda identifier: (
-            self.calls / identifier,
-            Mock(return_value={} if identifier == 'SWE-01' else self.reply),
-        )
+        original_factory = factory.side_effect
+
+        def factory_call(identifier):
+            folder, call = original_factory(identifier)
+            call.return_value = {} if identifier == 'SWE-01' else self.reply
+            return folder, call
+
+        factory.side_effect = factory_call
         before = self.file.read_bytes()
         with patch('builtins.print') as output:
             result = labels.main(['SWE', '--no-commit'], core=self.core)
@@ -196,8 +204,8 @@ class LabelTests(unittest.TestCase):
         rebuild.assert_called_once_with(core=self.core)
         git.assert_not_called()
 
-    def test_main_limits_model_calls_to_four_threads(self):
-        _, _, _ = self.prepare_main()
+    def test_main_limits_model_calls_to_requested_threads_and_serializes_writes(self):
+        factory, _, _ = self.prepare_main()
         for n in range(4, 10):
             self.write(dict(self.item, id=f'SWE-{n:02}'))
         barrier = threading.Barrier(4, timeout=5)
@@ -217,66 +225,130 @@ class LabelTests(unittest.TestCase):
                 active -= 1
             return self.reply
 
-        with patch(
-            'atlas.labels._call', side_effect=lambda identifier: (self.calls / identifier, call)
-        ):
-            self.assertEqual(labels.main(['SWE', '--no-commit'], core=self.core), 0)
+        original_factory = factory.side_effect
+        factory.side_effect = lambda identifier: (original_factory(identifier)[0], call)
+        main_thread = threading.get_ident()
+        written = []
+        apply = labels._apply
+
+        def checked_apply(identifier, prepared, result):
+            self.assertEqual(threading.get_ident(), main_thread)
+            written.append(identifier)
+            return apply(identifier, prepared, result)
+
+        with patch('atlas.labels._apply', side_effect=checked_apply):
+            self.assertEqual(
+                labels.main(['SWE', '--workers', '4', '--no-commit'], core=self.core), 0
+            )
+        self.assertEqual(written, [c.args[0] for c in factory.call_args_list])
         self.assertEqual((calls, peak), (8, 4))
 
-    def test_real_call_records_cli_output_and_checks_envelope(self):
+    def test_call_reuses_codex_with_schema_and_records_artifacts(self):
         config = self.root / 'config.json'
-        config.write_text('{"grok": "~/.grok/bin/grok"}')
+        config.write_text('{"codex": "~/.local/bin/codex"}')
         with patch('atlas.labels.CONFIG', config), patch('atlas.labels.CALLS', self.calls):
             folder, call = labels._call('SWE-01')
-        envelope = {
-            'structuredOutput': self.reply,
-            'structuredOutputError': None,
-            'stopReason': 'end_turn',
-        }
-        raw = json.dumps(envelope).encode()
-        with patch('subprocess.run', return_value=Mock(stdout=raw, returncode=0)) as run:
+
+        def execute(command, directory, text, timeout, check):
+            self.assertEqual(command[0], str(Path('~/.local/bin/codex').expanduser()))
+            self.assertIn('gpt-6.1-sol', command)
+            self.assertIn('model_reasoning_effort="medium"', command)
+            self.assertEqual(
+                command[command.index('--output-schema') + 1], str(folder / 'schema.json')
+            )
+            self.assertEqual(text, 'the prompt')
+            (directory / 'stdout.log').write_text('raw CLI events')
+            (directory / 'response.json').write_text(json.dumps(self.reply))
+            return 0
+
+        with patch('ingestion.providers.execute', side_effect=execute) as run:
             self.assertEqual(call('the prompt'), self.reply)
-        command = run.call_args.args[0]
-        self.assertEqual(command[0], str(Path('~/.grok/bin/grok').expanduser()))
-        self.assertEqual(
-            command[1:14],
-            [
-                '-m',
-                'grok-4.7',
-                '--reasoning-effort',
-                'high',
-                '--tools',
-                '',
-                '--disable-web-search',
-                '--no-subagents',
-                '--no-plan',
-                '--max-turns',
-                '1',
-                '--output-format',
-                'json',
-            ],
-        )
-        self.assertEqual(run.call_args.kwargs['cwd'], folder)
+        run.assert_called_once()
         self.assertEqual((folder / 'prompt.md').read_text(), 'the prompt')
         self.assertEqual(json.loads((folder / 'schema.json').read_text()), labels.SCHEMA)
-        self.assertEqual((folder / 'raw.json').read_bytes(), raw)
-        self.assertEqual(command[-2:], ['--prompt-file', str(folder / 'prompt.md')])
-        self.assertEqual(json.loads(command[command.index('--json-schema') + 1]), labels.SCHEMA)
-        for changed in [
-            {'structuredOutputError': 'invalid schema'},
-            {'stopReason': 'max_turns'},
-            {'structuredOutput': None},
+        self.assertEqual((folder / 'stdout.log').read_text(), 'raw CLI events')
+        self.assertEqual(json.loads((folder / 'response.json').read_text()), self.reply)
+        self.assertEqual(
+            json.loads((folder / 'model.json').read_text()),
+            {'provider': 'codex', 'model': 'gpt-6.1-sol', 'effort': 'medium'},
+        )
+        self.assertFalse((folder / 'success.json').exists())
+
+    def test_missing_recognizes_valid_legacy_calls_but_retries_failed_calls(self):
+        factory, _, _ = self.prepare_main()
+        for identifier, envelope in [
+            ('SWE-01', {'stopReason': 'end_turn', 'structuredOutput': self.reply}),
+            ('SWE-03', {'stopReason': 'max_turn_requests', 'structuredOutput': self.reply}),
         ]:
-            with self.subTest(changed=changed):
-                stdout = json.dumps(dict(envelope, **changed)).encode()
-                with patch('subprocess.run', return_value=Mock(stdout=stdout, returncode=0)):
-                    with self.assertRaisesRegex(ValueError, 'SWE-01:'):
-                        call('the prompt')
-        for stdout, code in [(b'not JSON', 0), (b'failed output', 1)]:
-            with patch('subprocess.run', return_value=Mock(stdout=stdout, returncode=code)):
-                with self.assertRaisesRegex(ValueError, 'SWE-01:'):
-                    call('the prompt')
-            self.assertEqual((folder / 'raw.json').read_bytes(), stdout)
+            folder = self.calls / (identifier + '-20261111T000000Z')
+            folder.mkdir(parents=True)
+            (folder / 'raw.json').write_text(json.dumps(envelope))
+        before = self.file.read_bytes()
+        self.assertEqual(labels.main(['--missing', '--no-commit'], core=self.core), 0)
+        self.assertEqual([c.args[0] for c in factory.call_args_list], ['SWE-03'])
+        self.assertEqual(self.file.read_bytes(), before)
+        self.assertTrue((self.calls / 'SWE-03-test/success.json').is_file())
+        factory.reset_mock()
+        self.assertEqual(labels.main(['--missing', '--no-commit'], core=self.core), 0)
+        factory.assert_not_called()
+
+    def test_missing_with_explicit_ids_uses_success_marker(self):
+        factory, _, _ = self.prepare_main()
+        folder = self.calls / 'SWE-01-20261111T000000Z'
+        folder.mkdir(parents=True)
+        (folder / 'success.json').write_text('{"model": "gpt-6.1-sol"}')
+        self.assertEqual(labels.main(['SWE', '--missing', '--no-commit'], core=self.core), 0)
+        self.assertEqual([c.args[0] for c in factory.call_args_list], ['SWE-03'])
+
+    def test_legacy_invalid_answers_and_partial_folders_are_missing(self):
+        for n, envelope in enumerate(
+            [
+                {},
+                {'stopReason': 'end_turn', 'structuredOutput': {}},
+                {
+                    'stopReason': 'end_turn',
+                    'structuredOutput': self.reply,
+                    'structuredOutputError': 'bad',
+                },
+                [],
+            ]
+        ):
+            folder = self.calls / f'SWE-01-{n}'
+            folder.mkdir(parents=True)
+            (folder / 'raw.json').write_text(json.dumps(envelope))
+        (self.calls / 'SWE-01-empty').mkdir()
+        (self.calls / 'SWE-01-bad').mkdir()
+        (self.calls / 'SWE-01-bad/raw.json').write_text('not JSON')
+        with patch('atlas.labels.CALLS', self.calls):
+            self.assertFalse(labels._written_before('SWE-01', self.item['completion_criteria']))
+
+    def test_provider_runtime_failure_does_not_stop_other_breakthroughs(self):
+        factory, _, _ = self.prepare_main()
+        original_factory = factory.side_effect
+
+        def factory_call(identifier):
+            folder, call = original_factory(identifier)
+            if identifier == 'SWE-01':
+                call.side_effect = RuntimeError('Codex exited 1')
+            return folder, call
+
+        factory.side_effect = factory_call
+        self.assertEqual(labels.main(['SWE', '--no-commit'], core=self.core), 1)
+        self.assertFalse((self.calls / 'SWE-01-test/success.json').exists())
+        self.assertTrue((self.calls / 'SWE-03-test/success.json').exists())
+
+    def test_workers_default_and_invalid_values(self):
+        self.prepare_main()
+        with patch('atlas.labels.ThreadPoolExecutor', wraps=labels.ThreadPoolExecutor) as pool:
+            self.assertEqual(labels.main(['SWE', '--no-commit'], core=self.core), 0)
+        pool.assert_called_once_with(max_workers=3)
+        for args in [['SWE', '--workers', '0'], ['SWE', '--workers', '-1'], []]:
+            with (
+                self.subTest(args=args),
+                patch('sys.stderr'),
+                self.assertRaises(SystemExit),
+            ):
+                labels.main(args, core=self.core)
 
 
 if __name__ == '__main__':

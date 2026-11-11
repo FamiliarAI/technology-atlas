@@ -53,7 +53,7 @@ function Section({ title, count, children }) {
   );
 }
 
-export default function Record({ id, record }) {
+export default function Record({ record }) {
   const research = record.progress.filter((r) => !r.criterion);
   return (
     <div className="record">
@@ -68,18 +68,12 @@ export default function Record({ id, record }) {
         </Section>
       ))}
       <Section title="Research sources not yet tied to a milestone" count={research.length}>
-        {research.map((r) => (
-          <div key={r.id} className="record-para">
+        {research.map((r, n) => (
+          <div key={n} className="record-para">
             <p>
               <a href={safe(r.url)} target="_blank" rel="noopener noreferrer">
                 {record.sources.find((s) => s.url === r.url)?.title || host(r.url)}
               </a>
-              {r.asset && (
-                <>
-                  {' · '}
-                  <a href={`/api/assets/${r.asset}`}>saved copy</a>
-                </>
-              )}
             </p>
             <p className="muted">{r.quote}</p>
           </div>
@@ -111,26 +105,9 @@ export default function Record({ id, record }) {
               </a>
             </p>
             <p className="mono muted">
-              {host(source.url)} · {source.status.replaceAll('_', ' ')}
-              {source.artifacts.map((artifact) => (
-                <span key={artifact.sha256}>
-                  {' · '}
-                  <a href={`/api/assets/${artifact.sha256}`}>
-                    saved copy{artifact.format ? ` (${artifact.format})` : ''}
-                  </a>
-                </span>
-              ))}
+              {host(source.url)} · {(source.status || '').replaceAll('_', ' ')}
             </p>
           </div>
-        ))}
-      </Section>
-      <Section title="Provenance" count={record.documents.length}>
-        {record.documents.map((kind) => (
-          <p key={kind}>
-            <a href={`/api/documents/${encodeURIComponent(`${id}:${kind}`)}`}>
-              Download {kind.replaceAll('_', ' ')}
-            </a>
-          </p>
         ))}
       </Section>
     </div>

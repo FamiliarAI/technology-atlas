@@ -1,4 +1,4 @@
-"""Milestone labels: python3 -m atlas.labels ID_OR_FIELD ... [--no-commit]."""
+"""Milestone labels: python3 -m atlas.labels ID_OR_FIELD ... [--missing] [--workers N] [--no-commit]."""
 
 import argparse
 import json
@@ -8,12 +8,14 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 
+from ingestion.providers import Models
+
 from . import core as records, store
 from .core import CORE
 from .store import CONFIG, ROOT
 
 CALLS = ROOT / 'atlas/data/labels'
-MODEL = 'grok-4.7'
+MODEL = 'gpt-6.1-sol'
 SCHEMA = {
     'type': 'object',
     'additionalProperties': False,
@@ -74,59 +76,34 @@ PROMPT = (
 )
 
 
-def _schema_args(schema_path):
-    """Keep the CLI's schema transport in one place; currently pass inline JSON."""
-    return ['--json-schema', schema_path.read_text(encoding='utf-8')]
-
-
 def _call(identifier):
     config = json.loads(CONFIG.read_text(encoding='utf-8'))
-    grok = str(Path(config['grok']).expanduser())
     stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
     folder = (CALLS / f'{identifier}-{stamp}').resolve()
     folder.mkdir(parents=True)
-    schema = folder / 'schema.json'
-    schema.write_text(json.dumps(SCHEMA, indent=2) + '\n', encoding='utf-8')
+    entry = {'provider': 'codex', 'model': MODEL, 'effort': 'medium'}
+    return folder, lambda prompt: Models(config).call('format', prompt, SCHEMA, folder, entry=entry)
 
-    def call(prompt):
-        prompt_path = folder / 'prompt.md'
-        prompt_path.write_text(prompt, encoding='utf-8')
-        command = [
-            grok,
-            '-m',
-            MODEL,
-            '--reasoning-effort',
-            'high',
-            '--tools',
-            '',
-            '--disable-web-search',
-            '--no-subagents',
-            '--no-plan',
-            '--max-turns',
-            '1',
-            '--output-format',
-            'json',
-        ]
-        command += _schema_args(schema) + ['--prompt-file', str(prompt_path)]
-        result = subprocess.run(command, cwd=folder, capture_output=True, check=False)
-        (folder / 'raw.json').write_bytes(result.stdout)
-        if result.returncode:
-            raise ValueError(f'{identifier}: Grok exited with status {result.returncode}')
+
+def _written_before(identifier, milestones):
+    for folder in sorted(CALLS.glob(f'{identifier}-*')):
+        if (folder / 'success.json').is_file():
+            return True
+        # Legacy Grok calls have no success marker. A complete envelope must also
+        # pass the label checks; failed or partial calls do not count.
         try:
-            envelope = json.loads(result.stdout)
-        except (ValueError, UnicodeError) as error:
-            raise ValueError(f'{identifier}: invalid Grok JSON output') from error
-        if not isinstance(envelope, dict):
-            raise ValueError(f'{identifier}: invalid Grok output envelope')
-        if envelope.get('structuredOutputError') is not None:
-            raise ValueError(f'{identifier}: {envelope["structuredOutputError"]}')
-        if envelope.get('stopReason') != 'end_turn':
-            raise ValueError(f'{identifier}: stopReason is not end_turn')
-        if not isinstance(envelope.get('structuredOutput'), dict):
-            raise ValueError(f'{identifier}: structuredOutput is not an object')
-        return envelope['structuredOutput']
-
-    return folder, call
+            envelope = json.loads((folder / 'raw.json').read_text(encoding='utf-8'))
+            if not isinstance(envelope, dict):
+                continue
+            if envelope.get('stopReason') != 'end_turn':
+                continue
+            if envelope.get('structuredOutputError') is not None:
+                continue
+            _validate(identifier, envelope.get('structuredOutput'), milestones)
+        except (OSError, ValueError):
+            continue
+        return True
+    return False
 
 
 def _validate(identifier, result, milestones):
@@ -201,8 +178,7 @@ def _replace_labels(source, milestones, replacements):
     return source
 
 
-def relabel(identifier, call=None, core=CORE):
-    """Replace one breakthrough's labels; return (id, old, new) in milestone order."""
+def _prepare(identifier, core):
     paths = [
         p for p in Path(core).glob('*/*.json') if p.stem == identifier and p.name != 'field.json'
     ]
@@ -217,20 +193,47 @@ def relabel(identifier, call=None, core=CORE):
         concept=item['concept'][0]['text'],
         milestones='\n'.join(f'{m["id"]}: {m["text"]}' for m in milestones),
     )
-    if call is None:
-        _, call = _call(identifier)
-    replacements = _validate(identifier, call(prompt), milestones)
+    return path, source, milestones, prompt
+
+
+def _apply(identifier, prepared, result):
+    path, source, milestones, _ = prepared
+    replacements = _validate(identifier, result, milestones)
     updated = _replace_labels(source, milestones, replacements)
     if updated != source:
         path.write_bytes(updated.encode('utf-8'))
     return [(m['id'], m['label'], replacements[m['id']]) for m in milestones]
 
 
+def relabel(identifier, call=None, core=CORE):
+    """Replace one breakthrough's labels; return (id, old, new) in milestone order."""
+    prepared = _prepare(identifier, core)
+    folder = None
+    if call is None:
+        folder, call = _call(identifier)
+    changes = _apply(identifier, prepared, call(prepared[3]))
+    if folder is not None:
+        _success(folder)
+    return changes
+
+
+def _success(folder):
+    (folder / 'success.json').write_text(json.dumps({'model': MODEL}) + '\n', encoding='utf-8')
+
+
 def main(argv=None, core=CORE):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('identifiers', nargs='+', metavar='ID_OR_FIELD')
+    parser.add_argument('identifiers', nargs='*', metavar='ID_OR_FIELD')
+    parser.add_argument(
+        '--missing', action='store_true', help='skip previously labelled breakthroughs'
+    )
+    parser.add_argument('--workers', type=int, default=3, help='parallel model calls (default: 3)')
     parser.add_argument('--no-commit', action='store_true')
     args = parser.parse_args(argv)
+    if args.workers < 1:
+        parser.error('--workers must be at least 1')
+    if not args.identifiers and not args.missing:
+        parser.error('name a breakthrough or field, or pass --missing')
     failed = False
     identifiers = []
     try:
@@ -252,22 +255,36 @@ def main(argv=None, core=CORE):
             failed = True
     identifiers = list(dict.fromkeys(identifiers))
 
-    def work(identifier):
-        folder = None
-        try:
-            folder, call = _call(identifier)
-            changes = relabel(identifier, call=call, core=core)
-            return folder, changes, None
-        except (OSError, ValueError, subprocess.SubprocessError) as error:
-            return folder, None, error
+    if not args.identifiers and args.missing:
+        identifiers = sorted(
+            identifier
+            for identifier, item in data['breakthroughs'].items()
+            if item.get('status') == 'active'
+        )
 
     folders = []
     completed = 0
-    with ThreadPoolExecutor(max_workers=4) as pool:
-        for identifier, (folder, changes, error) in zip(identifiers, pool.map(work, identifiers)):
-            if folder is not None:
-                folders.append(str(folder.relative_to(ROOT)))
-            if error is not None:
+    errors = (OSError, ValueError, RuntimeError, subprocess.SubprocessError)
+    with ThreadPoolExecutor(max_workers=args.workers) as pool:
+        jobs = []
+        for identifier in identifiers:
+            try:
+                prepared = _prepare(identifier, core)
+                if args.missing and _written_before(identifier, prepared[2]):
+                    continue
+                folder, call = _call(identifier)
+                jobs.append((identifier, folder, prepared, pool.submit(call, prepared[3])))
+            except errors as error:
+                print(f'{identifier}: {error}')
+                failed = True
+        # Only model calls run in workers. Apply and report in input order, even
+        # when calls finish out of order; commit once after all writes finish.
+        for identifier, folder, prepared, future in jobs:
+            folders.append(str(folder.relative_to(ROOT) if folder.is_relative_to(ROOT) else folder))
+            try:
+                changes = _apply(identifier, prepared, future.result())
+                _success(folder)
+            except errors as error:
                 print(f'{identifier}: {error}')
                 failed = True
                 continue
@@ -276,10 +293,11 @@ def main(argv=None, core=CORE):
             for milestone, old, new in changes:
                 print(f'  {milestone}: {old} -> {new}')
     try:
-        store.rebuild(core=core)
+        if completed:
+            store.rebuild(core=core)
         if not args.no_commit and completed:
             message = (
-                f'Relabel milestones for {", ".join(args.identifiers)} '
+                f'Relabel milestones for {", ".join(args.identifiers) or "missing"} '
                 f'({completed} breakthroughs)\n\nModel: {MODEL}\nCalls:\n' + '\n'.join(folders)
             )
             records.commit(message)

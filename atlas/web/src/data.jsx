@@ -1,10 +1,30 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { layout } from './sky.js';
 
+// The site reads only the data contract (docs/plans/2026-11-11-site-design.md, Technical):
+// data/catalog.json up front, and one field, one breakthrough or the search index on demand.
+// Paths are under Vite's base, so the same build works from the server and from the export.
+const DATA = import.meta.env.BASE_URL + 'data/';
+
 const get = async (path) => {
-  const res = await fetch(path);
+  const res = await fetch(DATA + path);
   if (!res.ok) throw new Error(`${path}: ${res.status}`);
   return res.json();
+};
+
+// Each file is fetched once per visit; a failed fetch is forgotten so it can be retried.
+const cache = new Map();
+const once = (path) => {
+  if (!cache.has(path)) {
+    cache.set(
+      path,
+      get(path).catch((e) => {
+        cache.delete(path);
+        throw e;
+      }),
+    );
+  }
+  return cache.get(path);
 };
 
 const DAY = 864e5;
@@ -16,12 +36,13 @@ export const STATUS = {
   met: 'Met',
 };
 
-// One request: the catalog carries milestone labels and status per breakthrough.
+// One request: the catalog carries every breakthrough's milestone statuses and links.
+// Summaries and milestone labels are in the field and breakthrough files.
 export async function loadAtlas() {
-  const catalog = await get('/api/catalog');
+  const catalog = await once('catalog.json');
   const items = {};
   for (const raw of catalog.breakthroughs) {
-    const status = raw.milestones.map((m) => m.status);
+    const status = raw.milestones;
     const met = status.filter((s) => s === 'met').length;
     const moving = status.filter((s) => s === 'in_progress').length;
     items[raw.id] = {
@@ -63,6 +84,7 @@ export async function loadAtlas() {
     items,
     links,
     sky,
+    regions: catalog.regions,
     recent: catalog.recent,
     asOf: catalog.as_of,
     totals: {
@@ -75,7 +97,26 @@ export async function loadAtlas() {
   };
 }
 
-export const loadBreakthrough = (id) => get('/api/breakthroughs/' + encodeURIComponent(id));
+export const loadField = (id) => once('field/' + encodeURIComponent(id) + '.json');
+export const loadBreakthrough = (id) => once('b/' + encodeURIComponent(id) + '.json');
+export const loadSearch = () => once('search.json');
+
+// A field file, or null until it arrives (or if it fails).
+export function useField(id) {
+  const [state, setState] = useState({ id: null, data: null });
+  useEffect(() => {
+    if (!id) return undefined;
+    let live = true;
+    loadField(id).then(
+      (data) => live && setState({ id, data }),
+      () => live && setState({ id, data: null }),
+    );
+    return () => {
+      live = false;
+    };
+  }, [id]);
+  return state.id === id ? state.data : null;
+}
 
 const Atlas = createContext({ atlas: null, error: null });
 
@@ -98,19 +139,49 @@ export const formatDate = (iso) => {
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
-export function search(atlas, query, limit = 8) {
+const escape = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// Ranks one text against the query: whole word, then the text's start, then the start of a
+// word, then any substring. 0 when absent.
+function match(text, q, words) {
+  const at = text.indexOf(q);
+  if (at < 0) return 0;
+  if (words.test(text)) return 4;
+  if (at === 0) return 3;
+  if (new RegExp('(^|[^\\p{L}\\p{N}])' + escape(q), 'u').test(text)) return 2;
+  return 1;
+}
+
+// Search over the catalog's titles, plus the search index's summaries once it has loaded.
+// Title whole-word and title-prefix matches rank above other substrings, so "shor" puts
+// "Shor's algorithm" above "short-wave".
+export function search(atlas, index, query, limit = 8) {
   const q = query.trim().toLowerCase();
   if (!q) return [];
+  const words = new RegExp('(^|[^\\p{L}\\p{N}])' + escape(q) + '($|[^\\p{L}\\p{N}])', 'u');
+  const terms = q.split(/\s+/);
+  const summaries = {};
+  for (const entry of index || []) summaries[entry.id] = entry.summary;
   const scored = [];
   for (const i of Object.values(atlas.items)) {
     const id = i.id.toLowerCase();
-    const title = i.title.toLowerCase();
     let score = 0;
     if (id === q) score = 100;
-    else if (id.startsWith(q)) score = 60;
-    else if (title.includes(q)) score = 40 - title.indexOf(q) / 100;
-    else if (atlas.field[i.field].name.toLowerCase().includes(q)) score = 20;
-    else if (i.search_text.toLowerCase().includes(q)) score = 10;
+    else if (id.startsWith(q)) score = 90;
+    else {
+      const title = match(i.title.toLowerCase(), q, words);
+      if (title) score = 40 + title * 10 - i.title.toLowerCase().indexOf(q) / 1000;
+      else if (atlas.field[i.field].name.toLowerCase().includes(q)) score = 30;
+      else {
+        const summary = match((summaries[i.id] || '').toLowerCase(), q, words);
+        if (summary) score = 10 + summary;
+        // Several words in any order, anywhere in the title or summary.
+        else if (terms.length > 1) {
+          const text = `${i.title} ${summaries[i.id] || ''}`.toLowerCase();
+          if (terms.every((t) => text.includes(t))) score = 5;
+        }
+      }
+    }
     if (score) scored.push([score, i]);
   }
   return scored

@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import Chart, { Locator } from '../Chart.jsx';
 import Starfield from '../Starfield.jsx';
-import { useAtlas } from '../data.jsx';
+import { useAtlas, useField } from '../data.jsx';
 import { FieldEmblem, StarGlyph, StatusMark, ringSegments } from '../glyphs.jsx';
 import { EASE } from '../motion.js';
 
@@ -89,6 +89,8 @@ function FieldList({ atlas, onPick, filter }) {
 function StarCard({ atlas, id, onClose }) {
   const item = atlas.items[id];
   const field = atlas.field[item.field];
+  // Summary and milestone labels come from the field file once it arrives.
+  const detail = useField(item.field)?.breakthroughs.find((b) => b.id === id);
   return (
     <motion.aside
       className="star-card"
@@ -109,13 +111,13 @@ function StarCard({ atlas, id, onClose }) {
         </button>
       </div>
       <h2 id="star-card-title">{item.title}</h2>
-      <p className="star-card-sum">{item.summary}</p>
+      <p className="star-card-sum">{detail?.summary}</p>
       <ol className="mini-milestones">
-        {item.milestones.map((m, n) => (
-          <li key={m.id} className={m.status}>
-            <StatusMark status={m.status} />
+        {item.status.map((status, n) => (
+          <li key={n} className={status}>
+            <StatusMark status={status} />
             <span className="mono">M{n + 1}</span>
-            <span>{m.label || 'Milestone ' + (n + 1)}</span>
+            <span>{detail?.milestones[n]?.label || 'Milestone ' + (n + 1)}</span>
           </li>
         ))}
       </ol>
