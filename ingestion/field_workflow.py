@@ -271,16 +271,22 @@ def workflow_lock(root):
 
 
 def concept_headings(notes, prefix=None):
-    """Locate concept entries in ordinary bold or ATX Markdown headings."""
+    """Locate concept entries in bold or ATX Markdown headings, else in plain heading lines."""
     identifier = (re.escape(prefix) if prefix is not None else r'[A-Za-z0-9_-]+') + r'-\d+'
-    pattern = (
+    marked = (
         r'^(?:\*\*(' + identifier + r')\.[ \t]+[^\n]+\*\*[ \t]*'
         r'|[ ]{0,3}#{1,6}[ \t]+(?:\*\*)?(' + identifier + r')\.[ \t]+[^\n]+)$'
     )
-    return [
-        (match[1] or match[2], match.start(), match.end())
-        for match in re.finditer(pattern, notes, re.M)
-    ]
+    # Codex Terra often writes 'MET-01. Title' on its own line with no Markdown marks.
+    plain = r'^(' + identifier + r')\.[ \t]+[^\n]+$'
+    for pattern in (marked, plain):
+        found = [
+            (match[1] or match[match.lastindex], match.start(), match.end())
+            for match in re.finditer(pattern, notes, re.M)
+        ]
+        if found:
+            return found
+    return []
 
 
 def concept_ids(notes, prefix):

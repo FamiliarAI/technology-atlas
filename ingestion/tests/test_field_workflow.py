@@ -689,6 +689,12 @@ class FieldWorkflowTests(unittest.TestCase):
                     with workflow_lock(Path(directory)):
                         pass
 
+    def test_concept_ids_accept_plain_headings_only_when_none_are_marked(self):
+        plain = 'Notes\n\nMET-01. One\n\nMET-01-problem: text\n\nMET-02. Two\n'
+        self.assertEqual(concept_ids(plain, 'MET'), ['MET-01', 'MET-02'])
+        mixed = '**MET-01. One**\n\nMET-01. A sentence in the body.\n'
+        self.assertEqual(concept_ids(mixed, 'MET'), ['MET-01'])
+
     def test_concept_ids_accept_atx_and_bold_without_claim_lines(self):
         body = (
             '\n'
