@@ -47,7 +47,7 @@ export default function Detail({ atlas, id, narrow, onOpen, onClose }) {
           <button ref={close} className="close" onClick={onClose} aria-label="Close">✕</button>
         </div>
         <h2 id="detail-title">{summary.title}</h2>
-        <MilestoneBar status={summary.status} large />
+        <MilestoneBar status={summary.status} labels={record?.completion_criteria.map((c) => c.label)} large />
         {error && <p className="note">Could not load this record: {error}</p>}
         {!record && !error && <p className="note">Loading record…</p>}
         {record && (
@@ -62,7 +62,15 @@ export default function Detail({ atlas, id, narrow, onOpen, onClose }) {
                 return (
                   <li key={n} className={status}>
                     <div className="milestone-head"><span className="lane-code">MILESTONE {n + 1}</span><span className={'pill ' + status}>{STATUS[status]}</span></div>
-                    <p>{c.text}</p>
+                    {c.label ? (
+                      <>
+                        <h4 className="milestone-title">{c.label}</h4>
+                        <details className="milestone-details">
+                          <summary>Details</summary>
+                          <p>{c.text}</p>
+                        </details>
+                      </>
+                    ) : <p>{c.text}</p>}
                     {rows.map((r) => (
                       <div key={r.id} className={'evidence ' + r.verdict}>
                         <span className="pill">{VERDICT[r.verdict]}</span>
