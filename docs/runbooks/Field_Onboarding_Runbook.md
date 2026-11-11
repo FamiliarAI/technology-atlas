@@ -1,143 +1,103 @@
 # Field Onboarding Runbook
 
-Updated November 1, 2026. Scope: the verified Chemistry workflow, now authorized for all 66 historical fields with three fields active at a time.
+Updated November 11, 2026. `ingestion.batch` coordinates the field workflow with three active fields and three review or rewrite workers per field. See the [pipeline README](../../ingestion/README.md) for caching, source recovery and test details, and the [review](../ingestion-review-2026-11-11.md) for the changes behind this workflow.
 
-This is the agreed workflow for the rebuild. See the [ingestion pipeline](../../ingestion/README.md) for implementation and commands. `ingestion.batch` coordinates the full sequence through `ingestion.field_workflow`; `ingestion.final_rewrite` implements step 5. The legacy `ingestion.pipeline run` command does not orchestrate this entire sequence. The [project plan](../plans/technology-graph-plan.md) retains historical context. Do not treat an evidence-review run as completion of this workflow.
+## Run and resume
 
-## Process at a glance
-
-1. Independent original research: Grok discovers concepts without seeing the historical list.
-2. Compare against the original list: in the same Grok conversation, research additions and modifications and return the complete reconciled list.
-3. Structure that reconciled research, then capture its cited sources as preparation for review.
-4. Review every item in the reconciled list.
-5. Produce the final structured output incorporating review corrections, with a change log and explicit unresolved issues.
-
-Source capture is part of step 3, not a separate selection or review pass. The structured list before review is provisional; review recommendations alone are not the final output.
-
-## Outcome
-
-Produce a source-supported shortlist of potential revolutionary innovations or discoveries for one selected field. Select for transformative impact before detailed evidence processing, using the achieved historical breakthroughs in the research prompt as calibration. Each included problem should explain what remains unsolved, why it matters, what would count as solving it, and what the cited evidence actually supports. Someone should be able to inspect the supporting passages and saved sources.
-
-Aim for ten independently researched concepts; explain any shortfall rather than pad the list. Then reconcile with the original list in a second research pass. Preserve every concept from the first pass, allowing modifications and additions with no ten-item cap. Concepts are the primary output; supporting claims and source-access issues must not be mistaken for a verdict on the concept. Preserve each field’s complete output and verification independently. The authorized batch runs three fields concurrently and refills a slot when a field finishes.
-
-## Execute the authorized 66-field batch
+Use the canonical roster and original lists restored from Git. For a new batch only:
 
 ```bash
 python3 -m ingestion.batch prepare --as-of 2026-11-01
-python3 -m ingestion.batch run
 ```
 
-Use the canonical roster and original lists restored from Git, not a manually reconstructed field list. Inspect `ingestion/runs/all-fields/progress.md` for current state. A field is complete only after all five steps, final validation, and its verified external backup. Once all 66 are complete, merge the per-field records with code into one field-separated `ingestion/runs/all-fields/final-innovations.json`. An incomplete field must not disappear from the progress report or be counted complete. Resume with the same command; do not restart successful research. If Grok access is exhausted, stop new scheduling and ask the user to switch accounts.
+Run or resume all fields, or select prefixes:
 
-## 1. Independent original research (Grok)
+```bash
+python3 -m ingestion.batch run
+python3 -m ingestion.batch run --fields MLC CLM VIR
+```
 
-Record the field, its boundaries, and the research date. If no field has been selected, ask which one to start with.
+`--fields PREFIX…` selects work without changing the roster. Inspect `ingestion/runs/all-fields/batch.json`, `progress.md` and each field's `workflow-receipt.json`. Resolve field roots from the manifest. Completed fields reuse validated outputs and backups; failed fields stay visible. Successful stages are cached, so resume rather than restarting discovery.
 
-Do not give Grok the original list in this step; preserve independent discovery. Research candidates using primary sources where available. Compare candidates for revolutionary impact, overlap, and obvious omissions. Inspect the plain-language shortlist before proceeding to structured records; an important unsolved problem alone does not qualify. Distinguish an open problem from an already demonstrated result or a speculative aspiration. Keep uncertainty explicit; a source describing a goal does not establish field-wide consensus.
+The signed-in CLI providers and ordered lists are in `ingestion/config.json`:
 
-For each candidate, keep a short problem statement, completion criteria, current state, significance, and citations. Record the research tool/model used. Keep raw research outputs so later corrections can be traced.
+| Stage | Ordered models |
+| --- | --- |
+| Research and reconcile | Grok `grok-4.7` high → Codex `gpt-6.1-terra` high → Codex `gpt-6.1-sol` high → Claude `opus` |
+| Format | Codex `gpt-6.1-terra` high → Codex `gpt-6.1-sol` high → Claude `opus` |
+| Review and rewrite | Codex `gpt-6.1-sol` medium → Claude `opus` |
 
-Use the already authorized tool/account configuration. Do not introduce paid API use or switch accounts implicitly. If Grok access or credits run out, stop that step and ask the user to switch accounts; never request credentials.
+Fallback occurs only on classified provider exhaustion or timeout. Other failures stay with the same model: format and review allow one retry; research and reconcile do not. A failed rewrite can be recovered or retried on resume. A safety refusal is final for every model and is never a reason to try another model.
 
-## 2. Compare against the original list (same Grok conversation)
+Grok exhaustion is recorded in `batch.json` at `providers.grok.exhausted_at`. All fields skip Grok for 24 hours and can use the remaining list. A timeout does not start that cooldown. Do not switch accounts automatically or request credentials. If no entry can run a stage, new field scheduling stops; wait for a reset or add capacity. Exit status 2 reports that condition; 1 reports an incomplete selected field or import error.
 
-Resume the exact Grok session from step 1, passing both its new list and the original list recovered from history. Save the original list with its Git revision. Reuse the earlier conversation and research context; do not assume hidden reasoning traces are preserved.
+## 1. Independent research
 
-Use [the reconciliation prompt](../../ingestion/prompts/reconcile.md). Ask Grok to compare concepts, modify or clarify the new entries, and add worthwhile omissions. It may search for new evidence supporting additions and modifications. It must preserve every first-pass concept and its stable ID; do not delete concepts or merge away first-pass entries. There is no ten-item cap. Weak sourcing calls for research or an explicit uncertainty, not automatic removal. Original entries are candidates, not established facts: reassess their sources and revolutionary impact.
+Record the field, boundaries and research date. Discover potentially revolutionary concepts without supplying the historical list. Aim for ten independently researched concepts, explaining a shortfall rather than padding. Use primary sources where available and the research prompt's historical breakthroughs to calibrate impact.
 
-Return a complete revised set of plain-language research notes in the same format as step 1: title, ID, significance, missing breakthrough, proposed completion criteria, current state, and actual supporting URLs/passages. Include a short change log and a disposition for every original entry: covered by an identified concept, added, or not added with a reason. Do not return only a comparison or recommendations.
+For each concept, retain its stable ID, significance, missing breakthrough, proposed completion criteria, current state and citations. Distinguish an unsolved problem, a demonstrated result and a speculative aspiration. A source describing a goal does not establish consensus. Preserve raw research and model attribution.
 
-Record and resume the explicit session ID, never whichever session happens to be latest. Retain the session's working directory. Before using this flow, verify a disposable two-turn conversation retains both its ID and first-turn information. The resume spike passed after restoring the original working directory: the resumed call retained the same session ID and recalled first-turn information. The current runner retains each field's `grok-workspace` directory and passes the successful first research session ID explicitly to reconciliation with `--resume`; it also rejects a returned conversation ID that differs from the requested session. Do not silently substitute a fresh conversation.
+## 2. Reconcile with the original list
 
-## 3. Structure the reconciled research
+Compare the full first-pass list with the original list recovered from Git. Research modifications and worthwhile additions. Preserve every first-pass concept and stable ID; there is no ten-item cap. Original entries are candidates to reassess, not established facts.
 
-Convert step 2's complete research notes into structured records without new selection or research. Preserve all concept IDs, original-entry dispositions, source links, uncertainty, and the change log. Validate the structure and check that no first-pass concept was lost.
+When Grok did the research and its session is available, resume that explicit session in the same working directory. The runner verifies the returned session ID. Otherwise use a fresh conversation containing the complete first pass and original list, with wording that explains the missing prior turn. Fresh reconciliation is the same pass without the earlier tool history. The receipt records `resume` or `fresh`.
 
-Download the cited sources for the reconciled list. Capture failures update source status; they do not trigger another whole-list rewrite. Exercise a failed download and recovery on one item when implementing capture, then reuse that behavior across the field.
+Return the complete revised research notes, a change log, and a disposition for every original entry: covered by identified concepts, added, or not added with a reason. Weak sourcing calls for research or explicit uncertainty, not silent removal.
 
-For each source used to support a claim:
+## 3. Structure and capture
 
-- Record its title, authors/date when available, original and resolved URL, DOI/other identifier when present, and retrieval date.
-- Save the best available original artifact: the paper PDF when available, otherwise usable HTML or XML. Record its path and content hash. Do not manufacture a PDF merely to satisfy a format requirement.
-- Open the saved artifact and check that it is the intended source and contains the relevant material. A PDF header, filename, or successful HTTP response is insufficient.
-- Link the claim to the supporting passage and page/section in that specific saved artifact. State limits on what the passage establishes.
+Format the reconciled notes without new selection or research. Preserve concept IDs, source links, uncertainty, original-entry dispositions and the change log. Validate that formatting neither loses nor invents concepts.
 
-Label publisher PDFs, webpage snapshots, abstracts, and locally rendered documents accurately. An abstract is a partial copy; a rendering that omits figures or tables is incomplete. Retain original XML/HTML when making a derivative rendering.
+Download and index cited sources with original/resolved URLs, identity metadata, retrieval information, paths and hashes. Retain original PDFs or usable HTML/XML/text. Follow PDF links; when nothing was captured and a DOI exists, try one Europe PMC open-copy lookup. Record failures and partial captures without rewriting the whole list.
 
-A Wayback snapshot is a best-effort additional backup. Its absence does not block a supported claim. Keep source copies private and excluded from Git; verify the ignore rule before adding any. Use legitimate access and record blocks rather than bypassing them.
+Open saved artifacts and verify identity and relevant passages. A successful download or PDF header is insufficient. Abstracts, truncated extraction and extraction warnings remain partial. PDF extraction repairs surrogate text; no OCR or PDF rendering is performed. Source text is limited to 120,000 characters per artifact, with truncation recorded. Keep private source copies under Git-ignored `ingestion/runs/`.
+
+For an inaccessible source, supply a legitimate alternate URL or manual copy with the README's `alternative` or `attach` command. Keep the original citation URL as the key; a DOI is not required for manual recovery. Preserve good copies and failed-operation history. An existing archive can be supplied; a fresh Wayback save is deferred and is not a support gate.
 
 ## 4. Review every concept
 
-Review every concept in the reconciled, structured list, including unchanged first-pass concepts as well as modifications and additions. For the current Chemistry run, this means all thirteen concepts; do not reuse earlier first-pass reviews as substitutes. Make one LLM review call per concept, using its current structured record and relevant saved evidence. Assess the concept’s revolutionary significance, scope, missing breakthrough, completion criteria, and current state. Return concrete proposed corrections for the final rewrite. Assess each material claim by reading its evidence in context. Automated quote matching and identifier checks are aids, not scientific judgments. Tolerate PDF line wrapping, hyphen spacing, presentation ligatures (ff/fi/fl/ffi/ffl/st), and quotation typography. Single/double delimiters may match around the same quoted span; do not conflate lexical apostrophes, primes, mathematical notation, changed words, numbers or negation. Retain the original quote and artifact; normalize only for comparison.
+Make one review call per reconciled concept using its structured record and saved evidence. Assess revolutionary significance, scope, overlap, missing breakthrough, completion criteria and current state, then propose concrete corrections. Keep concept assessment separate from claim-level evidence support and source-capture status.
 
-| Dimension | States | Meaning |
-|---|---|---|
-| Evidence support | Supported / Contradicted / Unresolved | Record a short reason. Supported means the inspected evidence supports the stated scope; it does not certify scientific truth. |
-| Source capture | Saved / Partial / Missing | Record what was retained and any missing material or failed operation. |
+| Dimension | States |
+| --- | --- |
+| Evidence support | Supported / Contradicted / Unresolved, with reasons |
+| Source capture | Saved / Partial / Missing, with limits and recovery actions |
 
-Keep each complete review prompt within the total input budget, not just a per-artifact text cap. Remove exact repeated excerpt text and JSON escape overhead first; if shortening is still required, retain every source/artifact reference and explicitly mark partial excerpts and omitted characters. Missing material limits the assessment; it is not evidence that a result is absent. Original source files remain unchanged.
+Supported means the inspected evidence supports the stated scope; it does not certify scientific truth. A saved source can contradict a claim. Missing evidence means unresolved, not contradicted. Proposed completion criteria need not represent published consensus. Record uncertainty and assess dated results at their stated dates.
 
-A saved paper can contradict a claim. A supported claim can still have an outstanding capture task. Missing evidence or failed extraction means unresolved, not contradicted.
+Validate quotations against the specific supplied artifact. Matching tolerates ordinary PDF wrapping and typography, without changing words, numbers or negation. Keep raw output and audits of normalized references. Capture metadata corrections cannot repair an unmatched passage or change a scientific judgment.
 
-Compare duplicate candidates and inspect obvious gaps in the field list. Narrow or correct claims where the evidence warrants it. One bad optional citation does not invalidate adequate support from another source; remove or flag the bad citation with a reason.
+The complete review prompt is capped at 900,000 UTF-8 bytes, including retry space. Deduplicate exact excerpts and avoid JSON escape overhead before shortening text. Preserve source/artifact references and mark omitted text as partial; full saved files remain unchanged. Missing passages limit the assessment and do not establish absence of evidence.
 
-Keep claim-level evidence results visible separately from the concept assessment. Do not label an entire concept unsupported merely because a supporting claim needs correction or a source could not be downloaded. Separate collection incomplete and review failed from evidence/scope uncertainty; one invalid quote must not discard valid assessments of other claims. Treat explicitly proposed completion criteria as proposals grounded in the goal, without demanding published consensus. Assess dated results at their stated dates and record recent-literature queries, cutoff and limitations separately. Do not silently promote candidates because a script finished.
+## 5. Rewrite and finish the field
 
-## 5. Produce the final structured output after review
-
-Rewrite each innovation independently with one LLM call. Supply only that concept's reconciled research, structured record, validated review, and source references. Do not send full source documents again or ask for new research: step 4 already inspected the evidence. Measure and record each input's size before execution, then run the independent calls in parallel with the chosen worker limit.
-
-Each final record has six sections:
-
-1. **Concept:** title and a plain-language explanation.
-2. **Significance:** why it would be revolutionary, its direct consequences, and possibilities that require further breakthroughs.
-3. **Missing breakthrough:** what remains unsolved and the barriers.
-4. **Current state:** demonstrated results, dates, and limitations.
-5. **Completion criteria:** what would count as achieving the breakthrough, with proposed criteria labeled as proposals.
-6. **Related concepts:** overlaps and distinctions without merging away identities.
-
-Integrate the reviewer's useful explanations, distinctions, and limitations into those sections; consolidation must not discard that detail. Put source citations near the statements they support and uncertainty where it matters. Keep the full review, original research, and change history linked as audit metadata rather than repeating proposed-correction and evidence-review sections in the main entry. Preserve every concept and stable ID, qualify unsupported assertions, and record which corrections were applied or left unresolved and why.
-
-Prepare and inspect input sizes before making model calls:
+Rewrite each reviewed concept independently using its reconciled research, structured record, validated review, source metadata and concept roster. Do not send full source documents again or request new research. Input sizes are recorded. To prepare without calls or run only this stage:
 
 ```bash
-python3 -m ingestion.final_rewrite ingestion/runs/CHEMREV --prepare-only
-python3 -m ingestion.final_rewrite ingestion/runs/CHEMREV --workers 13
+python3 -m ingestion.final_rewrite ingestion/runs/all-fields/MLC --prepare-only
+python3 -m ingestion.final_rewrite ingestion/runs/all-fields/MLC --workers 3
 ```
 
-The worker default is 3; the current Chemistry run authorizes 13 independent calls. This command is step 5 only, not a replacement for the preceding research, capture, and review stages. It produces `final-innovations.json` and `final-innovations.md` after validating the individual records and merging them deterministically. No LLM merge call is needed. Chemistry's consolidated output must contain all thirteen reconciled entries.
+Each final record has six sections: **concept, significance, missing breakthrough, current state, completion criteria, and related concepts**. Integrate review corrections and limitations, cite supported statements, label proposed criteria and retain unresolved issues. Keep full reviews and change history linked as audit metadata. Each record retains the models used for research, reconcile, format, review and rewrite.
 
-Check the final schema, concept-ID preservation, original-entry dispositions, and source/artifact references. These are code checks, not another routine LLM review. A failed or missing record must remain visible rather than silently producing a shortened final list. If a correction needs new research or a replacement source, recover only that item, capture the evidence, and update its review and final record; do not rerun the whole field. Preserve the prior outputs. Reviews that only produce recommendations are not a completed pipeline.
+Validate records, IDs, original-entry dispositions and source references, then merge deterministically into `final-innovations.json` and `final-innovations.md`. There is no LLM merge pass.
 
-The field is complete when:
+Only a recorded safety refusal at review or rewrite withholds a concept. Keep its `{id, title, stage, reason}` in the final `withheld` list and omit it from `innovations`. Preserve the refusal under `workflow-blocked/`; do not narrow, filter, retry or reroute it to another model. The marker blocks the stage even if metadata changes. Other review or rewrite failures block completion; a refusal at a field-wide stage blocks that stage. Preserve every non-withheld concept and every original-entry disposition.
 
-- The final revised list explains each concept, its completion criteria, current state, and significance, with inspectable supporting passages.
-- Every first-pass concept is retained, every original entry has a disposition, and review recommendations are applied or explicitly left unresolved with reasons. Overlaps and obvious omissions have been considered.
-- Capture status and remaining recovery actions are visible independently of evidence support.
-- Saved evidence for included claims can be reopened. Copy the field outputs and source files to a backup outside the project, then verify their hashes and reopen a source from that backup.
+The batch validates final records, reviews and source hashes, then verifies an external backup by checking all file hashes and reopening saved sources. It imports each finished field into `atlas/core` in the controller thread, one at a time, checks the core, rebuilds SQLite and commits with the field and model names. Existing core fields are left alone; a failed check or rebuild rolls back the import. Inspect `import_error` separately from field completion. There is no requirement to finish every field before importing one.
 
-Report the result briefly: the field, concepts retained/modified/added, corrections applied, where the outputs are, and remaining evidence or capture issues. A completed review does not mean every candidate is supported or every source is fully captured. If the result is empty or inadequate, state that and identify what is missing before expanding.
+Report the field, retained and withheld concepts, corrections, output locations and remaining evidence or capture issues. Completion does not imply every claim is supported or every source is fully captured.
 
-No prescribed report template or commit per field is required. When committing, inspect the staged changes and exclude private source copies. Do not push or publish without authorization.
+## Recovery and checks
 
-Before automating further, use this field to check three behaviors: a source supports the actual claim, a failed download can be recovered without losing earlier work, and repeating a completed step does not duplicate results. Add tests for those behaviors when implementing the tools; documentation-only changes need a consistency check.
+Repeat only the failed operation. Preserve successful captures, cached stages, attempts and raw outputs. Cache keys include the prompt/input and the selected model and effort; resumed reconciliation also includes its session ID. All configured entries' caches are checked before new calls. Prompt changes invalidate affected caches. Restore settings, caches, attempts and sources together from backup.
 
-## Recovery: only repeat what failed
+For documentation-only changes, check consistency against the implementation. Run ingestion tests with dependencies installed in the same Python environment:
 
-Keep a brief issue entry beside the affected source or claim: what failed, what was tried, and the next action. Preserve usable earlier captures. A failed retry must not replace the best saved copy.
+```bash
+python3 -m pip install -r ingestion/requirements.txt
+python3 -m unittest discover -s ingestion/tests -v
+```
 
-| Failure | Recovery |
-|---|---|
-| Timeout, rate limit, or temporary server failure | Retry the failed operation once after the indicated wait. If it still fails, record the next action and continue with other sources. |
-| Paywall, bot block, or dead URL | Look for a legitimate repository/author copy or existing archive. Use a relevant provider such as Europe PMC when appropriate. If unavailable, request a legitimate manual copy or find an alternative supporting source. |
-| Paper PDF download fails | Record that failure even if a landing-page snapshot exists. Follow declared and ordinary PDF links; keep usable HTML/XML and mark capture partial if relevant full text is missing. |
-| Rendering fails | Keep usable original HTML/XML. Retry rendering only if a readable derivative is actually needed. |
-| Wayback save fails | Keep the local artifact; record the backup failure and continue. |
-| Quote, identifier, or extraction check fails | Inspect source identity, version, passage, and extraction. Leave support unresolved until assessed; correct the citation or claim when justified. |
-| Named papers lack citation URLs | Repair an explicit source ledger from saved research before formatting; identify actual documents, map URLs to claims, and record gaps. Do not repeat whole-field discovery. |
-| Model service explicitly refuses a request for safety reasons | Preserve the refusal and mark that review unfinished. Do not automatically resend the same input or switch models to get around it. Continue unrelated fields. A permitted narrower review must disclose its reduced evidence scope; it is not equivalent to the refused full-source review. |
-| Research, formatting, or another pipeline step fails | Preserve successful outputs and resume only the failed step. Confirm the earlier process has stopped before retrying. |
-
-Manual copies may be linked by URL or another source identifier; a DOI is not required. Verify identity and relevant content, then reassess only the affected claims. Corrected claims and replacement citations form a new revision with a short explanation; preserve the raw outputs and previous evidence.
-
-Do not build a scheduler, extensive queues, OCR, or a catalog of fallback providers until a real case requires them. After the bounded retry, the issue remains open until an explicit next action is taken.
+The tests use temporary data and synthetic evidence, without live model or publisher calls.

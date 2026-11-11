@@ -1,74 +1,104 @@
 # Field ingestion
 
-Tools for the [field onboarding runbook](../docs/runbooks/Field_Onboarding_Runbook.md), adapted from the archived `fields_v5` pipeline at Git commit `7bc3997`. The agreed sequence is independent Grok research → same-thread comparison with the original list and further research → structuring and source capture → review of every concept → final structured rewrite.
+`ingestion.batch` coordinates `ingestion.field_workflow` across three fields at a time, refilling each slot when a field finishes. Review and rewrite each use three concept workers per field. See the [field onboarding runbook](../docs/runbooks/Field_Onboarding_Runbook.md) for research and evidence rules.
 
-The current full workflow is `ingestion.field_workflow`, coordinated across fields by `ingestion.batch`.
+## Run and resume
 
-From the repository root, use Python 3.10+ with `python3 -m pip install -r ingestion/requirements.txt`. The existing signed-in Grok CLI and Codex CLI bundled with ChatGPT are configured in `config.json`. No API key is needed. Model configuration is separate from the prompts. Do not switch accounts automatically; if Grok access is exhausted, ask the user to switch accounts.
+From the repository root, install the dependencies in the Python environment used to run the pipeline:
 
-## All 66 fields: complete workflow
+```bash
+python3 -m pip install -r ingestion/requirements.txt
+```
+
+The signed-in Grok, Codex and Claude CLIs are configured in `ingestion/config.json`; prompts are separate. The runner removes API-key environment overrides and does not switch accounts automatically.
+
+For a new batch, prepare the canonical 66-field roster and original Markdown/JSON lists from Git revision `7bc3997d0e1ee3ccdb4073402fb9744827173dda`:
 
 ```bash
 python3 -m ingestion.batch prepare --as-of 2026-11-01
 python3 -m ingestion.batch run
 ```
 
-Preparation restores the canonical 66-field roster and each original Markdown/JSON list from Git revision `7bc3997d0e1ee3ccdb4073402fb9744827173dda`, preserving their paths and hashes under `ingestion/runs/all-fields/originals/`. The batch runs three fields at a time and starts the next when a field finishes. Each field follows all five steps, with up to three independent concept calls inside a field. Grok research and reconciliation use the same persistent session and working directory. The existing Chemistry run is reused only after its final output and backup verify.
-
-Progress is recorded in `ingestion/runs/all-fields/batch.json` and `progress.md`; each field has a `workflow-receipt.json`. The final per-field outputs are `final-innovations.json` and `final-innovations.md`. A field counts as complete only after its records, reviews, saved-source hashes, and external backup validate. Backups default to `../2026_Takeoff_backups/all-fields/`. Completion is tracked per field, with each field retaining its own final outputs and original-entry dispositions.
-
-Rerun the same `batch run` command to resume. Verified completed fields are skipped; cached successful stages are reused. Failed fields remain visibly incomplete while other fields proceed. Grok account exhaustion stops new field scheduling and requires the user to switch accounts; credentials are never requested. The command exits nonzero for an incomplete batch (1) or an account switch requirement (2). Runtime receipts—not the presence of these commands—establish actual completion.
-
-## Final structured rewrite (step 5)
-
-Use one independent LLM rewrite per innovation. Its input contains only that concept's reconciled research, structured record, validated review, and source references—not full source documents again. Measure the prepared inputs before running calls:
+For the existing batch, rerun `run` without preparing it again. To run only selected field prefixes:
 
 ```bash
-python3 -m ingestion.final_rewrite ingestion/runs/CHEMREV --prepare-only
-python3 -m ingestion.final_rewrite ingestion/runs/CHEMREV --workers 13
+python3 -m ingestion.batch run --fields MLC CLM VIR
 ```
 
-`--prepare-only` prepares and measures inputs without model calls. The worker default is 3; 13 parallel calls are authorized for this Chemistry run. The command consumes the existing reconciled research and validated reviews; it does not rerun research, capture, or review.
+`--fields PREFIX…` limits work to those prefixes; it does not change the roster. Unknown prefixes are rejected. Verified completed fields reuse their outputs and backup and still get an import check. Failed fields remain visible while other fields proceed.
 
-Each record has six sections: **concept, significance, missing breakthrough, current state, completion criteria, and related concepts**. Incorporate the reviewer's detailed explanations, distinctions, and limitations into those sections, with citations beside the supported statements. Keep uncertainty explicit and preserve stable IDs. Link the full review, source references, and change history as audit metadata, rather than repeating the review's headings in the final entry.
+Live status is in `ingestion/runs/all-fields/batch.json` and `progress.md`. Each field has a `workflow-receipt.json`, final JSON and Markdown, and a verified external backup. Use the manifest's field roots; Chemistry uses `ingestion/runs/CHEMREV/`. Backups default to `../2026_Takeoff_backups/all-fields/`.
 
-Validate each record, then merge deterministically into `final-innovations.json` and readable `final-innovations.md`; there is no LLM merge pass. The Chemistry output must retain all thirteen entries and account for the review corrections. A missing or invalid record is an incomplete step, not permission to omit a concept. The presence of this command or documentation does not certify a completed run; inspect the generated outputs and validation results before reporting completion.
+Exit status is 1 if a selected field is incomplete or has an import error, and 2 if a stage runs out of usable fallback entries. In the latter case, the controller stops scheduling new fields; wait for a reset or add capacity. A selected subset can succeed while the overall batch remains incomplete.
 
-## Sources and recovery
+## Stages and models
 
-Downloads retain original PDF/HTML/XML/text and content hashes. The downloader follows a page's declared PDF links and ordinary links whose URL path ends in `.pdf` (including query strings), without recursively crawling linked pages; a failed PDF download remains visible even when the landing page was saved. PDF text is extracted with page markers. Valid UTF-16 surrogate pairs become Unicode characters, and lone surrogates become U+FFFD so the extracted text can be encoded as UTF-8. Parser warnings, including skipped form content, are retained as extraction issues so incomplete text cannot be certified as a full capture. No PDF rendering, OCR or automatic legal-copy provider search is performed. An abstract, unreadable PDF, truncated extraction or uncertain identity is never silently treated as a complete source. Extraction is limited to 120,000 characters per artifact and explicitly marks truncation. The per-field workflow also caps the complete review prompt at 900,000 UTF-8 bytes, including JSON and instructions, with space reserved for a bounded retry message. Small inputs are unchanged. Oversized inputs first use UTF-8 JSON and exact-text references to avoid repeated excerpts, then share the remaining text budget fairly across sources and their artifacts. All source identities, hashes and paths remain represented. Shortened excerpts report retained/omitted character counts, a truncation flag and an extraction-limit reason; full source files stay untouched, and limited excerpts cannot certify full capture.
+| Stage | Work | Ordered model list |
+| --- | --- | --- |
+| Research | Independent discovery without the original list; web tools enabled | Grok `grok-4.7` high → Codex `gpt-6.1-terra` high → Codex `gpt-6.1-sol` high → Claude `opus` |
+| Reconcile | Compare the first pass with the original list; further research with web tools | Grok `grok-4.7` high → Codex `gpt-6.1-terra` high → Codex `gpt-6.1-sol` high → Claude `opus` |
+| Format | Structure reconciled notes, original-entry dispositions and change log | Codex `gpt-6.1-terra` high → Codex `gpt-6.1-sol` high → Claude `opus` |
+| Capture | Download and index cited sources; no model call | None |
+| Review | One evidence review and proposed corrections per concept | Codex `gpt-6.1-sol` medium → Claude `opus` |
+| Rewrite | One final record per reviewed concept, then deterministic merge | Codex `gpt-6.1-sol` medium → Claude `opus` |
+| Finish | Validate, verify external backup, import into `atlas/core`, check, rebuild and commit | None |
 
-`captures.json` records each operation and its attempts. Transient downloads get one retry; a Retry-After longer than 60 seconds is deferred with the wait recorded. A normal rerun reuses successful operations and leaves failed ones alone.
+A stage advances to the next model **only on classified provider exhaustion or timeout**. An unclassified error or invalid output does not trigger fallback. Format and review allow one same-model retry; Codex formatting output exhaustion lowers effort to medium for that retry. Research and reconcile have no same-model retry. A failed rewrite can recover a valid saved result or retry on a later run.
 
-For an inaccessible source, find a legitimate repository/author/archived copy, then supply that URL or a manual file. Use the original citation URL as the stable key; no DOI is required.
+A safety refusal is final for every model. It is recorded under `workflow-blocked/` and checked before cache reuse or calls, even if the input metadata changes. The refused stage is never automatically retried, filtered or rerouted.
+
+Grok exhaustion is shared across fields and saved as `providers.grok.exhausted_at` in `batch.json`. Grok is skipped for 24 hours after that timestamp; the next configured model can continue. A timeout permits fallback but does not start the cooldown. Grok calls have a 2,400-second timeout; other calls default to 3,600 seconds.
+
+Reconciliation resumes the explicit Grok research session in its original `grok-workspace` only when Grok supplied that session and is available. Otherwise it starts a fresh conversation with the full first-pass list and original list. This is the same reconciliation pass; only tool history is absent. The attempt receipt records `resume` or `fresh`.
+
+## Final output and withheld concepts
+
+Each final record contains **concept, significance, missing breakthrough, current state, completion criteria, and related concepts**, with citations, corrections and unresolved issues. Rewrite inputs include the concept's research, structured record, validated review, source metadata and concept roster; full source documents are not sent again. Records retain stage model names in `models: {research, reconcile, format, review, rewrite}`; attempt receipts record provider and model.
+
+Only a recorded safety refusal at review or rewrite makes a concept withheld. The final `withheld` list records `{id, title, stage, reason}`; the concept is excluded from `innovations` without narrowing or sending it to another model. Other review or rewrite failures block the field. A refusal at a field-wide stage blocks that stage. All non-withheld concept IDs and every original-entry disposition must survive validation.
+
+To prepare rewrite inputs without calls, or rerun only the rewrite stage:
+
+```bash
+python3 -m ingestion.final_rewrite ingestion/runs/all-fields/MLC --prepare-only
+python3 -m ingestion.final_rewrite ingestion/runs/all-fields/MLC --workers 3
+```
+
+This produces `final-innovations.json` and `final-innovations.md`; it does not perform the batch's backup or import. The batch validates records, reviews and saved-source hashes, then copies and verifies the field outside the project. The controller imports finished fields into `atlas/core` one at a time, checks the core, rebuilds SQLite and creates a Git commit naming the field and models. Existing core fields are left alone. A failed check or rebuild rolls back the import; an import error is recorded separately. Each field can land independently.
+
+## Caching and recovery
+
+Successful stages use content-verified `workflow-cache/<stage>-<fingerprint>.json` entries. Fingerprints include prompt/input, schema where applicable, and the selected entry's `{model, effort}`; resumed reconciliation also includes its session ID. Every model entry's cache is checked before any new call, including during cooldown. Prompt changes invalidate affected caches. Attempts and logs are retained.
+
+`final-rewrite-cache/` stores validated records by prompt, schema and `{model, effort}`. The rewriter can also recover a matching prior result that passes current validation. Resume with the same settings and original list to reuse successful work.
+
+`captures.json` makes downloads idempotent: normal reruns reuse successful operations and leave failed ones alone. Transient downloads get one retry; waits over 60 seconds are deferred. Capture follows PDF links without recursively crawling pages. If no bytes were retained and a DOI is available, the workflow tries one Europe PMC open-copy lookup and records it in `source-recovery.json`.
+
+Saved PDF/HTML/XML/text artifacts retain hashes. PDF extraction preserves page markers, repairs surrogate pairs and replaces lone surrogates. Extraction issues and the 120,000-character artifact limit remain explicit. Review prompts are capped at 900,000 UTF-8 bytes, including retry space; repeated excerpts are deduplicated before text is shortened. Shortened text is marked partial; original files remain unchanged. Missing evidence means unresolved, not contradicted. No OCR or PDF rendering is performed.
+
+For a legitimate alternate or manual copy, keep the original citation URL as the key:
 
 ```bash
 python3 -m ingestion.pipeline alternative ingestion/runs/FLD "https://publisher.example/paper" "https://repository.example/paper.pdf"
-python3 -m ingestion.pipeline attach ingestion/runs/FLD "https://publisher.example/paper" /absolute/path/paper.pdf
+python3 -m ingestion.pipeline attach ingestion/runs/FLD "https://publisher.example/paper" copies/paper.pdf
 ```
 
-Alternative URLs are captured and their declared PDF links followed. Add `--retry` to `alternative` to retry that failed alternative. A fresh Wayback save is deferred; an existing accessible archive URL can be supplied as an alternative. Neither is a support gate.
+Use `alternative --retry` to retry a failed alternative. New copies still require identity and passage review. Raw reviews and reference-normalization audits are retained; metadata repairs do not change scientific judgments. Failed retries do not replace good copies.
 
-A new copy must pass source-identity and passage review. The pipeline accepts a `sha256:` prefix only when the remaining hash exactly identifies a supplied artifact, and maps a resolved artifact URL back to its parent source-record key only when both the artifact hash and resolved URL uniquely match supplied metadata. It does not infer that different papers are equivalent. Per-field reviews retain the raw output and an audit of normalized references. Full-copy labels are capped at partial when extraction is truncated or has recorded issues. These metadata corrections preserve raw model output and never change claim judgments or repair unmatched passages. The reviewer may link any supplied source for a problem to another of that problem's claims when the saved passage supports it; each new link remains explicit in the assessment. Original access failures remain recorded even after an alternate copy supports the claim. Good copies are never replaced by failed retries.
-
-## Inspect and back up
-
-All runtime files, including copied sources and model prompts containing source text, live under Git-ignored `ingestion/runs/`. Tests use temporary directories and synthetic evidence; they do not call the real models or remote publishers.
-
-Before treating the field as complete, inspect supported claims and unresolved cases, then create an external backup:
+Runtime files and source copies stay under Git-ignored `ingestion/runs/`. For a separate manual backup:
 
 ```bash
-python3 -m ingestion.pipeline backup ingestion/runs/FLD ../2026_Takeoff_backups/FLD-20261031
+python3 -m ingestion.pipeline backup ingestion/runs/FLD ../2026_Takeoff_backups/FLD-recovery
 ```
 
-The destination must be new and outside this project. The backup verifies every file hash and reopens every archived source. Its `backup-verification.json` records the check. Copy that directory back to a fresh run location to restore it; retain field settings, workflow caches, attempts, reconciled outputs and sources together. No command publishes or commits research.
+The destination must be new and outside the project. Backup checks all file hashes and reopens archived sources, recording `backup-verification.json`. Restore the whole directory, including settings, caches, attempts and sources, together.
 
 ## Tests
+
+With the dependencies installed in the same Python environment:
 
 ```bash
 python3 -m unittest discover -s ingestion/tests -v
 ```
 
-Coverage includes stage resumption, idempotency, failed-download recovery, preservation of good copies, artifact-bound passages, unsupported scope, missing evidence, capture completeness, manual attachments, UTF-8-safe PDF extraction, per-field batch completion, locks, subprocess failure/timeout, and backup readback. The suite tests orchestration and assessment boundaries; a real field is still needed to evaluate research quality and live account/provider behavior.
-
-Explicit provider safety refusals are recorded in `workflow-blocked/` by stage and input hash. They bypass automatic retries, and identical inputs are not resent on resume. Other fields can continue, but the affected field remains incomplete until its review requirement is resolved. Normal Markdown heading variants are accepted without rewriting the saved research.
+Tests use temporary directories and synthetic evidence rather than live models or publishers. They cover stage/cache reuse, fallback and cooldown, terminal refusals, withheld concepts, source recovery and extraction, review validation, batch completion, serialized import and backup verification. Live research quality and provider behavior still require real runs.

@@ -1,3 +1,5 @@
+> **2026-11-11 — Superseded.** This report is superseded as of 2026-11-11. Machine Learning's failure was a text-extraction bug, not a refusal. Machine Learning (MLC), Clinical Medicine (CLM) and Virology (VIR) are now complete; CLM-02 and VIR-01 are withheld. **34 of 66 fields are complete.** See [batch.json](../ingestion/runs/all-fields/batch.json) for live status and [the pipeline review](ingestion-review-2026-11-11.md) for the changes. The historical report below is unchanged.
+
 # Field ingestion: detailed status and recovery report
 
 Generated 2026-11-01T19:00:36.778070+00:00 (UTC), 2026-11-01T11:00:36.778070-08:00 (America/Los_Angeles).

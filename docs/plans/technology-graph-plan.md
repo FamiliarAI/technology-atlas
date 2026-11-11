@@ -33,7 +33,7 @@ A `needs` link means B is expected to come first on the way to A: A builds on B,
 ## Where things stand
 
 - **Core.** `atlas/core/` (files in git) is the source of truth; the SQLite database is rebuilt from it. See the [core design](2026-11-09-atlas-core-design.md).
-- **Content.** 31 of 66 fields are in the core (334 breakthroughs). 3 fields are blocked by one refused concept each (Clinical Medicine, Virology, Machine Learning); 32 are not finished. See `docs/ingestion-status-2026-11-01.md`.
+- **Content.** 34 of 66 fields are in the core (369 breakthroughs), with two withheld concepts (CLM-02 and VIR-01). 32 fields are unfinished. See `ingestion/runs/all-fields/batch.json` for live status.
 - **Labels.** Short milestone labels exist for 5 fields (QUA, CSC, CPE, SWE, ROB).
 - **Links.** 5 `needs` links, from 2 fields.
 - **Progress.** 4 judged rows.
