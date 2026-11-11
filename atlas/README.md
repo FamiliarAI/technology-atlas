@@ -71,6 +71,26 @@ Each field gets one model call using its database records and a catalog of every
 
 The database is rebuilt after each field. The command then commits `atlas/core/` once, with the fields, model and call-record folders (`atlas/data/prerequisites/`) in the message. `--no-commit` skips Git while keeping the file writes and rebuilds. The library functions `atlas.add.add` and `atlas.prerequisites.run` accept `core=` and `path=` and never run Git.
 
+## Milestone labels
+
+```bash
+python3 -m atlas.labels SWE-01 CSC
+python3 -m atlas.labels SWE --no-commit
+```
+
+Each ID selects one breakthrough; a field prefix selects its active breakthroughs. Overlapping
+arguments are deduplicated. One Grok 4.7 call per breakthrough writes short pass-condition labels,
+with at most four calls running at once. Only milestone `label` strings change; all other file
+bytes stay intact. Invalid answers leave that breakthrough untouched, while others continue.
+Failures are printed and the command exits non-zero.
+
+Prompts, schemas and raw CLI output are saved in `atlas/data/labels/<ID>-<UTC timestamp>/`.
+After processing, the database is rebuilt once and successful breakthroughs are committed
+together with the model and repository-relative call folders in the message. `--no-commit`
+skips Git. The library function `atlas.labels.relabel(identifier, call=None, core=CORE)`
+returns `(milestone id, old label, new label)` tuples without rebuilding or committing;
+tests can supply a stub `call(prompt)` returning the parsed answer.
+
 ## Data and integrity
 
 `atlas/data/atlas.sqlite3` is generated locally and ignored by Git. Tables:
