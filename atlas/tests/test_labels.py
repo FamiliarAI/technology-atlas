@@ -30,10 +30,12 @@ class LabelTests(unittest.TestCase):
             'other': {'label': 'Optional result', 'text': 'Unicode: café'},
         }
         self.file = self.write(self.item)
-        self.reply = {'milestones': [
-            {'id': 'm2', 'label': 'All assumptions explicitly reported'},
-            {'id': 'm1', 'label': 'Error decreases with distance'},
-        ]}
+        self.reply = {
+            'milestones': [
+                {'id': 'm2', 'label': 'All assumptions explicitly reported'},
+                {'id': 'm1', 'label': 'Error decreases with distance'},
+            ]
+        }
 
     def write(self, item):
         path = self.core / item['field'] / (item['id'] + '.json')
@@ -50,27 +52,33 @@ class LabelTests(unittest.TestCase):
                 changes = labels.relabel('SWE-01', call=call, core=self.core)
         rebuild.assert_not_called()
         commit.assert_not_called()
-        self.assertEqual(changes, [
-            ('m1', 'Proposed demonstration', 'Error decreases with distance'),
-            ('m2', 'Optional result', 'All assumptions explicitly reported'),
-        ])
+        self.assertEqual(
+            changes,
+            [
+                ('m1', 'Proposed demonstration', 'Error decreases with distance'),
+                ('m2', 'Optional result', 'All assumptions explicitly reported'),
+            ],
+        )
         expected = before.replace(
-            b'"text": "Show decreasing error.",\r\n'
-            b'         "label": "Proposed demonstration"',
+            b'"text": "Show decreasing error.",\r\n         "label": "Proposed demonstration"',
             b'"text": "Show decreasing error.",\r\n'
             b'         "label": "Error decreases with distance"',
         ).replace(
             b'"label": "Optional result",\r\n         "text": "Report all assumptions."',
-            b'"label": "All assumptions explicitly reported",\r\n'
-            b'         "text": "Report all assumptions."',
+            (
+                b'"label": "All assumptions explicitly reported",\r\n'
+                b'         "text": "Report all assumptions."'
+            ),
         )
         self.assertNotEqual(before, expected)
         self.assertEqual(self.file.read_bytes(), expected)
-        call.assert_called_once_with(labels.PROMPT.format(
-            title=self.item['title'],
-            concept='First concept paragraph',
-            milestones='m1: Show decreasing error.\nm2: Report all assumptions.',
-        ))
+        call.assert_called_once_with(
+            labels.PROMPT.format(
+                title=self.item['title'],
+                concept='First concept paragraph',
+                milestones='m1: Show decreasing error.\nm2: Report all assumptions.',
+            )
+        )
 
     def test_validation_rejects_whole_answer_without_writing(self):
         bad_labels = [
@@ -87,18 +95,22 @@ class LabelTests(unittest.TestCase):
             reply = copy.deepcopy(self.reply)
             reply['milestones'][1]['label'] = label
             cases.append((reply, reason))
-        cases.extend([
-            ({'milestones': self.reply['milestones'][:1]}, 'milestone ids'),
-            ({'milestones': self.reply['milestones'] * 2}, 'milestone ids'),
-            ({'milestones': [{'id': 'unknown', 'label': 'Working universal gate set'}]},
-             'milestone ids'),
-            ({'milestones': [{'id': 'm1', 'label': 42}]}, 'schema'),
-            ({'milestones': self.reply['milestones'], 'extra': True}, 'schema'),
-            ({'milestones': [dict(self.reply['milestones'][0], extra=True)]}, 'schema'),
-            ({'milestones': 'bad'}, 'schema'),
-            ({}, 'schema'),
-            (None, 'schema'),
-        ])
+        cases.extend(
+            [
+                ({'milestones': self.reply['milestones'][:1]}, 'milestone ids'),
+                ({'milestones': self.reply['milestones'] * 2}, 'milestone ids'),
+                (
+                    {'milestones': [{'id': 'unknown', 'label': 'Working universal gate set'}]},
+                    'milestone ids',
+                ),
+                ({'milestones': [{'id': 'm1', 'label': 42}]}, 'schema'),
+                ({'milestones': self.reply['milestones'], 'extra': True}, 'schema'),
+                ({'milestones': [dict(self.reply['milestones'][0], extra=True)]}, 'schema'),
+                ({'milestones': 'bad'}, 'schema'),
+                ({}, 'schema'),
+                (None, 'schema'),
+            ]
+        )
         before = self.file.read_bytes()
         for reply, reason in cases:
             with self.subTest(reply=reply):
@@ -126,7 +138,8 @@ class LabelTests(unittest.TestCase):
         (self.core / 'SWE/field.json').write_text('{"id": "SWE"}')
         factory = self.start_patch('atlas.labels._call')
         factory.side_effect = lambda identifier: (
-            self.calls / identifier, Mock(return_value=self.reply)
+            self.calls / identifier,
+            Mock(return_value=self.reply),
         )
         self.start_patch('atlas.labels.ROOT', new=self.root)
         rebuild = self.start_patch('atlas.labels.store.rebuild')
@@ -138,8 +151,9 @@ class LabelTests(unittest.TestCase):
         factory, rebuild, git = self.prepare_main()
         result = labels.main(['SWE', 'SWE-01', '--no-commit'], core=self.core)
         self.assertEqual(result, 0)
-        self.assertEqual(sorted(c.args[0] for c in factory.call_args_list),
-                         ['SWE-01', 'SWE-03'])
+        self.assertEqual(
+            sorted(call.args[0] for call in factory.call_args_list), ['SWE-01', 'SWE-03']
+        )
         rebuild.assert_called_once_with(core=self.core)
         git.assert_not_called()
         retired = json.loads((self.core / 'SWE/SWE-02.json').read_bytes())
@@ -151,8 +165,14 @@ class LabelTests(unittest.TestCase):
             self.assertEqual(labels.main(['SWE'], core=self.core), 0)
         rebuild.assert_called_once_with(core=self.core)
         commit.assert_called_once_with(
-            'Relabel milestones for SWE (2 breakthroughs)\n\nModel: grok-4.7\n'
-            'Calls:\natlas/data/labels/SWE-01\natlas/data/labels/SWE-03'
+            (
+                'Relabel milestones for SWE (2 breakthroughs)\n'
+                '\n'
+                'Model: grok-4.7\n'
+                'Calls:\n'
+                'atlas/data/labels/SWE-01\n'
+                'atlas/data/labels/SWE-03'
+            )
         )
         self.assertEqual(git.call_count, 3)
         self.assertEqual(git.call_args_list[0].args[0], ['git', 'add', 'atlas/core'])
@@ -167,11 +187,12 @@ class LabelTests(unittest.TestCase):
         with patch('builtins.print') as output:
             result = labels.main(['SWE', '--no-commit'], core=self.core)
         self.assertEqual(result, 1)
-        self.assertTrue(any('SWE-01:' in str(c) for c in output.call_args_list))
+        self.assertTrue(any('SWE-01:' in str(criterion) for criterion in output.call_args_list))
         self.assertEqual(self.file.read_bytes(), before)
         updated = json.loads((self.core / 'SWE/SWE-03.json').read_bytes())
-        self.assertEqual(updated['completion_criteria'][0]['label'],
-                         'Error decreases with distance')
+        self.assertEqual(
+            updated['completion_criteria'][0]['label'], 'Error decreases with distance'
+        )
         rebuild.assert_called_once_with(core=self.core)
         git.assert_not_called()
 
@@ -196,9 +217,9 @@ class LabelTests(unittest.TestCase):
                 active -= 1
             return self.reply
 
-        with patch('atlas.labels._call', side_effect=lambda identifier: (
-            self.calls / identifier, call
-        )):
+        with patch(
+            'atlas.labels._call', side_effect=lambda identifier: (self.calls / identifier, call)
+        ):
             self.assertEqual(labels.main(['SWE', '--no-commit'], core=self.core), 0)
         self.assertEqual((calls, peak), (8, 4))
 
@@ -207,27 +228,43 @@ class LabelTests(unittest.TestCase):
         config.write_text('{"grok": "~/.grok/bin/grok"}')
         with patch('atlas.labels.CONFIG', config), patch('atlas.labels.CALLS', self.calls):
             folder, call = labels._call('SWE-01')
-        envelope = {'structuredOutput': self.reply, 'structuredOutputError': None,
-                    'stopReason': 'end_turn'}
+        envelope = {
+            'structuredOutput': self.reply,
+            'structuredOutputError': None,
+            'stopReason': 'end_turn',
+        }
         raw = json.dumps(envelope).encode()
         with patch('subprocess.run', return_value=Mock(stdout=raw, returncode=0)) as run:
             self.assertEqual(call('the prompt'), self.reply)
         command = run.call_args.args[0]
         self.assertEqual(command[0], str(Path('~/.grok/bin/grok').expanduser()))
-        self.assertEqual(command[1:14], [
-            '-m', 'grok-4.7', '--reasoning-effort', 'high', '--tools', '',
-            '--disable-web-search', '--no-subagents', '--no-plan', '--max-turns', '1',
-            '--output-format', 'json',
-        ])
+        self.assertEqual(
+            command[1:14],
+            [
+                '-m',
+                'grok-4.7',
+                '--reasoning-effort',
+                'high',
+                '--tools',
+                '',
+                '--disable-web-search',
+                '--no-subagents',
+                '--no-plan',
+                '--max-turns',
+                '1',
+                '--output-format',
+                'json',
+            ],
+        )
         self.assertEqual(run.call_args.kwargs['cwd'], folder)
         self.assertEqual((folder / 'prompt.md').read_text(), 'the prompt')
         self.assertEqual(json.loads((folder / 'schema.json').read_text()), labels.SCHEMA)
         self.assertEqual((folder / 'raw.json').read_bytes(), raw)
         self.assertEqual(command[-2:], ['--prompt-file', str(folder / 'prompt.md')])
-        self.assertEqual(json.loads(command[command.index('--json-schema') + 1]),
-                         labels.SCHEMA)
+        self.assertEqual(json.loads(command[command.index('--json-schema') + 1]), labels.SCHEMA)
         for changed in [
-            {'structuredOutputError': 'invalid schema'}, {'stopReason': 'max_turns'},
+            {'structuredOutputError': 'invalid schema'},
+            {'stopReason': 'max_turns'},
             {'structuredOutput': None},
         ]:
             with self.subTest(changed=changed):

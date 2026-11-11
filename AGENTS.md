@@ -6,3 +6,9 @@
 - [Ingestion pipeline](ingestion/README.md)
 - [Detailed ingestion status and recovery report](docs/ingestion-status-2026-11-01.md)
 - [Technology Atlas v1 — run and test](atlas/README.md)
+
+# Code style
+
+- Python: one statement per line, lines up to 100 characters, single quotes. Run `ruff format atlas ingestion` before committing (config in `ruff.toml`).
+- Prompts, SQL and schemas are data: wrapping a long string must not change its value.
+- Tests: `python3 -m unittest discover -s atlas/tests`; ingestion tests need `jsonschema` (`/opt/homebrew/Caskroom/miniforge/base/bin/python -m unittest discover -s ingestion/tests`).

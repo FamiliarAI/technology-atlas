@@ -12,7 +12,13 @@ export const loadAtlas = async () => {
     const p = progress[i.id] || { status: [], count: 0 };
     const met = p.status.filter((s) => s === 'met').length;
     const moving = p.status.filter((s) => s === 'in_progress').length;
-    return { ...i, status: p.status, progressCount: p.count, score: met * 2 + moving, color: byField[i.field].color };
+    return {
+      ...i,
+      status: p.status,
+      progressCount: p.count,
+      score: met * 2 + moving,
+      color: byField[i.field].color,
+    };
   });
   // Within a lane, the furthest-advanced breakthroughs come first; ties keep ID order.
   for (const i of items) byField[i.field].items.push(i);
@@ -22,7 +28,13 @@ export const loadAtlas = async () => {
     (related[c.source] ||= new Set()).add(c.target);
     (related[c.target] ||= new Set()).add(c.source);
   }
-  return { fields, items: Object.fromEntries(items.map((i) => [i.id, i])), connections: catalog.connections, related, asOf: catalog.as_of };
+  return {
+    fields,
+    items: Object.fromEntries(items.map((i) => [i.id, i])),
+    connections: catalog.connections,
+    related,
+    asOf: catalog.as_of,
+  };
 };
 
 export const loadBreakthrough = (id) => get('/api/breakthroughs/' + encodeURIComponent(id));

@@ -34,36 +34,42 @@ SCHEMA = {
 PROMPT = (
     'You are writing short labels for the milestones of one proposed scientific or '
     'engineering breakthrough. Each milestone below is a completion criterion: a paragraph '
-    'describing something a qualifying result must show.\n\n'
+    'describing something a qualifying result must show.\n'
+    '\n'
     'For each milestone write one label: a plain statement of what must be shown for that '
-    'milestone to count as met.\n\n'
+    'milestone to count as met.\n'
+    '\n'
     'Rules:\n'
     '- 6 to 10 words, never more than 12. No full stop at the end.\n'
     '- Name the one core requirement. The paragraph holds the detail, so do not enumerate: '
     'never list more than three items, and prefer a summary noun ("full resource costs") '
     'to a list.\n'
-    '- Say the concrete thing demonstrated, using this breakthrough\'s own terms, quantities '
-    'and thresholds where the paragraph gives them. A reader who knows the field should be '
-    'able to look at a paper and say yes or no.\n'
+    "- Say the concrete thing demonstrated, using this breakthrough's own terms, "
+    'quantities and thresholds where the paragraph gives them. A reader who knows the '
+    'field should be able to look at a paper and say yes or no.\n'
     '- Use only what the paragraph says. Do not add numbers, thresholds or requirements it '
     'does not contain.\n'
-    '- Do not start with "Proposed" or "Optional". Do not hedge ("should", "may", "aims to"). '
-    'If the paragraph says the milestone is an optional stronger result, start the label '
-    'with "Stronger:".\n'
-    '- Do not repeat the breakthrough\'s title. Make the labels of one breakthrough clearly '
+    '- Do not start with "Proposed" or "Optional". Do not hedge ("should", "may", "aims '
+    'to"). If the paragraph says the milestone is an optional stronger result, start the '
+    'label with "Stronger:".\n'
+    "- Do not repeat the breakthrough's title. Make the labels of one breakthrough clearly "
     'different from each other.\n'
     '- A milestone about reporting, accounting, reproducibility or stated limits is still '
-    'a milestone: name what must be reported or reproduced.\n\n'
+    'a milestone: name what must be reported or reproduced.\n'
+    '\n'
     'Example. Paragraph: "Proposed demonstration: operate an encoded universal gate set, '
     'such as Clifford plus T, across a family of increasing code distances. On comparable '
     'logical workloads, show that error per operation decreases with distance, with '
     'quantified uncertainty…"\n'
     'Label: "Universal encoded gate set whose error per operation falls as code distance '
-    'increases"\n\n'
+    'increases"\n'
+    '\n'
     'Breakthrough: {title}\n'
-    'What it is: {concept}\n\n'
+    'What it is: {concept}\n'
+    '\n'
     'Milestones:\n'
-    '{milestones}\n\n'
+    '{milestones}\n'
+    '\n'
     'Return every milestone id exactly once.\n'
 )
 
@@ -86,9 +92,20 @@ def _call(identifier):
         prompt_path = folder / 'prompt.md'
         prompt_path.write_text(prompt, encoding='utf-8')
         command = [
-            grok, '-m', MODEL, '--reasoning-effort', 'high', '--tools', '',
-            '--disable-web-search', '--no-subagents', '--no-plan', '--max-turns', '1',
-            '--output-format', 'json',
+            grok,
+            '-m',
+            MODEL,
+            '--reasoning-effort',
+            'high',
+            '--tools',
+            '',
+            '--disable-web-search',
+            '--no-subagents',
+            '--no-plan',
+            '--max-turns',
+            '1',
+            '--output-format',
+            'json',
         ]
         command += _schema_args(schema) + ['--prompt-file', str(prompt_path)]
         result = subprocess.run(command, cwd=folder, capture_output=True, check=False)
@@ -165,8 +182,11 @@ def _members(source, start):
 
 
 def _replace_labels(source, milestones, replacements):
-    start = next(a for key, a, _ in _members(source, len(source) - len(source.lstrip()))
-                 if key == 'completion_criteria')
+    start = next(
+        a
+        for key, a, _ in _members(source, len(source) - len(source.lstrip()))
+        if key == 'completion_criteria'
+    )
     position = start + 1
     edits = []
     for milestone in milestones:
@@ -183,8 +203,9 @@ def _replace_labels(source, milestones, replacements):
 
 def relabel(identifier, call=None, core=CORE):
     """Replace one breakthrough's labels; return (id, old, new) in milestone order."""
-    paths = [p for p in Path(core).glob('*/*.json')
-             if p.stem == identifier and p.name != 'field.json']
+    paths = [
+        p for p in Path(core).glob('*/*.json') if p.stem == identifier and p.name != 'field.json'
+    ]
     if len(paths) != 1:
         raise ValueError(f'{identifier}: expected exactly one breakthrough file')
     path = paths[0]
@@ -220,7 +241,8 @@ def main(argv=None, core=CORE):
     for argument in args.identifiers:
         if Path(argument).name == argument and (Path(core) / argument).is_dir():
             identifiers.extend(
-                identifier for identifier, item in data['breakthroughs'].items()
+                identifier
+                for identifier, item in data['breakthroughs'].items()
                 if data.folders[identifier] == argument and item.get('status') == 'active'
             )
         elif argument in data['breakthroughs']:
@@ -242,9 +264,7 @@ def main(argv=None, core=CORE):
     folders = []
     completed = 0
     with ThreadPoolExecutor(max_workers=4) as pool:
-        for identifier, (folder, changes, error) in zip(
-            identifiers, pool.map(work, identifiers)
-        ):
+        for identifier, (folder, changes, error) in zip(identifiers, pool.map(work, identifiers)):
             if folder is not None:
                 folders.append(str(folder.relative_to(ROOT)))
             if error is not None:
@@ -260,8 +280,7 @@ def main(argv=None, core=CORE):
         if not args.no_commit and completed:
             message = (
                 f'Relabel milestones for {", ".join(args.identifiers)} '
-                f'({completed} breakthroughs)\n\nModel: {MODEL}\nCalls:\n'
-                + '\n'.join(folders)
+                f'({completed} breakthroughs)\n\nModel: {MODEL}\nCalls:\n' + '\n'.join(folders)
             )
             records.commit(message)
     except (OSError, ValueError, subprocess.SubprocessError) as error:

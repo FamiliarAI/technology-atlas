@@ -1,4 +1,5 @@
 """Retain original artifacts and retry failed operations without losing successes."""
+
 import hashlib
 import http.client
 import io
@@ -63,13 +64,20 @@ def request_url(url):
     port = p.port  # Validate malformed ports before urllib constructs a request.
     netloc = p.netloc
     if not netloc.isascii():
-        netloc = p.hostname.encode('idna').decode('ascii') + (f':{port}' if port is not None else '')
+        netloc = p.hostname.encode('idna').decode('ascii') + (
+            f':{port}' if port is not None else ''
+        )
     # Preserve existing percent escapes and URL delimiters; encode literal spaces/Unicode.
     safe = "/%:@!$&'()*+,;="
-    return urllib.parse.urlunsplit((p.scheme, netloc,
-        urllib.parse.quote(p.path, safe=safe),
-        urllib.parse.quote(p.query, safe=safe+'?[]'),
-        urllib.parse.quote(p.fragment, safe=safe+'?[]')))
+    return urllib.parse.urlunsplit(
+        (
+            p.scheme,
+            netloc,
+            urllib.parse.quote(p.path, safe=safe),
+            urllib.parse.quote(p.query, safe=safe + '?[]'),
+            urllib.parse.quote(p.fragment, safe=safe + '?[]'),
+        )
+    )
 
 
 class Redirect(urllib.request.HTTPRedirectHandler):
@@ -97,7 +105,14 @@ class HTML(HTMLParser):
             self.skip += 1
         if tag == 'meta' and a.get('name', '').lower() == 'citation_pdf_url' and a.get('content'):
             self.pdfs.append(a['content'])
-        if tag in ('link', 'a') and a.get('href') and (a.get('type', '').lower() == 'application/pdf' or urllib.parse.urlparse(a['href']).path.lower().endswith('.pdf')):
+        if (
+            tag in ('link', 'a')
+            and a.get('href')
+            and (
+                a.get('type', '').lower() == 'application/pdf'
+                or urllib.parse.urlparse(a['href']).path.lower().endswith('.pdf')
+            )
+        ):
             self.pdfs.append(a['href'])
 
     def handle_endtag(self, tag):
@@ -113,6 +128,7 @@ def extract(body, content_type):
     """Return format, text, issues, declared PDF links. Never certify completeness."""
     if body.startswith(b'%PDF-'):
         from pypdf import PdfReader
+
         class CaptureWarnings(logging.Handler):
             def __init__(self):
                 super().__init__(logging.WARNING)
@@ -130,7 +146,11 @@ def extract(body, content_type):
             reader = PdfReader(io.BytesIO(body))
             pages = [p.extract_text() or '' for p in reader.pages]
             text = '\n\n'.join(f'[Page {i}]\n{value}' for i, value in enumerate(pages, 1))
-            issues = [] if all(value.strip() for value in pages) and pages else ['Some PDF pages have no extractable text; inspect original']
+            issues = (
+                []
+                if all(value.strip() for value in pages) and pages
+                else ['Some PDF pages have no extractable text; inspect original']
+            )
             issues.extend('PDF extraction warning: ' + message for message in warnings.messages)
             return 'pdf', text, issues, []
         except Exception as e:
@@ -141,13 +161,23 @@ def extract(body, content_type):
         raise ValueError('Response claims PDF but has no PDF header')
     decoded = body.decode('utf-8', errors='replace')
     if 'html' in content_type or re.search(r'<(?:!doctype html|html)\b', decoded[:500], re.I):
-        parser = HTML(); parser.feed(decoded)
+        parser = HTML()
+        parser.feed(decoded)
         text = '\n'.join(parser.text)
-        if re.search(r'verify you are human|checking your browser|just a moment|access denied|captcha|enable javascript and cookies|checking your browser before accessing', text[:3000], re.I):
+        if re.search(
+            (
+                'verify you are human|checking your browser|just a moment|access '
+                'denied|captcha|enable javascript and cookies|checking your browser before '
+                'accessing'
+            ),
+            text[:3000],
+            re.I,
+        ):
             raise ValueError('Access challenge; seek a legitimate alternative or manual copy')
         return 'html', text, [] if text else ['No extractable text'], parser.pdfs
     if 'xml' in content_type:
         import xml.etree.ElementTree as ET
+
         try:
             text = ' '.join(ET.fromstring(body).itertext())
             return 'xml', text, [] if text.strip() else ['No extractable text'], []
@@ -185,9 +215,15 @@ class Archive:
             raise ValueError('Stored source hash mismatch')
         if not path.exists():
             path.write_bytes(body)
-        artifact = {'sha256': sha, 'path': str(path.relative_to(self.root)),
-                    'format': ext, 'kind': kind, 'resolved_url': resolved,
-                    'retrieved_at': now(), 'extraction_issues': issues}
+        artifact = {
+            'sha256': sha,
+            'path': str(path.relative_to(self.root)),
+            'format': ext,
+            'kind': kind,
+            'resolved_url': resolved,
+            'retrieved_at': now(),
+            'extraction_issues': issues,
+        }
         src = self.source(url)
         if not any(a['sha256'] == sha for a in src['artifacts']):
             src['artifacts'].append(artifact)
@@ -206,7 +242,12 @@ class Archive:
                 web_url(target)
                 body, ctype, resolved = self.getter(target)
                 sha, pdfs = self.retain(source_url, body, ctype, resolved, kind)
-                op.update(status='saved', artifact=sha, pdf_urls=[urllib.parse.urljoin(resolved, u) for u in pdfs], next_action=None)
+                op.update(
+                    status='saved',
+                    artifact=sha,
+                    pdf_urls=[urllib.parse.urljoin(resolved, u) for u in pdfs],
+                    next_action=None,
+                )
                 op['attempts'].append({'at': now(), 'result': 'saved', 'artifact': sha})
                 self.save()
                 return op
@@ -221,13 +262,24 @@ class Archive:
                             delay = max(0, int(wait))
                         except ValueError:
                             try:
-                                delay = max(0, (parsedate_to_datetime(wait) - datetime.now(timezone.utc)).total_seconds())
+                                delay = max(
+                                    0,
+                                    (
+                                        parsedate_to_datetime(wait) - datetime.now(timezone.utc)
+                                    ).total_seconds(),
+                                )
                             except (ValueError, TypeError):
                                 delay = 5
                 message = str(error)
                 op['attempts'].append({'at': now(), 'result': 'failed', 'error': message})
-                op.update(status='failed', next_action=(f'Retry this operation after {delay:g} seconds' if transient else
-                          'Inspect source; supply a legitimate alternative URL or manual copy'))
+                op.update(
+                    status='failed',
+                    next_action=(
+                        f'Retry this operation after {delay:g} seconds'
+                        if transient
+                        else 'Inspect source; supply a legitimate alternative URL or manual copy'
+                    ),
+                )
                 self.save()
                 if not transient or attempt == 1 or delay > 60:
                     return op
@@ -249,8 +301,16 @@ class Archive:
         file = Path(file)
         if file.stat().st_size > MAX_BYTES:
             raise ValueError('Manual copy exceeds 40 MiB')
-        types = {'.pdf': 'application/pdf', '.html': 'text/html', '.htm': 'text/html', '.xml': 'application/xml', '.txt': 'text/plain'}
-        sha, _ = self.retain(url, file.read_bytes(), types.get(file.suffix.lower(), ''), url, 'manual')
+        types = {
+            '.pdf': 'application/pdf',
+            '.html': 'text/html',
+            '.htm': 'text/html',
+            '.xml': 'application/xml',
+            '.txt': 'text/plain',
+        }
+        sha, _ = self.retain(
+            url, file.read_bytes(), types.get(file.suffix.lower(), ''), url, 'manual'
+        )
         self.save()
         return sha
 
@@ -263,11 +323,23 @@ class Archive:
             body = path.read_bytes()
             if digest(body) != a['sha256']:
                 raise ValueError(f'Source hash mismatch: {a["path"]}')
-            ctype = {'pdf': 'application/pdf', 'html': 'text/html', 'xml': 'application/xml', 'txt': 'text/plain'}[a['format']]
+            ctype = {
+                'pdf': 'application/pdf',
+                'html': 'text/html',
+                'xml': 'application/xml',
+                'txt': 'text/plain',
+            }[a['format']]
             _, text, issues, _ = extract(body, ctype)
             if not body:
-                issues = list(issues) + ['Retained artifact is empty (0 bytes); no source content is available']
-            item = {**a, 'text': text[:120000], 'truncated': len(text) > 120000, 'extraction_issues': issues}
+                issues = list(issues) + [
+                    'Retained artifact is empty (0 bytes); no source content is available'
+                ]
+            item = {
+                **a,
+                'text': text[:120000],
+                'truncated': len(text) > 120000,
+                'extraction_issues': issues,
+            }
             if not body:
                 item.update(byte_count=0, empty=True)
             items.append(item)

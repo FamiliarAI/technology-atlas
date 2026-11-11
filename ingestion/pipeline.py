@@ -1,4 +1,5 @@
 """Run with python3 -m ingestion.pipeline --help from the repository root."""
+
 import argparse
 import copy
 from contextlib import contextmanager
@@ -92,9 +93,16 @@ def validate_ledger(value, doc=None):
         mapped = {cid for source in value['sources'] for cid in source['claim_ids']}
         gaps = {g['claim_id'] for g in value['gaps']}
         if mapped | gaps != expected:
-            raise ValueError('Source ledger must map every claim to a source or explicit gap, with no unknown IDs')
+            raise ValueError(
+                (
+                    'Source ledger must map every claim to a source or explicit gap, with no '
+                    'unknown IDs'
+                )
+            )
         if {f['problem_id'] for f in value['freshness']} != {p['id'] for p in doc['problems']}:
-            raise ValueError('Source ledger must record a bounded freshness check for every candidate')
+            raise ValueError(
+                'Source ledger must record a bounded freshness check for every candidate'
+            )
     return value
 
 
@@ -111,9 +119,23 @@ class ReviewValidationError(ValueError):
 def normalize_passage(text):
     # Explicit presentation characters only: NFKC would also rewrite scientific
     # superscripts and mathematical alphabets, which must remain distinct.
-    text = text.translate(str.maketrans({
-        'ﬀ': 'ff', 'ﬁ': 'fi', 'ﬂ': 'fl', 'ﬃ': 'ffi', 'ﬄ': 'ffl', 'ﬅ': 'st', 'ﬆ': 'st',
-        '‘': "'", '’': "'", '“': '"', '”': '"'}))
+    text = text.translate(
+        str.maketrans(
+            {
+                'ﬀ': 'ff',
+                'ﬁ': 'fi',
+                'ﬂ': 'fl',
+                'ﬃ': 'ffi',
+                'ﬄ': 'ffl',
+                'ﬅ': 'st',
+                'ﬆ': 'st',
+                '‘': "'",
+                '’': "'",
+                '“': '"',
+                '”': '"',
+            }
+        )
+    )
     text = ' '.join(text.split())
     # Single/double delimiters around a complete quoted span are equivalent.
     # Never reinterpret contractions, possessives, primes, or unmatched marks.
@@ -131,8 +153,12 @@ def passage_matches(passage, text):
     # Only a physical line-end hyphen may be omitted or retained by the quote.
     # No fuzzy similarity, word substitution or general punctuation stripping.
     wrapped = re.sub(r'(?<=[A-Za-z])-[ \t]*\r?\n\s*(?=[A-Za-z])', '\x00', text)
-    pattern = ''.join(r'(?:-|\x00)' if char == '-' else re.escape(char) +
-                      (r'\x00?' if char.isascii() and char.isalpha() else '') for char in quote)
+    pattern = ''.join(
+        r'(?:-|\x00)'
+        if char == '-'
+        else re.escape(char) + (r'\x00?' if char.isascii() and char.isalpha() else '')
+        for char in quote
+    )
     return re.search(pattern, normalize_passage(wrapped)) is not None
 
 
@@ -154,16 +180,24 @@ def normalize_review_metadata(review, payload):
                 # A downloaded PDF may use its resolved URL rather than its
                 # parent source-record key. Normalize only an exact, unique
                 # supplied hash + resolved-URL pair, never URL similarity.
-                matches = [(source_url, item) for (source_url, sha), item in artifacts.items()
-                           if sha == reference and item.get('resolved_url') == evidence.get('url')]
+                matches = [
+                    (source_url, item)
+                    for (source_url, sha), item in artifacts.items()
+                    if sha == reference and item.get('resolved_url') == evidence.get('url')
+                ]
                 if len(matches) != 1:
                     continue
                 evidence['url'], artifact = matches[0]
             evidence['artifact'] = reference
-            if evidence.get('completeness') == 'full' and (artifact['truncated'] or artifact['extraction_issues']):
+            if evidence.get('completeness') == 'full' and (
+                artifact['truncated'] or artifact['extraction_issues']
+            ):
                 evidence['completeness'] = 'partial'
                 if isinstance(evidence.get('reason'), str):
-                    evidence['reason'] += ' [Pipeline capture limit: partial because the supplied extraction is truncated or has recorded issues.]'
+                    evidence['reason'] += (
+                        ' [Pipeline capture limit: partial because the supplied extraction '
+                        'is truncated or has recorded issues.]'
+                    )
     return result
 
 
@@ -199,7 +233,9 @@ def _validate_review(review, payload):
         if status != 'unresolved' and not any(
             e['relation'] == status and e['identity_verified'] for e in assessment['evidence']
         ):
-            raise ValueError('Conclusive assessment requires inspected evidence with verified identity')
+            raise ValueError(
+                'Conclusive assessment requires inspected evidence with verified identity'
+            )
     return review
 
 
@@ -212,14 +248,22 @@ def salvage_review(review, payload):
         single = copy.deepcopy(payload)
         single['problem']['claims'] = [copy.deepcopy(claim)]
         # Permit any source cited by this problem, as in the full review validator.
-        single['problem']['claims'][0]['citations'] = [c for original in payload['problem']['claims'] for c in original['citations']]
+        single['problem']['claims'][0]['citations'] = [
+            c for original in payload['problem']['claims'] for c in original['citations']
+        ]
         try:
             validate_review({'claims': matches}, single)
             output.append(matches[0])
         except ReviewValidationError as error:
             issues[claim['id']] = str(error)[:1000]
-            output.append({'id': claim['id'], 'status': 'unresolved',
-                           'reason': 'Review output could not be validated: ' + str(error)[:1000], 'evidence': []})
+            output.append(
+                {
+                    'id': claim['id'],
+                    'status': 'unresolved',
+                    'reason': 'Review output could not be validated: ' + str(error)[:1000],
+                    'evidence': [],
+                }
+            )
     return {'claims': output}, issues
 
 
@@ -228,10 +272,21 @@ def execute(cmd, directory, stdin=None, timeout=3600):
     env = dict(os.environ)
     for key in ('OPENAI_API_KEY', 'CODEX_API_KEY', 'XAI_API_KEY', 'GROK_API_KEY'):
         env.pop(key, None)
-    with tempfile.TemporaryDirectory(prefix='atlas-model-') as cwd, \
-            open(directory / 'stdout.log', 'w') as out, open(directory / 'stderr.log', 'w') as err:
-        process = subprocess.Popen(cmd, cwd=cwd, env=env, stdin=subprocess.PIPE if stdin is not None else subprocess.DEVNULL,
-                                   stdout=out, stderr=err, text=True, start_new_session=True)
+    with (
+        tempfile.TemporaryDirectory(prefix='atlas-model-') as cwd,
+        open(directory / 'stdout.log', 'w') as out,
+        open(directory / 'stderr.log', 'w') as err,
+    ):
+        process = subprocess.Popen(
+            cmd,
+            cwd=cwd,
+            env=env,
+            stdin=subprocess.PIPE if stdin is not None else subprocess.DEVNULL,
+            stdout=out,
+            stderr=err,
+            text=True,
+            start_new_session=True,
+        )
         try:
             process.communicate(stdin, timeout=timeout)
         except BaseException:
@@ -245,8 +300,10 @@ def execute(cmd, directory, stdin=None, timeout=3600):
                 pass
             raise
     if process.returncode:
-        raise RuntimeError(f'Model CLI exited {process.returncode}; inspect {directory / "stderr.log"}. '
-                           'If Grok access/credits are exhausted, stop and ask the user to switch accounts.')
+        raise RuntimeError(
+            f'Model CLI exited {process.returncode}; inspect {directory / "stderr.log"}. '
+            'If Grok access/credits are exhausted, stop and ask the user to switch accounts.'
+        )
 
 
 class Models:
@@ -258,21 +315,54 @@ class Models:
         (directory / 'prompt.md').write_text(text)
         write_json(directory / 'model.json', settings)
         if role == 'research':
-            cmd = [str(Path(self.config['grok']).expanduser()), '-m', settings['model'],
-                   '--reasoning-effort', settings['effort'], '--tools', 'web_search,web_fetch',
-                   '--no-subagents', '--no-plan', '--max-turns', '150', '--output-format', 'json',
-                   '--prompt-file', str(directory / 'prompt.md')]
+            cmd = [
+                str(Path(self.config['grok']).expanduser()),
+                '-m',
+                settings['model'],
+                '--reasoning-effort',
+                settings['effort'],
+                '--tools',
+                'web_search,web_fetch',
+                '--no-subagents',
+                '--no-plan',
+                '--max-turns',
+                '150',
+                '--output-format',
+                'json',
+                '--prompt-file',
+                str(directory / 'prompt.md'),
+            ]
             execute(cmd, directory)
             raw = json.loads((directory / 'stdout.log').read_text())
             if raw.get('stopReason') != 'end_turn' or not str(raw.get('text', '')).strip():
-                raise ValueError('Research did not finish with usable notes; inspect raw output and account access')
+                raise ValueError(
+                    (
+                        'Research did not finish with usable notes; inspect raw output and '
+                        'account access'
+                    )
+                )
             return raw['text']
         write_json(directory / 'schema.json', schema)
         output = directory / 'response.json'
-        cmd = [str(Path(self.config['codex']).expanduser()), 'exec', '--ignore-user-config',
-               '--skip-git-repo-check', '--ephemeral', '-s', 'read-only', '-m', settings['model'],
-               '-c', f'model_reasoning_effort="{settings["effort"]}"', '--output-schema',
-               str(directory / 'schema.json'), '-o', str(output), '--json', '-']
+        cmd = [
+            str(Path(self.config['codex']).expanduser()),
+            'exec',
+            '--ignore-user-config',
+            '--skip-git-repo-check',
+            '--ephemeral',
+            '-s',
+            'read-only',
+            '-m',
+            settings['model'],
+            '-c',
+            f'model_reasoning_effort="{settings["effort"]}"',
+            '--output-schema',
+            str(directory / 'schema.json'),
+            '-o',
+            str(output),
+            '--json',
+            '-',
+        ]
         execute(cmd, directory, text)
         return read_json(output)
 
@@ -297,7 +387,10 @@ class Pipeline:
                         event = json.loads(line)
                     except ValueError:
                         continue
-                    if event.get('type') in ('error', 'turn.failed') and 'max_output_tokens' in json.dumps(event):
+                    if event.get('type') in (
+                        'error',
+                        'turn.failed',
+                    ) and 'max_output_tokens' in json.dumps(event):
                         self.config['format']['effort'] = 'medium'
         self.models = models or Models(self.config)
         self.archive = archive or Archive(self.root)
@@ -318,7 +411,12 @@ class Pipeline:
         directory = self.root / 'attempts' / f'{name}-{uuid.uuid4().hex}'
         directory.mkdir(parents=True)
         (directory / 'prompt.md').write_text(text)
-        receipt = {'step': name, 'model': self.config[role], 'started_at': now(), 'status': 'running'}
+        receipt = {
+            'step': name,
+            'model': self.config[role],
+            'started_at': now(),
+            'status': 'running',
+        }
         write_json(directory / 'receipt.json', receipt)
         print(f'{name}: started', flush=True)
         try:
@@ -327,8 +425,12 @@ class Pipeline:
                 for old in self.root.glob(f'attempts/{name}-*/receipt.json'):
                     prior = read_json(old)
                     candidate = old.parent / 'result.json'
-                    if (prior.get('status') == 'failed' and prior.get('model') == self.config[role]
-                            and candidate.exists() and (old.parent / 'prompt.md').read_text() == text):
+                    if (
+                        prior.get('status') == 'failed'
+                        and prior.get('model') == self.config[role]
+                        and candidate.exists()
+                        and (old.parent / 'prompt.md').read_text() == text
+                    ):
                         try:
                             validator(read_json(candidate))
                         except (ValueError, jsonschema.ValidationError):
@@ -336,7 +438,11 @@ class Pipeline:
                         recovered = read_json(candidate)
                         receipt['recovered_from'] = str(candidate.relative_to(self.root))
                         break
-            value = recovered if recovered is not None else self.models.call(role, text, schema, directory)
+            value = (
+                recovered
+                if recovered is not None
+                else self.models.call(role, text, schema, directory)
+            )
             write_json(directory / 'result.json', value)
             self.last_step_directory = directory
             if schema:
@@ -345,7 +451,10 @@ class Pipeline:
                 validator(value)
             path = directory / 'result.json'
             self.last_step_directory = directory
-            self.state['cache'][key] = {'path': str(path.relative_to(self.root)), 'sha256': digest(path.read_bytes())}
+            self.state['cache'][key] = {
+                'path': str(path.relative_to(self.root)),
+                'sha256': digest(path.read_bytes()),
+            }
             write_json(self.root / 'state.json', self.state)
             receipt.update(status='complete', finished_at=now())
             print(f'{name}: complete', flush=True)
@@ -363,14 +472,37 @@ class Pipeline:
             if digest(path.read_bytes()) != entry['sha256']:
                 raise ValueError('Revision changed on disk; import a new revision')
             return validate_candidates(read_json(path))
-        notes = self.step('research', 'research', prompt('research', FIELD=self.spec['field'],
-                          BOUNDARIES=self.spec['boundaries'], AS_OF=self.spec['as_of'], PREFIX=self.spec['prefix']))
+        notes = self.step(
+            'research',
+            'research',
+            prompt(
+                'research',
+                FIELD=self.spec['field'],
+                BOUNDARIES=self.spec['boundaries'],
+                AS_OF=self.spec['as_of'],
+                PREFIX=self.spec['prefix'],
+            ),
+        )
         legacy_text = prompt('format', NOTES=notes)
         text = prompt('format', NOTES=notes + self.research_url_context(self.last_step_directory))
+
         def format_key(value):
-            return fingerprint({'name': 'format', 'role': self.config['format'], 'text': value, 'schema': schemas.CANDIDATES})
-        if format_key(text) not in self.state['cache'] and format_key(legacy_text) in self.state['cache']:
-            prior = self.step('format', 'format', legacy_text, schemas.CANDIDATES, validate_candidates)
+            return fingerprint(
+                {
+                    'name': 'format',
+                    'role': self.config['format'],
+                    'text': value,
+                    'schema': schemas.CANDIDATES,
+                }
+            )
+
+        if (
+            format_key(text) not in self.state['cache']
+            and format_key(legacy_text) in self.state['cache']
+        ):
+            prior = self.step(
+                'format', 'format', legacy_text, schemas.CANDIDATES, validate_candidates
+            )
             if prior['sources']:
                 return prior  # Provenance enrichment must not redo a usable completed format step.
         # Existing successful outputs remain resumable. New research must hand off
@@ -378,23 +510,47 @@ class Pipeline:
         if format_key(text) in self.state['cache']:
             return self.step('format', 'format', text, schemas.CANDIDATES, validate_candidates)
         saved = self.state.get('source_ledger')
-        policy = fingerprint({'prompt': (HERE / 'prompts/source_ledger.md').read_text(), 'schema': schemas.LEDGER, 'model': self.config['research']})
+        policy = fingerprint(
+            {
+                'prompt': (HERE / 'prompts/source_ledger.md').read_text(),
+                'schema': schemas.LEDGER,
+                'model': self.config['research'],
+            }
+        )
         if saved and saved['notes_hash'] == fingerprint(notes) and saved.get('policy') == policy:
             path = self.root / saved['path']
             if digest(path.read_bytes()) != saved['sha256']:
                 raise ValueError('Cached source ledger changed')
             ledger = validate_ledger(read_json(path))
         else:
-            ledger = self.step('source-ledger', 'research', prompt('source_ledger', INPUT=json.dumps({
-                'field': self.spec, 'notes': notes, 'leads': text, 'candidates': None})), validator=validate_ledger)
+            ledger = self.step(
+                'source-ledger',
+                'research',
+                prompt(
+                    'source_ledger',
+                    INPUT=json.dumps(
+                        {'field': self.spec, 'notes': notes, 'leads': text, 'candidates': None}
+                    ),
+                ),
+                validator=validate_ledger,
+            )
             path = self.last_step_directory / 'result.json'
-            self.state['source_ledger'] = {'notes_hash': fingerprint(notes), 'policy': policy, 'path': str(path.relative_to(self.root)),
-                                          'sha256': digest(path.read_bytes())}
+            self.state['source_ledger'] = {
+                'notes_hash': fingerprint(notes),
+                'policy': policy,
+                'path': str(path.relative_to(self.root)),
+                'sha256': digest(path.read_bytes()),
+            }
             write_json(self.root / 'state.json', self.state)
             ledger = validate_ledger(ledger)
         write_json(self.root / 'source-ledger.json', ledger)
-        return self.step('format', 'format', prompt('format', NOTES=notes + '\nSOURCE LEDGER:\n' + json.dumps(ledger)),
-                         schemas.CANDIDATES, lambda doc: validate_handoff(doc, ledger))
+        return self.step(
+            'format',
+            'format',
+            prompt('format', NOTES=notes + '\nSOURCE LEDGER:\n' + json.dumps(ledger)),
+            schemas.CANDIDATES,
+            lambda doc: validate_handoff(doc, ledger),
+        )
 
     def repair_sources(self):
         doc = validate_candidates(read_json(self.root / 'candidates.json'))
@@ -409,21 +565,56 @@ class Pipeline:
             raise ValueError('No saved research to repair')
         path, notes = research[-1]
         context = self.research_url_context(path.parent)
-        ledger = self.step('source-ledger', 'research', prompt('source_ledger',
-            INPUT=json.dumps({'field': self.spec, 'candidates': doc, 'notes': notes, 'leads': context})),
-            validator=validate_ledger)
+        ledger = self.step(
+            'source-ledger',
+            'research',
+            prompt(
+                'source_ledger',
+                INPUT=json.dumps(
+                    {'field': self.spec, 'candidates': doc, 'notes': notes, 'leads': context}
+                ),
+            ),
+            validator=validate_ledger,
+        )
         ledger = validate_ledger(ledger, doc)
         write_json(self.root / 'source-ledger.json', ledger)
-        repaired = self.step('format-repaired', 'format', prompt('format', NOTES=json.dumps({
-            'original_candidates': doc, 'source_ledger': ledger,
-            'instruction': 'Keep every candidate and its ID. Use verified source ledger mappings. Correct dated current-state claims only as explicitly documented in the ledger; label proposed completion criteria as proposals. Preserve gaps.'})) +
-            '\n\nFor this source-repair operation, correct author attribution and access descriptions that conflict with the ledger metadata. Preserve candidate IDs and substantive scope; do not turn search listings or uninspected claims into evidence.',
-            schemas.CANDIDATES, lambda result: validate_handoff(result, ledger))
+        repaired = self.step(
+            'format-repaired',
+            'format',
+            prompt(
+                'format',
+                NOTES=json.dumps(
+                    {
+                        'original_candidates': doc,
+                        'source_ledger': ledger,
+                        ('instruction'): (
+                            'Keep every candidate and its ID. Use verified source ledger '
+                            'mappings. Correct dated current-state claims only as '
+                            'explicitly documented in the ledger; label proposed '
+                            'completion criteria as proposals. Preserve gaps.'
+                        ),
+                    }
+                ),
+            )
+            + (
+                '\n'
+                '\n'
+                'For this source-repair operation, correct author attribution and access '
+                'descriptions that conflict with the ledger metadata. Preserve candidate '
+                'IDs and substantive scope; do not turn search listings or uninspected '
+                'claims into evidence.'
+            ),
+            schemas.CANDIDATES,
+            lambda result: validate_handoff(result, ledger),
+        )
         if {p['id'] for p in repaired['problems']} != {p['id'] for p in doc['problems']}:
             raise ValueError('Source repair must preserve candidate IDs')
         revision = self.root / 'source-repair-candidates.json'
         write_json(revision, repaired)
-        self.revise(revision, 'Repair missing source handoff and record bounded freshness checks from saved research')
+        self.revise(
+            revision,
+            'Repair missing source handoff and record bounded freshness checks from saved research',
+        )
         return repaired
 
     def research_url_context(self, directory):
@@ -438,29 +629,50 @@ class Pipeline:
             return ''
         transcript = directory / 'session.md'
         if not transcript.exists():
-            result = subprocess.run([str(Path(self.config['grok']).expanduser()), 'export', session, str(transcript)],
-                                    capture_output=True, text=True, timeout=30)
+            result = subprocess.run(
+                [str(Path(self.config['grok']).expanduser()), 'export', session, str(transcript)],
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
             if result.returncode:
                 (directory / 'session-export-error.txt').write_text(result.stderr)
                 return ''
-        urls = list(dict.fromkeys(re.findall(r'^- Web(?:Search: open|Fetch:) (https?://\S+)', transcript.read_text(), re.M)))
+        urls = list(
+            dict.fromkeys(
+                re.findall(
+                    r'^- Web(?:Search: open|Fetch:) (https?://\S+)', transcript.read_text(), re.M
+                )
+            )
+        )
         if not urls:
             return ''
-        return ('\n\nRESEARCH TOOL PROVENANCE: The session attempted the following URLs. An attempted URL does NOT '
-                'prove successful access or support. Match a URL to a source only when the notes and identifier make '
-                'the association clear; never invent a match. Use one source record per unique valid URL. Omit '
-                'unknown-URL records and citations rather than emitting blank URLs; retain their claims as unresolved.\n'
-                + '\n'.join(urls))
+        return (
+            '\n'
+            '\n'
+            'RESEARCH TOOL PROVENANCE: The session attempted the following URLs. An '
+            'attempted URL does NOT prove successful access or support. Match a URL to a '
+            'source only when the notes and identifier make the association clear; never '
+            'invent a match. Use one source record per unique valid URL. Omit unknown-URL '
+            'records and citations rather than emitting blank URLs; retain their claims as '
+            'unresolved.\n'
+        ) + '\n'.join(urls)
 
     def revise(self, file, reason):
         if not reason.strip():
             raise ValueError('A revision requires a reason')
         doc = validate_candidates(read_json(file))
-        folder = self.root / 'revisions'; folder.mkdir(exist_ok=True)
+        folder = self.root / 'revisions'
+        folder.mkdir(exist_ok=True)
         path = folder / f'{uuid.uuid4().hex}.json'
         write_json(path, doc)
-        entry = {'path': str(path.relative_to(self.root)), 'sha256': digest(path.read_bytes()), 'reason': reason,
-                 'at': now(), 'previous': self.state['revision']}
+        entry = {
+            'path': str(path.relative_to(self.root)),
+            'sha256': digest(path.read_bytes()),
+            'reason': reason,
+            'at': now(),
+            'previous': self.state['revision'],
+        }
         write_json(path.with_suffix('.receipt.json'), entry)
         invalidate_summaries(self.root)
         self.state['revision'] = entry
@@ -468,8 +680,17 @@ class Pipeline:
 
     def run(self, through='review', problem_id=None, retry=False):
         if through == 'research':
-            return self.step('research', 'research', prompt('research', FIELD=self.spec['field'],
-                             BOUNDARIES=self.spec['boundaries'], AS_OF=self.spec['as_of'], PREFIX=self.spec['prefix']))
+            return self.step(
+                'research',
+                'research',
+                prompt(
+                    'research',
+                    FIELD=self.spec['field'],
+                    BOUNDARIES=self.spec['boundaries'],
+                    AS_OF=self.spec['as_of'],
+                    PREFIX=self.spec['prefix'],
+                ),
+            )
         doc = self.candidates()
         write_json(self.root / 'candidates.json', doc)
         if through == 'format':
@@ -485,81 +706,228 @@ class Pipeline:
         reviews, payloads = {}, {}
         for p in problems:
             wanted = {c['url'] for claim in p['claims'] for c in claim['citations']}
-            payload = {'field': self.spec, 'problem': p, 'freshness': [f for f in read_json(self.root / 'source-ledger.json', {}).get('freshness', []) if f['problem_id'] == p['id']], 'sources': [
-                {**s, 'artifacts': self.archive.evidence(s['url'])} for s in doc['sources'] if s['url'] in wanted]}
+            payload = {
+                'field': self.spec,
+                'problem': p,
+                'freshness': [
+                    f
+                    for f in read_json(self.root / 'source-ledger.json', {}).get('freshness', [])
+                    if f['problem_id'] == p['id']
+                ],
+                'sources': [
+                    {**s, 'artifacts': self.archive.evidence(s['url'])}
+                    for s in doc['sources']
+                    if s['url'] in wanted
+                ],
+            }
             payloads[p['id']] = payload
-            if not any(a['text'].strip() for source in payload['sources'] for a in source['artifacts']):
-                review = {'claims': [{'id': c['id'], 'status': 'unresolved',
-                           'reason': 'No extracted source text is available; support cannot be assessed.',
-                           'evidence': []} for c in p['claims']]}
+            if not any(
+                a['text'].strip() for source in payload['sources'] for a in source['artifacts']
+            ):
+                review = {
+                    'claims': [
+                        {
+                            'id': c['id'],
+                            'status': 'unresolved',
+                            ('reason'): (
+                                'No extracted source text is available; support cannot be assessed.'
+                            ),
+                            'evidence': [],
+                        }
+                        for c in p['claims']
+                    ]
+                }
                 validate_review(review, payload)
-                folder = self.root / 'machine-reviews'; folder.mkdir(exist_ok=True)
+                folder = self.root / 'machine-reviews'
+                folder.mkdir(exist_ok=True)
                 path = folder / f'{p["id"]}-{fingerprint(payload)}.json'
                 if not path.exists():
-                    write_json(path, {'assessor': 'machine: missing evidence only', 'input': payload, 'review': review})
+                    write_json(
+                        path,
+                        {
+                            'assessor': 'machine: missing evidence only',
+                            'input': payload,
+                            'review': review,
+                        },
+                    )
                 reviews[p['id']] = review
             else:
-                issue_path = self.root / 'machine-reviews' / f'review-failed-{p["id"]}-{fingerprint(payload)}.json'
+                issue_path = (
+                    self.root
+                    / 'machine-reviews'
+                    / f'review-failed-{p["id"]}-{fingerprint(payload)}.json'
+                )
                 if issue_path.exists() and not retry:
                     reviews[p['id']] = read_json(issue_path)['review']
                     continue
                 try:
-                    raw_review = self.step('review-' + p['id'], 'review', prompt('review', INPUT=json.dumps(payload)),
-                        schemas.REVIEW, lambda r, payload=payload: validate_review(normalize_review_metadata(r, payload), payload))
+                    raw_review = self.step(
+                        'review-' + p['id'],
+                        'review',
+                        prompt('review', INPUT=json.dumps(payload)),
+                        schemas.REVIEW,
+                        lambda r, payload=payload: validate_review(
+                            normalize_review_metadata(r, payload), payload
+                        ),
+                    )
                     reviews[p['id']] = normalize_review_metadata(raw_review, payload)
                     if issue_path.exists():
-                        history = self.root / 'history'; history.mkdir(exist_ok=True)
+                        history = self.root / 'history'
+                        history.mkdir(exist_ok=True)
                         issue_path.rename(history / f'{issue_path.stem}-{uuid.uuid4().hex}.json')
                 except (ReviewValidationError, jsonschema.ValidationError) as error:
                     raw = read_json(self.last_step_directory / 'result.json', {})
-                    review, issues = salvage_review(normalize_review_metadata(raw, payload), payload)
+                    review, issues = salvage_review(
+                        normalize_review_metadata(raw, payload), payload
+                    )
                     issue_path.parent.mkdir(exist_ok=True)
-                    write_json(issue_path, {'assessor': 'machine: invalid review, no support judgment',
-                                           'input_hash': fingerprint(payload), 'issues': issues, 'review': review})
+                    write_json(
+                        issue_path,
+                        {
+                            'assessor': 'machine: invalid review, no support judgment',
+                            'input_hash': fingerprint(payload),
+                            'issues': issues,
+                            'review': review,
+                        },
+                    )
                     reviews[p['id']] = review
         field_review = None
         if problem_id is None:
-            field_review = self.step('field-review', 'review', prompt('field_review', INPUT=json.dumps(
-                {'field': self.spec, 'candidates': doc, 'reviews': reviews})), schemas.FIELD_REVIEW)
+            field_review = self.step(
+                'field-review',
+                'review',
+                prompt(
+                    'field_review',
+                    INPUT=json.dumps({'field': self.spec, 'candidates': doc, 'reviews': reviews}),
+                ),
+                schemas.FIELD_REVIEW,
+            )
         result = self.summarize(doc, problems, reviews, payloads, field_review, problem_id)
-        write_json(self.root / ('summary.json' if problem_id is None else f'summary-{problem_id}.json'), result)
+        write_json(
+            self.root / ('summary.json' if problem_id is None else f'summary-{problem_id}.json'),
+            result,
+        )
         print(json.dumps(result['counts']), flush=True)
         return result
 
     def summarize(self, doc, problems, reviews, payloads, field_review, scope):
-        rows, counts = [], {key: 0 for key in ('supported', 'partially_supported', 'unresolved', 'contradicted', 'collection_incomplete', 'review_failed')}
+        rows, counts = (
+            [],
+            {
+                key: 0
+                for key in (
+                    'supported',
+                    'partially_supported',
+                    'unresolved',
+                    'contradicted',
+                    'collection_incomplete',
+                    'review_failed',
+                )
+            },
+        )
         for p in problems:
             claims = reviews[p['id']]['claims']
             statuses = {c['status'] for c in claims}
-            invalid = any(c['reason'].startswith('Review output could not be validated:') for c in claims)
-            available = any(a['text'].strip() for source in payloads[p['id']]['sources'] for a in source['artifacts'])
-            status = ('review_failed' if invalid else 'contradicted' if 'contradicted' in statuses else
-                      'collection_incomplete' if not available else
-                      'supported' if statuses == {'supported'} else
-                      'partially_supported' if 'supported' in statuses else 'unresolved')
+            invalid = any(
+                c['reason'].startswith('Review output could not be validated:') for c in claims
+            )
+            available = any(
+                a['text'].strip()
+                for source in payloads[p['id']]['sources']
+                for a in source['artifacts']
+            )
+            status = (
+                'review_failed'
+                if invalid
+                else 'contradicted'
+                if 'contradicted' in statuses
+                else 'collection_incomplete'
+                if not available
+                else 'supported'
+                if statuses == {'supported'}
+                else 'partially_supported'
+                if 'supported' in statuses
+                else 'unresolved'
+            )
             counts[status] += 1
             captures = []
             for source in payloads[p['id']]['sources']:
                 url = source['url']
-                evidence = [e for c in claims for e in c['evidence'] if e['url'] == url and e['identity_verified']]
-                capture = 'saved' if any(e['completeness'] == 'full' for e in evidence) else 'partial' if source['artifacts'] else 'missing'
-                failures = [op for op in self.archive.source(url)['operations'].values() if op['status'] == 'failed']
-                captures.append({'url': url, 'status': capture, 'failures': failures,
-                                 'note': 'Artifact identity/completeness assessed by model; inspect before relying on it',
-                                 'artifacts': [{k: v for k, v in a.items() if k != 'text'} for a in source['artifacts']]})
-            rows.append({'id': p['id'], 'title': p['title'], 'status': status, 'claim_counts': {key: sum(c['status'] == key for c in claims) for key in ('supported', 'contradicted', 'unresolved')}, 'freshness': payloads[p['id']].get('freshness', []), 'claims': [{**original, 'assessment': assessment} for original in p['claims']
-                    for assessment in claims if assessment['id'] == original['id']], 'captures': captures})
-        return {'field': self.spec, 'scope': scope or 'whole field', 'counts': counts, 'problems': rows,
-                'candidate_hash': fingerprint(doc), 'excluded': doc['excluded'], 'field_review': field_review,
-                'completion': 'Review generated; inspect result and verify external backup before field completion'}
+                evidence = [
+                    e
+                    for c in claims
+                    for e in c['evidence']
+                    if e['url'] == url and e['identity_verified']
+                ]
+                capture = (
+                    'saved'
+                    if any(e['completeness'] == 'full' for e in evidence)
+                    else 'partial'
+                    if source['artifacts']
+                    else 'missing'
+                )
+                failures = [
+                    op
+                    for op in self.archive.source(url)['operations'].values()
+                    if op['status'] == 'failed'
+                ]
+                captures.append(
+                    {
+                        'url': url,
+                        'status': capture,
+                        'failures': failures,
+                        ('note'): (
+                            'Artifact identity/completeness assessed by model; inspect before '
+                            'relying on it'
+                        ),
+                        'artifacts': [
+                            {k: v for k, v in a.items() if k != 'text'} for a in source['artifacts']
+                        ],
+                    }
+                )
+            rows.append(
+                {
+                    'id': p['id'],
+                    'title': p['title'],
+                    'status': status,
+                    'claim_counts': {
+                        key: sum(c['status'] == key for c in claims)
+                        for key in ('supported', 'contradicted', 'unresolved')
+                    },
+                    'freshness': payloads[p['id']].get('freshness', []),
+                    'claims': [
+                        {**original, 'assessment': assessment}
+                        for original in p['claims']
+                        for assessment in claims
+                        if assessment['id'] == original['id']
+                    ],
+                    'captures': captures,
+                }
+            )
+        return {
+            'field': self.spec,
+            'scope': scope or 'whole field',
+            'counts': counts,
+            'problems': rows,
+            'candidate_hash': fingerprint(doc),
+            'excluded': doc['excluded'],
+            'field_review': field_review,
+            ('completion'): (
+                'Review generated; inspect result and verify external backup before field '
+                'completion'
+            ),
+        }
 
 
 def backup(directory, destination):
     src, dest = Path(directory).resolve(), Path(destination).resolve()
     if dest.is_relative_to(PROJECT) or dest.is_relative_to(src) or src.is_relative_to(dest):
-        raise ValueError('Backup destination must be outside the project and separate from the field directory')
+        raise ValueError(
+            'Backup destination must be outside the project and separate from the field directory'
+        )
     if dest.exists():
         raise ValueError('Use a new backup destination; existing backups are never overwritten')
+
     def inventory(root):
         entries = {}
         for p in root.rglob('*'):
@@ -568,6 +936,7 @@ def backup(directory, destination):
             if p.is_file() and p.name != '.lock':
                 entries[str(p.relative_to(root))] = digest(p.read_bytes())
         return entries
+
     before = inventory(src)
     shutil.copytree(src, dest, ignore=shutil.ignore_patterns('.lock'))
     if inventory(src) != before or inventory(dest) != before:
@@ -588,13 +957,17 @@ def init_field(field, prefix, boundaries, as_of):
         raise ValueError('Field and boundaries are required')
     root = HERE / 'runs' / prefix
     # Check before creating private outputs; never assume the ignore rule exists.
-    result = subprocess.run(['git', 'check-ignore', '--quiet', str(root / 'sources' / 'probe.pdf')], cwd=PROJECT)
+    result = subprocess.run(
+        ['git', 'check-ignore', '--quiet', str(root / 'sources' / 'probe.pdf')], cwd=PROJECT
+    )
     if result.returncode:
         raise ValueError('ingestion/runs must be Git-ignored before creating field outputs')
     spec = {'field': field, 'prefix': prefix, 'boundaries': boundaries, 'as_of': as_of}
     if root.exists():
         if read_json(root / 'field.json') != spec:
-            raise ValueError('Field already exists with different settings; choose a new abbreviation')
+            raise ValueError(
+                'Field already exists with different settings; choose a new abbreviation'
+            )
         return root
     root.mkdir(parents=True)
     write_json(root / 'field.json', spec)
@@ -605,27 +978,43 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest='command', required=True)
     init = sub.add_parser('init')
-    init.add_argument('field'); init.add_argument('prefix')
-    init.add_argument('--boundaries', required=True); init.add_argument('--as-of', required=True)
+    init.add_argument('field')
+    init.add_argument('prefix')
+    init.add_argument('--boundaries', required=True)
+    init.add_argument('--as-of', required=True)
     run = sub.add_parser('run')
     run.add_argument('directory', type=Path)
-    run.add_argument('--through', choices=['research', 'format', 'capture', 'review'], default='review')
-    run.add_argument('--problem'); run.add_argument('--retry', action='store_true')
-    repair = sub.add_parser('repair-sources', help='Repair source ledger using saved research, then create a candidate revision')
+    run.add_argument(
+        '--through', choices=['research', 'format', 'capture', 'review'], default='review'
+    )
+    run.add_argument('--problem')
+    run.add_argument('--retry', action='store_true')
+    repair = sub.add_parser(
+        'repair-sources',
+        help='Repair source ledger using saved research, then create a candidate revision',
+    )
     repair.add_argument('directory', type=Path)
     attach = sub.add_parser('attach')
-    attach.add_argument('directory', type=Path); attach.add_argument('url'); attach.add_argument('file', type=Path)
+    attach.add_argument('directory', type=Path)
+    attach.add_argument('url')
+    attach.add_argument('file', type=Path)
     alternative = sub.add_parser('alternative')
-    alternative.add_argument('directory', type=Path); alternative.add_argument('url'); alternative.add_argument('alternative_url')
+    alternative.add_argument('directory', type=Path)
+    alternative.add_argument('url')
+    alternative.add_argument('alternative_url')
     alternative.add_argument('--retry', action='store_true')
     revise = sub.add_parser('revise')
-    revise.add_argument('directory', type=Path); revise.add_argument('file', type=Path); revise.add_argument('--reason', required=True)
+    revise.add_argument('directory', type=Path)
+    revise.add_argument('file', type=Path)
+    revise.add_argument('--reason', required=True)
     back = sub.add_parser('backup')
-    back.add_argument('directory', type=Path); back.add_argument('destination', type=Path)
+    back.add_argument('directory', type=Path)
+    back.add_argument('destination', type=Path)
     args = parser.parse_args()
     try:
         if args.command == 'init':
-            print(init_field(args.field, args.prefix, args.boundaries, args.as_of)); return
+            print(init_field(args.field, args.prefix, args.boundaries, args.as_of))
+            return
         with locked(args.directory):
             if args.command == 'run':
                 Pipeline(args.directory).run(args.through, args.problem, args.retry)
