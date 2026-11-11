@@ -47,7 +47,7 @@ Two tracks run in parallel. They touch different code (`ingestion/` and `atlas/w
 ### Track A: content
 
 1. **Review and clean up the ingestion pipeline.** Read all of `ingestion/` and its documents first and write down what is found. Then remove dead and one-off code, drop the "all 66 complete" gate, let a field finish without a concept the provider refused to review (the refusal guard is never bypassed), and import each finished field into `atlas/core/` automatically.
-2. **Make the pipeline use several agents.** Each stage names an ordered list of models instead of one. Grok does research while its quota lasts; when it is exhausted or slow, the stage falls back to another web-capable agent (Codex GPT-6.1 Sol with search, then Opus) instead of stopping the batch. Every record keeps the name of the model that produced it. The design of the fallback comes out of the review in step 1.
+2. **Make the pipeline use several agents.** Each stage names an ordered list of models instead of one. Grok does research while its quota lasts; when it is exhausted or slow, the stage falls back, in this order, to the latest Codex Terra model with search, then Codex Sol, then Opus, instead of stopping the batch. Every record keeps the name of the model that produced it. The design of the fallback comes out of the review in step 1.
 3. **Finish the fields.** Machine Learning first, then the other blocked fields, then the 32 unfinished ones. Fields arrive in the atlas one at a time.
 4. **Prerequisite links for every field in the core**, using the existing per-field call.
 5. **Milestone labels for every field in the core**, using the existing per-breakthrough call.
@@ -67,7 +67,13 @@ Readable first, good-looking second, on desktop and phone.
    | Claims | What exactly are we predicting? | Every `needs` claim, standing or falsified |
 
    The map is for overview; lists do the reading. Everything is reachable by search, list, keyboard and screen reader. Phone is list-first. Colour means progress state and nothing else.
-2. **Visual direction: open.** Either a star atlas (breakthroughs as stars, fields as constellations, rings for prerequisite depth) or a literal tech tree (columns by depth). Motion with the Motion library for React, respecting reduced-motion settings. Hand-made SVG for the chart, icons and emblems. Generated images used sparingly, after a pilot.
+2. **Visual direction: a science-fiction star atlas** (decided November 11). The bar is a site the owner is proud to publish under his own name.
+   - **The idea.** A stellar-cartography instrument. Each breakthrough is a star, each field a constellation, `needs` links the constellation lines, and concentric rings mark prerequisite depth. A star's milestones are a segmented ring around it that fills as they are met; a star ignites as it nears achievement. Today's sky is mostly dark, which is the honest starting picture.
+   - **Restraint over cliché.** No neon cyberpunk, no fake terminal text, no decoration that carries no information. The science-fiction feel comes from depth, precision and light: a near-black field with real depth, hairline rings and tick marks, measured glow, and one warm accent reserved for progress.
+   - **Type.** A distinctive display face with a technical character, a highly readable text face for long passages, and a mono for IDs and coordinates. Chosen in the mock, bundled locally.
+   - **Motion.** The Motion library for React: the sky assembles on load, links draw when a star is focused, the view glides to a selected star, and recently moved stars pulse. All of it is off under reduced-motion settings.
+   - **Made assets.** Hand-made SVG for the chart, rings, icons and constellation emblems. Generated images (ChatGPT image model through the Codex CLI, once confirmed to work) only for atmosphere: a deep-field background plate and, after a pilot of ten, an illustration plate per breakthrough.
+   - **Quality gate.** Nothing is built past the mock until the owner approves it. Every screen is reviewed from screenshots at desktop and phone sizes before it is called done, and checked for contrast, keyboard use and load time.
 3. **Build** in `atlas/web`, React and Vite, reading the existing API. No new tables.
 4. **Static export.** The atlas is read-only, so v1 is exported to plain files. Saved source copies stay private; the public site links to originals.
 
