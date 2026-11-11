@@ -101,6 +101,14 @@ def normalize_passage(text):
     return re.sub(r'(?<=[A-Za-z])\s*-\s*(?=[A-Za-z])', '-', text)
 
 
+MIN_SQUEEZED_PASSAGE = 20
+
+
+def squeeze_passage(text):
+    text = re.sub(r'\s+', '', text)
+    return re.sub(r'(?<=[^\W\d_])[-\u2010\u2011\u00ad](?=[^\W\d_])', '', text)
+
+
 def passage_matches(passage, text):
     quote = normalize_passage(passage)
     if not quote:
@@ -116,7 +124,14 @@ def passage_matches(passage, text):
         else re.escape(char) + (r'\x00?' if char.isascii() and char.isalpha() else '')
         for char in quote
     )
-    return re.search(pattern, normalize_passage(wrapped)) is not None
+    if re.search(pattern, normalize_passage(wrapped)) is not None:
+        return True
+    # PDF extraction splits and joins words ('T hese', 'coun-terparts', 'onsetofchemical').
+    # Spacing and hyphens between letters may differ; every other character must still match.
+    compact = squeeze_passage(quote)
+    return len(compact) >= MIN_SQUEEZED_PASSAGE and compact in squeeze_passage(
+        normalize_passage(text)
+    )
 
 
 def normalize_review_metadata(review, payload):

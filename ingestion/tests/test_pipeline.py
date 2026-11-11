@@ -480,6 +480,33 @@ class ReviewTests(unittest.TestCase):
             self.assertTrue(passage_matches(plain, ligature))
         self.assertFalse(passage_matches('x2 = 4', 'x² = 4'))
         self.assertFalse(passage_matches('H2O', 'H₂O'))
+
+    def test_passage_tolerates_pdf_spacing_and_inword_hyphens_only(self):
+        quote = 'These parameters are available within weeks of counterparts'
+        self.assertTrue(
+            passage_matches(quote, 'T hese parameters are available within weeks of coun-terparts')
+        )
+        self.assertTrue(
+            passage_matches('the onset of chemical enrichment', 'theonsetofchemicalenrichment,and')
+        )
+        self.assertTrue(
+            passage_matches(
+                'achieved long‐term rejection‐free survival',
+                'achieved long‑term rejection‑free survival',
+            )
+        )
+        self.assertFalse(
+            passage_matches(
+                'These parameters were available within weeks',
+                'T hese parameters are available within weeks',
+            )
+        )
+        self.assertFalse(
+            passage_matches(
+                'a range of 35 percent of all cases', 'a range of 3-5 percent of all cases'
+            )
+        )
+        self.assertFalse(passage_matches('to be', 'tobe'))
         self.assertFalse(passage_matches('A = 1', '𝐀 = 1'))
         self.assertFalse(
             passage_matches('efficient algorithms exist', 'efficient algorithms do not exist')
