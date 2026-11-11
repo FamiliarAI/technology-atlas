@@ -388,10 +388,55 @@ def run(root, workers=3, prepare_only=False, state=None):
                                 )
                             )
                         try:
-                            record = Models(config).call(
-                                'rewrite', retry_text, FINAL_SCHEMA, folder, entry=entry
-                            )
+                            for attempt in range(2):
+                                record = Models(config).call(
+                                    'rewrite', retry_text, FINAL_SCHEMA, folder, entry=entry
+                                )
+                                write_json(folder / 'result.json', record)
+                                try:
+                                    validate_record(
+                                        normalize_source_aliases(record, payload), payload
+                                    )
+                                except (
+                                    ValueError,
+                                    KeyError,
+                                    TypeError,
+                                    AttributeError,
+                                    jsonschema.ValidationError,
+                                ) as error:
+                                    if provider_safety_refusal(folder) or attempt == 1:
+                                        raise
+                                    receipt.update(
+                                        status='failed', finished_at=now(), error=str(error)
+                                    )
+                                    write_json(folder / 'receipt.json', receipt)
+                                    rejected = batch / (
+                                        identifier + '-rejected-' + uuid.uuid4().hex
+                                    )
+                                    folder.rename(rejected)
+                                    folder.mkdir()
+                                    write_json(folder / 'input.json', payload)
+                                    receipt = {
+                                        k: v
+                                        for k, v in receipt.items()
+                                        if k not in ('error', 'finished_at')
+                                    }
+                                    receipt.update(
+                                        status='running',
+                                        started_at=now(),
+                                        rejected_attempt=str(rejected),
+                                    )
+                                    write_json(folder / 'receipt.json', receipt)
+                                    retry_text = text + (
+                                        '\n\nA prior attempt failed output validation: '
+                                        + str(error).splitlines()[0][:300]
+                                        + '\nReturn a fresh complete record satisfying the schema '
+                                        'and supplied source references.'
+                                    )
+                                    continue
+                                break
                         except ProviderUnavailable as error:
+                            record = None
                             if error.reason == 'exhausted':
                                 state.exhausted(error.provider)
                             label = f'unavailable-{len(unavailable) + 1}-{error.provider}'

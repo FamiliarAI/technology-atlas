@@ -205,6 +205,91 @@ class FinalRewriteTests(unittest.TestCase):
             self.assertEqual(result['concept'][0]['source_urls'], ['https://paper.org'])
             self.assertEqual((prior / 'result.json').read_bytes(), original)
 
+    def test_invalid_answer_gets_one_same_model_retry_and_retains_attempts(self):
+        from unittest.mock import patch
+        from ingestion.final_rewrite import run
+        from ingestion.sources import read_json
+
+        for invalid_kind in ('citation', 'schema', 'empty_section'):
+            for second_valid in (True, False):
+                with self.subTest(invalid_kind=invalid_kind, second_valid=second_valid):
+                    with tempfile.TemporaryDirectory() as tmp:
+                        root = Path(tmp)
+                        payload, valid, prior, key = self.rewrite_fixture(root, None)
+                        (prior / 'result.json').unlink()
+                        invalid = copy.deepcopy(valid)
+                        if invalid_kind == 'citation':
+                            invalid['concept'][0]['source_urls'] = ['https://invented.org']
+                        elif invalid_kind == 'schema':
+                            del invalid['concept']
+                        else:
+                            invalid['concept'] = []
+                        answers = [invalid, valid if second_valid else invalid]
+
+                        def answer(role, text, schema, folder, entry=None):
+                            write_json(folder / 'model.json', entry)
+                            (folder / 'stdout.log').write_text(f'call {call.call_count}')
+                            return answers.pop(0)
+
+                        with (
+                            patch(
+                                'ingestion.final_rewrite.validate_candidates',
+                                side_effect=lambda x: x,
+                            ),
+                            patch('ingestion.final_rewrite.make_input', return_value=payload),
+                            patch(
+                                'ingestion.final_rewrite.Models.call', side_effect=answer
+                            ) as call,
+                        ):
+                            if second_valid:
+                                run(root, workers=1)
+                            else:
+                                with self.assertRaisesRegex(ValueError, 'Final merge withheld'):
+                                    run(root, workers=1)
+                        self.assertEqual(call.call_count, 2)
+                        self.assertEqual(
+                            call.call_args_list[0].kwargs['entry'],
+                            call.call_args_list[1].kwargs['entry'],
+                        )
+                        batch = Path((root / 'current-final-rewrite.txt').read_text())
+                        attempts = [p.parent for p in batch.glob('*/result.json')]
+                        self.assertEqual(len(attempts), 2)
+                        receipts = [read_json(p / 'receipt.json') for p in attempts]
+                        self.assertCountEqual(
+                            [r['status'] for r in receipts],
+                            ['failed', 'complete' if second_valid else 'failed'],
+                        )
+                        first = next(
+                            p for p in attempts if (p / 'stdout.log').read_text() == 'call 1'
+                        )
+                        self.assertEqual(read_json(first / 'result.json'), invalid)
+                        self.assertTrue(read_json(first / 'receipt.json')['error'])
+                        self.assertEqual(
+                            read_json(batch / 'receipt.json')['status'],
+                            'complete' if second_valid else 'failed',
+                        )
+                        self.assertEqual((root / 'final-innovations.json').exists(), second_valid)
+
+    def test_valid_cached_rewrite_is_reused_without_call(self):
+        from unittest.mock import patch
+        from ingestion.final_rewrite import fingerprint, run
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            payload, valid, prior, key = self.rewrite_fixture(root, {'bad': 'schema'})
+            cache = root / 'final-rewrite-cache'
+            cache.mkdir()
+            write_json(
+                cache / (key + '.json'), {'record': valid, 'record_hash': fingerprint(valid)}
+            )
+            with (
+                patch('ingestion.final_rewrite.validate_candidates', side_effect=lambda x: x),
+                patch('ingestion.final_rewrite.make_input', return_value=payload),
+                patch('ingestion.final_rewrite.Models.call') as call,
+            ):
+                run(root, workers=1)
+                call.assert_not_called()
+
     def test_atx_and_bold_research_extract_same_concept_body(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

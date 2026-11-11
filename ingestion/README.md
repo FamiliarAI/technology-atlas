@@ -45,6 +45,8 @@ Exit status is 1 if a selected field is incomplete or has an import error, and 2
 
 A stage advances to the next model **only on classified provider exhaustion or timeout**. An unclassified error or invalid output does not trigger fallback. Format and review allow one same-model retry; Codex formatting output exhaustion lowers effort to medium for that retry. Research and reconcile have no same-model retry. A failed rewrite can recover a valid saved result or retry on a later run.
 
+A rewrite answer that fails validation gets one fresh call to the same model, with the rejected attempt retained on disk as failed; a second invalid answer fails the field, while safety refusals remain terminal and valid cached rewrites require no call.
+
 A safety refusal is final for every model. It is recorded under `workflow-blocked/` and checked before cache reuse or calls, even if the input metadata changes. The refused stage is never automatically retried, filtered or rerouted.
 
 Grok exhaustion is shared across fields and saved as `providers.grok.exhausted_at` in `batch.json`. Grok is skipped for 24 hours after that timestamp; the next configured model can continue. A timeout permits fallback but does not start the cooldown. Grok calls have a 2,400-second timeout; other calls default to 3,600 seconds.
