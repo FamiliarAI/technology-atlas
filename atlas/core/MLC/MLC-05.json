@@ -1,0 +1,236 @@
+{
+ "id": "MLC-05",
+ "title": "Local credit assignment that matches backpropagation at scale",
+ "concept": [
+  {
+   "text": "The proposed innovation is a learning rule that lets each part of a deep network determine how to change its own connections using information available locally in space and time, while matching the learning performance of strong backpropagation baselines. Credit assignment means determining which internal changes would improve the network’s overall task performance. The central challenge is to make useful intermediate features emerge without sending task-error derivatives backward through the entire network.",
+   "source_urls": [
+    "https://www.nature.com/articles/s41583-020-0277-3",
+    "https://arxiv.org/abs/2212.13345",
+    "https://arxiv.org/html/2609.33240v1"
+   ]
+  },
+  {
+   "text": "The target includes sustained performance as network depth, model size and training data increase. A local objective that works on a small classification problem would be a partial demonstration; the intended advance requires competitive feature learning across demanding tasks and multiple scales. Locality also needs an operational definition: local elementary computations can still participate in an iterative process whose useful result depends on convergence across the network.",
+   "source_urls": [
+    "https://arxiv.org/abs/2212.13345",
+    "https://arxiv.org/html/2609.33240v1"
+   ]
+  },
+  {
+   "text": "Scope synthesis: this entry concerns algorithmic parity without an end-to-end backward pass. It does not require the rule to surpass backpropagation in accuracy, speed or stability, and it does not assume that locality automatically produces inexpensive hardware or biological-order power consumption. Hardware implementation and energy efficiency are additional demonstrations with their own requirements.",
+   "source_urls": []
+  }
+ ],
+ "significance": [
+  {
+   "text": "Backpropagation is a standard method for training deep networks. It carries task-error derivatives backward through successive layers, and conventional implementations retain forward activations for that computation. Those dependencies create memory and scheduling burdens. Matching its learning performance with local updates would remove a major coordination requirement from training while preserving the ability to learn useful internal representations.",
+   "source_urls": [
+    "https://arxiv.org/abs/2212.13345",
+    "https://www.nature.com/articles/s41583-020-0277-3"
+   ]
+  },
+  {
+   "text": "The direct consequence would be comparable learning within the demonstrated task and scale range without a global backward sweep. Reduced dependencies between layer updates could support pipelined or asynchronous training. Hinton’s Forward-Forward discussion motivates processing sequential data without retaining neural activities for later error propagation, but the practical scheduling and throughput advantages of a competitive large-scale rule would still need measurement.",
+   "source_urls": [
+    "https://arxiv.org/abs/2212.13345"
+   ]
+  },
+  {
+   "text": "Analog, spiking and in-memory implementations are conditional downstream opportunities. A rule that uses locally available signals could be easier to map onto such substrates, especially where storing activities or computing precise backward derivatives is difficult. Locality alone does not establish compatibility, numerical robustness or an energy advantage. The supplied material describes practical difficulties with analog backpropagation; it does not show that backpropagation logically requires synchronous digital hardware.",
+   "source_urls": [
+    "https://arxiv.org/abs/2212.13345"
+   ]
+  },
+  {
+   "text": "Impact synthesis: passing the proposed billion-parameter language-modeling milestone would demonstrate parity within that suite, rather than establish frontier-quality learning in general. Frontier relevance would require appropriate capabilities, scales and baselines. Consumer-hardware training, superiority over backpropagation and the biological-order power goal of MLC-11 remain separate claims. Biological inspiration motivates the search for local rules but does not establish that an artificial implementation will reproduce the brain’s efficiency.",
+   "source_urls": []
+  }
+ ],
+ "missing_breakthrough": [
+  {
+   "text": "The missing capability is a rule that combines spatially and temporally local credit assignment with strong feature learning, and preserves that combination as depth and training scale grow. The scientific difficulty is making locally useful changes align with the final task objective: improving a layer’s own objective need not produce representations that later layers can use as effectively as representations trained end to end. The supplied experiments document substantial gaps for several tested local objectives, without establishing an impossibility result for arbitrary local learning rules.",
+   "source_urls": [
+    "https://arxiv.org/html/2609.33240v1"
+   ]
+  },
+  {
+   "text": "Predictive coding illustrates an important distinction between local operations and network-wide dependencies. The supplied discussion describes approaches that recover the backpropagation gradient at a fixed point of iterative inference. It also describes an implemented cheaper variant that removes the inference loop and becomes local supervised learning. Recovering the desired gradient therefore does not, by itself, demonstrate removal of the coordination or convergence burden. Conversely, an iterative method should not be called nonlocal merely because it iterates: its operations, communication dependencies and stopping conditions must be specified.",
+   "source_urls": [
+    "https://arxiv.org/html/2609.33240v1"
+   ]
+  },
+  {
+   "text": "Temporal locality creates a related engineering challenge. A rule must specify how much past activity it retains, how long information must remain available and whether delayed task feedback requires reconstructing earlier computations. The supplement to Backpropagation and the brain discusses the storage demands of backpropagation through time, while Forward-Forward motivates avoiding activity retention for later error propagation. Avoiding the full backward activation graph is meaningful, but a complete implementation must also disclose other retained state and delayed dependencies.",
+   "source_urls": [
+    "https://www.nature.com/articles/s41583-020-0277-3",
+    "https://arxiv.org/abs/2212.13345"
+   ]
+  },
+  {
+   "text": "Engineering synthesis: a convincing solution must make its information flow explicit and maintain competitive learning under realistic training and tuning budgets. If iterative inference, auxiliary objectives or additional passes are required, their costs must be measured. The supplied evidence does not establish that predictive-coding inference necessarily costs as much as backpropagation, nor that every local approach must encounter the gaps reported for the tested methods.",
+   "source_urls": []
+  }
+ ],
+ "current_state": [
+  {
+   "text": "On 17 April 2020, Lillicrap, Santoro, Marris, Akerman and Hinton published Backpropagation and the brain in Nature Reviews Neuroscience, volume 21, pages 335–346. Its available abstract discusses the biological difficulties associated with backpropagation and how feedback-induced activity changes might approximate learning signals. This is a conceptual account of possible mechanisms, not a demonstration of an artificial local rule matching backpropagation at large scale. The supplied review had a subscription preview of the main article and a complete supplement; access to the supplement does not imply access to the full main article.",
+   "source_urls": [
+    "https://www.nature.com/articles/s41583-020-0277-3"
+   ]
+  },
+  {
+   "text": "Hinton’s Forward-Forward algorithm, posted to arXiv on 27 December 2022, replaces the conventional forward-and-backward training sequence with two forward passes. The supplied review covered the complete 16-page paper. Its demonstrations concern small problems, and its discussion explicitly leaves large-network scaling unresolved. It establishes a concrete alternative learning mechanism and motivates potential hardware benefits, but does not demonstrate large-scale parity. It is presented here as an arXiv preprint; the supplied record does not establish a subsequent publication outcome.",
+   "source_urls": [
+    "https://arxiv.org/abs/2212.13345"
+   ]
+  },
+  {
+   "text": "Wu, Liu and Chen’s The Price of Locality, supplied as arXiv version 1 dated 27 September 2026, reports substantial performance gaps for tested local methods. On CIFAR-10 ResNets, backpropagation accuracy remained approximately 0.95–0.96, supervised local methods trailed by about 5–8 percentage points, and goodness-based Forward-Forward accuracy was approximately 0.31–0.42. The paper reports that the Forward-Forward gap worsened with depth within its experiments. These are attributed preprint results over the tested configurations, rather than a general theorem about local learning.",
+   "source_urls": [
+    "https://arxiv.org/html/2609.33240v1"
+   ]
+  },
+  {
+   "text": "For OpenWebText language-model training, the same preprint reports that the NCE-to-backpropagation perplexity ratio increased from 3.73 to 9.19 across its tested scales, while the LCE-to-backpropagation ratio increased from 1.20 to 1.51. Lower perplexity is better, so these ratios indicate worsening relative performance for those methods. The largest reported model had 124 million parameters and a 2.48-billion-token training budget; its backpropagation baseline reached perplexity 28. The prose identifies the 9.19 ratio as NCE versus backpropagation even though Table 2 abbreviates the relevant column as FFA. It should therefore not be represented as a vanilla Forward-Forward result.",
+   "source_urls": [
+    "https://arxiv.org/html/2609.33240v1"
+   ]
+  },
+  {
+   "text": "The supplied review retained the preprint’s relevant results prose and Table 2, including all five scale rows, but the extraction was truncated during Appendix B.4. Figure 2 itself and the later experimental appendices were not inspected. The numerical summary is supported by the retained prose and table, while full assessment of the experimental procedures remains limited by that coverage. The reported deterioration occurs within a range that does not establish frontier-scale behavior; extrapolation beyond that range remains uncertain.",
+   "source_urls": [
+    "https://arxiv.org/html/2609.33240v1"
+   ]
+  },
+  {
+   "text": "Evidence-bound synthesis: the supplied work establishes concrete local-learning approaches and reported shortcomings of several tested methods. It does not demonstrate the target innovation, prove that no other rule can achieve it, or establish a comprehensive present-day absence of solutions. No freshness search record was supplied, so field-wide openness as of the review’s 1 November 2026 cutoff remains unresolved. That limitation is not evidence that the reported results are false.",
+   "source_urls": []
+  }
+ ],
+ "completion_criteria": [
+  {
+   "text": "Proposed algorithmic milestone: on a preregistered language-modeling suite, demonstrate a local rule with a perplexity ratio no greater than 1.1 relative to a strong backpropagation baseline at one billion parameters or more. The implementation must neither retain the full forward activation graph for a backward pass nor propagate task error backward through all downstream layers. The ratio and size threshold are proposed choices for this record, not established community standards.",
+   "source_urls": [],
+   "id": "m1",
+   "label": "Proposed algorithmic milestone"
+  },
+  {
+   "text": "Proposed scaling protocol: test several model sizes, depths and training-data budgets, including the qualifying billion-parameter setting. Preregister baseline selection, architecture comparisons, data, training and tuning budgets, evaluation procedures and statistical reporting. Report absolute perplexities alongside ratios and disclose all auxiliary training work. One successful model would establish a milestone at that setting; sustained parity requires evidence across the scaling sequence, and broader feature-learning claims require additional demanding tasks.",
+   "source_urls": [],
+   "id": "m2",
+   "label": "Proposed scaling protocol"
+  },
+  {
+   "text": "Proposed locality and reproducibility checks: document the information available to each update, temporal retention windows, communication paths, synchronization requirements and any iterative inference. Release sufficient code, configurations and evaluation details for independent reproduction, including variability across repeated runs. Measure activation and other state storage, computation and communication so that a hidden network-wide dependency or expensive inference loop cannot be mistaken for removal of the original burden. Finite tests would establish demonstrated breadth, not literal universality across tasks or architectures.",
+   "source_urls": [],
+   "id": "m3",
+   "label": "Proposed locality and reproducibility checks"
+  },
+  {
+   "text": "Proposed separate hardware milestone: implement the same rule on a non-digital or in-memory substrate and report measured training energy per token together with achieved learning quality. Define the accounting boundary, including host computation, data movement and any digital auxiliary or gradient calculations. Algorithmic parity may be demonstrated before this hardware milestone. The hardware result would characterize that implementation and would not alone establish frontier competence at a biological-order power budget under MLC-11.",
+   "source_urls": [],
+   "id": "m4",
+   "label": "Proposed separate hardware milestone"
+  }
+ ],
+ "related_concepts": [
+  {
+   "text": "Roster-based synthesis: MLC-01, A predictive theory of what deep networks learn, could help explain when a local objective produces useful representations or fails as depth grows. MLC-05 instead requires an effective learning mechanism; predictive understanding and a working local rule are distinct achievements.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis: MLC-02, Domain learning at a human experience budget, concerns learning from limited experience, whereas MLC-05 concerns how credit reaches internal parameters. MLC-03, Cumulative learning without forgetting or loss of plasticity, concerns retaining and extending competence over time. Local updates could be investigated in both settings, but locality alone establishes neither sample efficiency nor resistance to forgetting.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis: MLC-04, World models that survive novel interventions, concerns the robustness of learned models under interventions. A local rule might train such a model, but matching backpropagation on a training suite would not establish intervention robustness. MLC-06, Algorithmic legibility sufficient to verify and edit a model, concerns understanding and modifying the resulting computation; locally generated updates do not necessarily make learned representations legible.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis: MLC-07, Open-ended curricula that create externally verified new competencies, concerns the generation and validation of learning experiences. MLC-08, Discovery of new empirical laws, confirmed by experiment, concerns scientifically validated outputs. A local credit-assignment rule could support systems pursuing either goal, while its own parity demonstration would establish neither open-ended competence growth nor empirical discovery.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis: MLC-09, Skill learning from scarce, irreversible, real-world outcomes, adds constraints on data collection and delayed consequences that could make temporal credit assignment especially relevant. Its real-world learning requirements remain separate from language-modeling parity. MLC-10, Non-vacuous behavioral certificates at frontier scale, concerns justified behavioral guarantees; reproducible training performance under MLC-05 is not itself such a certificate.",
+   "source_urls": []
+  },
+  {
+   "text": "Roster-based synthesis: MLC-11, Frontier competence at a biological-order power budget, has the closest hardware overlap. MLC-05 asks whether local learning can match backpropagation as scale grows; MLC-11 asks for a competence-and-power outcome. A local rule could contribute to that outcome, but a GPU implementation or an isolated energy-per-token result would not establish it. The roster supplies MLC-11’s title but no detailed criteria, so the precise accounting boundary and required competence cannot be inferred here.",
+   "source_urls": []
+  }
+ ],
+ "change_log": [
+  {
+   "change": "Preserved MLC-05’s identity and integrated the goal, quantitative results, implementation distinctions and proposed demonstrations into separate substantive sections.",
+   "reason": "The record needs to retain useful detail from both research and review without duplicating their explanations."
+  },
+  {
+   "change": "Replaced claims that backpropagation exclusively enabled modern models or necessarily ties training to synchronous digital hardware with a description of conventional activation storage and backward dependencies.",
+   "reason": "The supplied evidence supports practical burdens and opportunities, not those stronger historical or architectural necessities."
+  },
+  {
+   "change": "Qualified pipelining, asynchronous operation and alternative-substrate efficiency as implementation-dependent possibilities.",
+   "reason": "Removing a backward sweep does not by itself demonstrate scheduling, hardware or energy benefits."
+  },
+  {
+   "change": "Separated suite-level parity at one billion parameters from frontier-quality learning.",
+   "reason": "The proposed numerical milestone does not establish frontier-relevant scale or breadth of capability."
+  },
+  {
+   "change": "Preserved predictive coding’s fixed-point gradient-recovery distinction while removing asserted cost equivalence and automatic characterization of iterative inference as nonlocal.",
+   "reason": "The supplied discussion establishes iterative inference and a loop-free local variant, but provides neither measured cost equivalence nor grounds to equate iteration with nonlocal elementary operations."
+  },
+  {
+   "change": "Retained the reported vision accuracies, language-model perplexity ratios, model size, token budget and baseline perplexity, with attribution and access limitations.",
+   "reason": "The review supports these numbers in retained prose and Table 2 despite incomplete extraction and uninspected experimental material."
+  },
+  {
+   "change": "Explicitly attributed the 9.19 perplexity ratio to NCE versus backpropagation.",
+   "reason": "The paper’s prose identifies NCE, while its abbreviated table heading could otherwise cause misattribution to vanilla Forward-Forward."
+  },
+  {
+   "change": "Distinguished the Nature main-article preview from its fully available supplement, and identified the arXiv reports as preprints.",
+   "reason": "The interpretation must reflect the material actually covered by the supplied review."
+  },
+  {
+   "change": "Expanded the proposed completion protocol to include locality definitions, multiple scaling points, baseline and budget controls, reproducibility and energy-accounting boundaries.",
+   "reason": "A single qualifying result cannot establish persistent scaling parity, practical locality or implementation efficiency."
+  },
+  {
+   "change": "Removed the unsubstantiated roughly 20-watt figure and historical bundling claim while preserving the separation from MLC-11.",
+   "reason": "The supplied material does not substantiate that number or provide the referenced historical item; the roster does support a distinct biological-order power concept."
+  },
+  {
+   "change": "Added explicit freshness uncertainty and limited roster-based overlap explanations to what the supplied titles establish.",
+   "reason": "No freshness search record or detailed definitions of the other roster entries were supplied."
+  }
+ ],
+ "unresolved_issues": [
+  "Whether a qualifying local rule existed by 1 November 2026 remains unresolved because no freshness search record was supplied.",
+  "The empirical generality of The Price of Locality remains bounded by its tested methods and configurations; the supplied review did not inspect Figure 2 or later experimental appendices.",
+  "The measured computational and communication costs of the discussed iterative predictive-coding approaches relative to backpropagation are not established.",
+  "Spatial and temporal locality, permitted feedback and convergence dependencies still require operational definitions for the proposed evaluation.",
+  "The proposed 1.1 perplexity ratio and billion-parameter threshold require experimental specification and justification; they are not established standards or sufficient evidence of frontier quality.",
+  "MLC-11’s detailed competence requirements and power-accounting boundaries, and the referenced historical item’s scope, were not supplied."
+ ],
+ "models": {
+  "research": "grok-4.7-build",
+  "reconcile": "grok-4.7",
+  "format": "gpt-6.1-terra",
+  "review": "gpt-6.1-sol",
+  "rewrite": "gpt-6.1-sol"
+ },
+ "sources": [
+  "https://www.nature.com/articles/s41583-020-0277-3",
+  "https://arxiv.org/abs/2212.13345",
+  "https://arxiv.org/html/2609.33240v1"
+ ],
+ "provenance": {
+  "research": "ingestion/runs/all-fields/MLC/reconciled-research.md",
+  "structured_record": "ingestion/runs/all-fields/MLC/reconciled-structured.json",
+  "review": "ingestion/runs/all-fields/MLC/attempts/review-MLC-05-bacb7e6a1f684af6aa245345e7005f5d/validated.json"
+ },
+ "field": "MLC",
+ "status": "active"
+}
