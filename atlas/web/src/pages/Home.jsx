@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import Chart from '../Chart.jsx';
@@ -7,6 +8,7 @@ import { FieldEmblem, StarGlyph, StarMark, StatusLabel, ringSegments } from '../
 import { useNarrow } from './Atlas.jsx';
 import { EASE } from '../motion.js';
 import { claimState, ClaimStatus } from './claims.jsx';
+import { Arrow } from './common.jsx';
 
 const rise = (n, still) =>
   still
@@ -223,22 +225,33 @@ function DemoRing() {
   );
 }
 
+// Two stars and the claim line between them: brighter at the end that must come first, with
+// an arrowhead towards what it unlocks, as in the chart.
 function DemoOrder() {
-  const now = { status: ['in_progress', 'none', 'none', 'none'], glow: 0.125 };
+  const first = { status: ['in_progress', 'none', 'none', 'none'], glow: 0.125 };
   const later = { status: ['none', 'none', 'none'], glow: 0 };
   return (
-    <svg viewBox="-80 -50 160 120" className="demo" aria-hidden="true" style={{ overflow: 'hidden' }}>
-      <circle cy="170" r="120" className="demo-ring" />
-      <circle cy="170" r="180" className="demo-ring" />
-      <path d="M-14 50.8Q16 30 30 -7.5" className="demo-link" />
-      <g transform="translate(-14 50.8)">
-        <StarMark item={now} r={8.5} core={2.4} />
+    <svg viewBox="-80 -60 160 120" className="demo" aria-hidden="true">
+      <defs>
+        <linearGradient id="demo-claim" x1="-40" y1="28" x2="38" y2="-22" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#7FB2FF" stopOpacity="0.95" />
+          <stop offset="1" stopColor="#7FB2FF" stopOpacity="0.35" />
+        </linearGradient>
+      </defs>
+      <path d="M-34 24Q-6 -18 26 -18" className="demo-link" stroke="url(#demo-claim)" />
+      <path d="M20 -22.5L27 -18L20 -13.5" className="demo-link" stroke="#7FB2FF" strokeOpacity="0.5" />
+      <g transform="translate(-42 30)">
+        <StarMark item={first} r={9} core={2.5} />
       </g>
-      <g transform="translate(30 -7.5)">
-        <StarMark item={later} r={7.5} core={2} />
+      <g transform="translate(40 -18)">
+        <StarMark item={later} r={8} core={2.1} />
       </g>
-      <text x="-78" y="62" className="demo-text small">Ring 0</text>
-      <text x="-78" y="-6" className="demo-text small">Ring 1</text>
+      <text x="-42" y="54" textAnchor="middle" className="demo-text small">
+        Needed first
+      </text>
+      <text x="40" y="-38" textAnchor="middle" className="demo-text small">
+        Unlocked
+      </text>
     </svg>
   );
 }
@@ -258,8 +271,8 @@ function HowToRead() {
     ],
     [
       <DemoOrder key="d" />,
-      'Its distance is the order',
-      'The inner ring holds what could happen now. A star further out needs one further in to come first, and a line runs from the prerequisite outward.',
+      'Its lines are the order',
+      'A curved line is a claim that one breakthrough needs another first. It is brightest at the end that must come first, and points to what it unlocks. If the later one arrives first, the claim is proven wrong.',
     ],
   ];
   return (
@@ -283,24 +296,26 @@ function StartWith() {
   const { atlas } = useAtlas();
   const still = useReducedMotion();
   if (!atlas) return null;
+  // Fields with movement and order claims first: they have the most to show today.
   const picks = [...atlas.fields]
-    .sort((a, b) => b.moving * 3 + b.links - (a.moving * 3 + a.links) || a.sector.index - b.sector.index)
+    .sort((a, b) => b.moving * 3 + b.links - (a.moving * 3 + a.links) || a.id.localeCompare(b.id))
     .slice(0, 4);
   return (
     <section className="section start" aria-labelledby="start-title">
       <SectionHead
         index={3}
         label="Constellations"
-        title={<span id="start-title">Where to start</span>}
+        title={<span id="start-title">A few constellations to start with</span>}
       >
-        Each field of research is a constellation in its own sector of the sky. These four have the
-        most to show today.
+        Each field of research is a constellation, and neighbouring fields share one of{' '}
+        {atlas.regions.length} regions of the sky. These four have the most to show today.
       </SectionHead>
       <motion.ul className="field-tiles" {...reveal(still)}>
         {picks.map((f) => (
           <li key={f.id}>
-            <Link to={`/atlas?field=${f.id}`} className="field-tile">
+            <Link to={`/field/${f.id}`} className="field-tile">
               <FieldEmblem field={f} atlas={atlas} size={44} />
+              <p className="tile-region">{f.region}</p>
               <h3>{f.name}</h3>
               <p className="mono muted">
                 {f.items.length} breakthroughs · {f.moving} moving · {f.links} order links
@@ -343,7 +358,7 @@ function Claims() {
         </div>
       </motion.div>
       <ul className="claim-list">
-        {atlas.links.map((l) => {
+        {atlas.links.slice(0, 4).map((l) => {
           const a = atlas.items[l.from];
           const b = atlas.items[l.to];
           return (
@@ -358,12 +373,45 @@ function Claims() {
           );
         })}
       </ul>
+      <p className="more">
+        <Link to="/claims" className="text-link">
+          All {atlas.totals.links} order claims, with their reasons <Arrow />
+        </Link>
+      </p>
+    </section>
+  );
+}
+
+function Method() {
+  const still = useReducedMotion();
+  return (
+    <section className="section method-brief" aria-labelledby="method-title">
+      <SectionHead index={5} label="Method" title={<span id="method-title">How it is made</span>} />
+      <motion.div className="method-cols" {...reveal(still)}>
+        <p>
+          Language models researched every field and cited their sources; a second model then
+          reviewed each record against saved copies of those sources. Every quote shown as evidence was found,
+          word for word, in the saved text.
+        </p>
+        <p>
+          No person has reviewed the entries yet. They are proposals, published so they can be
+          checked and challenged. Editing opens after this first version.
+        </p>
+      </motion.div>
+      <p className="more">
+        <Link to="/about" className="text-link">
+          The method and its limits <Arrow />
+        </Link>
+      </p>
     </section>
   );
 }
 
 export default function Home() {
   const { error } = useAtlas();
+  useEffect(() => {
+    document.title = 'Technology Atlas · The wonders of the AI takeoff, named in advance';
+  }, []);
   return (
     <div className="home">
       <Hero />
@@ -375,6 +423,7 @@ export default function Home() {
           <HowToRead />
           <StartWith />
           <Claims />
+          <Method />
         </>
       )}
     </div>

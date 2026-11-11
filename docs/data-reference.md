@@ -93,7 +93,7 @@ Common writers and readers, used in the tables below:
 | `imported_from` | object | yes | `run_hash`: SHA-256 of the `final-innovations.json` bytes imported; `imported_at`: ISO time of import. | `import_field` | Nothing in code; an audit trail. |
 | `original_dispositions` | list | yes (660 items) | What happened to each entry of the field's original (pre-pipeline) list: `original_number` (int), `original_title`, `status` (`covered` 256, `added` 159, `not_added` 245), `concept_ids` (list of breakthrough IDs), `reason`. | Format stage (`FORMAT_SCHEMA` in `ingestion/field_workflow.py`) → `final_rewrite` → `import_field` | Nothing in `atlas/`; `ingestion.batch` validates it. |
 | `reconciliation_change_log` | list | yes (487 items) | Changes made when the first-pass research was reconciled with the original list: `concept_ids`, `change`, `reason`. | Format stage `change_log` → `import_field` | Nothing in `atlas/`. |
-| `withheld` | list | optional (35 of 66) | Withheld concepts: `id`, `title`, `stage` (`"review-CLM-02"`; a rewrite refusal would read `"final-rewrite-<ID>"`), `reason` (the provider's refusal text). Non-empty only in `CLM` and `VIR`. The 31 fields imported first have no key, which means none. | `final_rewrite` → `import_field` | `ingestion.batch.import_message`. The site's Method page lists the two withheld concepts as hard-coded text in `About.jsx`, not from data. |
+| `withheld` | list | optional (35 of 66) | Withheld concepts: `id`, `title`, `stage` (`"review-CLM-02"`; a rewrite refusal would read `"final-rewrite-<ID>"`), `reason` (the provider's refusal text). Non-empty only in `CLM` and `VIR`. The 31 fields imported first have no key, which means none. | `final_rewrite` → `import_field` | `ingestion.batch.import_message`. Copied to the `fields.withheld` column and served in the field file and the catalog (section 5). |
 
 ### 3.2 Breakthrough file `<FIELD>/<ID>.json` (742 files)
 
@@ -177,7 +177,7 @@ One judged progress row per line. `atlas.add` rewrites the whole file: re-adding
 
 | Table | Columns | Derived from |
 |---|---|---|
-| `fields` | `id`, `name`, `color`, `boundaries` | Each `field.json`. |
+| `fields` | `id`, `name`, `color`, `boundaries`, `withheld` | Each `field.json`. `withheld` is the field's `withheld` list as JSON, `[]` when the key is absent. |
 | `breakthroughs` | `id`, `field`, `payload` | Each active breakthrough file (retired ones left out). `payload` is the record as JSON with each `sources` URL expanded to `{url, title, status, artifacts}`, where `artifacts` is the source's `copies`. |
 | `assets` | `id`, `path`, `hash` | Each copy whose file was found on this computer (`store.resolver`) and whose bytes match. `id` and `hash` are the SHA-256; `path` is absolute and local. A missing copy is skipped and counted; a changed one stops the rebuild. |
 | `documents` | `id`, `path`, `hash` | Each breakthrough's `provenance` file that exists inside the repository. `id` is `<ID>:<kind>`, such as `QUA-01:review`. |
@@ -189,7 +189,7 @@ The database also serves `atlas.add` (milestone ranking, reuse of saved copies) 
 
 ## 5. The site data contract
 
-The site reads only four kinds of file. `atlas.server` builds them on request under `/data/`; `atlas.export` writes the same bytes to `OUT/data/`. All are built in `atlas/store.py` from one `site_view`, and encoded as compact UTF-8 JSON (`store.encode`). The React side loads them in `atlas/web/src/data.jsx`.
+The site reads only five kinds of file. `atlas.server` builds them on request under `/data/`; `atlas.export` writes the same bytes to `OUT/data/`. All are built in `atlas/store.py` from one `site_view`, and encoded as compact UTF-8 JSON (`store.encode`). The React side loads them in `atlas/web/src/data.jsx`.
 
 Milestone status in every file comes from judged rows only (`meets` → `met`, `advances` → `in_progress`, else `none`). `moved_at` is the latest `added_at` of a breakthrough's judged rows, or null.
 
@@ -204,6 +204,7 @@ Loaded once on every page (`loadAtlas`). Budget: under 300,000 bytes, enforced b
 | `fields[]` | Sorted by name. `id`, `name`, `region`, `breakthroughs` (count), `milestones` (`{none, in_progress, met}` counts). | Every page via `loadAtlas`; `sky.js` layout |
 | `breakthroughs[]` | Sorted by ID. `id`, `field`, `title`, `milestones` (a list of status strings, one per milestone, not objects), `prerequisites` (list of IDs this one needs), `moved_at`. | `loadAtlas` derives `met`, `moving`, `glow`, `recent`, `unlocks`, sky position; chart, lists, search |
 | `recent[]` | Up to 12 latest judged rows: `breakthrough`, `criterion`, `verdict`, `url`, `source_date`, `quote`, `added_at`, plus the milestone's `label`. | Home "what moved"; chart |
+| `withheld[]` | Sorted by field. `{id, title, field}` for each withheld concept (two on November 11). | Method page; Breakthrough page when a withheld ID is opened |
 
 ### `data/field/<ID>.json` (`store.field_data`)
 
@@ -213,11 +214,12 @@ Loaded when a field is opened (`useField`).
 |---|---|---|
 | `id`, `name`, `region`, `as_of` | As in the catalog. | Field page |
 | `boundaries` | The field's scope text. | Field page "scope" |
+| `withheld[]` | `{id, title, stage, reason}` for each withheld concept of this field; `[]` for most fields. `reason` is the provider's refusal text. | Field page note (CLM, VIR) |
 | `breakthroughs[]` | Sorted by ID. `id`; `title`; `summary` (first `concept` paragraph, whole); `milestones` (objects `{id, label, status}`); `prerequisites` (IDs); `unlocks` (IDs); `source_count`; `progress_count` (all progress rows, research citation rows included); `issue_count` (`unresolved_issues` length); `moved_at`. | Field page rows (`summary`); Atlas page star card (`summary`, milestone `label`). The counts are not displayed today; the pages take links from the catalog. |
 
 ### `data/b/<ID>.json` (`store.breakthrough_data`)
 
-Loaded by the Breakthrough page (`loadBreakthrough`) and by the Claims page for link reasons.
+Loaded by the Breakthrough page (`loadBreakthrough`).
 
 | Key | Contents | Used by |
 |---|---|---|
@@ -229,18 +231,22 @@ Loaded by the Breakthrough page (`loadBreakthrough`) and by the Claims page for 
 | `sources[]` | `{url, title, status}` only: links to the originals. | Citation titles; `Record.jsx` source list |
 | `progress[]` | Every database row for this breakthrough: `criterion`, `url`, `source_date`, `verdict`, `quote`, `model`, `added_at`. Rows with `criterion` null are research citations whose `quote` is a `current_state` paragraph. | Evidence (judged rows); `Record.jsx` research citations |
 | `prerequisites` | IDs this one needs. | Breakthrough page |
-| `needs[]` | `{id, title, field, field_name, reason}` for each link it holds. | "Needs first"; Claims page |
+| `needs[]` | `{id, title, field, field_name, reason}` for each link it holds. | "Needs first" |
 | `unlocks[]` | Same shape, for each breakthrough that needs this one; `reason` is taken from that breakthrough's link. | "Unlocks" |
 
 ### `data/search.json` (`store.search_index`)
 
 Loaded on first use of the search box (`Layout.jsx`). 206 KB on November 11; no budget. Each entry: `id`, `field`, `title`, `summary` (first `concept` paragraph cut at a word boundary to about 160 characters by `store.cut`). Ranking is in `data.jsx` `search`: ID, then title whole-word and prefix matches, then field name, then summary.
 
+### `data/claims.json` (`store.claims`)
+
+Loaded by the Claims page (`loadClaims`). 15 KB on November 11. A list with one entry per `needs` link whose prerequisite exists (77 on November 11), sorted by dependent ID then link order: `id` (the dependent breakthrough), `needs` (the prerequisite), `reason`, `model` (the model that proposed the link). Titles, fields and statuses come from the catalog.
+
 ### Deliberately left out
 
 - **Saved copies and their hashes** (`copies`, `copy`, `asset`). The copies are private research files, possibly under copyright; the public site links to the originals only (plan, Track B step 4).
 - **Provenance and local paths** (`provenance`, `assets.path`, `documents.path`). They point into git-ignored folders on one computer and are not public.
-- **Import and pipeline history** (`imported_from`, `original_dispositions`, `reconciliation_change_log`, `withheld`), field `color`, and each link's `model` and `field`. Not needed by any page, and the catalog must stay small.
+- **Import and pipeline history** (`imported_from`, `original_dispositions`, `reconciliation_change_log`), field `color`, and each link's `field` (the call that produced it). Not needed by any page, and the catalog must stay small. A link's `model` is only in `claims.json`.
 
 ## 6. Invariants and rules
 

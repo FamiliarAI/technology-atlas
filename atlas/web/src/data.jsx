@@ -86,6 +86,8 @@ export async function loadAtlas() {
     sky,
     regions: catalog.regions,
     recent: catalog.recent,
+    // Concepts left out because a provider refused to review them: {id, title, field}.
+    withheld: catalog.withheld || [],
     asOf: catalog.as_of,
     totals: {
       breakthroughs: all.length,
@@ -100,6 +102,8 @@ export async function loadAtlas() {
 export const loadField = (id) => once('field/' + encodeURIComponent(id) + '.json');
 export const loadBreakthrough = (id) => once('b/' + encodeURIComponent(id) + '.json');
 export const loadSearch = () => once('search.json');
+// Every `needs` link with its reason: [{id, needs, reason, model}], id the dependent.
+export const loadClaims = () => once('claims.json');
 
 // A field file, or null until it arrives (or if it fails).
 export function useField(id) {

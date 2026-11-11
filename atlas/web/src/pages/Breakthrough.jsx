@@ -6,6 +6,11 @@ import { formatDate, loadBreakthrough, useAtlas } from '../data.jsx';
 import { StarGlyph, StarMark, StatusLabel, ringSegments } from '../glyphs.jsx';
 import Record, { Citations, host, safe } from '../Record.jsx';
 import { EASE } from '../motion.js';
+import * as sky from '../sky.js';
+import { stepsBehind, useTitle } from './common.jsx';
+import NotFound from './NotFound.jsx';
+
+const reasonsOf = (list) => Object.fromEntries((list || []).map((l) => [l.id, l.reason]));
 
 const VERDICT = { meets: 'Meets', advances: 'Advances', contradicts: 'Contradicts' };
 
@@ -58,12 +63,13 @@ function Plate({ item }) {
   );
 }
 
-function Related({ atlas, ids, empty }) {
+function Related({ atlas, ids, reasons, empty }) {
   if (!ids.length) return <p className="order-empty">{empty}</p>;
   return (
     <ul className="order-list">
       {ids.map((id) => {
         const item = atlas.items[id];
+        const reason = reasons?.[id];
         return (
           <li key={id}>
             <Link to={'/b/' + id} className="order-row">
@@ -75,6 +81,7 @@ function Related({ atlas, ids, empty }) {
                 <span className="order-title">{item.title}</span>
               </span>
             </Link>
+            {reason && <p className="order-reason">{reason}</p>}
           </li>
         );
       })}
@@ -102,24 +109,32 @@ export default function Breakthrough() {
     };
   }, [id]);
   const item = atlas?.items[id];
-  useEffect(() => {
-    document.title = item ? `${item.title} · ${item.id} · Technology Atlas` : `${id} · Technology Atlas`;
-  }, [item, id]);
+  useTitle(item ? `${item.title} (${item.id})` : atlas ? 'Not found' : id);
 
   if (atlasError) return <p className="page-state">The atlas data could not be loaded: {atlasError}.</p>;
-  if (atlas && !item)
-    return (
-      <div className="page-state">
-        <p className="eyebrow">Not in the atlas</p>
-        <h1>No breakthrough has the ID {id}.</h1>
-        <p>
-          <Link to="/atlas">Go to the atlas</Link>
-        </p>
-      </div>
+  if (atlas && !item) {
+    const held = atlas.withheld.find((w) => w.id === id.toUpperCase());
+    return held ? (
+      <NotFound
+        eyebrow="Withheld"
+        title={`${held.id} is withheld from the atlas.`}
+        text={`“${held.title}” was researched, but the provider of the reviewing model declined to review it, so it is left out. The Method page explains why.`}
+      />
+    ) : (
+      <NotFound
+        eyebrow="Not in the atlas"
+        title={`No breakthrough has the ID ${id}.`}
+        text="Breakthrough IDs are a field’s short ID and a number, such as QUA-01. The atlas lists every one."
+      />
     );
+  }
   if (!item) return <p className="page-state">Finding {id}…</p>;
 
   const field = atlas.field[item.field];
+  const steps = stepsBehind(atlas, item.id);
+  // The star's chart coordinate, printed when the sky provides one (sky.js chartCoord).
+  const coord = typeof sky.chartCoord === 'function' ? sky.chartCoord(item, atlas.sky) : null;
+  const where = coord && Number.isFinite(coord.x) && Number.isFinite(coord.y) ? coord.text : null;
   const sourceTitle = (url) => record?.sources.find((s) => s.url === url)?.title || host(url);
   const judged = record ? record.progress.filter((r) => r.criterion) : [];
   const fade = (n) =>
@@ -137,7 +152,7 @@ export default function Breakthrough() {
       <nav className="crumbs" aria-label="Breadcrumb">
         <Link to="/atlas">Atlas</Link>
         <span aria-hidden="true">/</span>
-        <Link to={`/atlas?field=${field.id}`}>{field.name}</Link>
+        <Link to={`/field/${field.id}`}>{field.name}</Link>
         <span aria-hidden="true">/</span>
         <span className="mono" aria-current="page">
           {item.id}
@@ -219,18 +234,28 @@ export default function Breakthrough() {
 
           <section className="order" aria-labelledby="order-title">
             <h2 id="order-title">Order</h2>
+            <p className="section-note">
+              Each line is an order claim: it is proven wrong if the later breakthrough arrives
+              first. The reason under each is the one the linking model gave.
+            </p>
             <div className="order-cols">
               <div>
                 <h3 className="eyebrow">Needs first</h3>
                 <Related
                   atlas={atlas}
                   ids={item.prerequisites.filter((p) => atlas.items[p])}
-                  empty="Nothing. It sits on the inner ring: it could happen now."
+                  reasons={reasonsOf(record?.needs)}
+                  empty="No breakthrough is linked as needed before this one."
                 />
               </div>
               <div>
                 <h3 className="eyebrow">Unlocks</h3>
-                <Related atlas={atlas} ids={item.unlocks} empty="No breakthrough is linked as needing this one yet." />
+                <Related
+                  atlas={atlas}
+                  ids={item.unlocks}
+                  reasons={reasonsOf(record?.unlocks)}
+                  empty="No breakthrough is linked as needing this one."
+                />
               </div>
             </div>
           </section>
@@ -286,15 +311,27 @@ export default function Breakthrough() {
               <div>
                 <dt>Constellation</dt>
                 <dd>
-                  <Link to={`/atlas?field=${field.id}`}>{field.name}</Link>
+                  <Link to={`/field/${field.id}`}>{field.name}</Link>
                 </dd>
               </div>
               <div>
-                <dt>Ring</dt>
+                <dt>Region</dt>
+                <dd>{field.region}</dd>
+              </div>
+              <div>
+                <dt>Order</dt>
                 <dd>
-                  {item.depth} · {item.depth ? `needs ${item.depth} step${item.depth > 1 ? 's' : ''} first` : 'could happen now'}
+                  {steps
+                    ? `${steps} prerequisite step${steps > 1 ? 's' : ''} before it`
+                    : 'Nothing linked before it'}
                 </dd>
               </div>
+              {where && (
+                <div>
+                  <dt>Chart position</dt>
+                  <dd className="mono">{where}</dd>
+                </div>
+              )}
               <div>
                 <dt>Sources</dt>
                 <dd className="mono">{record ? record.sources.length : '…'}</dd>

@@ -173,6 +173,7 @@ def main(argv=None):
     print(
         f'{result["pages"]} pages, {result["data"]} data files in {args.out}; '
         f'catalog {sizes["catalog.json"]} B, search {sizes["search.json"]} B, '
+        f'claims {sizes["claims.json"]} B, '
         f'largest field {largest["field/"][1]} {largest["field/"][0]} B, '
         f'largest breakthrough {largest["b/"][1]} {largest["b/"][0]} B'
     )

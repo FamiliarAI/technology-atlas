@@ -68,10 +68,11 @@ Science fiction through depth, precision and light. No neon, no fake terminal te
 
 - React and Vite in `atlas/web`, with a client-side router. No new tables.
 - **One data contract, the same in development and in the export.** The site reads only these files, which the server builds on request and the export writes to disk:
-  - `data/catalog.json`: what every page and the chart need, and no more. Fields (`id`, `name`, `region`, counts) and breakthroughs (`id`, `field`, `title`, milestone statuses, `prerequisites`, `moved_at`), plus recent movement. Budget: under 300 KB before compression.
-  - `data/field/QUA.json`: one field's scope and its breakthroughs with summaries and milestone labels.
+  - `data/catalog.json`: what every page and the chart need, and no more. Fields (`id`, `name`, `region`, counts) and breakthroughs (`id`, `field`, `title`, milestone statuses, `prerequisites`, `moved_at`), plus recent movement and the withheld concepts. Budget: under 300 KB before compression.
+  - `data/field/QUA.json`: one field's scope, its breakthroughs with summaries and milestone labels, and any withheld concepts.
   - `data/b/QUA-01.json`: one breakthrough's full record, sources as links to the originals, and its evidence.
   - `data/search.json`: titles and short summaries, loaded when the search box is first used. Search ranks whole-word and title-prefix matches above substrings.
+  - `data/claims.json`: every `needs` link with its stated reason and the model that proposed it, for the Claims page.
 - v1 is exported as static files by `python3 -m atlas.export OUT`: the built site, the data files above, and one HTML file per route with its own title, description and share image. Saved source copies and working documents are not exported.
 - First load shows text within one second on a normal connection; the chart arrives after.
 

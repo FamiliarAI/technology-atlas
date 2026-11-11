@@ -18,6 +18,7 @@ from atlas.store import (
     REGIONS,
     breakthrough_data,
     catalog,
+    claims,
     connect,
     cut,
     encode,
@@ -90,6 +91,12 @@ class SiteTests(unittest.TestCase):
             {'id': 'QUA-01', 'reason': 'Needs the first.', 'model': 'm', 'field': 'QUA'}
         ]
         core.write_breakthrough(item, self.core)
+        path = self.core / 'QUA' / 'field.json'
+        field = json.loads(path.read_text())
+        field['withheld'] = [
+            {'id': 'QUA-03', 'title': 'Refused', 'stage': 'review-QUA-03', 'reason': 'Refusal.'}
+        ]
+        path.write_text(json.dumps(field))
         core.write_progress(
             [
                 {
@@ -118,7 +125,10 @@ class SiteTests(unittest.TestCase):
     def test_catalog_is_compact(self):
         with connect(self.db) as db:
             data = catalog(db)
-        self.assertEqual(list(data), ['as_of', 'regions', 'fields', 'breakthroughs', 'recent'])
+        self.assertEqual(
+            list(data), ['as_of', 'regions', 'fields', 'breakthroughs', 'recent', 'withheld']
+        )
+        self.assertEqual(data['withheld'], [{'id': 'QUA-03', 'title': 'Refused', 'field': 'QUA'}])
         self.assertEqual(data['regions'], list(REGIONS))
         fields = {field['id']: field for field in data['fields']}
         self.assertEqual(
@@ -157,6 +167,12 @@ class SiteTests(unittest.TestCase):
             self.assertIsNone(field_data(db, 'NOPE'))
             self.assertIsNone(breakthrough_data(db, 'QUA-99'))
         self.assertEqual(field['boundaries'], 'Quantum Computing scope.')
+        self.assertEqual(
+            field['withheld'],
+            [{'id': 'QUA-03', 'title': 'Refused', 'stage': 'review-QUA-03', 'reason': 'Refusal.'}],
+        )
+        with connect(self.db) as db:
+            self.assertEqual(field_data(db, 'ZZZ')['withheld'], [])
         self.assertEqual(field['breakthroughs'][0]['milestones'][0]['status'], 'in_progress')
         self.assertEqual(field['breakthroughs'][0]['unlocks'], ['QUA-02'])
         self.assertEqual(field['breakthroughs'][0]['source_count'], 1)
@@ -193,6 +209,15 @@ class SiteTests(unittest.TestCase):
         self.assertEqual(cut('short text'), 'short text')
         self.assertEqual(cut('alpha beta gamma', 12), 'alpha beta…')
 
+    def test_claims_lists_every_needs_link_with_its_reason(self):
+        with connect(self.db) as db:
+            data = claims(db)
+            links = sum(len(item['prerequisites']) for item in catalog(db)['breakthroughs'])
+        self.assertEqual(
+            data, [{'id': 'QUA-02', 'needs': 'QUA-01', 'reason': 'Needs the first.', 'model': 'm'}]
+        )
+        self.assertEqual(len(data), links)
+
     def test_server_serves_the_data_files(self):
         server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
         server.db_path = self.db
@@ -203,6 +228,7 @@ class SiteTests(unittest.TestCase):
             for path in [
                 '/data/catalog.json',
                 '/data/search.json',
+                '/data/claims.json',
                 '/data/field/QUA.json',
                 '/data/b/QUA-01.json',
             ]:
@@ -217,11 +243,17 @@ class SiteTests(unittest.TestCase):
     def test_export_writes_site_data_and_one_page_per_route(self):
         out = self.root / 'out'
         result = export(out, self.db, self.site, base_url='https://atlas.example/')
-        self.assertEqual(result['data'], 2 + 2 + 4)
+        self.assertEqual(result['data'], 3 + 2 + 4)
         self.assertEqual((out / 'assets/index.js').read_text(), 'run()')
         with connect(self.db) as db:
             self.assertEqual(json.loads((out / 'data/catalog.json').read_text()), catalog(db))
-        for name in ['search.json', 'field/QUA.json', 'field/ZZZ.json', 'b/QUA-01.json']:
+        for name in [
+            'search.json',
+            'claims.json',
+            'field/QUA.json',
+            'field/ZZZ.json',
+            'b/QUA-01.json',
+        ]:
             self.assertTrue((out / 'data' / name).is_file(), name)
         routes = ['', 'atlas', 'claims', 'about', 'field/QUA', 'field/ZZZ', 'b/QUA-01', 'b/ZZZ-02']
         for route in routes:

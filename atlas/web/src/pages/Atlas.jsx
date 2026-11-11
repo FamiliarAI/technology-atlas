@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import Chart, { Locator } from '../Chart.jsx';
 import Starfield from '../Starfield.jsx';
 import { useAtlas, useField } from '../data.jsx';
 import { FieldEmblem, StarGlyph, StatusMark, ringSegments } from '../glyphs.jsx';
+import { chartCoord, REGION_GRID } from '../sky.js';
 import { EASE } from '../motion.js';
+import '../sky.css';
 
 export function useNarrow(query = '(max-width: 900px)') {
   const [narrow, setNarrow] = useState(() => matchMedia(query).matches);
@@ -18,44 +20,143 @@ export function useNarrow(query = '(max-width: 900px)') {
   return narrow;
 }
 
-const RING = ['Ring 0 · could happen now', 'Ring 1 · needs one step first', 'Ring 2 · needs two steps first'];
-const ringName = (d) => RING[d] || `Ring ${d} · needs ${d} steps first`;
+const STEPS = ['Could happen now', 'Needs one step first', 'Needs two steps first'];
+const stepName = (d) => STEPS[d] || `Needs ${d} steps first`;
 
-function BreakthroughList({ atlas, field, onHighlight, selected }) {
-  const rings = [];
-  for (const item of field.items) (rings[item.depth] ||= []).push(item);
+// Regions in the order they sit on the chart, left to right and top to bottom.
+function useRegions(atlas) {
+  return useMemo(() => {
+    const names = [...REGION_GRID.flat(), ...atlas.regions.filter((r) => !REGION_GRID.flat().includes(r))];
+    return names
+      .map((name) => ({ name, fields: atlas.fields.filter((f) => f.region === name) }))
+      .filter((r) => r.fields.length);
+  }, [atlas]);
+}
+
+function Arrow({ back = false }) {
   return (
-    <div className="b-list">
-      {rings.map(
+    <svg viewBox="-8 -8 16 16" width="12" height="12" aria-hidden="true" className="sa-arrow">
+      <path d={back ? 'M5 0H-5M-1 -4L-5 0L-1 4' : 'M-5 0H5M1 -4L5 0L1 4'} />
+    </svg>
+  );
+}
+
+// ---------- Lists ----------
+
+function FieldList({ atlas, regions, filter, onPick, onHover }) {
+  const q = filter.trim().toLowerCase();
+  const match = (f) => !q || f.name.toLowerCase().includes(q) || f.id.toLowerCase().includes(q);
+  const shown = regions.map((r) => ({ ...r, fields: r.fields.filter(match) })).filter((r) => r.fields.length);
+  return (
+    <div className="sa-regions">
+      {shown.map((r) => (
+        <section key={r.name} aria-label={r.name}>
+          <h2 className="sa-region-head">
+            {r.name}
+            <span className="mono">{r.fields.length}</span>
+          </h2>
+          <ul className="sa-fields">
+            {r.fields.map((f) => (
+              <li key={f.id}>
+                <button
+                  type="button"
+                  className="sa-field"
+                  onClick={() => onPick(f.id)}
+                  onMouseEnter={() => onHover?.(f.id)}
+                  onMouseLeave={() => onHover?.(null)}
+                  onFocus={() => onHover?.(f.id)}
+                  onBlur={() => onHover?.(null)}
+                >
+                  <FieldEmblem field={f} atlas={atlas} size={28} />
+                  <span className="sa-field-name">{f.name}</span>
+                  <span className="sa-field-meta mono">
+                    {f.moving > 0 && (
+                      <span className="sa-moving" title={`${f.moving} moving`}>
+                        <i aria-hidden="true" />
+                        <span className="visually-hidden">{f.moving} moving, </span>
+                      </span>
+                    )}
+                    {f.items.length}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+      {!shown.length && <p className="sa-empty">No constellation matches “{filter}”.</p>}
+    </div>
+  );
+}
+
+function BreakthroughList({ atlas, field, selected, onSelect, onHighlight, links = false }) {
+  const detail = useField(field.id);
+  const summary = useMemo(
+    () => Object.fromEntries((detail?.breakthroughs || []).map((b) => [b.id, b.summary])),
+    [detail],
+  );
+  const steps = [];
+  for (const item of field.items) (steps[item.depth] ||= []).push(item);
+  return (
+    <div className="sa-blist">
+      {steps.map(
         (items, d) =>
           items && (
-            <section key={d} aria-label={ringName(d)}>
-              <h3 className="ring-head">{ringName(d)}</h3>
+            <section key={d} aria-label={stepName(d)}>
+              <h3 className="sa-step-head">
+                {stepName(d)}
+                <span className="mono">{items.length}</span>
+              </h3>
               <ul>
-                {items.map((item) => (
-                  <li key={item.id}>
-                    <Link
-                      to={'/b/' + item.id}
-                      className={'b-row' + (selected === item.id ? ' selected' : '')}
-                      onMouseEnter={() => onHighlight?.(item.id)}
-                      onMouseLeave={() => onHighlight?.(null)}
-                      onFocus={() => onHighlight?.(item.id)}
-                      onBlur={() => onHighlight?.(null)}
-                    >
-                      <StarGlyph item={item} size={34} />
-                      <span className="b-row-text">
-                        <span className="mono">{item.id}</span>
-                        <span className="b-row-title">{item.title}</span>
+                {items.map((item) => {
+                  const inner = (
+                    <>
+                      <StarGlyph item={item} size={30} />
+                      <span className="sa-b-text">
+                        <span className="sa-b-id mono">
+                          {item.id}
+                          <span>{chartCoord(item, atlas.sky)?.text}</span>
+                        </span>
+                        <span className="sa-b-title">{item.title}</span>
+                        {summary[item.id] && <span className="sa-b-sum">{summary[item.id]}</span>}
                         {item.prerequisites.length > 0 && (
-                          <span className="b-row-needs">needs {item.prerequisites.join(', ')}</span>
+                          <span className="sa-b-needs mono">needs {item.prerequisites.join(', ')}</span>
                         )}
                       </span>
-                      <span className="b-row-count mono" aria-label={`${item.met + item.moving} of ${item.status.length} milestones moving`}>
-                        {item.met + item.moving} of {item.status.length}
+                      <span
+                        className={'sa-b-count mono' + (item.met + item.moving ? ' warm' : '')}
+                        aria-label={`${item.met} met and ${item.moving} in progress of ${item.status.length} milestones`}
+                      >
+                        {item.met + item.moving}/{item.status.length}
                       </span>
-                    </Link>
-                  </li>
-                ))}
+                    </>
+                  );
+                  const hover = {
+                    onMouseEnter: () => onHighlight?.(item.id),
+                    onMouseLeave: () => onHighlight?.(null),
+                    onFocus: () => onHighlight?.(item.id),
+                    onBlur: () => onHighlight?.(null),
+                  };
+                  return (
+                    <li key={item.id}>
+                      {links ? (
+                        <Link to={'/b/' + item.id} className="sa-b" {...hover}>
+                          {inner}
+                        </Link>
+                      ) : (
+                        <button
+                          type="button"
+                          className={'sa-b' + (selected === item.id ? ' selected' : '')}
+                          aria-pressed={selected === item.id}
+                          onClick={() => onSelect(item.id)}
+                          {...hover}
+                        >
+                          {inner}
+                        </button>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </section>
           ),
@@ -64,55 +165,40 @@ function BreakthroughList({ atlas, field, onHighlight, selected }) {
   );
 }
 
-function FieldList({ atlas, onPick, filter }) {
-  const q = filter.trim().toLowerCase();
-  const fields = atlas.fields.filter((f) => !q || f.name.toLowerCase().includes(q) || f.id.toLowerCase().includes(q));
-  return (
-    <ul className="field-list">
-      {fields.map((f) => (
-        <li key={f.id}>
-          <button type="button" className="field-row" onClick={() => onPick(f.id)}>
-            <FieldEmblem field={f} atlas={atlas} size={30} />
-            <span className="field-row-name">{f.name}</span>
-            <span className="field-row-meta mono">
-              {f.moving > 0 && <i className="moving-dot" aria-label={`${f.moving} moving`} />}
-              {f.items.length}
-            </span>
-          </button>
-        </li>
-      ))}
-      {!fields.length && <li className="muted empty">No constellation matches “{filter}”.</li>}
-    </ul>
-  );
-}
+// ---------- The star card ----------
 
 function StarCard({ atlas, id, onClose }) {
   const item = atlas.items[id];
   const field = atlas.field[item.field];
-  // Summary and milestone labels come from the field file once it arrives.
   const detail = useField(item.field)?.breakthroughs.find((b) => b.id === id);
+  const coord = chartCoord(item, atlas.sky);
   return (
     <motion.aside
-      className="star-card"
-      aria-labelledby="star-card-title"
+      className="sa-card"
+      aria-labelledby="sa-card-title"
       initial={{ opacity: 0, x: 24 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 24 }}
       transition={{ duration: 0.45, ease: EASE }}
     >
-      <div className="star-card-top">
-        <p className="crumb">
-          <span className="mono">{item.id}</span> {field.name}
+      <div className="sa-card-top">
+        <p className="sa-card-crumb">
+          <span className="mono">{item.id}</span>
+          {field.name}
         </p>
-        <button type="button" className="close" onClick={onClose} aria-label="Close summary">
+        <button type="button" className="sa-close" onClick={onClose} aria-label="Close summary">
           <svg viewBox="-8 -8 16 16" width="14" height="14" aria-hidden="true">
             <path d="M-4.5 -4.5L4.5 4.5M4.5 -4.5L-4.5 4.5" />
           </svg>
         </button>
       </div>
-      <h2 id="star-card-title">{item.title}</h2>
-      <p className="star-card-sum">{detail?.summary}</p>
-      <ol className="mini-milestones">
+      <h2 id="sa-card-title">{item.title}</h2>
+      <p className="sa-card-coord mono">
+        Chart {coord.text}
+        {item.recent && <span className="sa-card-recent">moved in the last 30 days</span>}
+      </p>
+      {detail?.summary && <p className="sa-card-sum">{detail.summary}</p>}
+      <ol className="sa-card-milestones">
         {item.status.map((status, n) => (
           <li key={n} className={status}>
             <StatusMark status={status} />
@@ -121,100 +207,146 @@ function StarCard({ atlas, id, onClose }) {
           </li>
         ))}
       </ol>
-      <p className="star-card-order mono">
-        {item.prerequisites.length ? `Needs ${item.prerequisites.join(', ')}` : 'Ring 0 · could happen now'}
-        {item.unlocks.length > 0 && ` · unlocks ${item.unlocks.length}`}
+      <p className="sa-card-order mono">
+        {item.prerequisites.length ? `Needs ${item.prerequisites.join(', ')}` : 'Could happen now'}
+        {item.unlocks.length > 0 && ` · unlocks ${item.unlocks.join(', ')}`}
       </p>
       <Link to={'/b/' + item.id} className="button primary small">
         Open the breakthrough
-        <svg viewBox="-8 -8 16 16" width="13" height="13" aria-hidden="true">
-          <path d="M-5 0H5M1 -4L5 0L1 4" />
-        </svg>
+        <Arrow />
       </Link>
     </motion.aside>
   );
 }
 
+// ---------- The legend ----------
+
 function Legend() {
   const segs = ringSegments(['met', 'in_progress', 'none', 'none'], 7);
   return (
-    <div className="legend" aria-hidden="true">
-      <div className="legend-row">
-        <svg width="22" height="22" viewBox="-11 -11 22 22">
-          <circle r="2.6" fill="#FFB454" />
+    <div className="sa-legend" aria-label="How to read the sky" role="note">
+      <p className="sa-legend-row">
+        <svg width="34" height="16" viewBox="0 0 34 16" aria-hidden="true">
+          <path d="M3 11L15 5L31 9" className="lg-fig" />
+          <circle cx="3" cy="11" r="1.6" className="lg-dot" />
+          <circle cx="15" cy="5" r="1.6" className="lg-dot" />
+          <circle cx="31" cy="9" r="1.6" className="lg-dot" />
+        </svg>
+        <span>
+          <b>Figure line</b> one field
+        </span>
+      </p>
+      <p className="sa-legend-row">
+        <svg width="34" height="16" viewBox="0 0 34 16" aria-hidden="true">
+          <defs>
+            <linearGradient id="lg-claim" x1="0" x2="1">
+              <stop offset="0" stopColor="#7FB2FF" />
+              <stop offset="1" stopColor="#7FB2FF" stopOpacity="0.32" />
+            </linearGradient>
+          </defs>
+          <path d="M3 13Q14 0 28 8" className="lg-claim" />
+          <path d="M23.5 4.4L28.6 8.3L22.6 9.6" className="lg-arrow" />
+          <circle cx="3" cy="13" r="1.8" className="lg-dot" />
+        </svg>
+        <span>
+          <b>Claim line</b> the bright end must come first
+        </span>
+      </p>
+      <p className="sa-legend-row">
+        <svg width="34" height="16" viewBox="0 0 34 16" aria-hidden="true">
+          <circle cx="15" cy="10" r="1.8" className="lg-dot" />
+          <path d="M18.2 5.8L20.6 3.4" className="lg-cross" />
+        </svg>
+        <span>
+          <b>Tick</b> a claim with another field, drawn on hover
+        </span>
+      </p>
+      <p className="sa-legend-row">
+        <svg width="34" height="16" viewBox="0 0 34 16" aria-hidden="true">
+          <circle cx="4" cy="8" r="1.6" fill="#C3CDE2" opacity="0.85" />
+          <circle cx="17" cy="8" r="2.4" fill="#FFB454" />
+          <circle cx="30" cy="8" r="2.6" fill="#FFF1C9" />
+        </svg>
+        <span>
+          <b>Brightness</b> <em className="t-none">nothing met</em> · <em className="t-amber">under way</em> ·{' '}
+          <em className="t-met">all met</em>
+        </span>
+      </p>
+      <p className="sa-legend-row">
+        <svg width="34" height="18" viewBox="-17 -9 34 18" aria-hidden="true">
+          <circle r="2" fill="#FFB454" />
           {segs.map((s, n) => (
-            <path key={n} d={s.d} className={'seg ' + s.status} />
+            <path key={n} d={s.d} className={'sky-seg legend ' + s.status} />
           ))}
         </svg>
         <span>
-          Ring segments are milestones: <b className="t-none">empty</b>, <b className="t-amber">in progress</b>,{' '}
-          <b className="t-met">met</b>
+          <b>Ring</b> one segment per milestone
         </span>
-      </div>
-      <div className="legend-row">
-        <svg width="22" height="22" viewBox="-11 -11 22 22">
-          <circle r="4" className="legend-ring" />
-          <circle r="9" className="legend-ring" />
-        </svg>
-        <span>Rings outward: each needs something further in</span>
-      </div>
-      <div className="legend-row">
-        <svg width="22" height="22" viewBox="-11 -11 22 22">
-          <path d="M-8 6Q-2 -2 8 -6" className="legend-link" />
-        </svg>
-        <span>Lines: “needs” links, drawn on focus</span>
-      </div>
+      </p>
     </div>
   );
 }
 
+// ---------- Desktop ----------
+
 function DesktopAtlas({ atlas, field, star, setParams }) {
   const [filter, setFilter] = useState('');
   const [highlight, setHighlight] = useState(null);
+  const [highlightField, setHighlightField] = useState(null);
+  const [allClaims, setAllClaims] = useState(false);
+  const regions = useRegions(atlas);
   const f = field && atlas.field[field];
-  const pick = (id) => setParams(id ? { field: id } : {});
+  const pick = (id) => {
+    setHighlightField(null);
+    setParams(id ? { field: id } : {});
+  };
   const select = (id) => {
     if (!id) return setParams(field ? { field } : {});
     setParams({ field: atlas.items[id].field, star: id });
   };
+  useEffect(() => setHighlight(null), [field]);
+  const warm = Object.values(atlas.items).filter((i) => i.glow > 0);
   return (
-    <div className="atlas-desk">
-      <aside className="rail" aria-label="Constellations">
+    <div className="atlas-desk sa-desk">
+      <aside className="sa-rail" aria-label="Constellations">
         <AnimatePresence mode="wait" initial={false}>
           {f ? (
             <motion.div
               key={f.id}
-              className="rail-inner"
+              className="sa-rail-inner"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25 }}
             >
-              <button type="button" className="back" onClick={() => pick(null)}>
-                <svg viewBox="-8 -8 16 16" width="12" height="12" aria-hidden="true">
-                  <path d="M5 0H-5M-1 -4L-5 0L-1 4" />
-                </svg>
+              <button type="button" className="sa-back" onClick={() => pick(null)}>
+                <Arrow back />
                 All constellations
               </button>
-              <div className="rail-field">
-                <FieldEmblem field={f} atlas={atlas} size={48} />
+              <div className="sa-rail-field">
+                <FieldEmblem field={f} atlas={atlas} size={46} />
                 <div>
                   <p className="eyebrow">
-                    Constellation <span className="mono">{f.id}</span>
+                    {f.region} <span className="mono">{f.id}</span>
                   </p>
                   <h1>{f.name}</h1>
                 </div>
               </div>
-              <p className="rail-meta">
-                {f.items.length} breakthroughs, listed in prerequisite order. {f.moving} moving
-                {f.links ? `, ${f.links} order links.` : '.'}
+              <p className="sa-rail-meta">
+                {f.items.length} breakthroughs in prerequisite order.{' '}
+                {f.moving ? `${f.moving} moving.` : 'None has moved yet.'}{' '}
+                {f.links ? `${f.links} “needs” ${f.links === 1 ? 'claim' : 'claims'}.` : ''}
               </p>
-              <BreakthroughList atlas={atlas} field={f} onHighlight={setHighlight} selected={star} />
+              <Link to={'/field/' + f.id} className="sa-text-link">
+                The constellation’s page
+                <Arrow />
+              </Link>
+              <BreakthroughList atlas={atlas} field={f} selected={star} onSelect={select} onHighlight={setHighlight} />
             </motion.div>
           ) : (
             <motion.div
               key="all"
-              className="rail-inner"
+              className="sa-rail-inner"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -222,12 +354,28 @@ function DesktopAtlas({ atlas, field, star, setParams }) {
             >
               <p className="eyebrow">The atlas</p>
               <h1>What comes before what?</h1>
-              <p className="rail-meta">
-                {atlas.totals.breakthroughs} breakthroughs in {atlas.fields.length} constellations,
-                listed clockwise from the top. The centre is now; each ring outward needs something
-                further in.
+              <p className="sa-rail-meta">
+                {atlas.totals.breakthroughs} breakthroughs in {atlas.fields.length} constellations, across
+                eight regions of neighbouring disciplines. {atlas.totals.links} claim lines say what must
+                come first.
               </p>
-              <label className="filter">
+              {warm.length > 0 && (
+                <div className="sa-warm">
+                  <p className="sa-warm-head">Moving now</p>
+                  <ul>
+                    {warm.map((i) => (
+                      <li key={i.id}>
+                        <button type="button" onClick={() => select(i.id)}>
+                          <StarGlyph item={i} size={24} />
+                          <span className="mono">{i.id}</span>
+                          <span className="sa-warm-title">{i.title}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <label className="sa-filter">
                 <span className="visually-hidden">Filter constellations</span>
                 <input
                   type="search"
@@ -236,13 +384,13 @@ function DesktopAtlas({ atlas, field, star, setParams }) {
                   placeholder="Filter constellations"
                 />
               </label>
-              <FieldList atlas={atlas} onPick={pick} filter={filter} />
+              <FieldList atlas={atlas} regions={regions} filter={filter} onPick={pick} onHover={setHighlightField} />
             </motion.div>
           )}
         </AnimatePresence>
       </aside>
-      <div className="atlas-stage">
-        <Starfield density={0.7} seed={11} />
+      <div className="sa-stage">
+        <Starfield density={0.6} seed={11} />
         <Chart
           atlas={atlas}
           interactive
@@ -250,11 +398,14 @@ function DesktopAtlas({ atlas, field, star, setParams }) {
           focusField={field}
           selected={star}
           highlight={highlight}
+          highlightField={highlightField}
           onSelect={select}
           onFocusField={pick}
-          inset={{ right: star ? 400 : 0 }}
+          allClaims={allClaims}
+          inset={{ right: star ? 420 : 0, top: 30, bottom: 50 }}
+          pad={10}
         />
-        <p className="stage-crumb" aria-live="polite">
+        <nav className="sa-crumb" aria-label="Chart position">
           <button type="button" onClick={() => pick(null)}>
             Sky
           </button>
@@ -272,7 +423,19 @@ function DesktopAtlas({ atlas, field, star, setParams }) {
               <span className="mono">{star}</span>
             </>
           )}
-        </p>
+        </nav>
+        <button
+          type="button"
+          className={'sa-claims-toggle' + (allClaims ? ' on' : '')}
+          aria-pressed={allClaims}
+          onClick={() => setAllClaims(!allClaims)}
+        >
+          <svg viewBox="0 0 26 14" width="26" height="14" aria-hidden="true">
+            <rect x="0.5" y="0.5" width="25" height="13" rx="6.5" className="track" />
+            <circle cx={allClaims ? 19 : 7} cy="7" r="4" className="knob" />
+          </svg>
+          Show all {atlas.totals.links} claims
+        </button>
         <Legend />
         <AnimatePresence>
           {star && atlas.items[star] && <StarCard key={star} atlas={atlas} id={star} onClose={() => select(null)} />}
@@ -282,41 +445,38 @@ function DesktopAtlas({ atlas, field, star, setParams }) {
   );
 }
 
+// ---------- Phone: list first, a small locator on top ----------
+
 function PhoneAtlas({ atlas, field, setParams }) {
+  const regions = useRegions(atlas);
   const f = field && atlas.field[field];
   return (
-    <div className="atlas-phone">
-      <div className="phone-sky" aria-hidden="true">
-        <Starfield density={0.8} seed={11} />
-        <Chart atlas={atlas} labels={false} pad={0} />
-      </div>
-      <header className="phone-head">
-        <p className="eyebrow">The atlas</p>
+    <div className="sa-phone">
+      <header className="sa-phone-head">
+        <p className="eyebrow">{f ? f.region : 'The atlas'}</p>
         <h1>{f ? f.name : 'What comes before what?'}</h1>
-        <p className="phone-intro">
+        <p className="sa-phone-intro">
           {f
-            ? `${f.items.length} breakthroughs, in prerequisite order. ${f.moving} moving.`
-            : `${atlas.totals.breakthroughs} breakthroughs in ${atlas.fields.length} constellations. The centre of the sky is now; each ring outward needs something further in.`}
+            ? `${f.items.length} breakthroughs in prerequisite order. ${f.moving ? `${f.moving} moving.` : 'None has moved yet.'}`
+            : `${atlas.totals.breakthroughs} breakthroughs in ${atlas.fields.length} constellations, across eight regions of neighbouring disciplines.`}
         </p>
       </header>
-      <div className="locator-row">
-        <Locator atlas={atlas} field={field} size={92} />
-        <label className="field-select">
-          <span className="eyebrow">Constellation</span>
-          <select value={field || ''} onChange={(e) => setParams(e.target.value ? { field: e.target.value } : {})}>
-            <option value="">All {atlas.fields.length}</option>
-            {atlas.fields.map((x) => (
-              <option key={x.id} value={x.id}>
-                {x.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+      <figure className="sa-phone-sky">
+        <Locator atlas={atlas} field={field} width={358} />
+        <figcaption className="mono">
+          {f ? `${f.name} in the sky` : `The whole sky · ${atlas.fields.length} constellations`}
+        </figcaption>
+      </figure>
       {f ? (
-        <BreakthroughList atlas={atlas} field={f} />
+        <>
+          <button type="button" className="sa-back" onClick={() => setParams({})}>
+            <Arrow back />
+            All constellations
+          </button>
+          <BreakthroughList atlas={atlas} field={f} links />
+        </>
       ) : (
-        <FieldList atlas={atlas} onPick={(id) => setParams({ field: id })} filter="" />
+        <FieldList atlas={atlas} regions={regions} filter="" onPick={(id) => setParams({ field: id })} />
       )}
     </div>
   );
@@ -332,6 +492,9 @@ export default function Atlas() {
     const f = field && atlas?.field[field];
     document.title = f ? `${f.name} · Technology Atlas` : 'The atlas · Technology Atlas';
   }, [atlas, field]);
+  useEffect(() => {
+    if (narrow) window.scrollTo(0, 0);
+  }, [narrow, field]);
   if (error) return <p className="page-state">The atlas data could not be loaded: {error}.</p>;
   if (!atlas) return <p className="page-state">Charting the sky…</p>;
   const set = (p) => setParams(p, { replace: false });

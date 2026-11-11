@@ -10,6 +10,7 @@ from .store import (
     ROOT,
     breakthrough_data,
     catalog,
+    claims,
     connect,
     encode,
     field_data,
@@ -85,6 +86,8 @@ class Handler(BaseHTTPRequestHandler):
             value = catalog(db)
         elif name == 'search.json':
             value = search_index(db)
+        elif name == 'claims.json':
+            value = claims(db)
         elif name.startswith('field/') and name.endswith('.json'):
             value = field_data(db, name[len('field/') : -len('.json')])
         elif name.startswith('b/') and name.endswith('.json'):

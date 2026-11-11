@@ -42,7 +42,7 @@ def initialize(db):
         (
             '\n'
             '    CREATE TABLE IF NOT EXISTS fields (id TEXT PRIMARY KEY, name TEXT NOT '
-            'NULL, color TEXT NOT NULL, boundaries TEXT);\n'
+            'NULL, color TEXT NOT NULL, boundaries TEXT, withheld TEXT);\n'
             '    CREATE TABLE IF NOT EXISTS breakthroughs (id TEXT PRIMARY KEY, field TEXT '
             'NOT NULL REFERENCES fields(id), payload TEXT NOT NULL);\n'
             '    CREATE TABLE IF NOT EXISTS assets (id TEXT PRIMARY KEY, path TEXT NOT '
@@ -145,8 +145,14 @@ def rebuild(core=CORE, path=DB, roots=SOURCES):
             initialize(db)
             for prefix, field in sorted(data['fields'].items()):
                 db.execute(
-                    'INSERT INTO fields VALUES (?,?,?,?)',
-                    (prefix, field['name'], field['color'], field.get('boundaries')),
+                    'INSERT INTO fields VALUES (?,?,?,?,?)',
+                    (
+                        prefix,
+                        field['name'],
+                        field['color'],
+                        field.get('boundaries'),
+                        json.dumps(field.get('withheld') or []),
+                    ),
                 )
                 items = []
                 for identifier, item in sorted(data['breakthroughs'].items()):
@@ -330,6 +336,10 @@ def status_of(verdicts):
 def site_view(db):
     """Everything the data files are built from, read once."""
     fields = {row['id']: dict(row) for row in db.execute('SELECT * FROM fields ORDER BY id')}
+    for field in fields.values():
+        # Concepts a provider refused to review: {id, title, stage, reason}. A database built
+        # before the column existed has none recorded.
+        field['withheld'] = json.loads(field.get('withheld') or '[]')
     counts = dict(
         db.execute('SELECT breakthrough, COUNT(*) FROM progress GROUP BY breakthrough').fetchall()
     )
@@ -407,12 +417,18 @@ def catalog(db, view=None):
         if row['criterion'] and row['criterion'] <= len(milestones):
             label = milestones[row['criterion'] - 1]['label']
         recent.append(row | {'label': label})
+    withheld = [
+        {'id': entry['id'], 'title': entry['title'], 'field': prefix}
+        for prefix, field in sorted(view['fields'].items())
+        for entry in field['withheld']
+    ]
     return {
         'as_of': AS_OF,
         'regions': list(REGIONS),
         'fields': fields,
         'breakthroughs': breakthroughs,
         'recent': recent,
+        'withheld': withheld,
     }
 
 
@@ -445,6 +461,10 @@ def field_data(db, prefix, view=None):
         'boundaries': field.get('boundaries'),
         'as_of': AS_OF,
         'breakthroughs': breakthroughs,
+        'withheld': [
+            {key: entry.get(key) for key in ('id', 'title', 'stage', 'reason')}
+            for entry in field['withheld']
+        ],
     }
 
 
@@ -518,6 +538,22 @@ def breakthrough_data(db, identifier, view=None):
     }
 
 
+def claims(db, view=None):
+    """data/claims.json: every `needs` link, as {id, needs, reason, model}, id the dependent."""
+    view = view or site_view(db)
+    return [
+        {
+            'id': identifier,
+            'needs': entry['id'],
+            'reason': entry.get('reason'),
+            'model': entry.get('model'),
+        }
+        for identifier, item in sorted(view['items'].items())
+        for entry in item.get('prerequisites', [])
+        if entry['id'] in view['items']
+    ]
+
+
 def search_index(db, view=None):
     """data/search.json: titles and short summaries, loaded when search is first used."""
     view = view or site_view(db)
@@ -537,6 +573,7 @@ def site_files(db):
     view = site_view(db)
     yield 'catalog.json', catalog(db, view)
     yield 'search.json', search_index(db, view)
+    yield 'claims.json', claims(db, view)
     for prefix in view['fields']:
         yield f'field/{prefix}.json', field_data(db, prefix, view)
     for identifier in view['items']:

@@ -5,6 +5,7 @@ import { formatDate, loadSearch, search, useAtlas } from './data.jsx';
 import { SharedDefs, StarGlyph, Wordmark } from './glyphs.jsx';
 import Starfield from './Starfield.jsx';
 import { EASE } from './motion.js';
+import { AUTHOR, REPOSITORY_PUBLIC, REPOSITORY_URL } from './site.js';
 
 function Search({ open, onClose }) {
   const { atlas } = useAtlas();
@@ -103,49 +104,110 @@ function Search({ open, onClose }) {
   );
 }
 
+const NAV = [
+  ['/atlas', 'Atlas'],
+  ['/claims', 'Claims'],
+  ['/about', 'Method'],
+];
+
 function Header() {
   const [searching, setSearching] = useState(false);
+  const [menu, setMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
-  useEffect(() => setSearching(false), [location.pathname]);
+  const menuId = useId();
+  const menuButton = useRef(null);
+  useEffect(() => {
+    setSearching(false);
+    setMenu(false);
+  }, [location.pathname, location.search]);
   useEffect(() => {
     const on = () => setScrolled(scrollY > 8);
     on();
     addEventListener('scroll', on, { passive: true });
     return () => removeEventListener('scroll', on);
   }, []);
+  useEffect(() => {
+    if (!menu) return undefined;
+    const key = (e) => {
+      if (e.key === 'Escape') {
+        setMenu(false);
+        menuButton.current?.focus();
+      }
+    };
+    addEventListener('keydown', key);
+    return () => removeEventListener('keydown', key);
+  }, [menu]);
   return (
-    <header className={'site-header' + (scrolled ? ' scrolled' : '')}>
+    <header className={'site-header' + (scrolled || menu || searching ? ' scrolled' : '')}>
       <a className="skip" href="#main">
         Skip to content
       </a>
       <Link to="/" className="home-link" aria-label="Technology Atlas, home">
         <Wordmark />
       </Link>
-      <nav aria-label="Main">
-        <NavLink to="/atlas">Atlas</NavLink>
-        <NavLink to="/claims">Claims</NavLink>
-        <NavLink to="/about">Method</NavLink>
+      <nav aria-label="Main" className="main-nav">
+        {NAV.map(([to, label]) => (
+          <NavLink key={to} to={to}>
+            {label}
+          </NavLink>
+        ))}
       </nav>
       <Search open={searching} onClose={() => setSearching(false)} />
-      <button
-        type="button"
-        className="search-toggle"
-        aria-label={searching ? 'Close search' : 'Search'}
-        aria-expanded={searching}
-        onClick={() => setSearching((s) => !s)}
-      >
-        <svg viewBox="-8 -8 16 16" width="17" height="17" aria-hidden="true">
-          {searching ? (
-            <path d="M-4.5 -4.5L4.5 4.5M4.5 -4.5L-4.5 4.5" />
-          ) : (
-            <>
-              <circle cx="-1.5" cy="-1.5" r="4.6" />
-              <path d="M2 2L6 6" />
-            </>
-          )}
-        </svg>
-      </button>
+      <div className="header-buttons">
+        <button
+          type="button"
+          className="icon-button search-toggle"
+          aria-label={searching ? 'Close search' : 'Search breakthroughs'}
+          aria-expanded={searching}
+          onClick={() => {
+            setMenu(false);
+            setSearching((s) => !s);
+          }}
+        >
+          <svg viewBox="-8 -8 16 16" width="18" height="18" aria-hidden="true">
+            {searching ? (
+              <path d="M-4.5 -4.5L4.5 4.5M4.5 -4.5L-4.5 4.5" />
+            ) : (
+              <>
+                <circle cx="-1.5" cy="-1.5" r="4.6" />
+                <path d="M2 2L6 6" />
+              </>
+            )}
+          </svg>
+        </button>
+        <button
+          ref={menuButton}
+          type="button"
+          className="icon-button menu-toggle"
+          aria-label="Menu"
+          aria-expanded={menu}
+          aria-controls={menuId}
+          onClick={() => {
+            setSearching(false);
+            setMenu((m) => !m);
+          }}
+        >
+          <svg viewBox="-8 -8 16 16" width="18" height="18" aria-hidden="true">
+            {menu ? (
+              <path d="M-4.5 -4.5L4.5 4.5M4.5 -4.5L-4.5 4.5" />
+            ) : (
+              <path d="M-6 -3.5H6M-6 0.5H6M-6 4.5H2" />
+            )}
+          </svg>
+        </button>
+      </div>
+      <nav id={menuId} className={'phone-menu' + (menu ? ' open' : '')} aria-label="Menu" hidden={!menu}>
+        <ul>
+          {[['/', 'Home'], ...NAV].map(([to, label]) => (
+            <li key={to}>
+              <NavLink to={to} end={to === '/'}>
+                {label}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+      </nav>
     </header>
   );
 }
@@ -176,7 +238,17 @@ function Footer() {
             <dd>
               <Link to="/atlas">Atlas</Link> · <Link to="/claims">Claims</Link> ·{' '}
               <Link to="/about">Method</Link>
+              {REPOSITORY_PUBLIC && (
+                <>
+                  {' '}
+                  · <a href={REPOSITORY_URL}>Repository</a>
+                </>
+              )}
             </dd>
+          </div>
+          <div>
+            <dt>Made by</dt>
+            <dd>{AUTHOR}</dd>
           </div>
         </dl>
       </div>
@@ -187,8 +259,15 @@ function Footer() {
 export default function Layout({ children }) {
   const location = useLocation();
   useEffect(() => {
+    // A link to a section (/about#limits) lands on it once the page has faded in.
+    if (location.hash) {
+      const id = decodeURIComponent(location.hash.slice(1));
+      const timer = setTimeout(() => document.getElementById(id)?.scrollIntoView(), 350);
+      return () => clearTimeout(timer);
+    }
     window.scrollTo(0, 0);
-  }, [location.pathname]);
+    return undefined;
+  }, [location.pathname, location.hash]);
   return (
     <div className="site">
       <SharedDefs />

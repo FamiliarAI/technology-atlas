@@ -145,10 +145,16 @@ class AtlasTests(unittest.TestCase):
                 db.execute("SELECT name FROM sqlite_master WHERE name='runs'").fetchone()
             )
             columns = [row['name'] for row in db.execute('PRAGMA table_info(fields)')]
-            self.assertEqual(columns, ['id', 'name', 'color', 'boundaries'])
+            self.assertEqual(columns, ['id', 'name', 'color', 'boundaries', 'withheld'])
             self.assertEqual(
                 tuple(db.execute('SELECT * FROM fields').fetchone()),
-                ('SWE', 'Software Engineering', field['color'], field['boundaries']),
+                (
+                    'SWE',
+                    'Software Engineering',
+                    field['color'],
+                    field['boundaries'],
+                    json.dumps(field.get('withheld') or []),
+                ),
             )
             item = json.loads(
                 db.execute('SELECT payload FROM breakthroughs WHERE id=?', ('SWE-01',)).fetchone()[
