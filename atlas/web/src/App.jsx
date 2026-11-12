@@ -7,7 +7,6 @@ import Home from './pages/Home.jsx';
 import Atlas from './pages/Atlas.jsx';
 import Breakthrough from './pages/Breakthrough.jsx';
 import Field from './pages/Field.jsx';
-import Claims from './pages/claims.jsx';
 import About from './pages/About.jsx';
 import NotFound from './pages/NotFound.jsx';
 
@@ -36,7 +35,6 @@ export default function App() {
             <Route path="/atlas" element={<Atlas />} />
             <Route path="/b/:id" element={<Breakthrough />} />
             <Route path="/field/:field" element={<Field />} />
-            <Route path="/claims" element={<Claims />} />
             <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

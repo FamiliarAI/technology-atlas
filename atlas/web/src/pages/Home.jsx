@@ -3,11 +3,10 @@ import { Link } from 'react-router-dom';
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import Chart from '../Chart.jsx';
 import Starfield from '../Starfield.jsx';
-import { formatDate, useAtlas } from '../data.jsx';
+import { formatDate, milestoneOf, useAtlas } from '../data.jsx';
 import { FieldEmblem, StarGlyph, StarMark, StatusLabel, ringSegments } from '../glyphs.jsx';
 import { useNarrow } from './Atlas.jsx';
 import { EASE } from '../motion.js';
-import { claimState, ClaimStatus } from './claims.jsx';
 import { Arrow } from './common.jsx';
 
 const rise = (n, still) =>
@@ -61,15 +60,15 @@ function Hero() {
       <div className="hero-sky">{atlas && <Chart atlas={atlas} intro pad={8} labels={!narrow} />}</div>
       <div className="hero-copy">
         <motion.p className="eyebrow" {...rise(0, still)}>
-          A star atlas of the AI takeoff
+          A star atlas of what to work towards
         </motion.p>
         <motion.h1 id="hero-title" {...rise(1, still)}>
-          Naming the wonders before they arrive.
+          The breakthroughs worth working towards.
         </motion.h1>
         <motion.p className="lead" {...rise(2, still)}>
-          This atlas predicts the AI takeoff by naming, in advance, the breakthroughs expected on the
-          way. Each one has a test for recognising it and an order it should arrive in, so every
-          prediction here can be proven wrong.
+          A map of the breakthroughs people can work towards, with superintelligence to help. Each
+          has milestones along the way that tell us how close we are, and research papers are
+          added as they bring one nearer.
         </motion.p>
         <motion.div className="hero-actions" {...rise(3, still)}>
           <Link to="/atlas" className="button primary">
@@ -118,7 +117,7 @@ const host = (url) => {
   }
 };
 
-const VERDICT = { advances: 'in_progress', meets: 'met', contradicts: 'none' };
+const VERDICT = { advances: 'in_progress', meets: 'met' };
 
 function Moved() {
   const { atlas } = useAtlas();
@@ -133,7 +132,8 @@ function Moved() {
   return (
     <section className="section moved" aria-labelledby="moved-title">
       <SectionHead index={1} label="Recent movement" title={<span id="moved-title">What moved</span>}>
-        A source is saved, read against one milestone, and quoted exactly. Newest first.
+        A paper is saved, read against one milestone or against the breakthrough as a whole, and
+        quoted exactly. Newest first.
       </SectionHead>
       <motion.ol className="moved-list" {...reveal(still)}>
         {groups.map((g) => {
@@ -153,12 +153,19 @@ function Moved() {
                 </h3>
                 <ul className="moved-rows">
                   {g.rows.map((row, n) => {
+                    const m = milestoneOf(row);
                     return (
                       <li key={n}>
                         <div className="moved-row-head">
-                          <StatusLabel status={VERDICT[row.verdict]} />
-                          <span className="mono muted">M{row.criterion}</span>
-                          <span className="milestone-label">{row.label}</span>
+                          {VERDICT[row.verdict] ? (
+                            <StatusLabel status={VERDICT[row.verdict]} />
+                          ) : (
+                            <span className={'verdict ' + row.verdict}>Contradicts</span>
+                          )}
+                          <span className="mono muted">{m ? `M${m}` : 'Whole'}</span>
+                          <span className="milestone-label">
+                            {m ? row.label : 'A step toward the breakthrough as a whole'}
+                          </span>
                         </div>
                         <blockquote>
                           <p>“{row.quote}”</p>
@@ -179,9 +186,9 @@ function Moved() {
         })}
         {atlas && (
           <li className="moved-note">
-            That is every judgement so far: {atlas.recent.length} milestone readings across{' '}
-            {groups.length} breakthroughs. The rest of the sky is dark, which is the honest
-            starting picture.
+            That is every judgement so far: {atlas.recent.length} readings across {groups.length}{' '}
+            breakthroughs. The rest of the sky is dark because the atlas has not yet assessed it,
+            not because nothing has happened.
           </li>
         )}
       </motion.ol>
@@ -208,7 +215,7 @@ function DemoRing() {
   const labels = [
     ['Met', 28, -30, 'start'],
     ['In progress', 28, 34, 'start'],
-    ['No evidence yet', -28, 34, 'end'],
+    ['Not yet assessed', -30, 46, 'middle'],
   ];
   return (
     <svg viewBox="-80 -60 160 120" className="demo" aria-hidden="true">
@@ -225,32 +232,31 @@ function DemoRing() {
   );
 }
 
-// Two stars and the claim line between them: brighter at the end that must come first, with
-// an arrowhead towards what it unlocks, as in the chart.
-function DemoOrder() {
-  const first = { status: ['in_progress', 'none', 'none', 'none'], glow: 0.125 };
-  const later = { status: ['none', 'none', 'none'], glow: 0 };
+// A star and two papers: one added as a step toward a milestone (its ring segment), one as a
+// step toward the breakthrough as a whole (its point of light).
+function Paper({ x, y }) {
+  return (
+    <g transform={`translate(${x} ${y})`}>
+      <path d="M-5 -6.5H2.5L5 -4V6.5H-5Z" className="demo-paper" />
+      <path d="M-2.6 -2H2.6M-2.6 0.8H2.6M-2.6 3.6H0.8" className="demo-leader" />
+    </g>
+  );
+}
+
+function DemoPapers() {
+  const item = { status: ['in_progress', 'none', 'none', 'none'], glow: 0.125 };
   return (
     <svg viewBox="-80 -60 160 120" className="demo" aria-hidden="true">
-      <defs>
-        <linearGradient id="demo-claim" x1="-40" y1="28" x2="38" y2="-22" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#7FB2FF" stopOpacity="0.95" />
-          <stop offset="1" stopColor="#7FB2FF" stopOpacity="0.35" />
-        </linearGradient>
-      </defs>
-      <path d="M-34 24Q-6 -18 26 -18" className="demo-link" stroke="url(#demo-claim)" />
-      <path d="M20 -22.5L27 -18L20 -13.5" className="demo-link" stroke="#7FB2FF" strokeOpacity="0.5" />
-      <g transform="translate(-42 30)">
-        <StarMark item={first} r={9} core={2.5} />
-      </g>
-      <g transform="translate(40 -18)">
-        <StarMark item={later} r={8} core={2.1} />
-      </g>
-      <text x="-42" y="54" textAnchor="middle" className="demo-text small">
-        Needed first
+      <StarMark item={item} r={24} core={4.5} />
+      <line x1="44" y1="-32" x2="19" y2="-17" className="demo-leader" />
+      <Paper x={50} y={-36} />
+      <text x="50" y="-48" textAnchor="middle" className="demo-text small">
+        To a milestone
       </text>
-      <text x="40" y="-38" textAnchor="middle" className="demo-text small">
-        Unlocked
+      <line x1="-44" y1="26" x2="-7" y2="4" className="demo-leader" />
+      <Paper x={-50} y={30} />
+      <text x="-50" y="48" textAnchor="middle" className="demo-text small">
+        To the whole
       </text>
     </svg>
   );
@@ -261,18 +267,18 @@ function HowToRead() {
   const steps = [
     [
       <DemoStar key="d" />,
-      'A star is one breakthrough',
-      'Each star is a capability we expect on the way to the takeoff, with a permanent ID. The more milestones it has, the larger it is drawn.',
+      'A star is a breakthrough to work towards',
+      'Each star is one capability worth working towards, with a permanent ID. The more milestones it has, the larger it is drawn.',
     ],
     [
       <DemoRing key="d" />,
-      'Its ring is the test',
-      'One segment per milestone: the conditions under which we will say it has happened. A segment turns amber when a source advances it and white-gold when it is met. The star warms with them.',
+      'Its ring is its milestones',
+      'One segment per milestone along the way. A segment turns amber when a paper advances it and white-gold when it is met. Until a paper is judged against it, it reads as not yet assessed.',
     ],
     [
-      <DemoOrder key="d" />,
-      'Its lines are the order',
-      'A curved line is a claim that one breakthrough needs another first. It is brightest at the end that must come first, and points to what it unlocks. If the later one arrives first, the claim is proven wrong.',
+      <DemoPapers key="d" />,
+      'Papers are steps along the way',
+      'A paper that moves a breakthrough forward is added with an exact quote, as a step toward one milestone or toward the breakthrough as a whole. Either kind warms the star.',
     ],
   ];
   return (
@@ -296,9 +302,9 @@ function StartWith() {
   const { atlas } = useAtlas();
   const still = useReducedMotion();
   if (!atlas) return null;
-  // Fields with movement and order claims first: they have the most to show today.
+  // Fields with movement first: they have the most to show today.
   const picks = [...atlas.fields]
-    .sort((a, b) => b.moving * 3 + b.links - (a.moving * 3 + a.links) || a.id.localeCompare(b.id))
+    .sort((a, b) => b.moving - a.moving || b.items.length - a.items.length || a.id.localeCompare(b.id))
     .slice(0, 4);
   return (
     <section className="section start" aria-labelledby="start-title">
@@ -318,7 +324,7 @@ function StartWith() {
               <p className="tile-region">{f.region}</p>
               <h3>{f.name}</h3>
               <p className="mono muted">
-                {f.items.length} breakthroughs · {f.moving} moving · {f.links} order links
+                {f.items.length} breakthroughs · {f.moving} moving
               </p>
               <div className="tile-stars" aria-hidden="true">
                 {f.items.map((i) => (
@@ -336,57 +342,11 @@ function StartWith() {
   );
 }
 
-function Claims() {
-  const { atlas } = useAtlas();
-  const still = useReducedMotion();
-  if (!atlas) return null;
-  return (
-    <section className="section claims-brief" aria-labelledby="claims-title">
-      <SectionHead index={4} label="The claims" title={<span id="claims-title">What exactly is predicted</span>}>
-        Two kinds of claim, both falsifiable. There are no dates.
-      </SectionHead>
-      <motion.div className="claim-kinds" {...reveal(still)}>
-        <div>
-          <p className="claim-count mono">{number(atlas.totals.breakthroughs)}</p>
-          <h3>Recognition</h3>
-          <p>“This breakthrough counts as achieved when these milestones are met.” One per star.</p>
-        </div>
-        <div>
-          <p className="claim-count mono">{atlas.totals.links}</p>
-          <h3>Order</h3>
-          <p>“B needs A first.” Proven wrong if B arrives before A. One per line in the chart.</p>
-        </div>
-      </motion.div>
-      <ul className="claim-list">
-        {atlas.links.slice(0, 4).map((l) => {
-          const a = atlas.items[l.from];
-          const b = atlas.items[l.to];
-          return (
-            <li key={l.from + l.to}>
-              <p>
-                <Link to={'/b/' + b.id}>{b.title}</Link> <span className="mono muted">{b.id}</span>{' '}
-                <em>needs</em> <Link to={'/b/' + a.id}>{a.title}</Link>{' '}
-                <span className="mono muted">{a.id}</span> <em>first.</em>
-              </p>
-              <ClaimStatus state={claimState(a, b)} />
-            </li>
-          );
-        })}
-      </ul>
-      <p className="more">
-        <Link to="/claims" className="text-link">
-          All {atlas.totals.links} order claims, with their reasons <Arrow />
-        </Link>
-      </p>
-    </section>
-  );
-}
-
 function Method() {
   const still = useReducedMotion();
   return (
     <section className="section method-brief" aria-labelledby="method-title">
-      <SectionHead index={5} label="Method" title={<span id="method-title">How it is made</span>} />
+      <SectionHead index={4} label="Method" title={<span id="method-title">How it is made</span>} />
       <motion.div className="method-cols" {...reveal(still)}>
         <p>
           Language models researched every field and cited their sources; a second model then
@@ -410,7 +370,7 @@ function Method() {
 export default function Home() {
   const { error } = useAtlas();
   useEffect(() => {
-    document.title = 'Technology Atlas · The wonders of the AI takeoff, named in advance';
+    document.title = 'Technology Atlas · The breakthroughs worth working towards';
   }, []);
   return (
     <div className="home">
@@ -422,7 +382,6 @@ export default function Home() {
           <Moved />
           <HowToRead />
           <StartWith />
-          <Claims />
           <Method />
         </>
       )}

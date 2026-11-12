@@ -5,13 +5,12 @@ import { number, plural, useTitle } from './common.jsx';
 
 // Every statement here is checked against the repository: the pipeline in ingestion/README.md,
 // the terms in docs/plans/technology-graph-plan.md, the quote check in ingestion/pipeline.py
-// (passage_matches) and atlas/add.py, the link call in atlas/prerequisites.py, the label call
-// in atlas/labels.py, and the withheld lists in atlas/core/CLM/field.json and VIR/field.json.
+// (passage_matches) and atlas/add.py, the label call in atlas/labels.py, and the withheld lists in atlas/core/CLM/field.json and VIR/field.json.
 
 const STAGES = [
   [
     'Research',
-    'A model with web search lists the breakthroughs it expects in the field, without seeing any earlier list, and cites its sources.',
+    'A model with web search lists the field’s candidate breakthroughs, without seeing any earlier list, and cites its sources.',
   ],
   [
     'Reconcile',
@@ -43,8 +42,9 @@ const WORDS = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eig
 const words = (n) => WORDS[n] || String(n);
 
 const SECTIONS = [
+  ['map', 'A map, not a forecast'],
   ['research', 'How a breakthrough is researched'],
-  ['terms', 'What a milestone and a link mean'],
+  ['terms', 'What a milestone and a step mean'],
   ['sources', 'How sources are saved and quotes checked'],
   ['limits', 'What this is not, yet'],
   ['challenge', 'How to challenge an entry'],
@@ -73,6 +73,25 @@ export default function About() {
 
       <div className="about-body">
         <div className="about-main">
+          <section id="map" className="prose-section" aria-labelledby="map-title">
+            <h2 id="map-title">A map, not a forecast</h2>
+            <div className="prose">
+              <p>
+                The atlas is a map of breakthroughs worth working towards, now that superintelligence
+                can help. It is not a forecast. It says nothing about when any breakthrough will
+                arrive, or in what order.
+              </p>
+              <p>
+                The breakthroughs and their milestones were proposed by AI research models, working
+                from the literature they cite. No outside body has adopted them.
+              </p>
+              <p>
+                A cited paper supports part of the case: a result, a measurement, a gap. It does not
+                endorse the way the atlas defines the breakthrough or its milestones.
+              </p>
+            </div>
+          </section>
+
           <section id="research" className="prose-section" aria-labelledby="research-title">
             <h2 id="research-title">How a breakthrough is researched</h2>
             <div className="prose">
@@ -105,22 +124,17 @@ export default function About() {
                 breakthroughs against their saved sources and rewrote every final record, and later
                 wrote the short label for each milestone from its full criterion.
               </p>
-              <p>
-                The order claims came from one further model call per field, made by Codex Terra.
-                The call saw the field’s breakthroughs in full and a one-line catalogue of every
-                other breakthrough, and proposed what each one needs first, with a reason.{' '}
-                {t ? `It proposed ${t.links} links in all.` : ''} For many fields it proposed none.
-              </p>
             </div>
           </section>
 
           <section id="terms" className="prose-section" aria-labelledby="terms-title">
-            <h2 id="terms-title">What a milestone and a link mean</h2>
+            <h2 id="terms-title">What a milestone and a step mean</h2>
             <dl className="terms">
               <div>
                 <dt>Breakthrough</dt>
                 <dd>
-                  One proposed future capability, with a permanent ID such as <code>QUA-01</code>.
+                  One capability worth working towards, with a permanent ID such as{' '}
+                  <code>QUA-01</code>.
                   {t && ` There are ${number(t.breakthroughs)}.`}
                 </dd>
               </div>
@@ -128,23 +142,15 @@ export default function About() {
                 <dt>Milestone</dt>
                 <dd>
                   One of a breakthrough’s completion criteria, with a permanent ID such as{' '}
-                  <code>QUA-01.m1</code>, a short label and the full criterion text. A breakthrough
-                  counts as achieved when all of its milestones are met.
-                </dd>
-              </div>
-              <div>
-                <dt>Link</dt>
-                <dd>
-                  “X needs Y first” means Y is expected to come first on the way to X: X builds on
-                  Y, uses it as a component, assumes its result, or Y is the expected route. Pairs
-                  that are merely helpful, on the same topic or the same capability are not links. A
-                  link is falsified if X arrives before Y.
+                  <code>QUA-01.m1</code>, a short label and the full criterion text. Milestones are
+                  tests of progress along the way; a breakthrough is reached when all of them are
+                  met.
                 </dd>
               </div>
               <div>
                 <dt>Progress</dt>
                 <dd>
-                  One source judged against one milestone: it <em>advances</em>, <em>meets</em> or{' '}
+                  One paper judged against one milestone: it <em>advances</em>, <em>meets</em> or{' '}
                   <em>contradicts</em> it, with an exact quote.
                   {t &&
                     ` So far ${plural(t.moving + t.met, 'milestone')} ${
@@ -152,12 +158,21 @@ export default function About() {
                     } moved.`}
                 </dd>
               </div>
+              <div>
+                <dt>Step toward the whole</dt>
+                <dd>
+                  A paper judged to move a breakthrough forward as a whole, without advancing or
+                  meeting any one milestone. It is quoted in the same way, and it warms the star.
+                </dd>
+              </div>
+              <div>
+                <dt>Not yet assessed</dt>
+                <dd>
+                  A milestone that no paper has been judged against. It describes the atlas, not the
+                  science: almost every milestone is still in this state.
+                </dd>
+              </div>
             </dl>
-            <div className="prose">
-              <p>
-                There are no dates. The atlas predicts what will happen and in what order, not when.
-              </p>
-            </div>
           </section>
 
           <section id="sources" className="prose-section" aria-labelledby="sources-title">
@@ -182,10 +197,10 @@ export default function About() {
             <h2 id="limits-title">What this is not, yet</h2>
             <div className="prose">
               <p>
-                <strong>These are proposals.</strong> Every breakthrough, milestone and link was
-                written by a model and checked by another model. No person has reviewed them. Some
-                breakthroughs may duplicate others in neighbouring fields, and some milestones and
-                links may be wrong.
+                <strong>These are proposals.</strong> Every breakthrough and milestone was written
+                by a model and checked by another model. No person has reviewed them. Some
+                breakthroughs may duplicate others in neighbouring fields, and some milestones may
+                be wrong.
               </p>
               <p>
                 <strong>Nothing has been edited.</strong> Until this first version is published, the
@@ -229,8 +244,8 @@ export default function About() {
             <div className="prose">
               <p>
                 Every entry can be wrong in a way that can be shown: a milestone that is already
-                met, a quote that does not say what it is said to say, a link that runs the wrong
-                way, or a breakthrough that is not one. To challenge one,{' '}
+                met, a quote that does not say what it is said to say, a paper judged against the
+                wrong milestone, or a breakthrough that is not one. To challenge one,{' '}
                 {REPOSITORY_PUBLIC ? (
                   <a href={ISSUES_URL} target="_blank" rel="noopener noreferrer">
                     open an issue on the repository
@@ -246,10 +261,7 @@ export default function About() {
                 </p>
               )}
             </div>
-            <p className="claims-ways">
-              <Link to="/claims" className="text-link">
-                Read every claim
-              </Link>
+            <p className="page-ways">
               <Link to="/atlas" className="text-link">
                 Go to the atlas
               </Link>

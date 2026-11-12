@@ -27,9 +27,9 @@ cd atlas/web && npm install && npm run build
 
 The build goes to `atlas/static/site/` (ignored by Git) and is served by `atlas.server` at `/`; any path without a file extension outside `/api/` falls back to `index.html` so client routes load directly. For live editing, run `npm run dev` with the server on port 8765; Vite proxies `/api`.
 
-- `/` Home, `/atlas` the star chart (`?field=QUA` focuses a constellation, `&star=QUA-01` selects a star), `/b/QUA-01` a breakthrough. `/field/…`, `/claims` and `/about` are placeholders for now.
-- Star positions are computed in the browser from field and breakthrough IDs and prerequisite depth (`src/sky.js`), so the sky is the same on every load.
-- The site reads only the data contract (`atlas/store.py`: `catalog`, `field_data`, `breakthrough_data`, `search_index`), served under `/data/` and written to disk by the export: `data/catalog.json` (fields with `region` and milestone counts; breakthroughs with `milestones` as a status list, `prerequisites`, `moved_at`; `recent`; under 300 KB), `data/field/<ID>.json`, `data/b/<ID>.json` (sources as links to originals only) and `data/search.json` (loaded on first search focus). Regions are a constant (`REGIONS`) in `atlas/store.py`.
+- `/` Home, `/atlas` the star chart (`?field=QUA` focuses a constellation, `&star=QUA-01` selects a star), `/b/QUA-01` a breakthrough, `/field/…` a field, `/about` the method. There is no `/claims` page.
+- Star positions are computed in the browser (`src/sky.js`), so the sky is the same on every load.
+- The site reads only the data contract (`atlas/store.py`: `catalog`, `field_data`, `breakthrough_data`, `search_index`), served under `/data/` and written to disk by the export: `data/catalog.json` (fields with `region` and milestone counts; breakthroughs with `milestones` as a status list, `overall`, `moved_at`; `recent`; under 300 KB), `data/field/<ID>.json` (`boundaries` is empty when it is only the research prompt's instruction), `data/b/<ID>.json` (sources as links to originals only; evidence rows with `milestone`, null for a step toward the whole breakthrough) and `data/search.json` (loaded on first search focus). Regions are a constant (`REGIONS`) in `atlas/store.py`. The `needs` links stay in the records but are not in any data file. See the [data reference](../docs/data-reference.md) for every key.
 - `atlas/web/public/deep-field*.webp` is the Home background plate, generated with GPT Image through the Codex CLI.
 
 ## Included
@@ -42,7 +42,7 @@ The build goes to `atlas/static/site/` (ignored by Git) and is served by `atlas.
 - Review and research provenance downloads, with import history and record revisions in Git.
 - A SQLite view rebuilt atomically from `atlas/core/`, with stable IDs; Git holds the history of every record.
 
-The graph is a map of explicit discussion references, **not a dependency graph**. No cross-field semantic matching pass has been performed. Connections do not establish causality, prerequisites, or achievement. Reviewed concepts are proposals, not completed breakthroughs or forecasts.
+The atlas is a map of breakthroughs to work towards, **not a dependency graph**. It makes no order claims. Reviewed concepts are proposals, not completed breakthroughs or forecasts.
 
 ## Static export
 
@@ -52,7 +52,7 @@ python3 -m atlas.share atlas/data/share-out          # needs atlas.server runnin
 python3 -m atlas.export OUT --share atlas/data/share-out [--base-url https://example.org]
 ```
 
-Writes the built site, every data file, and one `index.html` per route (`/`, `/atlas`, `/claims`, `/about`, `/field/<ID>/`, `/b/<ID>/`, plus `404.html`), each with its own title, description and Open Graph tags (`og:image` is `share/<ID>.png` for breakthroughs, `share/field-<ID>.png` for fields, `share/default.png` otherwise; absolute when `--base-url` is given). `--share DIR` copies `DIR/share/*.png` into `OUT/share/`; the export prints how many pages have no image. Serve OUT from a site root. Saved source copies and provenance documents are not exported. OUT must be empty or an earlier export.
+Writes the built site, every data file, and one `index.html` per route (`/`, `/atlas`, `/about`, `/field/<ID>/`, `/b/<ID>/`, plus `404.html`), each with its own title, description and Open Graph tags (`og:image` is `share/<ID>.png` for breakthroughs, `share/field-<ID>.png` for fields, `share/default.png` otherwise; absolute when `--base-url` is given). `--share DIR` copies `DIR/share/*.png` into `OUT/share/`; the export prints how many pages have no image. Serve OUT from a site root. Saved source copies and provenance documents are not exported. OUT must be empty or an earlier export.
 
 ### Share images
 
@@ -68,8 +68,8 @@ python3 -m atlas.add <url> --no-commit            # write and rebuild, leave cha
 
 1. Saves the source into `atlas/data/added/sources/<sha256>.<ext>` (page plus any declared PDF, using the ingestion capture code). A URL already saved by the research reuses that copy. A Wayback save is requested; the archive copy is at `https://web.archive.org/web/<url>`.
 2. Ranks every milestone against the source's opening text by IDF-weighted word overlap, in memory, and keeps the top 20 (plus all of `--breakthrough`'s milestones).
-3. Makes one model call (the ingestion `format` model, strict JSON schema) that returns a row per milestone the source bears on: verdict `advances`/`meets`/`contradicts` and an exact quote. Prompt, schema, logs and response are kept in `atlas/data/added/calls/`.
-4. Writes the URL and saved-copy hash to `atlas/core/sources.jsonl`, merging copies by hash and keeping existing source metadata. Writes rows whose milestone was a candidate and whose quote is found in the saved copy to `atlas/core/progress.jsonl`, using stable milestone IDs; prints the rest as rejected. Re-adding a URL replaces all its earlier judgement lines, including when the new result is empty.
+3. Makes one model call (the ingestion `format` model, strict JSON schema) that returns a row per milestone the source bears on: verdict `advances`/`meets`/`contradicts` and an exact quote. Criterion 0 means a step toward a candidate breakthrough as a whole that bears on no single milestone; the prompt asks for a specific milestone whenever one fits, and forbids `meets` with 0. Prompt, schema, logs and response are kept in `atlas/data/added/calls/`.
+4. Writes the URL and saved-copy hash to `atlas/core/sources.jsonl`, merging copies by hash and keeping existing source metadata. Writes rows whose milestone (or, for criterion 0, breakthrough) was a candidate and whose quote is found in the saved copy to `atlas/core/progress.jsonl`, using stable milestone IDs, or `milestone: null` for criterion 0; rejects `meets` with criterion 0; prints the rest as rejected. Output says "whole breakthrough" for criterion-0 rows. Re-adding a URL replaces all its earlier judgement lines, including when the new result is empty.
 5. Rebuilds the database from core, including saved-copy assets, then commits `atlas/core/` with the URL, model and call-record folder in the message. `--no-commit` skips Git while still writing core and rebuilding.
 
 ## Prerequisite order
@@ -79,6 +79,8 @@ python3 -m atlas.prerequisites SWE CSC
 python3 -m atlas.prerequisites --all
 python3 -m atlas.prerequisites SWE --no-commit
 ```
+
+These links are kept in the records and checked by `python3 -m atlas.core check`, but they are not published in the site data.
 
 Each field gets one model call using its database records and a catalog of every active breakthrough. Checked links are written through the core writer to the dependent breakthrough's JSON file as `prerequisites: [{id, reason, model, field}]`. Unknown IDs, self-links, duplicates, links outside the requested field and loops are rejected. Re-running a field replaces links produced by that field's earlier call, preserving links from other fields. Source lists in these files remain URL lists.
 
@@ -108,11 +110,11 @@ tests can supply a stub `call(prompt)` returning the parsed answer.
 
 `atlas/data/atlas.sqlite3` is generated locally and ignored by Git. Tables:
 
-- `fields(id, name, color)` holds navigation groups (one per field), with the colour fixed at import. `imported_from` remains in core field files and is unused by the database.
+- `fields(id, name, color, boundaries, withheld)` holds navigation groups (one per field), with the colour fixed at import. `imported_from` remains in core field files and is unused by the database.
 - `breakthroughs`: the core records of active breakthroughs (retired ones are left out), with each source URL expanded back to `{url, title, status, artifacts}` from `sources.jsonl`.
 - `assets`: saved source copies found on this computer, and their hashes.
 - `documents`: research, structured-record, and review provenance files inside the repository.
-- `progress`: one row per source per milestone it bears on (breakthrough, criterion number, URL, saved-copy hash, source date, verdict `advances`/`meets`/`contradicts`, quote, model, date added). Each `current_state` paragraph's cited sources are derived with criterion and verdict left empty (`research:` IDs); each line of `atlas/core/progress.jsonl` becomes an `added:` row. Milestone status is computed from rows: `meets` → met, `advances` → in progress.
+- `progress`: one row per source per milestone it bears on (breakthrough, criterion number, URL, saved-copy hash, source date, verdict `advances`/`meets`/`contradicts`, quote, model, date added). Each `current_state` paragraph's cited sources are derived with criterion and verdict left empty (`research:` IDs); each line of `atlas/core/progress.jsonl` becomes an `added:` row. A line with `milestone: null` is a step toward the whole breakthrough: criterion empty, verdict set, ID ending in `:0`. Milestone status is computed from milestone rows: `meets` → met, `advances` → in progress.
 
 The database is a disposable view. Progress judgements and prerequisite links are saved in `atlas/core/` and survive deleting and rebuilding the database.
 
@@ -136,4 +138,4 @@ python3 -m atlas.core check
 (cd atlas/web && npm run build)
 ```
 
-`test_core.py` covers importing into and checking `atlas/core/`; `test_atlas.py` covers the rebuild (identical tables after deleting and rebuilding, a check problem or changed copy leaving the old database in place, missing copies skipped), relationship extraction, download allowlisting/integrity, progress, and the add and prerequisite passes.
+`test_core.py` covers importing into and checking `atlas/core/`; `test_atlas.py` covers the rebuild (identical tables after deleting and rebuilding, a check problem or changed copy leaving the old database in place, missing copies skipped), relationship extraction, download allowlisting/integrity, progress (including whole-breakthrough steps), and the add and prerequisite passes; `test_site.py` covers the site data files (no order links, no claims file), the server and the export.

@@ -1,3 +1,4 @@
+import { STATUS } from './data.jsx';
 import { arc, emblem } from './sky.js';
 
 const mix = (a, b, t) => {
@@ -66,8 +67,6 @@ export function Halo() {
   );
 }
 
-const LABEL = { none: 'no evidence yet', in_progress: 'in progress', met: 'met' };
-
 export function StarGlyph({ item, size = 40, title = true }) {
   const r = 6 + item.status.length * 0.5;
   const box = r + 3;
@@ -107,7 +106,7 @@ export function StatusLabel({ status }) {
   return (
     <span className={'status-label ' + status}>
       <StatusMark status={status} />
-      {LABEL[status][0].toUpperCase() + LABEL[status].slice(1)}
+      {STATUS[status]}
     </span>
   );
 }

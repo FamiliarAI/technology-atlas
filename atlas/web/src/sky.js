@@ -1,6 +1,5 @@
 // The sky's geometry: a flat, wide chart. Everything here is a pure function of the field and
-// breakthrough IDs, the field names and regions, and the prerequisite links, so the same data
-// always gives the same sky.
+// breakthrough IDs, the field names and regions, so the same data always gives the same sky.
 //
 // World units are screen pixels at the design scale (k = 1): the widest view of the atlas on a
 // 1440-wide screen is close to k = 1.1, so a constellation name set at 9.5 units reads at about
@@ -55,20 +54,6 @@ export function random(seed) {
     t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
-}
-
-export function depths(items) {
-  const memo = {};
-  const visit = (id, trail) => {
-    if (memo[id] !== undefined) return memo[id];
-    if (trail.has(id)) return 0; // a loop is rejected upstream; never recurse forever
-    trail.add(id);
-    const prereqs = (items[id]?.prerequisites || []).filter((p) => items[p]);
-    memo[id] = prereqs.length ? 1 + Math.max(...prereqs.map((p) => visit(p, trail))) : 0;
-    return memo[id];
-  };
-  for (const id of Object.keys(items)) visit(id, new Set());
-  return memo;
 }
 
 // Radius of a star's milestone ring: more milestones, a larger star.
@@ -137,7 +122,7 @@ function crosses(p1, p2, p3, p4) {
 // One field's figure: n well-spaced points along a seeded skeleton of two to four strokes,
 // sometimes branched, joined by a minimum spanning tree with at most a loop or two added and
 // long spurs cut. Returns points in a local frame centred on the figure, each with its
-// position along the skeleton so the stars can be laid out in prerequisite order.
+// position along the skeleton so the stars can be laid out in ID order.
 export function figure(fieldId, n) {
   const rand = random(hash('figure:' + fieldId));
   // Figures differ in scale as well as shape: some are tight clusters, some loose.
@@ -371,14 +356,13 @@ export function layout(fields, items) {
       .sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
   }
   const order = grid.flat().flatMap((r) => byRegion[r]);
-  const depth = depths(items);
   const members = {};
   for (const item of Object.values(items)) (members[item.field] ||= []).push(item);
 
   // Each constellation's figure and the cell it needs, label included.
   const cells = {};
   for (const id of order) {
-    const mine = (members[id] || []).sort((a, b) => depth[a.id] - depth[b.id] || a.id.localeCompare(b.id));
+    const mine = (members[id] || []).sort((a, b) => a.id.localeCompare(b.id));
     const lines = wrapName(known.get(id).name);
     const fig = settle(figure(id, mine.length), labelWidth(lines));
     const reach = starRadius(6);
@@ -600,7 +584,7 @@ export function layout(fields, items) {
     }
   }
 
-  // Stars: the field's breakthroughs in prerequisite order, along its figure from the start.
+  // Stars: the field's breakthroughs in ID order, along its figure from the start.
   const cx = world.w / 2;
   const cy = world.h / 2;
   const placed = {};
@@ -621,7 +605,6 @@ export function layout(fields, items) {
         y,
         angle: Math.atan2(y - cy, x - cx),
         radius: Math.hypot(x - cx, y - cy),
-        depth: depth[item.id],
       };
     });
     f.edges = cell.fig.edges.map(([a, b]) => [slot[a], slot[b]]);
@@ -629,8 +612,7 @@ export function layout(fields, items) {
     // Kept for older callers: a field's "sector" is now its bearing from the chart's centre.
     sectors[id] = { index, mid: bearing, start: bearing, end: bearing };
   });
-  const maxDepth = Math.max(0, ...Object.values(depth));
-  return { order, sectors, placed, maxDepth, world, regions, figures, outer: Math.max(world.w, world.h) / 2 };
+  return { order, sectors, placed, world, regions, figures, outer: Math.max(world.w, world.h) / 2 };
 }
 
 // A star's chart coordinate: two short numbers, across then down, in chart units (0 to 64
@@ -651,7 +633,7 @@ export function emblem(field, sky, items) {
   const f = sky.figures?.[field.id];
   const pts = items.map((i) => {
     const p = sky.placed[i.id];
-    return { x: p.x, y: p.y, lit: i.met + i.moving > 0 };
+    return { x: p.x, y: p.y, lit: i.met + i.moving + (i.overall || 0) > 0 };
   });
   if (!pts.length || !f) return { dots: [], lines: [], bearing: sector?.mid || 0 };
   const xs = pts.map((p) => p.x);
@@ -674,43 +656,6 @@ export function arc(cx, cy, r, a0, a1) {
   const y1 = cy + Math.sin(a1) * r;
   const large = a1 - a0 > Math.PI ? 1 : 0;
   return `M${x0.toFixed(2)} ${y0.toFixed(2)}A${r} ${r} 0 ${large} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`;
-}
-
-// A claim line: a gentle curve from what must come first to what it unlocks, with the point
-// and direction where an arrowhead sits just short of the target star.
-export function claimPath(a, b, stop = 0, arc = 0) {
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  const len = Math.hypot(dx, dy) || 1;
-  // Short claims bow a little; long ones (`arc`) bow as arcs, so many read as a sweep.
-  const bow = arc || Math.min(0.2, 14 / len + 0.08);
-  const qx = (a.x + b.x) / 2 - dy * bow;
-  const qy = (a.y + b.y) / 2 + dx * bow;
-  const t = Math.max(0.5, 1 - stop / len);
-  const u = 1 - t;
-  const tip = {
-    x: u * u * a.x + 2 * u * t * qx + t * t * b.x,
-    y: u * u * a.y + 2 * u * t * qy + t * t * b.y,
-  };
-  const tx = 2 * u * (qx - a.x) + 2 * t * (b.x - qx);
-  const ty = 2 * u * (qy - a.y) + 2 * t * (b.y - qy);
-  // The curve is cut at the arrowhead (de Casteljau), so the line ends where the arrow does.
-  const cqx = a.x + (qx - a.x) * t;
-  const cqy = a.y + (qy - a.y) * t;
-  // A polyline along the drawn curve, for keeping labels clear of it.
-  const points = [];
-  for (let n = 0; n <= 10; n++) {
-    const v = (n / 10) * t;
-    const w = 1 - v;
-    points.push({ x: w * w * a.x + 2 * w * v * qx + v * v * b.x, y: w * w * a.y + 2 * w * v * qy + v * v * b.y });
-  }
-  return {
-    d: `M${a.x.toFixed(2)} ${a.y.toFixed(2)}Q${cqx.toFixed(2)} ${cqy.toFixed(2)} ${tip.x.toFixed(2)} ${tip.y.toFixed(2)}`,
-    end: b,
-    points,
-    tip,
-    angle: (Math.atan2(ty, tx) * 180) / Math.PI,
-  };
 }
 
 export { TAU };

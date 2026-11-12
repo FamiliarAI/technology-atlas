@@ -51,6 +51,7 @@ def initialize(db):
             'NULL, hash TEXT NOT NULL);\n'
             '    -- One row per source per milestone it bears on. criterion and verdict '
             'stay NULL until judged.\n'
+            '    -- A judged row with criterion NULL bears on the breakthrough as a whole.\n'
             '    CREATE TABLE IF NOT EXISTS progress (id TEXT PRIMARY KEY, breakthrough '
             'TEXT NOT NULL, criterion INTEGER, url TEXT NOT NULL, asset TEXT, source_date '
             "TEXT, verdict TEXT CHECK (verdict IN ('advances','meets','contradicts')), "
@@ -201,11 +202,15 @@ def rebuild(core=CORE, path=DB, roots=SOURCES):
             for row in data['progress']:
                 if row['breakthrough'] not in criteria:
                     continue  # retired
-                criterion_number = criteria[row['breakthrough']][row['milestone']]
+                # A row with no milestone bears on the breakthrough as a whole: criterion NULL,
+                # and 0 in its ID.
+                criterion_number = None
+                if row['milestone'] is not None:
+                    criterion_number = criteria[row['breakthrough']][row['milestone']]
                 db.execute(
                     'INSERT OR REPLACE INTO progress VALUES (?,?,?,?,?,?,?,?,?,?)',
                     (
-                        f'added:{row.get("copy")}:{row["breakthrough"]}:{criterion_number}',
+                        f'added:{row.get("copy")}:{row["breakthrough"]}:{criterion_number or 0}',
                         row['breakthrough'],
                         criterion_number,
                         row['url'],
@@ -231,12 +236,14 @@ def rebuild(core=CORE, path=DB, roots=SOURCES):
 
 
 def progress(db, identifier, criteria):
+    """A breakthrough's rows: milestone rows in milestone order, then whole-breakthrough
+    judgements, then research citations. Also the status of each of its criteria milestones."""
     rows = [
         dict(row)
         for row in db.execute(
             (
                 'SELECT * FROM progress WHERE breakthrough=? ORDER BY criterion IS NULL, '
-                'criterion, added_at, id'
+                'criterion, verdict IS NULL, added_at, id'
             ),
             (identifier,),
         )
@@ -244,20 +251,23 @@ def progress(db, identifier, criteria):
     status = []
     for criterion_number in range(1, criteria + 1):
         verdicts = {row['verdict'] for row in rows if row['criterion'] == criterion_number}
-        status.append(
-            'met' if 'meets' in verdicts else 'in_progress' if 'advances' in verdicts else 'none'
-        )
+        status.append(status_of(verdicts))
     return rows, status
 
 
+def overall(rows):
+    """Steps toward the breakthrough as a whole: `advances` rows with no milestone."""
+    return sum(1 for row in rows if row['criterion'] is None and row['verdict'] == 'advances')
+
+
 def progress_summary(db):
-    """Per breakthrough: milestone status list and progress row count, for the tree."""
+    """Per breakthrough: milestone status list, whole-breakthrough steps and row count."""
     out = {}
     for row in db.execute('SELECT id, payload FROM breakthroughs'):
         rows, status = progress(
             db, row['id'], len(json.loads(row['payload'])['completion_criteria'])
         )
-        out[row['id']] = {'status': status, 'count': len(rows)}
+        out[row['id']] = {'status': status, 'overall': overall(rows), 'count': len(rows)}
     return out
 
 
@@ -310,6 +320,14 @@ REGION = {field: region for region, fields in REGIONS.items() for field in field
 DEFAULT_REGION = 'Engineering and Energy'
 STATUSES = ['none', 'in_progress', 'met']
 SUMMARY_CUT = 160
+# The research prompt's instruction, stored as most fields' `boundaries` after "<Name>". It is
+# not a scope a reader needs, so the field file carries an empty string instead.
+RESEARCH_SCOPE = (
+    ': fundamental discoveries and enabling technologies within this field. Include '
+    'cross-field consequences where the central advance belongs to this field; exclude '
+    'routine incremental optimization. Use the historical breakthroughs in the prompt to '
+    'calibrate revolutionary impact.'
+)
 
 
 def region(field):
@@ -370,16 +388,19 @@ def site_view(db):
             )
         item['field'] = row['field']
         item['milestones'] = milestones
+        item['overall'] = overall(rows)
+        # Any judged row counts as movement, including one about the breakthrough as a whole.
         item['moved_at'] = max((entry['added_at'] for entry in rows), default=None)
         item['progress_count'] = counts.get(row['id'], 0)
-        item['prerequisite_ids'] = [link['id'] for link in item.get('prerequisites', [])]
         items[row['id']] = item
-    unlocks = {identifier: [] for identifier in items}
-    for identifier, item in items.items():
-        for prerequisite in item['prerequisite_ids']:
-            if prerequisite in unlocks:
-                unlocks[prerequisite].append(identifier)
-    return {'fields': fields, 'items': items, 'unlocks': unlocks, 'judged': judged}
+    return {'fields': fields, 'items': items, 'judged': judged}
+
+
+def milestone_id(item, criterion):
+    """The stable milestone ID at a 1-based criterion position, or None for the whole."""
+    if criterion and criterion <= len(item.get('milestones', [])):
+        return item['milestones'][criterion - 1]['id']
+    return None
 
 
 def catalog(db, view=None):
@@ -405,18 +426,19 @@ def catalog(db, view=None):
             'field': item['field'],
             'title': item['title'],
             'milestones': [milestone['status'] for milestone in item['milestones']],
-            'prerequisites': item['prerequisite_ids'],
+            'overall': item['overall'],
             'moved_at': item['moved_at'],
         }
         for identifier, item in sorted(items.items())
     ]
     recent = []
     for row in view['judged'][:12]:
-        milestones = items.get(row['breakthrough'], {}).get('milestones', [])
+        item = items.get(row['breakthrough'], {})
+        milestones = item.get('milestones', [])
         label = None
         if row['criterion'] and row['criterion'] <= len(milestones):
             label = milestones[row['criterion'] - 1]['label']
-        recent.append(row | {'label': label})
+        recent.append(row | {'milestone': milestone_id(item, row['criterion']), 'label': label})
     withheld = [
         {'id': entry['id'], 'title': entry['title'], 'field': prefix}
         for prefix, field in sorted(view['fields'].items())
@@ -432,6 +454,12 @@ def catalog(db, view=None):
     }
 
 
+def scope(boundaries):
+    """A field's reader-facing scope: empty when it is only the research prompt's instruction."""
+    text = boundaries or ''
+    return '' if text.endswith(RESEARCH_SCOPE) else text
+
+
 def field_data(db, prefix, view=None):
     """data/field/<ID>.json: one field's scope and its breakthroughs, or None."""
     view = view or site_view(db)
@@ -444,8 +472,6 @@ def field_data(db, prefix, view=None):
             'title': item['title'],
             'summary': item['concept'][0]['text'] if item['concept'] else '',
             'milestones': item['milestones'],
-            'prerequisites': item['prerequisite_ids'],
-            'unlocks': view['unlocks'][identifier],
             'source_count': len(item.get('sources', [])),
             'progress_count': item['progress_count'],
             'issue_count': len(item.get('unresolved_issues', [])),
@@ -458,7 +484,7 @@ def field_data(db, prefix, view=None):
         'id': prefix,
         'name': field['name'],
         'region': region(prefix),
-        'boundaries': field.get('boundaries'),
+        'boundaries': scope(field.get('boundaries')),
         'as_of': AS_OF,
         'breakthroughs': breakthroughs,
         'withheld': [
@@ -466,27 +492,6 @@ def field_data(db, prefix, view=None):
             for entry in field['withheld']
         ],
     }
-
-
-def link(view, identifier, reason=None):
-    item = view['items'][identifier]
-    out = {
-        'id': identifier,
-        'title': item['title'],
-        'field': item['field'],
-        'field_name': view['fields'][item['field']]['name'],
-    }
-    if reason is not None:
-        out['reason'] = reason
-    return out
-
-
-def reason(view, dependent, prerequisite):
-    """Why dependent needs prerequisite, as written on the dependent's link."""
-    for entry in view['items'][dependent].get('prerequisites', []):
-        if entry['id'] == prerequisite:
-            return entry.get('reason')
-    return None
 
 
 def breakthrough_data(db, identifier, view=None):
@@ -506,11 +511,18 @@ def breakthrough_data(db, identifier, view=None):
         'change_log',
     ]
     rows, _ = progress(db, identifier, len(item['completion_criteria']))
-    # Saved-copy hashes stay out: the site links to originals only.
-    keys = ['criterion', 'url', 'source_date', 'verdict', 'quote', 'model', 'added_at']
-    evidence = [{key: row[key] for key in keys} for row in rows]
+    # Saved-copy hashes stay out: the site links to originals only. milestone is the stable ID,
+    # or None for a judgement about the breakthrough as a whole (and for research citations).
+    keys = ['url', 'source_date', 'verdict', 'quote', 'model', 'added_at']
+    evidence = [
+        {
+            'criterion': row['criterion'],
+            'milestone': milestone_id(item, row['criterion']),
+            **{key: row[key] for key in keys},
+        }
+        for row in rows
+    ]
     field = view['fields'][item['field']]
-    unlocked = view['unlocks'][identifier]
     return {
         'id': identifier,
         'field': item['field'],
@@ -528,30 +540,7 @@ def breakthrough_data(db, identifier, view=None):
             for source in item.get('sources', [])
         ],
         'progress': evidence,
-        'prerequisites': item['prerequisite_ids'],
-        'needs': [
-            link(view, entry['id'], entry.get('reason'))
-            for entry in item.get('prerequisites', [])
-            if entry['id'] in view['items']
-        ],
-        'unlocks': [link(view, other, reason(view, other, identifier)) for other in unlocked],
     }
-
-
-def claims(db, view=None):
-    """data/claims.json: every `needs` link, as {id, needs, reason, model}, id the dependent."""
-    view = view or site_view(db)
-    return [
-        {
-            'id': identifier,
-            'needs': entry['id'],
-            'reason': entry.get('reason'),
-            'model': entry.get('model'),
-        }
-        for identifier, item in sorted(view['items'].items())
-        for entry in item.get('prerequisites', [])
-        if entry['id'] in view['items']
-    ]
 
 
 def search_index(db, view=None):
@@ -573,7 +562,6 @@ def site_files(db):
     view = site_view(db)
     yield 'catalog.json', catalog(db, view)
     yield 'search.json', search_index(db, view)
-    yield 'claims.json', claims(db, view)
     for prefix in view['fields']:
         yield f'field/{prefix}.json', field_data(db, prefix, view)
     for identifier in view['items']:

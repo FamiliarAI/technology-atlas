@@ -1,7 +1,8 @@
 """Add a paper or link as progress: python3 -m atlas.add <url> [--breakthrough ID].
 
 Saves the source, ranks every milestone against its opening text in memory, and makes
-one model call that returns a progress row for each milestone the source bears on.
+one model call that returns a progress row for each milestone the source bears on, or with
+criterion 0 for a step toward a candidate breakthrough as a whole.
 """
 
 import argparse
@@ -48,7 +49,7 @@ SCHEMA = {
                 'required': ['breakthrough', 'criterion', 'verdict', 'quote'],
                 'properties': {
                     'breakthrough': {'type': 'string', 'pattern': r'^[A-Z]{2,8}-\d{2}$'},
-                    'criterion': {'type': 'integer', 'minimum': 1},
+                    'criterion': {'type': 'integer', 'minimum': 0},
                     'verdict': {'type': 'string', 'enum': ['advances', 'meets', 'contradicts']},
                     'quote': {'type': 'string', 'minLength': 20, 'maxLength': 600},
                 },
@@ -70,6 +71,12 @@ PROMPT = (
     'approach fails or is further away than assumed.\n'
     '- quote: a passage copied exactly from the source text (20-600 characters) that shows '
     'the result. Results only; not background, goals or plans.\n'
+    '\n'
+    'criterion is the milestone number shown in the candidate. Use criterion 0 for a concrete '
+    'result that is a step toward one of the listed breakthroughs as a whole but bears on no '
+    'single listed milestone of it. Prefer a specific milestone whenever one fits; use 0 only '
+    'when none does. A row with criterion 0 may have verdict "advances" or "contradicts", '
+    'never "meets".\n'
     '\n'
     'Return no row for a candidate the source only mentions, motivates, or relates to in '
     'topic. Most candidates will have no row. An empty list is a valid answer.\n'
@@ -213,10 +220,14 @@ def add(url, forced=None, call=None, saver=None, path=DB, core=CORE):
             _, call = _call(config)
         result = judge(url, text, candidates, call)
         allowed = {(milestone['breakthrough'], milestone['criterion']) for milestone in candidates}
+        # Criterion 0: a step toward a candidate breakthrough as a whole.
+        allowed |= {(milestone['breakthrough'], 0) for milestone in candidates}
         stored, rejected = [], []
         for row in result['rows']:
             if (row['breakthrough'], row['criterion']) not in allowed:
                 rejected.append((row, 'not a candidate milestone'))
+            elif row['criterion'] == 0 and row['verdict'] == 'meets':
+                rejected.append((row, 'meets needs a milestone'))
             elif not passage_matches(row['quote'], text):
                 rejected.append((row, 'quote not found in saved copy'))
             else:
@@ -234,9 +245,11 @@ def add(url, forced=None, call=None, saver=None, path=DB, core=CORE):
     # Re-adding a source replaces its earlier judgement; milestone IDs stay stable.
     rows = [row for row in data['progress'] if row['url'] != url]
     for row in stored:
-        milestone = data['breakthroughs'][row['breakthrough']]['completion_criteria'][
-            row['criterion'] - 1
-        ]['id']
+        milestone = None  # criterion 0: the breakthrough as a whole
+        if row['criterion']:
+            milestone = data['breakthroughs'][row['breakthrough']]['completion_criteria'][
+                row['criterion'] - 1
+            ]['id']
         rows.append(
             {
                 'breakthrough': row['breakthrough'],
@@ -253,6 +266,13 @@ def add(url, forced=None, call=None, saver=None, path=DB, core=CORE):
     records.write_progress(rows, core)
     store.rebuild(core=core, path=path)
     return stored, rejected
+
+
+def target(row):
+    """What a returned row bears on, for printing."""
+    if row['criterion'] == 0:
+        return 'whole breakthrough'
+    return f'milestone {row["criterion"]}'
 
 
 def main():
@@ -272,9 +292,9 @@ def main():
         else 'Wayback save failed; retry later'
     )
     for row in stored:
-        print(f'stored  {row["breakthrough"]} milestone {row["criterion"]}: {row["verdict"]}')
+        print(f'stored  {row["breakthrough"]} {target(row)}: {row["verdict"]}')
     for row, why in rejected:
-        print(f'rejected {row["breakthrough"]} milestone {row["criterion"]}: {why}')
+        print(f'rejected {row["breakthrough"]} {target(row)}: {why}')
     if not stored:
         print('No progress rows stored.')
     if not args.no_commit:

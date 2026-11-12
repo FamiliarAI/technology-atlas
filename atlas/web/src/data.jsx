@@ -30,34 +30,41 @@ const once = (path) => {
 const DAY = 864e5;
 export const TODAY = new Date();
 
+// The words describe the atlas's own assessment, not the science: almost no milestone has been
+// judged yet, so "none" means nobody has assessed it, not that nothing has happened.
 export const STATUS = {
-  none: 'No evidence yet',
+  none: 'Not yet assessed',
   in_progress: 'In progress',
   met: 'Met',
 };
 
-// One request: the catalog carries every breakthrough's milestone statuses and links.
-// Summaries and milestone labels are in the field and breakthrough files.
+// One request: the catalog carries every breakthrough's milestone statuses. Summaries and
+// milestone labels are in the field and breakthrough files.
 export async function loadAtlas() {
   const catalog = await once('catalog.json');
   const items = {};
   for (const raw of catalog.breakthroughs) {
-    const status = raw.milestones;
+    const status = raw.milestones || [];
     const met = status.filter((s) => s === 'met').length;
     const moving = status.filter((s) => s === 'in_progress').length;
+    // Papers judged to advance the breakthrough as a whole, not one milestone.
+    const overall = Number.isInteger(raw.overall) ? raw.overall : 0;
+    const n = status.length;
+    // 0 = nothing judged; 1 = every milestone met. In progress counts half. A star whose only
+    // progress is a step toward the whole is warm, as warm as one milestone in progress.
+    const glow = n ? (met + moving * 0.5) / n : 0;
     items[raw.id] = {
-      ...raw,
+      id: raw.id,
+      field: raw.field,
+      title: raw.title,
+      moved_at: raw.moved_at || null,
       status,
       met,
       moving,
-      // 0 = nothing judged; 1 = every milestone met. In progress counts half.
-      glow: status.length ? (met + moving * 0.5) / status.length : 0,
+      overall,
+      glow: glow || (overall ? 0.5 / Math.max(n, 4) : 0),
       recent: raw.moved_at ? TODAY - new Date(raw.moved_at) < 30 * DAY : false,
-      unlocks: [],
     };
-  }
-  for (const item of Object.values(items)) {
-    for (const p of item.prerequisites) items[p]?.unlocks.push(item.id);
   }
   const sky = layout(catalog.fields, items);
   for (const [id, point] of Object.entries(sky.placed)) Object.assign(items[id], point);
@@ -65,27 +72,22 @@ export async function loadAtlas() {
     const field = catalog.fields.find((f) => f.id === id);
     const list = Object.values(items)
       .filter((i) => i.field === id)
-      .sort((a, b) => a.depth - b.depth || a.id.localeCompare(b.id));
+      .sort((a, b) => a.id.localeCompare(b.id));
     return {
       ...field,
       sector: sky.sectors[id],
       items: list,
-      moving: list.filter((i) => i.moving || i.met).length,
-      links: list.reduce((n, i) => n + i.prerequisites.length, 0),
+      moving: list.filter(warm).length,
     };
   });
-  const links = Object.values(items).flatMap((i) =>
-    i.prerequisites.filter((p) => items[p]).map((p) => ({ from: p, to: i.id })),
-  );
   const all = Object.values(items);
   return {
     fields,
     field: Object.fromEntries(fields.map((f) => [f.id, f])),
     items,
-    links,
     sky,
     regions: catalog.regions,
-    recent: catalog.recent,
+    recent: catalog.recent || [],
     // Concepts left out because a provider refused to review them: {id, title, field}.
     withheld: catalog.withheld || [],
     asOf: catalog.as_of,
@@ -94,16 +96,27 @@ export async function loadAtlas() {
       milestones: all.reduce((n, i) => n + i.status.length, 0),
       met: all.reduce((n, i) => n + i.met, 0),
       moving: all.reduce((n, i) => n + i.moving, 0),
-      links: links.length,
+      overall: all.reduce((n, i) => n + i.overall, 0),
+      warm: all.filter(warm).length,
     },
   };
+}
+
+// Has anything been judged to move this breakthrough: a milestone, or the whole?
+export const warm = (item) => item.met + item.moving + item.overall > 0;
+
+// Which milestone a judged row is about: a 1-based number, or null for the whole breakthrough.
+// Rows carry `criterion` (a number) or `milestone` (an ID such as "m2", or null).
+export function milestoneOf(row) {
+  if (Number.isInteger(row.criterion)) return row.criterion;
+  if (Number.isInteger(row.milestone)) return row.milestone;
+  const m = /^m(\d+)$/.exec(row.milestone || '');
+  return m ? Number(m[1]) : null;
 }
 
 export const loadField = (id) => once('field/' + encodeURIComponent(id) + '.json');
 export const loadBreakthrough = (id) => once('b/' + encodeURIComponent(id) + '.json');
 export const loadSearch = () => once('search.json');
-// Every `needs` link with its reason: [{id, needs, reason, model}], id the dependent.
-export const loadClaims = () => once('claims.json');
 
 // A field file, or null until it arrives (or if it fails).
 export function useField(id) {

@@ -18,21 +18,16 @@ from .store import DB, connect, cut, encode, site_files
 
 MARKER = '.atlas-export'
 NAME = 'Technology Atlas'
-HOME_TITLE = 'Technology Atlas · The wonders of the AI takeoff, named in advance'
+HOME_TITLE = 'Technology Atlas · A map of the breakthroughs worth working towards'
 HOME_TEXT = (
-    'An attempt to predict the AI takeoff by naming its breakthroughs in advance, each with a '
-    'test for recognising it and an order it should arrive in.'
+    'A map of the breakthroughs worth working towards, and the milestones that tell us how '
+    'close we are.'
 )
 PAGES = {
-    'claims': (
-        'The claims',
-        'Every “needs” link written out as a sentence, grouped by field and marked standing or '
-        'falsified.',
-    ),
     'about': (
         'Method',
-        'How breakthroughs are researched, what a milestone and a link mean, how sources are '
-        'saved and quotes checked, which models did what, and how to challenge an entry.',
+        'How breakthroughs are researched, what a milestone means, how sources are saved and '
+        'quotes checked, which models did what, and how to challenge an entry.',
     ),
 }
 # Tags a route sets for itself; the built index.html's own copies are removed first.
@@ -209,7 +204,6 @@ def main(argv=None):
     print(
         f'{result["pages"]} pages, {result["data"]} data files in {args.out}; '
         f'catalog {sizes["catalog.json"]} B, search {sizes["search.json"]} B, '
-        f'claims {sizes["claims.json"]} B, '
         f'largest field {largest["field/"][1]} {largest["field/"][0]} B, '
         f'largest breakthrough {largest["b/"][1]} {largest["b/"][0]} B'
     )

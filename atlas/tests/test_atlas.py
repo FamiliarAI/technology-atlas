@@ -109,7 +109,15 @@ class AtlasTests(unittest.TestCase):
                 for table in TABLES
             }
 
-    def judged(self, verdict='meets'):
+    def links(self, db):
+        """Order links as rebuilt into the database (they are not in the site data)."""
+        out = {}
+        for row in db.execute('SELECT id, payload FROM breakthroughs'):
+            payload = json.loads(row['payload'])
+            out[row['id']] = [link['id'] for link in payload.get('prerequisites', [])]
+        return out
+
+    def judged(self, verdict='meets', whole=False):
         data = core.load(self.core)
         data['sources']['https://example.org/new'] = {
             'url': 'https://example.org/new',
@@ -131,7 +139,20 @@ class AtlasTests(unittest.TestCase):
                     'by': 'model',
                     'added_at': '2026-12-02',
                 }
-            ],
+            ]
+            + [
+                {
+                    'breakthrough': 'SWE-02',
+                    'milestone': None,
+                    'url': 'https://example.org/new',
+                    'copy': self.hash,
+                    'source_date': None,
+                    'verdict': 'advances',
+                    'quote': 'whole quote',
+                    'by': 'model',
+                    'added_at': '2026-12-03',
+                }
+            ][: int(whole)],
             self.core,
         )
 
@@ -249,13 +270,18 @@ class AtlasTests(unittest.TestCase):
 
     def test_deleting_and_rebuilding_gives_identical_tables(self):
         core.import_field(self.folder, self.core)
-        self.judged()
+        self.judged(whole=True)
         self.load()
         before = self.tables()
         self.db.unlink()
         self.load()
         self.assertEqual(self.tables(), before)
-        self.assertEqual(len(before['progress']), 3)
+        self.assertEqual(len(before['progress']), 4)
+        whole = [row for row in before['progress'] if row[0] == f'added:{self.hash}:SWE-02:0']
+        self.assertEqual([(row[2], row[6]) for row in whole], [(None, 'advances')])
+        with connect(self.db) as db:
+            self.assertEqual(progress_summary(db)['SWE-02']['overall'], 1)
+            self.assertEqual(progress_summary(db)['SWE-02']['status'], ['none'])
 
     def test_check_problem_stops_rebuild_and_keeps_old_database(self):
         self.load()
@@ -520,14 +546,113 @@ class AtlasTests(unittest.TestCase):
         self.assertEqual(source['title'], 'Paper')
         self.assertEqual(len(source['copies']), 2)
 
+    def test_added_source_can_step_toward_the_whole_breakthrough(self):
+        self.load()
+        text = 'Results: we demonstrate a proposed capability at full scale in a working system.'
+        added = self.root / 'added/sources'
+        added.mkdir(parents=True)
+        digest = sha(text.encode())
+        saved = added / (digest + '.html')
+        saved.write_text(text)
+        capture = patch('atlas.store.resolver', side_effect=lambda roots: resolver([self.root]))
+        capture.start()
+        self.addCleanup(capture.stop)
+        prompts = []
+        reply = {
+            'source_date': None,
+            'rows': [
+                {
+                    'breakthrough': 'SWE-01',
+                    'criterion': 0,
+                    'verdict': 'advances',
+                    'quote': 'we demonstrate a proposed capability at full scale',
+                },
+                {
+                    'breakthrough': 'SWE-02',
+                    'criterion': 0,
+                    'verdict': 'meets',
+                    'quote': 'we demonstrate a proposed capability at full scale',
+                },
+                {
+                    'breakthrough': 'SWE-02',
+                    'criterion': 0,
+                    'verdict': 'contradicts',
+                    'quote': 'a sentence the source never contains anywhere',
+                },
+                {
+                    'breakthrough': 'SWE-09',
+                    'criterion': 0,
+                    'verdict': 'advances',
+                    'quote': 'we demonstrate a proposed capability at full scale',
+                },
+            ],
+        }
+
+        def call(prompt):
+            prompts.append(prompt)
+            return reply
+
+        stored, rejected = add(
+            'https://arxiv.org/abs/2',
+            call=call,
+            saver=lambda url: (digest, str(saved), text),
+            core=self.core,
+            path=self.db,
+        )
+        self.assertEqual(len(prompts), 1)
+        self.assertIn('criterion 0', prompts[0])
+        self.assertIn('never "meets"', prompts[0])
+        self.assertEqual(
+            [(row['breakthrough'], row['criterion']) for row in stored], [('SWE-01', 0)]
+        )
+        self.assertEqual(
+            sorted(why for _, why in rejected),
+            [
+                'meets needs a milestone',
+                'not a candidate milestone',
+                'quote not found in saved copy',
+            ],
+        )
+        data = core.load(self.core)
+        self.assertEqual(core.check(data), [])
+        row = data['progress'][-1]
+        self.assertEqual(
+            (row['breakthrough'], row['milestone'], row['verdict']), ('SWE-01', None, 'advances')
+        )
+        with connect(self.db) as db:
+            self.assertEqual(
+                [
+                    tuple(row)
+                    for row in db.execute(
+                        "SELECT id, criterion FROM progress WHERE url='https://arxiv.org/abs/2'"
+                    )
+                ],
+                [(f'added:{digest}:SWE-01:0', None)],
+            )
+            self.assertEqual(
+                progress_summary(db)['SWE-01'], {'status': ['none'], 'overall': 1, 'count': 2}
+            )
+            self.assertEqual(catalog(db)['breakthroughs'][0]['overall'], 1)
+        with (
+            patch('sys.argv', ['atlas.add', 'https://arxiv.org/abs/2', '--no-commit']),
+            patch('atlas.add._call', return_value=(self.root, call)),
+            patch('atlas.add.add', return_value=(stored, rejected)),
+            patch('atlas.add.request_wayback', return_value=True),
+            patch('builtins.print') as printed,
+        ):
+            add_main()
+        lines = [entry.args[0] for entry in printed.call_args_list]
+        self.assertIn('stored  SWE-01 whole breakthrough: advances', lines)
+        self.assertIn('rejected SWE-02 whole breakthrough: meets needs a milestone', lines)
+
     def test_progress_summary_lists_every_breakthrough(self):
         self.load()
         with connect(self.db) as db:
             self.assertEqual(
                 progress_summary(db),
                 {
-                    'SWE-01': {'status': ['none'], 'count': 1},
-                    'SWE-02': {'status': ['none'], 'count': 1},
+                    'SWE-01': {'status': ['none'], 'overall': 0, 'count': 1},
+                    'SWE-02': {'status': ['none'], 'overall': 0, 'count': 1},
                 },
             )
 
@@ -601,10 +726,11 @@ class AtlasTests(unittest.TestCase):
         self.db.unlink()
         self.load()
         with connect(self.db) as db:
-            items = {i['id']: i['prerequisites'] for i in catalog(db)['breakthroughs']}
             self.assertEqual(
-                items, {'SWE-01': [], 'SWE-02': ['SWE-01'], 'CSC-01': ['SWE-02'], 'CSC-02': []}
+                self.links(db),
+                {'SWE-01': [], 'SWE-02': ['SWE-01'], 'CSC-01': ['SWE-02'], 'CSC-02': []},
             )
+            self.assertNotIn('prerequisites', catalog(db)['breakthroughs'][0])
             self.assertEqual(
                 json.loads(
                     db.execute("SELECT payload FROM breakthroughs WHERE id='CSC-01'").fetchone()[0]
@@ -636,7 +762,7 @@ class AtlasTests(unittest.TestCase):
         self.assertEqual(data['breakthroughs']['CSC-02']['prerequisites'][0]['id'], 'CSC-01')
         with connect(self.db) as db:
             self.assertEqual(
-                {i['id']: i['prerequisites'] for i in catalog(db)['breakthroughs']},
+                self.links(db),
                 {'SWE-01': [], 'SWE-02': [], 'CSC-01': [], 'CSC-02': ['CSC-01']},
             )
 

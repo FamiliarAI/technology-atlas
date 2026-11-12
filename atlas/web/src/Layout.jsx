@@ -106,7 +106,6 @@ function Search({ open, onClose }) {
 
 const NAV = [
   ['/atlas', 'Atlas'],
-  ['/claims', 'Claims'],
   ['/about', 'Method'],
 ];
 
@@ -220,8 +219,8 @@ function Footer() {
         <div>
           <Wordmark />
           <p className="footer-purpose">
-            An attempt to predict the AI takeoff by naming its wonders in advance, each with a test
-            for recognising it, so that every prediction can be proven wrong.
+            A map of the breakthroughs worth working towards, and the milestones that tell us how
+            close we are.
           </p>
         </div>
         <dl className="footer-meta">
@@ -236,8 +235,7 @@ function Footer() {
           <div>
             <dt>Read</dt>
             <dd>
-              <Link to="/atlas">Atlas</Link> · <Link to="/claims">Claims</Link> ·{' '}
-              <Link to="/about">Method</Link>
+              <Link to="/atlas">Atlas</Link> · <Link to="/about">Method</Link>
               {REPOSITORY_PUBLIC && (
                 <>
                   {' '}

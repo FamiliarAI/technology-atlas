@@ -78,9 +78,6 @@ export default function NotFound({
         <Link to="/atlas" className="text-link">
           The atlas <Arrow />
         </Link>
-        <Link to="/claims" className="text-link">
-          The claims <Arrow />
-        </Link>
         <Link to="/about" className="text-link">
           Method <Arrow />
         </Link>

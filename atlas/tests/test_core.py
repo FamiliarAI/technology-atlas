@@ -295,6 +295,12 @@ class CoreTests(unittest.TestCase):
         data = self.imported()
         data['progress'] = [self.progress()]
         self.assertEqual(core.check(data), [])
+        # A row with milestone null is a step toward the breakthrough as a whole.
+        for verdict in ['advances', 'contradicts']:
+            with self.subTest(whole=verdict):
+                whole = copy.deepcopy(data)
+                whole['progress'][0].update(milestone=None, verdict=verdict)
+                self.assertEqual(core.check(whole), [])
 
         def add_prerequisite_loop(data):
             for dependent, prerequisite_id in [('SWE-01', 'SWE-02'), ('SWE-02', 'SWE-01')]:
@@ -335,6 +341,8 @@ class CoreTests(unittest.TestCase):
             ('milestone', lambda data: data['progress'][0].update(milestone='m99')),
             ('source', lambda data: data['progress'][0].update(url='https://unknown')),
             ('verdict', lambda data: data['progress'][0].update(verdict='maybe')),
+            ('verdict', lambda data: data['progress'][0].update(milestone=None, verdict='meets')),
+            ('milestone', lambda data: data['progress'][0].pop('milestone')),
             (
                 'absolute path',
                 lambda data: data['breakthroughs']['SWE-01']['concept'][0].update(

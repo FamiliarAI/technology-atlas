@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { animate, useReducedMotion } from 'framer-motion';
 import { ringSegments, starColor } from './glyphs.jsx';
-import { chartCoord, claimPath, coreRadius, hash, LABEL, REGION_TYPE, starRadius, UNITS_ACROSS } from './sky.js';
+import { chartCoord, coreRadius, hash, LABEL, REGION_TYPE, starRadius, UNITS_ACROSS } from './sky.js';
 import { EASE } from './motion.js';
 import './sky.css';
 
@@ -12,8 +12,6 @@ import './sky.css';
 const LOD = [0, 2.1, 3.6, 6.5];
 const lodOf = (k) => LOD.filter((t) => k >= t).length - 1;
 const K_MAX = 14;
-// Claims across fields are drawn as arcs, so many together read as a sweep, not a scribble.
-const ARC = 0.22;
 
 function wrap(text, max) {
   const words = text.split(' ');
@@ -172,7 +170,7 @@ function StarLabel({ item, plan }) {
   );
 }
 
-const Star = memo(function Star({ item, lod, state, plan, crossing, interactive, tabbable, onSelect, onHover }) {
+const Star = memo(function Star({ item, lod, state, plan, interactive, tabbable, onSelect, onHover }) {
   const r = starRadius(item.status.length);
   const core = coreRadius(item.status.length);
   const warm = item.glow > 0;
@@ -217,12 +215,6 @@ const Star = memo(function Star({ item, lod, state, plan, crossing, interactive,
       ) : (
         <circle r={core} fill={starFill(item)} opacity={starAlpha(item)} className="sky-star-core" />
       )}
-      {crossing && (
-        // A quiet mark: this star has a claim with another field, drawn on hover or focus.
-        <g className="sky-screen">
-          <path d={lod >= 1 ? 'M7 -9.5L10.5 -13' : 'M3.2 -4.2L5.6 -6.6'} className="sky-cross" />
-        </g>
-      )}
       {lod >= 1 &&
         ringSegments(item.status, r).map((seg, n) => <path key={n} d={seg.d} className={'sky-seg ' + seg.status} />)}
       {active && (
@@ -256,9 +248,7 @@ const Constellation = memo(function Constellation({
   state,
   selected,
   hovered,
-  linked,
   plan,
-  crossing,
   labels,
   interactive,
   delay,
@@ -274,11 +264,10 @@ const Constellation = memo(function Constellation({
       return `M${p.x.toFixed(2)} ${p.y.toFixed(2)}L${q.x.toFixed(2)} ${q.y.toFixed(2)}`;
     })
     .join('');
-  const linkedSet = linked ? new Set(linked.split(' ')) : null;
   const starState = (item) => {
     if (item.id === selected) return 'selected';
     if (item.id === hovered) return 'hovered';
-    if (state === 'dim') return linkedSet?.has(item.id) ? 'linked' : 'dim';
+    if (state === 'dim') return 'dim';
     return 'rest';
   };
   const box = fig.box;
@@ -319,7 +308,6 @@ const Constellation = memo(function Constellation({
             lod={lod}
             state={starState(item)}
             plan={plan?.get(item.id) || null}
-            crossing={crossing.has(item.id)}
             interactive={interactive}
             tabbable={interactive && state === 'focus'}
             onSelect={onSelect}
@@ -340,51 +328,6 @@ const Constellation = memo(function Constellation({
             </g>
           </g>
         )}
-      </g>
-    </g>
-  );
-});
-
-// ---------- Claim lines ----------
-
-function useClaims(atlas) {
-  return useMemo(
-    () =>
-      atlas.links.map((l, n) => {
-        const a = atlas.items[l.from];
-        const b = atlas.items[l.to];
-        const cross = a.field !== b.field;
-        const path = claimPath(a, b, starRadius(b.status.length) + 1.6, cross ? ARC : 0);
-        return { ...l, n, path, a, b, cross };
-      }),
-    [atlas],
-  );
-}
-
-function Arrow({ path }) {
-  return (
-    <g transform={`translate(${path.tip.x.toFixed(2)} ${path.tip.y.toFixed(2)})`}>
-      <g className="sky-screen">
-        <path d="M-5.5 -3.2L0 0L-5.5 3.2" transform={`rotate(${path.angle.toFixed(1)})`} className="sky-arrow" />
-      </g>
-    </g>
-  );
-}
-
-// At rest only the claims inside a constellation are drawn, faintly; claims between fields
-// would cross the whole sky, so they wait for a hover, a focus or the "all claims" switch.
-const RestingClaims = memo(function RestingClaims({ claims }) {
-  return (
-    <g className="sky-claims-in" aria-hidden="true">
-      <g className="sky-claims rest">
-        {claims
-          .filter((c) => !c.cross)
-          .map((c) => (
-            <g key={c.n}>
-              <path d={c.path.d} stroke={`url(#claim-${c.n})`} className="sky-claim" />
-              <Arrow path={c.path} />
-            </g>
-          ))}
       </g>
     </g>
   );
@@ -456,7 +399,6 @@ export default function Chart({
   selected = null,
   highlight = null,
   highlightField = null,
-  allClaims = false,
   onSelect = () => {},
   onFocusField = () => {},
   onHover = () => {},
@@ -496,7 +438,7 @@ export default function Chart({
   const insetBottom = inset?.bottom || 0;
   // The centre of the part of the chart left free by panels over it.
   const oyOf = (h) => insetTop + (h - insetTop - insetBottom) / 2;
-  // A backdrop without names (the phone hero) is figures only: no frame, grid or claims.
+  // A backdrop without names (the phone hero) is figures only: no frame or grid.
   const bare = !interactive && !labels;
   const names = interactive;
 
@@ -509,19 +451,9 @@ export default function Chart({
       })),
     [atlas],
   );
-  const claims = useClaims(atlas);
+
+  // Stars with any judged progress get a beacon, findable from the widest view.
   const warm = useMemo(() => Object.values(atlas.items).filter((i) => i.glow > 0), [atlas]);
-  // Stars with a claim to or from another field, by field.
-  const crossing = useMemo(() => {
-    const out = Object.fromEntries(atlas.fields.map((f) => [f.id, new Set()]));
-    for (const c of claims) {
-      if (!c.cross) continue;
-      out[c.a.field].add(c.a.id);
-      out[c.b.field].add(c.b.id);
-    }
-    return out;
-  }, [atlas, claims]);
-  const none = useMemo(() => new Set(), []);
 
   const apply = useCallback(() => {
     if (!size || !worldRef.current) return;
@@ -786,36 +718,12 @@ export default function Chart({
   const hovered = hover || highlight;
   const active = selected || hovered;
   const liftField = hoverField || highlightField;
-  const activeField = active ? atlas.items[active]?.field : null;
-
-  // Claims in full: every one with the switch on; otherwise those of the focused or lifted
-  // constellation, and of the active star's constellation.
-  const fieldOf = (id) => atlas.items[id].field;
-  const touching = (l) => {
-    if (allClaims) return true;
-    const fs = [fieldOf(l.from), fieldOf(l.to)];
-    return (
-      (focusField && fs.includes(focusField)) ||
-      (activeField && fs.includes(activeField)) ||
-      (!focusField && liftField && fs.includes(liftField))
-    );
-  };
-  const shown = interactive ? claims.filter(touching) : [];
-  const shownKey = shown.map((c) => c.n).join(',');
-  const linkedByField = useMemo(() => {
-    const out = {};
-    for (const c of shown) {
-      for (const it of [c.a, c.b]) (out[it.field] ||= new Set()).add(it.id);
-    }
-    return Object.fromEntries(Object.entries(out).map(([k, v]) => [k, [...v].sort().join(' ')]));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shownKey]);
 
   const visibleSet = useMemo(() => new Set(visible.split(' ')), [visible]);
 
   // Which stars get a label, how much, and on which side: greedily, most important first.
   // Each label tries the right, left, below and above of its star, and takes the first spot
-  // that covers no other label, star, constellation name, figure line or drawn claim.
+  // that covers no other label, star, constellation name or figure line.
   const plans = useMemo(() => {
     if (lod < 2 || !interactive) return {};
     const k = kq;
@@ -836,14 +744,9 @@ export default function Chart({
         taken.push({ x: i.x - r, y: i.y - r, w: r * 2, h: r * 2, star: i.id });
       }
     }
-    for (const c of claims) {
-      if (c.cross && !shown.includes(c)) continue;
-      const pts = c.path.points;
-      for (let n = 1; n < pts.length; n++) segs.push([pts[n - 1], pts[n]]);
-    }
     const priority = (i) =>
       i.id === selected ? 0 : i.id === hovered ? 1 : i.glow > 0 ? 2 : i.field === focusField ? 3 : 4;
-    items.sort((a, b) => priority(a) - priority(b) || a.depth - b.depth || a.id.localeCompare(b.id));
+    items.sort((a, b) => priority(a) - priority(b) || a.id.localeCompare(b.id));
     const kinds = lod >= 3 ? ['title', 'short', 'id'] : focusField ? ['short', 'id'] : ['id'];
     for (const i of items) {
       const gap = starRadius(i.status.length) * k + 6;
@@ -881,7 +784,7 @@ export default function Chart({
     }
     return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [atlas, sky, claims, shownKey, lod, kq, visibleSet, focusField, selected, hovered, interactive]);
+  }, [atlas, sky, lod, kq, visibleSet, focusField, selected, hovered, interactive]);
   const intoView = (fx) => 0.15 + (fx / world.w) * 0.95 + (hash(String(Math.round(fx))) % 100) / 1000;
 
   // A backdrop drifts slowly across whatever part of the sky does not fit its box.
@@ -942,20 +845,6 @@ export default function Chart({
             <stop offset="25%" stopColor="#FFF1C9" stopOpacity="0.25" />
             <stop offset="100%" stopColor="#FFF1C9" stopOpacity="0" />
           </radialGradient>
-          {claims.map((c) => (
-            <linearGradient
-              key={c.n}
-              id={`claim-${c.n}`}
-              gradientUnits="userSpaceOnUse"
-              x1={c.a.x}
-              y1={c.a.y}
-              x2={c.path.tip.x}
-              y2={c.path.tip.y}
-            >
-              <stop offset="0" stopColor="#7FB2FF" stopOpacity="1" />
-              <stop offset="1" stopColor="#7FB2FF" stopOpacity="0.3" />
-            </linearGradient>
-          ))}
         </defs>
         <g className={drift > 1 && !still ? 'sky-drift' : undefined}>
           <g
@@ -965,12 +854,10 @@ export default function Chart({
               lod +
               (focusField ? ' focused' : '') +
               (active ? ' has-active' : '') +
-              (allClaims ? ' all-claims' : '') +
               (introOn && !still ? ' intro' : '')
             }
           >
             <Graticule world={world} regions={sky.regions} fine={lod >= 1} bare={bare} names={names} />
-            {!bare && <RestingClaims claims={claims} />}
             {fields.map((f) => {
               const fig = sky.figures[f.id];
               const state =
@@ -984,10 +871,8 @@ export default function Chart({
                   state={state}
                   selected={selected && atlas.items[selected]?.field === f.id ? selected : null}
                   hovered={hovered && atlas.items[hovered]?.field === f.id ? hovered : null}
-                  linked={linkedByField[f.id] || ''}
                   labels={labels && interactive}
                   plan={plans[f.id]}
-                  crossing={interactive && !allClaims ? crossing[f.id] : none}
                   interactive={interactive}
                   delay={intoView(fig.x)}
                   onFocusField={focusAt}
@@ -997,16 +882,6 @@ export default function Chart({
                 />
               );
             })}
-            <g className="sky-claims full" aria-hidden="true">
-              {shown.map((c) => (
-                <g key={`${c.n}-${focusField}-${activeField}-${liftField}-${allClaims}`} className={still ? '' : 'drawn'}>
-                  <path d={c.path.d} pathLength="1" stroke={`url(#claim-${c.n})`} className="sky-claim" />
-                  <g className="sky-arrow-in">
-                    <Arrow path={c.path} />
-                  </g>
-                </g>
-              ))}
-            </g>
             <g className="sky-beacons" aria-hidden="true">
               {warm.map((i) => (
                 <g key={i.id} transform={`translate(${i.x.toFixed(2)} ${i.y.toFixed(2)})`}>

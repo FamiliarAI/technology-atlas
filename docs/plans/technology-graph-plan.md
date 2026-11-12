@@ -4,14 +4,13 @@ Updated November 11, 2026. This is the plan of record. Earlier versions are in g
 
 ## Purpose
 
-Predict the AI takeoff towards the Singularity by naming the expected wonders in advance, each with a test for recognising it, so the predictions can be proven wrong.
+Map the breakthroughs that people should work towards, empowered by superintelligence, and the milestones along the way that tell us how close each one is.
 
-The atlas makes two kinds of falsifiable claim:
+- **Breakthrough:** a goal worth working towards.
+- **Milestone:** a result we should see on the way to it. Milestones are how we tell how close the goal is.
+- **Paper:** a research paper is added as a partial step toward one milestone, or toward the breakthrough as a whole.
 
-- **Recognition:** "this breakthrough counts as achieved when these milestones are met."
-- **Order:** "B needs A first." Falsified if B arrives before A.
-
-There are no dates in v1.
+The atlas is a map, not a forecast (decided by the owner on November 11). It makes no claim about when a breakthrough will arrive or in what order. There are no dates and no order claims.
 
 ## Rules
 
@@ -24,20 +23,18 @@ There are no dates in v1.
 
 - **Breakthrough:** one proposed future capability, with a permanent ID such as `CSC-02`.
 - **Milestone:** one of a breakthrough's completion criteria, with a permanent ID such as `CSC-02.m1`, a short label and the full criterion text.
-- **Link:** `needs`, a prerequisite, proposed by a model call and checked by code. It is the only kind of link.
+- **Link:** `needs`, a prerequisite proposed by a model call. Links are kept in the records but are not published: the atlas makes no order claims.
 - **Source:** a paper or page, identified by URL, with saved copies identified by SHA-256.
-- **Progress:** one source judged against one milestone: `advances`, `meets` or `contradicts`, with an exact quote.
-
-A `needs` link means B is expected to come first on the way to A: A builds on B, uses it as a component, assumes its result, or B is the expected route. Merely helpful, topical or same-capability pairs are not links.
+- **Progress:** one source judged against one milestone (`advances`, `meets` or `contradicts`) or against the breakthrough as a whole (`advances` or `contradicts`), with an exact quote.
 
 ## Where things stand
 
 - **Core.** `atlas/core/` (files in git) is the source of truth; the SQLite database is rebuilt from it. See the [core design](2026-11-09-atlas-core-design.md).
 - **Content.** All 66 fields are in the core (742 breakthroughs), with two withheld concepts (CLM-02 and VIR-01). Grok researched 39 fields; Codex Terra researched 27 after Grok's quota ran out, and its records cite fewer sources (median 1 per breakthrough against 3).
 - **Labels.** Every milestone of all 742 breakthroughs has a short label. Grok wrote those for the first 5 fields and Codex Sol the rest, on November 11.
-- **Links.** 77 `needs` links (61 across fields, 16 within one), from one call per field on November 11. 31 fields' calls proposed none.
+- **Links.** 77 `needs` links are stored in the records from one call per field on November 11. They are not shown on the site or exported.
 - **Progress.** 4 judged rows.
-- **UI.** The v1 site is built in `atlas/web`: home, the sky-map atlas, field, breakthrough, claims and Method pages, with a static export (`python3 -m atlas.export`). Share images are in progress. It is not published.
+- **UI.** The v1 site is built in `atlas/web`: home, the sky-map atlas, field, breakthrough and Method pages, with a static export (`python3 -m atlas.export`) and a share image per page. It is not published.
 - **Remote.** `github.com/FamiliarAI/technology-atlas`, private.
 
 ## Plan to v1
@@ -61,17 +58,16 @@ Readable first, good-looking second, on desktop and phone. A full website with t
    | Screen | Question | What leads |
    |---|---|---|
    | Home | What is this, and what moved? | Purpose, recent movement, then the map |
-   | Map | What comes before what? | Breakthroughs placed by prerequisite depth |
-   | Field | What is in this area? | A list in prerequisite order |
-   | Breakthrough | How will we know, and how close is it? | Milestone checklist, "needs first" and "unlocks", evidence, full record |
-   | Claims | What exactly are we predicting? | Every `needs` claim, standing or falsified |
+   | Map | What is there to work towards? | Breakthroughs grouped by field and region |
+   | Field | What is in this area? | A list of its breakthroughs |
+   | Breakthrough | How will we know, and how close is it? | Milestone checklist with evidence, papers as steps, sources in context, full record |
 
    The map is for overview; lists do the reading. Everything is reachable by search, list, keyboard and screen reader. Phone is list-first. Colour means progress state and nothing else.
 2. **Visual direction: a science-fiction star atlas** (decided November 11). The bar is a site the owner is proud to publish under his own name.
-   - **The idea.** A stellar-cartography instrument. Each breakthrough is a star, each field a constellation, `needs` links the constellation lines, and concentric rings mark prerequisite depth. A star's milestones are a segmented ring around it that fills as they are met; a star ignites as it nears achievement. Today's sky is mostly dark, which is the honest starting picture.
+   - **The idea.** A stellar-cartography instrument. Each breakthrough is a star and each field a constellation on a flat sky map. A star's milestones are a segmented ring around it that fills as they are met; a star ignites as it nears achievement. Today's sky is mostly dark, which is the honest starting picture.
    - **Restraint over cliché.** No neon cyberpunk, no fake terminal text, no decoration that carries no information. The science-fiction feel comes from depth, precision and light: a near-black field with real depth, hairline rings and tick marks, measured glow, and one warm accent reserved for progress.
    - **Type.** A distinctive display face with a technical character, a highly readable text face for long passages, and a mono for IDs and coordinates. Chosen in the mock, bundled locally.
-   - **Motion.** The Motion library for React: the sky assembles on load, links draw when a star is focused, the view glides to a selected star, and recently moved stars pulse. All of it is off under reduced-motion settings.
+   - **Motion.** The Motion library for React: the sky assembles on load, the view glides to a selected star, and recently moved stars pulse. All of it is off under reduced-motion settings.
    - **Made assets.** Hand-made SVG for the chart, rings, icons and constellation emblems. Generated images (GPT Image 2 through the Codex CLI, confirmed working November 11) only for atmosphere: a deep-field background plate and, after a pilot of ten, an illustration plate per breakthrough.
    - **Who makes what.** Fable writes the art direction and reviews screenshots; it does not draw SVG or generate images. Codex generates images, and Codex Sol or Opus writes the SVG and components.
    - **Quality gate.** Nothing is built past the mock until the owner approves it. Every screen is reviewed from screenshots at desktop and phone sizes before it is called done, and checked for contrast, keyboard use and load time.

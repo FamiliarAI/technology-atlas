@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Route, Routes, useParams } from 'react-router-dom';
 import { Locator } from './Chart.jsx';
-import { useAtlas } from './data.jsx';
+import { STATUS, useAtlas, warm as isWarm } from './data.jsx';
 import { ringSegments, starColor } from './glyphs.jsx';
 import { chartCoord, starRadius } from './sky.js';
 import './share.css';
@@ -79,6 +79,8 @@ function FitText({ as: Tag = 'h1', className, max, steps, lead = 1.06, children 
     el.style.lineHeight = String(lead);
     el.classList.remove('clamped');
     el.style.webkitLineClamp = '';
+    // Measure with words kept whole, so a long word makes the type smaller instead of breaking.
+    el.style.overflowWrap = 'normal';
     const fits = (size, lines) => {
       el.style.fontSize = size + 'px';
       const count = Math.round(el.scrollHeight / (size * lead));
@@ -90,6 +92,7 @@ function FitText({ as: Tag = 'h1', className, max, steps, lead = 1.06, children 
     }
     const [lines, floor] = steps[steps.length - 1];
     el.style.fontSize = floor + 'px';
+    el.style.overflowWrap = '';
     el.style.webkitLineClamp = String(lines);
     el.classList.add('clamped');
   }, [children, max, steps, lead]);
@@ -100,10 +103,10 @@ function FitText({ as: Tag = 'h1', className, max, steps, lead = 1.06, children 
   );
 }
 
-// Title sizes: two lines down to 64 px, three down to 50, four down to 38, then clamped.
+// Title sizes: two lines down to 64 px, three down to 44, four down to 38, then clamped.
 const TITLE_STEPS = [
   [2, 64],
-  [3, 50],
+  [3, 44],
   [4, 38],
 ];
 const NAME_STEPS = [
@@ -196,7 +199,10 @@ const plural = (n, one, many = one + 's') => `${n.toLocaleString('en-GB')} ${n =
 export function meterWords(item) {
   const n = item.status.length;
   const noun = n === 1 ? 'milestone' : 'milestones';
-  if (!item.met && !item.moving) return 'No evidence yet';
+  if (!item.met && !item.moving) {
+    if (!item.overall) return STATUS.none;
+    return `${item.overall === 1 ? '1 paper' : `${item.overall} papers`} toward the whole`;
+  }
   if (item.met === n) return n === 1 ? 'Its milestone is met' : `All ${n} milestones met`;
   if (item.met && item.moving) return `${item.met} met, ${item.moving} in progress, of ${n} ${noun}`;
   if (item.met) return `${item.met} of ${n} ${noun} met`;
@@ -214,7 +220,7 @@ function MeterMark({ status }) {
 }
 
 const stateOf = (item) =>
-  item.status.length && item.met === item.status.length ? 'met' : item.met || item.moving ? 'in_progress' : 'none';
+  item.status.length && item.met === item.status.length ? 'met' : isWarm(item) ? 'in_progress' : 'none';
 
 // One star, large: its point, its halo when warm, its ring of milestones, a graduated dial.
 function BigStar({ item, size = 300 }) {
@@ -355,7 +361,7 @@ export function FieldCard() {
   const field = atlas.field[id];
   if (!field) return <Failed reason={'No field ' + id} />;
   const milestones = field.items.reduce((n, i) => n + i.status.length, 0);
-  const warm = field.items.filter((i) => i.met || i.moving).length;
+  const warm = field.items.filter(isWarm).length;
   return (
     <Card kind="field" ready>
       <div className="card-main">
@@ -383,7 +389,7 @@ export function FieldCard() {
           </div>
           <div className={warm ? 'warm' : ''}>
             <b>{warm}</b>
-            <span>with evidence</span>
+            <span>in progress</span>
           </div>
         </footer>
       </div>
@@ -400,8 +406,8 @@ export function DefaultCard() {
   if (error) return <Failed reason={'Data: ' + error} />;
   if (!atlas || !loaded) return null;
   const { totals } = atlas;
-  // Breakthroughs with any judged evidence, as on the field cards.
-  const warm = Object.values(atlas.items).filter((i) => i.met || i.moving).length;
+  // Breakthroughs with any judged progress, as on the field cards.
+  const warm = Object.values(atlas.items).filter(isWarm).length;
   return (
     <Card kind="default" ready>
       <div className="card-intro">
@@ -409,10 +415,10 @@ export function DefaultCard() {
           <Wordmark />
         </header>
         <div className="card-body">
-          <h1 className="card-motto">Naming the wonders before they arrive.</h1>
+          <h1 className="card-motto">The breakthroughs worth working towards.</h1>
           <p className="card-sub">
-            Proposed breakthroughs of the AI takeoff in {atlas.fields.length} fields, each with a
-            test for knowing it has happened and an order it should arrive in.
+            A map of breakthroughs in {atlas.fields.length} fields, and the milestones that tell us
+            how close we are.
           </p>
         </div>
         <footer className="card-counts">
@@ -426,7 +432,7 @@ export function DefaultCard() {
           </div>
           <div className={warm ? 'warm' : ''}>
             <b>{warm}</b>
-            <span>with evidence</span>
+            <span>in progress</span>
           </div>
         </footer>
       </div>

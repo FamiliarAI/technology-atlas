@@ -1,28 +1,38 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Locator } from '../Chart.jsx';
-import { formatDate, loadBreakthrough, useAtlas } from '../data.jsx';
+import { formatDate, loadBreakthrough, milestoneOf, useAtlas, warm } from '../data.jsx';
 import { StarGlyph, StarMark, StatusLabel, ringSegments } from '../glyphs.jsx';
-import Record, { Citations, host, safe } from '../Record.jsx';
+import Record, { Cite, Citations, Paragraphs, SourceList, safe, sourceIndex, sourceName, host } from '../Record.jsx';
 import { EASE } from '../motion.js';
 import * as sky from '../sky.js';
-import { stepsBehind, useTitle } from './common.jsx';
+import { plural, useTitle } from './common.jsx';
 import NotFound from './NotFound.jsx';
-
-const reasonsOf = (list) => Object.fromEntries((list || []).map((l) => [l.id, l.reason]));
 
 const VERDICT = { meets: 'Meets', advances: 'Advances', contradicts: 'Contradicts' };
 
+const list = (value) => (Array.isArray(value) ? value : []);
+
+const papers = (n) => (n === 1 ? '1 paper' : `${n} papers`);
+
 function summaryLine(item) {
   const n = item.status.length;
-  if (item.met === n) return `All ${n} milestones met.`;
+  const whole = item.overall ? ` ${papers(item.overall)} toward the whole.` : '';
+  if (n && item.met === n) return `All ${n} milestones met.${whole}`;
   const parts = [];
   if (item.met) parts.push(`${item.met} met`);
   if (item.moving) parts.push(`${item.moving} in progress`);
-  if (!parts.length) return `None of ${n} milestones has evidence yet.`;
-  return `${parts.join(', ')} of ${n} milestones. ${item.met ? '' : 'None met.'}`.trim();
+  if (!parts.length) {
+    return item.overall
+      ? `No milestone assessed yet.${whole}`
+      : `Not yet assessed against any of its ${n} milestones.`;
+  }
+  return `${parts.join(', ')} of ${n} milestones.${item.met ? '' : ' None met.'}${whole}`;
 }
+
+const stateOf = (item) =>
+  item.status.length && item.met === item.status.length ? 'met' : warm(item) ? 'in_progress' : 'none';
 
 // The star at plate size: its ring numbered so each segment can be matched to a milestone.
 function Plate({ item }) {
@@ -63,31 +73,50 @@ function Plate({ item }) {
   );
 }
 
-function Related({ atlas, ids, reasons, empty }) {
-  if (!ids.length) return <p className="order-empty">{empty}</p>;
+// One judged row: its verdict, the exact quote, and the paper it comes from. When the paper is
+// also one of the record's sources, a numbered link leads to its entry.
+const shortUrl = (url) => {
+  try {
+    const u = new URL(url);
+    return u.hostname.replace(/^www\./, '') + u.pathname.replace(/\/$/, '');
+  } catch {
+    return host(url);
+  }
+};
+
+function Evidence({ row, label, sources }) {
+  const entry = sources.byUrl.get(row.url);
   return (
-    <ul className="order-list">
-      {ids.map((id) => {
-        const item = atlas.items[id];
-        const reason = reasons?.[id];
-        return (
-          <li key={id}>
-            <Link to={'/b/' + id} className="order-row">
-              <StarGlyph item={item} size={34} />
-              <span>
-                <span className="mono">
-                  {id} · {atlas.field[item.field].name}
-                </span>
-                <span className="order-title">{item.title}</span>
-              </span>
-            </Link>
-            {reason && <p className="order-reason">{reason}</p>}
-          </li>
-        );
-      })}
-    </ul>
+    <figure className={'quote ' + row.verdict}>
+      <figcaption>
+        <span className={'verdict ' + row.verdict}>{VERDICT[row.verdict] || row.verdict}</span>
+        {label && <span className="mono">{label}</span>}
+      </figcaption>
+      <blockquote>
+        <p>“{row.quote}”</p>
+      </blockquote>
+      <p className="quote-source">
+        <span>
+          <a href={safe(row.url)} target="_blank" rel="noopener noreferrer">
+            {entry ? sourceName(entry) : shortUrl(row.url)}
+          </a>{' '}
+          <Cite entry={entry} />
+        </span>
+        <span className="mono muted">
+          {row.source_date ? `published ${formatDate(row.source_date)}` : 'date not stated'} · judged by{' '}
+          {row.model || row.by} · {formatDate(row.added_at)}
+        </span>
+      </p>
+    </figure>
   );
 }
+
+// The sections read in full, in this order, under these headings.
+const READING = [
+  ['significance', 'Why it matters'],
+  ['current_state', 'What has been shown'],
+  ['missing_breakthrough', 'What is still missing'],
+];
 
 export default function Breakthrough() {
   const { id } = useParams();
@@ -96,6 +125,7 @@ export default function Breakthrough() {
   const [error, setError] = useState(null);
   const [open, setOpen] = useState(false);
   const still = useReducedMotion();
+  const sources = useMemo(() => sourceIndex(record), [record]);
   useEffect(() => {
     let live = true;
     setRecord(null);
@@ -131,12 +161,23 @@ export default function Breakthrough() {
   if (!item) return <p className="page-state">Finding {id}…</p>;
 
   const field = atlas.field[item.field];
-  const steps = stepsBehind(atlas, item.id);
   // The star's chart coordinate, printed when the sky provides one (sky.js chartCoord).
   const coord = typeof sky.chartCoord === 'function' ? sky.chartCoord(item, atlas.sky) : null;
   const where = coord && Number.isFinite(coord.x) && Number.isFinite(coord.y) ? coord.text : null;
-  const sourceTitle = (url) => record?.sources.find((s) => s.url === url)?.title || host(url);
-  const judged = record ? record.progress.filter((r) => r.criterion) : [];
+  const milestones = list(record?.milestones);
+  const criteria = list(record?.completion_criteria);
+  // Which milestone a judged row is about, as a 1-based position; null for the whole.
+  const position = (row) => {
+    if (typeof row.milestone === 'string') {
+      const at = milestones.findIndex((m) => m.id === row.milestone);
+      if (at >= 0) return at + 1;
+    }
+    return milestoneOf(row);
+  };
+  const judged = list(record?.progress).filter((r) => r.verdict && r.quote);
+  const whole = judged.filter((r) => position(r) === null);
+  const concept = list(record?.concept);
+  const issues = list(record?.unresolved_issues).filter((t) => typeof t === 'string' && t.trim());
   const fade = (n) =>
     still
       ? {}
@@ -161,43 +202,49 @@ export default function Breakthrough() {
       <div className="bpage-grid">
         <div className="bpage-main">
           <motion.header className="bpage-head" {...fade(0)}>
+            <p className="eyebrow bpage-id">
+              <span className="mono">{item.id}</span>
+            </p>
             <h1>{item.title}</h1>
             <p className="status-line">
               <span className="bpage-head-glyph">
                 <StarGlyph item={item} size={40} />
               </span>
-              <StatusLabel status={item.met === item.status.length ? 'met' : item.moving || item.met ? 'in_progress' : 'none'} />
+              <StatusLabel status={stateOf(item)} />
               <span>{summaryLine(item)}</span>
             </p>
           </motion.header>
 
           <motion.section className="concept" aria-label="Concept" {...fade(1)}>
-            <p className={'lead' + (open ? ' open' : '')}>{record?.concept[0]?.text}</p>
-            {!open && (
+            <p className={'lead' + (open ? ' open' : '')}>{concept[0]?.text}</p>
+            <Citations urls={concept[0]?.source_urls} sources={sources} />
+            {!open && concept[0] && (
               <button type="button" className="read-on" onClick={() => setOpen(true)}>
                 Read the whole paragraph
               </button>
             )}
-            {record?.concept.length > 1 && (
+            {concept.length > 1 && (
               <details className="criterion more-concept">
                 <summary>More on the concept</summary>
-                {record.concept.slice(1).map((p, n) => (
-                  <p key={n}>{p.text}</p>
-                ))}
+                <Paragraphs items={concept.slice(1)} sources={sources} />
               </details>
             )}
           </motion.section>
 
           <motion.section className="milestones" aria-labelledby="ms-title" {...fade(2)}>
-            <h2 id="ms-title">How we will know</h2>
+            <h2 id="ms-title">Milestones along the way</h2>
             <p className="section-note">
-              This counts as achieved when all {item.status.length} milestones are met.
+              Proposed by the atlas as tests of progress. No outside body has adopted them.
+            </p>
+            <p className="section-lead">
+              The breakthrough is reached when all {item.status.length} are met.
+              {record && !judged.length && ' No paper has been judged against them yet.'}
             </p>
             <ol>
               {item.status.map((status, n) => {
-                const m = record?.milestones[n] || { id: n, label: null, status };
-                const criterion = record?.completion_criteria[n];
-                const rows = judged.filter((r) => r.criterion === n + 1);
+                const m = milestones[n] || { id: n, label: null, status };
+                const criterion = criteria[n];
+                const rows = judged.filter((r) => position(r) === n + 1);
                 return (
                   <li key={m.id} className={'milestone ' + m.status} id={`m${n + 1}`}>
                     <span className="milestone-num mono" aria-hidden="true">
@@ -209,22 +256,16 @@ export default function Breakthrough() {
                         <span className="visually-hidden">Milestone {n + 1}: </span>
                         {m.label || criterion?.text || `Milestone ${n + 1}`}
                       </h3>
-                      {rows.length > 0 && (
-                        <p className="milestone-evidence">
-                          <a href={`#evidence-m${n + 1}`}>
-                            {rows.length === 1 ? '1 source' : `${rows.length} sources`}{' '}
-                            {rows.map((r) => r.verdict).includes('meets') ? 'meet' : 'advance'}
-                            {rows.length === 1 ? 's' : ''} it
-                          </a>
-                        </p>
-                      )}
                       {criterion && m.label && (
                         <details className="criterion">
                           <summary>The full criterion</summary>
                           <p>{criterion.text}</p>
-                          <Citations urls={criterion.source_urls} titleOf={sourceTitle} />
+                          <Citations urls={criterion.source_urls} sources={sources} />
                         </details>
                       )}
+                      {rows.map((r, k) => (
+                        <Evidence key={k} row={r} sources={sources} />
+                      ))}
                     </div>
                   </li>
                 );
@@ -232,70 +273,57 @@ export default function Breakthrough() {
             </ol>
           </motion.section>
 
-          <section className="order" aria-labelledby="order-title">
-            <h2 id="order-title">Order</h2>
-            <p className="section-note">
-              Each line is an order claim: it is proven wrong if the later breakthrough arrives
-              first. The reason under each is the one the linking model gave.
-            </p>
-            <div className="order-cols">
-              <div>
-                <h3 className="eyebrow">Needs first</h3>
-                <Related
-                  atlas={atlas}
-                  ids={item.prerequisites.filter((p) => atlas.items[p])}
-                  reasons={reasonsOf(record?.needs)}
-                  empty="No breakthrough is linked as needed before this one."
-                />
-              </div>
-              <div>
-                <h3 className="eyebrow">Unlocks</h3>
-                <Related
-                  atlas={atlas}
-                  ids={item.unlocks}
-                  reasons={reasonsOf(record?.unlocks)}
-                  empty="No breakthrough is linked as needing this one."
-                />
-              </div>
-            </div>
-          </section>
+          {!record && !error && <p className="muted bpage-loading">Loading the record…</p>}
+          {error && <p className="muted bpage-loading">The full record could not be loaded: {error}.</p>}
 
-          <section className="evidence" aria-labelledby="evidence-title">
-            <h2 id="evidence-title">Evidence</h2>
-            {!record && !error && <p className="muted">Loading the record…</p>}
-            {error && <p className="muted">The full record could not be loaded: {error}.</p>}
-            {record && !judged.length && (
+          {whole.length > 0 && (
+            <section className="bpage-section whole" aria-labelledby="whole-title">
+              <h2 id="whole-title">Steps toward the whole</h2>
               <p className="section-note">
-                No source has been judged against these milestones yet. Research behind the record is
-                listed in the full record below.
+                Papers that move the breakthrough forward as a whole, without meeting or advancing
+                one milestone.
               </p>
+              {whole.map((r, k) => (
+                <Evidence key={k} row={r} label="the whole" sources={sources} />
+              ))}
+            </section>
+          )}
+
+          {record &&
+            READING.map(([key, title]) =>
+              list(record[key]).length ? (
+                <section key={key} className="bpage-section reading" aria-labelledby={key + '-title'}>
+                  <h2 id={key + '-title'}>{title}</h2>
+                  <Paragraphs items={record[key]} sources={sources} />
+                </section>
+              ) : null,
             )}
-            {judged.map((r, n) => (
-              <figure key={n} className={'quote ' + r.verdict} id={`evidence-m${r.criterion}`}>
-                <figcaption>
-                  <span className={'verdict ' + r.verdict}>{VERDICT[r.verdict]}</span>
-                  <span className="mono">milestone {r.criterion}</span>
-                </figcaption>
-                <blockquote>
-                  <p>“{r.quote}”</p>
-                </blockquote>
-                <p className="quote-source">
-                  <a href={safe(r.url)} target="_blank" rel="noopener noreferrer">
-                    {sourceTitle(r.url)}
-                  </a>
-                  <span className="mono muted">
-                    {r.source_date ? `published ${formatDate(r.source_date)}` : 'date not stated'} · judged by{' '}
-                    {r.model} · {formatDate(r.added_at)}
-                  </span>
-                </p>
-              </figure>
-            ))}
-          </section>
+
+          {issues.length > 0 && (
+            <section className="bpage-section reading" aria-labelledby="issues-title">
+              <h2 id="issues-title">What is uncertain</h2>
+              <ul className="issues">
+                {issues.map((issue, n) => (
+                  <li key={n}>{issue}</li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           {record && (
-            <section className="full-record" aria-labelledby="record-title">
-              <h2 id="record-title">Full record</h2>
-              <Record record={record} />
+            <section className="bpage-section sources" id="sources" aria-labelledby="sources-title">
+              <h2 id="sources-title">Sources</h2>
+              <p className="section-note">
+                Each source supports part of this record. Citing it does not mean its authors endorse
+                how the atlas defines the breakthrough or its milestones.
+              </p>
+              <SourceList sources={sources} />
+            </section>
+          )}
+
+          {record && (
+            <section className="full-record" aria-label="More of the record">
+              <Record record={record} sources={sources} />
             </section>
           )}
         </div>
@@ -318,14 +346,6 @@ export default function Breakthrough() {
                 <dt>Region</dt>
                 <dd>{field.region}</dd>
               </div>
-              <div>
-                <dt>Order</dt>
-                <dd>
-                  {steps
-                    ? `${steps} prerequisite step${steps > 1 ? 's' : ''} before it`
-                    : 'Nothing linked before it'}
-                </dd>
-              </div>
               {where && (
                 <div>
                   <dt>Chart position</dt>
@@ -334,7 +354,18 @@ export default function Breakthrough() {
               )}
               <div>
                 <dt>Sources</dt>
-                <dd className="mono">{record ? record.sources.length : '…'}</dd>
+                <dd>
+                  {record ? (
+                    <a href="#sources" onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById('sources')?.scrollIntoView({ block: 'start' });
+                    }}>
+                      {plural(sources.entries.length, 'source')}
+                    </a>
+                  ) : (
+                    '…'
+                  )}
+                </dd>
               </div>
               <div>
                 <dt>Last moved</dt>

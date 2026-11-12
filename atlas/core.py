@@ -249,15 +249,22 @@ def check(data):
     for row_number, row in enumerate(data['progress'], 1):
         identifier = row.get('breakthrough')
         item = items.get(identifier)
+        milestone = row.get('milestone')
         if item is None:
             problems.append(f'Unknown progress breakthrough: row {row_number}: {identifier}')
-        elif row.get('milestone') not in {
+        elif 'milestone' not in row:
+            problems.append(f'Missing progress milestone: row {row_number}')
+        elif milestone is not None and milestone not in {
             criterion.get('id') for criterion in item['completion_criteria']
         }:
-            problems.append(f'Unknown progress milestone: row {row_number}: {row.get("milestone")}')
+            problems.append(f'Unknown progress milestone: row {row_number}: {milestone}')
         if row.get('url') not in sources:
             problems.append(f'Unknown progress source: row {row_number}: {row.get("url")}')
-        if row.get('verdict') not in ('advances', 'meets', 'contradicts'):
+        # milestone null: a step toward the breakthrough as a whole, which cannot meet it.
+        verdicts = ('advances', 'contradicts')
+        if milestone is not None:
+            verdicts += ('meets',)
+        if row.get('verdict') not in verdicts:
             problems.append(f'Invalid progress verdict: row {row_number}: {row.get("verdict")}')
 
     def paths(value, location):

@@ -3,15 +3,7 @@ import { Locator } from '../Chart.jsx';
 import { useAtlas, useField } from '../data.jsx';
 import { FieldEmblem } from '../glyphs.jsx';
 import NotFound from './NotFound.jsx';
-import {
-  Arrow,
-  BreakthroughChip,
-  MilestoneMeter,
-  number,
-  plural,
-  prerequisiteOrder,
-  useTitle,
-} from './common.jsx';
+import { Arrow, MilestoneMeter, number, plural, useTitle } from './common.jsx';
 
 // The first sentence of a summary, as the row's one line; the page has the rest.
 function firstSentence(text) {
@@ -20,11 +12,20 @@ function firstSentence(text) {
   return (m ? m[0] : text).trim();
 }
 
+// Is there any scope text at all? An empty string, list or object has none.
+function hasScope(value) {
+  if (!value) return false;
+  if (typeof value === 'string') return value.trim().length > 0;
+  if (Array.isArray(value)) return value.some(hasScope);
+  if (typeof value === 'object') return Object.values(value).some(hasScope);
+  return true;
+}
+
 // The scope as stored is the brief the researcher was given. It is usually one string, but
 // render a list or an object of lists without guessing at its meaning.
 function Scope({ value }) {
-  if (!value) return null;
-  if (typeof value === 'string') return <p className="field-scope-text">{value}</p>;
+  if (!hasScope(value)) return null;
+  if (typeof value === 'string') return <p className="field-scope-text">{value.trim()}</p>;
   if (Array.isArray(value))
     return (
       <ul className="field-scope-list">
@@ -47,8 +48,7 @@ function Scope({ value }) {
   );
 }
 
-function Row({ atlas, item, summary }) {
-  const needs = item.prerequisites.filter((p) => atlas.items[p]);
+function Row({ item, summary }) {
   return (
     <li className="frow" id={item.id}>
       <div className="frow-id mono">{item.id}</div>
@@ -63,30 +63,6 @@ function Row({ atlas, item, summary }) {
             {plural(item.status.length, 'milestone')}
           </span>
         </div>
-        {(needs.length > 0 || item.unlocks.length > 0) && (
-          <dl className="frow-links">
-            {needs.length > 0 && (
-              <div>
-                <dt>Needs first</dt>
-                <dd>
-                  {needs.map((id) => (
-                    <BreakthroughChip key={id} atlas={atlas} id={id} />
-                  ))}
-                </dd>
-              </div>
-            )}
-            {item.unlocks.length > 0 && (
-              <div>
-                <dt>Unlocks</dt>
-                <dd>
-                  {item.unlocks.map((id) => (
-                    <BreakthroughChip key={id} atlas={atlas} id={id} />
-                  ))}
-                </dd>
-              </div>
-            )}
-          </dl>
-        )}
       </div>
     </li>
   );
@@ -111,15 +87,11 @@ export default function Field() {
       />
     );
 
-  const items = prerequisiteOrder(field.items);
+  const items = [...field.items].sort((a, b) => a.id.localeCompare(b.id));
   const summaries = Object.fromEntries((data?.breakthroughs || []).map((b) => [b.id, b.summary]));
   const milestones = items.reduce((n, i) => n + i.status.length, 0);
   const met = items.reduce((n, i) => n + i.met, 0);
   const moving = items.reduce((n, i) => n + i.moving, 0);
-  const mine = new Set(items.map((i) => i.id));
-  const inside = atlas.links.filter((l) => mine.has(l.from) && mine.has(l.to)).length;
-  const incoming = atlas.links.filter((l) => !mine.has(l.from) && mine.has(l.to)).length;
-  const outgoing = atlas.links.filter((l) => mine.has(l.from) && !mine.has(l.to)).length;
   const neighbours = atlas.fields.filter((f) => f.region === field.region && f.id !== field.id);
 
   return (
@@ -155,22 +127,7 @@ export default function Field() {
               <dt>Met</dt>
               <dd>{met}</dd>
             </div>
-            <div>
-              <dt>Order claims</dt>
-              <dd>{inside + incoming + outgoing}</dd>
-            </div>
           </dl>
-          <p className="fpage-links-note">
-            {inside + incoming + outgoing === 0
-              ? 'No order claim touches this field yet: the call that proposes links found none here.'
-              : [
-                  inside && `${plural(inside, 'link')} within the field`,
-                  incoming && `${plural(incoming, 'link')} from other fields`,
-                  outgoing && `${plural(outgoing, 'link')} to other fields`,
-                ]
-                  .filter(Boolean)
-                  .join(', ') + '.'}
-          </p>
         </header>
         <aside className="fpage-sky" aria-label="In the sky">
           <div className="fpage-marks">
@@ -185,10 +142,10 @@ export default function Field() {
       </div>
 
       <section className="fpage-list" aria-labelledby="list-title">
-        <h2 id="list-title">Its breakthroughs, in prerequisite order</h2>
+        <h2 id="list-title">Its breakthroughs</h2>
         <p className="section-note">
-          A breakthrough is listed after anything in this field it needs first. Among the rest,
-          those that others need come first.
+          Each is a breakthrough worth working towards, listed by ID. The marks show how many of
+          its milestones the atlas has assessed as in progress or met.
         </p>
         {data?.withheld?.length > 0 && (
           <p className="fpage-withheld">
@@ -208,12 +165,12 @@ export default function Field() {
         )}
         <ol className="frows">
           {items.map((item) => (
-            <Row key={item.id} atlas={atlas} item={item} summary={summaries[item.id]} />
+            <Row key={item.id} item={item} summary={summaries[item.id]} />
           ))}
         </ol>
       </section>
 
-      {data?.boundaries && (
+      {hasScope(data?.boundaries) && (
         <details className="fpage-brief">
           <summary>
             <span>Research brief</span>

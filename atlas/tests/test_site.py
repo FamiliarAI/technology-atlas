@@ -7,6 +7,7 @@ import threading
 import unittest
 from http.server import ThreadingHTTPServer
 from pathlib import Path
+from urllib.error import HTTPError
 from urllib.request import urlopen
 
 from atlas import core
@@ -17,8 +18,8 @@ from atlas.store import (
     REGION,
     REGIONS,
     breakthrough_data,
+    RESEARCH_SCOPE,
     catalog,
-    claims,
     connect,
     cut,
     encode,
@@ -72,12 +73,13 @@ class SiteTests(unittest.TestCase):
         self.db = self.root / 'atlas.sqlite3'
         body = b'saved copy'
         self.hash = sha(body)
+        scopes = {'QUA': 'Quantum Computing scope.', 'ZZZ': 'Unmapped Field' + RESEARCH_SCOPE}
         for prefix, name in [('QUA', 'Quantum Computing'), ('ZZZ', 'Unmapped Field')]:
             folder = self.root / 'runs' / prefix
             (folder / 'sources').mkdir(parents=True)
             (folder / 'sources' / (self.hash + '.html')).write_bytes(body)
             value = {
-                'field': {'prefix': prefix, 'field': name, 'boundaries': name + ' scope.'},
+                'field': {'prefix': prefix, 'field': name, 'boundaries': scopes[prefix]},
                 'created_at': '2026-11-01T00:00:00+00:00',
                 'innovations': [
                     record(f'{prefix}-01', f'{name} first <&> "one"', 'https://example.org/a'),
@@ -151,13 +153,14 @@ class SiteTests(unittest.TestCase):
                 'field': 'QUA',
                 'title': 'Quantum Computing first <&> "one"',
                 'milestones': ['in_progress'],
-                'prerequisites': [],
+                'overall': 0,
                 'moved_at': '2026-11-02',
             },
         )
-        self.assertEqual(data['breakthroughs'][1]['prerequisites'], ['QUA-01'])
+        self.assertEqual(data['breakthroughs'][1]['moved_at'], None)
         self.assertNotIn('search_text', encode(data).decode())
         self.assertEqual(data['recent'][0]['label'], 'Milestone text for QUA-01')
+        self.assertEqual(data['recent'][0]['milestone'], 'm1')
 
     def test_field_breakthrough_and_search_files(self):
         with connect(self.db) as db:
@@ -173,25 +176,14 @@ class SiteTests(unittest.TestCase):
             [{'id': 'QUA-03', 'title': 'Refused', 'stage': 'review-QUA-03', 'reason': 'Refusal.'}],
         )
         with connect(self.db) as db:
-            self.assertEqual(field_data(db, 'ZZZ')['withheld'], [])
+            other = field_data(db, 'ZZZ')
+        self.assertEqual(other['withheld'], [])
+        # The research prompt's instruction is not a scope: the field file leaves it empty.
+        self.assertEqual(other['boundaries'], '')
         self.assertEqual(field['breakthroughs'][0]['milestones'][0]['status'], 'in_progress')
-        self.assertEqual(field['breakthroughs'][0]['unlocks'], ['QUA-02'])
         self.assertEqual(field['breakthroughs'][0]['source_count'], 1)
         self.assertTrue(field['breakthroughs'][0]['summary'].startswith('Milestone text'))
-        self.assertEqual(
-            item['needs'],
-            [
-                {
-                    'id': 'QUA-01',
-                    'title': 'Quantum Computing first <&> "one"',
-                    'field': 'QUA',
-                    'field_name': 'Quantum Computing',
-                    'reason': 'Needs the first.',
-                }
-            ],
-        )
-        self.assertEqual(first['unlocks'][0]['id'], 'QUA-02')
-        self.assertEqual(first['unlocks'][0]['reason'], 'Needs the first.')
+        self.assertEqual(item['title'], 'Quantum Computing second')
         self.assertEqual(
             first['sources'],
             [{'url': 'https://example.org/a', 'title': 'Paper', 'status': 'saved'}],
@@ -201,6 +193,20 @@ class SiteTests(unittest.TestCase):
             self.assertNotIn(leak, text)
         judged = [row for row in first['progress'] if row['verdict']]
         self.assertEqual(judged[0]['quote'], 'quote')
+        self.assertEqual((judged[0]['criterion'], judged[0]['milestone']), (1, 'm1'))
+        self.assertEqual(
+            list(judged[0]),
+            [
+                'criterion',
+                'milestone',
+                'url',
+                'source_date',
+                'verdict',
+                'quote',
+                'model',
+                'added_at',
+            ],
+        )
         entry = index[0]
         self.assertEqual(list(entry), ['id', 'field', 'title', 'summary'])
         self.assertLessEqual(len(entry['summary']), 161)
@@ -210,14 +216,99 @@ class SiteTests(unittest.TestCase):
         self.assertEqual(cut('short text'), 'short text')
         self.assertEqual(cut('alpha beta gamma', 12), 'alpha beta…')
 
-    def test_claims_lists_every_needs_link_with_its_reason(self):
-        with connect(self.db) as db:
-            data = claims(db)
-            links = sum(len(item['prerequisites']) for item in catalog(db)['breakthroughs'])
+    def test_order_links_stay_in_the_records_but_not_in_the_site_data(self):
         self.assertEqual(
-            data, [{'id': 'QUA-02', 'needs': 'QUA-01', 'reason': 'Needs the first.', 'model': 'm'}]
+            core.load(self.core)['breakthroughs']['QUA-02']['prerequisites'][0]['id'], 'QUA-01'
         )
-        self.assertEqual(len(data), links)
+        with connect(self.db) as db:
+            files = dict(site_files(db))
+        self.assertNotIn('claims.json', files)
+        self.assertEqual(
+            sorted(files),
+            [
+                'b/QUA-01.json',
+                'b/QUA-02.json',
+                'b/ZZZ-01.json',
+                'b/ZZZ-02.json',
+                'catalog.json',
+                'field/QUA.json',
+                'field/ZZZ.json',
+                'search.json',
+            ],
+        )
+
+        def keys(value):
+            if isinstance(value, dict):
+                for key, child in value.items():
+                    yield key
+                    yield from keys(child)
+            elif isinstance(value, list):
+                for child in value:
+                    yield from keys(child)
+
+        for name, value in files.items():
+            found = set(keys(value)) & {'prerequisites', 'needs', 'unlocks', 'depth'}
+            self.assertEqual(found, set(), name)
+        # Breakthroughs within a field are in ID order.
+        self.assertEqual(
+            [item['id'] for item in files['field/QUA.json']['breakthroughs']], ['QUA-01', 'QUA-02']
+        )
+
+    def test_a_step_toward_the_whole_breakthrough_counts_as_movement(self):
+        data = core.load(self.core)
+        rows = data['progress'] + [
+            {
+                'breakthrough': 'QUA-02',
+                'milestone': None,
+                'url': 'https://example.org/b',
+                'copy': self.hash,
+                'source_date': '2026-10',
+                'verdict': 'advances',
+                'quote': 'whole quote',
+                'by': 'model',
+                'added_at': '2026-11-03',
+            },
+            {
+                'breakthrough': 'QUA-02',
+                'milestone': None,
+                'url': 'https://example.org/a',
+                'copy': sha(b'other copy'),
+                'source_date': None,
+                'verdict': 'contradicts',
+                'quote': 'against quote',
+                'by': 'model',
+                'added_at': '2026-11-01',
+            },
+        ]
+        core.write_progress(rows, self.core)
+        rebuild(self.core, self.db, roots=[self.root / 'runs'])
+        with connect(self.db) as db:
+            data = catalog(db)
+            item = breakthrough_data(db, 'QUA-02')
+            ids = [row[0] for row in db.execute("SELECT id FROM progress WHERE id LIKE 'added:%'")]
+        self.assertIn(f'added:{self.hash}:QUA-02:0', ids)
+        second = data['breakthroughs'][1]
+        self.assertEqual(
+            (second['id'], second['milestones'], second['overall'], second['moved_at']),
+            ('QUA-02', ['none'], 1, '2026-11-03'),
+        )
+        self.assertEqual(data['breakthroughs'][0]['overall'], 0)
+        self.assertEqual(
+            [(row['breakthrough'], row['milestone'], row['label']) for row in data['recent']],
+            [
+                ('QUA-02', None, None),
+                ('QUA-01', 'm1', 'Milestone text for QUA-01'),
+                ('QUA-02', None, None),
+            ],
+        )
+        judged = [row for row in item['progress'] if row['verdict']]
+        self.assertEqual(
+            [(row['criterion'], row['milestone'], row['verdict']) for row in judged],
+            [(None, None, 'contradicts'), (None, None, 'advances')],
+        )
+        # Judgements come before the research citations in the same list.
+        self.assertTrue(item['progress'][0]['verdict'])
+        self.assertEqual(item['milestones'][0]['status'], 'none')
 
     def test_server_serves_the_data_files(self):
         server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
@@ -229,13 +320,15 @@ class SiteTests(unittest.TestCase):
             for path in [
                 '/data/catalog.json',
                 '/data/search.json',
-                '/data/claims.json',
                 '/data/field/QUA.json',
                 '/data/b/QUA-01.json',
             ]:
                 with urlopen(base + path) as res:
                     self.assertEqual(res.headers['Content-Type'], 'application/json; charset=utf-8')
                     json.load(res)
+            with self.assertRaises(HTTPError) as error:
+                urlopen(base + '/data/claims.json')
+            self.assertEqual(error.exception.code, 404)
         finally:
             server.shutdown()
             server.server_close()
@@ -244,19 +337,20 @@ class SiteTests(unittest.TestCase):
     def test_export_writes_site_data_and_one_page_per_route(self):
         out = self.root / 'out'
         result = export(out, self.db, self.site, base_url='https://atlas.example/')
-        self.assertEqual(result['data'], 3 + 2 + 4)
+        self.assertEqual(result['data'], 2 + 2 + 4)
         self.assertEqual((out / 'assets/index.js').read_text(), 'run()')
         with connect(self.db) as db:
             self.assertEqual(json.loads((out / 'data/catalog.json').read_text()), catalog(db))
         for name in [
             'search.json',
-            'claims.json',
             'field/QUA.json',
             'field/ZZZ.json',
             'b/QUA-01.json',
         ]:
             self.assertTrue((out / 'data' / name).is_file(), name)
-        routes = ['', 'atlas', 'claims', 'about', 'field/QUA', 'field/ZZZ', 'b/QUA-01', 'b/ZZZ-02']
+        self.assertFalse((out / 'data/claims.json').exists())
+        self.assertFalse((out / 'claims').exists())
+        routes = ['', 'atlas', 'about', 'field/QUA', 'field/ZZZ', 'b/QUA-01', 'b/ZZZ-02']
         for route in routes:
             page = (out / route / 'index.html').read_text()
             self.assertEqual(page.count('<title>'), 1)

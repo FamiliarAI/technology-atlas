@@ -1,6 +1,6 @@
 /* The star chart, its locator and the atlas page. Palette, type and motion follow
    docs/plans/2026-11-11-site-design.md. Colour means progress state and nothing else:
-   amber is under way, white-gold is met; the structure accent is for claims and focus. */
+   amber is under way, white-gold is met; the structure accent is for lines, rings and focus. */
 
 /* ---------- Chart ---------- */
 
@@ -40,10 +40,6 @@
   mask-image: linear-gradient(to right, transparent 0%, #000 42%),
     linear-gradient(to bottom, #000 62%, transparent 88%);
   mask-composite: intersect;
-}
-
-.sky-chart.backdrop .sky-claims.rest {
-  opacity: 0.35;
 }
 
 /* On a phone the hero sky is figures only, soft, fading out at its foot. */
@@ -92,7 +88,6 @@
   animation: sky-draw 0.9s var(--ease) calc(var(--d) + 0.15s) both;
 }
 
-.sky-world.intro .sky-claims-in,
 .sky-world.intro .sky-beacons {
   animation: sky-fade 0.8s var(--ease) 1.2s both;
 }
@@ -258,23 +253,6 @@
   opacity: 0.25;
 }
 
-.sky-star.linked {
-  opacity: 0.95;
-}
-
-.sky-cross {
-  fill: none;
-  stroke: var(--accent);
-  stroke-width: 1.2;
-  stroke-linecap: round;
-  opacity: 0.55;
-}
-
-.sky-con.hover .sky-cross,
-.sky-con.focus .sky-cross {
-  opacity: 0.9;
-}
-
 .sky-seg {
   fill: none;
   stroke-linecap: butt;
@@ -385,57 +363,6 @@
 
 .sky-beacon-ring.met {
   stroke: var(--met);
-}
-
-/* Claim lines */
-
-.sky-claims {
-  pointer-events: none;
-}
-
-.sky-claim {
-  fill: none;
-  stroke-width: calc(1.25px * var(--ik));
-  stroke-linecap: round;
-}
-
-.sky-arrow {
-  fill: none;
-  stroke: var(--accent);
-  stroke-width: 1.2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.sky-claims.rest {
-  opacity: 0.45;
-  transition: opacity 0.5s var(--ease);
-}
-
-.sky-claims.rest .sky-claim {
-  stroke-width: calc(0.9px * var(--ik));
-}
-
-.sky-claims.rest .sky-arrow {
-  opacity: 0.7;
-}
-
-.sky-world.focused .sky-claims.rest,
-.sky-world.has-active .sky-claims.rest {
-  opacity: 0.15;
-}
-
-.sky-world.all-claims .sky-claims.full {
-  opacity: 0.75;
-}
-
-.sky-claims .drawn .sky-claim {
-  stroke-dasharray: 1;
-  animation: sky-draw 0.9s var(--ease) both;
-}
-
-.sky-claims .drawn .sky-arrow-in {
-  animation: sky-fade 0.3s ease 0.75s both;
 }
 
 /* Rulers on the stage edges: chart coordinates for whatever is in view */
@@ -775,25 +702,6 @@
   margin: 6px 0 0;
 }
 
-.sa-step-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin: 28px 0 2px;
-  padding-bottom: 8px;
-  font: 400 11.5px/1.4 var(--display);
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--accent);
-  border-bottom: 1px solid var(--hair-strong);
-}
-
-.sa-step-head .mono {
-  color: var(--muted);
-  font-size: 11px;
-  letter-spacing: 0;
-}
-
 .sa-blist ul {
   list-style: none;
   margin: 0;
@@ -855,11 +763,6 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
-
-.sa-b-needs {
-  color: var(--accent);
-  font-size: 11px;
 }
 
 .sa-b-count {
@@ -979,21 +882,6 @@
 
 .lg-dot {
   fill: #9aa5bd;
-}
-
-.lg-claim {
-  fill: none;
-  stroke: url(#lg-claim);
-  stroke-width: 1.4;
-}
-
-.lg-arrow {
-  fill: none;
-  stroke: var(--accent);
-  stroke-width: 1.2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  opacity: 0.6;
 }
 
 /* Star card */
@@ -1125,12 +1013,6 @@
   color: var(--met);
 }
 
-.sa-card-order {
-  margin-bottom: 18px;
-  color: var(--accent);
-  font-size: 11.5px;
-}
-
 /* ---------- The atlas page, phone: list first ---------- */
 
 .sa-phone {
@@ -1180,8 +1062,7 @@
     opacity: 0.5;
   }
   .sky-drift,
-  .sky-world.intro *,
-  .sky-claims .drawn * {
+  .sky-world.intro * {
     animation: none !important;
   }
 }
@@ -1191,66 +1072,18 @@
   right: 424px;
 }
 
-.lg-cross {
-  fill: none;
-  stroke: var(--accent);
-  stroke-width: 1.3;
-  stroke-linecap: round;
-  opacity: 0.8;
-}
-
-/* The switch that draws every claim at once. */
-.sa-claims-toggle {
-  position: absolute;
-  z-index: 2;
-  top: 20px;
-  right: 22px;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 7px 12px 7px 9px;
-  background: rgb(5 7 13 / 0.72);
-  border: 1px solid var(--hair-strong);
-  font: 400 11.5px/1 var(--display);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--soft);
-  backdrop-filter: blur(6px);
-}
-
-.sa-claims-toggle:hover {
-  color: var(--text);
-  border-color: rgb(127 178 255 / 0.5);
-}
-
-.sa-claims-toggle .track {
-  fill: none;
-  stroke: rgb(127 178 255 / 0.5);
-}
-
-.sa-claims-toggle .knob {
-  fill: var(--muted);
-  transition: cx 0.25s var(--ease);
-}
-
-.sa-claims-toggle.on {
-  color: var(--text);
-  border-color: rgb(127 178 255 / 0.6);
-}
-
-.sa-claims-toggle.on .track {
-  fill: rgb(127 178 255 / 0.18);
-}
-
-.sa-claims-toggle.on .knob {
-  fill: var(--accent);
-}
-
-.sa-stage:has(.sa-card) .sa-claims-toggle {
-  right: 424px;
-}
-
 .loc-bounds {
   fill: none;
   stroke: rgb(127 178 255 / 0.3);
+}
+
+/* Papers judged toward the breakthrough as a whole, beside the milestone count. */
+.sa-b-whole {
+  margin-left: 4px;
+}
+
+.sa-card-whole {
+  margin: -4px 0 12px;
+  color: var(--amber);
+  font-size: 11px;
 }
