@@ -6,18 +6,18 @@ Only `brief` and `models.brief` are added; every other byte of the file stays th
 """
 
 import argparse
+import hashlib
 import json
 import subprocess
-from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
 from datetime import datetime, timezone
 from pathlib import Path
 
 from ingestion.pipeline import passage_matches
 from ingestion.providers import Models
-from ingestion.sources import MIN_TEXT
 
-from . import add as adding, core as records, store
+from . import batch, core as records, store
+from .copies import choose, known_copies
 from .core import CORE
 from .store import CONFIG, DB, ROOT, connect
 
@@ -145,16 +145,21 @@ PROMPT = (
     '- possible: 1 or 2 paragraphs, each at most 400 characters. What people could do once this\n'
     "  exists that they cannot do today. Start from the reader's world, not from the technology.\n"
     '- why: 1 or 2 paragraphs, each at most 400 characters. What would change, and for whom, as the\n'
-    '  entry argues it. State it plainly; do not hedge it away.\n'
-    '- sources: exactly one item for every source given, in the order given.\n'
+    '  entry argues it. State it plainly. Caveats and limits do not belong here; they go in missing,\n'
+    '  uncertain and not_established.\n'
+    '- sources: one item for every source that has saved text, in the order given. A source with no\n'
+    '  saved text gets an item only if the entry says what it reports; otherwise leave it out.\n'
     '  - who: the people or organisation that did the work, at most 80 characters, for example\n'
-    '    "Google Quantum AI and collaborators". If the text does not say, use the journal or site.\n'
+    '    "Google Quantum AI and collaborators". Take it from the paper itself. Never name the website\n'
+    '    that hosts the copy, such as GitHub, arXiv or PubMed.\n'
     '  - showed: at most 300 characters. What they showed, in one or two sentences. For a source with\n'
     "    no saved text, say in one sentence what kind of work it is, from the entry's description,\n"
     '    and nothing more.\n'
-    "  - quote: one passage copied exactly, character for character, from that source's saved text,\n"
-    '    40 to 300 characters, in which the authors state the result. Not a title, a heading or a\n'
-    '    description of method. null if the source has no saved text or no such passage.\n'
+    "  - quote: one sentence or passage copied exactly, character for character, from that source's\n"
+    '    saved text, 40 to 300 characters, in which the authors state a concrete finding: what they\n'
+    '    measured, observed, proved or built. Not a title, a heading, a method, an aim, or a sentence\n'
+    '    about what the results suggest or make possible. null if the source has no saved text or no\n'
+    '    such passage.\n'
     '  - cited_for: one sentence, at most 160 characters: the part of the case this source supports.\n'
     '  - not_established: one sentence, at most 160 characters: the gap between what they showed and\n'
     '    the breakthrough. This is about the science, never about access to the paper.\n'
@@ -166,7 +171,8 @@ PROMPT = (
     '- milestones: one item for each milestone, same ids, same order.\n'
     '  - label: at most 10 words and 80 characters, naming the result that would have to be seen.\n'
     '  - explanation: at most 240 characters. One sentence on what would have to be shown, then one\n'
-    '    on why it matters for the breakthrough.\n'
+    '    on why it matters for the breakthrough. Statements, never instructions: write "A trial would\n'
+    '    have to show X", not "Show X".\n'
     '- uncertain: 1 to 3 items, each at most 160 characters. Open questions about the science, or\n'
     '  about how the milestones should be judged. Nothing about documents, dates or citations.\n'
     '\n'
@@ -177,6 +183,10 @@ PROMPT = (
     'Sources:\n'
     '{sources}\n'
 )
+
+# Identifies the prompt a stored brief was written from (brief.prompt); --missing rewrites
+# briefs whose hash differs.
+PROMPT_HASH = hashlib.sha256(PROMPT.encode()).hexdigest()[:12]
 
 RETRY = (
     '\nYour previous answer was rejected:\n'
@@ -203,13 +213,11 @@ def describe(item):
 
 
 def saved_text(source, db):
-    """Full extracted text of a source's fullest saved copy, chosen as atlas.add.save chooses.
-    Empty when no copy is on this computer or the fullest has under MIN_TEXT characters (a
-    cookie wall or error page, not the paper)."""
-    chosen = adding.best(adding.known_copies(source, db))
-    if chosen is None or len(chosen[2].strip()) < MIN_TEXT:
-        return ''
-    return chosen[2]
+    """Full extracted text of the copy atlas.copies.choose picks: a trusted copy of the work
+    itself with at least MIN_TEXT characters. Empty when there is none (no copy on this
+    computer, a cookie wall or error page, or only PDFs that are other works)."""
+    chosen = choose(source, known_copies(source, db))
+    return chosen.text if chosen else ''
 
 
 def gather(data, identifier, db):
@@ -324,13 +332,14 @@ def validate(item, sources, result):
             reject(f'source url {url} is not one of the given URLs')
     if len(urls) != len(set(urls)):
         reject('a source url appears twice')
-    if urls != given and set(urls) <= set(given) and len(urls) == len(set(urls)):
-        missing = [url for url in given if url not in urls]
-        reject(
-            f'sources must be every given source in the given order; missing: {missing}'
-            if missing
-            else 'sources must be in the order given'
-        )
+    if len(urls) == len(set(urls)) and set(urls) <= set(given):
+        missing = [
+            source['url'] for source in sources if source['text'] and source['url'] not in urls
+        ]
+        if missing:
+            reject(f'every source with saved text must appear; missing: {missing}')
+        elif urls != [url for url in given if url in urls]:
+            reject('sources must be in the order given')
     for entry in result['sources']:
         where = f'source {entry["url"]}'
         check(entry['who'], 'who', where + ' who')
@@ -373,6 +382,7 @@ def validate(item, sources, result):
             for milestone in result['milestones']
         ],
         'uncertain': result['uncertain'],
+        'prompt': PROMPT_HASH,
     }
 
 
@@ -395,7 +405,7 @@ def write(identifier, brief, model=MODEL, core=CORE):
     item['brief'] = brief
     item.setdefault('models', {})['brief'] = model
     updated = dump(item)
-    path.write_text(updated, encoding='utf-8')
+    records.replace_text(path, updated)
 
 
 def _call(identifier):
@@ -463,54 +473,103 @@ def show(identifier, result, attempts):
         print(f'  {"checked  " if source["checked"] else "unchecked"} {source["url"]}')
 
 
+def wanted(data, missing):
+    """Active breakthroughs, in ID order; with missing, only those with no brief or a brief
+    written from another prompt."""
+    return sorted(
+        identifier
+        for identifier, item in data['breakthroughs'].items()
+        if item.get('status') == 'active'
+        and (not missing or (item.get('brief') or {}).get('prompt') != PROMPT_HASH)
+    )
+
+
 def main(argv=None, core=CORE, path=DB):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('identifiers', nargs='+', metavar='ID')
+    parser.add_argument('identifiers', nargs='*', metavar='ID')
+    parser.add_argument('--all', action='store_true', help='every active breakthrough')
+    parser.add_argument(
+        '--missing',
+        action='store_true',
+        help='only breakthroughs with no brief, or one written from another prompt',
+    )
     parser.add_argument('--workers', type=int, default=3, help='parallel model calls (default: 3)')
     parser.add_argument('--no-commit', action='store_true')
     args = parser.parse_args(argv)
     if args.workers < 1:
         parser.error('--workers must be at least 1')
-    failed = False
-    folders = []
-    completed = 0
-    errors = (OSError, ValueError, RuntimeError, subprocess.SubprocessError)
-    with ThreadPoolExecutor(max_workers=args.workers) as pool:
-        jobs = []
-        for identifier in dict.fromkeys(args.identifiers):
-            try:
-                item, sources, text = prepare(identifier, core, path)
-                folder, call = _call(identifier)
-                jobs.append((identifier, folder, pool.submit(answer, item, sources, text, call)))
-            except errors as error:
-                print(f'{identifier}: {error}')
-                failed = True
-        # Only model calls run in workers; writes happen here, in input order.
-        for identifier, folder, future in jobs:
-            folders.append(str(folder.relative_to(ROOT) if folder.is_relative_to(ROOT) else folder))
-            try:
-                result, attempts = future.result()
-                write(identifier, result, core=core)
-                _success(folder, attempts)
-            except errors as error:
-                print(f'{identifier}: {error}')
-                failed = True
-                continue
-            completed += 1
-            show(identifier, result, attempts)
+    if not args.identifiers and not args.all and not args.missing:
+        parser.error('name breakthroughs, or pass --all or --missing')
     try:
-        if completed:
+        data = records.load(core)
+    except (OSError, ValueError) as error:
+        print(error)
+        return 1
+    unknown = [
+        identifier for identifier in args.identifiers if identifier not in data['breakthroughs']
+    ]
+    if unknown:
+        parser.error('unknown breakthrough: ' + ', '.join(unknown))
+    identifiers = list(args.identifiers)
+    if args.all or args.missing:
+        everything = wanted(data, args.missing)
+        if identifiers and args.missing:
+            identifiers = [identifier for identifier in identifiers if identifier in everything]
+        elif not identifiers:
+            identifiers = everything
+    identifiers = list(dict.fromkeys(identifiers))
+    folders = {}
+
+    def message(done):
+        return (
+            f"Write reader's version for {len(done)} breakthroughs ({done[0]} to {done[-1]})"
+            f'\n\nModel: {MODEL}\nPrompt: {PROMPT_HASH}\nCalls:\n'
+            + '\n'.join(folders[identifier] for identifier in done)
+        )
+
+    writer = batch.Writer(50, not args.no_commit, message, core)
+
+    def work(identifier, stop):
+        item, sources, text = prepare(identifier, core, path)
+        folder, call = _call(identifier)
+        folders[identifier] = str(
+            folder.relative_to(ROOT) if folder.is_relative_to(ROOT) else folder
+        )
+
+        def guarded(prompt_text):
+            if stop.is_set():
+                raise batch.Stopped()
+            return call(prompt_text)
+
+        result, attempts = answer(item, sources, text, guarded)
+        writer.write(identifier, lambda: write(identifier, result, core=core))
+        _success(folder, attempts)
+        return result, attempts
+
+    def report(identifier, outcome):
+        status, value = outcome
+        if status == 'done':
+            show(identifier, *value)
+        elif status == 'failed':
+            print(f'{identifier}: failed: {value}')
+
+    outcomes, exhausted = batch.run(identifiers, work, args.workers, report)
+    failed = sum(1 for status, _ in outcomes.values() if status == 'failed')
+    stopped = sum(1 for status, _ in outcomes.values() if status == 'stopped')
+    done = [value for status, value in outcomes.values() if status == 'done']
+    try:
+        if done:
             store.rebuild(core=core, path=path)
-        if not args.no_commit and completed:
-            message = (
-                f"Write reader's version for {', '.join(args.identifiers)} "
-                f'({completed} breakthroughs)\n\nModel: {MODEL}\nCalls:\n' + '\n'.join(folders)
-            )
-            records.commit(message)
+        writer.flush()
     except (OSError, ValueError, subprocess.SubprocessError) as error:
         print(error)
-        failed = True
-    return int(failed)
+        return 1
+    print(
+        f'Done: {len(done)} briefs written, {failed} failed, {stopped} not started; '
+        f'{sum(1 for _, attempts in done if attempts > 1)} needed the retry'
+        + ('. Stopped: a provider reported exhaustion.' if exhausted else '')
+    )
+    return int(bool(failed) or exhausted)
 
 
 if __name__ == '__main__':

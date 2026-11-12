@@ -6,16 +6,19 @@ text, this fetches the abstract from NCBI E-utilities and, when it names one, th
 and records them as `alternative` copies of the same source, rebuilds and commits atlas/core
 unless --no-commit. No model calls.
 
---list counts, without fetching, the PubMed sources that would be re-captured: those of the named
-breakthroughs, or of the whole atlas when none is named.
+With no ID, every PubMed source in the atlas is covered. --list counts, without fetching, the
+PubMed sources that would be re-captured. Resumable: a rerun skips what is done.
 """
 
 import argparse
+import time
 from contextlib import closing
 
 from ingestion.sources import MIN_TEXT, Archive, pubmed_id
 
 from . import add as adding, core as records, store
+from .batch import ARCHIVE_LOCK
+from .copies import choose, known_copies
 from .core import CORE
 from .store import DB, connect
 
@@ -35,29 +38,43 @@ def short(data, urls, db):
     for url in dict.fromkeys(urls):
         if pubmed_id(url) is None or url not in data['sources']:
             continue
-        chosen = adding.best(adding.known_copies(data['sources'][url], db))
-        if chosen is None or len(chosen[2].strip()) < MIN_TEXT:
+        source = data['sources'][url]
+        if choose(source, known_copies(source, db)) is None:
             found.append(url)
     return found
 
 
-def recapture(urls, core=CORE, path=DB, archive=None):
-    """Fetch the abstract and PMC copies for urls and record them. Returns {url: characters of
-    the fullest copy afterwards}."""
-    archive = archive or Archive(adding.ADDED)
-    data = records.load(core)
+def recapture(urls, core=CORE, path=DB, archive=None, every=20, pause=1.0, echo=None):
+    """Fetch the abstract and PMC copies for urls and record them, writing sources.jsonl every
+    `every` URLs so an interrupted run keeps its work; a rerun skips what is done (the archive
+    keeps each fetch). Pauses `pause` seconds between sources on top of the archive's NCBI
+    rate limit. Rebuilds once at the end. Returns {url: characters of the fullest copy}."""
     result = {}
-    for url in urls:
-        archive.pubmed(url)
+    data = records.load(core)
+    for number, url in enumerate(urls, 1):
+        with ARCHIVE_LOCK:
+            archive_ = archive or Archive(adding.ADDED)
+            try:
+                archive_.pubmed(url)
+            except (OSError, ValueError) as error:
+                if echo:
+                    echo(f'  {url}: failed: {error}')
+                continue
+            items = archive_.evidence(url)
         source = data['sources'][url]
         known = {copy['sha256'] for copy in source['copies']}
         for copy in adding.captured(url):
             if copy['sha256'] not in known and copy['kind'] == 'alternative':
                 source['copies'].append(copy)
-        texts = [len(item['text'].strip()) for item in archive.evidence(url)]
-        result[url] = max(texts, default=0)
+        result[url] = max((len(item['text'].strip()) for item in items), default=0)
         if result[url] >= MIN_TEXT:
             source['status'] = 'saved'
+        if echo:
+            echo(f'  {number}/{len(urls)} {url}: {result[url]} characters')
+        if number % every == 0:
+            records.write_sources(data['sources'], core)
+        if pause and number < len(urls):
+            time.sleep(pause)
     records.write_sources(data['sources'], core)
     store.rebuild(core=core, path=path)
     return result
@@ -69,8 +86,6 @@ def main(argv=None, core=CORE, path=DB):
     parser.add_argument('--list', action='store_true', help='count only; fetch nothing')
     parser.add_argument('--no-commit', action='store_true')
     args = parser.parse_args(argv)
-    if not args.identifiers and not args.list:
-        parser.error('name breakthroughs, or pass --list')
     data = records.load(core)
     for identifier in args.identifiers:
         if identifier not in data['breakthroughs']:
@@ -87,13 +102,15 @@ def main(argv=None, core=CORE, path=DB):
         for url in found:
             print('  ' + url)
         return 0
-    result = recapture(found, core, path)
-    for url, characters in result.items():
-        print(f'  {url}: {characters} characters')
+    result = recapture(found, core, path, echo=lambda text: print(text, flush=True))
+    fixed = sum(1 for characters in result.values() if characters >= MIN_TEXT)
+    print(f'Done: {fixed} of {len(found)} now have readable text')
     if not args.no_commit and result:
+        scope = ', '.join(args.identifiers) or 'the whole atlas'
         records.commit(
-            f'Re-capture {len(result)} PubMed sources for {", ".join(args.identifiers)}\n\n'
-            'Abstracts from NCBI E-utilities and PMC pages, recorded as alternative copies.'
+            f'Re-capture {len(result)} PubMed sources ({scope})\n\n'
+            'Abstracts from NCBI E-utilities and PMC pages, recorded as alternative copies; '
+            f'{fixed} now have readable text.'
         )
     return 0
 

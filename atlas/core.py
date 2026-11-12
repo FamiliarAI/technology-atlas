@@ -17,9 +17,17 @@ class _Loaded(dict):
     """Keep file locations for checking, outside the persisted records."""
 
 
+def replace_text(path, text):
+    """Write text to path atomically, so a concurrent reader sees the old or the new file."""
+    path = Path(path)
+    temp = path.with_name(path.name + '.tmp')
+    temp.write_text(text, encoding='utf-8')
+    os.replace(temp, path)
+
+
 def _json(path, value):
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(value, indent=1, ensure_ascii=False) + '\n', encoding='utf-8')
+    replace_text(path, json.dumps(value, indent=1, ensure_ascii=False) + '\n')
 
 
 def _rows(path):
@@ -43,17 +51,17 @@ def write_breakthrough(item, core=CORE):
 def write_sources(sources, core=CORE):
     core = Path(core)
     core.mkdir(parents=True, exist_ok=True)
-    (core / 'sources.jsonl').write_text(
+    replace_text(
+        core / 'sources.jsonl',
         ''.join(json.dumps(sources[url], ensure_ascii=False) + '\n' for url in sorted(sources)),
-        encoding='utf-8',
     )
 
 
 def write_progress(rows, core=CORE):
     core = Path(core)
     core.mkdir(parents=True, exist_ok=True)
-    (core / 'progress.jsonl').write_text(
-        ''.join(json.dumps(row, ensure_ascii=False) + '\n' for row in rows), encoding='utf-8'
+    replace_text(
+        core / 'progress.jsonl', ''.join(json.dumps(row, ensure_ascii=False) + '\n' for row in rows)
     )
 
 

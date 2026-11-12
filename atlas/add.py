@@ -16,12 +16,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from ingestion.pipeline import Models, passage_matches
-from ingestion.sources import MIN_TEXT, UA, Archive, extract, request_url
+from ingestion.sources import UA, Archive, request_url
 from . import core as records, store
+from .batch import ARCHIVE_LOCK
+from .copies import ADDED, Copy, choose, known_copies
 from .core import CORE
 from .store import CONFIG, DB, ROOT, connect
 
-ADDED = ROOT / 'atlas/data/added'
 CANDIDATES = 20
 TEXT_LIMIT = 120000
 STOP = set(
@@ -132,70 +133,49 @@ def rank(db, opening, forced=None, limit=CANDIDATES):
     return chosen
 
 
-FORMATS = {'pdf': 'application/pdf', 'xml': 'application/xml', 'txt': 'text/plain'}
-
-
-def copy_text(file):
-    """Extracted text of a saved copy file."""
-    body = Path(file).read_bytes()
-    kind = FORMATS.get(Path(file).suffix.lstrip('.').lower(), 'text/html')
-    if body.startswith(b'%PDF-'):
-        kind = 'application/pdf'
-    try:
-        return extract(body, kind)[1]
-    except ValueError:
-        return ''
-
-
-def known_copies(source, db):
-    """(sha256, path, text, kind) for each recorded copy of a source found on this computer."""
-    found = []
-    for copy in source.get('copies', []):
-        row = db.execute('SELECT path FROM assets WHERE id=?', (copy['sha256'],)).fetchone()
-        if row is not None and Path(row['path']).is_file():
-            found.append((copy['sha256'], row['path'], copy_text(row['path']), copy['kind']))
-    return found
-
-
-def best(copies):
-    """The copy with the most extracted text, or None."""
-    return max(copies, key=lambda copy: len(copy[2].strip()), default=None)
-
-
 def captured(url):
     """Copies of url in the atlas/data/added archive: {sha256, format, kind} each."""
     if not (ADDED / 'captures.json').is_file():
         return []
+    with ARCHIVE_LOCK:
+        artifacts = Archive(ADDED).source(url)['artifacts']
     return [
         {key: artifact[key] for key in ('sha256', 'format', 'kind')}
-        for artifact in Archive(ADDED).source(url)['artifacts']
+        for artifact in artifacts
         if (ADDED / artifact['path']).is_file()
     ]
 
 
-def save(url, path=DB, core=CORE):
+def save(url, path=DB, core=CORE, title=None):
     (
-        """Best saved copy for url: (sha256, path, text, kind), the one with the most """
-        """text. Captures only when the recorded copies have under MIN_TEXT characters; a """
-        """PubMed page then also gets its E-utilities abstract and PMC page."""
+        """The copy of url to read, as a Copy: the trusted copy with the most text """
+        """(atlas.copies). Captures only when no trusted copy has MIN_TEXT characters; a """
+        """PubMed page then also gets its E-utilities abstract and PMC page. When still none """
+        """has, the trusted copy with the most text is returned for the caller to judge."""
     )
-    source = records.load(core)['sources'].get(url, {})
+    source = dict(records.load(core)['sources'].get(url) or {'url': url, 'title': title or ''})
     with closing(connect(path)) as db:
-        copies = known_copies(source, db)
-    chosen = best(copies)
-    if chosen and len(chosen[2].strip()) >= MIN_TEXT:
+        found = known_copies(source, db)
+    chosen = choose(source, found)
+    if chosen:
         return chosen
     ADDED.mkdir(parents=True, exist_ok=True)
-    archive = Archive(ADDED)
-    archive.capture(url)
-    archive.pubmed(url)
-    for item in archive.evidence(url):
-        copies.append(
-            (item['sha256'], str((ADDED / item['path']).resolve()), item['text'], item['kind'])
-        )
-    if not copies:
+    with ARCHIVE_LOCK:
+        archive = Archive(ADDED)
+        archive.capture(url)
+        archive.pubmed(url)
+        items = archive.evidence(url)
+    known = {copy.sha256 for copy in found}
+    for item in items:
+        if item['sha256'] not in known:
+            path_ = str((ADDED / item['path']).resolve())
+            found.append(
+                Copy(item['sha256'], path_, item['text'], item['kind'], item.get('resolved_url'))
+            )
+    chosen = choose(source, found) or choose(source, found, minimum=1)
+    if chosen is None:
         raise SystemExit('Could not save ' + url + '; see ' + str(ADDED / 'captures.json'))
-    return best(copies)
+    return chosen
 
 
 def request_wayback(url):
@@ -227,27 +207,10 @@ def _call(config):
     return calls, lambda prompt: Models(config).call('format', prompt, SCHEMA, calls)
 
 
-def add(
-    url,
-    forced=None,
-    call=None,
-    saver=None,
-    path=DB,
-    core=CORE,
-    title=None,
-    only=None,
-    record_captured=None,
-):
-    (
-        """Save url, judge it against ranked milestones, and store verified rows. """
-        """A new source gets title, or its URL when none is given. With only, rows for """
-        """other breakthroughs are not stored, and only that breakthrough's earlier rows """
-        """for url are replaced. Every copy captured for url is recorded unless a stub """
-        """saver is given (record_captured overrides). Returns (stored, rejected)."""
-    )
-    copy = saver(url) if saver else save(url, path, core)
-    sha, file, text = copy[:3]
-    kind = copy[3] if len(copy) > 3 else 'source'
+def assess(url, copy, forced=None, call=None, path=DB, only=None):
+    """Judge a saved copy against ranked milestones without writing anything. Returns a dict:
+    stored and rejected rows, source_date, model, added_at."""
+    text = copy[2]
     if not text.strip():
         raise SystemExit('Saved copy has no extractable text; attach a readable copy')
     with closing(connect(path)) as db:
@@ -257,35 +220,45 @@ def add(
         ):
             raise SystemExit('Unknown breakthrough ' + forced)
         candidates = rank(db, text[:4000], forced)
-        config = json.loads(CONFIG.read_text())
-        model = config['format']['model']
-        if call is None:
-            _, call = _call(config)
-        result = judge(url, text, candidates, call)
-        allowed = {(milestone['breakthrough'], milestone['criterion']) for milestone in candidates}
-        # Criterion 0: a step toward a candidate breakthrough as a whole.
-        allowed |= {(milestone['breakthrough'], 0) for milestone in candidates}
-        stored, rejected = [], []
-        for row in result['rows']:
-            if only and row['breakthrough'] != only:
-                rejected.append((row, 'other breakthrough, not stored'))
-            elif (row['breakthrough'], row['criterion']) not in allowed:
-                rejected.append((row, 'not a candidate milestone'))
-            elif row['criterion'] == 0 and row['verdict'] == 'meets':
-                rejected.append((row, 'meets needs a milestone'))
-            elif not passage_matches(row['quote'], text):
-                rejected.append((row, 'quote not found in saved copy'))
-            else:
-                stored.append(row)
-        added_at = datetime.now(timezone.utc).isoformat()
+    config = json.loads(CONFIG.read_text())
+    if call is None:
+        _, call = _call(config)
+    result = judge(url, text, candidates, call)
+    allowed = {(milestone['breakthrough'], milestone['criterion']) for milestone in candidates}
+    # Criterion 0: a step toward a candidate breakthrough as a whole.
+    allowed |= {(milestone['breakthrough'], 0) for milestone in candidates}
+    stored, rejected = [], []
+    for row in result['rows']:
+        if only and row['breakthrough'] != only:
+            rejected.append((row, 'other breakthrough, not stored'))
+        elif (row['breakthrough'], row['criterion']) not in allowed:
+            rejected.append((row, 'not a candidate milestone'))
+        elif row['criterion'] == 0 and row['verdict'] == 'meets':
+            rejected.append((row, 'meets needs a milestone'))
+        elif not passage_matches(row['quote'], text):
+            rejected.append((row, 'quote not found in saved copy'))
+        else:
+            stored.append(row)
+    return {
+        'stored': stored,
+        'rejected': rejected,
+        'source_date': result['source_date'],
+        'model': config['format']['model'],
+        'added_at': datetime.now(timezone.utc).isoformat(),
+    }
+
+
+def record(url, copy, judged, core=CORE, title=None, only=None, record_captured=True):
+    """Write a judged source to atlas/core: the source line and copies, and its progress rows
+    (replacing earlier rows for url, or only only's earlier rows). Does not rebuild."""
+    sha, file = copy[0], copy[1]
+    kind = copy[3] if len(copy) > 3 else 'source'
     data = records.load(core)
     source = data['sources'].setdefault(
         url, {'url': url, 'title': title or url, 'status': 'saved', 'copies': []}
     )
     chosen = {'sha256': sha, 'format': Path(file).suffix.lstrip('.').lower(), 'kind': kind}
-    # Every copy captured for url is recorded, so later readers can choose the fullest one.
-    if record_captured is None:
-        record_captured = saver is None
+    # Every copy captured for url is recorded, so later readers can choose among them.
     for entry in [chosen] + (captured(url) if record_captured else []):
         if entry['sha256'] not in {known['sha256'] for known in source['copies']}:
             source['copies'].append(entry)
@@ -297,7 +270,7 @@ def add(
         for row in data['progress']
         if row['url'] != url or (only and row['breakthrough'] != only)
     ]
-    for row in stored:
+    for row in judged['stored']:
         milestone = None  # criterion 0: the breakthrough as a whole
         if row['criterion']:
             milestone = data['breakthroughs'][row['breakthrough']]['completion_criteria'][
@@ -309,16 +282,29 @@ def add(
                 'milestone': milestone,
                 'url': url,
                 'copy': sha,
-                'source_date': result['source_date'],
+                'source_date': judged['source_date'],
                 'verdict': row['verdict'],
                 'quote': row['quote'],
-                'by': model,
-                'added_at': added_at,
+                'by': judged['model'],
+                'added_at': judged['added_at'],
             }
         )
     records.write_progress(rows, core)
+
+
+def add(url, forced=None, call=None, saver=None, path=DB, core=CORE, title=None, only=None):
+    (
+        """Save url, judge it against ranked milestones, store verified rows and rebuild. """
+        """A new source gets title, or its URL when none is given. With only, rows for """
+        """other breakthroughs are not stored, and only that breakthrough's earlier rows """
+        """for url are replaced. Every copy captured for url is recorded unless a stub """
+        """saver is given. Returns (stored, rejected)."""
+    )
+    copy = saver(url) if saver else save(url, path, core, title)
+    judged = assess(url, copy, forced, call, path, only)
+    record(url, copy, judged, core, title, only, record_captured=saver is None)
     store.rebuild(core=core, path=path)
-    return stored, rejected
+    return judged['stored'], judged['rejected']
 
 
 def target(row):

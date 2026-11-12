@@ -8,6 +8,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from atlas import brief as briefs, core, find as finding
+from atlas.copies import Copy
 from atlas.store import breakthrough_data, connect, rebuild, resolver, sha
 
 TEXT = (
@@ -253,7 +254,7 @@ class PassTests(unittest.TestCase):
         added.mkdir()
         archive = lambda root: Archive(root, lambda target: pages[target], lambda wait: None)
         with patch('atlas.add.ADDED', added), patch('atlas.add.Archive', archive):
-            sha256, file, text, kind = adding.save(url, self.db, self.core)
+            sha256, file, text, kind, _ = adding.save(url, self.db, self.core)
         self.assertEqual(kind, 'alternative')
         self.assertIn('the treatment worked', text)
         self.assertTrue(file.endswith('.xml'))
@@ -416,8 +417,8 @@ class PassTests(unittest.TestCase):
             prompts.append(text)
             return answer([self.saved, self.unsaved], quote='Cookies must be enabled')
 
-        cookie = [(self.hash, 'wall.html', wall, 'source')]
-        with patch('atlas.add.known_copies', return_value=cookie):
+        cookie = [Copy(self.hash, 'wall.txt', wall, 'source', self.saved)]
+        with patch('atlas.brief.known_copies', return_value=cookie):
             result, _ = briefs.brief('NRL-17', call=call, core=self.core, path=self.db)
         self.assertNotIn(wall, prompts[0])
         self.assertEqual(prompts[0].count('Saved text: none'), 2)

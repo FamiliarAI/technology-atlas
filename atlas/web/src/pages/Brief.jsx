@@ -3,6 +3,9 @@ import { StatusLabel } from '../glyphs.jsx';
 import Record, { Citations, Evidence, Paragraphs, SourceList, host, safe, sourceName } from '../Record.jsx';
 import { plural } from './common.jsx';
 
+// A page shows this many sources in full; the rest fold under one line.
+const LEAD_SOURCES = 4;
+
 // The reader's version of a breakthrough (the record's `brief`): a few plain questions, the
 // sources that answer them, and the milestones in plain words. The research record it was
 // written from follows, collapsed. Any part may be missing; a missing part shows nothing.
@@ -189,10 +192,23 @@ export default function BriefBody({ brief, record, item, sources, position, judg
           fade={fade(3)}
         >
           <ol className="brief-sources">
-            {briefSources.map((source, n) => (
+            {briefSources.slice(0, LEAD_SOURCES).map((source, n) => (
               <BriefSource key={n} source={source} entry={sources.byUrl.get(source.url)} />
             ))}
           </ol>
+          {briefSources.length > LEAD_SOURCES && (
+            <details className="criterion brief-more">
+              <summary>
+                {briefSources.length - LEAD_SOURCES} more{' '}
+                {briefSources.length - LEAD_SOURCES === 1 ? 'source' : 'sources'}
+              </summary>
+              <ol className="brief-sources">
+                {briefSources.slice(LEAD_SOURCES).map((source, n) => (
+                  <BriefSource key={n} source={source} entry={sources.byUrl.get(source.url)} />
+                ))}
+              </ol>
+            </details>
+          )}
         </Question>
       )}
 
