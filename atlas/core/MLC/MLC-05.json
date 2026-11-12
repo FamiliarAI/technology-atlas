@@ -219,7 +219,8 @@
   "reconcile": "grok-4.7",
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
-  "rewrite": "gpt-6.1-sol"
+  "rewrite": "gpt-6.1-sol",
+  "brief": "gpt-6.1-sol"
  },
  "sources": [
   "https://www.nature.com/articles/s41583-020-0277-3",
@@ -232,5 +233,80 @@
   "review": "ingestion/runs/all-fields/MLC/attempts/review-MLC-05-bacb7e6a1f684af6aa245345e7005f5d/validated.json"
  },
  "field": "MLC",
- "status": "active"
+ "status": "active",
+ "brief": {
+  "title": "AI training with each layer learning locally",
+  "possible": [
+   "Researchers could train large AI models with each layer learning from nearby information available at the time, while matching strong standard training methods. Today’s standard, backpropagation, sends error signals backward through the network to determine which connections should change."
+  ],
+  "why": [
+   "For people building AI, this would remove a major coordination requirement from training while preserving learning quality. Layers could become less dependent on one another’s update schedules, opening ways to keep data moving through a network as it learns."
+  ],
+  "sources": [
+   {
+    "url": "https://www.nature.com/articles/s41583-020-0277-3",
+    "who": "Timothy P. Lillicrap, Adam Santoro, Luke Marris, Colin J. Akerman and Geoffrey Hinton",
+    "showed": "They described how feedback in the brain might let individual connections approximate the learning signals used by backpropagation.",
+    "quote": null,
+    "cited_for": "The review explains the biological motivation for learning from locally available signals.",
+    "not_established": "A proposed brain mechanism does not demonstrate competitive training of large artificial networks.",
+    "checked": false
+   },
+   {
+    "url": "https://arxiv.org/abs/2212.13345",
+    "who": "Geoffrey Hinton",
+    "showed": "His Forward-Forward method trains each layer to distinguish real from negative examples without a backward pass. This preprint demonstrated learning on small problems.",
+    "quote": "The forward-forward algorithm is somewhat slower than backpropagation and does not generalize\nquite as well on several of the toy problems investigated in this paper so it is unlikely to replace\nbackpropagation for applications where power is not an issue.",
+    "cited_for": "A concrete learning method can operate without sending error signals backward through the whole network.",
+    "not_established": "The small demonstrations do not establish comparable learning as networks and training datasets grow.",
+    "checked": true
+   },
+   {
+    "url": "https://arxiv.org/html/2609.33240v1",
+    "who": "Zhaoxian Wu, Haichuan Liu and Tianyi Chen",
+    "showed": "Their preprint reports that tested local methods lagged behind backpropagation on image and language tasks. Several gaps grew with network depth or training scale.",
+    "quote": "This plateau arises because concurrent layer updates create a moving-target problem: an update in one layer changes the input distribution for the next layer, which is optimizing a different objective than it did at the previous step.",
+    "cited_for": "The tested methods expose difficulties in turning useful local changes into strong overall learning.",
+    "not_established": "These results do not prove that every possible local learning rule must fail.",
+    "checked": true
+   }
+  ],
+  "shown": [
+   "Hinton demonstrated local learning on small problems. Wu and colleagues tested several approaches at larger scales, reaching language models with 124 million adjustable connections, but reported substantial performance gaps. Both studies are preprints."
+  ],
+  "missing": [
+   "A local rule still needs to match strong backpropagation training as model size, depth and training data grow.",
+   "A complete implementation needs to expose retained activity, delayed feedback and any dependence on repeated network-wide calculations.",
+   "Independent reproduction and full resource measurements are needed to establish that coordination burdens have actually been removed.",
+   "The same rule still needs a hardware demonstration measuring training energy alongside learning quality."
+  ],
+  "milestones": [
+   {
+    "id": "m1",
+    "label": "Comparable language learning with a billion adjustable connections",
+    "explanation": "A local rule would have to meet the proposed prediction-error margin without retaining the full activity history for a backward pass or sending errors backward through all layers. This would establish parity at the target scale."
+   },
+   {
+    "id": "m2",
+    "label": "Sustained learning quality across increasing training scales",
+    "explanation": "Comparisons would have to be specified before testing across sizes, depths and data budgets, reporting prediction-error scores and all extra training work. This would distinguish sustained parity from an isolated success."
+   },
+   {
+    "id": "m3",
+    "label": "Reproducible local updates with full resource costs",
+    "explanation": "Independent teams would have to reproduce results from a fully specified rule, with memory, computation, communication and repeated-run variation measured. This would expose hidden coordination or costly repeated calculations."
+   },
+   {
+    "id": "m4",
+    "label": "Measured hardware training energy alongside learning quality",
+    "explanation": "The same rule would have to train on non-digital hardware or hardware that computes within memory, reporting energy per unit of text and quality, including supporting work. This would establish the implementation’s energy cost."
+   }
+  ],
+  "uncertain": [
+   "It remains unclear which feedback, memory and coordination dependencies should count as local learning.",
+   "The proposed performance margin and model-size threshold need justification; meeting them would not establish leading AI capabilities generally.",
+   "The reported failures may not extend to other local rules, and the costs of methods that repeatedly refine network activity remain unresolved."
+  ],
+  "prompt": "5e97d4b8dfc3"
+ }
 }
