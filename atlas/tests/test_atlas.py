@@ -22,8 +22,6 @@ from atlas.store import (
 from atlas.server import Handler
 from atlas.add import add
 from atlas.add import main as add_main
-from atlas.prerequisites import run as prerequisites
-from atlas.prerequisites import main as prerequisites_main
 
 TABLES = ['fields', 'breakthroughs', 'assets', 'documents', 'progress']
 
@@ -108,14 +106,6 @@ class AtlasTests(unittest.TestCase):
                 table: [tuple(row) for row in db.execute(f'SELECT * FROM {table} ORDER BY 1')]
                 for table in TABLES
             }
-
-    def links(self, db):
-        """Order links as rebuilt into the database (they are not in the site data)."""
-        out = {}
-        for row in db.execute('SELECT id, payload FROM breakthroughs'):
-            payload = json.loads(row['payload'])
-            out[row['id']] = [link['id'] for link in payload.get('prerequisites', [])]
-        return out
 
     def judged(self, verdict='meets', whole=False):
         data = core.load(self.core)
@@ -287,7 +277,7 @@ class AtlasTests(unittest.TestCase):
         self.load()
         before = self.db.read_bytes()
         item = core.load(self.core)['breakthroughs']['SWE-01']
-        item['prerequisites'] = [{'id': 'SWE-99', 'reason': 'x', 'model': 'm', 'field': 'SWE'}]
+        item['merged_into'] = 'SWE-99'
         core.write_breakthrough(item, self.core)
         with self.assertRaises(ValueError) as error:
             self.load()
@@ -656,122 +646,11 @@ class AtlasTests(unittest.TestCase):
                 },
             )
 
-    def test_prerequisites_keep_checked_links_on_the_dependent_record(self):
-        other = self.root / 'CSC'
-        (other / 'sources').mkdir(parents=True)
-        (other / 'sources' / self.source.name).write_bytes(self.source.read_bytes())
-        value = copy.deepcopy(self.value)
-        value['field'] = {'prefix': 'CSC', 'field': 'Computer Science'}
-        for n, i in enumerate(value['innovations'], 1):
-            i['id'] = f'CSC-0{n}'
-        (other / 'final-innovations.json').write_text(json.dumps(value))
-        core.import_field(self.folder, self.core)
-        self.load(other)
-        reply = {
-            'breakthroughs': [
-                {
-                    'breakthrough': 'SWE-01',
-                    'needs': [
-                        {'id': 'SWE-09', 'reason': 'SWE-09 does not exist in the catalog at all.'}
-                    ],
-                    'needed_by': [
-                        {
-                            'id': 'SWE-02',
-                            'reason': 'SWE-02 builds directly on the SWE-01 capability.',
-                        }
-                    ],
-                },
-                {
-                    'breakthrough': 'SWE-02',
-                    'needs': [
-                        {'id': 'SWE-01', 'reason': 'Repeated from the other side of the same link.'}
-                    ],
-                    'needed_by': [
-                        {
-                            'id': 'CSC-01',
-                            'reason': 'CSC-01 needs the SWE-02 system to exist first.',
-                        },
-                        {'id': 'SWE-01', 'reason': 'This link would close a loop with SWE-02.'},
-                    ],
-                },
-                {
-                    'breakthrough': 'CSC-02',
-                    'needs': [
-                        {'id': 'CSC-01', 'reason': 'Neither side of this link is in this field.'}
-                    ],
-                    'needed_by': [],
-                },
-            ]
-        }
-        capture = patch('atlas.store.resolver', side_effect=lambda roots: resolver([self.root]))
-        capture.start()
-        self.addCleanup(capture.stop)
-        before = core.load(self.core)['breakthroughs']
-        stored, rejected = prerequisites(
-            'SWE', call=lambda prompt: reply, core=self.core, path=self.db
-        )
-        self.assertEqual(len(stored), 2)
-        self.assertEqual(
-            sorted(why for _, why in rejected),
-            ['closes a loop', 'neither side in this field', 'unknown ID'],
-        )
-        data = core.load(self.core)
-        self.assertEqual(core.check(data), [])
-        for identifier, item in data['breakthroughs'].items():
-            self.assertEqual(
-                {k: v for k, v in item.items() if k != 'prerequisites'}, before[identifier]
-            )
-        self.assertEqual(data['breakthroughs']['SWE-02']['prerequisites'][0]['id'], 'SWE-01')
-        self.assertEqual(data['breakthroughs']['CSC-01']['prerequisites'][0]['field'], 'SWE')
-        self.db.unlink()
-        self.load()
-        with connect(self.db) as db:
-            self.assertEqual(
-                self.links(db),
-                {'SWE-01': [], 'SWE-02': ['SWE-01'], 'CSC-01': ['SWE-02'], 'CSC-02': []},
-            )
-            self.assertNotIn('prerequisites', catalog(db)['breakthroughs'][0])
-            self.assertEqual(
-                json.loads(
-                    db.execute("SELECT payload FROM breakthroughs WHERE id='CSC-01'").fetchone()[0]
-                )['prerequisites'][0]['field'],
-                'SWE',
-            )
-        prerequisites(
-            'CSC',
-            call=lambda prompt: {
-                'breakthroughs': [
-                    {
-                        'breakthrough': 'CSC-02',
-                        'needs': [
-                            {'id': 'CSC-01', 'reason': 'CSC-02 extends the CSC-01 result directly.'}
-                        ],
-                        'needed_by': [],
-                    }
-                ]
-            },
-            core=self.core,
-            path=self.db,
-        )
-        prerequisites(
-            'SWE', call=lambda prompt: {'breakthroughs': []}, core=self.core, path=self.db
-        )
-        data = core.load(self.core)
-        self.assertEqual(data['breakthroughs']['SWE-02']['prerequisites'], [])
-        self.assertEqual(data['breakthroughs']['CSC-01']['prerequisites'], [])
-        self.assertEqual(data['breakthroughs']['CSC-02']['prerequisites'][0]['id'], 'CSC-01')
-        with connect(self.db) as db:
-            self.assertEqual(
-                self.links(db),
-                {'SWE-01': [], 'SWE-02': [], 'CSC-01': [], 'CSC-02': ['CSC-01']},
-            )
-
     def test_writer_commands_commit_core_unless_no_commit(self):
         self.load()
         calls = self.root / 'calls'
         for module, main, args, writer in [
             ('atlas.add', add_main, ['https://example.org'], 'add'),
-            ('atlas.prerequisites', prerequisites_main, ['SWE'], 'run'),
         ]:
             for flag in [[], ['--no-commit']]:
                 with (

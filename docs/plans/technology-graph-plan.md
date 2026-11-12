@@ -15,7 +15,7 @@ The atlas is a map, not a forecast (decided by the owner on November 11). It mak
 ## Rules
 
 - **No editorial changes before v1 is published.** Content ships as the research pipeline produced it. Renames, merges, splits, curation and milestone restructuring come after v1, as tracked edits.
-- **Cost rule.** Reuse existing data and structures. A new table, record kind or kind of model pass needs an explicit decision. Decided so far: one prerequisite call per field; one call per paper added; one label call per breakthrough.
+- **Cost rule.** Reuse existing data and structures. A new table, record kind or kind of model pass needs an explicit decision. Decided so far: one call per paper added; one label call per breakthrough.
 - **Model routing.** Cheapest capable model first: Grok, then Codex GPT-6.1 Sol, then Opus. Fable is for design, architecture and review.
 - **Code style.** See `AGENTS.md`.
 
@@ -23,7 +23,7 @@ The atlas is a map, not a forecast (decided by the owner on November 11). It mak
 
 - **Breakthrough:** one proposed future capability, with a permanent ID such as `CSC-02`.
 - **Milestone:** one of a breakthrough's completion criteria, with a permanent ID such as `CSC-02.m1`, a short label and the full criterion text.
-- **Link:** `needs`, a prerequisite proposed by a model call. Links are kept in the records but are not published: the atlas makes no order claims.
+- **Link:** links were removed on November 11, 2026 and are in git history.
 - **Source:** a paper or page, identified by URL, with saved copies identified by SHA-256.
 - **Progress:** one source judged against one milestone (`advances`, `meets` or `contradicts`) or against the breakthrough as a whole (`advances` or `contradicts`), with an exact quote.
 
@@ -32,7 +32,7 @@ The atlas is a map, not a forecast (decided by the owner on November 11). It mak
 - **Core.** `atlas/core/` (files in git) is the source of truth; the SQLite database is rebuilt from it. See the [core design](2026-11-09-atlas-core-design.md).
 - **Content.** All 66 fields are in the core (742 breakthroughs), with two withheld concepts (CLM-02 and VIR-01). Grok researched 39 fields; Codex Terra researched 27 after Grok's quota ran out, and its records cite fewer sources (median 1 per breakthrough against 3).
 - **Labels.** Every milestone of all 742 breakthroughs has a short label. Grok wrote those for the first 5 fields and Codex Sol the rest, on November 11.
-- **Links.** 77 `needs` links are stored in the records from one call per field on November 11. They are not shown on the site or exported.
+- **Links.** The links were removed on November 11, 2026 and are in git history.
 - **Progress.** 4 judged rows.
 - **UI.** The v1 site is built in `atlas/web`: home, the sky-map atlas, field, breakthrough and Method pages, with a static export (`python3 -m atlas.export`) and a share image per page. It is not published.
 - **Remote.** `github.com/FamiliarAI/technology-atlas`, private.
@@ -46,7 +46,7 @@ Two tracks run in parallel. They touch different code (`ingestion/` and `atlas/w
 1. **Review and clean up the ingestion pipeline.** Read all of `ingestion/` and its documents first and write down what is found. Then remove dead and one-off code, drop the "all 66 complete" gate, let a field finish without a concept the provider refused to review (the refusal guard is never bypassed), and import each finished field into `atlas/core/` automatically.
 2. **Make the pipeline use several agents.** Each stage names an ordered list of models instead of one. Grok does research while its quota lasts; when it is exhausted or slow, the stage falls back, in this order, to the latest Codex Terra model with search, then Codex Sol, then Opus, instead of stopping the batch. Every record keeps the name of the model that produced it. The design of the fallback comes out of the review in step 1.
 3. **Finish the fields.** Machine Learning first, then the other blocked fields, then the 32 unfinished ones. Fields arrive in the atlas one at a time.
-4. **Prerequisite links for every field in the core**, using the existing per-field call.
+4. Removed: the atlas makes no order claims.
 5. **Milestone labels for every field in the core**, using the existing per-breakthrough call.
 
 ### Track B: UI

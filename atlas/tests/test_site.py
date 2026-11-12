@@ -88,12 +88,6 @@ class SiteTests(unittest.TestCase):
             }
             (folder / 'final-innovations.json').write_text(json.dumps(value))
             core.import_field(folder, self.core)
-        data = core.load(self.core)
-        item = data['breakthroughs']['QUA-02']
-        item['prerequisites'] = [
-            {'id': 'QUA-01', 'reason': 'Needs the first.', 'model': 'm', 'field': 'QUA'}
-        ]
-        core.write_breakthrough(item, self.core)
         path = self.core / 'QUA' / 'field.json'
         field = json.loads(path.read_text())
         field['withheld'] = [
@@ -216,10 +210,7 @@ class SiteTests(unittest.TestCase):
         self.assertEqual(cut('short text'), 'short text')
         self.assertEqual(cut('alpha beta gamma', 12), 'alpha beta…')
 
-    def test_order_links_stay_in_the_records_but_not_in_the_site_data(self):
-        self.assertEqual(
-            core.load(self.core)['breakthroughs']['QUA-02']['prerequisites'][0]['id'], 'QUA-01'
-        )
+    def test_data_files_have_no_order_claims(self):
         with connect(self.db) as db:
             files = dict(site_files(db))
         self.assertNotIn('claims.json', files)
@@ -247,7 +238,7 @@ class SiteTests(unittest.TestCase):
                     yield from keys(child)
 
         for name, value in files.items():
-            found = set(keys(value)) & {'prerequisites', 'needs', 'unlocks', 'depth'}
+            found = set(keys(value)) & {'pre' + 'requisites', 'needs', 'unlocks', 'depth'}
             self.assertEqual(found, set(), name)
         # Breakthroughs within a field are in ID order.
         self.assertEqual(

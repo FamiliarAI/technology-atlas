@@ -6,7 +6,7 @@ November 11, 2026. Every term and data field of the Technology Atlas: what it ho
 
 The atlas is a map of breakthroughs people should work towards ([project plan](plans/technology-graph-plan.md)). Each breakthrough has milestones that show how close it is. Each milestone is a test: "this breakthrough counts as achieved when these milestones are met." Research papers are added as steps toward one milestone, or toward the breakthrough as a whole.
 
-The atlas no longer makes order claims ("B needs A first"). The `needs` links made earlier remain in the records in `atlas/core/` and are still checked, but they are not published in the site data.
+The atlas makes no order claims. The links were removed on November 11, 2026. They are in git history.
 
 There are no dates in v1.
 
@@ -19,11 +19,11 @@ research pipeline (ingestion/)  →  atlas/core/ files in git (source of truth)
   →  website (atlas/web) and static export
 ```
 
-Counts on November 11: 66 fields, 742 breakthroughs, 2,800 milestones, 77 `needs` links, 1,676 sources, 4 judged progress rows, 2 withheld concepts.
+Counts on November 11: 66 fields, 742 breakthroughs, 2,800 milestones, 1,676 sources, 4 judged progress rows, 2 withheld concepts.
 
 ## 2. Glossary
 
-**Field.** A discipline and the folder that holds its breakthroughs. Its ID is a prefix of 2 to 8 capitals: `QUA` (Quantum Computing), `CHEMREV` (Chemistry). Fields are navigation labels; anything that crosses fields is a link.
+**Field.** A discipline and the folder that holds its breakthroughs. Its ID is a prefix of 2 to 8 capitals: `QUA` (Quantum Computing), `CHEMREV` (Chemistry). Fields are navigation labels.
 
 **Region.** One of eight groups of neighbouring fields, such as "Computing and Information". Regions are a constant (`REGIONS` in `atlas/store.py`), not core data. A field missing from the constant falls into "Engineering and Energy".
 
@@ -35,9 +35,7 @@ Counts on November 11: 66 fields, 742 breakthroughs, 2,800 milestones, 77 `needs
 
 **Label.** A milestone's short pass condition, such as "Universal encoded gates whose error per operation falls with code distance". At import, code takes the criterion's text before its first colon (or its first eight words if that is over 80 characters), which often yields a phrase like "Proposed demonstration" (`NEP-01.m1`). `python3 -m atlas.labels` replaces these with model-written labels; that rewrite is in progress across all fields.
 
-**Link.** A `needs` link, also called a *prerequisite*: "A needs B" means B is expected to come first on the way to A. Each link is stored on the dependent breakthrough (A) in its `prerequisites` list. Example: `AER-05` (space-to-Earth solar power) needs `ELE-07`. It is the only kind of link; `related_concepts` stays as text. Links remain in the records and `atlas.core check` still checks them, but they are not published: no site data file carries `prerequisites`, `needs` or `unlocks`, and there is no claims file or page.
-
-**Claim.** Inside the pipeline, one cited statement in the research record (`candidates.problems[].claims[]`), which the review then checks. The atlas once also used the word for its predictions, including *order* claims (`needs` links); order claims are no longer published.
+**Claim.** Inside the pipeline, one cited statement in the research record (`candidates.problems[].claims[]`), which the review then checks. The atlas once also used the word for its predictions, including *order* claims (`needs` links); those links were removed on November 11, 2026 and are in git history.
 
 **Source.** A paper or page, identified by its URL. One line in `atlas/core/sources.jsonl`. Example: `https://arxiv.org/abs/2610.24077`.
 
@@ -57,7 +55,7 @@ Judged rows live in `atlas/core/progress.jsonl`. The database adds unjudged *res
 
 **Constellation, star.** The site's words for a field and a breakthrough on the star chart. *Figure lines* join a constellation's stars and mean only "same field". Star positions are computed in the browser (`atlas/web/src/sky.js`) and are not data.
 
-**Model names.** As recorded in the files: `grok-4.7-build` (Grok; the config asks for `grok-4.7` and the provider reports `grok-4.7-build`), `gpt-6.1-terra` (Codex Terra), `gpt-6.1-sol` (Codex Sol), `opus` (Claude Opus). By `models.research`, Grok researched 39 fields and Terra 27. Prerequisite links and `atlas.add` judgements use the config's `format` model (`gpt-6.1-terra`); labels use `gpt-6.1-sol`. Fable writes design and review, not data.
+**Model names.** As recorded in the files: `grok-4.7-build` (Grok; the config asks for `grok-4.7` and the provider reports `grok-4.7-build`), `gpt-6.1-terra` (Codex Terra), `gpt-6.1-sol` (Codex Sol), `opus` (Claude Opus). By `models.research`, Grok researched 39 fields and Terra 27. `atlas.add` judgements use the config's `format` model (`gpt-6.1-terra`); labels use `gpt-6.1-sol`. Fable writes design and review, not data.
 
 ## 3. Records in `atlas/core/`
 
@@ -66,7 +64,7 @@ Layout:
 ```
 atlas/core/
   QUA/field.json      one field
-  QUA/QUA-01.json     one breakthrough, with its milestones and outgoing needs links
+  QUA/QUA-01.json     one breakthrough, with its milestones
   sources.jsonl       one line per source, sorted by URL
   progress.jsonl      one line per judged progress row
 ```
@@ -86,7 +84,7 @@ Common writers and readers, used in the tables below:
 | Field | Type | Required? | What it contains | Written by | Read by |
 |---|---|---|---|---|---|
 | `id` | string | yes | Field ID, equal to the folder name. `"QUA"` | `import_field` (from the run's `prefix`) | `check`; `rebuild` → `fields.id` |
-| `name` | string | yes | Display name. `"Quantum Computing"` | `import_field` (from the run's `field`) | `rebuild` → `fields.name`; catalog, field file, link names, prerequisite prompt |
+| `name` | string | yes | Display name. `"Quantum Computing"` | `import_field` (from the run's `field`) | `rebuild` → `fields.name`; catalog, field file |
 | `color` | string | yes | CSS colour fixed at import, such as `"hsl(145 60% 74%)"`; four early fields have hex colours. Never recoloured. | `import_field` via `atlas.core.next_color` | `rebuild` → `fields.color`; `next_color`. Not in the site data (colour on the site means progress only). |
 | `as_of` | string | yes | Date the field's batch was prepared. `"2026-11-01"` for all 66. | `import_field` (copied from the run's `field.json`) | Nothing. The site's `as_of` is the constant `AS_OF` in `store.py`. |
 | `boundaries` | string | yes | The field's scope as given to the research prompt. In 65 of 66 fields this is the prompt's fixed instruction, "<Name>: fundamental discoveries and enabling technologies within this field. Include cross-field consequences…"; only `CHEMREV` has a real scope. | `import_field` (from the run's `field.json`) | `rebuild` → `fields.boundaries`; field file `boundaries`, which is empty when the text is that instruction (`store.scope`) → Field page "scope" |
@@ -110,22 +108,21 @@ Milestones (items of `completion_criteria`) are paragraphs with two more keys, `
 | Field | Type | Required? | What it contains | Written by | Read by |
 |---|---|---|---|---|---|
 | `id` | string | yes | Breakthrough ID, equal to the file name. Permanent. | Research stage (`PREFIX-NN` headings) → `final_rewrite` | `check`; everything |
-| `title` | string | yes | One-line name. | `final_rewrite` (rewrite model) | Catalog, field file, search, b file; page titles; prompts in `atlas.prerequisites`, `atlas.labels`, `atlas.add` |
+| `title` | string | yes | One-line name. | `final_rewrite` (rewrite model) | Catalog, field file, search, b file; page titles; prompts in `atlas.labels`, `atlas.add` |
 | `field` | string | yes | Home field ID; must match the folder. | `import_field` | `check`; `rebuild` → `breakthroughs.field` |
 | `status` | string | yes | `"active"` (all 742) or `"retired"`. Retired records are skipped by `rebuild` and by `atlas.labels`. | `import_field` | `rebuild`; `atlas.labels`; b file `status` |
 | `merged_into` | string | optional (0) | For a retired record, the ID it was merged into. | Manual edit (none yet) | `check` (must resolve) |
 | `concept` | paragraphs | yes (1,729) | What the breakthrough is. The first paragraph is the summary used everywhere. | `final_rewrite` | b file; field file `summary`; search `summary`; Breakthrough page; prompts |
 | `significance` | paragraphs | yes (2,324) | Why it would matter. | `final_rewrite` | b file → `Record.jsx` |
-| `missing_breakthrough` | paragraphs | yes (2,551) | What is still missing today. | `final_rewrite` | b file → `Record.jsx`; prerequisite prompt |
+| `missing_breakthrough` | paragraphs | yes (2,551) | What is still missing today. | `final_rewrite` | b file → `Record.jsx` |
 | `current_state` | paragraphs | yes (3,583) | The state of the art, with citations. | `final_rewrite` | b file → `Record.jsx`; `rebuild` derives research citation rows from its `source_urls` |
-| `completion_criteria` | list | yes (2,800; 2 to 6 per breakthrough) | The milestones, in order. Each item: `text`, `source_urls`, `id` (`m1`… assigned once at import, never renumbered), `label`. | `final_rewrite` (text, source_urls); `import_field` (`id`, first `label`); `atlas.labels.relabel` (`label` only, byte-preserving edit) | `check` (IDs unique); `site_view` (statuses, labels); b file; prompts in `atlas.add`, `atlas.prerequisites`, `atlas.labels` |
-| `related_concepts` | paragraphs | yes (3,493) | Prose naming related concepts, often by ID. No link is derived from it. | `final_rewrite` | b file → `Record.jsx`; prerequisite prompt |
+| `completion_criteria` | list | yes (2,800; 2 to 6 per breakthrough) | The milestones, in order. Each item: `text`, `source_urls`, `id` (`m1`… assigned once at import, never renumbered), `label`. | `final_rewrite` (text, source_urls); `import_field` (`id`, first `label`); `atlas.labels.relabel` (`label` only, byte-preserving edit) | `check` (IDs unique); `site_view` (statuses, labels); b file; prompts in `atlas.add`, `atlas.labels` |
+| `related_concepts` | paragraphs | yes (3,493) | Prose naming related concepts, often by ID. No link is derived from it. | `final_rewrite` | b file → `Record.jsx` |
 | `unresolved_issues` | list of strings | yes (4,740 strings) | Evidence gaps the review left open. | `final_rewrite` | b file → `Record.jsx`; field file `issue_count` |
 | `change_log` | list | yes (6,644 items) | Changes the review made: `change`, `reason`. | `final_rewrite` | b file → `Record.jsx` |
 | `sources` | list of strings | yes (1,820 URLs) | Every URL the record cites; each is a line in `sources.jsonl`. Median 2 per breakthrough. | `import_field` (reduces the pipeline's source objects to URLs) | `check`; `rebuild` expands each URL back to `{url, title, status, artifacts}` |
 | `provenance` | object | yes | Repository-relative paths of the pipeline files behind the record: `research` (`reconciled-research.md`), `structured_record` (`reconciled-structured.json`), `review` (the concept's `validated.json`). All under git-ignored `ingestion/runs/`. | `final_rewrite.make_input` → `import_field` (made relative) | `rebuild` → `documents` table (local downloads only). Not in the site data. |
 | `models` | object | yes | Model that ran each pipeline stage: `research`, `reconcile`, `format`, `review` (missing in 2 records, `CLM-05` and `CLM-13`, for which the pipeline recorded no review model), `rewrite`. Example (`QUA-01`): research and reconcile `grok-4.7-build`, format `gpt-6.1-terra`, review and rewrite `gpt-6.1-sol`. | `final_rewrite` (`attempt_model` per stage) | b file `models` (not displayed by the site today) |
-| `prerequisites` | list | optional (61 records; 59 non-empty, 77 links) | The record's `needs` links. Each item: `id` (the breakthrough this one needs), `reason` (one sentence, 20 to 400 characters), `model` (all `gpt-6.1-terra`), `field` (the field whose call produced the link, which may be either end; 39 links came from the other end's call). An empty list means a call ran and found none. | `atlas.prerequisites.run` | `check` (resolve, no loops); kept in the database `payload` for `atlas.prerequisites`. Not in the site data. |
 
 The pipeline's intermediate structures (research claims with citations, review verdicts per claim with evidence passages) do not enter the atlas. Their shapes are `CANDIDATES` and `REVIEW` in `ingestion/schemas.py`, `FORMAT_SCHEMA` and `REVIEW_SCHEMA` in `ingestion/field_workflow.py`, and `FINAL_SCHEMA` in `ingestion/final_rewrite.py`, which is the shape of each breakthrough before import adds `field`, `status`, milestone `id` and `label`, and reduces `sources` to URLs.
 
@@ -186,7 +183,7 @@ One judged progress row per line. `atlas.add` rewrites the whole file: re-adding
 
 On November 11: 66 fields, 742 breakthroughs, 2,238 assets, 2,226 documents, 3,554 progress rows of which 4 are judged.
 
-No column was added for whole-breakthrough rows. The database also serves `atlas.add` (milestone ranking, reuse of saved copies) and `atlas.prerequisites` (the catalog in its prompt). The server's `/api/assets/<sha256>` and `/api/documents/<id>` give verified local downloads from `assets` and `documents`; the site and the export do not use them.
+No column was added for whole-breakthrough rows. The database also serves `atlas.add` (milestone ranking, reuse of saved copies). The server's `/api/assets/<sha256>` and `/api/documents/<id>` give verified local downloads from `assets` and `documents`; the site and the export do not use them.
 
 ## 5. The site data contract
 
@@ -241,7 +238,6 @@ Loaded on first use of the search box (`Layout.jsx`). 206 KB on November 11; no 
 - **Saved copies and their hashes** (`copies`, `copy`, `asset`). The copies are private research files, possibly under copyright; the public site links to the originals only (plan, Track B step 4).
 - **Provenance and local paths** (`provenance`, `assets.path`, `documents.path`). They point into git-ignored folders on one computer and are not public.
 - **Import and pipeline history** (`imported_from`, `original_dispositions`, `reconciliation_change_log`) and field `color`. Not needed by any page, and the catalog must stay small.
-- **`needs` links** (`prerequisites`) and anything derived from them. The atlas no longer makes order claims. The links stay in the records and are still checked.
 
 ## 6. Invariants and rules
 
@@ -250,9 +246,8 @@ Loaded on first use of the search box (`Layout.jsx`). 206 KB on November 11; no 
 - Each `field.json` `id` equals its folder name.
 - Each breakthrough's `id` equals its file name; its `field` exists, the ID starts with `<field>-`, and the file sits in that field's folder. No breakthrough ID appears in two folders.
 - Every breakthrough has milestone IDs, unique within it.
-- Every `prerequisites[].id` and `merged_into` names an existing breakthrough.
+- Every `merged_into` names an existing breakthrough.
 - Every URL in a breakthrough's `sources` is a line in `sources.jsonl`; no URL appears twice there.
-- `needs` links have no loops.
 - Every progress row names an existing breakthrough, has a `milestone` key holding one of its milestone IDs or null, names a URL in `sources.jsonl`, and has a verdict of `advances`, `meets` or `contradicts`. A row with `milestone` null may not be `meets`.
 - No string anywhere in the core starts with `/Users/` or `/private/` (no absolute paths).
 
@@ -262,7 +257,7 @@ The rebuild adds one more: a saved copy whose bytes no longer match its hash sto
 
 - **IDs are permanent.** A breakthrough or milestone ID is never reused or renumbered. A record is retired (`status: "retired"`, optionally `merged_into`), never deleted. Milestone IDs do not change when milestones are inserted, split or reordered.
 - **No absolute paths** in `atlas/core/` (checked as above for the two common prefixes).
-- **Cost rule.** No new table, record kind or kind of model pass without the owner's explicit decision. Decided so far: one prerequisite call per field, one call per paper added, one label call per breakthrough.
+- **Cost rule.** No new table, record kind or kind of model pass without the owner's explicit decision. Decided so far: one call per paper added, one label call per breakthrough.
 - **No editorial changes before v1 is published.** Content ships as the pipeline produced it. Renames, merges, splits, curation and milestone restructuring come after v1, as tracked edits. The label pass is one of the decided passes (plan, Track A step 5); it changes only `label`, never the criterion text.
 - **No predicted dates in v1.** `source_date` is the publication date of evidence, not a prediction.
 - **Re-running research** on an imported field never overwrites its files ([core design](plans/2026-11-09-atlas-core-design.md)). The importer refuses a field that already exists.
@@ -290,13 +285,6 @@ python3 -m atlas.core import      # no model calls: import every batch-complete 
 
 ```bash
 python3 -m atlas.add <url> [--breakthrough QUA-01] [--no-commit]
-```
-
-**Re-run links** (one model call per field). Replaces that field's earlier links, keeps links made by other fields' calls, rebuilds after each field, commits once. Needs a built database. The links are kept in the records only; the site does not publish them.
-
-```bash
-python3 -m atlas.prerequisites QUA CSC [--no-commit]
-python3 -m atlas.prerequisites --all
 ```
 
 **Re-run labels** (one call per breakthrough, `gpt-6.1-sol`). Arguments are breakthrough IDs or field IDs. `--missing` skips breakthroughs that already have a successful label call; given alone, it covers every active breakthrough. Changes only `label` strings, rebuilds once, commits successful ones. Calls are saved in `atlas/data/labels/<ID>-<UTC time>/`.

@@ -221,31 +221,11 @@ def check(data):
         milestones = [criterion.get('id') for criterion in item['completion_criteria']]
         if None in milestones or len(milestones) != len(set(milestones)):
             problems.append(f'Missing or duplicate milestone ID: {identifier}')
-        for link in item.get('prerequisites', []):
-            if link['id'] not in items:
-                problems.append(f'Unknown prerequisite: {identifier} -> {link["id"]}')
         if 'merged_into' in item and item['merged_into'] not in items:
             problems.append(f'Unknown merged_into: {identifier} -> {item["merged_into"]}')
         for url in item.get('sources', []):
             if url not in sources:
                 problems.append(f'Unknown source: {identifier}: {url}')
-    visiting, visited = set(), set()
-
-    def visit(identifier):
-        if identifier in visiting:
-            problems.append('Prerequisite loop: ' + identifier)
-            return
-        if identifier in visited:
-            return
-        visiting.add(identifier)
-        for link in items[identifier].get('prerequisites', []):
-            if link['id'] in items:
-                visit(link['id'])
-        visiting.remove(identifier)
-        visited.add(identifier)
-
-    for identifier in items:
-        visit(identifier)
     for row_number, row in enumerate(data['progress'], 1):
         identifier = row.get('breakthrough')
         item = items.get(identifier)

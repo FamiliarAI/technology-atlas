@@ -302,10 +302,6 @@ class CoreTests(unittest.TestCase):
                 whole['progress'][0].update(milestone=None, verdict=verdict)
                 self.assertEqual(core.check(whole), [])
 
-        def add_prerequisite_loop(data):
-            for dependent, prerequisite_id in [('SWE-01', 'SWE-02'), ('SWE-02', 'SWE-01')]:
-                data['breakthroughs'][dependent].update(prerequisites=[{'id': prerequisite_id}])
-
         cases = [
             ('breakthrough ID', lambda data: data['breakthroughs']['SWE-01'].update(id='SWE-99')),
             ('field', lambda data: data['breakthroughs']['SWE-01'].update(field='CSC')),
@@ -320,13 +316,6 @@ class CoreTests(unittest.TestCase):
                 'milestone',
                 lambda data: data['breakthroughs']['SWE-01']['completion_criteria'][0].pop('id'),
             ),
-            (
-                'prerequisite',
-                lambda data: data['breakthroughs']['SWE-01'].update(
-                    prerequisites=[{'id': 'SWE-99'}]
-                ),
-            ),
-            ('loop', add_prerequisite_loop),
             (
                 'merged_into',
                 lambda data: data['breakthroughs']['SWE-01'].update(

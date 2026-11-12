@@ -11,7 +11,7 @@ import shutil
 
 import jsonschema
 from . import schemas
-from .providers import Models, execute  # noqa: F401  (atlas/add.py and prerequisites.py)
+from .providers import Models, execute  # noqa: F401  (atlas/add.py)
 from .sources import Archive, digest, now, web_url, write_json
 
 HERE = Path(__file__).resolve().parent
