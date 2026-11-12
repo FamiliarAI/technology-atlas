@@ -190,7 +190,8 @@
   "reconcile": "grok-4.7-build",
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
-  "rewrite": "gpt-6.1-sol"
+  "rewrite": "gpt-6.1-sol",
+  "brief": "gpt-6.1-sol"
  },
  "sources": [
   "https://doi.org/10.6028/NIST.FIPS.203",
@@ -203,5 +204,80 @@
   "review": "ingestion/runs/all-fields/MAT/attempts/review-MAT-09-8269be8f439249e5ba90ed0f5547f817/validated.json"
  },
  "field": "MAT",
- "status": "active"
+ "status": "active",
+ "brief": {
+  "title": "Fast solutions to the maths protecting encryption",
+  "possible": [
+   "Ordinary computers could recover encryption secrets from public information by efficiently solving lattice problems, mathematical puzzles about regular grids of points. A concrete target is ML-KEM-1024, a standard method for establishing a shared secret key.",
+   "The algorithm would run in polynomial time, meaning its running time grows as a fixed power of problem size. Its total computing costs would also be low enough to attack the settings used in real cryptography."
+  ],
+  "why": [
+   "Organisations using ML-KEM to protect communications against future quantum computers would face an attack from ordinary computers. An efficient mathematical solution would overturn the security assumption behind that protection."
+  ],
+  "sources": [
+   {
+    "url": "https://doi.org/10.6028/NIST.FIPS.203",
+    "who": "National Institute of Standards and Technology",
+    "showed": "NIST standardized ML-KEM for establishing shared secret keys. Its security rests on the presumed difficulty of solving equations with deliberately added small errors.",
+    "quote": null,
+    "cited_for": "The standard defines the cryptographic target and the public information an attack would use.",
+    "not_established": "Standardization supplies neither a proof of computational hardness nor an efficient attack.",
+    "checked": false
+   },
+   {
+    "url": "https://apelletm.pages.math.cnrs.fr/page-perso/documents/enseignement/PEPR_school/lecture_1.pdf",
+    "who": "Alice Pellet-Mary",
+    "showed": "Pellet-Mary reviewed algorithms for lattice problems. Fast methods give limited accuracy, while methods offering better solutions require much more computation.",
+    "quote": null,
+    "cited_for": "Known methods face a trade-off between speed and solution quality.",
+    "not_established": "The review gives no efficient classical method for recovering secrets at real cryptographic settings.",
+    "checked": false
+   },
+   {
+    "url": "https://mathoverflow.net/questions/468811/polynomial-time-quantum-algorithms-for-lattice-problems-gapsvp-sivp-lwe",
+    "who": "Yilei Chen",
+    "showed": "Chen reported a bug and withdrew his claim of an efficient quantum algorithm for recovering secrets from noisy equations with a particular relationship between their numerical range and error size.",
+    "quote": "Step 9 of\nthe algorithm contains a bug, which I don’t know how to fix.",
+    "cited_for": "A claimed quantum advance lost its central running-time claim after a bug was found.",
+    "not_established": "The withdrawn claim establishes no working attack on ML-KEM or efficient classical solution.",
+    "checked": true
+   }
+  ],
+  "shown": [
+   "The methods reviewed by Alice Pellet-Mary illustrate the remaining obstacle. Algorithms can solve lattice problems quickly with loose accuracy guarantees, or spend much more computation obtaining better answers. Neither capability establishes efficient secret recovery at cryptographic settings."
+  ],
+  "missing": [
+   "A correct classical algorithm with a proved polynomial running time for a growing family of cryptographically relevant problems remains to be demonstrated.",
+   "Repeated recovery of shared secrets from public information at unchanged ML-KEM-1024 settings remains to be demonstrated.",
+   "Independent reproduction with practical computing costs, including memory and preparation, remains to be demonstrated."
+  ],
+  "milestones": [
+   {
+    "id": "m1",
+    "label": "A reviewed proof of correctness and efficient scaling",
+    "explanation": "A peer-reviewed algorithm would have to prove correctness and polynomial running time for a defined, growing family of relevant problems, including preparation costs. This would establish its mathematical guarantee."
+   },
+   {
+    "id": "m2",
+    "label": "Repeated shared-secret recovery at standard settings",
+    "explanation": "Tests would have to recover shared secrets across independently generated, unchanged ML-KEM-1024 cases using public keys and encrypted messages. This would establish success against the practical target."
+   },
+   {
+    "id": "m3",
+    "label": "A reproducible public attack with measured computing costs",
+    "explanation": "Released code and experimental details would have to enable independent reproduction using only public inputs, with time, memory, preparation and failures reported. This would establish reproducibility and practical cost."
+   },
+   {
+    "id": "m4",
+    "label": "Demonstrated limits on performance, scaling and broader reach",
+    "explanation": "Tests would have to establish performance at ML-KEM-1024, and proofs would have to justify scaling and any broader claims. This would establish which problems and cryptographic systems the method actually reaches."
+   }
+  ],
+  "uncertain": [
+   "The running-time growth, computing budget and success rate sufficient for practical completion still need justification.",
+   "The connection between a general lattice solver’s accuracy and recovery of ML-KEM secrets requires its own mathematical argument or explicit attack.",
+   "An attack exploiting ML-KEM’s particular structure could have a narrower reach than a general solution to lattice problems."
+  ],
+  "prompt": "5e97d4b8dfc3"
+ }
 }

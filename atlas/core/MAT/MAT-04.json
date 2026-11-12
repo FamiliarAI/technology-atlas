@@ -190,7 +190,8 @@
   "reconcile": "grok-4.7-build",
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
-  "rewrite": "gpt-6.1-sol"
+  "rewrite": "gpt-6.1-sol",
+  "brief": "gpt-6.1-sol"
  },
  "sources": [
   "https://doi.org/10.48550/arXiv.2601.13256"
@@ -201,5 +202,100 @@
   "review": "ingestion/runs/all-fields/MAT/attempts/review-MAT-04-75ed497a4676419ba58ea017c3a17213/validated.json"
  },
  "field": "MAT",
- "status": "active"
+ "status": "active",
+ "brief": {
+  "title": "Affordable, guaranteed solutions to many-variable equations",
+  "possible": [
+   "Researchers could calculate how best to act under uncertainty in models with many interacting variables, with a proved limit on numerical error. The solver would cover a defined family of nonlinear equations—equations whose terms depend on the solution in more complex ways than simple proportionality.",
+   "It would solve equations describing change over time, including a substantial family describing optimal decisions. Both computing time and memory would grow only as fixed powers of the number of variables and the inverse of the allowed error."
+  ],
+  "why": [
+   "Conventional grids multiply their storage needs whenever another variable is added. Avoiding that explosive growth would let researchers calculate dependable answers for covered models that such grids cannot fit in memory.",
+   "For people studying decisions under uncertainty, this would give numerical answers with explicit accuracy guarantees. It could make comparisons between control strategies more dependable."
+  ],
+  "sources": [
+   {
+    "url": "https://doi.org/10.48550/arXiv.2601.13256",
+    "who": "Wenzhong Zhang, Zheyuan Hu, Wei Cai and George Em Karniadakis",
+    "showed": "Their review compares neural networks—learned mathematical approximations—on equations with up to 1000 variables. It describes measured accuracy, computing time and memory use.",
+    "quote": "Representative benchmark problems – including Hamilton-Jacobi-Bellman and Black-Scholes\nequations in up to 1000 dimensions – illustrate the scalability, effectiveness, and accuracy of\nthe methods.",
+    "cited_for": "Numerical tests already reach large problems, while accuracy guarantees and coverage of the solution region remain challenges.",
+    "not_established": "Benchmark performance does not prove bounds on computing time and memory for an entire equation family.",
+    "checked": true
+   },
+   {
+    "url": "https://arxiv.org/abs/2311.11579",
+    "who": "Ariel Neufeld, Tuan Anh Nguyen and Sizhou Wu",
+    "showed": "They prove that an iterative random-sampling solver has costs growing as fixed powers of problem size and requested accuracy under stated assumptions, even when nonlinear terms depend on how the solution changes across variables.",
+    "quote": "that its computational complexity only grows polynomi-\nally in the dimension d P N and the reciprocal of the accuracy ε, under some suitable assumptions\non the nonlinear part of the corresponding PDE.",
+    "cited_for": "Cost and accuracy guarantees already exist for restricted nonlinear equation families.",
+    "not_established": "This theorem alone does not establish the required decision-equation coverage, memory bounds and practical demonstration.",
+    "checked": true
+   },
+   {
+    "url": "https://arxiv.org/abs/2506.23969",
+    "who": "Martin Hutzenthaler and Tuan Anh Nguyen",
+    "showed": "In a preprint, they prove that a particular iterative random-sampling method can fail on an optimal-decision equation: its error grows faster than any fixed power of the number of variables.",
+    "quote": "In this paper we prove the\nsurprising fact that MLP approximations for one such example equation suffer from the curse of\ndimensionality.",
+    "cited_for": "Guarantees for restricted equation families cannot simply be extended to broader decision problems.",
+    "not_established": "The counterexample limits this method; it does not prove that every algorithm must fail.",
+    "checked": true
+   },
+   {
+    "url": "https://www.global-sci.com/cicp/article/view/6906",
+    "who": "Sebastian Becker, Ramon Braunwarth, Martin Hutzenthaler and collaborators",
+    "showed": "They extend an iterative random-sampling method to coupled equations and test it on several equation families with up to 1000 variables.",
+    "quote": "More specifically, we apply the proposed\nMLP approximation method in the case of Allen-Cahn PDEs, Sine-Gordon-type PDEs,\nsystems of coupled semilinear heat PDEs, and semilinear Black-Scholes PDEs in up to\n1000 dimensions.",
+    "cited_for": "Computational demonstrations span several equation families at the proposed demonstration scale.",
+    "not_established": "These tests do not establish the full combination of proved error, memory bounds and optimal-decision coverage.",
+    "checked": true
+   },
+   {
+    "url": "https://collaborate.princeton.edu/en/publications/multilevel-picard-iterations-for-solving-smooth-semilinear-parabo/",
+    "who": "Weinan E, Martin Hutzenthaler, Arnulf Jentzen and Thomas Kruse",
+    "showed": "They build an iterative random-sampling solver for answers at individual locations and times. They prove favorable cost bounds for a restricted family whose nonlinear terms do not depend on the solution's spatial rates of change.",
+    "quote": "We introduce a new family of numerical algorithms for approximating solutions of general high-dimensional semilinear parabolic partial differential equations at single space-time points.",
+    "cited_for": "Earlier work already connects guaranteed accuracy to favorable computational cost under specific assumptions.",
+    "not_established": "The restricted theorem does not establish the broader decision-equation family and practical resource requirements sought.",
+    "checked": true
+   }
+  ],
+  "shown": [
+   "Neufeld, Nguyen and Wu have proved favorable cost bounds for a restricted nonlinear equation family. Becker and collaborators have tested related methods with 1000 variables. These establish mathematical and computational progress toward different parts of the goal."
+  ],
+  "missing": [
+   "A complete guarantee would need to cover a clearly defined, substantial family of nonlinear optimal-decision equations.",
+   "The proof would need to count all computation and memory, including sampling and any training, without hiding exponential costs.",
+   "The algorithm would need to guarantee accuracy throughout its declared region, rather than only at sampled locations.",
+   "An executable implementation would need to meet its proved accuracy with practical resources and support independent reproduction."
+  ],
+  "milestones": [
+   {
+    "id": "m1",
+    "label": "Proved accuracy with bounded computing time and memory",
+    "explanation": "A theorem would have to cover a substantial nonlinear optimal-decision family with at least 100 variables and explicit fixed-power resource bounds. This would connect accuracy to total cost under stated assumptions."
+   },
+   {
+    "id": "m2",
+    "label": "A practical run meets a preset error guarantee",
+    "explanation": "A run with 1000 variables would have to meet a preset proved error limit, measure time and peak memory, and quantify a comparable grid's memory needs. This would demonstrate useful scale."
+   },
+   {
+    "id": "m3",
+    "label": "Independent reproduction succeeds across difficult cases",
+    "explanation": "Released proofs, code, equations and settings would have to enable independent reproduction across the declared family, including difficult boundary cases. This would test reproducibility and demonstrated breadth."
+   },
+   {
+    "id": "m4",
+    "label": "The theorem and practical resource requirements both hold",
+    "explanation": "Completion would require a valid cost theorem and practical resources at demonstration scale, without assuming an unknown approximation size. This would establish that the guarantee corresponds to a usable calculation."
+   }
+  ],
+  "uncertain": [
+   "The exact equation family and how far it would extend existing cost theorems remain open.",
+   "The acceptable error, solution region and dependence on equation parameters still need definition.",
+   "Growth by fixed powers can still be unaffordable; the powers and multiplying constants will determine practical value."
+  ],
+  "prompt": "5e97d4b8dfc3"
+ }
 }

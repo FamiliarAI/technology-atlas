@@ -159,7 +159,8 @@
   "reconcile": "grok-4.7-build",
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
-  "rewrite": "gpt-6.1-sol"
+  "rewrite": "gpt-6.1-sol",
+  "brief": "gpt-6.1-sol"
  },
  "sources": [
   "https://doi.org/10.48550/arXiv.1611.03530"
@@ -170,5 +171,100 @@
   "review": "ingestion/runs/all-fields/MAT/attempts/review-MAT-07-1c0072548f4f46d0a49131a7f3eb8bd6/validated.json"
  },
  "field": "MAT",
- "status": "active"
+ "status": "active",
+ "brief": {
+  "title": "Mathematical blueprints for learning from data",
+  "possible": [
+   "People building systems that learn from examples could choose a model’s structure and training method before running experiments, with a mathematical guarantee about errors on unseen data. The prescription would start from explicit assumptions about the data and work for models of finite size.",
+   "The theory would cover feature learning: how training changes the internal patterns a model uses to solve a task. It would predict how performance changes as the model or its training dataset grows."
+  ],
+  "why": [
+   "Designers could spend less time on unsuccessful training experiments and compare designs on a common mathematical basis. Explicit assumptions would also help them identify changes in the data that invalidate a guarantee."
+  ],
+  "sources": [
+   {
+    "url": "https://doi.org/10.48550/arXiv.1611.03530",
+    "who": "Chiyuan Zhang, Samy Bengio, Moritz Hardt, Benjamin Recht and Oriol Vinyals",
+    "showed": "The tested image models memorized randomly assigned categories yet performed much better on unseen images when trained with genuine categories. Model size alone could not explain the difference.",
+    "quote": "Deep neural networks easily ﬁt random labels.",
+    "cited_for": "The distinction between memorizing examples and learning patterns that work on unseen data.",
+    "not_established": "These experiments do not provide a mathematical prescription for choosing a model and training method.",
+    "checked": true
+   },
+   {
+    "url": "https://papers.neurips.cc/paper_files/paper/2023/hash/236b6a814a1d2c0ff504ca7bf380f7ff-Abstract-Conference.html",
+    "who": "Eshaan Nichani, Alex Damian and Jason D. Lee",
+    "showed": "They proved that networks can learn internal patterns arranged in a hierarchy. For specified target structures, their theorem bounds the training data and network size needed for low error on unseen data.",
+    "quote": "This demonstrates that three-layer networks\nindeed perform hierarchical learning.",
+    "cited_for": "Proofs can connect learned internal patterns, a specified training procedure and performance on unseen data.",
+    "not_established": "The result depends on particular hierarchical structures and does not establish the full prospective design demonstration.",
+    "checked": true
+   },
+   {
+    "url": "https://papers.neurips.cc/paper_files/paper/2024/file/6bd5fca2074dcd9ede9de50f71f7ec28-Paper-Conference.pdf",
+    "who": "Jason D. Lee, Kazusato Oko, Taiji Suzuki and Denny Wu",
+    "showed": "For bell-shaped random inputs, they proved that training with reused data can learn polynomial rules—sums of powers of a hidden input direction—with data and runtime requirements close to the theoretical minimum.",
+    "quote": "Surpris-\ningly, we prove that a two-layer neural network optimized by an SGD-based algo-\nrithm (on the squared loss) learns f∗ with a complexity that is not governed by the\ninformation exponent.",
+    "cited_for": "A specified training rule can achieve strong mathematical guarantees for a structured family of learning tasks.",
+    "not_established": "The guarantees concern restricted target functions and input distributions, rather than a broadly applicable design theory.",
+    "checked": true
+   },
+   {
+    "url": "https://proceedings.mlr.press/v178/damian22a.html",
+    "who": "Alex Damian, Jason D. Lee and Mahdi Soltanolkotabi",
+    "showed": "They proved that training can discover the few input directions relevant to certain polynomial tasks. Those learned patterns also support efficient learning of related tasks.",
+    "quote": "Our primary result is that gradient descent learns a representation of the data which depends only\non the directions relevant to f ⋆.",
+    "cited_for": "Learning useful internal patterns can reduce data requirements and help with related tasks.",
+    "not_established": "The proofs require particular input and target assumptions and do not supply the complete design framework.",
+    "checked": true
+   },
+   {
+    "url": "https://www.jmlr.org/beta/papers/v24/22-1132.html",
+    "who": "Spencer Frei, Niladri S. Chatterji and Peter L. Bartlett",
+    "showed": "For a specified clustered data model, they proved that training strengthens useful internal patterns despite corrupted category labels. Error on unseen data approaches the rate of label corruption.",
+    "quote": "We show that, although linear classiﬁers are no better than random guessing for\nthe distribution we consider, two-layer ReLU networks trained by gradient descent achieve\ngeneralization error close to the label noise rate.",
+    "cited_for": "Feature learning and useful error guarantees can be proved together even with corrupted training labels.",
+    "not_established": "The guarantee applies to a particular clustered distribution and training setup, rather than a general prescription.",
+    "checked": true
+   }
+  ],
+  "shown": [
+   "Nichani and colleagues connected learned internal patterns to mathematical limits on data needs and network size for hierarchical tasks. Damian and colleagues proved that training can find relevant input directions and reuse them across related tasks.",
+   "Lee and colleagues proved near-minimal data and runtime requirements for restricted polynomial tasks. Frei and colleagues proved useful error guarantees despite corrupted labels. These are concrete pieces of a design theory, each under specific assumptions."
+  ],
+  "missing": [
+   "A unified prescription must connect data assumptions, changing internal patterns, successful training and useful guarantees for finite models.",
+   "Predictions made before experiments must hold across distinct structured task families as data quantity and model size change.",
+   "Independent groups must reproduce successful predictions and a predicted failure after a specified change in the data.",
+   "The prescribed designs must be computable and trainable within stated resource limits, with clear boundaries on their guarantees."
+  ],
+  "milestones": [
+   {
+    "id": "m1",
+    "label": "Advance designs and error predictions for two data families",
+    "explanation": "The theory would have to prescribe designs and predict errors across data quantities and finite model sizes for two defined data families, with tolerances fixed beforehand. This tests whether it guides choices before training."
+   },
+   {
+    "id": "m2",
+    "label": "Useful proofs for finite models and datasets",
+    "explanation": "Proofs would have to connect explicit data assumptions and the prescribed training to useful bounds on unseen-data error at tested model and dataset sizes. This turns predictions into mathematical guarantees."
+   },
+   {
+    "id": "m3",
+    "label": "Independent reproduction of successes and a predicted failure",
+    "explanation": "Independent groups would have to reproduce successful predictions and a predefined failure after a specified data change, accounting for variation across runs. This tests reproducibility and the theory’s boundaries."
+   },
+   {
+    "id": "m4",
+    "label": "Usable designs with clear resource and applicability limits",
+    "explanation": "The prescriptions would have to be computable and trainable within stated resources, with explicit limits on where assumptions and guarantees apply. This establishes practical use within the demonstrated scope."
+   }
+  ],
+  "uncertain": [
+   "Whether any theory already meets the complete proposed demonstration remains unresolved.",
+   "The task families, error measure, training rules, resource limits and acceptable prediction tolerances remain to be specified.",
+   "How to establish that real application data satisfy the mathematical assumptions remains an open question."
+  ],
+  "prompt": "5e97d4b8dfc3"
+ }
 }
