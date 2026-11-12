@@ -182,7 +182,8 @@
   "reconcile": "gpt-6.1-terra",
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
-  "rewrite": "gpt-6.1-sol"
+  "rewrite": "gpt-6.1-sol",
+  "brief": "gpt-6.1-sol"
  },
  "sources": [
   "https://pmc.ncbi.nlm.nih.gov/articles/PMC13370857/"
@@ -193,5 +194,90 @@
   "review": "ingestion/runs/all-fields/BIF/attempts/review-BIF-09-e0e6a92c9cb84b328b3961afbe98177b/validated.json"
  },
  "field": "BIF",
- "status": "active"
+ "status": "active",
+ "brief": {
+  "title": "Predicting which molecules bind across all proteins",
+  "possible": [
+   "Researchers could screen an organism’s full set of proteins to predict which small molecules or other proteins bind to them, which pairs stay apart, where they touch and how strongly they bind under specified conditions. This would extend to unfamiliar partners and proteins that are flexible or sit in cell membranes."
+  ],
+  "why": [
+   "Drug researchers could prioritize laboratory tests, compare how selectively a candidate binds across proteins and choose molecular changes to investigate. Biologists could identify candidate interaction partners and plan experiments around their predicted contact sites."
+  ],
+  "sources": [
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13370857/",
+    "who": "Joelle N Eaves and Daniel R Woldring",
+    "showed": "Binding-strength predictions depended on how the molecular structures were generated. Averaging predictions across several possible arrangements failed to restore performance close to that obtained with experimentally measured structures.",
+    "quote": "Multipose\naveraging showed source-dependent effects and did not recover near-crystal\nperformance for any perturbed input.",
+    "cited_for": "Reliable binding-strength estimates require tests using the computed structures researchers would use in practice.",
+    "not_established": "The study tested known binding pairs, leaving rejection of nonbinding pairs and performance on unfamiliar targets unresolved.",
+    "checked": true
+   },
+   {
+    "url": "https://arxiv.org/abs/2412.10966",
+    "who": "Alex Morehead and Jianlin Cheng",
+    "showed": "Their preprint presents FlowDock, which jointly predicts bound structures and binding strength. It reported a 51% success rate for finding bound arrangements from proteins initially modeled without their partners.",
+    "quote": "FlowDock provides predicted structural confidence\nscores and binding affinity values with each of its generated protein-ligand complex structures",
+    "cited_for": "A single model can produce both molecular arrangements and binding-strength estimates.",
+    "not_established": "These benchmarks leave broad rejection of nonbinding pairs and dependable screening across an organism’s proteins unresolved.",
+    "checked": true
+   },
+   {
+    "url": "https://www.nature.com/articles/s42256-025-01124-5.pdf",
+    "who": "David Graber, Peter Stockinger, Fabian Meyer and collaborators",
+    "showed": "They created CleanSplit, training data filtered to remove similarities to test cases. Existing models lost accuracy after retraining, while their GEMS model retained strong performance on independent tests.",
+    "quote": "Retraining current top-performing models on CleanSplit \ncaused their benchmark performance to drop substantially, indicating \nthat the performance of existing models is largely driven by data leakage.",
+    "cited_for": "Tests must control similarities between training and test examples to measure performance on unfamiliar molecular pairs.",
+    "not_established": "Independent benchmark accuracy leaves performance with computed structures and across the full range of protein targets unresolved.",
+    "checked": true
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11831152/",
+    "who": "Andrew Savinov, Sebastian Swanson, Amy E Keating and Gene-Wei Li",
+    "showed": "FragFold predicted where protein fragments bind and inhibit target proteins. Experiments supported predicted contact arrangements, including previously unknown ones.",
+    "quote": "Across full protein sequences, 68% of FragFold-predicted binding peaks match experimentally measured inhibitory peaks.",
+    "cited_for": "Protein-fragment binding predictions can agree with experimental measurements of inhibition.",
+    "not_established": "Fragment inhibition results leave dependable binding-strength prediction across diverse molecular partners unresolved.",
+    "checked": true
+   }
+  ],
+  "shown": [
+   "Morehead and Cheng’s FlowDock combines structure and binding-strength prediction. Graber and colleagues’ GEMS retains accuracy after filtering similarities between training and test cases. Savinov and colleagues’ FragFold connects predicted fragment binding with measured inhibition.",
+   "Eaves and Woldring found that binding-strength accuracy depended on the source of the structures. Together, these results demonstrate parts of the capability in bounded tests. Dependable screening across an organism’s full protein set remains to be demonstrated."
+  ],
+  "missing": [
+   "A system must reliably distinguish binding from nonbinding pairs while predicting contact sites and binding strength.",
+   "Performance must hold across unfamiliar protein families, molecular partners, flexible proteins and proteins in membranes.",
+   "Predictions need dependable uncertainty estimates under specified binding conditions and with computed structures.",
+   "Independent demonstrations must establish affordable computing costs, broad coverage and useful error rates at screening scale."
+  ],
+  "milestones": [
+   {
+    "id": "m1",
+    "label": "Blinded tests establish binding, contact sites and binding strength",
+    "explanation": "Blinded tests on new pairs would have to measure binding, contact arrangements and binding strength, with uncertainty matching observed errors across diverse and difficult targets. This would establish breadth beyond familiar examples."
+   },
+   {
+    "id": "m2",
+    "label": "Screening tests succeed with computed structures and nonbinding pairs",
+    "explanation": "Tests would have to include nonbinding pairs and structures computed from proteins without bound partners or predicted jointly with partners. This would establish performance with inputs used in practical screening."
+   },
+   {
+    "id": "m3",
+    "label": "Predefined criteria expose performance across target classes",
+    "explanation": "Tests would have to set conditions, binding definitions, success thresholds and uncertainty criteria beforehand, then compare methods and report performance by target and input type. This would expose failures hidden by averages."
+   },
+   {
+    "id": "m4",
+    "label": "Independent groups reproduce results at practical screening costs",
+    "explanation": "Independent groups would have to repeat the tests and confirm new interactions using shared workflows that report computing costs, speed, coverage and failures. This would establish reproducibility and practical screening limits."
+   }
+  ],
+  "uncertain": [
+   "How much performance will fall on genuinely unfamiliar proteins and molecular partners remains unclear.",
+   "It remains unclear how reliably models can handle flexible molecular states and changing binding conditions.",
+   "Appropriate success thresholds, binding definitions, computing budgets and required protein coverage remain open."
+  ],
+  "prompt": "5e97d4b8dfc3"
+ }
 }
