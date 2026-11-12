@@ -216,6 +216,84 @@
   "reconcile": "grok-4.7-build",
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
-  "rewrite": "gpt-6.1-sol"
+  "rewrite": "gpt-6.1-sol",
+  "brief": "gpt-6.1-sol"
+ },
+ "brief": {
+  "title": "Computer-checkable guarantees about AI behavior",
+  "possible": [
+   "People using a powerful AI system could get a proof that it obeys a precise rule for every allowed input and execution. The rule might forbid a defined kind of output, keep a controller within safe limits, or protect a particular secret.",
+   "An independent checker could validate the proof for the identified model and operating conditions. This would cover the whole stated range of behavior, beyond the examples anyone has tested."
+  ],
+  "why": [
+   "For people deciding whether to deploy AI in consequential settings, a checkable guarantee could provide stronger grounds for trusting a specific behavior. Controllers and systems handling sensitive information could come with a precise, independently checkable claim."
+  ],
+  "sources": [
+   {
+    "url": "https://proceedings.mlr.press/v267/chiu25a.html",
+    "who": "Hong-Ming Chiu, Hao Chen, Huan Zhang and Richard Y. Zhang",
+    "showed": "Their SDP-CROWN method improved checks that image classifiers keep their labels under limited input changes. It tightened bounds, mathematical limits on possible outputs, by accounting for interactions between artificial neurons, the model's processing units.",
+    "quote": "In theory, we prove that our proposed inter-neuron bound\ncan be up to √n times tighter than the per-neuron bounds\ncommonly used in scalable verifiers.",
+    "cited_for": "More precise bounds can improve proofs that image classifiers withstand limited input changes.",
+    "not_established": "These classifier results do not establish consequential behavioral guarantees for a deployed frontier language model.",
+    "checked": true
+   },
+   {
+    "url": "https://livrepository.liverpool.ac.uk/3184632/",
+    "who": "Xiaowei Huang and collaborators",
+    "showed": "They surveyed language-model vulnerabilities and ways to check safety requirements, including mathematical proofs and monitoring during use.",
+    "quote": null,
+    "cited_for": "The survey frames rigorous safety checking as a research goal for language models.",
+    "not_established": "A survey of checking methods does not demonstrate a machine-checkable behavioral guarantee for a frontier model.",
+    "checked": false
+   },
+   {
+    "url": "https://arxiv.org/abs/2606.09377",
+    "who": "Sergei Vorobyov and Eugene Ilyushin",
+    "showed": "This preprint spread verification across graphics processors and ruled out a specified failure on an image-classification benchmark. Its FSDP method distributed model weights while preserving the calculated output bounds exactly.",
+    "quote": "producing\nbounds that arebitwise identicalto the single-GPU baseline",
+    "cited_for": "Distributing verification can reduce memory use while preserving bounds, but the search process has further memory bottlenecks.",
+    "not_established": "Large-scale bound calculations and an image benchmark proof do not establish a frontier language model's behavioral guarantee.",
+    "checked": true
+   }
+  ],
+  "shown": [
+   "Chiu and colleagues improved certification of specially trained image classifiers with up to 2.47 million adjustable weights. Their checks cover resistance to limited input changes.",
+   "Vorobyov and Ilyushin's preprint calculated bounds on a synthetic network containing over a billion weights in one matrix. It also proved an image benchmark property without further search. These are steps toward larger proofs, rather than a complete demonstration of the proposed capability."
+  ],
+  "missing": [
+   "A practical proof connecting a consequential behavioral rule to every allowed input and execution of an identified deployed-scale model remains needed.",
+   "The proof must cover the actual arithmetic, output-generation rules, randomness and surrounding system included in its claim.",
+   "Verification needs sufficiently precise bounds without prohibitive computation or memory use.",
+   "A smaller stand-in model needs a proved error limit tight enough to transfer its guarantee to the original."
+  ],
+  "milestones": [
+   {
+    "id": "m1",
+    "label": "A public large model obeys a consequential rule",
+    "explanation": "A public model with at least 10 billion adjustable weights would need a machine-checked proof covering every allowed input and explicitly defined execution. This would demonstrate the capability at the proposed scale."
+   },
+   {
+    "id": "m2",
+    "label": "A smaller model's guarantee transfers to the original",
+    "explanation": "A machine-checked error bound would have to hold across the whole allowed input range and preserve the smaller model's safety margin. This would prove that its guarantee excludes forbidden behavior in the original."
+   },
+   {
+    "id": "m3",
+    "label": "Independent checking confirms the proof and exact computation",
+    "explanation": "A proof assistant, software for checking mathematical proofs, would need to reproduce the checker’s correctness and model certificate, with assumptions and costs published. This would make independent checking practical to assess."
+   },
+   {
+    "id": "m4",
+    "label": "Consequential guarantees hold across varied conditions",
+    "explanation": "Proofs would have to cover consequential rules across multiple meaningful input regions and model configurations, with exclusions disclosed. This would demonstrate breadth while preserving the claimed numerical and system behavior."
+   }
+  ],
+  "uncertain": [
+   "Which precise behavioral rules and operating conditions would capture consequential language-model failures?",
+   "Is the proposed model-size threshold a useful test when size alone does not determine proof difficulty or practical value?",
+   "Can a smaller model's error be measured tightly enough to preserve the original model's required behavior?"
+  ],
+  "prompt": "5e97d4b8dfc3"
  }
 }

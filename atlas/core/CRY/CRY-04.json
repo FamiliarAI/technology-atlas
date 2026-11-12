@@ -255,6 +255,114 @@
   "reconcile": "grok-4.7-build",
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
-  "rewrite": "gpt-6.1-sol"
+  "rewrite": "gpt-6.1-sol",
+  "brief": "gpt-6.1-sol"
+ },
+ "brief": {
+  "title": "Private computing at close to ordinary cost",
+  "possible": [
+   "You could ask a cloud service to run long, varied programs on encrypted data at close to ordinary computing costs. Organizations could calculate joint statistics while keeping their inputs private, without handing all their data to a shared custodian."
+  ],
+  "why": [
+   "A smaller price penalty for privacy would make confidential cloud processing and collaboration between independent data owners practical for broader workloads. People could get useful results without giving the computer doing the work access to the underlying data."
+  ],
+  "sources": [
+   {
+    "url": "https://dl.acm.org/doi/10.1145/1536414.1536440",
+    "who": "Gentry",
+    "showed": "This work constructs a way to perform general computation on encrypted data by refreshing it as computation proceeds.",
+    "quote": null,
+    "cited_for": "It establishes that general computation on encrypted data is possible.",
+    "not_established": "It does not establish execution at close to ordinary computing costs.",
+    "checked": false
+   },
+   {
+    "url": "https://link.springer.com/article/10.1186/s42400-026-00571-w",
+    "who": "Tianyu Li and collaborators",
+    "showed": "Their survey identifies bootstrapping, which refreshes encrypted data so computation can continue, as a major cost. It describes improvements in speed and in processing many values together.",
+    "quote": "But in practice, bootstrapping consumes over 50%\nof total execution time, posing a serious obstacle to FHE adoption.",
+    "cited_for": "Refreshing encrypted data remains a major obstacle to affordable private computation.",
+    "not_established": "The reported costs do not establish a universal slowdown for whole programs or a minimum achievable cost.",
+    "checked": true
+   },
+   {
+    "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ITC.2021.2",
+    "who": "Ivan Bjerre Damgård, Boyang Li and Nikolaj Ignatieff Schwartzbach",
+    "showed": "They prove minimum communication requirements for particular joint computations with perfect security, meaning protection even against unlimited computing power.",
+    "quote": "We prove two classes of lower bounds on the communication complexity of information-theoretically\nsecure multiparty computation.",
+    "cited_for": "Some security guarantees impose unavoidable communication costs.",
+    "not_established": "These bounds do not rule out the proposed communication target for schemes whose security depends on computational difficulty.",
+    "checked": true
+   },
+   {
+    "url": "https://eprint.iacr.org/2025/235",
+    "who": "Wei-Kai Lin, Ethan Mook and Daniel Wichs",
+    "showed": "They construct private joint computation that resists cheating and supports programs with memory access. After input preparation, execution time grows in proportion to the ordinary program's runtime.",
+    "quote": "The online run-time of each MPC execution is only proportional to the RAM run-time of the underlying program, that can be sublinear in the input size.",
+    "cited_for": "Private execution can have theoretically efficient runtime after input preparation.",
+    "not_established": "Proportional runtime does not demonstrate a small measured slowdown once preparation, memory and networking are included.",
+    "checked": true
+   },
+   {
+    "url": "https://eprint.iacr.org/2026/2311",
+    "who": "Alexander Bienstock, Yuval Efron and Kevin Yeo",
+    "showed": "Their preprint reports reduced communication for restricted classes of small computations when most participants remain honest. It protects against cheating even when attackers choose whom to corrupt during execution.",
+    "quote": "To our knowledge, this is the first information-theoretic MPC protocol with $o(n^2)$ communication for a wide-range of circuit classes.",
+    "cited_for": "Communication costs can fall below a previously persistent barrier for some small computations.",
+    "not_established": "The result requires restrictions on computation size, depth and input holders; it does not demonstrate low total execution cost.",
+    "checked": true
+   },
+   {
+    "url": "https://eprint.iacr.org/2023/307",
+    "who": "Daniel Escudero and collaborators",
+    "showed": "Their SUPERPACK protocol reduces communication during private joint computation even when most participants cheat. They implement it and report improved runtimes in distributed settings with moderately many participants.",
+    "quote": "We implement both \\textsc{SuperPack} and Turbospeedz and verify with experimental results that our approach indeed leads to more competitive runtimes in distributed environments with a moderately large number of parties.",
+    "cited_for": "Private joint computation can achieve practical communication and runtime improvements.",
+    "not_established": "The communication result depends on the honest share of participants and excludes the full cost of advance preparation.",
+    "checked": true
+   }
+  ],
+  "shown": [
+   "General computation on encrypted data already exists. Li and collaborators describe ways to sustain long computations and reduce their costs. The remaining advance is making broad private workloads affordable.",
+   "Lin, Mook and Wichs establish private joint execution whose runtime, after preparation, scales with the ordinary program's runtime. SUPERPACK demonstrates practical improvements in distributed execution. Neither demonstrates the proposed total-cost target across general workloads."
+  ],
+  "missing": [
+   "Broad, long-running encrypted programs have yet to demonstrate the proposed small slowdown while hiding memory access patterns.",
+   "Private joint computation has yet to demonstrate both proposed resource bounds while protecting against a dishonest majority.",
+   "A complete cost demonstration must include preparation, memory and networking, with explicit rules for spreading reusable costs across executions."
+  ],
+  "milestones": [
+   {
+    "id": "m1",
+    "label": "Billion-step programs run privately near ordinary speed",
+    "explanation": "Varied programs would have to meet the proposed time and security targets while hiding memory addresses, without a trusted hardware enclave. This would test affordable encrypted execution over long runs."
+   },
+   {
+    "id": "m2",
+    "label": "Private joint computation meets both resource limits",
+    "explanation": "Participants would have to meet both proposed 10× resource bounds despite a dishonest majority, with explicit guarantees about stopping or delivering results. This would establish the separate joint-computation track."
+   },
+   {
+    "id": "m3",
+    "label": "Matched comparisons account for every resource cost",
+    "explanation": "Comparisons would have to match hardware, program behavior and precision, and disclose network conditions and all resource costs under explicit reuse rules. This would prevent preparation or extra processors from hiding costs."
+   },
+   {
+    "id": "m4",
+    "label": "Independent teams reproduce secure and correct execution",
+    "explanation": "Released software, benchmarks, security arguments and correctness checks would have to support independent reproduction across varied workloads. This would establish breadth within the tested boundaries."
+   },
+   {
+    "id": "m5",
+    "label": "Measured overhead stays within the declared operating limits",
+    "explanation": "Measured overhead would have to remain within 10× under the accounting rules, with supported program sizes, memory, participant counts and networks stated. This would distinguish practical efficiency from favorable growth rates."
+   }
+  ],
+  "uncertain": [
+   "The proposed performance and security thresholds are benchmark choices; representative workloads and cost-sharing rules remain unsettled.",
+   "Whether the joint-computation communication target is achievable depends on the exact task, security guarantees and setup assumptions.",
+   "Cheap private execution alone does not determine what released results reveal or hide timing, traffic and participation."
+  ],
+  "prompt": "5e97d4b8dfc3"
  }
 }
