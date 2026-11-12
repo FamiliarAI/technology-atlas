@@ -92,7 +92,7 @@ skips Git. The library function `atlas.labels.relabel(identifier, call=None, cor
 returns `(milestone id, old label, new label)` tuples without rebuilding or committing;
 tests can supply a stub `call(prompt)` returning the parsed answer.
 
-## Finding papers and the reader's version (pilot)
+## Finding papers and the reader's version
 
 ```bash
 python3 -m atlas.find NRL-17 ELE-01 --limit 4 --no-commit
@@ -102,7 +102,7 @@ python3 -m atlas.find --thin --workers 3             # records citing at most on
 python3 -m atlas.brief --missing --workers 4
 ```
 
-Both passes are piloted on eight breakthroughs; the owner approved the pilot on November 11, 2026.
+Both passes were piloted on eight breakthroughs (November 11, 2026) and then run across the atlas on November 12: every breakthrough has a reader's version, and the 281 that cited at most one source were topped up.
 
 `atlas.find` makes one Codex Terra (`gpt-6.1-terra`) web-search call per breakthrough, asking for up to `--limit` primary sources that report a result and are not already cited. Each returned URL goes through `atlas.add` with the breakthrough forced and the paper's title, so it is saved, judged and quote-checked as above; rows for other breakthroughs are printed as "other breakthrough, not stored" and dropped. `--url URL` (repeatable, one breakthrough) skips the search and adds the given URLs. A URL that cannot be saved, whose saved copy has under 1,000 characters of text (a cookie wall such as PubMed's), or that is already cited is printed and skipped before any judge call. Calls (the search, one `add-N/` per judge call, and `reports.json`) are saved in `atlas/data/find/<ID>-<UTC timestamp>/`. `--thin` selects active breakthroughs citing at most one source; `--workers N` runs breakthroughs in parallel with every core write, rebuild (at most one per breakthrough) and commit under one lock; breakthroughs with a completed call record are skipped unless `--force`; failures are printed and the run continues; exhaustion stops new calls and keeps what is done; commits every 25 and at the end unless `--no-commit`; no Wayback requests in batch runs.
 

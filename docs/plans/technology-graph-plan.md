@@ -35,9 +35,9 @@ The atlas is a map, not a forecast (decided by the owner on November 11). It mak
 - **Links.** The links were removed on November 11, 2026 and are in git history.
 - **Progress.** 4 judged rows.
 - **UI.** The v1 site is built in `atlas/web`: home, the sky-map atlas, field, breakthrough and Method pages, with a static export (`python3 -m atlas.export`) and a share image per page. It is not published.
-- **Reader's version (pilot).** Eight breakthroughs (QUA-01, QUA-08, SWE-01, SWE-03, NRL-17, ELE-01, CAR-09, MIC-07) have a short reader's version (`brief`) that the page leads with, in six questions; the research record is unchanged beneath it. Written by `python3 -m atlas.brief`, one call per breakthrough. The owner approved the pilot on November 11; running all 742 is not yet decided.
-- **Source top-up (pilot).** `python3 -m atlas.find` finds further papers for one breakthrough and adds each through `atlas.add`. Piloted on the four Terra breakthroughs above.
-- **Known gap.** 105 of the 193 PubMed sources are marked saved but hold only a cookie notice. `python3 -m atlas.pubmed` re-captures them from PubMed's data service; only the pilot's three are done.
+- **Reader's version.** All 742 breakthroughs have a short reader's version (`brief`) that the page leads with, in six questions; the research record is unchanged beneath it. Written by `python3 -m atlas.brief`, one Codex Sol call per breakthrough (whole-atlas run November 12: none failed, 7 needed the retry). Of 2,551 source entries, 1,839 carry a quote checked against the saved copy; the rest show no quote.
+- **Source top-up.** `python3 -m atlas.find` finds further papers for one breakthrough and adds each through `atlas.add`. Run on November 12 for the 281 breakthroughs that cited at most one source: 1,063 papers found, 810 saved, 1,466 judged rows stored. Nine breakthroughs still have a single source in their reader's version.
+- **PubMed copies.** PubMed pages that had saved only a cookie notice were re-captured from PubMed's data service with `python3 -m atlas.pubmed`; one of 193 (`pubmed.ncbi.nlm.nih.gov/77/`) still has no readable text.
 - **Remote.** `github.com/FamiliarAI/technology-atlas`, private.
 
 ## Plan to v1
