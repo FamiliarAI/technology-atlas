@@ -19,6 +19,38 @@ MAX_BYTES = 40 * 1024 * 1024
 UA = 'AtlasIngestion/1.0 (private research source capture)'
 
 
+# A PubMed page often reaches the capture code as a short "Cookies must be enabled" page. Its
+# abstract comes from NCBI E-utilities instead, and the full text from PMC when it names one.
+PUBMED = re.compile(r'^https?://pubmed\.ncbi\.nlm\.nih\.gov/(\d+)/?(?:[?#].*)?$')
+EFETCH = (
+    'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={}'
+    '&rettype=abstract&retmode=xml'
+)
+PMC_PAGE = 'https://pmc.ncbi.nlm.nih.gov/articles/{}/'
+NCBI_INTERVAL_S = 0.34  # NCBI allows 3 requests a second without a key.
+MIN_TEXT = 1000  # Shorter extracted text is a cookie wall or error page, not a paper.
+
+
+def pubmed_id(url):
+    match = PUBMED.match(url.strip())
+    return match.group(1) if match else None
+
+
+def pmc_id(body):
+    """The PMC ID named in a PubMed efetch XML record, or None."""
+    import xml.etree.ElementTree as ET
+
+    try:
+        root = ET.fromstring(body)
+    except ET.ParseError:
+        return None
+    for element in root.iter('ArticleId'):
+        value = (element.text or '').strip()
+        if element.get('IdType') == 'pmc' and re.fullmatch(r'PMC\d+', value):
+            return value
+    return None
+
+
 def now():
     return datetime.now(timezone.utc).isoformat()
 
@@ -291,6 +323,29 @@ class Archive:
         op = self.operation(url, alternative, 'alternative', retry=retry)
         for pdf in op.get('pdf_urls', []):
             self.operation(url, pdf, 'paper_pdf', retry=retry)
+
+    def pubmed(self, url, retry=False):
+        """For a PubMed URL whose captured text is short, retain the E-utilities abstract and,
+        when it names one, the PMC article as alternative copies. Returns the PMC URL or None."""
+        identifier = pubmed_id(url)
+        if identifier is None:
+            return None
+        texts = [len(item['text'].strip()) for item in self.evidence(url)]
+        if max(texts, default=0) >= MIN_TEXT:
+            return None
+        self.sleep(NCBI_INTERVAL_S)
+        efetch = EFETCH.format(identifier)
+        op = self.operation(url, efetch, 'alternative', retry=retry)
+        if op.get('status') != 'saved':
+            return None
+        artifact = next(a for a in self.source(url)['artifacts'] if a['sha256'] == op['artifact'])
+        pmc = pmc_id((self.root / artifact['path']).read_bytes())
+        if pmc is None:
+            return None
+        self.sleep(NCBI_INTERVAL_S)
+        page = PMC_PAGE.format(pmc)
+        self.alternative(url, page, retry=retry)
+        return page
 
     def attach(self, url, file):
         file = Path(file)

@@ -92,6 +92,23 @@ skips Git. The library function `atlas.labels.relabel(identifier, call=None, cor
 returns `(milestone id, old label, new label)` tuples without rebuilding or committing;
 tests can supply a stub `call(prompt)` returning the parsed answer.
 
+## Finding papers and the reader's version (pilot)
+
+```bash
+python3 -m atlas.find NRL-17 ELE-01 --limit 4 --no-commit
+python3 -m atlas.brief QUA-01 NRL-17 --no-commit
+```
+
+Both passes are piloted on eight breakthroughs; the owner approved the pilot on November 11, 2026.
+
+`atlas.find` makes one Codex Terra (`gpt-6.1-terra`) web-search call per breakthrough, asking for up to `--limit` primary sources that report a result and are not already cited. Each returned URL goes through `atlas.add` with the breakthrough forced and the paper's title, so it is saved, judged and quote-checked as above; rows for other breakthroughs are printed as "other breakthrough, not stored" and dropped. `--url URL` (repeatable, one breakthrough) skips the search and adds the given URLs. A URL that cannot be saved, whose saved copy has under 1,000 characters of text (a cookie wall such as PubMed's), or that is already cited is printed and skipped before any judge call. Calls (the search, one `add-N/` per judge call, and `reports.json`) are saved in `atlas/data/find/<ID>-<UTC timestamp>/`. One commit at the end unless `--no-commit`.
+
+`atlas.brief` makes one Codex Sol (`gpt-6.1-sol`) call per breakthrough (`--workers N`, default 3), with the whole record and every source: the record's sources plus papers with judged rows, each with the passages citing it, its judged quotes and the opening of its saved copy (12,000 characters each, 80,000 in all; a copy under 1,000 characters, such as PubMed's cookie wall, counts as none). The answer is the record's `brief`: a plain-language title, what becomes possible, why it matters, one item per source (who, what they showed, an exact quote, why it is cited, what it does not establish), what has been shown, what is missing, one explanation per milestone, and what is uncertain. Wrong milestone IDs, unknown, repeated, missing or reordered sources, wrong list counts (possible, why and shown 1 or 2; missing 2 to 4; uncertain 1 to 3), or text more than 10% over the prompt's stated limits rejects the answer; it is asked once more with every problem and its measured length. Each quote is checked against the saved copy's full text; one not found is stored as null with `checked: false`. Only `brief` and `models.brief` are added to the record file; every other byte stays. Calls are saved in `atlas/data/brief/<ID>-<UTC timestamp>/attempt-N/`. The library function `atlas.brief.brief(identifier, call=None, core=CORE, path=DB)` writes one brief without rebuilding or committing; tests supply a stub `call(prompt)`.
+
+Saved copies: `atlas.add.save` and the brief both use the recorded copy with the most extracted text, and `atlas.add` captures only when it has under 1,000 characters. A PubMed page that captures as a cookie wall gets its abstract from NCBI E-utilities and, when named, its PMC article, kept as `alternative` copies (`Archive.pubmed` in `ingestion/sources.py`). `python3 -m atlas.pubmed ID ... [--no-commit]` does this for existing sources of the named breakthroughs without a model call; `python3 -m atlas.pubmed --list` counts, without fetching, the PubMed sources across the atlas that would be re-captured (105 of 193 on November 12).
+
+The b file carries `brief` when the record has one, and lists papers that only have judged rows after the record's own sources.
+
 ## Data and integrity
 
 `atlas/data/atlas.sqlite3` is generated locally and ignored by Git. Tables:
@@ -124,4 +141,4 @@ python3 -m atlas.core check
 (cd atlas/web && npm run build)
 ```
 
-`test_core.py` covers importing into and checking `atlas/core/`; `test_atlas.py` covers the rebuild (identical tables after deleting and rebuilding, a check problem or changed copy leaving the old database in place, missing copies skipped), download allowlisting/integrity, progress (including whole-breakthrough steps), and the add pass; `test_site.py` covers the site data files (no order links, no claims file), the server and the export.
+`test_core.py` covers importing into and checking `atlas/core/`; `test_atlas.py` covers the rebuild (identical tables after deleting and rebuilding, a check problem or changed copy leaving the old database in place, missing copies skipped), download allowlisting/integrity, progress (including whole-breakthrough steps), and the add pass; `test_site.py` covers the site data files (no order links, no claims file), the server and the export. `test_passes.py` covers `atlas.find` (including `--url` and dropped rows for other breakthroughs) and `atlas.brief` with stubbed calls, copy choice in `atlas.add.save`, `atlas.pubmed`, the `brief` check and the b file's `brief` and judged-only sources; `ingestion/tests/test_pubmed.py` covers the PubMed fetch with a stubbed network.

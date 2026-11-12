@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from ingestion.pipeline import Models, passage_matches
-from ingestion.sources import UA, Archive, request_url
+from ingestion.sources import MIN_TEXT, UA, Archive, extract, request_url
 from . import core as records, store
 from .core import CORE
 from .store import CONFIG, DB, ROOT, connect
@@ -132,42 +132,70 @@ def rank(db, opening, forced=None, limit=CANDIDATES):
     return chosen
 
 
-def save(url, path=DB):
-    (
-        """Saved copy for url: (sha256, path, text). Reuses an existing asset when """
-        """the URL was already saved."""
-    )
-    with closing(connect(path)) as db:
-        known = db.execute(
-            (
-                'SELECT a.id, a.path FROM progress p JOIN assets a ON a.id = p.asset WHERE '
-                'p.url=? LIMIT 1'
-            ),
-            (url,),
-        ).fetchone()
-    if known and Path(known['path']).is_file():
-        from ingestion.sources import extract
+FORMATS = {'pdf': 'application/pdf', 'xml': 'application/xml', 'txt': 'text/plain'}
 
-        body = Path(known['path']).read_bytes()
-        _, text, _, _ = extract(
-            body, 'application/pdf' if body.startswith(b'%PDF-') else 'text/html'
-        )
-        return known['id'], known['path'], text
+
+def copy_text(file):
+    """Extracted text of a saved copy file."""
+    body = Path(file).read_bytes()
+    kind = FORMATS.get(Path(file).suffix.lstrip('.').lower(), 'text/html')
+    if body.startswith(b'%PDF-'):
+        kind = 'application/pdf'
+    try:
+        return extract(body, kind)[1]
+    except ValueError:
+        return ''
+
+
+def known_copies(source, db):
+    """(sha256, path, text, kind) for each recorded copy of a source found on this computer."""
+    found = []
+    for copy in source.get('copies', []):
+        row = db.execute('SELECT path FROM assets WHERE id=?', (copy['sha256'],)).fetchone()
+        if row is not None and Path(row['path']).is_file():
+            found.append((copy['sha256'], row['path'], copy_text(row['path']), copy['kind']))
+    return found
+
+
+def best(copies):
+    """The copy with the most extracted text, or None."""
+    return max(copies, key=lambda copy: len(copy[2].strip()), default=None)
+
+
+def captured(url):
+    """Copies of url in the atlas/data/added archive: {sha256, format, kind} each."""
+    if not (ADDED / 'captures.json').is_file():
+        return []
+    return [
+        {key: artifact[key] for key in ('sha256', 'format', 'kind')}
+        for artifact in Archive(ADDED).source(url)['artifacts']
+        if (ADDED / artifact['path']).is_file()
+    ]
+
+
+def save(url, path=DB, core=CORE):
+    (
+        """Best saved copy for url: (sha256, path, text, kind), the one with the most """
+        """text. Captures only when the recorded copies have under MIN_TEXT characters; a """
+        """PubMed page then also gets its E-utilities abstract and PMC page."""
+    )
+    source = records.load(core)['sources'].get(url, {})
+    with closing(connect(path)) as db:
+        copies = known_copies(source, db)
+    chosen = best(copies)
+    if chosen and len(chosen[2].strip()) >= MIN_TEXT:
+        return chosen
     ADDED.mkdir(parents=True, exist_ok=True)
     archive = Archive(ADDED)
     archive.capture(url)
-    items = archive.evidence(url)
-    if not items:
+    archive.pubmed(url)
+    for item in archive.evidence(url):
+        copies.append(
+            (item['sha256'], str((ADDED / item['path']).resolve()), item['text'], item['kind'])
+        )
+    if not copies:
         raise SystemExit('Could not save ' + url + '; see ' + str(ADDED / 'captures.json'))
-    best = next(
-        (
-            artifact
-            for artifact in items
-            if artifact['format'] == 'pdf' and artifact['text'].strip()
-        ),
-        None,
-    ) or next((artifact for artifact in items if artifact['text'].strip()), items[0])
-    return best['sha256'], str((ADDED / best['path']).resolve()), best['text']
+    return best(copies)
 
 
 def request_wayback(url):
@@ -199,12 +227,27 @@ def _call(config):
     return calls, lambda prompt: Models(config).call('format', prompt, SCHEMA, calls)
 
 
-def add(url, forced=None, call=None, saver=None, path=DB, core=CORE):
+def add(
+    url,
+    forced=None,
+    call=None,
+    saver=None,
+    path=DB,
+    core=CORE,
+    title=None,
+    only=None,
+    record_captured=None,
+):
     (
         """Save url, judge it against ranked milestones, and store verified rows. """
-        """Returns (stored, rejected)."""
+        """A new source gets title, or its URL when none is given. With only, rows for """
+        """other breakthroughs are not stored, and only that breakthrough's earlier rows """
+        """for url are replaced. Every copy captured for url is recorded unless a stub """
+        """saver is given (record_captured overrides). Returns (stored, rejected)."""
     )
-    sha, file, text = saver(url) if saver else save(url, path)
+    copy = saver(url) if saver else save(url, path, core)
+    sha, file, text = copy[:3]
+    kind = copy[3] if len(copy) > 3 else 'source'
     if not text.strip():
         raise SystemExit('Saved copy has no extractable text; attach a readable copy')
     with closing(connect(path)) as db:
@@ -224,7 +267,9 @@ def add(url, forced=None, call=None, saver=None, path=DB, core=CORE):
         allowed |= {(milestone['breakthrough'], 0) for milestone in candidates}
         stored, rejected = [], []
         for row in result['rows']:
-            if (row['breakthrough'], row['criterion']) not in allowed:
+            if only and row['breakthrough'] != only:
+                rejected.append((row, 'other breakthrough, not stored'))
+            elif (row['breakthrough'], row['criterion']) not in allowed:
                 rejected.append((row, 'not a candidate milestone'))
             elif row['criterion'] == 0 and row['verdict'] == 'meets':
                 rejected.append((row, 'meets needs a milestone'))
@@ -235,15 +280,23 @@ def add(url, forced=None, call=None, saver=None, path=DB, core=CORE):
         added_at = datetime.now(timezone.utc).isoformat()
     data = records.load(core)
     source = data['sources'].setdefault(
-        url, {'url': url, 'title': url, 'status': 'saved', 'copies': []}
+        url, {'url': url, 'title': title or url, 'status': 'saved', 'copies': []}
     )
-    if sha not in {copy['sha256'] for copy in source['copies']}:
-        source['copies'].append(
-            {'sha256': sha, 'format': Path(file).suffix.lstrip('.').lower(), 'kind': 'source'}
-        )
+    chosen = {'sha256': sha, 'format': Path(file).suffix.lstrip('.').lower(), 'kind': kind}
+    # Every copy captured for url is recorded, so later readers can choose the fullest one.
+    if record_captured is None:
+        record_captured = saver is None
+    for entry in [chosen] + (captured(url) if record_captured else []):
+        if entry['sha256'] not in {known['sha256'] for known in source['copies']}:
+            source['copies'].append(entry)
+    source['status'] = 'saved'
     records.write_sources(data['sources'], core)
     # Re-adding a source replaces its earlier judgement; milestone IDs stay stable.
-    rows = [row for row in data['progress'] if row['url'] != url]
+    rows = [
+        row
+        for row in data['progress']
+        if row['url'] != url or (only and row['breakthrough'] != only)
+    ]
     for row in stored:
         milestone = None  # criterion 0: the breakthrough as a whole
         if row['criterion']:

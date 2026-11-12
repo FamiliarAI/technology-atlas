@@ -35,6 +35,9 @@ The atlas is a map, not a forecast (decided by the owner on November 11). It mak
 - **Links.** The links were removed on November 11, 2026 and are in git history.
 - **Progress.** 4 judged rows.
 - **UI.** The v1 site is built in `atlas/web`: home, the sky-map atlas, field, breakthrough and Method pages, with a static export (`python3 -m atlas.export`) and a share image per page. It is not published.
+- **Reader's version (pilot).** Eight breakthroughs (QUA-01, QUA-08, SWE-01, SWE-03, NRL-17, ELE-01, CAR-09, MIC-07) have a short reader's version (`brief`) that the page leads with, in six questions; the research record is unchanged beneath it. Written by `python3 -m atlas.brief`, one call per breakthrough. The owner approved the pilot on November 11; running all 742 is not yet decided.
+- **Source top-up (pilot).** `python3 -m atlas.find` finds further papers for one breakthrough and adds each through `atlas.add`. Piloted on the four Terra breakthroughs above.
+- **Known gap.** 105 of the 193 PubMed sources are marked saved but hold only a cookie notice. `python3 -m atlas.pubmed` re-captures them from PubMed's data service; only the pilot's three are done.
 - **Remote.** `github.com/FamiliarAI/technology-atlas`, private.
 
 ## Plan to v1

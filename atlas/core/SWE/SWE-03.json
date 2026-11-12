@@ -210,6 +210,99 @@
   "reconcile": "grok-4.7-build",
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
-  "rewrite": "gpt-6.1-sol"
+  "rewrite": "gpt-6.1-sol",
+  "brief": "gpt-6.1-sol"
+ },
+ "brief": {
+  "title": "Software plans that match what people need",
+  "possible": [
+   "Before software is built, users and buyers could check whether its specification—the precise rules it must follow—matches their recorded needs and operating conditions. The check would either support that match within stated limits or show a concrete situation where the rules allow something unwanted or prevent something intended.",
+   "A reviewable package would separate desired outcomes, observations about the operating environment, assumptions, and required software behavior. It would keep legitimate design choices open and make clear which conclusions depend on evidence from the real world."
+  ],
+  "why": [
+   "Software can obey its rules perfectly while missing what users expect. Checking the rules themselves would help developers and buyers resolve misunderstandings before coding and reduce the risk of proving that software meets the wrong requirements."
+  ],
+  "sources": [
+   {
+    "url": "https://sel4.systems/Verification/proofs.html",
+    "who": "The seL4 Foundation",
+    "showed": "The seL4 proofs establish stated properties of the operating-system core. Its account also acknowledges that those properties may leave out user expectations.",
+    "quote": null,
+    "cited_for": "Proving that code follows a specification does not establish that the specification captures user expectations.",
+    "not_established": "The proofs do not establish that the specification covers all intended behavior and relevant operating conditions.",
+    "checked": false
+   },
+   {
+    "url": "https://www.anthropic.com/research/formal-verification",
+    "who": "David Delmas and Jean Souyris, Airbus France",
+    "showed": "They describe Astrée, a tool that checks code for errors during execution. Tailoring it to aircraft control software and individual programs helps reduce false alarms.",
+    "quote": "The Astrée static analyser has proved to meet these requirements.",
+    "cited_for": "Tools can check selected software properties while requiring engineering judgment about alarms and real operating conditions.",
+    "not_established": "Checking for errors during execution does not establish that the software's requirements express what users need.",
+    "checked": true
+   },
+   {
+    "url": "https://dl.acm.org/doi/pdf/10.1145/3779132",
+    "who": "Brun and colleagues",
+    "showed": "This research roadmap discusses gathering and formalizing user intent alongside software generation and proof.",
+    "quote": null,
+    "cited_for": "It connects expressing user intent precisely with building software whose properties can be proved.",
+    "not_established": "A roadmap does not demonstrate a working method for checking specifications against intent and operating conditions.",
+    "checked": false
+   },
+   {
+    "url": "https://dl.acm.org/doi/10.1145/237432.237434",
+    "who": "Zave and Jackson",
+    "showed": "This requirements-engineering article provides conceptual background for separating requirements, descriptions of the environment, and machine specifications.",
+    "quote": null,
+    "cited_for": "It provides background for keeping desired outcomes separate from environmental descriptions and software behavior.",
+    "not_established": "Conceptual distinctions do not demonstrate a repeatable, mechanically checkable argument that a specification matches needs.",
+    "checked": false
+   },
+   {
+    "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
+    "who": "Amazon Web Services engineers, abridged by Leslie Lamport",
+    "showed": "Amazon engineers used mathematical descriptions and automated checks of possible behavior to find subtle design bugs. They distinguished checking a design from knowing that code implements it.",
+    "quote": "The model checker later found two bugs in other algorithms,\nboth serious and subtle.",
+    "cited_for": "Checking a design can expose serious bugs while leaving separate questions about its implementation.",
+    "not_established": "Finding design bugs does not establish that the chosen requirements capture stakeholder intent and operating conditions.",
+    "checked": true
+   }
+  ],
+  "shown": [
+   "Anthropic reports proofs that selected software operations cannot crash under stated assumptions, alongside other checks of behavior. seL4 demonstrates substantial mathematical assurance, and Amazon engineers have found subtle design bugs. These results establish properties of chosen targets; they do not demonstrate the full check proposed here."
+  ],
+  "missing": [
+   "A demonstrated method must connect recorded needs and environmental observations to a specification and a checkable argument or concrete disagreement.",
+   "It must distinguish valid design choices from omissions and contradictions, and present disagreements that affected people can judge.",
+   "It must connect assumptions to independent observations and distinguish coverage of modeled situations from coverage of the deployed world."
+  ],
+  "milestones": [
+   {
+    "id": "m1",
+    "label": "Independent teams produce packages linked to shared inputs",
+    "explanation": "Two independent teams must separate needs, assumptions, and software rules from shared inputs, declaring scope, checks, and allowed choices. This tests whether others can repeat the translation and trace its reasoning."
+   },
+   {
+    "id": "m2",
+    "label": "Automated comparison establishes agreement or exposes a distinguishing situation",
+    "explanation": "A mechanical check must establish consistent agreement on required observable behavior or show a distinguishing situation, preserving valid choices. This makes differences judgeable without forcing identical designs."
+   },
+   {
+    "id": "m3",
+    "label": "Historical tests report failures found, missed, and disagreements rejected",
+    "explanation": "A historical test set fixed in advance must report knowable failures found and missed, plus disagreements stakeholders reject, using independent judgments of knowability. This tests usefulness without relying on hindsight."
+   },
+   {
+    "id": "m4",
+    "label": "Independent evaluators reproduce claims, boundaries, and resource costs",
+    "explanation": "Independent evaluators must rerun checks and reconstruct claims, including environmental evidence, unresolved decisions, invalidating conditions, and resource costs. This tests reproducibility and practical usefulness."
+   }
+  ],
+  "uncertain": [
+   "What should count as a match between needs and software rules, and which situations must the comparison cover?",
+   "How should people resolve disputed needs and judge which historical failures were knowable without hindsight?",
+   "How can evaluators detect omissions shared by independent teams and obtain independent evidence about human behavior and physical systems?"
+  ]
  }
 }

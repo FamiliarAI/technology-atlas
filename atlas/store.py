@@ -163,7 +163,17 @@ def rebuild(core=CORE, path=DB, roots=SOURCES):
                     for source in map(data['sources'].get, item.get('sources', [])):
                         summary = {key: source[key] for key in ('url', 'title', 'status')}
                         sources.append(summary | {'artifacts': source['copies']})
-                    item = dict(item, sources=sources)
+                    # Papers that only have judged rows: listed apart so source counts keep
+                    # meaning the record's citations.
+                    cited = set(item.get('sources', []))
+                    judged = []
+                    for url in dict.fromkeys(
+                        row['url'] for row in data['progress'] if row['breakthrough'] == identifier
+                    ):
+                        if url not in cited:
+                            source = data['sources'][url]
+                            judged.append({key: source[key] for key in ('url', 'title', 'status')})
+                    item = dict(item, sources=sources, judged_sources=judged)
                     db.execute(
                         'INSERT INTO breakthroughs VALUES (?,?,?)',
                         (identifier, prefix, json.dumps(item)),
@@ -523,7 +533,11 @@ def breakthrough_data(db, identifier, view=None):
         for row in rows
     ]
     field = view['fields'][item['field']]
-    return {
+    sources = [
+        {'url': source['url'], 'title': source.get('title'), 'status': source.get('status')}
+        for source in item.get('sources', []) + item.get('judged_sources', [])
+    ]
+    out = {
         'id': identifier,
         'field': item['field'],
         'field_name': field['name'],
@@ -534,13 +548,25 @@ def breakthrough_data(db, identifier, view=None):
         **{key: item.get(key, []) for key in sections},
         'milestones': item['milestones'],
         'moved_at': item['moved_at'],
-        # Links to the originals only: no saved copies, no local paths.
-        'sources': [
-            {'url': source['url'], 'title': source.get('title'), 'status': source.get('status')}
-            for source in item.get('sources', [])
-        ],
+        # Links to the originals only: no saved copies, no local paths. Papers that only have
+        # judged rows follow the record's own sources.
+        'sources': sources,
         'progress': evidence,
     }
+    if item.get('brief'):
+        # The reader's version; each source carries the title and status of its listed source.
+        known = {source['url']: source for source in sources}
+        brief = dict(item['brief'])
+        brief['sources'] = [
+            entry
+            | {
+                'title': known.get(entry['url'], {}).get('title'),
+                'status': known.get(entry['url'], {}).get('status'),
+            }
+            for entry in brief['sources']
+        ]
+        out['brief'] = brief
+    return out
 
 
 def search_index(db, view=None):

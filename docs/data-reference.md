@@ -55,7 +55,7 @@ Judged rows live in `atlas/core/progress.jsonl`. The database adds unjudged *res
 
 **Constellation, star.** The site's words for a field and a breakthrough on the star chart. *Figure lines* join a constellation's stars and mean only "same field". Star positions are computed in the browser (`atlas/web/src/sky.js`) and are not data.
 
-**Model names.** As recorded in the files: `grok-4.7-build` (Grok; the config asks for `grok-4.7` and the provider reports `grok-4.7-build`), `gpt-6.1-terra` (Codex Terra), `gpt-6.1-sol` (Codex Sol), `opus` (Claude Opus). By `models.research`, Grok researched 39 fields and Terra 27. `atlas.add` judgements use the config's `format` model (`gpt-6.1-terra`); labels use `gpt-6.1-sol`. Fable writes design and review, not data.
+**Model names.** As recorded in the files: `grok-4.7-build` (Grok; the config asks for `grok-4.7` and the provider reports `grok-4.7-build`), `gpt-6.1-terra` (Codex Terra), `gpt-6.1-sol` (Codex Sol), `opus` (Claude Opus). By `models.research`, Grok researched 39 fields and Terra 27. `atlas.add` judgements use the config's `format` model (`gpt-6.1-terra`); labels use `gpt-6.1-sol`; `atlas.find` searches with `gpt-6.1-terra` and `atlas.brief` writes with `gpt-6.1-sol`. Fable writes design and review, not data.
 
 ## 3. Records in `atlas/core/`
 
@@ -122,7 +122,25 @@ Milestones (items of `completion_criteria`) are paragraphs with two more keys, `
 | `change_log` | list | yes (6,644 items) | Changes the review made: `change`, `reason`. | `final_rewrite` | b file → `Record.jsx` |
 | `sources` | list of strings | yes (1,820 URLs) | Every URL the record cites; each is a line in `sources.jsonl`. Median 2 per breakthrough. | `import_field` (reduces the pipeline's source objects to URLs) | `check`; `rebuild` expands each URL back to `{url, title, status, artifacts}` |
 | `provenance` | object | yes | Repository-relative paths of the pipeline files behind the record: `research` (`reconciled-research.md`), `structured_record` (`reconciled-structured.json`), `review` (the concept's `validated.json`). All under git-ignored `ingestion/runs/`. | `final_rewrite.make_input` → `import_field` (made relative) | `rebuild` → `documents` table (local downloads only). Not in the site data. |
-| `models` | object | yes | Model that ran each pipeline stage: `research`, `reconcile`, `format`, `review` (missing in 2 records, `CLM-05` and `CLM-13`, for which the pipeline recorded no review model), `rewrite`. Example (`QUA-01`): research and reconcile `grok-4.7-build`, format `gpt-6.1-terra`, review and rewrite `gpt-6.1-sol`. | `final_rewrite` (`attempt_model` per stage) | b file `models` (not displayed by the site today) |
+| `models` | object | yes | Model that ran each pipeline stage: `research`, `reconcile`, `format`, `review` (missing in 2 records, `CLM-05` and `CLM-13`, for which the pipeline recorded no review model), `rewrite`. Example (`QUA-01`): research and reconcile `grok-4.7-build`, format `gpt-6.1-terra`, review and rewrite `gpt-6.1-sol`. `brief` is added with the `brief` key below. | `final_rewrite` (`attempt_model` per stage); `atlas.brief` (`brief` only) | b file `models` (not displayed by the site today) |
+| `brief` | object | optional (pilot: 8 records) | The reader's version: a short plain-language account written on top of the research record, which stays unchanged. Keys below. Added as the file's last key; no other byte of the file changes. | `atlas.brief` (model `gpt-6.1-sol`) | `check` (milestone IDs, source URLs); b file `brief` |
+
+The `brief` object:
+
+| Key | Type | What it contains |
+|---|---|---|
+Limits below are the prompt's; the code rejects an answer only past 110% of a limit, so stored text can exceed a stated limit by up to 10%. Counts are exact.
+
+| Key | Type | What it contains |
+|---|---|---|
+| `title` | string | Plain-language name of the capability, at most 60 characters. The record's `title` stays the title everywhere else (catalog, field file, search). |
+| `possible` | list of strings | 1 or 2 paragraphs of at most 400 characters: what people could do once this exists. |
+| `why` | list of strings | 1 or 2 paragraphs of at most 400 characters: what would change, and for whom. |
+| `sources` | list | Exactly one item per source of the breakthrough, in the order given to the model: the record's `sources`, then papers with judged rows. Each: `url` (in `sources.jsonl`), `who` (who did the work, at most 80 characters), `showed` (what they showed, at most 300), `quote` (a passage of 40 to 300 characters found in the fullest saved copy's text by `ingestion.pipeline.passage_matches`, or null), `cited_for` and `not_established` (one sentence each, at most 160), `checked` (true only when code found the quote; set by code, not the model; a quote not found or outside 40 to 300 characters is stored as null with `checked` false). Two versions of one work: the second says "An earlier (or A later) version of the same work." with a null quote. |
+| `shown` | list of strings | 1 or 2 paragraphs of at most 400 characters: the furthest anyone has got, and who. |
+| `missing` | list of strings | 2 to 4 items of at most 160 characters: what nobody has yet done. |
+| `milestones` | list | One per milestone, same IDs in the same order: `id`, `label` (at most 10 words and 80 characters; the record's own `label` is not changed), `explanation` (at most 240 characters). |
+| `uncertain` | list of strings | 1 to 3 items of at most 160 characters: open questions about the science or how the milestones should be judged. |
 
 The pipeline's intermediate structures (research claims with citations, review verdicts per claim with evidence passages) do not enter the atlas. Their shapes are `CANDIDATES` and `REVIEW` in `ingestion/schemas.py`, `FORMAT_SCHEMA` and `REVIEW_SCHEMA` in `ingestion/field_workflow.py`, and `FINAL_SCHEMA` in `ingestion/final_rewrite.py`, which is the shape of each breakthrough before import adds `field`, `status`, milestone `id` and `label`, and reduces `sources` to URLs.
 
@@ -133,7 +151,7 @@ One JSON object per line, sorted by URL, no duplicate URLs.
 | Field | Type | Required? | What it contains | Written by | Read by |
 |---|---|---|---|---|---|
 | `url` | string | yes | The cited URL, as the research wrote it. The key. | `import_field` (`_merge_source`); `atlas.add` | `check`; `rebuild`; b file `sources[].url` |
-| `title` | string | yes | Title from the research; empty in 158 lines. `atlas.add` uses the URL as title for a new source. | same | b file `sources[].title` (the site shows the host name when empty) |
+| `title` | string | yes | Title from the research; empty in 158 lines. `atlas.add` uses the URL as title for a new source unless given a title; `atlas.find` gives the paper's title as the search returned it. | same | b file `sources[].title` (the site shows the host name when empty) |
 | `status` | string | yes | `saved` (1,274: at least one non-empty copy) or `not_captured` (402). | Capture stage (`ingestion/field_workflow.py`); `atlas.add` writes `saved` | b file `sources[].status` |
 | `copies` | list | yes (2,284 items; empty when not captured) | Saved copies, merged by hash. Keys below. Local paths (`path`, `absolute_path`) are dropped at import. | Capture stage → `import_field`; `atlas.add` appends `{sha256, format, kind}` | `rebuild` → `assets`; research citation rows' `asset`. Not in the site data. |
 
@@ -226,7 +244,8 @@ Loaded by the Breakthrough page (`loadBreakthrough`).
 | `concept`, `significance`, `missing_breakthrough`, `current_state`, `completion_criteria`, `related_concepts`, `unresolved_issues`, `change_log` | The record's sections, unchanged (paragraphs keep `source_urls`; criteria keep `id`, `label`, `text`). | Breakthrough page (concept, full criterion text and citations); `Record.jsx` (collapsed full record) |
 | `milestones` | Objects `{id, label, status}`. | Milestone checklist |
 | `moved_at` | As above. | Breakthrough page |
-| `sources[]` | `{url, title, status}` only: links to the originals. | Citation titles; `Record.jsx` source list |
+| `sources[]` | `{url, title, status}` only: links to the originals. The record's `sources` first, then papers that only have judged rows for this breakthrough (such as those added by `atlas.find`). | Citation titles; `Record.jsx` source list |
+| `brief` | The record's `brief` (section 3.2), present only when the record has one. Each `brief.sources[]` item also carries the `title` and `status` of the same URL in `sources[]`. | Breakthrough page reader's version |
 | `progress[]` | Every database row for this breakthrough, in this order: milestone rows by milestone, then whole-breakthrough rows, then research citations. Each row: `criterion` (1-based, or null), `milestone` (the stable ID such as `"m1"`, or null), `url`, `source_date`, `verdict`, `quote`, `model`, `added_at`. A row with a `verdict` and `milestone` null is a step toward the breakthrough as a whole. A row with `verdict` null is a research citation whose `quote` is a `current_state` paragraph. | Evidence (judged rows); `Record.jsx` research citations |
 
 ### `data/search.json` (`store.search_index`)
@@ -248,6 +267,7 @@ Loaded on first use of the search box (`Layout.jsx`). 206 KB on November 11; no 
 - Every breakthrough has milestone IDs, unique within it.
 - Every `merged_into` names an existing breakthrough.
 - Every URL in a breakthrough's `sources` is a line in `sources.jsonl`; no URL appears twice there.
+- A `brief`, when present, lists exactly the record's milestone IDs in order, and its source URLs are lines in `sources.jsonl`, none twice.
 - Every progress row names an existing breakthrough, has a `milestone` key holding one of its milestone IDs or null, names a URL in `sources.jsonl`, and has a verdict of `advances`, `meets` or `contradicts`. A row with `milestone` null may not be `meets`.
 - No string anywhere in the core starts with `/Users/` or `/private/` (no absolute paths).
 
@@ -257,7 +277,7 @@ The rebuild adds one more: a saved copy whose bytes no longer match its hash sto
 
 - **IDs are permanent.** A breakthrough or milestone ID is never reused or renumbered. A record is retired (`status: "retired"`, optionally `merged_into`), never deleted. Milestone IDs do not change when milestones are inserted, split or reordered.
 - **No absolute paths** in `atlas/core/` (checked as above for the two common prefixes).
-- **Cost rule.** No new table, record kind or kind of model pass without the owner's explicit decision. Decided so far: one call per paper added, one label call per breakthrough.
+- **Cost rule.** No new table, record kind or kind of model pass without the owner's explicit decision. Decided so far: one call per paper added, one label call per breakthrough. Piloted, owner approved the pilot on November 11 (second round November 12): one search call per breakthrough to find papers (`atlas.find`, plus the add call per paper it finds), and one call per breakthrough for the reader's version (`atlas.brief`, plus at most one retry). Running either beyond the pilot needs a new decision.
 - **No editorial changes before v1 is published.** Content ships as the pipeline produced it. Renames, merges, splits, curation and milestone restructuring come after v1, as tracked edits. The label pass is one of the decided passes (plan, Track A step 5); it changes only `label`, never the criterion text.
 - **No predicted dates in v1.** `source_date` is the publication date of evidence, not a prediction.
 - **Re-running research** on an imported field never overwrites its files ([core design](plans/2026-11-09-atlas-core-design.md)). The importer refuses a field that already exists.
@@ -292,6 +312,26 @@ python3 -m atlas.add <url> [--breakthrough QUA-01] [--no-commit]
 ```bash
 python3 -m atlas.labels QUA-01 CSC [--workers 3] [--no-commit]
 python3 -m atlas.labels --missing
+```
+
+**Find papers** (piloted; one Codex Terra web-search call per breakthrough, then one `atlas.add` call per paper). The search returns up to `--limit` primary sources (default 4) that are not already cited, and is told to return a PubMed Central, publisher or preprint page rather than a pubmed.ncbi.nlm.nih.gov page when one exists. Each goes through `atlas.add` with `--breakthrough` set to the breakthrough and the returned title; rows the judge returns for other breakthroughs are printed as "other breakthrough, not stored" and dropped, and only that breakthrough's earlier rows for the URL are replaced (`atlas.add` run by hand still stores rows for any candidate breakthrough). `--url URL` (repeatable, one breakthrough) skips the search and adds the given URLs the same way. A URL that cannot be saved, whose saved copy has under 1,000 characters of text (a cookie wall such as PubMed's), or that is already cited is printed and skipped before any judge call. Prints, per paper, whether it was saved, rows stored and rows rejected with the reason. Calls are saved in `atlas/data/find/<ID>-<UTC time>/` (the search call, `add-N/` per judge call, `reports.json`). One commit of `atlas/core/` at the end unless `--no-commit`.
+
+```bash
+python3 -m atlas.find NRL-17 ELE-01 [--limit 4] [--no-commit]
+python3 -m atlas.find CAR-09 --url https://pubmed.ncbi.nlm.nih.gov/32192678/ [--no-commit]
+```
+
+**Saved copies and PubMed.** `atlas.add.save` and the brief both pick a source's copy the same way: the recorded copy with the most extracted text. `atlas.add` captures only when that copy has under 1,000 characters. A `pubmed.ncbi.nlm.nih.gov/<PMID>/` page usually captures as a 153-character "Cookies must be enabled" page; `Archive.pubmed` in `ingestion/sources.py` then fetches the abstract from NCBI E-utilities (`efetch`, no key, at most 3 requests a second) and, when the XML names a PMC ID, the PMC article page, and keeps both as `alternative` copies of the same source. `python3 -m atlas.pubmed` does this for existing sources without a model call (no fetch with `--list`). On November 12, 105 of the 193 PubMed sources had under 1,000 characters of saved text; the pilot re-captured the three cited by pilot breakthroughs, and the rest are untouched.
+
+```bash
+python3 -m atlas.pubmed --list                 # count across the atlas, no fetching
+python3 -m atlas.pubmed CAR-09 NRL-17 [--no-commit]
+```
+
+**Write the reader's version** (piloted; one Codex Sol call per breakthrough, `gpt-6.1-sol`, no search). The call gets the whole record and every source (the record's `sources` plus papers with judged rows), each with the passages that cite it, its judged quotes and the opening of its saved copy (at most 12,000 characters each, 80,000 in all; a copy with under 1,000 characters of text, such as PubMed's cookie wall, counts as no saved copy). An answer whose milestone IDs, source URLs and order, list counts or lengths (with 10% slack) are wrong is rejected and asked again once, listing every problem with its measured length; a second failure leaves the record unchanged. Quotes are checked against the saved copy's full text. Writes `brief` and `models.brief` only, rebuilds once, commits unless `--no-commit`. Calls are saved in `atlas/data/brief/<ID>-<UTC time>/attempt-N/`.
+
+```bash
+python3 -m atlas.brief QUA-01 NRL-17 [--workers 3] [--no-commit]
 ```
 
 **Correct a record by hand.** Edit the file, run the check, rebuild, commit with the reason. Before v1 only non-editorial fixes are allowed.

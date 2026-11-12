@@ -200,6 +200,24 @@ def import_field(folder, core=CORE, color=None):
         write_progress([], core)
 
 
+def _check_brief(identifier, item, sources):
+    """The reader's version names the record's milestones in order and only known sources."""
+    brief = item['brief']
+    if not isinstance(brief, dict):
+        return [f'Brief is not an object: {identifier}']
+    problems = []
+    milestones = [criterion.get('id') for criterion in item['completion_criteria']]
+    if [milestone.get('id') for milestone in brief.get('milestones', [])] != milestones:
+        problems.append(f'Brief milestones do not match the record: {identifier}')
+    urls = [source.get('url') for source in brief.get('sources', [])]
+    if len(urls) != len(set(urls)):
+        problems.append(f'Duplicate brief source: {identifier}')
+    for url in urls:
+        if url not in sources:
+            problems.append(f'Unknown brief source: {identifier}: {url}')
+    return problems
+
+
 def check(data):
     problems = []
     fields = data['fields']
@@ -226,6 +244,8 @@ def check(data):
         for url in item.get('sources', []):
             if url not in sources:
                 problems.append(f'Unknown source: {identifier}: {url}')
+        if 'brief' in item:
+            problems += _check_brief(identifier, item, sources)
     for row_number, row in enumerate(data['progress'], 1):
         identifier = row.get('breakthrough')
         item = items.get(identifier)

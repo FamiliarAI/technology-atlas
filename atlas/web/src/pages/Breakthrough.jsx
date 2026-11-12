@@ -4,13 +4,12 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { Locator } from '../Chart.jsx';
 import { formatDate, loadBreakthrough, milestoneOf, useAtlas, warm } from '../data.jsx';
 import { StarGlyph, StarMark, StatusLabel, ringSegments } from '../glyphs.jsx';
-import Record, { Cite, Citations, Paragraphs, SourceList, safe, sourceIndex, sourceName, host } from '../Record.jsx';
+import Record, { Citations, Evidence, Paragraphs, SourceList, reveal, sourceIndex } from '../Record.jsx';
+import BriefBody from './Brief.jsx';
 import { EASE } from '../motion.js';
 import * as sky from '../sky.js';
 import { plural, useTitle } from './common.jsx';
 import NotFound from './NotFound.jsx';
-
-const VERDICT = { meets: 'Meets', advances: 'Advances', contradicts: 'Contradicts' };
 
 const list = (value) => (Array.isArray(value) ? value : []);
 
@@ -73,44 +72,6 @@ function Plate({ item }) {
   );
 }
 
-// One judged row: its verdict, the exact quote, and the paper it comes from. When the paper is
-// also one of the record's sources, a numbered link leads to its entry.
-const shortUrl = (url) => {
-  try {
-    const u = new URL(url);
-    return u.hostname.replace(/^www\./, '') + u.pathname.replace(/\/$/, '');
-  } catch {
-    return host(url);
-  }
-};
-
-function Evidence({ row, label, sources }) {
-  const entry = sources.byUrl.get(row.url);
-  return (
-    <figure className={'quote ' + row.verdict}>
-      <figcaption>
-        <span className={'verdict ' + row.verdict}>{VERDICT[row.verdict] || row.verdict}</span>
-        {label && <span className="mono">{label}</span>}
-      </figcaption>
-      <blockquote>
-        <p>“{row.quote}”</p>
-      </blockquote>
-      <p className="quote-source">
-        <span>
-          <a href={safe(row.url)} target="_blank" rel="noopener noreferrer">
-            {entry ? sourceName(entry) : shortUrl(row.url)}
-          </a>{' '}
-          <Cite entry={entry} />
-        </span>
-        <span className="mono muted">
-          {row.source_date ? `published ${formatDate(row.source_date)}` : 'date not stated'} · judged by{' '}
-          {row.model || row.by} · {formatDate(row.added_at)}
-        </span>
-      </p>
-    </figure>
-  );
-}
-
 // The sections read in full, in this order, under these headings.
 const READING = [
   ['significance', 'Why it matters'],
@@ -139,7 +100,18 @@ export default function Breakthrough() {
     };
   }, [id]);
   const item = atlas?.items[id];
-  useTitle(item ? `${item.title} (${item.id})` : atlas ? 'Not found' : id);
+  // The reader's version, when the breakthrough has one: it leads, and the record follows collapsed.
+  // An empty brief counts as none.
+  const brief =
+    record?.brief &&
+    typeof record.brief === 'object' &&
+    Object.values(record.brief).some((v) =>
+      typeof v === 'string' ? v.trim() : Array.isArray(v) && v.length > 0,
+    )
+      ? record.brief
+      : null;
+  const plain = typeof brief?.title === 'string' && brief.title.trim() ? brief.title.trim() : null;
+  useTitle(item ? `${plain || item.title} (${item.id})` : atlas ? 'Not found' : id);
 
   if (atlasError) return <p className="page-state">The atlas data could not be loaded: {atlasError}.</p>;
   if (atlas && !item) {
@@ -205,7 +177,8 @@ export default function Breakthrough() {
             <p className="eyebrow bpage-id">
               <span className="mono">{item.id}</span>
             </p>
-            <h1>{item.title}</h1>
+            <h1>{plain || item.title}</h1>
+            {plain && <p className="bpage-subtitle">{item.title}</p>}
             <p className="status-line">
               <span className="bpage-head-glyph">
                 <StarGlyph item={item} size={40} />
@@ -215,116 +188,130 @@ export default function Breakthrough() {
             </p>
           </motion.header>
 
-          <motion.section className="concept" aria-label="Concept" {...fade(1)}>
-            <p className={'lead' + (open ? ' open' : '')}>{concept[0]?.text}</p>
-            <Citations urls={concept[0]?.source_urls} sources={sources} />
-            {!open && concept[0] && (
-              <button type="button" className="read-on" onClick={() => setOpen(true)}>
-                Read the whole paragraph
-              </button>
-            )}
-            {concept.length > 1 && (
-              <details className="criterion more-concept">
-                <summary>More on the concept</summary>
-                <Paragraphs items={concept.slice(1)} sources={sources} />
-              </details>
-            )}
-          </motion.section>
+          {brief ? (
+            <BriefBody
+              brief={brief}
+              record={record}
+              item={item}
+              sources={sources}
+              position={position}
+              judged={judged}
+              fade={fade}
+            />
+          ) : (
+            <>
+              <motion.section className="concept" aria-label="Concept" {...fade(1)}>
+                <p className={'lead' + (open ? ' open' : '')}>{concept[0]?.text}</p>
+                <Citations urls={concept[0]?.source_urls} sources={sources} />
+                {!open && concept[0] && (
+                  <button type="button" className="read-on" onClick={() => setOpen(true)}>
+                    Read the whole paragraph
+                  </button>
+                )}
+                {concept.length > 1 && (
+                  <details className="criterion more-concept">
+                    <summary>More on the concept</summary>
+                    <Paragraphs items={concept.slice(1)} sources={sources} />
+                  </details>
+                )}
+              </motion.section>
 
-          <motion.section className="milestones" aria-labelledby="ms-title" {...fade(2)}>
-            <h2 id="ms-title">Milestones along the way</h2>
-            <p className="section-note">
-              Proposed by the atlas as tests of progress. No outside body has adopted them.
-            </p>
-            <p className="section-lead">
-              The breakthrough is reached when all {item.status.length} are met.
-              {record && !judged.length && ' No paper has been judged against them yet.'}
-            </p>
-            <ol>
-              {item.status.map((status, n) => {
-                const m = milestones[n] || { id: n, label: null, status };
-                const criterion = criteria[n];
-                const rows = judged.filter((r) => position(r) === n + 1);
-                return (
-                  <li key={m.id} className={'milestone ' + m.status} id={`m${n + 1}`}>
-                    <span className="milestone-num mono" aria-hidden="true">
-                      {n + 1}
-                    </span>
-                    <div className="milestone-body">
-                      <StatusLabel status={m.status} />
-                      <h3>
-                        <span className="visually-hidden">Milestone {n + 1}: </span>
-                        {m.label || criterion?.text || `Milestone ${n + 1}`}
-                      </h3>
-                      {criterion && m.label && (
-                        <details className="criterion">
-                          <summary>The full criterion</summary>
-                          <p>{criterion.text}</p>
-                          <Citations urls={criterion.source_urls} sources={sources} />
-                        </details>
-                      )}
-                      {rows.map((r, k) => (
-                        <Evidence key={k} row={r} sources={sources} />
-                      ))}
-                    </div>
-                  </li>
-                );
-              })}
-            </ol>
-          </motion.section>
+              <motion.section className="milestones" aria-labelledby="ms-title" {...fade(2)}>
+                <h2 id="ms-title">Milestones along the way</h2>
+                <p className="section-note">
+                  Proposed by the atlas as tests of progress. No outside body has adopted them.
+                </p>
+                <p className="section-lead">
+                  The breakthrough is reached when all {item.status.length} are met.
+                  {record && !judged.length && ' No paper has been judged against them yet.'}
+                </p>
+                <ol>
+                  {item.status.map((status, n) => {
+                    const m = milestones[n] || { id: n, label: null, status };
+                    const criterion = criteria[n];
+                    const rows = judged.filter((r) => position(r) === n + 1);
+                    return (
+                      <li key={m.id} className={'milestone ' + m.status} id={`m${n + 1}`}>
+                        <span className="milestone-num mono" aria-hidden="true">
+                          {n + 1}
+                        </span>
+                        <div className="milestone-body">
+                          <StatusLabel status={m.status} />
+                          <h3>
+                            <span className="visually-hidden">Milestone {n + 1}: </span>
+                            {m.label || criterion?.text || `Milestone ${n + 1}`}
+                          </h3>
+                          {criterion && m.label && (
+                            <details className="criterion">
+                              <summary>The full criterion</summary>
+                              <p>{criterion.text}</p>
+                              <Citations urls={criterion.source_urls} sources={sources} />
+                            </details>
+                          )}
+                          {rows.map((r, k) => (
+                            <Evidence key={k} row={r} sources={sources} />
+                          ))}
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ol>
+              </motion.section>
 
-          {!record && !error && <p className="muted bpage-loading">Loading the record…</p>}
-          {error && <p className="muted bpage-loading">The full record could not be loaded: {error}.</p>}
+              {!record && !error && <p className="muted bpage-loading">Loading the record…</p>}
+              {error && <p className="muted bpage-loading">The full record could not be loaded: {error}.</p>}
 
-          {whole.length > 0 && (
-            <section className="bpage-section whole" aria-labelledby="whole-title">
-              <h2 id="whole-title">Steps toward the whole</h2>
-              <p className="section-note">
-                Papers that move the breakthrough forward as a whole, without meeting or advancing
-                one milestone.
-              </p>
-              {whole.map((r, k) => (
-                <Evidence key={k} row={r} label="the whole" sources={sources} />
-              ))}
-            </section>
-          )}
-
-          {record &&
-            READING.map(([key, title]) =>
-              list(record[key]).length ? (
-                <section key={key} className="bpage-section reading" aria-labelledby={key + '-title'}>
-                  <h2 id={key + '-title'}>{title}</h2>
-                  <Paragraphs items={record[key]} sources={sources} />
+              {whole.length > 0 && (
+                <section className="bpage-section whole" aria-labelledby="whole-title">
+                  <h2 id="whole-title">Steps toward the whole</h2>
+                  <p className="section-note">
+                    Papers that move the breakthrough forward as a whole, without meeting or advancing
+                    one milestone.
+                  </p>
+                  {whole.map((r, k) => (
+                    <Evidence key={k} row={r} label="the whole" sources={sources} />
+                  ))}
                 </section>
-              ) : null,
-            )}
+              )}
 
-          {issues.length > 0 && (
-            <section className="bpage-section reading" aria-labelledby="issues-title">
-              <h2 id="issues-title">What is uncertain</h2>
-              <ul className="issues">
-                {issues.map((issue, n) => (
-                  <li key={n}>{issue}</li>
-                ))}
-              </ul>
-            </section>
-          )}
+              {record &&
+                READING.map(([key, title]) =>
+                  list(record[key]).length ? (
+                    <section key={key} className="bpage-section reading" aria-labelledby={key + '-title'}>
+                      <h2 id={key + '-title'}>{title}</h2>
+                      <Paragraphs items={record[key]} sources={sources} />
+                    </section>
+                  ) : null,
+                )}
 
-          {record && (
-            <section className="bpage-section sources" id="sources" aria-labelledby="sources-title">
-              <h2 id="sources-title">Sources</h2>
-              <p className="section-note">
-                Each source supports part of this record. Citing it does not mean its authors endorse
-                how the atlas defines the breakthrough or its milestones.
-              </p>
-              <SourceList sources={sources} />
-            </section>
-          )}
+              {issues.length > 0 && (
+                <section className="bpage-section reading" aria-labelledby="issues-title">
+                  <h2 id="issues-title">What is uncertain</h2>
+                  <ul className="issues">
+                    {issues.map((issue, n) => (
+                      <li key={n}>{issue}</li>
+                    ))}
+                  </ul>
+                </section>
+              )}
 
-          {record && (
-            <section className="full-record" aria-label="More of the record">
-              <Record record={record} sources={sources} />
-            </section>
+              {record && (
+                <section className="bpage-section sources" id="sources" aria-labelledby="sources-title">
+                  <h2 id="sources-title">Sources</h2>
+                  <p className="section-note">
+                    Each source supports part of this record. Citing it does not mean its authors endorse
+                    how the atlas defines the breakthrough or its milestones.
+                  </p>
+                  <SourceList sources={sources} />
+                </section>
+              )}
+
+              {record && (
+                <section className="full-record" aria-label="More of the record">
+                  <Record record={record} sources={sources} />
+                </section>
+              )}
+            </>
           )}
         </div>
 
@@ -346,7 +333,7 @@ export default function Breakthrough() {
                 <dt>Region</dt>
                 <dd>{field.region}</dd>
               </div>
-              {where && (
+              {where && !brief && (
                 <div>
                   <dt>Chart position</dt>
                   <dd className="mono">{where}</dd>
@@ -358,7 +345,9 @@ export default function Breakthrough() {
                   {record ? (
                     <a href="#sources" onClick={(e) => {
                       e.preventDefault();
-                      document.getElementById('sources')?.scrollIntoView({ block: 'start' });
+                      const target = document.getElementById('sources');
+                      reveal(target);
+                      target?.scrollIntoView({ block: 'start' });
                     }}>
                       {plural(sources.entries.length, 'source')}
                     </a>

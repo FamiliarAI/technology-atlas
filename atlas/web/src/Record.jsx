@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { formatDate } from './data.jsx';
 
 // A breakthrough's sources in context, its citations as numbered in-page links, and the parts
 // of the record kept collapsed at the foot of its page.
@@ -71,10 +72,16 @@ export function sourceIndex(record) {
 
 export const sourceName = (entry) => entry.title || host(entry.url);
 
+// Opens every collapsed section that holds an element, so a link into it lands on something seen.
+export function reveal(el) {
+  for (let d = el?.closest('details'); d; d = d.parentElement?.closest('details')) d.open = true;
+}
+
 // Moves the view and keyboard focus to an in-page entry, and marks it for a moment.
 export function jumpTo(id) {
   const el = document.getElementById(id);
   if (!el) return;
+  reveal(el);
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   el.scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'center' });
   el.focus({ preventScroll: true });
@@ -129,6 +136,46 @@ export function Paragraphs({ items, sources }) {
   ));
 }
 
+const VERDICT = { meets: 'Meets', advances: 'Advances', contradicts: 'Contradicts' };
+
+// One judged row: its verdict, the exact quote, and the paper it comes from. When the paper is
+// also one of the record's sources, a numbered link leads to its entry.
+const shortUrl = (url) => {
+  try {
+    const u = new URL(url);
+    return u.hostname.replace(/^www\./, '') + u.pathname.replace(/\/$/, '');
+  } catch {
+    return host(url);
+  }
+};
+
+export function Evidence({ row, label, sources }) {
+  const entry = sources.byUrl.get(row.url);
+  return (
+    <figure className={'quote ' + row.verdict}>
+      <figcaption>
+        <span className={'verdict ' + row.verdict}>{VERDICT[row.verdict] || row.verdict}</span>
+        {label && <span className="mono">{label}</span>}
+      </figcaption>
+      <blockquote>
+        <p>“{row.quote}”</p>
+      </blockquote>
+      <p className="quote-source">
+        <span>
+          <a href={safe(row.url)} target="_blank" rel="noopener noreferrer">
+            {entry ? sourceName(entry) : shortUrl(row.url)}
+          </a>{' '}
+          <Cite entry={entry} />
+        </span>
+        <span className="mono muted">
+          {row.source_date ? `published ${formatDate(row.source_date)}` : 'date not stated'} · judged by{' '}
+          {row.model || row.by} · {formatDate(row.added_at)}
+        </span>
+      </p>
+    </figure>
+  );
+}
+
 // Passages shown at once under a source; the rest are one click away.
 const SHOWN = 3;
 
@@ -148,7 +195,7 @@ function Passages({ items }) {
 const STATUS = { saved: 'copy saved', not_captured: 'no copy saved' };
 
 // The Sources section: one entry per source, what it is and what this record cites it for.
-export function SourceList({ sources }) {
+export function SourceList({ sources, heading: Heading = 'h3' }) {
   if (!sources.entries.length) return <p className="section-note">This record cites no source.</p>;
   return (
     <ol className="source-list">
@@ -158,10 +205,10 @@ export function SourceList({ sources }) {
             {entry.n}
           </span>
           <div className="source-body">
-            <h3>
+            <Heading>
               <span className="visually-hidden">Source {entry.n}: </span>
               {sourceName(entry)}
-            </h3>
+            </Heading>
             <p className="source-meta mono muted">
               {host(entry.url)}
               {STATUS[entry.status] && ` · ${STATUS[entry.status]}`}
