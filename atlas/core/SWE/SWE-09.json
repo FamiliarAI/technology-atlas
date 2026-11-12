@@ -202,6 +202,74 @@
   "reconcile": "grok-4.7-build",
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
-  "rewrite": "gpt-6.1-sol"
+  "rewrite": "gpt-6.1-sol",
+  "brief": "gpt-6.1-sol"
+ },
+ "brief": {
+  "title": "Software that behaves the same when tasks overlap",
+  "possible": [
+   "A browser or database could run tasks at the same time without their timing changing its defined visible behavior. With the same outside inputs and deliberately chosen outcomes, developers could reproduce failures even when the computer shares work differently.",
+   "A programming language and its execution system would provide this guarantee by default, while supporting complex systems software at competitive speed. Programs could still make explicit choices, such as serving whichever request arrives first."
+  ],
+  "why": [
+   "Developers could spend less time chasing failures that disappear when a program runs again. Repeatable behavior would make regression tests more dependable and parallel software easier to maintain.",
+   "People checking software correctness could reason about the program’s rules and declared choices, with fewer accidental task orderings to consider."
+  ],
+  "sources": [
+   {
+    "url": "https://arxiv.org/pdf/2210.15202",
+    "who": "Laure Gonnord, Ludovic Henrio, Lionel Morel, and Gabriel Radanne",
+    "showed": "Their survey compares ways to make simultaneous tasks produce repeatable results. It distinguishes agreement on a final result from agreement on the sequence of visible events.",
+    "quote": "Monitoring a conﬂuent program\nleads to diﬀerent traces, which is not the case for a determinist ic program.",
+    "cited_for": "Existing programming models supply building blocks and reveal restrictions needed to control conflicting tasks.",
+    "not_established": "The survey does not demonstrate a broadly usable systems language with the full guarantee and competitive speed.",
+    "checked": true
+   },
+   {
+    "url": "https://doc.rust-lang.org/rustonomicon/races.html",
+    "who": "The Rustonomicon authors",
+    "showed": "Safe Rust prevents data races: unsynchronized access to shared memory involving a write. Its example still behaves differently depending on which task runs first.",
+    "quote": "However Rust does not prevent general race conditions.",
+    "cited_for": "Preventing unsafe memory access does not ensure repeatable program behavior.",
+    "not_established": "Safe Rust’s protection against data races does not guarantee that task ordering leaves visible behavior unchanged.",
+    "checked": true
+   }
+  ],
+  "shown": [
+   "The survey by Gonnord and colleagues describes existing models that guarantee repeatable results under particular restrictions. These establish useful foundations, but do not demonstrate the proposed combination of systems breadth, visible behavior guarantees, and speed."
+  ],
+  "missing": [
+   "A practical language must support the communication and shared changes needed in browsers, databases, and operating system cores.",
+   "A precise guarantee must cover visible outputs, outside events, whether programs finish, and whether ongoing services keep making progress.",
+   "The language tools and execution system must preserve that guarantee without imposing unacceptable resource costs."
+  ],
+  "milestones": [
+   {
+    "id": "m1",
+    "label": "A real subsystem behaves identically under contrasting task orderings",
+    "explanation": "A storage engine or browser subsystem would have to match defined observations under two schedulers, including one designed to expose conflicts, using a preset test protocol. This would demonstrate the guarantee on tested workloads."
+   },
+   {
+    "id": "m2",
+    "label": "The guarantee holds for every permitted task ordering",
+    "explanation": "An argument would have to cover every allowed task ordering, explain progress assumptions, and show how language tools enforce the rules. Rejection tests would support claims that forbidden interference cannot slip through."
+   },
+   {
+    "id": "m3",
+    "label": "Fixing a declared choice restores repeatable behavior",
+    "explanation": "A test would have to introduce one declared choice and regain repeatable observations when its outcome is fixed. This would show that deliberate variation and its downstream effects remain accounted for."
+   },
+   {
+    "id": "m4",
+    "label": "Reproducible performance reaches half the conventional baseline",
+    "explanation": "The subsystem would have to complete at least half as much work per second as a respected conventional implementation, with published costs, limits, and reproduction details. This would test whether the guarantee remains practical."
+   }
+  ],
+  "uncertain": [
+   "Whether an existing language already combines the full guarantee, broad systems support, and competitive speed remains unresolved.",
+   "Which visible events must stay identical, and what scheduling assumptions ensure continued progress, still need precise definitions.",
+   "The performance baseline and workloads remain to be chosen; success in a subsystem would leave broader systems performance open."
+  ],
+  "prompt": "5e97d4b8dfc3"
  }
 }

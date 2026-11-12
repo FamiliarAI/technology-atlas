@@ -240,6 +240,97 @@
   "reconcile": "grok-4.7-build",
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
-  "rewrite": "gpt-6.1-sol"
+  "rewrite": "gpt-6.1-sol",
+  "brief": "gpt-6.1-sol"
+ },
+ "brief": {
+  "title": "Software that spreads safely across computers",
+  "possible": [
+   "Programmers could write a payment, inventory, or auction service as if it had a single copy of its data. A tool would generate software that runs across machines, with computer-checked proof that completed operations obey the original rules under specified failures."
+  ],
+  "why": [
+   "Waiting for machines to agree can slow services or stop them responding. Connecting application rules to these agreement steps could help teams build distributed services while reasoning about a simpler program.",
+   "Teams without specialist expertise in distributed systems could gain access to verified implementations. They could also generate different deployment strategies from the same application rules."
+  ],
+  "sources": [
+   {
+    "url": "https://github.com/papers-we-love/papers-we-love/blob/main/distributed_systems/ironFleet-proving-practical-distributed-systems-correct.pdf",
+    "who": "IronFleet researchers",
+    "showed": "IronFleet concerns a handwritten distributed implementation with expert-assisted correctness proofs.",
+    "quote": null,
+    "cited_for": "It provides a comparison with manually written and proved distributed software.",
+    "not_established": "A handwritten implementation does not establish automatic generation from ordinary sequential code.",
+    "checked": false
+   },
+   {
+    "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
+    "who": "Chris Newcombe and colleagues at Amazon Web Services",
+    "showed": "Amazon engineers used model checking, which explores possible executions of a design, to find subtle bugs in fault-tolerant systems.",
+    "quote": "The model checker later found two bugs in other algorithms,\nboth serious and subtle.",
+    "cited_for": "Checking precise designs can expose bugs missed by reviews and testing.",
+    "not_established": "The work leaves unproved whether executable code implements the checked design.",
+    "checked": true
+   },
+   {
+    "url": "https://arxiv.org/abs/1901.01930",
+    "who": "Joseph M. Hellerstein and Peter Alvaro",
+    "showed": "They explain when computations can reach consistent results without machines waiting for agreement. They also describe tools that insert agreement steps where analysis cannot establish this.",
+    "quote": "Additional facts can only result in additional cycles being detected:\nthe output grows monotonically with the input.",
+    "cited_for": "Some computations can safely proceed without waiting for other machines.",
+    "not_established": "Agreement on results does not prove that generated software preserves the original program’s ordering and failure requirements.",
+    "checked": true
+   },
+   {
+    "url": "https://arxiv.org/html/1805.06358v1",
+    "who": "Nuno Preguiça, Carlos Baquero, and Marc Shapiro",
+    "showed": "They describe data structures whose copies reach the same state after receiving the same updates. Developers must still choose what simultaneous changes mean.",
+    "quote": "As these operations commute (i.e., executing them in any order yields the same result) the Counter data\ntype naturally converges towards the expected result.",
+    "cited_for": "Carefully chosen data representations can support updates without waiting for agreement.",
+    "not_established": "Copies reaching the same state does not establish that they preserve arbitrary application rules.",
+    "checked": true
+   }
+  ],
+  "shown": [
+   "Hellerstein and Alvaro describe foundations for identifying computations that need no agreement steps, plus existing tools that add those steps elsewhere. Preguiça and colleagues describe data structures that reconcile updates. Amazon demonstrates design checking. These are parts of the proposed capability."
+  ],
+  "missing": [
+   "The target needs an integrated tool that generates distributed software from sequential code and explicit requirements.",
+   "Computer-checked proofs must connect completed operations to the original rules and separately establish when work can continue.",
+   "The tool must choose suitable data representations and justify where machines wait for agreement.",
+   "Independent demonstrations must establish application breadth, proof effort, and practical running costs."
+  ],
+  "milestones": [
+   {
+    "id": "m1",
+    "label": "A generated service survives crashes and broken connections",
+    "explanation": "A generated service would have to run across data centers under repeatable crashes and broken network connections. This would demonstrate execution under its declared requirements."
+   },
+   {
+    "id": "m2",
+    "label": "Completed operations provably obey the original program",
+    "explanation": "Computer-checked proofs would have to establish legal sequential behavior, defined ordering, and separate progress guarantees. This would connect running software to the original rules under stated assumptions."
+   },
+   {
+    "id": "m3",
+    "label": "Agreement steps are justified, and eligible work continues",
+    "explanation": "A sound analysis would have to bound agreement sites, with separate proof of any minimality claim. Work whose conclusions survive new information would have to progress during network breaks when inputs permit."
+   },
+   {
+    "id": "m4",
+    "label": "Conflicting requirements receive explanations, and unknowns remain unknown",
+    "explanation": "Within its declared scope, the tool would have to accept supported applications and explain incompatible demands while reporting undecidable cases as unknown. This would make its limits usable."
+   },
+   {
+    "id": "m5",
+    "label": "Independent users reproduce results and measure practical costs",
+    "explanation": "Independent users would have to regenerate software, recheck proofs, and repeat failure experiments across different applications while reporting costs. This would establish reproducibility and practical breadth."
+   }
+  ],
+  "uncertain": [
+   "Which application languages, ordering rules, and failures can the tool support?",
+   "Can it prove that agreement steps are necessary, rather than merely safe choices?",
+   "Can proof automation and runtime costs make the approach practical across different applications?"
+  ],
+  "prompt": "5e97d4b8dfc3"
  }
 }

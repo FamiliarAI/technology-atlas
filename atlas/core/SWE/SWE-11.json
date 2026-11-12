@@ -239,6 +239,145 @@
   "reconcile": "grok-4.7-build",
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
-  "rewrite": "gpt-6.1-sol"
+  "rewrite": "gpt-6.1-sol",
+  "brief": "gpt-6.1-sol"
+ },
+ "brief": {
+  "title": "Software rewrites with proof they preserve behavior",
+  "possible": [
+   "Engineers could reorganize an established software system, speed it up, or move it to another language or kind of computer with a machine-checked proof that it preserves the specified behavior. A separate checker would accept the proof, or the tool would reject the change."
+  ],
+  "why": [
+   "Teams maintaining long-lived software could undertake migrations and structural improvements with less uncertainty about introducing behavioral changes. They could rely on checked proofs alongside tests when deciding whether a rewrite preserves what their software does."
+  ],
+  "sources": [
+   {
+    "url": "https://compcert.inria.fr/doc/index.html",
+    "who": "Inria and AbsInt",
+    "showed": "CompCert translates a large part of C into assembly, the instructions used by a processor. Its proof establishes that compilation preserves behavior under its stated rules.",
+    "quote": "CompCert is a compiler that generates ARM, PowerPC, RISC-V and x86 assembly\ncode from CompCert C, a large subset of the C programming language.",
+    "cited_for": "CompCert demonstrates that a substantial compiler can have machine-checked correctness proofs.",
+    "not_established": "This does not establish a general tool for substantial restructurings or migrations between programming languages.",
+    "checked": true
+   },
+   {
+    "url": "https://dl.acm.org/doi/fullHtml/10.1145/1538788.1538814",
+    "who": "Xavier Leroy",
+    "showed": "This overview explains proofs of compiler correctness and checks of individual translations.",
+    "quote": null,
+    "cited_for": "It supports the foundations for proving that software translation preserves behavior.",
+    "not_established": "It does not establish routine, independently checked modernization of practical software systems.",
+    "checked": false
+   },
+   {
+    "url": "https://www.absint.com/compcert/structure.htm",
+    "who": "AbsInt",
+    "showed": "CompCert proves refinement: compiled code may narrow the original program's choices or replace behavior for which the language gives no rules with defined behavior.",
+    "quote": "The CompCert frontend and backend compilation passes are all formally proved \nto be free of miscompilation errors; as a consequence, so is their composition.",
+    "cited_for": "It explains what CompCert's preservation guarantee covers.",
+    "not_established": "Refinement does not require the original and compiled programs to allow exactly the same behaviors.",
+    "checked": true
+   },
+   {
+    "url": "https://weizmann.elsevierpure.com/en/publications/translation-validation-2/",
+    "who": "Amir Pnueli, M. Siegel and E. Singerman",
+    "showed": "They described translation validation, which checks each individual translation, and applied it to translating the SIGNAL programming language into sequential C.",
+    "quote": null,
+    "cited_for": "It supports checking each translation rather than proving the entire translator correct in advance.",
+    "not_established": "The application does not establish broad coverage of practical software migrations.",
+    "checked": false
+   },
+   {
+    "url": "https://dl.acm.org/doi/10.1145/3586046",
+    "who": "Emre and colleagues",
+    "showed": "This work studies replacing pointers, which hold memory addresses, with references subject to Rust's safety checks during translation from C.",
+    "quote": null,
+    "cited_for": "It concerns making translated Rust code use safer ways to access memory.",
+    "not_established": "Converting pointers into safe references does not establish a proof that observable behavior is preserved.",
+    "checked": false
+   },
+   {
+    "url": "https://dl.acm.org/doi/pdf/10.1145/3586046",
+    "who": "Emre and colleagues",
+    "showed": "A later version of the same work.",
+    "quote": null,
+    "cited_for": "See the other version.",
+    "not_established": "See the other version.",
+    "checked": false
+   },
+   {
+    "url": "https://arxiv.org/abs/2505.04852",
+    "who": "Yifei Gao and colleagues",
+    "showed": "Their PR2 preprint uses a language model to rewrite translated Rust code. It reports an average local pointer elimination rate of 18.57%, using compilation and test feedback.",
+    "quote": "It is\nshown that PR2 successfully eliminates 18.57%\nof local raw pointers across these projects, sig-\nnificantly enhancing the safety of the trans-\nlated Rust code.",
+    "cited_for": "It demonstrates practical progress in rewriting translated software to use safer memory access.",
+    "not_established": "PR2 has no theoretical correctness guarantee; compilation and passing tests do not prove preserved behavior.",
+    "checked": true
+   },
+   {
+    "url": "https://www.conference-publishing.com/toc/OOPSLAA26/abs",
+    "who": "Aymeric Fromherz and Jonathan Protzenko",
+    "showed": "The proceedings include Scylla, their work on translating a restricted part of C into safe Rust.",
+    "quote": null,
+    "cited_for": "It identifies Scylla as published research on practical language migration.",
+    "not_established": "Publication does not establish a formal guarantee that Scylla preserves behavior.",
+    "checked": false
+   },
+   {
+    "url": "https://arxiv.org/abs/2412.15042",
+    "who": "Aymeric Fromherz and Jonathan Protzenko",
+    "showed": "Scylla translates a restricted part of C into safe Rust after programmers restructure the original code. Case studies covered cryptographic software, parsers and compression, with similar performance on the studied workloads.",
+    "quote": "We show that these can be rewritten to Rust with small\nrefactors of the original C code, and that the resulting Rust code exhibits similar performance characteristics\nas the original C code.",
+    "cited_for": "It demonstrates useful language migration within a restricted range of programs.",
+    "not_established": "Scylla has no formal translation correctness guarantee, and its results do not cover arbitrary C systems.",
+    "checked": true
+   },
+   {
+    "url": "https://arxiv.org/pdf/2412.15042",
+    "who": "Aymeric Fromherz and Jonathan Protzenko",
+    "showed": "A later version of the same work.",
+    "quote": null,
+    "cited_for": "See the other version.",
+    "not_established": "See the other version.",
+    "checked": false
+   }
+  ],
+  "shown": [
+   "Inria and AbsInt's CompCert already proves that compilation preserves behavior under stated rules. Fromherz and Protzenko's Scylla demonstrates migration from restricted C to safe Rust after programmer restructuring, but without a formal correctness guarantee. These achievements establish different parts of the broader capability."
+  ],
+  "missing": [
+   "A practical modernization tool still needs to combine useful coverage, automatic proofs and independent checking.",
+   "Proofs must account for memory access, language differences, runtime interactions and concurrent execution within the claimed scope.",
+   "Preparation effort and repeated proof costs must remain manageable as systems grow.",
+   "Representative evaluations must expose failures and show that the acceptance process rejects deliberately incorrect changes."
+  ],
+  "milestones": [
+   {
+    "id": "m1",
+    "label": "A production rewrite with an independently checked proof",
+    "explanation": "A production system would have to be transformed with an independently checked preservation proof, or rejected, with materials another team can reproduce. This would establish the complete process on practical software."
+   },
+   {
+    "id": "m2",
+    "label": "A precise guarantee covering difficult program behavior",
+    "explanation": "The proof would have to define preserved observations, exact equality or allowed narrowing of behavior, errors, concurrency, undefined behavior and trusted assumptions. This would make its coverage and exclusions explicit."
+   },
+   {
+    "id": "m3",
+    "label": "Measured costs and speed within declared limits",
+    "explanation": "An evaluation would have to separate preparation effort from recurring costs and meet predeclared limits for those costs and output speed. This would test whether routine use approaches ordinary build costs."
+   },
+   {
+    "id": "m4",
+    "label": "Reproduced results across representative systems, including failures",
+    "explanation": "Independent teams would have to reproduce representative results, report failures, distinguish unsupported cases from unproved valid changes, and reject invalid changes. This would establish demonstrated breadth and rejection behavior."
+   }
+  ],
+  "uncertain": [
+   "The range of languages, computer architectures, transformations and concurrent behavior needed to establish broad practical usefulness remains unsettled.",
+   "No agreed numerical limits define acceptable recurring costs or output performance.",
+   "A rejected transformation may be correct but beyond the tool's ability to prove."
+  ],
+  "prompt": "5e97d4b8dfc3"
  }
 }

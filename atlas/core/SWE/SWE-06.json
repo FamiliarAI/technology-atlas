@@ -197,6 +197,94 @@
   "reconcile": "grok-4.7-build",
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
-  "rewrite": "gpt-6.1-sol"
+  "rewrite": "gpt-6.1-sol",
+  "brief": "gpt-6.1-sol"
+ },
+ "brief": {
+  "title": "Recovering the rules old software lives by",
+  "possible": [
+   "When old software needs replacing, developers could recover the rules its parts follow, even when nobody wrote them down. These contracts—precise descriptions of behavior and dependencies—would come with computer-checked proofs that the old code follows them, plus a clear account of what remains unproved.",
+   "Developers could then check a replacement against the same contracts before putting it into service. This would let them preserve behavior that other software relies on and deliberately choose what should change."
+  ],
+  "why": [
+   "Replacing one part of a large software system can break the parts around it. Recovering usable contracts could reduce the manual work of reconstructing those connections and make verified replacement practical for software built without formal specifications.",
+   "Teams maintaining financial or safety-critical software could use this capability to replace obsolete components and modernize systems piece by piece."
+  ],
+  "sources": [
+   {
+    "url": "https://www.sciencedirect.com/science/article/pii/S0164121224000153",
+    "who": "Lathouwers and Huisman",
+    "showed": "This is a survey of tools that generate annotations, the statements supplied to software proof checkers.",
+    "quote": null,
+    "cited_for": "It concerns automatic generation of statements used in software proofs.",
+    "not_established": "A survey does not itself demonstrate recovery and verified replacement of a production system.",
+    "checked": false
+   },
+   {
+    "url": "https://www.darpa.mil/research/programs/verified-security-and-performance-enhancement-of-large-legacy-software",
+    "who": "DARPA",
+    "showed": "The completed V-SPELLS program pursued tools for recovering software structure and safely combining replacement components with existing code. It lists a demonstration of resulting tools.",
+    "quote": null,
+    "cited_for": "The program identifies the engineering challenges of recovering contracts and safely replacing components.",
+    "not_established": "The program description does not demonstrate sound recovery of an entire production system's behavior.",
+    "checked": false
+   },
+   {
+    "url": "https://www.cs.purdue.edu/homes/xyzhang/fall07/Papers/invariants-verify-rv2001.pdf",
+    "who": "Jeremy W. Nimmer and Michael D. Ernst",
+    "showed": "Their preliminary prototype inferred rules from test runs, then checked them by reasoning about code. On small programs, the checker accepted all or most proposed rules.",
+    "quote": "In preliminary experiments, ESC/Java veriﬁed all or\nmost of the invariants proposed by Daikon.",
+    "cited_for": "Automatic discovery of behavioral rules can be combined with checking them against code.",
+    "not_established": "Potentially unsafe assumptions about data ownership prevent an end-to-end guarantee.",
+    "checked": true
+   },
+   {
+    "url": "https://people.csail.mit.edu/mernst/pubs/invariants-tse2001-abstract.html",
+    "who": "Michael D. Ernst, Jake Cockrell, William G. Griswold, and David Notkin",
+    "showed": "Daikon recovered behavioral rules from program runs. On small programs, it rediscovered known rules and found others that helped developers modify code.",
+    "quote": "These\nexperiments demonstrate that, at least for small programs, invariant\ninference is both accurate and useful.",
+    "cited_for": "Rules inferred from executions can help programmers understand and change small programs.",
+    "not_established": "Rules observed in test runs need not hold on every execution, and usefulness on small programs does not establish production-scale recovery.",
+    "checked": true
+   }
+  ],
+  "shown": [
+   "Nimmer and Ernst demonstrated an automatic pipeline that discovers behavioral rules from executions and checks them against code. Their preliminary experiments worked on small programs, but potentially unsafe assumptions about which code controls data limited the guarantee.",
+   "Ernst and colleagues also showed that inferred rules could help with software modification on small programs. DARPA's completed V-SPELLS program pursued the broader goal of recovering software structure and supporting compatible replacements."
+  ],
+  "missing": [
+   "A production-scale demonstration must combine useful recovered contracts, checked proofs about the old code, and a replacement checked against those contracts.",
+   "The assumptions used in proofs must be justified, with unproved behavior listed separately and kept within meaningful bounds.",
+   "Recovered contracts must capture enough behavior to justify replacement while remaining understandable and affordable to maintain.",
+   "Independent teams and developers without verification expertise must be able to repeat the process and use its results."
+  ],
+  "milestones": [
+   {
+    "id": "m1",
+    "label": "Large-system proof and independently written replacement",
+    "explanation": "A million-line system, or a smaller one with documented regulatory barriers to rewriting, would need reviewable contracts, a substantial checked proof and an independently written replacement. Both would have to satisfy the same contracts."
+   },
+   {
+    "id": "m2",
+    "label": "Explicit assumptions and bounded unproved behavior",
+    "explanation": "Evaluation would define compatibility, language rules, environment assumptions, trusted tools, minimum coverage and bounded unproved behavior separately. This would establish whether the contracts justify the intended replacement."
+   },
+   {
+    "id": "m3",
+    "label": "Predetermined comparisons find only declared differences",
+    "explanation": "Tests fixed in advance would compare old and replacement code across declared interfaces and conditions, with differences confined to declared unproved behavior. This would corroborate proofs and expose modeling mistakes."
+   },
+   {
+    "id": "m4",
+    "label": "Independent repetition and replacement by ordinary developers",
+    "explanation": "Independent evaluators would repeat recovery and proof checks, accounting for human work, costs, unresolved claims and trusted tools. Developers without verification expertise would then verify a subsystem replacement to test practical use."
+   }
+  ],
+  "uncertain": [
+   "How much behavior must contracts cover, and how little may remain unproved, for a replacement guarantee to be useful?",
+   "Can recovery produce contracts strong enough for compatibility at a practical cost across different kinds of systems?",
+   "Comparison tests can reveal disagreements but cannot establish that every possible disagreement falls within the declared unproved behavior."
+  ],
+  "prompt": "5e97d4b8dfc3"
  }
 }

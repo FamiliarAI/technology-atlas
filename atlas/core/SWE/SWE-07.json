@@ -244,6 +244,99 @@
   "reconcile": "grok-4.7-build",
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
-  "rewrite": "gpt-6.1-sol"
+  "rewrite": "gpt-6.1-sol",
+  "brief": "gpt-6.1-sol"
+ },
+ "brief": {
+  "title": "Running untrusted software with limits on data leaks",
+  "possible": [
+   "You could let software you do not trust process private information while enforcing your rules about what it may reveal. This would cover supplied programs, plugins and generated code, at a cost ordinary services could afford.",
+   "The boundary would cover files and messages as well as covert channels: hidden ways to communicate through timing or shared computer resources. Such channels would be blocked or have a proved limit on how much information they could carry."
+  ],
+  "why": [
+   "Organizations could use useful software for sensitive work without relying solely on trust in its authors. The protection would come from an enforced boundary around the running program.",
+   "This could make supplied software and generated code easier to deploy wherever private information needs processing."
+  ],
+  "sources": [
+   {
+    "url": "https://sel4.systems/About/FAQ.html",
+    "who": "The seL4 project",
+    "showed": "The FAQ explains practical implications of devices that can access memory directly.",
+    "quote": null,
+    "cited_for": "Device behavior matters to the security assumptions of the operating system.",
+    "not_established": "Device guidance does not establish a complete boundary against information leaks from general programs.",
+    "checked": false
+   },
+   {
+    "url": "https://sel4.systems/Verification/assumptions.html",
+    "who": "The seL4 project",
+    "showed": "The seL4 kernel, the core of an operating system, has a confidentiality proof covering its internal storage channels. The proof excludes timing channels and depends on hardware assumptions.",
+    "quote": "As mentioned above, in practice the proof covers all\n    in-kernel storage channels but does not cover timing channels",
+    "cited_for": "Mathematical guarantees can cover specific information paths while leaving others outside their scope.",
+    "not_established": "The proof does not establish confinement of general applications across timing channels and the surrounding system.",
+    "checked": true
+   },
+   {
+    "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
+    "who": "Butler W. Lampson, Xerox Palo Alto Research Center",
+    "showed": "Lampson demonstrated how a service could leak information through files and shared resources. He proposed rules for confinement and discussed limiting hidden communication when blocking it costs too much.",
+    "quote": "Using these procedures and three files called data, sendclock, and receiveclock, a service\ncan send a stream of bits to another concurrently running program.",
+    "cited_for": "Preventing leaks requires controlling hidden communication as well as ordinary outputs.",
+    "not_established": "The conceptual rules do not demonstrate a practical system for general programs at ordinary-service cost.",
+    "checked": true
+   },
+   {
+    "url": "https://www.computer.org/csdl/proceedings-article/iiswc/2025/491700a423/2bNw7H0xFJu",
+    "who": "Xiaoyang Sun, Jeremy Singer and Zheng Wang",
+    "showed": "The work is described as an experimental study of CHERI/Morello memory safety, which restricts invalid memory access, and its performance cost.",
+    "quote": null,
+    "cited_for": "The study concerns the cost of memory protection.",
+    "not_established": "Memory safety alone does not establish control over all ways private information can escape.",
+    "checked": false
+   }
+  ],
+  "shown": [
+   "The seL4 project has proved confidentiality for storage channels inside an operating-system kernel. That is a concrete guarantee within a defined model, but it leaves timing channels outside the proof.",
+   "Lampson laid out why even apparently harmless access to files or shared resources can let secrets escape. His proposed rules explain the challenge; they do not demonstrate the full practical capability."
+  ],
+  "missing": [
+   "A useful general-program demonstration must enforce the caller’s disclosure rules across ordinary and hidden communication paths.",
+   "A checked proof must bound total leakage across channels, cooperating components and repeated runs.",
+   "The mathematical model must be connected to actual hardware, devices and the software controlling them.",
+   "Independent experiments must demonstrate useful performance across different workloads."
+  ],
+  "milestones": [
+   {
+    "id": "m1",
+    "label": "A useful application runs under explicit disclosure rules",
+    "explanation": "A database, build system or document renderer would have to run on shared hardware under published disclosure rules and attacker assumptions. This would demonstrate useful work within a defined boundary."
+   },
+   {
+    "id": "m2",
+    "label": "A checked proof bounds total information leakage",
+    "explanation": "A computer-checked proof would have to meet a leakage limit declared before testing, combining channels and repeated activity under justified machine assumptions. This would give the boundary a precise mathematical meaning."
+   },
+   {
+    "id": "m3",
+    "label": "Reproducible attacks test the leakage limit",
+    "explanation": "An attack team would have to try to disclose a planted secret through the specified channels using reproducible procedures. This would test the system alongside the proof without turning unsuccessful attacks into a universal guarantee."
+   },
+   {
+    "id": "m4",
+    "label": "Protected execution retains at least half the throughput",
+    "explanation": "The protected workload would have to complete work at least half as fast as its unprotected baseline with comparable resources. This would meet the proposed threshold for practical performance."
+   },
+   {
+    "id": "m5",
+    "label": "Independent teams reproduce results across different workloads",
+    "explanation": "Independent teams would have to reproduce results across materially different workloads and permitted interactions. This would establish demonstrated breadth, while general coverage would still require an argument covering supported programs."
+   }
+  ],
+  "uncertain": [
+   "Whether any mainstream platform already meets the complete target remains unresolved.",
+   "The supported programs, attacker capabilities, observation period and acceptable total leakage still need to be chosen.",
+   "The cost of controlling hidden communication across useful workloads, and the hardware assumptions required, remain open."
+  ],
+  "prompt": "5e97d4b8dfc3"
  }
 }

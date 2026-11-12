@@ -222,6 +222,99 @@
   "reconcile": "grok-4.7-build",
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
-  "rewrite": "gpt-6.1-sol"
+  "rewrite": "gpt-6.1-sol",
+  "brief": "gpt-6.1-sol"
+ },
+ "brief": {
+  "title": "Software guarantees that survive changes and failures",
+  "possible": [
+   "Engineers could replace part of an online service without rebuilding the argument that the whole service behaves correctly. Each part would have a contract stating what it promises and what it needs. Tools would combine contracts checked against running code, even when parts share memory, exchange messages and fail separately."
+  ],
+  "why": [
+   "Teams maintaining services could check whether components’ promises and assumptions fit together. Reusable proofs could make upgrades and changes to system design easier to assess, without repeatedly examining every component’s internal details."
+  ],
+  "sources": [
+   {
+    "url": "https://www.nsf.gov/funding/opportunities/shf-software-hardware-foundations",
+    "who": "U.S. National Science Foundation",
+    "showed": "Its research programme includes combining guarantees about software parts and checking software correctness.",
+    "quote": null,
+    "cited_for": "The programme treats reasoning about systems through their parts as a research topic.",
+    "not_established": "A funding programme does not demonstrate a working method for production services.",
+    "checked": false
+   },
+   {
+    "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
+    "who": "Chris Newcombe and colleagues at Amazon Web Services",
+    "showed": "Amazon engineers used TLA+, a language for precise system models, to find design bugs. Their account did not prove that executable code followed those models.",
+    "quote": "In several\ncases, we have prevented subtle but serious bugs from reaching\nproduction.",
+    "cited_for": "Checking precise designs can find bugs that ordinary engineering checks miss.",
+    "not_established": "A checked design does not establish that the executable implementation obeys it.",
+    "checked": true
+   },
+   {
+    "url": "https://deepspec.org/page/Research/",
+    "who": "The DeepSpec team",
+    "showed": "The team found that independently verified components could rely on incompatible descriptions of the same programming language.",
+    "quote": "What we often find in practice (for example) is that the C language spec used in proving CertiKOS does not match the C language spec delivered by CompCert.",
+    "cited_for": "Component contracts must match what surrounding components actually require.",
+    "not_established": "The overview does not demonstrate an integrated method covering concurrent services and partial failures.",
+    "checked": true
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5597730/",
+    "who": "Andrew W Appel and colleagues",
+    "showed": "The authors described contracts tied to both code and its users. They reported experiments connecting checked correctness proofs across teams.",
+    "quote": "We identify an important class of specification that has already been used in a few experiments that connect strong component-correctness theorems across the work of different teams.",
+    "cited_for": "Checked proofs about separate components can already be connected in narrower settings.",
+    "not_established": "These experiments do not establish routine maintenance of the full proposed service scope by ordinary engineers.",
+    "checked": true
+   },
+   {
+    "url": "https://research.tudelft.nl/en/publications/iris-from-the-ground-up-a-modular-foundation-for-higher-order-con/",
+    "who": "Ralf Jung and colleagues",
+    "showed": "Iris provides mathematical rules for checking programs whose parts run at once. It is implemented in Coq, a tool that checks proofs, and has served multiple verification projects.",
+    "quote": "Iris is a framework for higher-order concurrent separation logic, which has been implemented in the Coq proof assistant and deployed very effectively in a wide variety of verification projects.",
+    "cited_for": "Implemented tools already support proofs about interacting parts that run at once.",
+    "not_established": "This result does not establish the combined failure-handling method or its usability for ordinary service engineers.",
+    "checked": true
+   }
+  ],
+  "shown": [
+   "CertiKOS demonstrated reasoning from component guarantees in a kernel, the core of an operating system, including interchangeable implementations. Yggdrasil demonstrated reusable crash-recovery proofs and replacement of storage components, but only when execution follows a single sequence rather than concurrent activity."
+  ],
+  "missing": [
+   "A combined demonstration must cover shared memory, messages, partial failures and recovery, with contracts proved against executable code.",
+   "System proofs must survive compatible replacements, while checks reject incompatible contracts and code that violates its contract.",
+   "Engineers without proof expertise must demonstrate that they can maintain the guarantees through a production release."
+  ],
+  "milestones": [
+   {
+    "id": "m1",
+    "label": "A service’s safety, recovery and progress follow from contracts",
+    "explanation": "Checked component contracts would have to establish a production service’s safety, crash recovery and continued progress under stated conditions. This would demonstrate the combined capability."
+   },
+   {
+    "id": "m2",
+    "label": "Compatible replacements preserve proofs and mismatches are rejected",
+    "explanation": "A replacement meeting the same contract would have to preserve the system proof; checks would reject incompatible contracts and implementation violations. This would establish reusable reasoning through component changes."
+   },
+   {
+    "id": "m3",
+    "label": "Ordinary engineers maintain independently reproducible proofs through a release",
+    "explanation": "Independent teams would have to reproduce the proof, and engineers without proof expertise maintain it through a production release with recorded effort. Failure exercises would help connect the model to running behaviour."
+   },
+   {
+    "id": "m4",
+    "label": "The demonstration’s coverage and trusted dependencies are explicit",
+    "explanation": "The demonstration would have to state its covered properties, components, failures, conditions and trusted tools. This would define where its guarantees apply without claiming that a finite demonstration covers every system."
+   }
+  ],
+  "uncertain": [
+   "Whether a production-ready method already meets the full combined target remains unresolved.",
+   "The training, assistance and maintenance effort ordinary engineers would need remain unquantified.",
+   "The exact rules for memory, messages, recovery and scheduling, and which tools must be trusted, remain unspecified."
+  ],
+  "prompt": "5e97d4b8dfc3"
  }
 }
