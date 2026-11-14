@@ -9,6 +9,7 @@ import Breakthrough from './pages/Breakthrough.jsx';
 import Field from './pages/Field.jsx';
 import About from './pages/About.jsx';
 import NotFound from './pages/NotFound.jsx';
+import { ReviewQueue } from './Review.jsx';
 
 // Share cards (/share/...) are images for link previews: drawn alone, outside the layout, and
 // loaded only when asked for (python3 -m atlas.share screenshots them).
@@ -38,6 +39,7 @@ export default function App() {
             <Route path="/hand/:id" element={<Breakthrough draft hand />} />
             <Route path="/field/:field" element={<Field />} />
             <Route path="/about" element={<About />} />
+            <Route path="/review" element={<ReviewQueue />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>

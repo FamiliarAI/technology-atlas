@@ -269,6 +269,10 @@ def check(data):
             problems += _check_brief(identifier, item, sources)
         if 'page' in item:
             problems += _check_page(identifier, item)
+        if 'review' in item:
+            from .review import problems as review_problems  # atlas.review imports this module
+
+            problems += review_problems(identifier, item['review'], items)
     for row_number, row in enumerate(data['progress'], 1):
         identifier = row.get('breakthrough')
         item = items.get(identifier)

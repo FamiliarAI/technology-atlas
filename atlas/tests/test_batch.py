@@ -148,6 +148,77 @@ class BatchTests(unittest.TestCase):
             ['done', 'failed', 'failed', 'stopped', 'stopped'],
         )
 
+    def test_adaptive_rises_until_throttled_then_settles_20_percent_below(self):
+        throttled, peak, lines = [0], [0], []
+        inside = [0]
+        guard = threading.Lock()
+        path = self.root / 'workers.json'
+
+        def work(identifier, stop):
+            with guard:
+                inside[0] += 1
+                peak[0] = max(peak[0], inside[0])
+                # The provider starts refusing connections once 14 calls run at once.
+                if inside[0] >= 14:
+                    throttled[0] += 1
+            time.sleep(0.002)
+            with guard:
+                inside[0] -= 1
+            return identifier
+
+        adaptive = batch.Adaptive(
+            start=6,
+            most=48,
+            path=path,
+            throttled=lambda: throttled[0],
+            load=lambda: 0,
+            log=lines.append,
+        )
+        outcomes, _ = batch.run([str(n) for n in range(400)], work, adaptive)
+        self.assertEqual({status for status, _ in outcomes.values()}, {'done'})
+        self.assertTrue(adaptive.settled, lines)
+        self.assertGreaterEqual(adaptive.ceiling, 14)
+        self.assertEqual(adaptive.limit, int(adaptive.ceiling * 0.8))
+        self.assertLessEqual(peak[0], adaptive.ceiling)
+        self.assertIn('settling at', ' '.join(lines))
+        saved = json.loads(path.read_text())
+        self.assertEqual(saved['workers'], adaptive.limit)
+        # A later run starts where this one settled, without climbing.
+        again = batch.Adaptive(start=6, path=path, throttled=lambda: 0, load=lambda: 0, log=str)
+        self.assertEqual((again.limit, again.settled), (adaptive.limit, True))
+
+    def test_adaptive_without_throttling_rises_to_the_cap_and_saves_nothing(self):
+        path = self.root / 'workers.json'
+        adaptive = batch.Adaptive(
+            start=2, most=10, path=path, throttled=lambda: 0, load=lambda: 0, log=str
+        )
+        batch.run([str(n) for n in range(200)], lambda identifier, stop: identifier, adaptive)
+        self.assertEqual((adaptive.limit, adaptive.settled), (10, False))
+        self.assertFalse(path.exists())
+
+    def test_adaptive_backs_off_when_the_machine_is_overloaded(self):
+        adaptive = batch.Adaptive(start=10, most=48, throttled=lambda: 0, load=lambda: 3.5, log=str)
+        batch.run([str(n) for n in range(5)], lambda identifier, stop: identifier, adaptive)
+        self.assertEqual((adaptive.ceiling, adaptive.limit), (10, 8))
+
+    def test_codex_throttling_is_counted_from_its_error_events(self):
+        from ingestion import providers
+
+        folder = self.root / 'call'
+        folder.mkdir()
+        (folder / 'stderr.log').write_text('')
+        event = {
+            'type': 'error',
+            'message': 'Reconnecting... 2/5 (unexpected status 403 Forbidden: Unknown error)',
+        }
+        (folder / 'stdout.log').write_text(json.dumps(event) + '\n')
+        before = providers.throttled()
+        providers.note_throttling(folder)
+        self.assertEqual(providers.throttled(), before + 1)
+        (folder / 'stdout.log').write_text('{"type":"turn.completed"}\n')
+        providers.note_throttling(folder)
+        self.assertEqual(providers.throttled(), before + 1)
+
     # atlas.find
 
     def test_thin_selects_records_with_at_most_one_source_and_skips_done_ones(self):

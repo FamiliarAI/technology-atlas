@@ -2380,6 +2380,17 @@ COMMIT_EVERY = 25
 GIVE_UP = 3  # --missing skips an entry that has failed this many times in a row
 TRAILER = 'Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>'
 FAILURES = 'failures.json'
+WORKERS = 'workers.json'  # the worker count `--workers auto` settled on
+
+
+def worker_count(text):
+    """--workers: a number, or `auto` to find the most the provider allows (atlas.batch)."""
+    if text == 'auto':
+        return text
+    value = int(text)
+    if value < 1:
+        raise ValueError(text)
+    return value
 
 
 def select(step, data, missing=False, every=False, fields=(), limit=None, failures=None):
@@ -2468,6 +2479,14 @@ def run_batch(step, identifiers, writer, workers=3, commit=True, replace=False, 
                 failures[key] = failures.get(key, 0) + 1
             failures_path.write_text(json.dumps(failures, indent=1, sort_keys=True) + '\n')
 
+    if workers == 'auto':
+
+        def note(text):
+            print(text, flush=True)
+            with lock, log_path.open('a') as handle:
+                handle.write(f'{datetime.now(timezone.utc).isoformat()} {text}\n')
+
+        workers = batches.Adaptive(path=CALLS / WORKERS, log=note)
     outcomes, exhausted = batches.run(identifiers, work, workers, report)
     done = [i for i, (status, _) in outcomes.items() if status == 'done']
     failed = sum(1 for status, _ in outcomes.values() if status == 'failed')
@@ -2513,7 +2532,12 @@ def main(argv=None):
         sub.add_argument('--all', action='store_true', help='every active breakthrough')
         sub.add_argument('--field', action='append', default=[], help='only this field')
         sub.add_argument('--limit', type=int, help='at most this many entries')
-        sub.add_argument('--workers', type=int, default=3)
+        sub.add_argument(
+            '--workers',
+            type=worker_count,
+            default=3,
+            help='parallel calls, or auto: rise until throttled, then settle 20%% below',
+        )
         sub.add_argument('--no-commit', action='store_true')
         writer_options(sub)
 
@@ -2544,7 +2568,8 @@ def main(argv=None):
             def work(identifier):
                 return define(identifier, replace=args.replace, writer=writer, out=args.out)
 
-            with ThreadPoolExecutor(args.workers) as pool:
+            fixed = 3 if args.workers == 'auto' else args.workers
+            with ThreadPoolExecutor(fixed) as pool:
                 for line in pool.map(lambda identifier: safely(work, identifier), args.ids):
                     print(line, flush=True)
             return 0

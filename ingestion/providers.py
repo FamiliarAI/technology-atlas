@@ -99,6 +99,25 @@ def exhausted(provider, message):
     return any(re.search(pattern, message, re.I) for pattern in EXHAUSTION.get(provider, ()))
 
 
+# Codex retries a refused or throttled connection itself and reports each retry as an error
+# event. A call that saw one is counted, so a batch can tell when it runs too many at once.
+THROTTLE = re.compile(r'Reconnecting\.\.\.[^\n]*unexpected status (?:403|429|5\d\d)', re.I)
+_throttled = [0]
+_throttled_lock = threading.Lock()
+
+
+def throttled():
+    """How many Codex calls in this process have been throttled so far."""
+    with _throttled_lock:
+        return _throttled[0]
+
+
+def note_throttling(directory):
+    if THROTTLE.search(codex_errors(directory)):
+        with _throttled_lock:
+            _throttled[0] += 1
+
+
 def stage_entries(config, stage):
     """The ordered fallback list for a stage, from `stages` or the older single keys."""
     if stage in config.get('stages', {}):
@@ -240,6 +259,7 @@ def codex(config, entry, text, directory, schema=None, timeout=DEFAULT_TIMEOUT_S
         output = directory / 'response.md'
     command += ['-o', str(output), '--json', '-']
     code = execute(command, directory, text, timeout, check=False)
+    note_throttling(directory)
     if code:
         if exhausted('codex', codex_errors(directory)):
             raise ProviderExhausted('codex', f'Codex {entry["model"]} usage exhausted')

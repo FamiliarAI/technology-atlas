@@ -72,9 +72,14 @@ def routes(files):
         summary = record['concept'][0]['text'] if record['concept'] else record['title']
         if brief.get('possible'):
             summary = brief['possible'][0]
+        title = brief.get('title') or item['title']
+        if record.get('published'):
+            # The published page is what /b/<ID> shows, so its title and definition lead.
+            title = record['page']['title']
+            summary = record['page']['definition']
         yield (
             '/b/' + item['id'],
-            f'{brief.get("title") or item["title"]} · {item["id"]} · {NAME}',
+            f'{title} · {item["id"]} · {NAME}',
             cut(summary, 200),
             item['id'],
         )
@@ -130,8 +135,9 @@ def share_images(source):
     return sorted(folder.glob('*.png'))
 
 
-def export(out, db_path=DB, site=SITE, base_url='', share=None):
+def export(out, db_path=DB, site=SITE, base_url='', share=None, public=False):
     """Write the static site to out, with share images from share (an atlas.share folder).
+    public: only the breakthroughs the owner published (atlas.review), and their fields.
 
     Returns {'pages': n, 'data': n, 'bytes': {...}, 'images': n, 'without_image': [route, ...]}.
     """
@@ -144,6 +150,8 @@ def export(out, db_path=DB, site=SITE, base_url='', share=None):
         raise SystemExit('Run python3 -m atlas.store first')
     images = share_images(share) if share else []
     prepare(out)
+    # Marked first, so an export that fails part-way can still be replaced by the next one.
+    (out / MARKER).write_text('Written by python3 -m atlas.export; safe to replace.\n')
     shutil.copytree(site, out, dirs_exist_ok=True)
     if images:
         (out / 'share').mkdir(exist_ok=True)
@@ -151,7 +159,7 @@ def export(out, db_path=DB, site=SITE, base_url='', share=None):
             shutil.copyfile(path, out / 'share' / path.name)
     db = connect(db_path)
     try:
-        files = dict(site_files(db))
+        files = dict(site_files(db, public))
     finally:
         db.close()
     sizes = {}
@@ -197,9 +205,17 @@ def main(argv=None):
         type=Path,
         help='folder written by python3 -m atlas.share; its share/*.png are copied in',
     )
+    parser.add_argument(
+        '--public',
+        action='store_true',
+        help='only published breakthroughs (python3 -m atlas.review) and their fields',
+    )
     args = parser.parse_args(argv)
-    result = export(args.out, args.db, base_url=args.base_url, share=args.share)
+    result = export(args.out, args.db, base_url=args.base_url, share=args.share, public=args.public)
     sizes = result['bytes']
+    if not any(name.startswith('b/') for name in sizes):
+        print(f'{result["pages"]} pages in {args.out}; no breakthrough is published yet')
+        return
     largest = {
         kind: max((size, name) for name, size in sizes.items() if name.startswith(kind))
         for kind in ['field/', 'b/']

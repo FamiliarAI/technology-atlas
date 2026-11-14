@@ -5,6 +5,10 @@ import json
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
+
+from . import core as records
+from .review import Refused, decide, listing, review_message
+from .similar import LIKELY, Index
 from .store import (
     DB,
     ROOT,
@@ -74,15 +78,77 @@ class Handler(BaseHTTPRequestHandler):
                         {'error': 'Saved file changed; import and verify again'}, status=409
                     )
                 return self.reply(data, 'application/octet-stream', filename=saved_path.name)
+        if path == '/api/review':
+            return self.reply(listing(records.load(self.server.core)))
+        if path.startswith('/api/review/'):
+            return self.review_state(path.removeprefix('/api/review/'))
         if path.startswith('/api/'):
             return self.reply({'error': 'Not found'}, status=404)
         return self.site(path)
+
+    # The owner's review (atlas.review), local only: read and written straight from atlas/core,
+    # so a decision shows at once; the database catches up at the next rebuild.
+
+    def review_state(self, identifier):
+        data = records.load(self.server.core)
+        item = data['breakthroughs'].get(identifier)
+        if item is None:
+            return self.reply({'error': 'Not found'}, status=404)
+        index = Index(data)
+        return self.reply(
+            {
+                'id': identifier,
+                'review': item.get('review'),
+                'page': bool(item.get('page')),
+                'similar': {
+                    'published': index.nearest(identifier, 'published'),
+                    'all': index.nearest(identifier, 'all'),
+                    'likely': LIKELY,
+                },
+            }
+        )
+
+    def do_POST(self):
+        path = unquote(urlsplit(self.path).path)
+        if not path.startswith('/api/review/'):
+            return self.reply({'error': 'Not found'}, status=404)
+        # Only this site may decide: a JSON body (other sites cannot send one without a
+        # preflight this server never answers) from this server's own origin.
+        origin = self.headers.get('Origin')
+        host = self.headers.get('Host')
+        if origin not in (f'http://{host}', None) or 'json' not in (
+            self.headers.get('Content-Type') or ''
+        ):
+            return self.reply({'error': 'Refused'}, status=403)
+        try:
+            length = int(self.headers.get('Content-Length') or 0)
+            body = json.loads(self.rfile.read(min(length, 20000)) or b'{}')
+        except ValueError:
+            return self.reply({'error': 'Not JSON'}, status=400)
+        identifier = path.removeprefix('/api/review/')
+        state = body.get('state')
+        try:
+            decide(identifier, state, body.get('note'), body.get('into'), core=self.server.core)
+        except Refused as error:
+            return self.reply({'error': str(error)}, status=400)
+        problems = records.check(records.load(self.server.core))
+        if problems:
+            return self.reply({'error': 'Check failed: ' + '; '.join(problems[:3])}, status=500)
+        warning = None
+        if self.server.commit:
+            try:
+                records.commit(review_message(state, [identifier]))
+            except Exception as error:  # noqa: BLE001 - the decision is written; commit later
+                warning = f'Saved, not committed ({error}); the next commit of atlas/core takes it'
+        return (
+            self.review_state(identifier) if warning is None else self.reply({'warning': warning})
+        )
 
     def data(self, db, name):
         """The site's data contract, built on request (the export writes the same files)."""
         value = None
         if name == 'catalog.json':
-            value = catalog(db)
+            value = catalog(db) | {'local': True}  # offers the review tools (Review.jsx)
         elif name == 'search.json':
             value = search_index(db)
         elif name.startswith('field/') and name.endswith('.json'):
@@ -112,11 +178,13 @@ class Handler(BaseHTTPRequestHandler):
         pass
 
 
-def serve(port=8765, db_path=DB):
+def serve(port=8765, db_path=DB, core=records.CORE, commit=True):
     if not Path(db_path).exists():
         raise SystemExit('Run python3 -m atlas.store first')
     server = ThreadingHTTPServer(('127.0.0.1', port), Handler)
     server.db_path = db_path
+    server.core = core
+    server.commit = commit
     print(f'Technology Atlas: http://127.0.0.1:{port}', flush=True)
     server.serve_forever()
 

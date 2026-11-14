@@ -361,8 +361,43 @@ def status_of(verdicts):
     return 'none'
 
 
-def site_view(db):
-    """Everything the data files are built from, read once."""
+def page_milestones(page):
+    """A page's active milestones with a status each, by the rule of Page.jsx progress():
+    only confirmed results count; met if any is met, in progress if any is partial."""
+    order = page.get('milestone_order') or [m['id'] for m in page['milestones']]
+    known = {m['id']: m for m in page['milestones'] if m.get('status', 'active') == 'active'}
+    out = []
+    for identifier in order:
+        if identifier not in known:
+            continue
+        verdicts = {
+            row['verdict']
+            for row in page.get('results', [])
+            if row.get('confirmed') is True and row['milestone'] == identifier
+        }
+        status = 'met' if 'met' in verdicts else 'in_progress' if verdicts else 'none'
+        out.append({'id': identifier, 'label': known[identifier]['title'], 'status': status})
+    return out
+
+
+def published(item):
+    """The owner published this breakthrough's page (atlas.review)."""
+    return bool(item.get('page')) and (item.get('review') or {}).get('state') == 'published'
+
+
+def site_view(db, public=False):
+    """Everything the data files are built from, read once. public: only published
+    breakthroughs, and only the fields that have one (the public export)."""
+    view = _site_view(db)
+    if public:
+        view['items'] = {key: item for key, item in view['items'].items() if published(item)}
+        fields = {item['field'] for item in view['items'].values()}
+        view['fields'] = {key: field for key, field in view['fields'].items() if key in fields}
+        view['judged'] = [row for row in view['judged'] if row['breakthrough'] in view['items']]
+    return view
+
+
+def _site_view(db):
     fields = {row['id']: dict(row) for row in db.execute('SELECT * FROM fields ORDER BY id')}
     for field in fields.values():
         # Concepts a provider refused to review: {id, title, stage, reason}. A database built
@@ -385,6 +420,9 @@ def site_view(db):
     items = {}
     for row in db.execute('SELECT id, field, payload FROM breakthroughs ORDER BY id'):
         item = json.loads(row['payload'])
+        if published(item):
+            # The published page names the breakthrough everywhere: lists, search, the chart.
+            item['title'] = item['page']['title']
         rows = mine.get(row['id'], [])
         milestones = []
         for number, criterion in enumerate(item['completion_criteria'], 1):
@@ -399,6 +437,13 @@ def site_view(db):
         item['field'] = row['field']
         item['milestones'] = milestones
         item['overall'] = overall(rows)
+        if published(item):
+            # Lists and the chart describe a published breakthrough by its page: its
+            # definition, its active milestones, and marks from its confirmed results only.
+            page = item['page']
+            item['concept'] = [{'text': page['definition'], 'source_urls': []}]
+            item['milestones'] = page_milestones(page)
+            item['overall'] = 0
         # Any judged row counts as movement, including one about the breakthrough as a whole.
         item['moved_at'] = max((entry['added_at'] for entry in rows), default=None)
         item['progress_count'] = counts.get(row['id'], 0)
@@ -570,6 +615,9 @@ def breakthrough_data(db, identifier, view=None):
         # The breakthrough page entry (atlas.page). The judged list is bookkeeping for the
         # results pass and stays out.
         out['page'] = {key: value for key, value in item['page'].items() if key != 'judged'}
+        # A published page is the breakthrough's page at /b/<ID>. The owner's review notes
+        # stay out of the data.
+        out['published'] = published(item)
     return out
 
 
@@ -587,9 +635,9 @@ def search_index(db, view=None):
     ]
 
 
-def site_files(db):
-    """Every data file of the contract: (path under data/, value)."""
-    view = site_view(db)
+def site_files(db, public=False):
+    """Every data file of the contract: (path under data/, value). public: published only."""
+    view = site_view(db, public)
     yield 'catalog.json', catalog(db, view)
     yield 'search.json', search_index(db, view)
     for prefix in view['fields']:

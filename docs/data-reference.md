@@ -375,6 +375,19 @@ python3 -m atlas.page check
 nohup atlas/run_pages.sh gpt-6.1-sol medium atlas/data/page/run.log --workers 3 &
 ```
 
+**Review and publish** (`atlas.review`; no model calls). The owner's decision on a breakthrough is stored on its record as `review`: `{state, note, into, at, log}`, where `state` is `published`, `hold`, `merge` (with `into`, another breakthrough), `revise`, `retire`, or null (draft); `hold`, `revise` and `retire` need a note; each decision appends `{date, state, note?, into?}` to `log`. Only `published` changes anything outside the record: `python3 -m atlas.export OUT --public` writes only published breakthroughs and the fields that have one, `/b/<ID>` shows the page (not the reader's version), and lists, search and the chart use the page's title, definition and milestone marks from its confirmed results (`store.page_milestones`). The other states record intent and change nothing. `atlas.core check` refuses a published record without a page and a merge into an unknown breakthrough. Review notes never reach the site data. Publishing first prints the closest published pages (`atlas.similar`: TF-IDF cosine over each page's title, definition, completion test and milestone titles; flagged at 0.25 or more); a match never blocks. The local server offers the same decisions as buttons on `/draft/<ID>` and `/b/<ID>`, and a queue at `/review`, through `/api/review` (local server only; same-origin JSON POST); each decision is committed.
+
+```bash
+python3 -m atlas.review list [--state published|hold|merge|revise|retire|none]
+python3 -m atlas.review publish SUR-01 QUA-01
+python3 -m atlas.review hold BME-04 --note "needs the FDA guidance quote"
+python3 -m atlas.review merge CLM-11 --into BME-01 --note "same breakthrough"
+python3 -m atlas.review clear SUR-01                 # back to draft (unpublish)
+python3 -m atlas.similar BME-12 --among all          # the duplicate search alone
+python3 -m atlas.store && python3 -m atlas.export atlas/data/public --public
+python3 -m http.server 8766 --bind 127.0.0.1 --directory atlas/data/public   # production preview
+```
+
 **Correct a record by hand.** Edit the file, run the check, rebuild, commit with the reason. Before v1 only non-editorial fixes are allowed.
 
 **Export the site.** OUT must be empty or an earlier export. `--db` picks another database. Share images are made first from the running site, then copied in.

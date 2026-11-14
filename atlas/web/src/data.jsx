@@ -91,6 +91,8 @@ export async function loadAtlas() {
     // Concepts left out because a provider refused to review them: {id, title, field}.
     withheld: catalog.withheld || [],
     asOf: catalog.as_of,
+    // Set only by the local server (atlas.server): the owner's review tools are offered there.
+    local: catalog.local === true,
     totals: {
       breakthroughs: all.length,
       milestones: all.reduce((n, i) => n + i.status.length, 0),

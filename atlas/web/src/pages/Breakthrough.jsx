@@ -13,6 +13,7 @@ import { EASE } from '../motion.js';
 import * as sky from '../sky.js';
 import { plural, useTitle } from './common.jsx';
 import NotFound from './NotFound.jsx';
+import { ReviewPanel } from '../Review.jsx';
 
 const list = (value) => (Array.isArray(value) ? value : []);
 
@@ -107,6 +108,9 @@ export default function Breakthrough({ draft = false, hand = false }) {
   // An empty brief counts as none.
   // The breakthrough page entry (atlas.page), carried in /data/b/<ID>.json when written.
   const page = record?.id === id ? record.page : null;
+  // A published page is the breakthrough's page at /b/<ID>; /draft/<ID> shows any page.
+  const showPage = Boolean(page) && (draft ? !hand : record.published === true);
+  const old = !draft && !showPage;
   const brief =
     record?.brief &&
     typeof record.brief === 'object' &&
@@ -116,7 +120,7 @@ export default function Breakthrough({ draft = false, hand = false }) {
       ? record.brief
       : null;
   const plain = typeof brief?.title === 'string' && brief.title.trim() ? brief.title.trim() : null;
-  useTitle(item ? `${plain || item.title} (${item.id})` : atlas ? 'Not found' : id);
+  useTitle(item ? `${(showPage && page.title) || plain || item.title} (${item.id})` : atlas ? 'Not found' : id);
 
   if (atlasError) return <p className="page-state">The atlas data could not be loaded: {atlasError}.</p>;
   if (atlas && !item) {
@@ -165,7 +169,7 @@ export default function Breakthrough({ draft = false, hand = false }) {
         };
 
   return (
-    <article className={'bpage' + (draft && item && (IDEAL[item.id] || page) ? ' bpage-ideal' : '')}>
+    <article className={'bpage' + ((draft && IDEAL[item.id]) || showPage ? ' bpage-ideal' : '')}>
       <div className="bpage-wash" aria-hidden="true" />
       <nav className="crumbs" aria-label="Breadcrumb">
         <Link to="/atlas">Atlas</Link>
@@ -176,17 +180,18 @@ export default function Breakthrough({ draft = false, hand = false }) {
           {item.id}
         </span>
       </nav>
+      <ReviewPanel id={item.id} local={atlas.local} />
       <div className="bpage-grid">
         <div className="bpage-main">
           <motion.header className="bpage-head" {...fade(0)}>
-            {!draft && (
+            {old && (
               <p className="eyebrow bpage-id">
                 <span className="mono">{item.id}</span>
               </p>
             )}
-            <h1>{(draft && ((!hand && page?.title) || IDEAL[item.id]?.title)) || plain || item.title}</h1>
-            {plain && !draft && <p className="bpage-subtitle">{item.title}</p>}
-            {!draft && (
+            <h1>{(showPage && page.title) || (draft && IDEAL[item.id]?.title) || plain || item.title}</h1>
+            {plain && old && <p className="bpage-subtitle">{item.title}</p>}
+            {old && (
               <p className="status-line">
                 <span className="bpage-head-glyph">
                   <StarGlyph item={item} size={40} />
@@ -197,7 +202,7 @@ export default function Breakthrough({ draft = false, hand = false }) {
             )}
           </motion.header>
 
-          {draft && !hand && page ? (
+          {showPage ? (
             <PageBody page={page} />
           ) : draft && IDEAL[item.id] ? (
             <IdealBody page={IDEAL[item.id]} />
