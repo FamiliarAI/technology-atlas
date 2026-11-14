@@ -180,7 +180,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "sources": [
   "https://arxiv.org/abs/2312.14902"
@@ -266,5 +267,368 @@
    "Is the proposed accuracy target appropriate across the different forces and transport quantities being predicted?"
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "MEC-01",
+  "title": "Predictive turbulence modeling for engineering flows",
+  "definition": "A turbulence-prediction method calculates forces, flow separation, heat transfer and mixing on engineering configurations outside its calibration data within application-defined error and computing budgets. Its closure—the representation of turbulent motions omitted from the calculation—transfers without adjustment to the new configuration’s measured results.",
+  "goal": {
+   "need": "Goc et al.'s 2019 aircraft-model study evaluated six angles of attack at Reynolds number 1.93×10^6; each angle required about 800,000 CPU core-hours for 30 mean-chord transit times. NASA's standard cases quantify separation-length errors even in simpler geometries. Engineering prediction must address error and computing cost together to support comparisons of new designs.",
+   "need_refs": [
+    1,
+    2,
+    3
+   ],
+   "figures": {
+    "caption": "Typical RANS separation-bubble-length errors reported in NASA's standard test-case document.",
+    "columns": [
+     "Flow",
+     "Reynolds number",
+     "Length overprediction"
+    ],
+    "rows": [
+     [
+      "NASA wall-mounted hump",
+      "936,000",
+      "About 35%"
+     ],
+     [
+      "Axisymmetric transonic bump",
+      "2,763,000",
+      "20–30%"
+     ]
+    ],
+    "note": "RANS denotes Reynolds-averaged Navier–Stokes modeling. These are separation-length errors, not force-coefficient errors.",
+    "ref": 2
+   },
+   "statements": [
+    {
+     "body": "NASA CFD Vision 2030 study team",
+     "year": "2014",
+     "quote": "Emphasis on physics-based, predictive modeling.",
+     "context": "One of the study's minimum required capabilities; its accompanying discussion includes turbulence, separation, reacting flows and heat transfer.",
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "AIAA CFD Vision 2030 Integration Committee roadmap authors",
+     "year": "2021",
+     "quote": "Improving predictions of separated flow is a focus of the Roadmap.",
+     "context": null,
+     "ref": 4,
+     "checked": null
+    }
+   ]
+  },
+  "completion": {
+   "title": "Independent teams reproduce one frozen method across turbulence, aircraft and engine prediction tests.",
+   "criterion": "One frozen method passes the cited benchmark, aircraft and propulsion targets on configurations excluded from calibration: 40% error reduction across all NASA standard cases, maximum-lift prediction at certification-flight-test accuracy, and the specified engine workflow within one week while meeting its output metrics. Blind validation includes forces, separation, heat transfer and mixing; independent teams reproduce predictions without measurement-based retuning. Application owners must first publish the numerical tolerances missing from the challenge documents. Uncertainties are assessed using ASME V&V 20.",
+   "set_by": "Atlas operational definition combining published application targets; no outside body located defines this combined transferability test.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searched NASA's CFD Vision 2030 study and technical challenges, AIAA's roadmap, ASME V&V 20, TMR and the Closure Challenge for a common accuracy, cost and transferability test; none was found. ASME confines validation to specified quantities and points. This combines the published application targets with blind transfer and independent reproduction. Goc's six-angle aircraft study and Wu's four outside-training flow families demonstrate parts of the capability.",
+   "refs": [
+    1,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "Models reduce prediction error by 40% across all NASA standard turbulence test cases.",
+    "criterion": "Reduce predictive error by 40% for 100% of NASA's standard test cases using their published flow metrics. The programme's minimum-success level was the same reduction for 50% of cases. The suite covers separated flow, free shear flow and shock–boundary-layer interaction. NASA closed TC-69 on 31 May 2018, but its review panel could not confirm that the numerical success criteria were fully met.",
+    "set_by": "NASA Transformational Tools and Technologies Project, TC-69/TACP01/TTT, full-success exit criterion; case definitions and metrics published by DeBonis, Rumsey and Malik.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "Physics-based models and simulation techniques identified that reduce 40% predictive error for 100% of the standard test cases by the due date.",
+    "threshold_ref": 10,
+    "refs": [
+     10,
+     2
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "Large-eddy simulation represents complex three-dimensional flow at an application-relevant Reynolds number.",
+    "criterion": "Demonstrate wall-modeled or wall-resolved large-eddy simulation, which resolves larger turbulent motions, for complex three-dimensional flow at an appropriate Reynolds number. Goc et al. reported this stage for the JAXA Standard Model at Re=1.93×10^6: lift near stall agreed with wind-tunnel measurements, while drag was overpredicted across the six evaluated angles. NASA's roadmap specifies no numerical accuracy cutoff for this demonstration.",
+    "set_by": "NASA CFD Vision 2030 study, Figure 1, physical-modeling track; the milestone is stated in the roadmap figure.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     3,
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m3",
+    "title": "Transport-aircraft maximum lift is predicted at least as accurately as certification flight tests.",
+    "criterion": "Predict the maximum lift coefficient of transport aircraft with equal or better accuracy than certification flight tests, using computationally efficient methods that resolve turbulent eddies. The coefficient normalizes lift by dynamic pressure and wing area. NASA's statement supplies no numerical error or runtime limit. The 2026 roadmap assessment reports maximum-lift predictions by multiple teams on HLPW5 benchmarks, while identifying remaining errors in smooth-body separation.",
+    "set_by": "NASA Revolutionary Computational Aerosciences programme, Technical Challenge 1, presented on 2 July 2019; this target specifically concerns transport-aircraft maximum lift.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "transport aircraft with equal or better accuracy than certification flight tests.",
+    "threshold_ref": 11,
+    "refs": [
+     11,
+     13
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "A full-engine simulation meets engine-test metrics within one week, including model preparation.",
+    "criterion": "For one engine operating point, complete the workflow from model build to processed results within one week while meeting performance, operability, emissions and durability accuracy metrics. Use full-annulus simulations for operability; include secondary and cooling flow paths when assessing durability. This is the propulsion Grand Challenge team's proposed integrated demonstration. Its document does not assign numerical tolerances to the four accuracy metrics.",
+    "set_by": "AIAA CFD Vision 2030 propulsion Grand Challenge team, Anand and colleagues, Section VI; an industry–NASA challenge proposal for aircraft engines.",
+    "set_by_kind": "professional_society",
+    "threshold_quote": "conduct a full engine simulation for one operating point from model build to processed results within 1 week",
+    "threshold_ref": 12,
+    "refs": [
+     12
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No field-wide numerical acceptance test combining transfer to unseen flows, force and transport accuracy, and computational cost was found.",
+   "The cited aircraft and engine challenge documents do not provide numerical tolerances for certification-level lift error or the four engine-output metrics.",
+   "No published demonstration satisfying the complete one-week engine workflow and all four accuracy requirements was located.",
+   "The Closure Challenge defines a velocity-error ranking score, but no score that declares the broader capability achieved.",
+   "Wu et al.'s publisher page returned HTTP 403; the cited result is from the arXiv version, whose metadata identifies a related 2025 AIAA Journal publication."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "report",
+    "url": "https://web.stanford.edu/group/ctr/ResBriefs/2019/01_Goc.pdf",
+    "doi": null,
+    "title": "Wall-modeled large-eddy simulation of aircraft in landing configuration",
+    "authors": "Goc K, Bose ST, Moin P.",
+    "container": "Center for Turbulence Research Annual Research Briefs",
+    "year": "2019",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 2,
+    "kind": "report",
+    "url": "https://tmbwg.github.io/turbmodels/Papers/StandardTestCasesFinal6.pdf",
+    "doi": null,
+    "title": "Test Cases for NASA’s Revolutionary Computational Aerosciences Technical Challenge",
+    "authors": "DeBonis J, Rumsey C, Malik M.",
+    "container": "NASA",
+    "year": "2015",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "report",
+    "url": "https://ntrs.nasa.gov/api/citations/20140003093/downloads/20140003093.pdf",
+    "doi": null,
+    "title": "CFD Vision 2030 Study: A Path to Revolutionary Computational Aerosciences",
+    "authors": "Slotnick J, Khodadoust A, Alonso J, Darmofal D, Gropp W, Lurie E, Mavriplis D.",
+    "container": "NASA",
+    "year": "2014",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "report",
+    "url": "https://cfd2030.com/report/CFD-Vision-2030-Roadmap-2020-Report.pdf",
+    "doi": null,
+    "title": "The CFD Vision 2030 Roadmap: 2020 Status, Progress and Challenges",
+    "authors": "Cary A, Chawner J, Duque E, Gropp W, Kleb B, Kolonay R, Nielsen E, Smith B.",
+    "container": "AIAA CFD Vision 2030 Integration Committee",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "web",
+    "url": "https://www.asme.org/codes-standards/find-codes-standards/standard-for-verification-and-validation-in-computational-fluid-dynamics-and-heat-transfer",
+    "doi": null,
+    "title": "V V 20 - Standard for Verification and Validation in Computational Fluid Dynamics and Heat Transfer",
+    "authors": "American Society of Mechanical Engineers",
+    "container": "ASME",
+    "year": "2009, reaffirmed 2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2312.14902v1",
+    "doi": "10.48550/arXiv.2312.14902",
+    "title": "Turbulence Closure modeling with machine learning approaches: A Perspective",
+    "authors": "Girimaji SS",
+    "container": "arXiv",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 7,
+    "kind": "web",
+    "url": "https://tmbwg.github.io/turbmodels/",
+    "doi": null,
+    "title": "Turbulence Modeling Resource",
+    "authors": "Turbulence Model Benchmarking Working Group",
+    "container": "AIAA Turbulence Model Benchmarking Working Group",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 8,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2603.28884v1",
+    "doi": "10.48550/arXiv.2603.28884",
+    "title": "The Closure Challenge: a benchmark task for machine learning in turbulence modelling",
+    "authors": "McConkey R, Buchanan T, Smidt T, Bodner A, Dwight R, Cinnella P",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 9,
+    "kind": "preprint",
+    "url": "https://arxiv.org/abs/2503.02482",
+    "doi": "10.48550/arXiv.2503.02482",
+    "title": "Data-driven Turbulence Modeling for Separated Flows Considering Non-Local Effect",
+    "authors": "Wu C, Zhang S, Guo C, Zhang Y",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 10,
+    "kind": "report",
+    "url": "https://ntrs.nasa.gov/api/citations/20210013373/downloads/Technical%20Challenge%20Completion%20Record_Turbulence%20Transition%20Numerical%20Method_31%20Mar%202021_FINAL.pdf",
+    "doi": null,
+    "title": "Technical Challenge Completion Record",
+    "authors": "NASA",
+    "container": "NASA",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 11,
+    "kind": "report",
+    "url": "https://ntrs.nasa.gov/api/citations/20190030750/downloads/20190030750.pdf",
+    "doi": null,
+    "title": "Revolutionary Computational Aerosciences (RCA) Research Portfolio and CFD 2030",
+    "authors": "Malik MR, Kiris CC.",
+    "container": "NASA",
+    "year": "2019",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 12,
+    "kind": "report",
+    "url": "https://ntrs.nasa.gov/api/citations/20205008206/downloads/CFD2030IC_Propulsion_Grand_Challenge-final3.pdf?attachment=true",
+    "doi": "10.2514/6.2021-0956",
+    "title": "Vision 2030 Aircraft Propulsion Grand Challenge Problem: Full-engine CFD Simulations with High Geometric Fidelity and Physics Accuracy",
+    "authors": "Anand MS, Medic G, Paliath U, Suder KL, Malik MR, Laskowski GM",
+    "container": "AIAA Scitech 2021 Forum",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 13,
+    "kind": "report",
+    "url": "https://cfd2030.com/report/CFD-Vision-2030-Roadmap-Update-Slides-Av26.pdf",
+    "doi": null,
+    "title": "CFD Vision 2030 Roadmap: Progress and Projections in 2026",
+    "authors": "Wissink A, Cary A, Georgiadis N, Smith B, Wyman N, Wang ZJ, Gropp W, Duraisamy K, Wukie N.",
+    "container": "AIAA CFD Vision 2030",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 3 from arXiv, 9 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 4 found, 0 not found, 1 with no readable copy."
+   }
+  ]
  }
 }

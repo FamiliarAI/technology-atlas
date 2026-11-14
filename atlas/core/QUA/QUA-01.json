@@ -231,7 +231,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Quantum computers that stay reliable as jobs grow",
@@ -324,5 +325,327 @@
    "The proposed milestones still need concrete workloads, checking methods, resource budgets and acceptable overall failure probabilities."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "QUA-01",
+  "title": "Below-threshold universal quantum computation",
+  "definition": "A quantum computer executes operations sufficient to approximate arbitrary quantum circuits, with errors per logical operation falling as code distance increases. A logical qubit encodes information across physical qubits; distance is the minimum weight of an undetectable logical error. Decoding interprets error-check measurements during execution.",
+  "goal": {
+   "need": "The Willow study contrasts physical entangling-gate performance with the error rates required by many applications. Error correction must bridge this gap during universal computation: protected Clifford operations require an additional non-Clifford operation, such as the T gate, to approximate arbitrary quantum circuits.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": {
+    "caption": "Error scales contrasted in the Willow study",
+    "columns": [
+     "Quantity",
+     "Value"
+    ],
+    "rows": [
+     [
+      "Physical entangling-gate infidelity",
+      "Approximately 10^-3"
+     ],
+     [
+      "Error rate required for many applications",
+      "Below 10^-10"
+     ]
+    ],
+    "note": "Physical infidelity is calculated as one minus the cited 99.9% fidelity. These quantities are not an identical operational error metric; application requirements depend on the workload.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "Google Quantum AI",
+     "year": "2023",
+     "quote": "The ultimate goal is to demonstrate a pathway to achieving the low errors needed for using quantum computers in meaningful applications.",
+     "context": null,
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "Microsoft Quantum and Qolab",
+     "year": "2026",
+     "quote": "Error-corrected logical qubits are needed to achieve this goal.",
+     "context": "The preceding sentence identifies the goal as executing long algorithms with end-to-end error rates below those physical qubits can support directly.",
+     "ref": 4,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "Universal logical circuits show below-threshold scaling with real-time decoding.",
+   "criterion": "Execute full encoded Clifford-plus-T circuits at increasing code distances, with repeated error checks, magic-state preparation and consumption, real-time decoding and required measurement-conditioned feedback. Logical error per operation must decrease with distance, including the non-Clifford contribution; for distances differing by two, the suppression ratio Λ = ε_d/ε_(d+2) must exceed 1. The published proposal specifies color codes and supplies no fixed circuit length or statistical significance cutoff.",
+   "set_by": "The quantum error-correction below-threshold convention, applied to universal circuits by the Quantinuum Helios team in its Discussion. Its explicit experimental proposal concerns color codes.",
+   "set_by_kind": "community_convention",
+   "threshold_quote": "below threshold behavior on a full Clifford plus T circuit",
+   "threshold_ref": 2,
+   "basis": "The below-threshold convention tests whether added protection reduces logical errors. Quantinuum explicitly proposes extending it to a full universal circuit with real-time decoding. Microsoft/Qolab likewise requires universal logical operations, distance-dependent improvement and measurement-conditioned control. This is a published experimental target, rather than a certification standard. The cited demonstrations do not establish the complete integrated test.",
+   "refs": [
+    1,
+    2,
+    4,
+    6,
+    7
+   ],
+   "threshold_checked": true
+  },
+  "case_label": "Hardware platform",
+  "cases": [
+   "Superconducting circuits",
+   "Trapped ions",
+   "Neutral atoms"
+  ],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A logical memory has a lower error rate than its constituent physical qubits.",
+    "criterion": "Quantum error correction produces at least one logical qubit whose error rate is lower than that of physical qubits under a comparable task. The National Academies calls this milestone G2b. Willow, published on 9 December 2024, reports a distance-7 memory using 101 physical qubits with lifetime 291 ± 6 μs, exceeding its best constituent physical-qubit lifetime by a factor of 2.4 ± 0.3.",
+    "set_by": "National Academies of Sciences, Engineering, and Medicine, Quantum Computing: Progress and Prospects, section 7.3.4, milestone G2b; the memory comparison is operationalized in the Willow study.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "yielding one or more logical qubits of better error rates than possible with physical qubits",
+    "threshold_ref": 5,
+    "refs": [
+     5,
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "Logical memory errors decrease with code distance, with suppression factor Λ > 1.",
+    "criterion": "Increasing distance reduces memory error per correction cycle: Λ = ε_d/ε_(d+2) > 1. Superconducting: Willow tests d = 3, 5, 7 with 100,000 repetitions per plotted point, obtaining Λ = 2.14 ± 0.02; its separate d = 5 real-time experiment reaches one million cycles. Trapped ions: the Helios preprint of 16 October 2026 uses 15,840/21,600/29,000 shots at d = 3/5/7, with 20 rounds per shot. Neutral atoms: the study published on 10 November 2025 obtains Λ = 2.14 ± 0.13 from d = 3 versus 5 over four rounds without postselection.",
+    "set_by": "The below-threshold quantum error-correction convention, expressed quantitatively in the Willow study, equation 1 and the following definition of Λ.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "the logical error rate should be suppressed exponentially as we increase the number of physical qubits per logical qubit.",
+    "threshold_ref": 1,
+    "refs": [
+     1,
+     2,
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "Logical Clifford-circuit errors decrease with code distance, with suppression factor Λ > 1.",
+    "criterion": "Logical Clifford-circuit error per operation decreases with code distance, with suppression ratio Λ > 1. The Helios preprint, not peer reviewed, compares d = 3 and 5 using 2,220, 1,110 and 666 sampled two-qubit Clifford circuits of lengths 69, 139 and 209 gates. Each sampled circuit runs once at each distance and unencoded. At d = 5 it reports (7 ± 3) × 10^-5 error per two-qubit Clifford. Error decoding is offline.",
+    "set_by": "The below-threshold convention applied to logical two-qubit Clifford randomized benchmarking by the Quantinuum Helios team; its published implementation uses color codes.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "below threshold scaling of error rates for Clifford two-qubit randomized benchmarking circuits",
+    "threshold_ref": 2,
+    "refs": [
+     2
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "Logical non-Clifford gates use real-time decoding and measurement-conditioned feedback.",
+    "criterion": "Logical non-Clifford operations execute with repeated error correction, real-time error decoding and feedback conditioned on decoded measurements. Superconducting: Garner et al.'s 30 October 2026 preprint, not peer reviewed, tests three-T-state synthesis in 15 settings with 14,861,490 raw shots; S corrections run in real time, but error decoding is offline. Neutral atoms: Bluvstein et al. apply universal-gate feed-forward in software. Trapped ions: Helios also decodes offline. These results do not establish this complete control-loop test.",
+    "set_by": "Microsoft Quantum and Qolab, Scalable logical qubits, capability items 4 and 5: universal operations and measurement-conditioned control under repeated error correction.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "allow program execution to branch on measurement outcomes",
+    "threshold_ref": 4,
+    "refs": [
+     4,
+     7,
+     6,
+     2
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "Logical non-Clifford errors decrease as code distance grows, with suppression factor Λ > 1.",
+    "criterion": "The non-Clifford operation or its prepared resource has decreasing logical error as code distance grows. Superconducting: the cultivation preprint version of 15 December 2025 reports a d = 3 fidelity lower bound of 0.9999(1), retaining 8% of attempts, and grafting into d = 5; it does not test this scaling. Trapped ions: Helios identifies this as remaining work. Neutral atoms: the 19 December 2024 preprint tests 5-to-1 distillation at d = 3 and 5, with 1,152,262 and 259,261 factory runs; it reports that the data-code gates are not yet below their circuit threshold.",
+    "set_by": "The below-threshold convention and Microsoft/Qolab reliability criterion; Quantinuum explicitly identifies the remaining resource-preparation test for color codes in the Helios Discussion.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "predictably reduces logical error rate",
+    "threshold_ref": 4,
+    "refs": [
+     4,
+     2,
+     8,
+     9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No platform-independent acceptance standard specifying circuit length, statistical significance or permissible postselection for the integrated universal-circuit test was located.",
+   "The Science full text for DOI 10.1126/science.aee7961 could not be opened; the accessible cultivation preprint was read.",
+   "The Willow author correction published on 28 April 2026 could not be opened.",
+   "Total shot counts underlying the cultivation fidelity lower bound were not located in the accessible text."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41586-024-08449-y",
+    "doi": "10.1038/s41586-024-08449-y",
+    "title": "Quantum error correction below the surface code threshold",
+    "authors": "Google Quantum AI and Collaborators, Acharya R, Abanin DA, Aghababaie-Beni L, Aleiner I, Andersen TI, et al.",
+    "container": "Nature",
+    "year": "2025",
+    "volume": "638",
+    "issue": "8052",
+    "pages": "920-926",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2610.24077v1",
+    "doi": "10.48550/arXiv.2610.24077",
+    "title": "Quantum error correction well below the color code threshold",
+    "authors": "Lavasani A, Reed AP, Dreiling JM, Park AJ, Mills M, Puviani M, et al.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 3,
+    "kind": "web",
+    "url": "https://research.google/blog/suppressing-quantum-errors-by-scaling-a-surface-code-logical-qubit/",
+    "doi": null,
+    "title": "Suppressing quantum errors by scaling a surface code logical qubit",
+    "authors": "Neven H, Kelly J",
+    "container": "Google Research",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "web",
+    "url": "https://quantum.microsoft.com/en-us/insights/blogs/scalable-logical-qubits",
+    "doi": null,
+    "title": "Scalable logical qubits",
+    "authors": "Troyer M, Nayak C, Martinis J",
+    "container": "Microsoft Quantum",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "book",
+    "url": "https://www.nationalacademies.org/read/25196/chapter/9",
+    "doi": "10.17226/25196",
+    "title": "Quantum Computing: Progress and Prospects",
+    "authors": "Committee on Technical Assessment of the Feasibility and Implications of Quantum Computing, Computer Science and Telecommunications Board, Intelligence Community Studies Board, Division on Engineering and Physical Sciences, National Academies of Sciences, Engineering, and Medicine",
+    "container": "National Academies Press",
+    "year": "2019",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=960314",
+    "doi": "10.1038/s41586-025-09848-5",
+    "title": "A fault-tolerant neutral-atom architecture for universal quantum computation",
+    "authors": "Bluvstein D, Geim AA, Li SH, Evered SJ, Bonilla Ataides JP, Baranes G, et al.",
+    "container": "Nature",
+    "year": "2026",
+    "volume": "649",
+    "issue": "8095",
+    "pages": "39-46",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2611.00404v1",
+    "doi": "10.48550/arXiv.2611.00404",
+    "title": "Early Fault-Tolerant Magic State Synthesis and Spacetime Efficient Analog Rotations with Color Code on a Superconducting Quantum Processor",
+    "authors": "Garner S, Hoyt A, Kan S, Stein S, Liu C, Li A",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 8,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2512.13908v1",
+    "doi": "10.48550/arXiv.2512.13908",
+    "title": "Magic state cultivation on a superconducting quantum processor",
+    "authors": "Rosenfeld E, Gidney C, Roberts G, Morvan A, Lacroix N, Kafri D, et al.",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 9,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2412.15165",
+    "doi": "10.48550/arXiv.2412.15165",
+    "title": "Experimental demonstration of logical magic state distillation",
+    "authors": "Rodriguez PS, Robinson JM, Jepsen PN, He Z, Duckering C, Zhao C, et al.",
+    "container": "arXiv",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4",
+   "m5"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 3 from Crossref, 0 from PubMed, 4 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 8 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }
