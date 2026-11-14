@@ -291,7 +291,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Software that comes with proof it works as specified",
@@ -501,5 +502,374 @@
    "A correct implementation can follow inadequate requirements; deciding whether the specification captures user intent remains a separate challenge."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "SWE-01",
+  "title": "Automatic verifying compilation for systems software",
+  "definition": "A toolchain turns systems code and a formal specification, a mathematical statement of required behavior, into an executable and a machine-checked proof that it implements that behavior. Supporting invariants and proofs are generated automatically within a declared language and execution model.",
+  "goal": {
+   "need": "Verus’s 2024 systems case studies contain about 6,100 implementation lines and 31,000 proof lines. The first seL4 proof involved about 25 person-years for design, documentation, implementation and verification, including research and tooling. These measure proof-code volume and whole-project effort respectively; neither establishes today’s marginal verification cost. They motivate reducing the work needed to obtain functional-correctness proofs.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": {
+    "caption": "The first completed seL4 correctness proof, 2009",
+    "columns": [
+     "Artifact",
+     "Lines"
+    ],
+    "rows": [
+     [
+      "Verified C code",
+      "7,500"
+     ],
+     [
+      "Isabelle proof scripts",
+      "200,000"
+     ]
+    ],
+    "note": "The proof scripts were manually written and machine checked. These are historical project counts.",
+    "ref": 2
+   },
+   "statements": [
+    {
+     "body": "Microsoft Research — Tony Hoare’s grand-challenge proposal",
+     "year": "2003",
+     "quote": "If the project is successful, a verifying compiler will be available as a standard tool in some widely used programming productivity toolset.",
+     "context": null,
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "DARPA, PROVERS programme",
+     "year": "2023",
+     "quote": "The overarching goal of PROVERS is to make formal methods accessible to non-experts",
+     "context": "The solicitation also calls for minimizing effects on existing development processes and performance.",
+     "ref": 4,
+     "checked": null
+    }
+   ]
+  },
+  "completion": {
+   "title": "Non-specialists obtain automatically constructed functional-correctness proofs for systems binaries.",
+   "criterion": "A team without formal-verification specialists supplies a systems application's code and an independently reviewed functional specification. One toolchain emits a runnable binary and a machine-checkable proof that its modeled executions satisfy that specification, automatically constructing supporting invariants and proofs. Required functional behavior includes termination, concurrency and failure recovery where specified. An independent team reproduces the build and proof check. Undischarged obligations prevent certification.",
+   "set_by": "Technology Atlas; provisional integration test.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches of Hoare’s grand challenge, DARPA’s PROVERS solicitation, the trusted-software roadmap, and verifying-compiler standards, prizes and benchmarks found no published test combining non-expert use, automatic functional proof construction and binary coverage. This provisional test combines those goals. Hoare’s published test permits partial verification and an unverified compiler; PROVERS supplies programme-specific usability and proof-repair targets.",
+   "refs": [
+    3,
+    4,
+    5
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A verifier automatically proves annotated source code satisfies its functional contracts.",
+    "criterion": "An implemented verifier proves annotated source programs satisfy their functional contracts by generating verification conditions and automatically discharging them. Developers may supply loop invariants and other proof annotations. Leino and Schulte’s 2007 account describes Spec# as a prototype and gives a verifier construction for a core multithreaded language. This establishes source-level verification with supplied proof guidance.",
+    "set_by": "Deductive-verification convention, described by Microsoft Research’s Leino and Schulte in A Verifying Compiler for a Multi-threaded Object-Oriented Language.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "A verifying compiler automatically verifies the correctness of a source program before compiling it.",
+    "threshold_ref": 6,
+    "refs": [
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A systems implementation has a machine-checked proof of refinement to its functional specification.",
+    "criterion": "A machine-checked proof establishes that a systems implementation refines its abstract functional specification under stated assumptions. Specialist proof engineering is permitted. seL4 completed its initial C-level functional-correctness proof in 2009. Verus’s 2024 persistent-log case study establishes refinement to an abstract infinite log and atomicity with respect to crashes; its assurance trusts Verus, its solvers and the Rust compiler.",
+    "set_by": "seL4 project, the functional-correctness criterion in seL4 Proofs, published for verified kernel configurations.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "behaves precisely as specified in the seL4 specification and nothing more.",
+    "threshold_ref": 7,
+    "refs": [
+     7,
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A compiler has a machine-checked semantic-preservation theorem from source code to assembly.",
+    "criterion": "For every supported source program successfully compiled, a machine-checked theorem establishes that generated assembly behavior improves on an allowed source behavior. CompCert proves this from CompCert C syntax trees to assembly syntax trees. Improvement permits elimination of undefined behavior; nondeterministic choices may be resolved. The theorem transports separately established source properties but does not prove application correctness, assembling or linking.",
+    "set_by": "CompCert project, Semantic preservation theorem in the CompCert C manual.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "then the observable behavior of C improves on one of the allowed observable behaviors of S.",
+    "threshold_ref": 8,
+    "refs": [
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "A systems binary has a machine-checked proof that it implements its functional specification.",
+    "criterion": "The machine code executed by the processor is proved to implement source behavior covered by a functional-correctness theorem. seL4 reports this property for configurations supporting binary correctness. Ironclad Apps reported a related assembly-level result in 2014 for four applications and their kernel, drivers and libraries: remote clients observe outputs permitted by abstract state machines. Ironclad retained manual annotations and hardware assumptions; about 6,500 runnable implementation lines took about 3 person-years to verify.",
+    "set_by": "seL4 project, the binary-correctness criterion in seL4 Proofs, published for configurations supporting that additional proof.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "the binary code implements precisely the behaviour of the specification, and nothing more.",
+    "threshold_ref": 7,
+    "refs": [
+     7,
+     9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "Agents prove properties of systems machine code without human-written proof code.",
+    "criterion": "Agents construct checked machine-code proofs against approved specifications without human-written proof code; expert specifications and strategy may remain. On 10 November 2026, Google DeepMind reported this for libsignal security, with about 6.5 million Lean proof lines and trusted routine contracts. On 22 October 2026, Anthropic and Theorem reported no-crash proofs for 239 entry points across 123 libraries: single-threaded static RISC-V binaries, fixed memory and inputs below 64 MiB. Both are developer reports, not peer reviewed; neither establishes a general non-expert functional-correctness workflow.",
+    "set_by": "Google DeepMind, AlphaProof Code, sections 2.4 and 7; its published acceptance procedure combines approved theorem statements with Lean kernel checking.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "A proof is accepted only if it proves exactly the statements the user approved.",
+    "threshold_ref": 10,
+    "refs": [
+     10,
+     11,
+     12
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m6",
+    "title": "Non-experts prove >10 property classes with <5% residual findings and 1% manual proof changes.",
+    "criterion": "Under PROVERS phase-three conditions, traditional developers work on programme-designated high-complexity systems. The published targets are more than 10 classes of system properties proved, less than 5% of serious red-team findings remaining, and 1% of proof lines requiring manual change after software updates or maintenance. These are tentative programme goals assessed through independent evaluation, rather than requirements for full functional correctness or automatic initial proof construction.",
+    "set_by": "DARPA, PROVERS Broad Agency Announcement HR001123S0020, dated 29 March 2023, Table 1. Numerical thresholds appear only in the table; its transcription is hosted by GovTribe.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     4
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No external numerical cutoff for development cost comparable to ordinary implementation and testing was located.",
+   "Searches did not locate a public PROVERS phase-three assessment against Table 1.",
+   "The SAM.gov solicitation page exposed no readable attachment; the PROVERS announcement was readable through GovTribe’s transcription.",
+   "Searches did not locate independent reproductions of the cited October and November 2026 developer reports."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://www.andrew.cmu.edu/user/bparno/papers/verus-sys.pdf",
+    "doi": "10.1145/3694715.3695952",
+    "title": "Verus: A Practical Foundation for Systems Verification",
+    "authors": "Lattuada A, Hance T, Bosamiya J, Brun M, Cho C, LeBlanc H, et al.",
+    "container": "Proceedings of the ACM SIGOPS 30th Symposium on Operating Systems Principles",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": "438-454",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "web",
+    "url": "https://trustworthy.systems/projects/OLD/l4.verified/numbers",
+    "doi": null,
+    "title": "Proof Statistics",
+    "authors": "Trustworthy Systems",
+    "container": "Trustworthy Systems",
+    "year": "undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "journal",
+    "url": "https://www.cs.cmu.edu/~15811/papers/grand-challenge.pdf",
+    "doi": "10.1145/602382.602403",
+    "title": "The Verifying Compiler: A Grand Challenge for Computing Research",
+    "authors": "Hoare T",
+    "container": "J. ACM",
+    "year": "2003",
+    "volume": "50",
+    "issue": "1",
+    "pages": "63-69",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 4,
+    "kind": "report",
+    "url": "https://govtribe.com/file/government-file/hr001123s0020-dot-pdf",
+    "doi": null,
+    "title": "Broad Agency Announcement: Pipelined Reasoning Of Verifiers Enabling Robust Systems (PROVERS)",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "DARPA; transcription hosted by GovTribe",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "journal",
+    "url": "https://people.cs.umass.edu/brun/pubs/pubs/Brun26tosem.pdf",
+    "doi": "10.1145/3779132",
+    "title": "Automatically Engineering Trusted Software: A Research Roadmap",
+    "authors": "Brun Y, Chakraborty S, Le Goues C, Păsăreanu C, Singla A",
+    "container": "ACM Trans. Softw. Eng. Methodol.",
+    "year": "2026",
+    "volume": "35",
+    "issue": "9",
+    "pages": "1-30",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 6,
+    "kind": "book",
+    "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2007/01/AVerifyingCompilerMarktoberdorf2006.pdf",
+    "doi": null,
+    "title": "A Verifying Compiler for a Multi-threaded Object-Oriented Language",
+    "authors": "Leino KRM, Schulte W.",
+    "container": "Software Systems Reliability and Security. IOS Press",
+    "year": "2007",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 7,
+    "kind": "web",
+    "url": "https://sel4.systems/Verification/proofs.html",
+    "doi": null,
+    "title": "seL4 Proofs",
+    "authors": "seL4 project",
+    "container": "seL4",
+    "year": "undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 8,
+    "kind": "web",
+    "url": "https://compcert.org/man/manual001.html",
+    "doi": null,
+    "title": "Chapter 1 CompCert C: a trustworthy compiler",
+    "authors": "CompCert project",
+    "container": "CompCert manual",
+    "year": "undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 9,
+    "kind": "journal",
+    "url": "https://www.cs.cmu.edu/~15811/papers/ironclad-apps.pdf",
+    "doi": null,
+    "title": "Ironclad Apps: End-to-End Security via Automated Full-System Verification",
+    "authors": "Hawblitzel C, Howell J, Lorch JR, Narayan A, Parno B, Zhang D, Zill B.",
+    "container": "11th USENIX Symposium on Operating Systems Design and Implementation",
+    "year": "2014",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 10,
+    "kind": "report",
+    "url": "https://google-deepmind.github.io/code-verification/",
+    "doi": null,
+    "title": "AlphaProof Code: Verifying Signal’s Security at the Machine-Code Level",
+    "authors": "Chaudhuri S, Ferraiuolo A, Kovsharov A, Chajed T, Schlesinger S, Seth K, Katz J, Sutton C, Kohli P.",
+    "container": "Google DeepMind",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 11,
+    "kind": "web",
+    "url": "https://www.anthropic.com/research/formal-verification",
+    "doi": null,
+    "title": "LLMs are making formal software verification feasible at a much larger scale",
+    "authors": "Anthropic",
+    "container": "Anthropic",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 12,
+    "kind": "report",
+    "url": "https://assets.claude.com/6867eadf760258fa8b42a504600cd3c036d16358.pdf",
+    "doi": null,
+    "title": "Appendix: LLMs are making formal software verification feasible at a much larger scale",
+    "authors": "Anthropic",
+    "container": "Anthropic",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4",
+   "m5",
+   "m6"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 3 from Crossref, 0 from PubMed, 0 from arXiv, 9 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 6 found, 0 not found, 1 with no readable copy."
+   }
+  ]
  }
 }
