@@ -229,7 +229,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Quantum computers that break widely used encryption",
@@ -317,5 +318,362 @@
    "Success on one cryptographic target would leave the resources and runtime needed for other targets open."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "QUA-02",
+  "title": "Cryptographically relevant execution of Shor’s algorithm",
+  "definition": "A quantum computer executes Shor’s algorithm to factor the 2048-bit RSA challenge number or recover a secret scalar on secp256k1, a deployed 256-bit elliptic curve. This scalar is the discrete logarithm: the number of repeated additions of a public base point that produces the public key.",
+  "goal": {
+   "need": "NIST’s classical security estimates distinguish the target key sizes from toy demonstrations. Quantum recovery of their factors or private scalars would demonstrate the failure of the corresponding mathematical protection. Google identifies characterizing the required quantum hardware as necessary for planning migration to quantum-resistant cryptography.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": {
+    "caption": "NIST’s estimated classical security strengths",
+    "columns": [
+     "System",
+     "Parameter size",
+     "Security strength"
+    ],
+    "rows": [
+     [
+      "RSA",
+      "2048-bit modulus",
+      "112 bits"
+     ],
+     [
+      "Elliptic-curve cryptography",
+      "256-bit base-point order",
+      "128 bits"
+     ]
+    ],
+    "note": "From Table 2 of the 2020 recommendation. These are classical estimates, not quantum attack costs.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "Google Quantum AI and Google Security",
+     "year": "2025",
+     "quote": "it's important the size and performance of a future quantum computer that could likely break current cryptography algorithms is carefully characterized.",
+     "context": "The authors discuss planning the transition to post-quantum cryptography.",
+     "ref": 2,
+     "checked": true
+    },
+    {
+     "body": "Internet Engineering Task Force",
+     "year": "2026",
+     "quote": "The advent of a cryptographically relevant quantum computer (CRQC) would render state-of-the-art, traditional public key algorithms deployed today obsolete",
+     "context": null,
+     "ref": 3,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "Quantum Shor execution factors RSA-2048 or recovers a secp256k1 private scalar.",
+   "criterion": "Execute Shor’s algorithm on quantum hardware to factor RSA Laboratories’ RSA-2048 challenge number, or recover an initially unknown scalar k from Q = kG on secp256k1, whose base point G has 256-bit order. The solution must come from the quantum computation and satisfy pq = N for prime factors p and q, or kG = Q for the recovered scalar. Each branch establishes only its corresponding cryptographic capability.",
+   "set_by": "Alice & Bob and collaborators, Pappalardo et al., Sections I–II: proposed cryptanalytic benchmarking protocol in a preprint, not a certification standard.",
+   "set_by_kind": "protocol",
+   "threshold_quote": "Shor’s algorithm applied respectively to RSA-2048 challenge number, Bitcoin curve (secp256k1)",
+   "threshold_ref": 4,
+   "basis": "The developer names both target computations as benchmarks. Gidney’s preprint of 21 May 2025 estimates RSA-2048 in under one week with fewer than 1,000,000 noisy qubits, assuming square-grid nearest-neighbor connectivity, 0.1% gate error, 1 μs correction cycles and 10 μs reaction time. This is a resource estimate. GAO reported in 2026 that no cryptographically relevant quantum computer existed. The benchmark imposes no runtime or repetition threshold.",
+   "refs": [
+    4,
+    5,
+    6,
+    7
+   ],
+   "threshold_checked": true
+  },
+  "case_label": "Cryptographic target",
+  "cases": [
+   "RSA-2048 factoring",
+   "secp256k1 discrete logarithm"
+  ],
+  "milestone_structure": "sequence",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A small-instance Shor experiment produces output distinguishable from noise.",
+    "criterion": "Execute a small instance of the target problem’s quantum period-finding circuit and distinguish its algorithmic output from noise. The published factoring example used two photons, a recycled control qubit and a circuit compiled for N = 21 and base x = 4. The version posted on 24 October 2012 reports this demonstration; it does not establish cryptographic-scale factoring.",
+    "set_by": "Martín-López et al., experimental quantum order-finding protocol. The published test was for factoring; its signal-versus-noise criterion is used here for both target classes.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "The algorithmic output is distinguishable from noise, in contrast to previous demonstrations.",
+    "threshold_ref": 8,
+    "refs": [
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "Quantum error correction creates a logical qubit with lower error than its physical constituents.",
+    "criterion": "Encode quantum information across physical qubits and obtain a lower logical error rate for the corresponding task. A 101-physical-qubit surface-code memory reported a lifetime 2.4 ± 0.3 times its best constituent physical qubit in the preprint posted on 24 August 2024. Separately, Réglade et al., published on 6 May 2024, controlled one cat qubit with bit-flip times above 10 s; that result concerns protection against one error channel.",
+    "set_by": "National Academies of Sciences, Engineering, and Medicine, Quantum Computing: Progress and Prospects, Section 7.3.4, milestone G2b.",
+    "set_by_kind": "professional_society",
+    "threshold_quote": "one or more logical qubits of better error rates than possible with physical qubits",
+    "threshold_ref": 9,
+    "refs": [
+     9,
+     10,
+     11
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "Encoded qubits implement a universal fault-tolerant gate set.",
+    "criterion": "Implement logical operations sufficient to approximate arbitrary quantum circuits while preserving error correction, for example Hadamard H, the phase gate T and controlled-NOT. Bluvstein et al. demonstrated constituent operations with up to 448 neutral atoms, including arbitrary-angle synthesis using encoded qubits; their journal article was published online on 10 November 2025. Some characterizations use postselection, so these results do not establish sustained cryptographic-scale computation.",
+    "set_by": "Universal logical computation convention, instantiated by Bluvstein et al.’s experimental protocol and Figure 4; shared by both cryptographic targets.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "Synthesizing arbitrary-angle rotations with a universal fault-tolerant gate set.",
+    "threshold_ref": 12,
+    "refs": [
+     12,
+     13
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "A quantum processor solves FFDLP-512 with an 80-bit exponent.",
+    "criterion": "Execute Shor’s algorithm to recover the 80-bit exponent x in h = g^x mod p for the proposed FFDLP-512 benchmark, with a 512-bit prime modulus p; verify the result by modular exponentiation. The authors propose this shared processor benchmark before RSA-2048 and state that it exercises all RSA algorithm blocks. Their preprint of 27 October 2026 supplies a resource estimate, not an execution.",
+    "set_by": "Alice & Bob and collaborators, Pappalardo et al., Section I and Appendix D.2. This proposed intermediate benchmark specifically reuses the RSA implementation.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "a 512-bit prime group and an 80-bit exponent.",
+    "threshold_ref": 4,
+    "refs": [
+     4
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No published hardware execution satisfying the RSA-2048, secp256k1 or FFDLP-512 benchmark was located.",
+   "No regulator or standards-body acceptance protocol for quantum provenance in a cryptographic-scale Shor execution was located.",
+   "No small elliptic-curve Shor result satisfying the first milestone was verified in this search.",
+   "The Nature publisher pages for the cat-qubit, surface-code and neutral-atom papers could not be opened; accessible abstracts and repository versions were used."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "report",
+    "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57pt1r5.pdf",
+    "doi": "10.6028/NIST.SP.800-57pt1r5",
+    "title": "Recommendation for Key Management: Part 1 – General",
+    "authors": "Barker E.",
+    "container": "National Institute of Standards and Technology",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 2,
+    "kind": "web",
+    "url": "https://blog.google/security/tracking-cost-of-quantum-factori/",
+    "doi": null,
+    "title": "Tracking the Cost of Quantum Factoring",
+    "authors": "Gidney C, Schmieg S.",
+    "container": "Google Security",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "report",
+    "url": "https://www.rfc-editor.org/rfc/rfc9958.html",
+    "doi": "10.17487/RFC9958",
+    "title": "Post-Quantum Cryptography for Engineers",
+    "authors": "Banerjee A, Reddy T, Schoinianakis D, Hollebeek T, Ounsworth M.",
+    "container": "RFC Editor",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/2610.37839",
+    "doi": "10.48550/arXiv.2610.37839",
+    "title": "Shor’s algorithm compiled on cat qubits: 22 593 qubits for RSA-2048 in 3.14 days",
+    "authors": "Pappalardo A, Goudarzi D, Hertz V, Jacinto H, Kroell L, Schrottenloher A, et al.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 5,
+    "kind": "web",
+    "url": "https://bips.dev/340/",
+    "doi": null,
+    "title": "BIP 340: Schnorr Signatures for secp256k1",
+    "authors": "Wuille P, Nick J, Ruffing T.",
+    "container": "Bitcoin Improvement Proposals",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "preprint",
+    "url": "https://arxiv.org/abs/2505.15917",
+    "doi": "10.48550/arXiv.2505.15917",
+    "title": "How to factor 2048 bit RSA integers with less than a million noisy qubits",
+    "authors": "Gidney C",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 7,
+    "kind": "report",
+    "url": "https://files.gao.gov/reports/GAO-27-108740/index.html",
+    "doi": null,
+    "title": "QUANTUM COMPUTING: Federal Actions Needed to Prepare for Emerging Cyber Threat",
+    "authors": "United States Government Accountability Office",
+    "container": "GAO",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 8,
+    "kind": "journal",
+    "url": "https://arxiv.org/html/1111.4147v2",
+    "doi": "10.1038/nphoton.2012.259",
+    "title": "Experimental realisation of Shor’s quantum factoring algorithm using qubit recycling",
+    "authors": "Martin-Lopez E, Laing A, Lawson T, Alvarez R, Zhou XQ, O'Brien JL",
+    "container": "arXiv",
+    "year": "2011",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 9,
+    "kind": "book",
+    "url": "https://www.nationalacademies.org/read/25196/chapter/9",
+    "doi": "10.17226/25196",
+    "title": "Quantum Computing: Progress and Prospects",
+    "authors": "National Academies of Sciences, Engineering, and Medicine",
+    "container": "National Academies Press",
+    "year": "2019",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 10,
+    "kind": "journal",
+    "url": "https://arxiv.org/abs/2408.13687",
+    "doi": "10.1038/s41586-024-08449-y",
+    "title": "Quantum error correction below the surface code threshold",
+    "authors": "Google Quantum AI and Collaborators, Acharya R, Abanin DA, Aghababaie-Beni L, Aleiner I, Andersen TI, et al.",
+    "container": "Nature",
+    "year": "2025",
+    "volume": "638",
+    "issue": "8052",
+    "pages": "920-926",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 11,
+    "kind": "journal",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/38710932/",
+    "doi": "10.1038/s41586-024-07294-3",
+    "title": "Quantum control of a cat qubit with bit-flip times exceeding ten seconds",
+    "authors": "Réglade U, Bocquet A, Gautier R, Cohen J, Marquet A, Albertinale E, et al.",
+    "container": "Nature",
+    "year": "2024",
+    "volume": "629",
+    "issue": "8013",
+    "pages": "778-783",
+    "citation_source": "pubmed"
+   },
+   {
+    "id": 12,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2506.20661",
+    "doi": "10.48550/arXiv.2506.20661",
+    "title": "Architectural mechanisms of a universal fault-tolerant quantum computer",
+    "authors": "Bluvstein D, Geim AA, Li SH, Evered SJ, Ataides JPB, Baranes G, et al.",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 13,
+    "kind": "journal",
+    "url": "https://authors.library.caltech.edu/records/8pkpg-qpw22",
+    "doi": "10.1038/s41586-025-09848-5",
+    "title": "A fault-tolerant neutral-atom architecture for universal quantum computation",
+    "authors": "Bluvstein D, Geim AA, Li SH, Evered SJ, Bonilla Ataides JP, Baranes G, et al.",
+    "container": "Nature",
+    "year": "2026",
+    "volume": "649",
+    "issue": "8095",
+    "pages": "39-46",
+    "citation_source": "crossref"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 1 from PubMed, 4 from arXiv, 6 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 7 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }
