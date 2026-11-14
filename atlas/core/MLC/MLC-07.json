@@ -203,7 +203,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "sources": [
   "https://arxiv.org/abs/2406.04268",
@@ -289,5 +290,286 @@
    "Would the generated skills be useful enough to justify the cost of learning and independently testing them?"
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "MLC-07",
+  "title": "Open-ended autonomous skill learning",
+  "definition": "An AI system repeatedly generates its own learning goals and acquires independently tested skills beyond its initial task list while retaining earlier skills. It also produces learning artifacts, such as executable programs or training examples, from which a separate learner acquires those skills.",
+  "goal": {
+   "need": "In Voyager’s Minecraft ablation, substituting a random curriculum reduced discovered items by 93%; exploration used three trials per method and a budget of 160 prompting iterations. Task choice therefore affects measured exploration. GOAL-Robots set the goal of agents that generate their own goals and reuse the resulting skills on new user tasks.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": null,
+   "statements": [
+    {
+     "body": "European Commission, Horizon 2020 GOAL-Robots project",
+     "year": "2016",
+     "quote": "First, to exhibit an autonomous open-ended learning process, robots should be able to self-generate goals, and hence tasks to practice.",
+     "context": "Objective of grant 713010; the project began on 1 November 2016.",
+     "ref": 2,
+     "checked": true
+    },
+    {
+     "body": "Google DeepMind researchers, Hughes and colleagues",
+     "year": "2024",
+     "quote": "Furthermore, we claim that such open-endedness is an essential property of any artificial superhuman intelligence (ASI).",
+     "context": "The authors define open-endedness through novelty and learnability relative to an observer.",
+     "ref": 3,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "Autonomous learning produces retained, independently verified skills that a separate learner also acquires.",
+   "criterion": "After initial setup, no human supplies further task goals. The system repeatedly proposes tasks absent from its initial list and unsolved by its preceding version, learns them, and exports learning artifacts. An independent evaluator confirms each claimed addition using tests the system did not write. A separate learner that initially fails those tests passes them after learning from the artifacts. Earlier accepted skills still pass their tests after subsequent additions. This finite demonstration establishes the observed run; no duration, domain count or growth-rate cutoff is prescribed.",
+   "set_by": "Technology Atlas; provisional operational test, without an externally established completion threshold.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searched GOAL-Robots objectives, DeepMind’s definition, POWERPLAY, POET, Voyager, and 2026 definitions and benchmarks for a joint autonomous-goal, retention, independent-verification and learner-transfer endpoint; none specifies one. AlphaEvolve requires user-provided evaluation. This Atlas test combines the stated capabilities; observer learnability in Hughes et al. does not itself mean acquisition of an executable skill.",
+   "refs": [
+    2,
+    3,
+    4,
+    5,
+    1,
+    6,
+    7,
+    8
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "An agent finishes an autonomously generated terrain with a reward score of at least 230.",
+    "criterion": "Generate a bipedal-walker terrain autonomously, then learn a controller that reaches its finish line and obtains a score of at least 230 under POET’s scoring function. This is POET’s definition of a solved environment. The 13 April 2020 Enhanced POET version reports growth in ANNECS, its count of qualifying environments created and solved, over 60,000 iterations; Figure 8 summarizes five runs.",
+    "set_by": "Uber AI, Enhanced POET, Appendix A.3.1; a protocol for simulated bipedal-walker terrains.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "an environment is considered solved when the agent both reaches the finish line and obtains a score of 230 or above.",
+    "threshold_ref": 5,
+    "refs": [
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A solver learns a self-invented task its predecessor failed and retains all earlier tasks.",
+    "criterion": "At each accepted addition, the old solver fails the self-invented task, while the modified solver solves that task and every previously learned task. Task-specific correctness procedures supply the binary test; novelty is relative to the predecessor. The experimental preprint submitted on 31 October 2012 depicts one run with 340 self-generated tasks, including 67 non-compression action-sequence tasks learned in 8 hours. These tasks were internally validated.",
+    "set_by": "IDSIA, POWERPLAY, Sections 1.1–2; the algorithm’s task-acceptance protocol.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "(3) The new solver can still solve the known set of previously learned tasks.",
+    "threshold_ref": 4,
+    "refs": [
+     4,
+     9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A second agent solves an unseen Minecraft task within 50 iterations using an exported skill library.",
+    "criterion": "Give a different agent the executable skill library acquired by an automatic curriculum. Voyager’s protocol clears inventory, starts a newly instantiated Minecraft world and allows 50 prompting iterations per unseen task: a diamond pickaxe, golden sword, lava bucket or compass. In the version of 19 October 2023, AutoGPT with Voyager’s library obtained a compass in 2 of 3 attempts; without it, 0 of 3. This demonstrates program reuse; acquisition of a skill by an independent learner was not tested.",
+    "set_by": "Voyager developers, Section 3.3 and Table 2; an experimental transfer protocol for Minecraft.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "0/3 means the method fails to solve the task within the maximal prompting iterations (50).",
+    "threshold_ref": 1,
+    "refs": [
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "Independent tests confirm that self-generated learning adds skills while retaining every earlier skill.",
+    "criterion": "During repeated autonomous additions, each new task lies outside the initially enumerated list and is unsolved by the preceding system. Independently implemented tests verify its acquisition and re-test all earlier accepted skills after later learning; the retained inventory grows. This integrates autonomous goal generation, learning and independent verification, before requiring artifact-mediated acquisition by a second learner. The cited POWERPLAY and Voyager experiments demonstrate separate components of this test.",
+    "set_by": "Technology Atlas; provisional integration test, because the cited programme objectives and protocols provide no combined endpoint.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     2,
+     3,
+     4,
+     1,
+     9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No published run-duration, retention-duration or sample-size requirement was found for the combined demonstration.",
+   "No common protocol was found for the separate learner’s initial knowledge, resources and acquisition of skills from artifacts."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2305.16291v2",
+    "doi": "10.48550/arXiv.2305.16291",
+    "title": "Voyager: An Open-Ended Embodied Agent with Large Language Models",
+    "authors": "Wang G, Xie Y, Jiang Y, Mandlekar A, Xiao C, Zhu Y, et al.",
+    "container": "arXiv",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 2,
+    "kind": "web",
+    "url": "https://cordis.europa.eu/project/id/713010",
+    "doi": "10.3030/713010",
+    "title": "Goal-based Open-ended Autonomous Learning Robots",
+    "authors": "European Commission",
+    "container": "CORDIS",
+    "year": "2016",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 3,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2406.04268v1",
+    "doi": "10.48550/arXiv.2406.04268",
+    "title": "Open-Endedness is Essential for Artificial Superhuman Intelligence",
+    "authors": "Hughes E, Dennis M, Parker-Holder J, Behbahani F, Mavalankar A, Shi Y, et al.",
+    "container": "arXiv",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 4,
+    "kind": "journal",
+    "url": "https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2013.00313/full",
+    "doi": "10.3389/fpsyg.2013.00313",
+    "title": "PowerPlay: Training an Increasingly General Problem Solver by Continually Searching for the Simplest Still Unsolvable Problem",
+    "authors": "Schmidhuber J",
+    "container": "Front. Psychol.",
+    "year": "2013",
+    "volume": "4",
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 5,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2003.08536v2",
+    "doi": "10.48550/arXiv.2003.08536",
+    "title": "Enhanced POET: Open-Ended Reinforcement Learning through Unbounded Invention of Learning Challenges and their Solutions",
+    "authors": "Wang R, Lehman J, Rawal A, Zhi J, Li Y, Clune J, et al.",
+    "container": "arXiv",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 6,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2606.08369v1",
+    "doi": "10.48550/arXiv.2606.08369",
+    "title": "An Information-Theoretic Definition for Open-Ended Learning",
+    "authors": "Xu W, Zhu Y, Roy BV",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 7,
+    "kind": "preprint",
+    "url": "https://arxiv.org/abs/2610.02588",
+    "doi": "10.48550/arXiv.2610.02588",
+    "title": "Open-Endedness Bench: Measuring Epistemic Process from Agent Records",
+    "authors": "Shi C, Ji X, Huang J, Wang J, He Y, Liu J",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 8,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2506.13131v1",
+    "doi": "10.48550/arXiv.2506.13131",
+    "title": "AlphaEvolve: A coding agent for scientific and algorithmic discovery",
+    "authors": "Novikov A, Vũ N, Eisenberger M, Dupont E, Huang PS, Wagner AZ, et al.",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 9,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/1210.8385v1",
+    "doi": "10.48550/arXiv.1210.8385",
+    "title": "First Experiments with PowerPlay",
+    "authors": "Srivastava RK, Steunebrink BR, Schmidhuber J",
+    "container": "arXiv",
+    "year": "2012",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 7 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 5 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }

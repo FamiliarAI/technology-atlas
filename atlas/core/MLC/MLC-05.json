@@ -220,7 +220,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "sources": [
   "https://www.nature.com/articles/s41583-020-0277-3",
@@ -308,5 +309,275 @@
    "The reported failures may not extend to other local rules, and the costs of methods that repeatedly refine network activity remain unresolved."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "MLC-05",
+  "title": "Local learning with backpropagation parity",
+  "definition": "A deep network learns through objectives confined to individual layers or gradient-isolated blocks: task-error derivatives do not cross their boundaries. One rule matches the cited end-to-end backpropagation comparisons across image tasks and language-model sizes, without retaining an end-to-end activation graph for backward computation.",
+  "goal": {
+   "need": "An OpenWebText language-model comparison reports backpropagation validation perplexities of 138 and 28 at approximately 7 million and 124 million backbone parameters; local cross-entropy gives 166 and 42. Lower perplexity means better next-token prediction. At the larger setting, auxiliary local heads increase the local model’s total parameter count to 586.9 million. The goal is to remove backward dependencies between layers while preserving learning quality.",
+   "need_refs": [
+    1
+   ],
+   "figures": {
+    "caption": "Two scales from the OpenWebText language-model comparison",
+    "columns": [
+     "Backbone parameters",
+     "Backpropagation perplexity",
+     "Local cross-entropy perplexity"
+    ],
+    "rows": [
+     [
+      "7 million",
+      "138",
+      "166"
+     ],
+     [
+      "124 million",
+      "28",
+      "42"
+     ]
+    ],
+    "note": "Preprint dated 27 September 2026. These are best validation perplexities. The respective budgets are 0.14 billion and 2.48 billion token presentations from a 50-million-token training subset. Backbone counts exclude auxiliary local heads.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "IEEE International Roadmap for Devices and Systems",
+     "year": "2024",
+     "quote": "Solving the spatial credit assignment problem in a local fashion remain a challenge, however.",
+     "context": null,
+     "ref": 2,
+     "checked": true
+    },
+    {
+     "body": "Geoffrey Hinton, Forward-Forward developer, Google Brain",
+     "year": "2022",
+     "quote": "allow video to be pipelined through the network without ever storing activities or stopping to propagate derivatives.",
+     "context": "The passage describes what separating Forward-Forward’s positive and negative training passes in time could permit.",
+     "ref": 3,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "Independent investigators reproduce one local rule’s parity across the cited image and language comparisons.",
+   "criterion": "Independent investigators reproduce one rule with no task-error derivatives crossing layer/block boundaries or retained end-to-end activation graph. At the cited architectures and budgets, its mean linear-readout accuracy is at least 80.69%, 81.97%, 36.78% and 55.19% on CIFAR-10, STL-10, Tiny ImageNet and ImageNet, respectively; mean validation loss is at most 2.771/2.418 nats/token at the 125M/400M parameter classes, for both two and four blocks. It must also equal or improve matched end-to-end baseline reruns in every setting. Local updates use current-minibatch activities, targets and local parameter/optimizer state.",
+   "set_by": "Technology Atlas fallback, using published comparison settings; no external body was found that sets this combined test.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches covered IEEE IRDS, MLCommons AlgoPerf, DARPA-related goals, local-learning prizes and published comparison papers. No joint locality, scale and parity criterion was found. This fallback adopts published architecture-matched baselines, zero mean performance deficit and independent reproduction. It establishes parity within these settings; the image paper explicitly says its global baseline is below the state of the art.",
+   "refs": [
+    2,
+    4,
+    5,
+    6,
+    7
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A locally trained network reaches at most 1.36% MNIST test error after 60 epochs.",
+    "criterion": "Use Hinton’s supervised Forward-Forward comparison: four fully connected hidden layers, each containing 2,000 rectified linear units, with labels included in the input. Reach at most 1.36% MNIST test error after 60 epochs. The preprint dated 27 December 2022 reports this result and says backpropagation takes about 20 epochs for similar performance; it does not state an independent-run count.",
+    "set_by": "Technology Atlas fallback, adopting Hinton’s reported demonstration as a reference result; Hinton did not designate it as a field milestone.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     3
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m2",
+    "title": "Locally learned image features reach at least 80.69% CIFAR-10 linear-readout accuracy.",
+    "criterion": "Use the self-supervised VGG architecture, augmentation and linear-readout comparison in Table 2 of Zihan and colleagues. Reach mean CIFAR-10 accuracy of at least 80.69%, the architecture-matched BP-InfoNCE result. The ICML paper reports 81.18% ± 0.18% for CLAPP++both against 80.69% ± 0.84% for BP-InfoNCE; uncertainties are 95% confidence intervals from four random seeds. The paper’s ImageNet comparison retains a performance gap.",
+    "set_by": "Technology Atlas fallback, adopting the published CIFAR-10 comparison; the authors did not designate this numerical result as a field milestone.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     4,
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m3",
+    "title": "A four-block 400M-class language model comes within 0.062 nats/token of end-to-end training.",
+    "criterion": "Use Moon and colleagues’ 24-layer, 400M-class decoder-only Transformer, partitioned into four gradient-isolated blocks, on the FineWeb-Edu 10BT sample. At the reported 14,000-step checkpoint, reach a validation negative-log-likelihood gap no greater than 0.062 nats/token above the end-to-end reference of 2.418. The preprint revised on 26 October 2026 reports this gap with first-block multi-token prediction. Quality comparisons use one seed. Gradients remain permitted inside each block.",
+    "set_by": "Technology Atlas fallback, adopting Moon and colleagues’ reported Table 1 gap; the authors did not set it as a field milestone.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m4",
+    "title": "One local learning rule matches backpropagation across all the specified image and language settings.",
+    "criterion": "In the originating laboratory, one rule satisfies every image and language quality comparison in the completion criterion, under its locality conditions and the cited architectures, data and budgets. Mean performance meets both the published numerical references and matched end-to-end baseline reruns in every setting. This is the combined demonstration immediately preceding independent reproduction.",
+    "set_by": "Technology Atlas fallback; no external cross-domain milestone was found. The component comparison settings come from the cited papers.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     4,
+     5,
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No externally defined milestone ladder for local learning at backpropagation parity was found.",
+   "No field-wide numerical bound on retained activity or agreed statistical noninferiority margin for parity was found.",
+   "The Nature page for Backpropagation and the brain redirected to an inaccessible authentication service.",
+   "The PMLR-hosted full-text PDF could not be opened; the corresponding arXiv HTML version was accessible."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2609.33240v1",
+    "doi": "10.48550/arXiv.2609.33240",
+    "title": "The Price of Locality: Why Forward-Forward Underperforms Backpropagation?",
+    "authors": "Wu Z, Liu H, Chen T",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 2,
+    "kind": "report",
+    "url": "https://irds.ieee.org/images/files/pdf/2024/2024IRDS_BC.pdf",
+    "doi": null,
+    "title": "International Roadmap for Devices and Systems: 2024 Update, Beyond CMOS and Emerging Research Materials",
+    "authors": "IEEE International Roadmap for Devices and Systems.",
+    "container": "IEEE",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/2212.13345",
+    "doi": "10.48550/arXiv.2212.13345",
+    "title": "The Forward-Forward Algorithm: Some Preliminary Investigations",
+    "authors": "Hinton G",
+    "container": "arXiv",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 4,
+    "kind": "journal",
+    "url": "https://proceedings.mlr.press/v306/zihan26a.html",
+    "doi": null,
+    "title": "Can local learning match self-supervised backpropagation?",
+    "authors": "Zihan WS, Delrocq A, Gerstner W, Bellec G.",
+    "container": "Proc Mach Learn Res",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2601.21683v2",
+    "doi": "10.48550/arXiv.2601.21683",
+    "title": "Can Local Learning Match Self-Supervised Backpropagation?",
+    "authors": "Zihan WS, Delrocq A, Gerstner W, Bellec G",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 6,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2610.04867v2",
+    "doi": "10.48550/arXiv.2610.04867",
+    "title": "Greedy Local Learning for Language Model Pretraining: Gaps and Objective Design",
+    "authors": "Moon J, Zaheer SA, Lee J, Kim G, Park CY",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 7,
+    "kind": "web",
+    "url": "https://mlcommons.org/benchmarks/algorithms/",
+    "doi": null,
+    "title": "AlgoPerf: Training Algorithms Benchmark Results",
+    "authors": "MLCommons.",
+    "container": "MLCommons",
+    "year": "n.d.",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 4 from arXiv, 3 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 2 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }
