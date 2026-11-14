@@ -1685,15 +1685,18 @@ def results(
 # add: judge named sources against every active milestone.
 
 
-def add(identifier, urls, judge=None):
+def add(identifier, urls, judge=None, titles=None, note=None):
     """Save each URL through the archive (if not held) and judge it against all active
-    milestones and cases. No search."""
+    milestones and cases. No search. titles: {url: title} for sources the page does not cite
+    yet (the title helps choose the saved copy); note: a log row to add, as (actor, text)."""
     page = load(identifier)
     before = snapshot(page)
     entry = judge_entry(config())
     calls = folder(identifier, 'add')
     work = Judgement(page, entry['model'])
-    titles = {normal(r['url']): r['title'] for r in page['references']}
+    titles = {normal(url): title for url, title in (titles or {}).items()} | {
+        normal(r['url']): r['title'] for r in page['references']
+    }
     sources = []
     skipped = []
     for url in urls:
@@ -1714,6 +1717,7 @@ def add(identifier, urls, judge=None):
                 f'Replaced {work.replaced} earlier rows; added {len(work.added)} results.',
             )
         ]
+        + ([row(*note)] if note else [])
     )
     save(page)
     return (
@@ -1722,6 +1726,74 @@ def add(identifier, urls, judge=None):
         f'quotes {quotes[0]} found / {quotes[1]} not found / {quotes[2]} unreadable; '
         f'citations {citations}'
     )
+
+
+# merge: a breakthrough marked as a duplicate (atlas.review, state merge) gives its evidence to
+# the page it merges into.
+
+
+def merge(identifier, judge=None, core=None):
+    """Judge the sources behind identifier's results against the kept page's own milestones and
+    cases (through add: the judge model, no search, saved copies). A result is a verdict
+    against one page's criterion, so rows are never copied as they stand; the evidence is
+    judged again. Sources the kept page already cites are left out. Marks the merged record's
+    review with `copied` and the date. Returns a line."""
+    core = Path(core or CORE)
+    data = records.load(core)
+    item = data['breakthroughs'].get(identifier)
+    review = (item or {}).get('review') or {}
+    if review.get('state') != 'merge':
+        raise ValueError(f'{identifier}: not marked merge (atlas.review merge ... --into ...)')
+    into = review['into']
+    with claimed('results', identifier) as mine, claimed('results', into) as theirs:
+        if not (mine and theirs):
+            raise batches.Stopped('another run is working on one of the two pages')
+        source = item.get('page') or {}
+        keep = load(into)
+        cited = {normal(r['url']) for r in keep['references']}
+        by_id = {r['id']: r for r in source.get('references', [])}
+        urls, titles = [], {}
+        for result in source.get('results', []):
+            reference = by_id.get(result.get('ref'))
+            if reference and normal(reference['url']) not in cited:
+                if reference['url'] not in titles:
+                    urls.append(reference['url'])
+                titles[reference['url']] = reference.get('title') or ''
+        if urls:
+            note = (
+                'atlas.page',
+                f'Merged from {identifier}: {len(urls)} sources behind its results judged against '
+                'this page’s milestones.',
+            )
+            line = add(into, urls, judge, titles, note)
+        else:
+            line = f'{into}: nothing new; every source behind {identifier}’s results is cited'
+        # Record on the merged breakthrough that its evidence has gone across.
+        fresh = records.load(core)['breakthroughs'][identifier]
+        fresh['review']['copied'] = today()
+        fresh['review'].setdefault('log', []).append(
+            {'date': today(), 'state': 'merge', 'copied': len(urls), 'into': into}
+        )
+        records.write_breakthrough(fresh, core)
+    return f'{identifier} -> {line}'
+
+
+def pending_merges(data):
+    """Breakthroughs marked merge whose evidence has not gone across, whose target is kept."""
+    items = data['breakthroughs']
+    out = []
+    for identifier, item in sorted(items.items()):
+        review = item.get('review') or {}
+        target = items.get(review.get('into'), {})
+        if (
+            review.get('state') == 'merge'
+            and not review.get('copied')
+            and item.get('page')
+            and target.get('page')
+            and (target.get('review') or {}).get('state') != 'merge'
+        ):
+            out.append(identifier)
+    return out
 
 
 # revise: proposed operations, applied by code.
@@ -2614,7 +2686,39 @@ def main(argv=None):
     five.add_argument('ids', nargs='*')
     six = steps.add_parser('migrate', help='one-off: move the pilot entries into their records')
     six.add_argument('ids', nargs='+')
+    seven = steps.add_parser(
+        'merge', help='judge a merged breakthrough’s sources into the page it merges into'
+    )
+    seven.add_argument('ids', nargs='*', metavar='ID', help='breakthroughs marked merge')
+    seven.add_argument('--pending', action='store_true', help='every merge not yet carried over')
+    seven.add_argument('--no-commit', action='store_true')
     args = parser.parse_args(argv)
+    if args.step == 'merge':
+        identifiers = args.ids or (pending_merges(records.load(CORE)) if args.pending else [])
+        if not identifiers:
+            print('Nothing to merge.')
+            return 0
+        done, failed = [], 0
+        for identifier in identifiers:
+            try:
+                print(merge(identifier), flush=True)
+                done.append(identifier)
+            except batches.Stopped as error:
+                print(f'{identifier}: not merged now ({error})', flush=True)
+            except Exception as error:  # noqa: BLE001 - one merge must not stop the rest
+                print(f'{identifier}: failed: {type(error).__name__}: {error}', flush=True)
+                failed += 1
+        if done:
+            problems_ = records.check(records.load(CORE))
+            if problems_:
+                print('atlas/core check failed:\n' + '\n'.join(problems_))
+                return 1
+            if not args.no_commit:
+                records.commit(
+                    f'Merge evidence of {len(done)} duplicates into the pages they merge into\n\n'
+                    f'{", ".join(done)}\n\n{TRAILER}'
+                )
+        return 1 if failed else 0
     writer = writer_entry(getattr(args, 'model', None), getattr(args, 'effort', None))
     if args.step in ('define', 'results'):
         if args.step == 'define' and args.out:

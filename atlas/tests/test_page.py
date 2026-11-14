@@ -528,6 +528,43 @@ class PageTests(unittest.TestCase):
             len([j for j in page['judged'] if j['url'].startswith('https://added')]), 4
         )
 
+    def test_merge_judges_the_duplicates_sources_against_the_kept_page(self):
+        self.define()
+        duplicate = {
+            'id': 'BME-98',
+            'field': 'BME',
+            'title': 'A duplicate',
+            'status': 'active',
+            'review': {'state': 'merge', 'into': 'BME-99', 'note': 'same', 'log': []},
+            'page': {
+                'references': [
+                    {'id': 1, 'url': 'https://added.example/x', 'title': 'Added paper'},
+                    {'id': 2, 'url': 'https://journal.example/paper', 'title': 'Cited already'},
+                ],
+                'results': [{'ref': 1, 'milestone': 'm1'}, {'ref': 2, 'milestone': 'm2'}],
+            },
+        }
+        (self.core / 'BME' / 'BME-98.json').write_text(pages.dump_record(duplicate))
+        prompts = []
+
+        def judge(text):
+            prompts.append(text)
+            return {'kind': 'journal', 'doi': None, 'rows': [held_row('m3', 'Heart')]}
+
+        self.assertEqual(pages.pending_merges(core.load(self.core)), ['BME-98'])
+        line = pages.merge('BME-98', judge, core=self.core)
+        self.assertIn('BME-98 -> BME-99: judged 1 of 1 sources', line)
+        # Only the source the kept page does not cite yet is judged, against its own milestones.
+        self.assertEqual(len(prompts), 1)
+        self.assertIn('m3 (', prompts[0])
+        page = self.stored()
+        urls = {r['id']: r['url'] for r in page['references']}
+        self.assertIn('https://added.example/x', [urls[r['ref']] for r in page['results']])
+        self.assertTrue(any('Merged from BME-98' in r['action'] for r in page['log']))
+        merged = core.load(self.core)['breakthroughs']['BME-98']['review']
+        self.assertTrue(merged['copied'])
+        self.assertEqual(pages.pending_merges(core.load(self.core)), [])
+
     # revise
 
     def test_revise_stores_a_proposal_and_applies_nothing(self):
