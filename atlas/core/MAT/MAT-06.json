@@ -225,7 +225,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "sources": [
   "https://doi.org/10.1007/978-3-030-56880-1_3",
@@ -314,5 +315,258 @@
    "Extending the target to elliptic curves, another mathematical setting used in cryptography, would require separate proofs and demonstrations."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "MAT-06",
+  "title": "Classical polynomial-time factoring and prime-field discrete logs",
+  "definition": "Classical, non-quantum algorithms factor arbitrary integers into primes and recover discrete logarithms—exponents x from g and g^x modulo a prime—including in subgroups formed by powers of g. Each algorithm has a proved running time polynomial in input bit length; zero-error randomized algorithms may use polynomial expected time.",
+  "goal": {
+   "need": "NIST's 2020 comparison assigns 112-bit security strength to a 2048-bit RSA modulus and to finite-field systems with a 2048-bit modulus and 224-bit subgroup order. Classical polynomial-time algorithms would undermine the corresponding computational hardness assumptions. Their execution cost at these finite sizes would still depend on the polynomial's constants and degree.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": {
+    "caption": "Matched classical computations reported at CRYPTO 2020.",
+    "columns": [
+     "Problem",
+     "Modulus length",
+     "Reference core-years"
+    ],
+    "rows": [
+     [
+      "RSA-240 factorization",
+      "795 bits",
+      "953"
+     ],
+     [
+      "DLP-240 discrete logarithm",
+      "795 bits",
+      "3177"
+     ]
+    ],
+    "note": "One instance of each problem. Costs are normalized to physical Intel Xeon Gold 6130 cores at 2.10 GHz; core-years measure accumulated processor effort.",
+    "ref": 3
+   },
+   "statements": [
+    {
+     "body": "RSA Laboratories",
+     "year": "1998",
+     "quote": "a ‘breakthrough’ means finding a polynomial time algorithm.",
+     "context": "Question 2.3.9 applies this definition to integer factoring and general discrete logarithms, distinguishing them from elliptic-curve discrete logarithms.",
+     "ref": 4,
+     "checked": false
+    },
+    {
+     "body": "National Institute of Standards and Technology",
+     "year": "2024",
+     "quote": "If large-scale quantum computers are realized, the security of many commonly used public-key cryptosystems will be at risk.",
+     "context": "The following sentence identifies integer factorization and discrete logarithms over finite fields and elliptic curves as the underlying problems. This statement concerns quantum attacks.",
+     "ref": 5,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "Both target problems have proved classical algorithms with polynomial bit complexity.",
+   "criterion": "A peer-reviewed proof establishes uniform classical algorithms that factor every integer N ≥ 2 completely and, for every prime p, base g of supplied order q, and h in its subgroup, return x with 0 ≤ x < q and g^x ≡ h modulo p. Each algorithm has a proved O(b^k) bit-operation bound, for total input length b and a fixed k: worst-case time if deterministic, or expected time with zero error if randomized. The bound includes preprocessing and makes no unproved number-theoretic assumptions.",
+   "set_by": "Cryptographic community convention, explicitly stated by RSA Laboratories in FAQ v4.0, Question 2.3.9; polynomial and randomized complexity conventions follow Handbook of Applied Cryptography, §2.3.",
+   "set_by_kind": "community_convention",
+   "threshold_quote": "a ‘breakthrough’ means finding a polynomial time algorithm.",
+   "threshold_ref": 4,
+   "basis": "RSA Laboratories explicitly identifies polynomial time as the breakthrough criterion for the two problems. The Handbook distinguishes polynomial complexity from performance at particular input sizes. This mathematical test supplies no additional wall-clock, memory or hardware requirement.",
+   "refs": [
+    4,
+    2
+   ],
+   "threshold_checked": false
+  },
+  "case_label": "Problem class",
+  "cases": [
+   "Integer factorization",
+   "Prime-field discrete logarithms"
+  ],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "Classical algorithms run in polynomial time when relevant prime factors are polynomial in input bit length.",
+    "criterion": "For input bit length b and any fixed c, trial division, primality testing and perfect-power handling factor N when its second-largest distinct prime divisor is at most b^c. For prime-field logarithms, Pohlig–Hellman with baby-step–giant-step takes polynomial time when every prime divisor of the supplied group order q is at most b^c; q can then be factored by trial division. Gaudry's §§1.2–1.3 establish these restricted families.",
+    "set_by": "Algorithmic-number-theory convention documented by Gaudry, CIRM 2014, §§1.2–1.3. The quotation states the factoring condition; Theorem 4 and its following complexity analysis supply the logarithm condition.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "factoring integers N for which the second largest prime is bounded by a polynomial in log N can be done in polynomial time.",
+    "threshold_ref": 6,
+    "refs": [
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A classical computation solves the published 795-bit benchmark for a target problem.",
+    "criterion": "Factor the single RSA-240 challenge modulus, or solve the single DLP-240 target in Appendix A: modulus p = RSA-240 + 49204 and base 5, with p and (p−1)/2 prime. Boudot and colleagues report both results in 2020. For the factoring case, Lu's developer report records RSA-260 factors obtained on 3 September 2026 using a GPU implementation of the general number field sieve; that report is not peer reviewed.",
+    "set_by": "Computational benchmark convention: RSA Laboratories' RSA-240 challenge and Boudot and colleagues' DLP-240 challenge, specified and solved in their CRYPTO 2020 paper.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "the factorization of RSA-240, a 795-bit number, and a discrete logarithm computation over a 795-bit prime field.",
+    "threshold_ref": 3,
+    "refs": [
+     3,
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "At least one target problem has a proved classical polynomial-time algorithm.",
+    "criterion": "An unconditional classical polynomial-time algorithm solves every valid input of either complete problem class, using the correctness and complexity conventions specified in completion. Establishing this result for one case leaves the other case required for joint completion.",
+    "set_by": "RSA Laboratories, FAQ v4.0, Question 2.3.9, applies its polynomial-time breakthrough criterion to factoring and discrete logarithms individually.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "a ‘breakthrough’ means finding a polynomial time algorithm.",
+    "threshold_ref": 4,
+    "refs": [
+     4,
+     2
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": false
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No peer-reviewed general classical polynomial-time solution for either problem class was located.",
+   "No joint wall-clock, memory or hardware threshold for practical implementation was found in RSA challenge material, NIST standards or algorithmic surveys.",
+   "No externally prescribed sequence of milestones for the combined capability was found."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "report",
+    "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57pt1r5.pdf",
+    "doi": "10.6028/NIST.SP.800-57pt1r5",
+    "title": "Recommendation for Key Management: Part 1 – General",
+    "authors": "Barker E",
+    "container": "National Institute of Standards and Technology",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "book",
+    "url": "https://cacr.uwaterloo.ca/hac/about/chap2.pdf",
+    "doi": "10.1201/9781439821916",
+    "title": "Handbook of Applied Cryptography",
+    "authors": "Menezes AJ, van Oorschot PC, Vanstone SA",
+    "container": "CRC Press",
+    "year": "2018",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 3,
+    "kind": "journal",
+    "url": "https://arxiv.org/pdf/2006.06197",
+    "doi": "10.1007/978-3-030-56880-1_3",
+    "title": "Comparing the difficulty of factorization and discrete logarithm: a 240-digit experiment",
+    "authors": "Boudot F, Gaudry P, Guillevic A, Heninger N, Thomé E, Zimmermann P",
+    "container": "Lecture Notes in Computer Science",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": "62-91",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 4,
+    "kind": "report",
+    "url": "https://www.networkdls.com/File/Entity/article-archive/faqs-about-todays-cryptography-v4.pdf",
+    "doi": null,
+    "title": "RSA Laboratories’ Frequently Asked Questions About Today’s Cryptography, v4.0",
+    "authors": "RSA Laboratories.",
+    "container": "RSA Data Security, Inc.",
+    "year": "1998",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "report",
+    "url": "https://doi.org/10.6028/NIST.FIPS.203",
+    "doi": "10.6028/NIST.FIPS.203",
+    "title": "Module-Lattice-Based Key-Encapsulation Mechanism Standard",
+    "authors": "National Institute of Standards and Technology (US)",
+    "container": "National Institute of Standards and Technology",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://www.numdam.org/item/10.5802/ccirm.21.pdf",
+    "doi": "10.5802/ccirm.21",
+    "title": "Integer factorization and discrete logarithm problems",
+    "authors": "Gaudry P",
+    "container": "Cours du CIRM",
+    "year": "2014",
+    "volume": "4",
+    "issue": "1",
+    "pages": "1-20",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "press_release",
+    "url": "https://cognition.com/blog/factoring-rsa-260",
+    "doi": null,
+    "title": "Factoring RSA-260",
+    "authors": "Lu E.",
+    "container": "Cognition",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 5 from Crossref, 0 from PubMed, 0 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 3 found, 3 not found, 0 with no readable copy."
+   }
+  ]
  }
 }
