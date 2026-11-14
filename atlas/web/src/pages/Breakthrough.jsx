@@ -2,6 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Locator } from '../Chart.jsx';
+import DraftBody from './Draft.jsx';
+import IdealBody, { IDEAL } from './Ideal.jsx';
+import PageBody from './Page.jsx';
 import { formatDate, loadBreakthrough, milestoneOf, useAtlas, warm } from '../data.jsx';
 import { StarGlyph, StarMark, StatusLabel, ringSegments } from '../glyphs.jsx';
 import Record, { Citations, Evidence, Paragraphs, SourceList, reveal, sourceIndex } from '../Record.jsx';
@@ -79,7 +82,7 @@ const READING = [
   ['missing_breakthrough', 'What is still missing'],
 ];
 
-export default function Breakthrough() {
+export default function Breakthrough({ draft = false, hand = false }) {
   const { id } = useParams();
   const { atlas, error: atlasError } = useAtlas();
   const [record, setRecord] = useState(null);
@@ -102,6 +105,8 @@ export default function Breakthrough() {
   const item = atlas?.items[id];
   // The reader's version, when the breakthrough has one: it leads, and the record follows collapsed.
   // An empty brief counts as none.
+  // The breakthrough page entry (atlas.page), carried in /data/b/<ID>.json when written.
+  const page = record?.id === id ? record.page : null;
   const brief =
     record?.brief &&
     typeof record.brief === 'object' &&
@@ -160,7 +165,7 @@ export default function Breakthrough() {
         };
 
   return (
-    <article className="bpage">
+    <article className={'bpage' + (draft && item && (IDEAL[item.id] || page) ? ' bpage-ideal' : '')}>
       <div className="bpage-wash" aria-hidden="true" />
       <nav className="crumbs" aria-label="Breadcrumb">
         <Link to="/atlas">Atlas</Link>
@@ -174,21 +179,39 @@ export default function Breakthrough() {
       <div className="bpage-grid">
         <div className="bpage-main">
           <motion.header className="bpage-head" {...fade(0)}>
-            <p className="eyebrow bpage-id">
-              <span className="mono">{item.id}</span>
-            </p>
-            <h1>{plain || item.title}</h1>
-            {plain && <p className="bpage-subtitle">{item.title}</p>}
-            <p className="status-line">
-              <span className="bpage-head-glyph">
-                <StarGlyph item={item} size={40} />
-              </span>
-              <StatusLabel status={stateOf(item)} />
-              <span>{summaryLine(item)}</span>
-            </p>
+            {!draft && (
+              <p className="eyebrow bpage-id">
+                <span className="mono">{item.id}</span>
+              </p>
+            )}
+            <h1>{(draft && ((!hand && page?.title) || IDEAL[item.id]?.title)) || plain || item.title}</h1>
+            {plain && !draft && <p className="bpage-subtitle">{item.title}</p>}
+            {!draft && (
+              <p className="status-line">
+                <span className="bpage-head-glyph">
+                  <StarGlyph item={item} size={40} />
+                </span>
+                <StatusLabel status={stateOf(item)} />
+                <span>{summaryLine(item)}</span>
+              </p>
+            )}
           </motion.header>
 
-          {brief ? (
+          {draft && !hand && page ? (
+            <PageBody page={page} />
+          ) : draft && IDEAL[item.id] ? (
+            <IdealBody page={IDEAL[item.id]} />
+          ) : brief && draft ? (
+            <DraftBody
+              brief={brief}
+              record={record}
+              item={item}
+              sources={sources}
+              position={position}
+              judged={judged}
+              fade={fade}
+            />
+          ) : brief ? (
             <BriefBody
               brief={brief}
               record={record}

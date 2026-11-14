@@ -34,6 +34,8 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/atlas" element={<Atlas />} />
             <Route path="/b/:id" element={<Breakthrough />} />
+            <Route path="/draft/:id" element={<Breakthrough draft />} />
+            <Route path="/hand/:id" element={<Breakthrough draft hand />} />
             <Route path="/field/:field" element={<Field />} />
             <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />

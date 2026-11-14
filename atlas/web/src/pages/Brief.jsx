@@ -20,7 +20,7 @@ const texts = (value) =>
 
 const said = (value) => (typeof value === 'string' && value.trim() ? value.trim() : null);
 
-function Question({ id, title, note, fade, children }) {
+export function Question({ id, title, note, fade, children }) {
   return (
     <motion.section className="bpage-section reading brief-q" aria-labelledby={id} {...fade}>
       <h2 id={id}>{title}</h2>
@@ -30,7 +30,7 @@ function Question({ id, title, note, fade, children }) {
   );
 }
 
-function Prose({ items }) {
+export function Prose({ items }) {
   return items.map((text, n) => (
     <div key={n} className="record-para">
       <p>{text}</p>
@@ -38,7 +38,7 @@ function Prose({ items }) {
   ));
 }
 
-function Items({ items }) {
+export function Items({ items }) {
   return (
     <ul className="issues">
       {items.map((text, n) => (
@@ -50,7 +50,7 @@ function Items({ items }) {
 
 // One source of the brief: who, then what they showed; what the atlas takes from it and what
 // it does not.
-function BriefSource({ source, entry }) {
+export function BriefSource({ source, entry, number, citation, forLabel = 'Why the atlas cites it', notLabel = 'What it does not establish' }) {
   const who = said(source.who);
   const title = entry ? said(entry.title) : null;
   const showed = said(source.showed);
@@ -65,9 +65,21 @@ function BriefSource({ source, entry }) {
       : 'saved copy kept'
     : 'no saved copy to check';
   return (
-    <li className="brief-source">
-      <h3 className="brief-who">{who || title || (url ? host(url) : 'A source')}</h3>
-      {title && who && <p className="brief-paper">{title}</p>}
+    <li className="brief-source" id={number ? `ref-${number}` : undefined}>
+      {citation && (
+        <p className="draft-citation">
+          <span className="draft-refnum mono">{number}.</span>
+          <span>
+            {citation.text}{' '}
+            <a href={'https://doi.org/' + citation.doi} target="_blank" rel="noopener noreferrer">
+              doi:{citation.doi}
+            </a>
+          </span>
+        </p>
+      )}
+      <h3 className="brief-who" hidden={!!citation}>
+        {number && <span className="draft-refnum mono">{number}</span>}{who || title || (url ? host(url) : 'A source')}</h3>
+      {title && who && !citation && <p className="brief-paper">{title}</p>}
       {showed && <p className="brief-showed">{showed}</p>}
       {quote && (
         <blockquote className="brief-quote">
@@ -78,13 +90,13 @@ function BriefSource({ source, entry }) {
         <dl className="brief-why">
           {citedFor && (
             <div>
-              <dt className="source-section">Why the atlas cites it</dt>
+              <dt className="source-section">{forLabel}</dt>
               <dd className="source-passage">{citedFor}</dd>
             </div>
           )}
           {notEstablished && (
             <div>
-              <dt className="source-section">What it does not establish</dt>
+              <dt className="source-section">{notLabel}</dt>
               <dd className="source-passage">{notEstablished}</dd>
             </div>
           )}
@@ -117,7 +129,7 @@ const READING = [
   ['missing_breakthrough', 'What is still missing'],
 ];
 
-function ResearchRecord({ record, sources }) {
+export function ResearchRecord({ record, sources }) {
   const issues = list(record.unresolved_issues).filter((t) => typeof t === 'string' && t.trim());
   return (
     <details className="bpage-record">
