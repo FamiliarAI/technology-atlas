@@ -221,7 +221,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "sources": [
   "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8364152/",
@@ -323,5 +324,322 @@
    "Low power alone does not settle suitability for phones or drones, total lifetime energy, or the effect on overall electricity demand."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "MLC-11",
+  "title": "AI training and inference within a 20-watt power budget",
+  "definition": "An AI system matches a named, dated frontier model across its published evaluation suite while averaging at most 20 watts of total electrical power separately during complete training and inference—the production of outputs. The electrical ceiling is an Atlas definition, motivated by the brain’s metabolic power.",
+  "goal": {
+   "need": "On 11 August 2025, Epoch AI reported individual frontier training runs exceeding 100 megawatts. Balasubramanian’s 2021 commentary places the brain’s metabolic power near 20 watts. These figures motivate reducing AI power demand; they do not measure efficiency at equal capability. Inference adds recurring energy expenditure, which measured experiments show varies substantially by task.",
+   "need_refs": [
+    1,
+    2,
+    3
+   ],
+   "figures": {
+    "caption": "Energy consumed by two task categories in the 2024 Power Hungry Processing study.",
+    "columns": [
+     "Task",
+     "Mean kWh per 1,000 inferences",
+     "Standard deviation"
+    ],
+    "rows": [
+     [
+      "Text classification",
+      "0.002",
+      "0.001"
+     ],
+     [
+      "Image generation",
+      "2.907",
+      "3.31"
+     ]
+    ],
+    "note": "These are different tasks, not equivalent capabilities. Each model–dataset experiment used 1,000 sequential inferences and 10 repetitions. CodeCarbon accounting included one active A100 GPU and the idle consumption of the other seven GPUs.",
+    "ref": 3
+   },
+   "statements": [
+    {
+     "body": "White House Office of Science and Technology Policy",
+     "year": "2015",
+     "quote": "solve unfamiliar problems using what it has learned, and operate with the energy efficiency of the human brain.",
+     "context": "Part of the Nanotechnology-Inspired Grand Challenge for Future Computing announced on 20 October 2015. The announcement specifies neither a frontier-model comparison nor a wattage test.",
+     "ref": 4,
+     "checked": true
+    },
+    {
+     "body": "Defense Advanced Research Projects Agency",
+     "year": "2014",
+     "quote": "perform difficult perception and control tasks while at the same time achieving significant energy savings.",
+     "context": "The stated purpose of the SyNAPSE programme, described on 7 August 2014. Its scope is perception and control rather than the draft’s joint frontier training-and-inference capability.",
+     "ref": 5,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "An independent team reproduces frontier-model competence with training and inference each averaging at most 20 W.",
+   "criterion": "An independent team repeats m3: match or exceed every score of a named, dated frontier model on its published evaluation suite; complete all training, including inherited model and teacher computation, within the reference model’s documented training duration; and meet its documented inference throughput and latency on identical workloads. Total electrical input, including processors, memory, storage, communication, power conversion and cooling, must average at most 20 W separately over complete training and sustained inference. Remote computation counts. Measure peak power, duration and total energy.",
+   "set_by": "Atlas fallback; no outside body was found to publish this joint test.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches of the White House grand challenge and federal vision, DARPA SyNAPSE, neuromorphic roadmaps and MLCommons rules found no joint frontier-competence, training, inference and wattage criterion. This Atlas test operationalizes the brain-efficiency goal using the approximately 20 W biological reference. Comparator-relative speed limits and independent repetition are additional Atlas conditions. MLPerf Power’s 2025 methodology does not include datacentre cooling or storage-node power.",
+   "refs": [
+    2,
+    4,
+    6,
+    7
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "An embedded image classifier reaches MLPerf Tiny’s 85% top-1 accuracy target.",
+    "criterion": "Under the MLPerf Tiny v0.5 Closed image-classification protocol, the reference ResNet architecture classifies the selected 200 CIFAR-10 test images with at least 85% top-1 accuracy: the highest-scoring class must be correct on at least 170 images. The 2021 paper reports 86.5% for its reference implementation. This is a narrow inference demonstration; its measurement window excludes preprocessing and postprocessing, and the protocol sets no 20 W ceiling.",
+    "set_by": "MLCommons, MLPerf Tiny v0.5, image-classification Quality Target. This benchmark-specific test does not establish broad competence.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "we set the quality target to 85% top-1 accuracy.",
+    "threshold_ref": 8,
+    "refs": [
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "Llama 3.1 405B reaches MLPerf Training’s validation log-perplexity target of 5.6.",
+    "criterion": "Continue training the supplied Llama 3.1 405B checkpoint with the benchmark’s modified tokenizer until validation log perplexity—the logarithm of predictive perplexity—is at most 5.6 on 5,760 sequences constructed from 91,205 C4 validation records. MLCommons specifies three runs and reports the median time. On 4 June 2025, NVIDIA reported 121.09 minutes using 512 Blackwell GPUs, a developer result not peer reviewed. This benchmark starts from a fully trained checkpoint and establishes neither complete training nor a 20 W result.",
+    "set_by": "MLCommons, MLPerf Training Llama 3.1 405B benchmark; the numerical target appears in the benchmark table. Written specifically for this model and continued-training workload.",
+    "set_by_kind": "protocol",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     9,
+     10,
+     11
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m3",
+    "title": "A system matches a frontier model with training and inference averaging at most 20 W each.",
+    "criterion": "Match or exceed every published evaluation-suite score of a named, dated frontier model. Complete all training, including inherited model and teacher computation, within that reference model’s documented training duration, and meet its documented inference throughput and latency on identical workloads. Average total electrical input must be at most 20 W separately during complete training and sustained inference, counting processors, memory, storage, communication, power conversion, cooling and remote computation. This is the first joint demonstration; independent repetition remains the completion test.",
+    "set_by": "Atlas fallback. Searches of federal brain-efficiency goals, neuromorphic roadmaps and MLCommons protocols found no externally defined joint demonstration milestone.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     2,
+     4,
+     6,
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No outside body was found to specify frontier-model equivalence during complete training and inference within either 20 W or 100 W.",
+   "No published demonstration satisfying the joint completion criterion was located in searches through 14 November 2026.",
+   "The NIH BRAIN Research Roadmap Innovation Domains PDF and the full UK Neuromorphic Computing Roadmap PDF could not be opened."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "web",
+    "url": "https://epochai.substack.com/p/power-demands-of-frontier-ai-training",
+    "doi": null,
+    "title": "Projecting AI Training Power Demand",
+    "authors": "You J, Owen D.",
+    "container": "Epoch AI",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 2,
+    "kind": "journal",
+    "url": "https://www.pnas.org/doi/10.1073/pnas.2107022118",
+    "doi": "10.1073/pnas.2107022118",
+    "title": "Brain power",
+    "authors": "Balasubramanian V",
+    "container": "Proc. Natl. Acad. Sci. U.S.A.",
+    "year": "2021",
+    "volume": "118",
+    "issue": "32",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 3,
+    "kind": "journal",
+    "url": "https://arxiv.org/html/2311.16863v3",
+    "doi": "10.1145/3630106.3658542",
+    "title": "Power Hungry Processing: Watts Driving the Cost of AI Deployment?",
+    "authors": "Luccioni S, Jernite Y, Strubell E",
+    "container": "The 2024 ACM Conference on Fairness Accountability and Transparency",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": "85-99",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 4,
+    "kind": "web",
+    "url": "https://obamawhitehouse.archives.gov/blog/2015/10/15/nanotechnology-inspired-grand-challenge-future-computing",
+    "doi": null,
+    "title": "A Nanotechnology-Inspired Grand Challenge for Future Computing",
+    "authors": "Whitman L, Bryant R, Kalil T.",
+    "container": "White House",
+    "year": "2015",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "press_release",
+    "url": "https://www.darpa.mil/news/2014/synapse-program-brain-inspired-chip",
+    "doi": null,
+    "title": "SyNAPSE Program Develops Advanced Brain-Inspired Chip",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "DARPA",
+    "year": "2014",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "report",
+    "url": "https://www.nano.gov/sites/default/files/pub_resource/federal-vision-for-nanotech-inspired-future-computing-grand-challenge.pdf",
+    "doi": null,
+    "title": "A Federal Vision for Future Computing: A Nanotechnology-Inspired Grand Challenge",
+    "authors": "Department of Energy; National Science Foundation; Department of Defense; National Institute of Standards and Technology; Intelligence Community",
+    "container": "National Nanotechnology Initiative",
+    "year": "2016",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 7,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2410.12032v2",
+    "doi": "10.48550/arXiv.2410.12032",
+    "title": "MLPerf Power: Benchmarking the Energy Efficiency of Machine Learning Systems from µWatts to MWatts for Sustainable AI",
+    "authors": "Tschand A, Rajan ATR, Idgunji S, Ghosh A, Holleman J, Kiraly C, et al.",
+    "container": "arXiv",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 8,
+    "kind": "journal",
+    "url": "https://datasets-benchmarks-proceedings.neurips.cc/paper_files/paper/2021/file/da4fb5c6e93e74d3df8527599fa62642-Paper-round1.pdf",
+    "doi": "10.48550/arXiv.2106.07597",
+    "title": "MLPerf Tiny Benchmark",
+    "authors": "Banbury C, Reddi VJ, Torelli P, Holleman J, Jeffries N, Kiraly C, et al.",
+    "container": "arXiv",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 9,
+    "kind": "web",
+    "url": "https://mlcommons.org/benchmarks/training/",
+    "doi": null,
+    "title": "MLPerf Training",
+    "authors": "MLCommons",
+    "container": "MLCommons",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 10,
+    "kind": "web",
+    "url": "https://mlcommons.org/2025/05/training-llama31405b/",
+    "doi": null,
+    "title": "MLCommons MLPerf Training Expands with Llama 3.1 405B",
+    "authors": "Liu Y, Hodak M, Kassa H, Kurkure U, Marcinkiewicz M, Mehta P, et al.",
+    "container": "MLCommons",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 11,
+    "kind": "web",
+    "url": "https://developer.nvidia.com/blog/nvidia-blackwell-delivers-up-to-2-6x-higher-performance-in-mlperf-training-v5-0/",
+    "doi": null,
+    "title": "NVIDIA Blackwell Delivers up to 2.6x Higher Performance in MLPerf Training v5.0",
+    "authors": "Eryilmaz SB, Eassa A.",
+    "container": "NVIDIA Technical Blog",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 2 from arXiv, 7 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 3 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "completion.title is 113 characters, over its limit of 110; kept."
+   }
+  ]
  }
 }

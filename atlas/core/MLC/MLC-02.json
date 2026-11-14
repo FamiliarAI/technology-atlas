@@ -265,7 +265,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "sources": [
   "https://aclanthology.org/2023.conll-babylm.1/",
@@ -382,5 +383,282 @@
    "Sparse observations may fit several conflicting rules; success depends on whether feedback and exploration can distinguish them."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "MLC-02",
+  "title": "Human-level sample efficiency",
+  "definition": "A learning procedure acquires unfamiliar domain rules, reaching human reference performance from no more domain-specific experience than comparison humans. The target rules are withheld from earlier training, retrieval and auxiliary systems.",
+  "goal": {
+   "need": "In 2023, BabyLM’s organizers reported that typical language models required 3–4 orders of magnitude more data than children. Its 2026 tracks restrict training corpora to 10 million or 100 million words and also limit repeated exposure. These programmes target learning when the available evidence cannot be increased to match large-model training datasets.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": {
+    "caption": "BabyLM 2026 text-only training limits",
+    "columns": [
+     "Track",
+     "Corpus limit, words",
+     "Cumulative exposure limit, words"
+    ],
+    "rows": [
+     [
+      "Strict-Small",
+      "10,000,000",
+      "100,000,000"
+     ],
+     [
+      "Strict",
+      "100,000,000",
+      "1,000,000,000"
+     ]
+    ],
+    "note": "Cumulative exposure includes repeated passes and text generated during training. These are competition budgets, not measured human-equivalence thresholds.",
+    "ref": 2
+   },
+   "statements": [
+    {
+     "body": "BabyLM Challenge organizers",
+     "year": "2026",
+     "quote": "The BabyLM Challenge is a shared task aimed at closing the data-efficiency gap between human and machine language learners.",
+     "context": null,
+     "ref": 2,
+     "checked": true
+    },
+    {
+     "body": "DARPA, Learning with Less Labels programme",
+     "year": "2018",
+     "quote": "reduce the amount of data needed to adapt a model from millions to hundreds of labeled examples",
+     "context": "The programme target counts labeled adaptation examples.",
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "ARC Prize Foundation",
+     "year": "2026",
+     "quote": "We define AGI as a system’s ability to acquire any skill a human can, as efficiently as a human can.",
+     "context": "AGI means artificial general intelligence; this is the Foundation’s definition.",
+     "ref": 4,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "One learner matches human performance and experience budgets on withheld language and interactive tasks.",
+   "criterion": "Under a published human-comparison protocol, the same learning procedure reaches at least the human reference performance on unfamiliar language and interactive rule-learning tasks, using no more target-domain experience than the human participants. Target-specific rules are excluded from prior training, retrieval and auxiliary models. Experience includes demonstrations, feedback and repeated exposure; allowed general priors are specified separately. This is an Atlas fallback criterion. The cited results do not establish this combined demonstration.",
+   "set_by": "Technology Atlas fallback; no common externally published completion test was located.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches covered BabyLM rules and findings, DARPA LwLL targets, ARC-AGI-3 scoring and human-comparison learning papers. No common test combined withheld domain rules, fully counted experience and cross-domain human parity. The fallback retains the published goals of closing the human–machine learning gap and matching human acquisition efficiency, without introducing an unsupported apprenticeship-hour limit.",
+   "refs": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A learner matches human accuracy after one example of an unfamiliar handwritten character.",
+    "criterion": "On the published 20-choice Omniglot task, attain an error rate no greater than the human reference of 4.5% across 10 evaluation alphabets, after one target-character example. Background training uses separate alphabets. On 11 December 2015, Lake and colleagues reported 3.3% error for Bayesian program learning versus 4.5% for 40 human participants. The model learned its prior from 30 background alphabets. This demonstrates new-character classification within handwriting priors.",
+    "set_by": "Lake, Salakhutdinov and Tenenbaum, published Omniglot human-comparison protocol and Figure 6A; the reference concerns handwritten-character classification.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "On a challenging one-shot classification task, the model achieves human-level performance while outperforming recent deep learning approaches.",
+    "threshold_ref": 6,
+    "refs": [
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A language model beats BabyLM’s large-data reference scores using under 100 million pretraining words.",
+    "criterion": "Under the 2023 Strict corpus limit of 100 million words, exceed the aggregate reference scores: Llama 2 70B, 0.71; RoBERTa-Base, 0.70. The aggregate weights grammar tests at 50%, GLUE at 30% and MSGS generalization tests at 20%. ELC-BERT scored 0.74 among 24 Strict models and used over 450 corpus passes. Task fine-tuning adds data outside the pretraining cap.",
+    "set_by": "BabyLM organizers, published skyline-comparison convention, 2023 Findings Section 5.4 and Table 2. This is a comparative benchmark result, not a competition pass mark.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "BabyLM submissions that approach these scores can be considered to have greater sample efficiency than the skyline models",
+    "threshold_ref": 1,
+    "refs": [
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "An agent reaches a median human-normalized Atari score of 1 within 100,000 steps per game.",
+    "criterion": "On Atari 100k, train with at most 100,000 environment steps per game across 26 games, equivalent to 400,000 frames with frame skip 4, and attain a median human-normalized score of at least 1. The normalized score is (agent score − random score)/(human score − random score). The 2021 EfficientZero paper reports a median of 1.160 and mean of 1.904 over 32 seeds. This budget limits environment interaction; replay and learned-model simulation remain available.",
+    "set_by": "Atari 100k benchmark community; budget and human-normalization convention documented by Ye and colleagues in Sections 5.1–5.2 and Table 1.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "The benchmark allows the agent to interact with 100 thousand environment steps",
+    "threshold_ref": 7,
+    "refs": [
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "An agent scores 100% on ARC-AGI-3’s semi-private interactive environments.",
+    "criterion": "Reach 100% Relative Human Action Efficiency on ARC-AGI-3’s semi-private set under the Foundation’s scoring protocol. Scores compare action counts with first-time human baselines, cap level scores at 1.15, and aggregate weighted levels within games and then across games. On 3 September 2026, the Foundation reported GPT-6 Astra at 99.9% with its Provider Adapter and 62.7% with the Standard harness; these web results are not peer reviewed. Internal reasoning and tool calls do not count as environment actions.",
+    "set_by": "ARC Prize Foundation, ARC-AGI-3 Scoring Methodology; 100% is its published human-efficiency reference.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "To unlock a maximum game score of 100%, the AI must complete all levels, including the final one.",
+    "threshold_ref": 5,
+    "refs": [
+     5,
+     4
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No common externally published completion standard combining cross-domain learning, withheld rules and fully counted human-comparable experience was located.",
+   "No published conversion between language words, environment actions and apprenticeship hours was located.",
+   "No recognized milestone ladder joining the language and interactive benchmark protocols was located.",
+   "The opened Astra reports do not supply its total target-relevant training experience or the semi-private environment count underlying the headline score."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "report",
+    "url": "https://aclanthology.org/2023.conll-babylm.1.pdf",
+    "doi": "10.18653/v1/2023.conll-babylm.1",
+    "title": "Findings of the BabyLM Challenge: Sample-Efficient Pretraining on Developmentally Plausible Corpora",
+    "authors": "Warstadt A, Mueller A, Choshen L, Wilcox E, Zhuang C, Ciro J, et al.",
+    "container": "Proceedings of the BabyLM Challenge at the 27th Conference on Computational Natural Language Learning",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": "1-6",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "report",
+    "url": "https://aclanthology.org/2026.babylm-main.37.pdf",
+    "doi": "10.18653/2026.babylm-main.37",
+    "title": "Findings of the Fourth BabyLM Challenge & Workshop: Going Beyond English",
+    "authors": "Choshen L, Cotterell R, Gul MO, Jumelet J, Linzen T, Mueller A, et al.",
+    "container": "Proceedings of the Second BabyLM Workshop",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": "479-492",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 3,
+    "kind": "web",
+    "url": "https://www.darpa.mil/news/2018/reducing-data-demands-smart-machine",
+    "doi": null,
+    "title": "Reducing the Data Demands of Smart Machines",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "DARPA",
+    "year": "2018",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "web",
+    "url": "https://arcprize.org/blog/astra",
+    "doi": null,
+    "title": "OpenAI's GPT-6 Astra on ARC-AGI-3",
+    "authors": "Kamradt G",
+    "container": "ARC Prize",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "web",
+    "url": "https://docs.arcprize.org/methodology",
+    "doi": null,
+    "title": "ARC-AGI-3 Scoring Methodology",
+    "authors": "ARC Prize Foundation",
+    "container": "ARC-AGI-3 Docs",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://www.cs.toronto.edu/~rsalakhu/papers/LakeEtAl2015Science.pdf",
+    "doi": "10.1126/science.aab3050",
+    "title": "Human-level concept learning through probabilistic program induction",
+    "authors": "Lake BM, Salakhutdinov R, Tenenbaum JB",
+    "container": "Science",
+    "year": "2015",
+    "volume": "350",
+    "issue": "6266",
+    "pages": "1332-1338",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "report",
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2021/file/d5eca8dc3820cad9fe56a3bafda65ca1-Paper.pdf",
+    "doi": null,
+    "title": "Mastering Atari Games with Limited Data",
+    "authors": "Ye W, Liu S, Kurutach T, Abbeel P, Gao Y",
+    "container": "Advances in Neural Information Processing Systems 34",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 3 from Crossref, 0 from PubMed, 0 from arXiv, 4 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 7 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }
