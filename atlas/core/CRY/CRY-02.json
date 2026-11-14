@@ -203,7 +203,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Encryption from any hard-to-reverse calculation",
@@ -280,5 +281,334 @@
    "Security against quantum computers does not follow from the stated assumptions and attacker model."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "CRY-02",
+  "title": "Public-key encryption from one-way functions",
+  "definition": "A general construction turns any classical one-way function—efficient to compute but hard to invert on a uniformly random input—into public-key encryption, where anyone can encrypt with a published key and only the secret-key holder can decrypt. Security follows from one-wayness alone, using classical polynomial-time algorithms without an ideal random oracle or shared setup.",
+  "goal": {
+   "need": "The cited Merkle-style benchmark gives an eavesdropper roughly N² computation steps against N steps by the participants; its realization from one-way functions assumes exponential inversion hardness. Ordinary encryption requires security against every polynomial-time attacker. One-way functions already suffice for pseudorandom generators. Extending that implication to public-key encryption would put both capabilities on the same computational assumption.",
+   "need_refs": [
+    1,
+    2,
+    3
+   ],
+   "figures": null,
+   "statements": [
+    {
+     "body": "Applebaum, Barak and Wigderson, developers of public-key encryption constructions",
+     "year": "2009",
+     "quote": "A complete solution to this problem would be obtained by constructing public key encryption based solely on the existence of one-way functions.",
+     "context": "The problem is broadening the computational foundations of public-key encryption.",
+     "ref": 4,
+     "checked": true
+    },
+    {
+     "body": "Garg, Hajiabadi, Mahmoody and Mohammed, cryptographic construction and separation researchers",
+     "year": "2018",
+     "quote": "Understanding whether public-key encryption can be based on one-way functions is a fundamental open problem in cryptography.",
+     "context": null,
+     "ref": 5,
+     "checked": true
+    },
+    {
+     "body": "National Academies of Sciences, Engineering, and Medicine",
+     "year": "2022",
+     "quote": "known methods for constructing efficient public-key encryption and digital signature algorithms take advantage of sophisticated mathematical structures",
+     "context": "The committee describes the mathematical structure used by existing public-key constructions; it does not set an OWF-only construction target.",
+     "ref": 6,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "One-way functions imply public-key encryption secure against chosen-plaintext attack.",
+   "criterion": "Prove a general construction from any classical one-way function, with classical probabilistic polynomial-time key generation, encryption and decryption, without additional hardness or setup assumptions. Decryption error is negligible. Given the public key and two chosen equal-length messages, every probabilistic polynomial-time adversary identifies the encrypted message with probability at most 1/2 + negl(n). Here n is the security parameter; negl(n) is eventually below n^−c for every c > 0. A non-negligible distinguishing attack must yield an efficient inverter. The construction and reduction may use code.",
+   "set_by": "Cryptographic community; Barak’s Lecture 10 states the desired implication and defines its chosen-plaintext security game. Håstad et al. establish equivalence of the pseudorandom-generator and one-way-function assumptions.",
+   "set_by_kind": "community_convention",
+   "threshold_quote": "If the PRG assumption is true then there exists a CPA-secure public key encryption.",
+   "threshold_ref": 3,
+   "basis": "The published implication and CPA game specify the theoretical goal. A fixed quadratic work gap does not satisfy security against every polynomial-time attacker. Li, Ni and Zan’s 2023 construction claim is catalogued as a preprint. A separate preprint submitted on 28 September 2026 still describes Minicrypt assumptions as not known to imply public-key encryption.",
+   "refs": [
+    2,
+    3,
+    4,
+    7,
+    8
+   ],
+   "threshold_checked": true
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "Any one-way function yields a pseudorandom generator that stretches its seed by at least one bit.",
+    "criterion": "From any one-way function, construct a polynomial-time generator G that maps an n-bit uniform seed to at least n+1 bits. For every probabilistic polynomial-time distinguisher, the acceptance-probability difference between G’s output and a uniform string of the same length is negligible in n. Håstad, Impagliazzo, Levin and Luby proved this implication; their journal article was published on 7 April 1999.",
+    "set_by": "Cryptographic community; Håstad, Impagliazzo, Levin and Luby, Definition 3.5 and Theorem 6.3.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "The definition of a pseudorandom generator only requires the generator to stretch the input by at least one bit.",
+    "threshold_ref": 2,
+    "refs": [
+     2
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A random-oracle key-agreement protocol achieves a quadratic oracle-query gap.",
+    "criterion": "In the random-oracle model, honest parties use O(N) oracle queries to agree on a secret, while an eavesdropper making o(N²) queries recovers it with probability o(1). A random oracle is an ideal uniformly random function accessible to all parties. Merkle published the puzzle construction in 1978; Barak and Mahmoody-Ghidary give its oracle-query analysis and prove a matching quadratic upper bound. Query counts do not bound the attacker’s computation between queries.",
+    "set_by": "Merkle’s published puzzle protocol; its random-oracle security benchmark is formalized by Barak and Mahmoody-Ghidary.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "work which increases as the square of the work required of the two communicants to select the key.",
+    "threshold_ref": 9,
+    "refs": [
+     9,
+     10
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "Key agreement from exponentially hard one-way functions attains a nearly quadratic time gap.",
+    "criterion": "Assume a function on k-bit inputs cannot be inverted with probability above 2^(−αk) in time 2^(αk), where α ≥ 1/2 − δ and 0 < δ < 1/10 are constants. Obtain key agreement with honest-party running time N for which adversaries running in time at most N^(2−10δ) recover the secret with probability o(1). Biham, Goren and Ishai proved this in 2008; Barak and Mahmoody-Ghidary state these quantitative parameters. This assumes exponential hardness and gives a fixed polynomial time gap.",
+    "set_by": "Biham, Goren and Ishai’s TCC 2008 protocol; quantitative parameters as stated by Barak and Mahmoody-Ghidary.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "a key agreement protocol resisting adversaries whose running time is nearly quadratic in the running time of the honest parties.",
+    "threshold_ref": 11,
+    "refs": [
+     11,
+     10,
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "Key agreement from any one-way function resists every polynomial-time eavesdropper.",
+    "criterion": "From an arbitrary classical one-way function alone, construct polynomial-time parties communicating classically over a public channel, without an ideal oracle or shared setup. Their n-bit outputs agree with probability 1 − negl(n); every probabilistic polynomial-time eavesdropper given the transcript recovers the first party’s output with probability at most negl(n). Ball et al. characterize the OWF-to-key-agreement question through a reduction between two promise problems. Interaction is allowed; obtaining public-key encryption remains a further step.",
+    "set_by": "Cryptographic community; Ball, Liu, Mazor and Pass, Definition 2.11 and the stated OWF-to-key-agreement question. The security definition is independent of the underlying assumption.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "Such a protocol is a key-agreement protocol if it is a (1 − neg(n), neg(n))-key-agreement.",
+    "threshold_ref": 12,
+    "refs": [
+     12
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No government programme or standards-body document specifying an OWF-to-PKE completion test or staged roadmap was found.",
+   "No peer-reviewed validation of Li, Ni and Zan’s 2023 construction claim was found.",
+   "No OWF-only construction meeting the interactive key-agreement criterion was found in the located peer-reviewed literature.",
+   "The ACM page for the 1989 Impagliazzo–Rudich paper returned HTTP 403; its CRYPTO ’88 version was accessible through Springer."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://link.springer.com/article/10.1007/s00145-024-09518-1",
+    "doi": "10.1007/s00145-024-09518-1",
+    "title": "On Building Fine-Grained One-Way Functions from Strong Average-Case Hardness",
+    "authors": "Brzuska C, Couteau G",
+    "container": "J Cryptol",
+    "year": "2025",
+    "volume": "38",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "journal",
+    "url": "https://www.cs.bu.edu/fac/lnd/pdf/hill.pdf",
+    "doi": "10.1137/S0097539793244708",
+    "title": "A Pseudorandom Generator from any One-way Function",
+    "authors": "HÅstad J, Impagliazzo R, Levin LA, Luby M",
+    "container": "SIAM J. Comput.",
+    "year": "1999",
+    "volume": "28",
+    "issue": "4",
+    "pages": "1364-1396",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 3,
+    "kind": "web",
+    "url": "https://www.boazbarak.org/cs127spring16/chap10_public_key_intro",
+    "doi": null,
+    "title": "Lecture 10: Public key cryptography",
+    "authors": "Barak B.",
+    "container": "Boaz Barak",
+    "year": "2016",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "report",
+    "url": "https://www.wisdom.weizmann.ac.il/~bennyap/pubs/ncpkcFull1.pdf",
+    "doi": "10.1145/1806689.1806715",
+    "title": "Public-Key Cryptography from Different Assumptions",
+    "authors": "Applebaum B, Barak B, Wigderson A",
+    "container": "Proceedings of the forty-second ACM symposium on Theory of computing",
+    "year": "2010",
+    "volume": null,
+    "issue": null,
+    "pages": "171-180",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 5,
+    "kind": "book",
+    "url": "https://pure.psu.edu/en/publications/limits-on-the-power-of-garbling-techniques-for-public-key-encrypt/",
+    "doi": "10.1007/978-3-319-96878-0_12",
+    "title": "Limits on the power of garbling techniques for public-key encryption",
+    "authors": "Garg S, Hajiabadi M, Mahmoody M, Mohammed A",
+    "container": "Lecture Notes in Computer Science",
+    "year": "2018",
+    "volume": null,
+    "issue": null,
+    "pages": "335-364",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 6,
+    "kind": "report",
+    "url": "https://www.nationalacademies.org/read/26168/chapter/4",
+    "doi": "10.17226/26168",
+    "title": "Cryptography and the Intelligence Community: The Future of Encryption",
+    "authors": "Committee on the Future of Encryption, Intelligence Community Studies Board, Division on Engineering and Physical Sciences, National Academies of Sciences, Engineering, and Medicine",
+    "container": "National Academies Press",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "preprint",
+    "url": "https://eprint.iacr.org/2023/1260",
+    "doi": null,
+    "title": "Public-Key Encryption from Average Hard NP Language",
+    "authors": "Li H, Ni P, Zan Y.",
+    "container": "Cryptology ePrint Archive",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 8,
+    "kind": "preprint",
+    "url": "https://arxiv.org/abs/2609.35633",
+    "doi": "10.48550/arXiv.2609.35633",
+    "title": "Succinct Arguments for QMA from Collapsing Hash Functions",
+    "authors": "Bartusek J, Malavolta G",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 9,
+    "kind": "journal",
+    "url": "https://people.csail.mit.edu/vinodv/COURSES/MAT302-S13/MerklePuzzlepaper.pdf",
+    "doi": "10.1145/359460.359473",
+    "title": "Secure Communications Over Insecure Channels",
+    "authors": "Merkle RC",
+    "container": "Commun. ACM",
+    "year": "1978",
+    "volume": "21",
+    "issue": "4",
+    "pages": "294-299",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 10,
+    "kind": "report",
+    "url": "https://www.boazbarak.org/Papers/merkle.pdf",
+    "doi": "10.1007/978-3-642-03356-8_22",
+    "title": "Merkle Puzzles are Optimal — an O(n²)-query attack on key exchange from a random oracle",
+    "authors": "Barak B, Mahmoody-Ghidary M",
+    "container": "Lecture Notes in Computer Science",
+    "year": "2009",
+    "volume": null,
+    "issue": null,
+    "pages": "374-390",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 11,
+    "kind": "book",
+    "url": "https://link.springer.com/chapter/10.1007/978-3-540-78524-8_4",
+    "doi": "10.1007/978-3-540-78524-8_4",
+    "title": "Basing Weak Public-Key Cryptography on Strong One-Way Functions",
+    "authors": "Biham E, Goren YJ, Ishai Y",
+    "container": "Lecture Notes in Computer Science",
+    "year": "2008",
+    "volume": null,
+    "issue": null,
+    "pages": "55-72",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 12,
+    "kind": "report",
+    "url": "https://eccc.weizmann.ac.il/report/2024/055/download/",
+    "doi": "10.1109/FOCS57990.2023.00034",
+    "title": "Kolmogorov Comes to Cryptomania: On Interactive Kolmogorov Complexity and Key-Agreement",
+    "authors": "Ball M, Liu Y, Mazor N, Pass R",
+    "container": "2023 IEEE 64th Annual Symposium on Foundations of Computer Science (FOCS)",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": "458-483",
+    "citation_source": "crossref"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 9 from Crossref, 0 from PubMed, 1 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 8 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }

@@ -224,7 +224,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Software with affordable proof that it works",
@@ -319,5 +320,369 @@
    "The ordinary-development baseline, allowed cost multiple, maintenance interval and rules for counting code remain to be defined."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "CSC-04",
+  "title": "Proof-carrying code at development and maintenance cost parity",
+  "definition": "Production machine code would carry independently checkable proofs of its stated behaviour, memory safety (valid memory accesses) and information flow (permitted transfers between security domains). Total development and maintenance cost, including proofs, would not exceed that of equivalent software developed and tested without proofs.",
+  "goal": {
+   "need": "The seL4 team found 144 of 160 C defects during verification of its first kernel in 2009. Its design-through-verification effort included research, tools and libraries, so it does not isolate proof overhead. Reducing the effort needed to obtain and maintain such evidence is the economic goal.",
+   "need_refs": [
+    1
+   ],
+   "figures": {
+    "caption": "The first seL4 functional-correctness proof, completed in 2009",
+    "columns": [
+     "Quantity",
+     "Reported value"
+    ],
+    "rows": [
+     [
+      "Verified C implementation",
+      "7,500 lines"
+     ],
+     [
+      "Isabelle proof scripts",
+      "200,000 lines"
+     ],
+     [
+      "Design through verification",
+      "About 25 person-years"
+     ]
+    ],
+    "note": "One kernel project; effort includes design, documentation, implementation, verification, research, tools and libraries. The source provides no matched development control.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "Microsoft Research (Tony Hoare’s research proposal)",
+     "year": "2003",
+     "quote": "A verifying compiler uses mathematical and logical reasoning to check the correctness of the programs that it compiles.",
+     "context": null,
+     "ref": 2,
+     "checked": true
+    },
+    {
+     "body": "DARPA, High-Assurance Cyber Military Systems programme",
+     "year": "undated",
+     "quote": "HACMS seeks a synthesizer capable of producing a machine-checkable proof that the generated code satisfies functional specifications as well as security and safety policies.",
+     "context": null,
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "DARPA, Pipelined Reasoning of Verifiers Enabling Robust Systems programme",
+     "year": "2023",
+     "quote": "make formal methods accessible to non-experts (e.g., software developers and systems engineers) while minimizing impact on their existing processes and performance.",
+     "context": null,
+     "ref": 4,
+     "checked": null
+    }
+   ]
+  },
+  "completion": {
+   "title": "Production code carries executable-level proofs at development and maintenance cost parity.",
+   "criterion": "For a production software system, independently check proofs that its delivered executable meets a published functional specification, memory-safety rules and information-flow policy, under explicit execution assumptions. Demonstrate total development and maintenance cost ≤1.0 times a matched implementation-and-testing baseline with the same functionality, performance requirements and change workload. Include labour for specification, integration, testing, proof construction and repair, plus tools and computation. Fix the baseline, costing method, workload and maintenance interval before comparison.",
+   "set_by": "Atlas operational definition; no joint external acceptance test located.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searched Hoare’s challenge, DARPA HACMS and PROVERS rules, and formal-verification standards, cost benchmarks and industrial acceptance thresholds. No published test combining executable-level proofs with whole-lifecycle cost parity was found. The 1.0 cost ratio operationalises ordinary development cost; it is an Atlas choice. PROVERS’s proof-edit percentage does not measure total cost.",
+   "refs": [
+    2,
+    3,
+    4
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A code consumer validates a supplied binary’s safety proof before executing the binary.",
+    "criterion": "The consumer checks an accompanying proof against its safety policy. In Necula and Lee’s 1996 packet-filter experiment, reads were confined to packet and scratch memory, writes to scratch memory, branches were forward, and protected registers were preserved, conditional on valid input addresses. Four DEC Alpha assembly packet filters were certified against that policy.",
+    "set_by": "Proof-carrying-code research convention; Necula and Lee’s OSDI 1996 protocol, instantiated for packet filters.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "Kernel safety is ensured by validating the safety proof.",
+    "threshold_ref": 5,
+    "refs": [
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A software implementation has a machine-checked proof that it refines its functional specification.",
+    "criterion": "A machine-checked refinement proof establishes that implementation behaviour conforms to the abstract functional specification under stated assumptions. The 2009 seL4 result met this test for one ARMv6 kernel at C-source level. Compiler correctness, assembly, boot code, cache management and hardware remained assumptions.",
+    "set_by": "Functional-verification community’s refinement criterion, instantiated by the seL4 team in SOSP 2009.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "Functional correctness means here that the implementation always strictly follows our high-level abstract specification of kernel behaviour.",
+    "threshold_ref": 6,
+    "refs": [
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m3",
+    "title": "A compiler has a machine-checked semantic-preservation proof from its source language to assembly.",
+    "criterion": "Successful compilation is connected by a machine-checked semantic-preservation theorem to the source and assembly semantics; guarantees respect the theorem’s treatment of undefined source behaviour. CompCert 3.18, dated 31 August 2026, supplies such proofs for CompCert C, a large C subset, targeting ARM, PowerPC, RISC-V and x86 assembly. This result stops at assembly rather than establishing the entire deployed executable.",
+    "set_by": "Compiler-verification community’s semantic-preservation criterion, formalised in CompCert’s documentation and Compiler module.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "the fact that the generated assembly code is semantically equivalent to its source program",
+    "threshold_ref": 7,
+    "refs": [
+     7,
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "A system’s executable inherits functional-correctness and information-flow guarantees from its source.",
+    "criterion": "Binary refinement connects the executable to the verified source semantics, carrying the applicable functional and security theorems through compilation. seL4 reports this proof stack in supporting configurations. Its 2013 translation-validation result covered all previously verified functions of one kernel compiled by GCC 4.5.1 at optimisation level 1 for ARM; assembly routines and volatile hardware accesses were excluded. The validator, SMT solvers and machine model remained part of the trust assumptions.",
+    "set_by": "Binary-refinement and information-flow verification conventions; Sewell, Myreen and Klein’s PLDI 2013 result and the seL4 proof statements.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "Formally, we prove that the binary is a refinement of the stated C source semantics.",
+    "threshold_ref": 9,
+    "refs": [
+     9,
+     10
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m5",
+    "title": "A software system meets PROVERS targets for >10 property classes and 1% manual proof edits.",
+    "criterion": "On a Phase 3 system, traditional developers demonstrate proofs for >10 classes of system properties; <5% of serious red-team findings remain; the target for proof lines requiring manual change after updates and maintenance is 1%. These are DARPA’s tentative programme targets. As a precursor, the 2018 s2n paper reports 956 proof replays after deployment in November 2016 and three manual proof updates over one year. Some replays involved no change to verified code; this does not measure the fraction of proof lines edited.",
+    "set_by": "DARPA, PROVERS BAA HR001123S0020, Table 1, dated 29 March 2023; thresholds are tabulated. The opened text is mirrored by GovTribe. The FAQ specifies non-expert participation.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     4,
+     11,
+     12
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No external acceptance test combining executable-level proofs with total development and maintenance cost parity was located.",
+   "No public PROVERS Phase 3 evaluation demonstrating all three Table 1 targets together was located.",
+   "SAM.gov exposed no readable BAA text; the PROVERS thresholds were read in GovTribe’s transcription.",
+   "No published demonstration located combined all three executable-level properties with the specified cost-parity comparison."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "web",
+    "url": "https://trustworthy.systems/projects/OLD/l4.verified/numbers",
+    "doi": null,
+    "title": "Proof Statistics",
+    "authors": "Trustworthy Systems",
+    "container": "Trustworthy Systems",
+    "year": "undated; 2009 results",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 2,
+    "kind": "journal",
+    "url": "https://www.cs.cmu.edu/~15811/papers/grand-challenge.pdf",
+    "doi": "10.1145/602382.602403",
+    "title": "The Verifying Compiler: A Grand Challenge for Computing Research",
+    "authors": "Hoare T",
+    "container": "J. ACM",
+    "year": "2003",
+    "volume": "50",
+    "issue": "1",
+    "pages": "63-69",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 3,
+    "kind": "web",
+    "url": "https://www.darpa.mil/research/programs/high-assurance-cyber-military-systems",
+    "doi": null,
+    "title": "High-Assurance Cyber Military Systems (HACMS)",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "DARPA",
+    "year": "undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "report",
+    "url": "https://govtribe.com/file/government-file/hr001123s0020-dot-pdf",
+    "doi": null,
+    "title": "Pipelined Reasoning Of Verifiers Enabling Robust Systems (PROVERS)",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "DARPA; text mirrored by GovTribe",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "book",
+    "url": "https://www.usenix.org/legacy/publications/library/proceedings/osdi96/full_papers/necula/html/node11.html",
+    "doi": "10.1145/238721.238781",
+    "title": "Safe Kernel Extensions Without Run-Time Checking",
+    "authors": "Necula GC, Lee P",
+    "container": "Proceedings of the second USENIX symposium on Operating systems design and implementation",
+    "year": "1996",
+    "volume": null,
+    "issue": null,
+    "pages": "229-243",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 6,
+    "kind": "book",
+    "url": "https://sel4.systems/Research/pdfs/sel4-formal-verification-os-kernel.pdf",
+    "doi": "10.1145/1629575.1629596",
+    "title": "seL4: Formal Verification of an OS Kernel",
+    "authors": "Klein G, Elphinstone K, Heiser G, Andronick J, Cock D, Derrin P, et al.",
+    "container": "Proceedings of the ACM SIGOPS 22nd symposium on Operating systems principles",
+    "year": "2009",
+    "volume": null,
+    "issue": null,
+    "pages": "207-220",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "web",
+    "url": "https://compcert.org/doc/index.html",
+    "doi": null,
+    "title": "The CompCert verified compiler",
+    "authors": "CompCert development team",
+    "container": "CompCert",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 8,
+    "kind": "web",
+    "url": "https://compcert.org/doc/html/compcert.driver.Compiler.html",
+    "doi": null,
+    "title": "Module Compiler",
+    "authors": "CompCert development team",
+    "container": "CompCert",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 9,
+    "kind": "book",
+    "url": "https://trustworthy.systems/publications/nicta_full_text/6449.pdf",
+    "doi": "10.1145/2491956.2462183",
+    "title": "Translation Validation for a Verified OS Kernel",
+    "authors": "Sewell TAL, Myreen MO, Klein G",
+    "container": "Proceedings of the 34th ACM SIGPLAN Conference on Programming Language Design and Implementation",
+    "year": "2013",
+    "volume": null,
+    "issue": null,
+    "pages": "471-482",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 10,
+    "kind": "web",
+    "url": "https://sel4.systems/Verification/proofs.html",
+    "doi": null,
+    "title": "seL4 Proofs",
+    "authors": "seL4 Foundation",
+    "container": "seL4",
+    "year": "undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 11,
+    "kind": "report",
+    "url": "https://www.darpa.mil/sites/default/files/PROVERS-FAQ_05042023_FINAL.pdf",
+    "doi": null,
+    "title": "Pipelined Reasoning of Verifiers Enabling Robust Systems (PROVERS): Frequently Asked Questions (FAQ)",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "DARPA",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 12,
+    "kind": "book",
+    "url": "https://d1.awsstatic.com/Security/pdfs/Continuous_Formal_Verification_Of_Amazon_s2n.pdf",
+    "doi": "10.1007/978-3-319-96142-2_26",
+    "title": "Continuous Formal Verification of Amazon s2n",
+    "authors": "Chudnov A, Collins N, Cook B, Dodds J, Huffman B, MacCárthaigh C, et al.",
+    "container": "Lecture Notes in Computer Science",
+    "year": "2018",
+    "volume": null,
+    "issue": null,
+    "pages": "430-446",
+    "citation_source": "crossref"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4",
+   "m5"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 5 from Crossref, 0 from PubMed, 0 from arXiv, 7 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 4 found, 0 not found, 3 with no readable copy."
+   }
+  ]
  }
 }

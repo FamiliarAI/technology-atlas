@@ -249,7 +249,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Quantum computers that finish large, useful calculations",
@@ -358,5 +359,436 @@
    "The proposed factoring size is a milestone criterion, rather than an agreed standard; projected resources also depend on unresolved assumptions."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "CSC-02",
+  "title": "Utility-scale fault-tolerant quantum computation",
+  "definition": "A programmable quantum computer runs application workloads while correcting errors in logical qubits, quantum information encoded across physical qubits. Its protected gates can approximate arbitrary quantum circuits; utility scale uses DARPA's test that computational value exceeds lifetime acquisition, operating and maintenance costs.",
+  "goal": {
+   "need": "Shor's algorithm factors integers in a number of steps polynomial in their bit length, making RSA factoring a concrete application. Gidney's RSA-2048 estimate assumes a square nearest-neighbour layout, 0.1% gate errors, 1 μs error-correction cycles and 10 μs control response. The resource requirements below are a preprint estimate, not an executed cryptanalytic calculation.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": {
+    "caption": "Gidney's estimated resources for fault-tolerant RSA factoring",
+    "columns": [
+     "Workload",
+     "Physical qubits",
+     "Runtime"
+    ],
+    "rows": [
+     [
+      "Factor a 2,048-bit RSA integer",
+      "<1,000,000",
+      "<1 week"
+     ]
+    ],
+    "note": "Conditional resource estimate from a preprint; operating assumptions are stated above.",
+    "ref": 2
+   },
+   "statements": [
+    {
+     "body": "Defense Advanced Research Projects Agency, Quantum Benchmarking Initiative",
+     "year": "2025",
+     "quote": "approaches for constructing a utility-scale fault-tolerant quantum computer and computational workflows that include quantum compute steps.",
+     "context": "Scope of the QBI 2026 opportunity, published on 14 November 2025.",
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "IBM",
+     "year": "2025",
+     "quote": "a large-scale, fault-tolerant quantum computer capable of running quantum circuits comprising 100 million quantum gates on 200 logical qubits.",
+     "context": "IBM's specification for its Starling development target.",
+     "ref": 4,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "A universal fault-tolerant quantum computer delivers computational value greater than its lifetime cost.",
+   "criterion": "An operating programmable computer with a universal set of fault-tolerant logical gates delivers computational value greater than its cost: value/cost > 1. DARPA's QBI measures value in dollars and includes the customer's acquisition, operating and maintenance expenses over a reasonable system lifetime; preceding R&D is excluded. The valuation is application- and system-specific. A validated construction plan alone does not establish operation.",
+   "set_by": "DARPA, QBI solicitation DARPA-PS-24-26, section II.B.3 and footnote 4, with valuation clarified in Q&A 8. Universal logical gates follow the field convention exemplified by Postler et al.",
+   "set_by_kind": "government_programme",
+   "threshold_quote": "one whose computational value exceeds its costs",
+   "threshold_ref": 5,
+   "basis": "The universal logical-gate requirement defines the computing capability. DARPA's qualitative value-over-cost definition supplies the application-scale test without imposing an arbitrary factoring size or qubit count. QBI Stage C assesses readiness for construction, which precedes demonstrating this criterion in an operating system.",
+   "refs": [
+    5,
+    6,
+    7
+   ],
+   "threshold_checked": null
+  },
+  "case_label": "Hardware platform",
+  "cases": [
+   "Superconducting circuits",
+   "Trapped ions",
+   "Neutral atoms",
+   "Optical photonics",
+   "Silicon spins"
+  ],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "An error-corrected logical qubit outlives its best constituent physical qubit.",
+    "criterion": "The logical storage lifetime exceeds that of the best constituent physical qubit under the comparison protocol. On 9 December 2024, Google reported a 101-physical-qubit, distance-7 memory with lifetime ratio 2.4 ± 0.3. The correction published on 28 April 2026 amends repetition-code figure labels.",
+    "set_by": "Quantum-error-correction community's memory breakeven convention, explicitly applied by Google Quantum AI; the cited experiment used superconducting circuits.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "exceeding the lifetime of its best physical qubit",
+    "threshold_ref": 8,
+    "refs": [
+     8,
+     9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "Increasing code distance suppresses encoded errors exponentially, with suppression factor Λ > 1.",
+    "criterion": "At comparable physical noise, increasing code distance reduces logical errors exponentially; fitted suppression Λ exceeds 1. Code distance is the minimum weight of a nontrivial logical Pauli operator. Google reported Λ = 2.14 ± 0.02 for distances 3, 5 and 7 on 9 December 2024. Quantinuum's preprint of 16 October 2026 reports distance-7 memory error 5 (+4/−2) × 10⁻⁶ per cycle from 3 failures in 29,000 shots of 20 cycles; two-qubit Clifford tests used distances 3 and 5, with all decoding offline. Arrays of up to 448 neutral atoms gave Λ = 2.14 ± 0.13 over four correction rounds, published on 10 November 2025.",
+    "set_by": "Quantum-error-correction community's below-threshold scaling criterion, applied in the cited superconducting, trapped-ion and neutral-atom experiments.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "suppressing logical errors exponentially with code distance once physical error rates fall below a critical threshold.",
+    "threshold_ref": 10,
+    "refs": [
+     8,
+     10,
+     11
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A processor executes a fault-tolerant universal gate set on logical qubits.",
+    "criterion": "Execute logical one-qubit and entangling operations forming a universal gate set, with fault-tolerant constructions that prevent correctable faults spreading into uncorrectable errors. Universality permits arbitrary quantum circuits to be approximated to arbitrary accuracy. On 25 May 2022, Postler et al. reported two encoded trapped-ion qubits, a logical controlled-NOT and magic-state-injected T gate. Bluvstein et al. demonstrated neutral-atom universal-logic ingredients using [[15,1,3]] code blocks, published on 10 November 2025.",
+    "set_by": "Quantum-computing community's universal fault-tolerant gate-set criterion; Postler et al. apply it to two trapped-ion logical qubits.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "a fault-tolerant universal set of gates on two logical qubits",
+    "threshold_ref": 7,
+    "refs": [
+     7,
+     11
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "A decoder keeps pace with error correction and supplies corrections before dependent logical gates.",
+    "criterion": "The integrated decoder processes error syndromes at their production rate, or close enough to avoid exponential backlog, and returns corrections before dependent logical operations. Throughput and response latency are separate requirements. Google's report of 9 December 2024 tested a distance-5 memory on 72 physical qubits for up to 10⁶ cycles: mean decoder latency was 63 ± 17 μs, with ten shots per duration. Feedback was not implemented, so this establishes memory throughput rather than the complete gate-feedback requirement.",
+    "set_by": "Real-time-decoding requirements published by Battistel et al. in Nano Futures; timing requirements depend on the hardware platform.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "the decoder needs to process the syndrome data at the same rate as it is received or close to it",
+    "threshold_ref": 12,
+    "refs": [
+     12,
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "An error-corrected processor executes circuits containing about one million logical operations.",
+    "criterion": "Execute circuits with roughly 10⁶ quantum operations on protected logical qubits. Preskill's megaquop regime is explicitly approximate. His example of order 100 logical qubits and depth 10,000 is illustrative, and his order-10⁻⁶ error per logical gate is a heuristic rather than an acceptance limit. QuEra's roadmap adopts the megaquop designation for Libra. None of the cited experimental results establishes this circuit workload.",
+    "set_by": "Preskill's published megaquop convention, also adopted in QuEra's roadmap; this is an approximate named regime rather than a formal standard.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "mega means not precisely a million but somewhere in the vicinity of a million.",
+    "threshold_ref": 13,
+    "refs": [
+     13,
+     14
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m6",
+    "title": "Hardware prototypes pass DARPA's readiness test for constructing a utility-scale quantum computer.",
+    "criterion": "Components and major hardware prototypes pass DARPA's system-specific evaluation, and DARPA judges the approach ready to begin final design and construction of a utility-scale system. This requires successful completion of QBI Stage C. DARPA's list current on 8 October 2026 places Atom Computing, Diraq, IBM, IonQ, Microsoft and PsiQuantum in active Stage C; admission to Stage C does not satisfy this milestone.",
+    "set_by": "DARPA, QBI Stage C completion criterion, published in its solicitation and Proposers Day presentation of 3 September 2024.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "ready to immediately begin the final design and\nconstruction of a USQC whose value exceeds its cost",
+    "threshold_ref": 15,
+    "refs": [
+     15,
+     16
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No common fixed-workload and fixed-success-probability acceptance benchmark was found across the searched QBI documents, IBM roadmap and megaquop literature.",
+   "No public completed QBI Stage C hardware-validation assessment was found.",
+   "Sources located in targeted optical-photonic and silicon-spin searches did not establish attainment of milestones m1–m4 for those platforms."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://arxiv.org/abs/quant-ph/9508027",
+    "doi": "10.1137/S0097539795293172",
+    "title": "Polynomial-Time Algorithms for Prime Factorization and Discrete Logarithms on a Quantum Computer",
+    "authors": "Shor PW",
+    "container": "SIAM J. Comput.",
+    "year": "1997",
+    "volume": "26",
+    "issue": "5",
+    "pages": "1484-1509",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "preprint",
+    "url": "https://arxiv.org/abs/2505.15917",
+    "doi": "10.48550/arXiv.2505.15917",
+    "title": "How to factor 2048 bit RSA integers with less than a million noisy qubits",
+    "authors": "Gidney C",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 3,
+    "kind": "web",
+    "url": "https://www.darpa.mil/work-with-us/opportunities/darpa-pa-26-02",
+    "doi": null,
+    "title": "QBI 2026",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "DARPA",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "web",
+    "url": "https://www.ibm.com/quantum/blog/large-scale-ftqc",
+    "doi": null,
+    "title": "How IBM will build the world's first large-scale, fault-tolerant quantum computer",
+    "authors": "IBM",
+    "container": "IBM Quantum Computing Blog",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "report",
+    "url": "https://govtribe.com/file/government-file/darpa-ps-24-26-dot-pdf",
+    "doi": null,
+    "title": "Program Solicitation Quantum Benchmarking Initiative (QBI)",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "DARPA; government document reproduced by GovTribe",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "report",
+    "url": "https://www.darpa.mil/sites/default/files/attachment/2025-02/darpa-program-qbi-q-a-2-2025.pdf",
+    "doi": null,
+    "title": "Quantum Benchmarking Initiative (QBI) Questions and Answers (Q&A)",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "DARPA",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 7,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41586-022-04721-1",
+    "doi": "10.1038/s41586-022-04721-1",
+    "title": "Demonstration of fault-tolerant universal quantum gate operations",
+    "authors": "Postler L, Heuβen S, Pogorelov I, Rispler M, Feldker T, Meth M, et al.",
+    "container": "Nature",
+    "year": "2022",
+    "volume": "605",
+    "issue": "7911",
+    "pages": "675-680",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 8,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41586-024-08449-y",
+    "doi": "10.1038/s41586-024-08449-y",
+    "title": "Quantum error correction below the surface code threshold",
+    "authors": "Google Quantum AI and Collaborators, Acharya R, Abanin DA, Aghababaie-Beni L, Aleiner I, Andersen TI, et al.",
+    "container": "Nature",
+    "year": "2025",
+    "volume": "638",
+    "issue": "8052",
+    "pages": "920-926",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 9,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41586-026-10559-8?error=cookies_not_supported",
+    "doi": "10.1038/s41586-026-10559-8",
+    "title": "Author Correction: Quantum error correction below the surface code threshold",
+    "authors": "Google Quantum AI and Collaborators, Acharya R, Abanin DA, Aghababaie-Beni L, Aleiner I, Andersen TI, et al.",
+    "container": "Nature",
+    "year": "2026",
+    "volume": "653",
+    "issue": "8114",
+    "pages": "E5-E5",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 10,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2610.24077v1",
+    "doi": "10.48550/arXiv.2610.24077",
+    "title": "Quantum error correction well below the color code threshold",
+    "authors": "Lavasani A, Reed AP, Dreiling JM, Park AJ, Mills M, Puviani M, et al.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 11,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41586-025-09848-5?error=cookies_not_supported",
+    "doi": "10.1038/s41586-025-09848-5",
+    "title": "A fault-tolerant neutral-atom architecture for universal quantum computation",
+    "authors": "Bluvstein D, Geim AA, Li SH, Evered SJ, Bonilla Ataides JP, Baranes G, et al.",
+    "container": "Nature",
+    "year": "2026",
+    "volume": "649",
+    "issue": "8095",
+    "pages": "39-46",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 12,
+    "kind": "journal",
+    "url": "https://arxiv.org/html/2303.00054v2",
+    "doi": "10.1088/2399-1984/aceba6",
+    "title": "Real-Time Decoding for Fault-Tolerant Quantum Computing: Progress, Challenges and Outlook",
+    "authors": "Battistel F, Chamberland C, Johar K, Overwater RWJ, Sebastiano F, Skoric L, et al.",
+    "container": "Nano Futures",
+    "year": "2023",
+    "volume": "7",
+    "issue": "3",
+    "pages": "032003",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 13,
+    "kind": "journal",
+    "url": "https://arxiv.org/html/2502.17368v2",
+    "doi": "10.1145/3723153",
+    "title": "Beyond NISQ: The Megaquop Machine",
+    "authors": "Preskill J",
+    "container": "ACM Trans. Quantum Comput.",
+    "year": "2025",
+    "volume": "6",
+    "issue": "3",
+    "pages": "1-7",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 14,
+    "kind": "web",
+    "url": "https://www.quera.com/our-quantum-roadmap",
+    "doi": null,
+    "title": "The Road to Commercially Valuable Fault-Tolerant Quantum Computing",
+    "authors": "QuEra Computing",
+    "container": "QuEra",
+    "year": "Undated; accessed 14 November 2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 15,
+    "kind": "report",
+    "url": "https://www.darpa.mil/sites/default/files/attachment/2024-12/qbi-proposers-day-2024-program-manager.pdf",
+    "doi": null,
+    "title": "Quantum Benchmarking Initiative (QBI)",
+    "authors": "Altepeter J; Defense Advanced Research Projects Agency",
+    "container": "DARPA",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 16,
+    "kind": "web",
+    "url": "https://www.darpa.mil/research/programs/quantum-benchmarking-initiative",
+    "doi": null,
+    "title": "QBI",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "DARPA",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4",
+   "m5",
+   "m6"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 7 from Crossref, 0 from PubMed, 2 from arXiv, 7 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 8 found, 0 not found, 1 with no readable copy."
+   }
+  ]
  }
 }

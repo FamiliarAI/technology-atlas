@@ -135,7 +135,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "sources": [
   "https://www.nrel.gov/docs/fy22osti/78457.pdf"
@@ -224,5 +225,300 @@
    "The network diversity, failure coverage, test duration and safety thresholds needed to judge success remain open choices."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "ELE-09",
+  "title": "Autonomous restoration of AC distribution networks",
+  "definition": "Alternating-current (AC) distribution networks automatically isolate faults, energise healthy sections as islands supplied by local resources, and synchronise them back to the grid. Protection, switches and grid-forming inverters, which establish voltage and frequency, coordinate across vendors through specified communication failures.",
+  "goal": {
+   "need": "U.S. electricity customers averaged 11 hours of interruptions in 2024, with major events accounting for 80% of interruption hours. EPRI’s utility-microgrid tests target autonomous resupply and reconnection without further customer interruptions.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": {
+    "caption": "U.S. electricity interruptions in 2024",
+    "columns": [
+     "Quantity",
+     "Value"
+    ],
+    "rows": [
+     [
+      "Average interruption duration",
+      "11 hours per customer"
+     ],
+     [
+      "Major-event share of interruption hours",
+      "80%"
+     ]
+    ],
+    "note": "Major events include hurricanes.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "U.S. Department of Energy, Office of Electricity",
+     "year": "2026",
+     "quote": "Autonomous self-healing protection schemes for a fractal grid",
+     "context": "The March 2026 draft microgrid control and protection strategy lists this among its research targets for interconnected microgrids.",
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "Universal Interoperability for Grid-Forming Inverters Consortium",
+     "year": "2022",
+     "quote": "The 20+MW demonstration Area is tasked to demonstrate the deployment of GFM technologies from multiple vendors that provide a range of grid services",
+     "context": "GFM means grid-forming. This passage describes the consortium’s demonstration work area.",
+     "ref": 4,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "A multi-vendor distribution network restores and reconnects autonomously through communication failures.",
+   "criterion": "An operating AC distribution network with equipment from multiple vendors completes an operator-specified field test without restoration commands from a human. It isolates the specified fault, black-starts healthy de-energised sections, supplies the resulting islands and synchronises them back to the grid while designated operator–resource communication links are interrupted. Load service, voltage, frequency, protection and synchronisation remain within the operator’s specified limits, given the available generation, stored energy and intact electrical paths.",
+   "set_by": "Technology Atlas, combining the cited restoration, field-validation and communication requirements.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searched DOE microgrid control and protection plans, IEEE 2030.8’s published scope, EPRI’s utility-controller protocol and UNIFI Version 3. These provide separate requirements for restoration, field validation and interrupted communications. No combined multi-vendor field acceptance test was found. The Atlas criterion combines those functions in one operating network.",
+   "refs": [
+    3,
+    5,
+    2,
+    6
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "Grid-forming inverters energise a dead network without an external voltage or frequency reference.",
+    "criterion": "Resources designated for black start establish voltage without an external AC reference, supply transformer and load inrush within their equipment limits, and provide a voltage reference for other resources to synchronise. Banerjee and colleagues’ 2022 paper reports a laboratory demonstration with 12 inverters forming two microgrids initially loaded at approximately 30 W and 10 W.",
+    "set_by": "UNIFI Consortium, Specifications for Grid-forming Inverter-based Resources, Version 3, section 3.2.2, for resources designated to provide black-start services.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "without an external voltage or frequency reference at the ac terminals.",
+    "threshold_ref": 6,
+    "refs": [
+     6,
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A microgrid controller autonomously black-starts its island and passes EPRI’s eight functional checks.",
+    "criterion": "After feeder blackout, the controller energises the full island and reaches steady state. All eight Table 10 checks pass, covering controller power, permissions, settings, isolation, resource modes, load-pickup sequence, status communication and system-condition checks. Skaria and colleagues’ 2024 field demonstration used a 2.5 kVA inverter to energise a 75 kVA transformer.",
+    "set_by": "EPRI, Utility Microgrid Controller Test Plan, December 2023. The eight pass/fail criteria appear in Table 10.",
+    "set_by_kind": "protocol",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     2,
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m3",
+    "title": "An island reconnects autonomously with its online resources and supplied loads remaining energised.",
+    "criterion": "With reconnection authorised and grid conditions stable for the configured service delay, the microgrid synchronises within site-specific tolerances and reconnects with resources online, loads energised and grid-connected settings restored. Zhou and colleagues’ paper, published on 3 June 2026, reports one field restoration example reaching reconnection in approximately 3.5 s after shedding approximately 2.9 MW.",
+    "set_by": "EPRI, Utility Microgrid Controller Test Plan, December 2023, Synchronized Reconnection procedure and Table 12.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "the transition should not disrupt customers or cause unacceptable grid disturbances.",
+    "threshold_ref": 2,
+    "refs": [
+     2,
+     9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "A fielded power system maintains specified operation when operator–inverter communications fail.",
+    "criterion": "The power system and its grid-forming resources maintain the functions and operating limits specified by the system operator during delayed or interrupted operator–plant communications in field operation. Related simulations in Banerjee and colleagues’ 2022 paper joined three inverter-supplied islands through circuit breakers using local measurements.",
+    "set_by": "UNIFI Consortium, Specifications for Grid-forming Inverter-based Resources, Version 3, section 3.4.1. The system operator specifies the required operation.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "function as specified by the system operator when communications are delayed or interrupted.",
+    "threshold_ref": 6,
+    "refs": [
+     6,
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "The NSF-hosted Silva, Ropp and Lavrova conference paper could not be opened after repeated attempts.",
+   "No opened study reports a complete pass of EPRI’s eight black-start checks or a field test of the cited UNIFI communication-interruption requirement.",
+   "No opened study demonstrates the complete restoration sequence in a multi-vendor operating distribution network with designated communications interrupted."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "web",
+    "url": "https://www.eia.gov/tODAyinenergy/detail.php?id=66744",
+    "doi": null,
+    "title": "Hurricanes in 2024 led to the most hours without power in the United States in 10 years",
+    "authors": "U.S. Energy Information Administration",
+    "container": "Today in Energy",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 2,
+    "kind": "report",
+    "url": "https://restservice.epri.com/publicdownload/000000003002028385/0/Product",
+    "doi": null,
+    "title": "Utility Microgrid Controller Test Plan: Evaluation Method for Utility Microgrid Controllers",
+    "authors": "Electric Power Research Institute",
+    "container": "EPRI",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "report",
+    "url": "https://www.energy.gov/sites/default/files/2026-04/Strategic_Plan_5_Microgrid_Control_and_protection.pdf",
+    "doi": null,
+    "title": "Microgrids R&D Strategic Plans Topic 5 – Advanced Microgrid Control and Protection",
+    "authors": "U.S. Department of Energy, Office of Electricity",
+    "container": "U.S. Department of Energy",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "report",
+    "url": "https://unificonsortium.org/wp-content/uploads/2022_unifi_Newsletter.pdf",
+    "doi": null,
+    "title": "Annual Newsletter 2022",
+    "authors": "UNIFI Consortium",
+    "container": "UNIFI Consortium",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "web",
+    "url": "https://standards.ieee.org/ieee/2030.8/12543/",
+    "doi": null,
+    "title": "Standard for the Testing of Microgrid Controllers",
+    "authors": "IEEE Standards Association",
+    "container": "IEEE Standards Association",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "report",
+    "url": "https://docs.nlr.gov/docs/fy26osti/98381.pdf",
+    "doi": "10.2172/3016250",
+    "title": "UNIFI Specifications for Grid-forming Inverter-based Resources Version 3",
+    "authors": "National Laboratory of the Rockies (NLR), Golden, CO (United States), Kroposki B, USDOE Office of Energy Efficiency and Renewable Energy (EERE), Renewable Power Office. Solar Energy Technologies Office",
+    "container": "National Laboratory of the Rockies",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "preprint",
+    "url": "https://docs.nlr.gov/docs/fy22osti/78457.pdf",
+    "doi": "10.1109/PESGM48719.2022.9916679",
+    "title": "Autonomous Microgrid Restoration Using Grid-Forming Inverters and Smart Circuit Breakers: Preprint",
+    "authors": "Banerjee A, Pandey A, Pailla UR, Seo GS, Shekhar S, Jain H, et al.",
+    "container": "2022 IEEE Power &amp; Energy Society General Meeting (PESGM)",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": "1-5",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 8,
+    "kind": "preprint",
+    "url": "https://www.ece.ucf.edu/~qu/wp-content/uploads/2024/03/PESGM24_FieldDemo.pdf",
+    "doi": "10.1109/PESGM51994.2024.10689195",
+    "title": "Experiences and Lessons from Field Demonstration of Grid-forming Inverter in An AC Microgrid",
+    "authors": "Skaria G, Marasini G, Qu Z, Brooker P, York R, Remo T, et al.",
+    "container": "2024 IEEE Power &amp; Energy Society General Meeting (PESGM)",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": "1-5",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 9,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41598-026-54725-4",
+    "doi": "10.1038/s41598-026-54725-4",
+    "title": "Research on a fast self-healing control method for tie-line faults in regional distribution networks based on source–load–storage interaction",
+    "authors": "Zhou C, Gui S, Gao G, Liu C, Ma Y",
+    "container": "Sci Rep",
+    "year": "2026",
+    "volume": "16",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 4 from Crossref, 0 from PubMed, 0 from arXiv, 5 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 5 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }

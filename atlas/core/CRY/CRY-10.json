@@ -245,7 +245,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Knowing how safe shared secrets are from quantum computers",
@@ -316,5 +317,284 @@
    "Whether a result for the initial target would extend to larger versions or other lattice systems depends on its mathematical mechanism."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "CRY-10",
+  "title": "Quantum security classification of ML-KEM",
+  "definition": "A mathematical result decides whether each standardized ML-KEM parameter set meets its claimed NIST security category against general quantum computation. ML-KEM is a key-encapsulation mechanism: two parties use it to establish a shared secret for subsequent encryption.",
+  "goal": {
+   "need": "FIPS 203, effective 13 August 2024, standardizes three ML-KEM parameter sets, each producing a 256-bit shared secret. Their security claims compare attack costs with symmetric cryptographic benchmarks. Resolving those claims would establish whether the standardized key-establishment mechanism provides its claimed protection against quantum computation.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": {
+    "caption": "Standardized ML-KEM parameter sets and claimed security categories",
+    "columns": [
+     "Parameter set",
+     "NIST category"
+    ],
+    "rows": [
+     [
+      "ML-KEM-512",
+      "1"
+     ],
+     [
+      "ML-KEM-768",
+      "3"
+     ],
+     [
+      "ML-KEM-1024",
+      "5"
+     ]
+    ],
+    "note": "These are claimed categories, rather than unconditional quantum lower bounds.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "NIST Post-Quantum Cryptography Standardization programme",
+     "year": "2016",
+     "quote": "The goal of this research is to develop cryptographic algorithms that would be secure against both quantum and classical computers.",
+     "context": null,
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "CRYSTALS-Kyber submission team",
+     "year": "2021",
+     "quote": "Kyber is an IND-CCA2-secure key-encapsulation mechanism (KEM)",
+     "context": "Kyber is ML-KEM’s predecessor. IND-CCA2 denotes security against adaptive chosen-ciphertext attacks.",
+     "ref": 4,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "Each ML-KEM parameter set’s NIST category is proved or refuted against general quantum computation.",
+   "criterion": "For each parameter set, a peer-reviewed theorem establishes or refutes its claimed category in the chosen-ciphertext security experiment. Categories 1, 3 and 5 compare attack resources with key search on block ciphers having 128-, 192- and 256-bit keys, respectively. A refutation supplies a correct quantum attack violating that requirement; confirmation supplies an applicable quantum lower bound after all reduction losses. The result covers FIPS 203’s actual distributions and symmetric functions, with matched success probabilities and explicit computation, memory and access assumptions.",
+   "set_by": "Atlas synthesis using NIST’s security definitions and category benchmarks; NIST has not prescribed this conclusive-proof test.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches of NIST’s call and evaluation criteria, FIPS 203, SP 800-227, Kyber documentation, CRYPTREC evaluations and quantum-security papers found no externally defined conclusive-classification test. NIST supplies resource benchmarks, but does not require unconditional proofs. Luo’s preprint submitted on 17 May 2026 claims quantum attacks; a preprint claim alone does not establish this completion test.",
+   "refs": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "threshold_checked": null
+  },
+  "case_label": "Parameter set",
+  "cases": [
+   "ML-KEM-512",
+   "ML-KEM-768",
+   "ML-KEM-1024"
+  ],
+  "milestone_structure": "sequence",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "K-PKE has an IND-CPA reduction with two module-LWE terms and one pseudorandom-function term.",
+    "criterion": "Prove that the chosen-plaintext distinguishing advantage against K-PKE, ML-KEM’s underlying encryption scheme, is bounded by the sum of two module-LWE distinguishing advantages and one pseudorandom-function advantage. Matrix generation is modeled as a random oracle and noise generation as pseudorandom functions. CRYPTREC’s Theorem 4.1 gives this result in classical and quantum random-oracle models. It establishes a conditional reduction, rather than a lower bound on module-LWE attack costs.",
+    "set_by": "The field’s IND-CPA security convention; Kyber specification Theorem 1, refined for standardized K-PKE in CRYPTREC Theorem 4.1. The quoted statement was written for Kyber.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "Kyber.CPAPKE is tightly IND-CPA secure under the Module-LWE hardness assumption.",
+    "threshold_ref": 4,
+    "refs": [
+     4,
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "ML-KEM’s quantum IND-CCA reduction avoids a square-root loss in the base encryption advantage.",
+    "criterion": "Reduce the chosen-ciphertext distinguishing advantage of ML-KEM’s transformation to the chosen-plaintext distinguishing advantage of K-PKE without a square-root advantage loss, retaining the oracle-query, correctness and symmetric-primitive terms. The quantum random-oracle model permits superposition queries to ideal random functions replacing hashes. Ge, Liao and Xue publish the transformation result as a preprint received on 21 May 2024; CRYPTREC applies it to ML-KEM in Theorem 4.3. This remains conditional security in an idealized model.",
+    "set_by": "The field’s IND-CCA and quantum random-oracle conventions; Ge, Liao and Xue’s transformation theorem, applied to ML-KEM by CRYPTREC Theorem 4.3.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "Their IND-CCA security can be reduced to the IND-CPA security of the underlying public key encryption (PKE) scheme without the square-root advantage loss.",
+    "threshold_ref": 8,
+    "refs": [
+     5,
+     6,
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A concrete quantum reduction leaves ML-KEM’s NIST category conditional only on lattice hardness.",
+    "criterion": "For a parameter set, prove a theorem for the standardized mechanism that derives its claimed NIST category from an explicit numerical hardness hypothesis about a named lattice problem. The theorem covers general quantum circuits, the specified symmetric functions, classical chosen-ciphertext access, reduction costs, probability losses and decapsulation failures. Establishing or falsifying the remaining quantitative lattice hypothesis is then the final step on the security-proof route. The cited sources do not establish this theorem.",
+    "set_by": "Atlas synthesis from NIST’s category benchmarks and the conditional reductions; no external body’s published milestone requiring this result was found.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     1,
+     2,
+     5,
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No external body’s published goal or completion criterion for a conclusive quantum classification of all three ML-KEM parameter sets was found.",
+   "No externally prescribed sequence extending the existing conditional reductions to an unconditional concrete quantum classification was found.",
+   "No independent confirmation or peer-reviewed version of Luo’s claimed ML-KEM quantum attack was found.",
+   "The INSPIRE record supplied for Regev’s paper did not expose readable article text."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "report",
+    "url": "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.203.pdf",
+    "doi": "10.6028/NIST.FIPS.203",
+    "title": "Module-Lattice-Based Key-Encapsulation Mechanism Standard",
+    "authors": "National Institute of Standards and Technology (US)",
+    "container": "NIST",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "web",
+    "url": "https://csrc.nist.gov/Projects/Post-Quantum-Cryptography/Post-Quantum-Cryptography-Standardization/Evaluation-Criteria/Security-(Evaluation-Criteria)",
+    "doi": null,
+    "title": "Post-Quantum Cryptography: Security (Evaluation Criteria)",
+    "authors": "National Institute of Standards and Technology",
+    "container": "Computer Security Resource Center",
+    "year": "2016",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "web",
+    "url": "https://csrc.nist.gov/Projects/post-quantum-cryptography/post-quantum-cryptography-standardization/Call-for-Proposals",
+    "doi": null,
+    "title": "Post-Quantum Cryptography: Call for Proposals",
+    "authors": "National Institute of Standards and Technology",
+    "container": "Computer Security Resource Center",
+    "year": "2016",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "report",
+    "url": "https://pq-crystals.org/kyber/data/kyber-specification-round3-20210804.pdf",
+    "doi": null,
+    "title": "CRYSTALS-Kyber: Algorithm Specifications And Supporting Documentation (version 3.02)",
+    "authors": "Avanzi R, Bos J, Ducas L, Kiltz E, Lepoint T, Lyubashevsky V, Schanck JM, Schwabe P, Seiler G, Stehlé D",
+    "container": "CRYSTALS",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "report",
+    "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-227.pdf",
+    "doi": "10.6028/NIST.SP.800-227",
+    "title": "Recommendations for Key-Encapsulation Mechanisms",
+    "authors": "Alagic G, Barker E, Chen L, Moody D, Robinson A, Silberg H, et al.",
+    "container": "NIST",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 6,
+    "kind": "report",
+    "url": "https://www.cryptrec.go.jp/exreport/cryptrec-ex-3502-2025.pdf",
+    "doi": null,
+    "title": "CRYPTREC: ML-KEM Evaluation Report",
+    "authors": "Espitau T, Katsumata S, Samwel N, Wiggers T, van Woerden W, Zijlstra T",
+    "container": "CRYPTREC",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 7,
+    "kind": "preprint",
+    "url": "https://arxiv.org/abs/2605.17412",
+    "doi": "10.48550/arXiv.2605.17412",
+    "title": "Module Lattice Security (Part IV): Probabilistic Polynomial Quantum Attack on Module-LWE over 2-Power Cyclotomics",
+    "authors": "Luo MX",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 8,
+    "kind": "preprint",
+    "url": "https://eprint.iacr.org/2024/777",
+    "doi": null,
+    "title": "Measure-Rewind-Extract: Tighter Proofs of One-Way to Hiding and CCA Security in the Quantum Random Oracle Model",
+    "authors": "Ge J, Liao H, Xue R",
+    "container": "Cryptology ePrint Archive",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 1 from arXiv, 5 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 4 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }
