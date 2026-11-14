@@ -201,35 +201,6 @@ function Threshold({ unit }) {
   );
 }
 
-// A measure: its name, then the value alone at body size and the conditions beneath it. A value
-// longer than a headline (an entry written before value and note were separated) is shown as
-// the note, full width, with no headline value.
-const HEADLINE = 40;
-
-function Measure({ item }) {
-  const headline = item.value && item.value.length <= HEADLINE ? item.value : null;
-  const note = [headline ? null : item.value, item.note].filter(Boolean).join(' ');
-  return (
-    <li className={headline ? '' : 'page-measure-long'}>
-      <span className="page-measure-name">{item.measure}</span>
-      <span className="page-measure-body">
-        {headline && (
-          <span className="page-measure-value">
-            {headline}
-            <Refs ns={[item.ref]} />
-          </span>
-        )}
-        {note && (
-          <span className="page-measure-note">
-            {note}
-            {!headline && <Refs ns={[item.ref]} />}
-          </span>
-        )}
-      </span>
-    </li>
-  );
-}
-
 function Unit({ number, id, title, criterion, setBy, kind, refs, results, basis, unit }) {
   return (
     <li id={id}>
@@ -380,16 +351,6 @@ export default function PageBody({ page }) {
             results={on('completion')}
           />
         </ol>
-        {page.measures.length > 0 && (
-          <>
-            <h3 className="ideal-sub">Measured alongside, with no threshold attached</h3>
-            <ul className="page-measures">
-              {page.measures.map((t, n) => (
-                <Measure key={n} item={t} />
-              ))}
-            </ul>
-          </>
-        )}
       </Section>
 
       <section className="bpage-section ideal-section ideal-milestones" aria-labelledby="ms-title">

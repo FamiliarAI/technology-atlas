@@ -337,13 +337,7 @@ milestones
     if they are separate parts of the problem that can be reached in any order.
 
 measures
-  0 to 4 quantities worth tracking that carry no threshold, such as the best value reported so
-  far, each with its reference. measure: what is measured. value: the quantity alone, a number
-  with its unit and at most a few qualifying words, at most 40 characters ("271 days", "up to
-  125 organs a year"). note: the conditions, at most 200 characters: subject, sample size, date,
-  how it ended; null if nothing needs adding. A measure must not repeat a finding already given
-  as a result under a milestone, unless it is the single best value to date for the quantity
-  that the completion test or a milestone is about.
+  Always an empty list.
 
 not_found
   What you searched for and could not find or could not open, one short sentence each, so that a
