@@ -124,6 +124,7 @@ Milestones (items of `completion_criteria`) are paragraphs with two more keys, `
 | `provenance` | object | yes | Repository-relative paths of the pipeline files behind the record: `research` (`reconciled-research.md`), `structured_record` (`reconciled-structured.json`), `review` (the concept's `validated.json`). All under git-ignored `ingestion/runs/`. | `final_rewrite.make_input` → `import_field` (made relative) | `rebuild` → `documents` table (local downloads only). Not in the site data. |
 | `models` | object | yes | Model that ran each pipeline stage: `research`, `reconcile`, `format`, `review` (missing in 2 records, `CLM-05` and `CLM-13`, for which the pipeline recorded no review model), `rewrite`. Example (`QUA-01`): research and reconcile `grok-4.7-build`, format `gpt-6.1-terra`, review and rewrite `gpt-6.1-sol`. `brief` is added with the `brief` key below. | `final_rewrite` (`attempt_model` per stage); `atlas.brief` (`brief` only) | b file `models` (not displayed by the site today) |
 | `brief` | object | optional (all 742 records since November 12) | The reader's version: a short plain-language account written on top of the research record, which stays unchanged. Keys below. Added as the file's last key; no other byte of the file changes. | `atlas.brief` (model `gpt-6.1-sol`) | `check` (milestone IDs, source URLs); b file `brief` |
+| `page` | object | optional (3 pilot records on November 14: BME-12, PHY-02, MAT-01) | The breakthrough page entry: definition, why it is a goal, a completion test and milestones whose thresholds are set by outside bodies, results judged against them, references and a log. A base version, improved over time and never regenerated. Keys below. Always the file's last key; no other byte of the file changes (`models.page` records the writer). Intended to supersede `brief` as the breakthrough page once the owner approves; until then `/b/<ID>` shows the brief and `/draft/<ID>` shows the page. | `atlas.page` (`define`, `results`, `add`, `revise --apply`, or a hand edit) | `check` (`atlas.page.validate`); b file `page` |
 
 The `brief` object:
 
@@ -142,6 +143,27 @@ Limits below are the prompt's; the code rejects an answer only past 110% of a li
 | `milestones` | list | One per milestone, same IDs in the same order: `id`, `label` (at most 10 words and 80 characters; the record's own `label` is not changed), `explanation` (at most 240 characters). |
 | `uncertain` | list of strings | 1 to 3 items of at most 160 characters: open questions about the science or how the milestones should be judged. |
 | `prompt` | string | The first 12 hex digits of the SHA-256 of the prompt text the brief was written from (`atlas.brief.PROMPT_HASH`). `--missing` rewrites briefs whose value differs. Not for display. |
+
+The `page` object (shape: `SCHEMA` in `atlas/page.py` plus the keys code adds). Limits are the prompt's; text over a limit is kept and logged, never rejected.
+
+| Key | Type | What it contains |
+|---|---|---|
+| `id` | string | The breakthrough ID. |
+| `title`, `definition` | string | The capability in the field's terms (at most 70 characters); what would exist or be true (at most 420). |
+| `goal` | object | `need` (at most 600 characters) with `need_refs`; `figures` (a small table with caption, columns, rows, note, ref, or null); `statements`: 2 to 5 `{body, year, quote, context, ref, checked}` by bodies with standing. |
+| `completion` | object | `title`, `criterion`, `set_by`, `set_by_kind` (`regulator`, `standards_body`, `professional_society`, `government_programme`, `prize`, `protocol`, `community_convention`, or `atlas` when no outside test was found), `threshold_quote` (the setting body's own passage), `threshold_ref`, `threshold_checked`, `basis`, `refs`. |
+| `case_label`, `cases` | string or null, list | Sub-cases tracked apart (2 to 5, each at most 4 words), or none. |
+| `milestone_structure` | string | `sequence` or `parallel`. |
+| `milestones` | list | Each: `id` (`m1`, `m2`, ... permanent, never reused), `title`, `criterion`, `set_by`, `set_by_kind`, `threshold_quote`, `threshold_ref`, `threshold_checked`, `refs`, `status` (`active` or `retired`), `replaced_by` (ids, when retired by a split, merge or replacement). |
+| `milestone_order` | list | The active milestone ids in display order. |
+| `measures` | list | 0 to 4 `{measure, value, note, ref}`: `value` is the quantity alone (at most 40 characters), `note` the conditions (at most 200). Entries written before November 14 have no `note`; the page shows a long `value` as a note. |
+| `not_found` | list of strings | What was searched for and not found. |
+| `references` | list | Numbered 1..n: `id`, `kind`, `url`, `doi`, `title`, `authors`, `container`, `year`, `volume`, `issue`, `pages`, `citation_source` (`crossref`, `pubmed`, `arxiv` or `model`). References with the same DOI are merged by code. |
+| `results` | list | Each: `milestone` (an id or `completion`), `case`, `verdict` (`met` or `partial`), `finding`, `detail`, `quote`, `checked`, `confirmed` (peer review, replication or an official record), `peer_reviewed`, `ref`, `judged_by`, `judged_on`. Only confirmed results move a mark; results on a retired milestone stay but are not shown or counted. |
+| `judged` | list | Code's record of `{url, milestone, hash, date, by}`: which source was judged against which criterion wording. Not in the site data. |
+| `version` | integer | 1 for the base; +1 for every applied revision. |
+| `results_run` | string | Date the results pass last completed with no timed-out call; cleared when a revision changes a criterion. `results --missing` selects entries without it. |
+| `accessed`, `log` | string, list | Date of the base; `{date, actor, action}` rows written by code only. |
 
 The pipeline's intermediate structures (research claims with citations, review verdicts per claim with evidence passages) do not enter the atlas. Their shapes are `CANDIDATES` and `REVIEW` in `ingestion/schemas.py`, `FORMAT_SCHEMA` and `REVIEW_SCHEMA` in `ingestion/field_workflow.py`, and `FINAL_SCHEMA` in `ingestion/final_rewrite.py`, which is the shape of each breakthrough before import adds `field`, `status`, milestone `id` and `label`, and reduces `sources` to URLs.
 
@@ -247,6 +269,7 @@ Loaded by the Breakthrough page (`loadBreakthrough`).
 | `moved_at` | As above. | Breakthrough page |
 | `sources[]` | `{url, title, status}` only: links to the originals. The record's `sources` first, then papers that only have judged rows for this breakthrough (such as those added by `atlas.find`). | Citation titles; `Record.jsx` source list |
 | `brief` | The record's `brief` (section 3.2), present only when the record has one, including its `prompt` hash, which the page should ignore. Each `brief.sources[]` item also carries the `title` and `status` of the same URL in `sources[]`. | Breakthrough page reader's version |
+| `page` | The record's `page` (section 3.2) without `judged`, present only when the record has one. | `/draft/<ID>` (`Page.jsx`) |
 | `progress[]` | Every database row for this breakthrough, in this order: milestone rows by milestone, then whole-breakthrough rows, then research citations. Each row: `criterion` (1-based, or null), `milestone` (the stable ID such as `"m1"`, or null), `url`, `source_date`, `verdict`, `quote`, `model`, `added_at`. A row with a `verdict` and `milestone` null is a step toward the breakthrough as a whole. A row with `verdict` null is a research citation whose `quote` is a `current_state` paragraph. | Evidence (judged rows); `Record.jsx` research citations |
 
 ### `data/search.json` (`store.search_index`)
@@ -268,6 +291,7 @@ Loaded on first use of the search box (`Layout.jsx`). 206 KB on November 11; no 
 - Every breakthrough has milestone IDs, unique within it.
 - Every `merged_into` names an existing breakthrough.
 - Every URL in a breakthrough's `sources` is a line in `sources.jsonl`; no URL appears twice there.
+- A `page`, when present, passes `atlas.page.validate`: references numbered 1..n and every citation resolving, milestone ids unique and of the form `m<n>`, `milestone_order` listing each active milestone once, `replaced_by` naming known milestones, every result on a known milestone and case, and its `id` equal to the record's.
 - A `brief`, when present, lists exactly the record's milestone IDs in order, and its source URLs are lines in `sources.jsonl`, none twice.
 - Every progress row names an existing breakthrough, has a `milestone` key holding one of its milestone IDs or null, names a URL in `sources.jsonl`, and has a verdict of `advances`, `meets` or `contradicts`. A row with `milestone` null may not be `meets`.
 - No string anywhere in the core starts with `/Users/` or `/private/` (no absolute paths).
@@ -338,6 +362,17 @@ python3 -m atlas.pubmed [--no-commit]          # every PubMed cookie wall in the
 ```bash
 python3 -m atlas.brief QUA-01 NRL-17 [--workers 3] [--no-commit]
 python3 -m atlas.brief --missing --workers 4 [--no-commit]
+```
+
+**Write and improve breakthrough page entries** (`atlas.page`; owner authorised a whole-atlas run of the base entries on November 14). `define` writes the base with one writer call with web search (default Codex Sol `gpt-6.1-sol`, effort high; `--model`, `--effort` override), given the whole record and every source the atlas holds; it refuses an entry that has a page unless `--replace`. `results` is incremental: sources the entry already uses are judged from saved copies against milestones they have not been judged against in their current wording (judge: the config's `format` model, no search), then one writer search call looks for the open cells and each new candidate is saved and judged against its one milestone. `add ID URL...` judges named sources against every active milestone. `revise ID [--note]` proposes operations into `atlas/data/page/<ID>-revise-<stamp>/proposal.json`; `--apply [PATH]` applies them one by one, logs each, and bumps `version`. `check` validates stored pages, so a hand edit of `page` is a supported change. Citations are filled from Crossref, PubMed and arXiv; quotations are checked against saved copies; a quotation not found or text over a limit is kept and logged. `define` and `results` take explicit IDs, `--missing`, `--all`, `--field F` (repeatable), `--limit N`, `--workers N`, `--no-commit`; a failure is printed, written to `atlas/data/page/runs/<stamp>-<pass>.log` and counted in `atlas/data/page/failures.json` (`--missing` leaves out an entry after 3 failures in a row); a provider reporting exhaustion stops new calls and exits 75; atlas/core is committed every 25 entries and at the end; the database is rebuilt once at the end. `atlas/run_pages.sh MODEL EFFORT LOGFILE [args]` loops both passes unattended (30-minute sleep on exhaustion) until both have nothing to do. Calls are saved under `atlas/data/page/`.
+
+```bash
+python3 -m atlas.page define --missing --field BME --limit 1 --model gpt-6.1-sol --effort medium
+python3 -m atlas.page results --missing --workers 3
+python3 -m atlas.page add PHY-02 https://example.org/paper
+python3 -m atlas.page revise BME-12 --note "..."      # then: revise BME-12 --apply
+python3 -m atlas.page check
+nohup atlas/run_pages.sh gpt-6.1-sol medium atlas/data/page/run.log --workers 3 &
 ```
 
 **Correct a record by hand.** Edit the file, run the check, rebuild, commit with the reason. Before v1 only non-editorial fixes are allowed.

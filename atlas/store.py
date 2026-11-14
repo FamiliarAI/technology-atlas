@@ -566,6 +566,10 @@ def breakthrough_data(db, identifier, view=None):
             for entry in brief['sources']
         ]
         out['brief'] = brief
+    if item.get('page'):
+        # The breakthrough page entry (atlas.page). The judged list is bookkeeping for the
+        # results pass and stays out.
+        out['page'] = {key: value for key, value in item['page'].items() if key != 'judged'}
     return out
 
 

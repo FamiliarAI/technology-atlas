@@ -112,6 +112,20 @@ Saved copies: `atlas.copies.choose` picks the copy read by `atlas.add.save` and 
 
 The b file carries `brief` when the record has one, and lists papers that only have judged rows after the record's own sources.
 
+## Breakthrough page entries
+
+```bash
+python3 -m atlas.page define BME-12            # the base entry; refuses one that exists
+python3 -m atlas.page results BME-12           # incremental: judges only what is new
+python3 -m atlas.page add PHY-02 URL [URL ...] # judge named sources, no search
+python3 -m atlas.page revise BME-12 --note ".."   # proposal only; --apply applies it
+python3 -m atlas.page check                    # validate stored pages (and hand edits)
+python3 -m atlas.page define --missing --field AST --limit 1 --model gpt-6.1-sol --effort medium
+atlas/run_pages.sh gpt-6.1-sol medium atlas/data/page/run.log --workers 3   # unattended
+```
+
+`atlas.page` writes the breakthrough page entry as the record's `page` key (last key; `models.page` = the writer; no other byte changes): a definition, why it is a goal, a completion test and milestones whose thresholds are set by outside bodies (with the body's own passage, checked against a saved copy), results judged against them by the config's `format` model, registry-filled references and a code-written log. An entry is a base improved over time: milestone ids are permanent, `revise --apply` applies proposed operations one by one, `results` judges only source/milestone pairs not yet judged against the current wording, and hand edits are checked by `check` and by `python3 -m atlas.core check`. The b file carries `page` (without its `judged` bookkeeping); `/draft/<ID>` shows it, while `/b/<ID>` still shows the reader's version. `page` is meant to supersede `brief` as the breakthrough page once the owner approves. Batch flags, the run log, failure counts, exit code 75 on provider exhaustion and the 25-entry commit cadence are described in `docs/data-reference.md` section 7. Tests: `atlas/tests/test_page.py` (stubbed calls and network).
+
 ## Data and integrity
 
 `atlas/data/atlas.sqlite3` is generated locally and ignored by Git. Tables:

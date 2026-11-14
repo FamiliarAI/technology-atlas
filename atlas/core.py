@@ -226,6 +226,19 @@ def _check_brief(identifier, item, sources):
     return problems
 
 
+def _check_page(identifier, item):
+    """The breakthrough page entry passes atlas.page's structural check."""
+    from .page import validate  # atlas.page imports this module
+
+    page = item['page']
+    if not isinstance(page, dict):
+        return [f'Page is not an object: {identifier}']
+    problems = [f'Page: {identifier}: {problem}' for problem in validate(page)]
+    if page.get('id') != identifier:
+        problems.append(f'Page id does not match the record: {identifier}')
+    return problems
+
+
 def check(data):
     problems = []
     fields = data['fields']
@@ -254,6 +267,8 @@ def check(data):
                 problems.append(f'Unknown source: {identifier}: {url}')
         if 'brief' in item:
             problems += _check_brief(identifier, item, sources)
+        if 'page' in item:
+            problems += _check_page(identifier, item)
     for row_number, row in enumerate(data['progress'], 1):
         identifier = row.get('breakthrough')
         item = items.get(identifier)
