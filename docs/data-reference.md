@@ -383,6 +383,9 @@ python3 -m atlas.review publish SUR-01 QUA-01
 python3 -m atlas.review hold BME-04 --note "needs the FDA guidance quote"
 python3 -m atlas.review merge CLM-11 --into BME-01 --note "same breakthrough"
 python3 -m atlas.review clear SUR-01                 # back to draft (unpublish)
+python3 -m atlas.review auto --locks atlas/data/page/locks   # owner's standing rule, Nov 14:
+#   publish every judged page; of duplicates (similarity >= 0.25) keep the one with more
+#   confirmed results and mark the others merge into it; claimed pages wait
 python3 -m atlas.similar BME-12 --among all          # the duplicate search alone
 python3 -m atlas.store && python3 -m atlas.export atlas/data/public --public
 python3 -m http.server 8766 --bind 127.0.0.1 --directory atlas/data/public   # production preview
