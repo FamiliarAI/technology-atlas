@@ -178,7 +178,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "sources": [
   "https://www.nature.com/articles/s41586-024-07487-w",
@@ -264,5 +265,298 @@
    "Coverage beyond proteins remains to be defined."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "BCH-02",
+  "title": "Quantitative prediction of protein function from sequence",
+  "definition": "From a protein’s amino-acid sequence and specified surroundings, a method predicts conformational populations (fractions occupying different shapes), binding affinities, association and dissociation rates, and catalytic rates where applicable. Its predictions and uncertainty estimates remain valid for unfamiliar proteins and changes in temperature, pH, ligands and sequence.",
+  "goal": {
+   "need": "CASP16 received predictions from 30 research groups for 229 protein–ligand poses and 140 affinities in 2024. Removing 18 previously disclosed affinities left 122 for assessment. Providing experimental complex structures did not improve affinity prediction, showing that structural information alone did not resolve quantitative binding prediction.",
+   "need_refs": [
+    1
+   ],
+   "figures": {
+    "caption": "CASP16 Stage 1 affinity rankings after removal of previously disclosed measurements.",
+    "columns": [
+     "Quantity",
+     "Combined Kendall’s τ"
+    ],
+    "rows": [
+     [
+      "Best participant result",
+      "0.39"
+     ],
+     [
+      "Expected result for a perfect predictor under the experimental-error model",
+      "0.73"
+     ]
+    ],
+    "note": "Kendall’s τ measures rank agreement. The expected value was estimated by resampling with approximately threefold uncertainty in IC50, the concentration producing 50% inhibition; it is specific to these datasets.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "National Institute of Standards and Technology",
+     "year": "2025",
+     "quote": "the Protein Function Problem, i.e., quantitative prediction of protein function from sequence.",
+     "context": null,
+     "ref": 2,
+     "checked": true
+    },
+    {
+     "body": "DARPA, Network of Optimal Dynamic Energy Signatures programme",
+     "year": "2025",
+     "quote": "predict their biological functions by identifying telltale patterns of protein movement.",
+     "context": "The programme seeks a biophysics-informed computational tool that takes protein sequences as input.",
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "Wellcome Sanger Institute, Google DeepMind Fellowship grand challenges",
+     "year": "2026",
+     "quote": "The goal is to use these uniquely sized\nquantitative data sets to train the next\ngeneration of AI models",
+     "context": "Grand Challenge 3 concerns quantitative prediction of protein stability, binding affinity, specificity, aggregation and allostery from sequence and structure.",
+     "ref": 4,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "Independent blind experiments validate function predictions across unrelated protein families.",
+   "criterion": "From sequence, partner identities and specified temperature, pH, solvent and concentrations, predict conformational populations, equilibrium binding constants, association and dissociation rate constants, and catalytic turnover where applicable for proteins from unrelated families excluded from model fitting. Predictions fixed before measurement must agree with experiment within independently determined experimental uncertainty for every tested observable. An independent laboratory must reproduce this agreement and assess the stated prediction uncertainties. Completion establishes only the tested families and conditions.",
+   "set_by": "Atlas fallback; no outside body’s joint acceptance test was found.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searched NIST’s protein-function programme, DARPA’s NODES solicitation and FAQs, Sanger’s grand challenges, CASP16 assessments and SAMPL kinetics reports for a joint acceptance test. None defines one covering all these observables and environmental changes. This fallback extends NODES’ agreement-within-statistical-errors criterion to NIST’s quantitative prediction goal; numerical coverage and calibration requirements remain externally undefined.",
+   "refs": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A protein–ligand pose is predicted with pocket-aligned ligand RMSD below 2 Å.",
+    "criterion": "From protein sequence and ligand identity, predict a bound ligand’s coordinates with pocket-aligned root mean squared deviation (RMSD) below 2 Å from experiment. The AlphaFold 3 paper of 8 May 2024 evaluated this criterion on the 428-complex PoseBusters benchmark using a model trained with a 30 September 2019 cutoff. Its PORCN–LGK974 example had ligand RMSD 1.00 Å, for one complex.",
+    "set_by": "Google DeepMind and Isomorphic Labs, AlphaFold 3 paper, PoseBusters evaluation; this criterion concerns protein–small-molecule complexes.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "pocket-aligned ligand root mean squared deviation (r.m.s.d.) of less than 2 Å.",
+    "threshold_ref": 6,
+    "refs": [
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "Predicted protein conformational populations match thermodynamic ratios within statistical errors.",
+    "criterion": "For a given protein sequence, predict probabilities of multiple conformational intermediates whose ratios match thermodynamic ratios within statistical errors, verified by biophysical or analytical measurements. ESMDynamic, published on 11 August 2026, reported contact-occupancy RMSE of 7.6 percentage points at 320 K for 270 held-out domains, primarily against molecular-dynamics simulations averaging 464 ns. Those contact occupancies do not establish experimental conformational-state populations.",
+    "set_by": "DARPA, NODES programme solicitation DARPA-PS-25-30, 31 July 2025, section 1.2; the requirement concerns protein ensembles.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "Rather, the relative probabilities of the multiple identified intermediates should\nconverge on thermodynamic ratios within statistical errors.",
+    "threshold_ref": 5,
+    "refs": [
+     5,
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "An enzyme reaction’s activation free energy is predicted within 1 kcal/mol of experiment.",
+    "criterion": "Predict an enzyme chemical step’s activation free-energy barrier within 1 kcal/mol of its experimental estimate. A commentary published on 5 July 2007 reports 15.6 ± 1.1 kcal/mol calculated versus 15.4 kcal/mol experimental for chorismate mutase, with entropy corrections evaluated at 300 K; the underlying activation-enthalpy calculation averaged 16 reaction pathways for one enzyme. These calculations used structural models. Agreement for a chemical-step barrier does not establish prediction of overall catalytic turnover.",
+    "set_by": "Computational enzymology’s chemical-accuracy convention, stated by Mulholland in Chemistry Central Journal in 2007; it concerns reaction barriers rather than a sequence-only input standard.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "near chemical accuracy, i.e. to within 1 kcal/mol in the best cases.",
+    "threshold_ref": 8,
+    "refs": [
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "Blind experiments validate populations, affinities and rates for a protein family under perturbations.",
+    "criterion": "Within a protein family, predictions fixed before measurement reproduce conformational populations, equilibrium binding constants, association and dissociation rate constants and catalytic turnover where applicable, under sequence mutations and changes in temperature, pH and ligand concentration. Each tested observable must agree within independently measured experimental uncertainty. This joint integration test precedes validation across unrelated families and independent replication.",
+    "set_by": "Atlas fallback; searches of NIST, DARPA NODES, CASP/SAMPL, Sanger and enzyme-kinetics benchmarks found no published joint integration threshold.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     1,
+     2,
+     4,
+     5,
+     7,
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No common numerical acceptance criteria were found for predictive uncertainty calibration, family-level generalization or minimum molecular coverage.",
+   "No complete public scoring formula was found for NODES’ 60% and 70% targets for continuous observables.",
+   "No corresponding joint completion standard covering non-protein biomolecules was found.",
+   "The CatPred publisher and PMC full texts could not be opened.",
+   "The full text of the 2006 enzyme-barrier paper could not be opened; its coauthor’s 2007 commentary supplies the numerical comparison."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12750038/",
+    "doi": "10.1002/prot.70061",
+    "title": "Assessment of Pharmaceutical Protein–Ligand Pose and Affinity Predictions in CASP16",
+    "authors": "Gilson MK, Eberhardt J, Škrinjar P, Durairaj J, Robin X, Kryshtafovych A",
+    "container": "Proteins",
+    "year": "2026",
+    "volume": "94",
+    "issue": "1",
+    "pages": "249-266",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "web",
+    "url": "https://www.nist.gov/programs-projects/measurements-and-standards-super-intelligence-ready-biological-data-unlocking",
+    "doi": null,
+    "title": "Measurements and Standards for Super intelligence-Ready Biological Data: Unlocking Protein Function",
+    "authors": "National Institute of Standards and Technology",
+    "container": "NIST",
+    "year": "2025; updated 2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "web",
+    "url": "https://www.darpa.mil/research/programs/nodes",
+    "doi": null,
+    "title": "NODES",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "DARPA",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "report",
+    "url": "https://www.sanger.ac.uk/wp-content/uploads/2026-Google-DeepMind-Fellowship-Grand-Challenges-booklet-FINAL.pdf",
+    "doi": null,
+    "title": "Grand Challenges: 2026 Google DeepMind Fellowship in Genomics and AI",
+    "authors": "Wellcome Sanger Institute",
+    "container": "Wellcome Sanger Institute",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "report",
+    "url": "https://everglade.com/wp-content/uploads/DARPA-PS-25-30.pdf",
+    "doi": null,
+    "title": "Program Solicitation: Network of Optimal Dynamic Energy Signatures (NODES)",
+    "authors": "Defense Advanced Research Projects Agency, Biological Technologies Office",
+    "container": "DARPA",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41586-024-07487-w",
+    "doi": "10.1038/s41586-024-07487-w",
+    "title": "Accurate structure prediction of biomolecular interactions with AlphaFold 3",
+    "authors": "Abramson J, Adler J, Dunger J, Evans R, Green T, Pritzel A, et al.",
+    "container": "Nature",
+    "year": "2024",
+    "volume": "630",
+    "issue": "8016",
+    "pages": "493-500",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13554154/",
+    "doi": "10.1038/s41467-026-76361-2",
+    "title": "ESMDynamic: Fast and accurate prediction of protein dynamic contact maps from single sequences",
+    "authors": "Kleiman DE, Feng J, Xue Z, Shukla D",
+    "container": "Nat Commun",
+    "year": "2026",
+    "volume": "17",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 8,
+    "kind": "journal",
+    "url": "https://link.springer.com/article/10.1186/1752-153X-1-19",
+    "doi": "10.1186/1752-153X-1-19",
+    "title": "Chemical accuracy in QM/MM calculations on enzyme-catalysed reactions",
+    "authors": "Mulholland AJ",
+    "container": "Chemistry Central Journal",
+    "year": "2007",
+    "volume": "1",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 4 from Crossref, 0 from PubMed, 0 from arXiv, 4 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 6 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }
