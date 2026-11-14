@@ -209,7 +209,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Quantum computers that grow by adding modules",
@@ -269,5 +270,330 @@
    "The proposed distance and workload tests are not established standards; convincing acceptance thresholds remain to be defined."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "QUA-06",
+  "title": "Fault-tolerant modular quantum computing",
+  "definition": "A network of processor modules executes quantum computations on logical qubits, units of quantum information encoded to permit error correction. Errors in local processing and communication can be suppressed by increasing error-correction resources.",
+  "goal": {
+   "need": "A 2024 analysis estimates single-module limits of 10²–10⁴ physical qubits for trapped ions, superconducting circuits and Rydberg arrays. JST's networked-computer project estimates a requirement of one million physical qubits, with more than 1,000 per logical qubit. Interconnects let computation span modules while preserving quantum information.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": {
+    "caption": "Resource estimates in JST's networked-computer project",
+    "columns": [
+     "Quantity",
+     "Physical qubits"
+    ],
+    "rows": [
+     [
+      "Complete computer",
+      "1,000,000"
+     ],
+     [
+      "One logical qubit",
+      "More than 1,000"
+     ]
+    ],
+    "note": "These are the project's estimates, not universal requirements for quantum error correction.",
+    "ref": 2
+   },
+   "statements": [
+    {
+     "body": "Japan Science and Technology Agency, Moonshot Goal 6, Yamamoto project",
+     "year": "2026",
+     "quote": "This R&D project aims to realize a large-scale \"Fault-Tolerant Networked Quantum Computer\"",
+     "context": null,
+     "ref": 2,
+     "checked": true
+    },
+    {
+     "body": "IBM Quantum",
+     "year": "2026",
+     "quote": "To scale to a large number of error-corrected qubits, the processing modules for Starling need to be linked with long-range connections called l-couplers.",
+     "context": null,
+     "ref": 3,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "Three or more processor modules form a fault-tolerant quantum computing network.",
+   "criterion": "At least three processor modules form a network in which any two modules can exchange quantum information and each supports universal fault-tolerant logical operations. Preparation, storage, transmission, gate and measurement errors can be made arbitrarily small by adding error-correction resources, including protection during communication delays. This meets the functionality of the roadmap's few-qubit fault-tolerant network stage.",
+   "set_by": "Wehner, Elkouss and Hanson, 2018 roadmap, Figure 4, Table 1 and 'Few-qubit fault-tolerant networks'; its stages are adopted in IRTF QIRG RFC 9583.",
+   "set_by_kind": "community_convention",
+   "threshold_quote": "Fault tolerance implies that all error parameters (Table 1) of a quantum memory network can be made negligible by adding more resources.",
+   "threshold_ref": 4,
+   "basis": "The roadmap identifies three end nodes as the smallest network and includes distributed quantum computing at its few-qubit fault-tolerant stage. This criterion tests protected computation and communication together; it does not prescribe a carrier-specific link rate or fidelity.",
+   "refs": [
+    4,
+    5
+   ],
+   "threshold_checked": true
+  },
+  "case_label": "Interconnect",
+  "cases": [
+   "Microwave links",
+   "Optical links"
+  ],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "Processor interfaces share an entangled pair of physical qubits.",
+    "criterion": "Create an entangled pair shared between processor interfaces and available for subsequent operations. Optical preprint, revised 9 October 2026: one barium ion and one diamond silicon-vacancy electron spin had Bell-state fidelity 87.9(7)% from 9,000 measurement outcomes. Pair generation was 1.03(1) kHz excluding 664 µs characterization readout, or 612(4) Hz including it. The result is not peer reviewed and uses physical qubits.",
+    "set_by": "IRTF Quantum Internet Research Group, RFC 9583, Section 4.3; an informational research-group consensus document.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "A shared entanglement is established between the quantum computer A and the quantum computer B",
+    "threshold_ref": 5,
+    "refs": [
+     5,
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "Separate processor modules execute deterministic, repeatable entangling gates on data qubits.",
+    "criterion": "Execute deterministic, repeatable entangling gates on data qubits in separate modules, leaving outputs available for further gates. Optical result published 5 February 2025: two ion-trap modules about 2 m apart; CZ fidelity 86.2(9)%; Grover success 71(1)% from 500 repetitions per marked state. Microwave preprint submitted 21 October 2026: four 80 cm links between two 120-qubit processors; mean distant CZ fidelity 94.75% across four links. Only a subset of processor qubits participated. The gates were physical; the microwave result is not peer reviewed.",
+    "set_by": "Main et al., deterministic and repeatable quantum-gate-teleportation protocol, Nature (2025); demonstrated with trapped-ion modules.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "For a scalable DQC architecture, the QGT implementation must be deterministic and repeatable",
+    "threshold_ref": 7,
+    "refs": [
+     7,
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "Remote syndrome measurements drive error correction on data qubits in separate modules.",
+    "criterion": "Measure joint data-qubit parity across modules and use the syndrome, an error-indicating measurement outcome, for real-time correction. A preprint revised 15 October 2026 used two ion-trap modules about 2 m apart. A distributed [[2,1,1]] code detected phase flips; joint XX and ZZ measurements supported active correction of single-qubit Pauli errors on a two-data-qubit Bell state. Correction of this known state does not establish correction of arbitrary encoded information. The result is not peer reviewed.",
+    "set_by": "Ainley et al., remote syndrome-extraction and feedforward protocol, Sections II–III (2026 preprint); demonstrated with trapped-ion modules.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "measurement without disturbing the encoded state, and classical communication and feedforward to convert the measurement outcome into an error-detection or correction operation.",
+    "threshold_ref": 9,
+    "refs": [
+     9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "Remote processors establish entanglement between separately encoded logical qubits.",
+    "criterion": "Establish entanglement between logical qubits encoded in separate processors, as specified by JST's project. A related experiment published 5 September 2018 teleported a controlled-NOT gate between two superconducting-cavity logical qubits and generated logical Bell states. Its modules were in one device; it supplied an encoded-operation precursor rather than a demonstration between remote processors.",
+    "set_by": "Japan Science and Technology Agency, Moonshot Goal 6, Yamamoto project's logical-entanglement-distribution milestone; written for atom/ion processors.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "establish entanglement between the logical qubits of remote processors",
+    "threshold_ref": 2,
+    "refs": [
+     2,
+     10
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "A surface-code intermodule operation suppresses logical errors as code distance increases.",
+    "criterion": "An implemented surface-code interface suppresses logical bit-flip and phase-flip failures as spatial code distance and syndrome-measurement rounds increase, with module and interface noise below their joint threshold. Code distance measures protection against physical errors. Ramette et al. establish this behavior analytically and numerically; their approximate 1% module and 10% interface thresholds belong to their noise model. Those theoretical thresholds are not acceptance limits for arbitrary hardware.",
+    "set_by": "Ramette et al., surface-code interface protocol, Equations (3)–(7) and Figure 4 (2024); the conditions apply to this code and noise model.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "logical failure from long time-like error chains can be suppressed by simply doing more rounds of syndrome extraction per logical gate",
+    "threshold_ref": 1,
+    "refs": [
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "Searches of IBM, JST, NSF-workshop and IRTF roadmaps found no numerical acceptance threshold common to microwave and optical fault-tolerant computing interconnects.",
+   "Searches for modular logical gates, logical entanglement and distributed error correction did not locate an experiment satisfying the full completion criterion.",
+   "JST's logical-entanglement milestone specifies no fidelity, separation or entanglement-rate acceptance threshold."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41534-024-00855-4?error=cookies_not_supported",
+    "doi": "10.1038/s41534-024-00855-4",
+    "title": "Fault-tolerant connection of error-corrected qubits with noisy links",
+    "authors": "Ramette J, Sinclair J, Breuckmann NP, Vuletić V",
+    "container": "npj Quantum Inf",
+    "year": "2024",
+    "volume": "10",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "report",
+    "url": "https://www.jst.go.jp/moonshot/en/program/goal6/files/6K_yamamoto.pdf",
+    "doi": null,
+    "title": "Fault-Tolerant Networked Quantum Computer",
+    "authors": "Japan Science and Technology Agency.",
+    "container": "Moonshot Research and Development Program",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "web",
+    "url": "https://www.ibm.com/quantum/blog/path-to-ibm-quantum-starling",
+    "doi": null,
+    "title": "Tracking progress on the path to IBM Quantum Starling",
+    "authors": "Steffen M, Marwick M.",
+    "container": "IBM Quantum Computing Blog",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "journal",
+    "url": "https://qutech.nl/wp-content/uploads/2018/10/Quantum-internet-A-vision.pdf",
+    "doi": "10.1126/science.aam9288",
+    "title": "Quantum internet: A vision for the road ahead",
+    "authors": "Wehner S, Elkouss D, Hanson R",
+    "container": "Science",
+    "year": "2018",
+    "volume": "362",
+    "issue": "6412",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 5,
+    "kind": "report",
+    "url": "https://www.rfc-editor.org/rfc/rfc9583.html",
+    "doi": "10.17487/RFC9583",
+    "title": "Application Scenarios for the Quantum Internet",
+    "authors": "Wang C, Rahman A, Li R, Aelmans M, Chakraborty K",
+    "container": "Internet Research Task Force",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 6,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2610.10705v2",
+    "doi": "10.48550/arXiv.2610.10705",
+    "title": "Quantum Networking at the Speed of Quantum Computation: Kilohertz Entanglement in a Heterogeneous Quantum System",
+    "authors": "Hartung L, Barral P, Glachman N, Toh G, Davidson JH, Saha S, et al.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 7,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41586-024-08404-x?code=test&error=cookies_not_supported",
+    "doi": "10.1038/s41586-024-08404-x",
+    "title": "Distributed quantum computing across an optical network link",
+    "authors": "Main D, Drmota P, Nadlinger DP, Ainley EM, Agrawal A, Nichol BC, et al.",
+    "container": "Nature",
+    "year": "2025",
+    "volume": "638",
+    "issue": "8050",
+    "pages": "383-388",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 8,
+    "kind": "preprint",
+    "url": "https://arxiv.org/abs/2610.29986",
+    "doi": "10.48550/arXiv.2610.29986",
+    "title": "Meter-scale quantum interconnects between large quantum processors",
+    "authors": "Sundaresan NM, Cotaj N, Kandel YP, Lewandowski E, Longton CR, Martin Y, et al.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 9,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2609.13065v2",
+    "doi": "10.48550/arXiv.2609.13065",
+    "title": "Error Correction in a Distributed Quantum Computer",
+    "authors": "Ainley EM, Agrawal A, Araki T, Martínez AR, Main D, Malinowski E, et al.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 10,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41586-018-0470-y?error=cookies_not_supported",
+    "doi": "10.1038/s41586-018-0470-y",
+    "title": "Deterministic teleportation of a quantum gate between two logical qubits",
+    "authors": "Chou KS, Blumoff JZ, Wang CS, Reinhold PC, Axline CJ, Gao YY, et al.",
+    "container": "Nature",
+    "year": "2018",
+    "volume": "561",
+    "issue": "7723",
+    "pages": "368-373",
+    "citation_source": "crossref"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4",
+   "m5"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 5 from Crossref, 0 from PubMed, 3 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 8 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }

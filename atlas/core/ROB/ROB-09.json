@@ -252,7 +252,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Robots that keep learning without forgetting",
@@ -347,5 +348,279 @@
    "Permitted memory and replay need clear rules, as does the range of robot bodies and physically feasible tasks used to judge transfer."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "ROB-09",
+  "title": "Lifelong learning for robot manipulation",
+  "definition": "A physical robot acquires manipulation tasks sequentially during deployment, retains earlier task performance, and combines acquired motor skills to complete an undemonstrated task in a new environment. Manipulation means acting on objects by grasping, moving or using them.",
+  "goal": {
+   "need": "LIBERO supplies 50 demonstrations for each of 130 simulated manipulation tasks. LEGION trains for 1 million steps on each of 10 simulated tasks. The goal is to reuse acquired knowledge as tasks change while preserving earlier performance, so that learning another task does not discard previous training. These are experimental training budgets, not measured deployment costs.",
+   "need_refs": [
+    1,
+    2,
+    3
+   ],
+   "figures": null,
+   "statements": [
+    {
+     "body": "DARPA, Lifelong Learning Machines programme",
+     "year": "2017",
+     "quote": "enable systems to learn from experience on the fly",
+     "context": "The programme describes the purpose of developing new machine-learning mechanisms.",
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "Billard and colleagues, authors of A roadmap for AI in robotics",
+     "year": "2025",
+     "quote": "to design robots capable of lifelong learning, while guaranteeing safe deployment and usage, and sustainable computational costs.",
+     "context": "The authors identify this as a primary long-term challenge.",
+     "ref": 4,
+     "checked": true
+    },
+    {
+     "body": "Google DeepMind",
+     "year": "2026",
+     "quote": "They lack the ability to truly learn for themselves or adapt to unpredictable environments.",
+     "context": "The passage refers to robots programmed or teleoperated for narrow, repetitive task sequences.",
+     "ref": 5,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "One robot learns sequential tasks, retains them and composes them in an unseen environment.",
+   "criterion": "One physical manipulator must acquire new tasks through a deployment-time sequence, with L2M sample efficiency SE > 1 against single-task learners and performance maintenance PM ≥ 0 on earlier tasks. After those updates, it must complete an undemonstrated combination of the newly acquired skills in an environment absent from instruction. SE compares saturated performance and experiences needed to reach it; PM is the mean change in earlier-task performance during subsequent learning. Replay is permitted. No universal task count, instruction budget or trial count is specified.",
+   "set_by": "Atlas synthesis of published component criteria; no external integrated completion test found.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "DARPA L2M programme and metrics documents, the robotics roadmap, LIBERO, and web searches for robotics standards and competitions yielded no integrated physical acquisition–retention–composition pass test or universal instruction budget. L2M supplies SE > 1 and PM ≥ 0 as component interpretations. Their conjunction with composition in an unseen environment is an Atlas synthesis.",
+   "refs": [
+    1,
+    3,
+    4,
+    6,
+    7,
+    8
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A simulated robot learns a task stream with mean forgetting no greater than zero.",
+    "criterion": "For a simulated manipulation-task stream, require F ≤ 0, where F is the mean, over all but the final task, of success immediately after learning that task minus success after the entire stream. Improvements can offset losses in this aggregate. On 5 February 2025, LEGION reported F = 0.0 and final mean success 0.84 across 10 simulated tasks trained for 1 million steps each. Its physical deployment froze the learned parameters.",
+    "set_by": "The signed forgetting convention used in lifelong learning, defined in LEGION, Methods: Forgetting.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "When F > 0 represents that the agent may have lost knowledge of prior tasks.",
+    "threshold_ref": 2,
+    "refs": [
+     2
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A physical robot scores 7/7 on the held-out Toast a Bagel composition task.",
+    "criterion": "Complete the physical Toast a Bagel protocol for all 7 rubric points: open the oven, insert the bagel, close the oven, turn the knob, retrieve a plate, retrieve the toast and plate it. Stepwise language coaching is allowed; the complete task has no robot-training episodes. The π0.7 preprint of 24 April 2026 reports coached execution and subsequent training of autonomous high-level policies from coaching episodes. These results are not peer reviewed and do not test earlier-task retention.",
+    "set_by": "Physical Intelligence, π0.7, Appendix A-G; this published task endpoint applies specifically to Toast a Bagel.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "Maximum score: 7 (open oven; insert bagel; close oven; turn knob; retrieve plate; retrieve toast; place on plate).",
+    "threshold_ref": 7,
+    "refs": [
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A physical robot learns manipulation tasks with L2M sample efficiency greater than 1.",
+    "criterion": "On physical manipulation tasks with saturated learning curves, require mean L2M sample efficiency SE > 1. For each task, SE = (learner saturation / single-task-expert saturation) × (expert experiences to saturation / learner experiences to saturation). On 30 July 2026, Google DeepMind reported adaptation to new paired-arm robots in a few hours, typically using fewer than 200 examples. This developer report is not peer reviewed and does not supply the matched learning curves needed to establish SE > 1.",
+    "set_by": "Johns Hopkins APL L2M evaluation team, Lifelong Learning Metrics, section 3.4.5; its domain-agnostic criterion is applied here to physical manipulation.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "L2 agent demonstrates better performance than the Single Task Expert;",
+    "threshold_ref": 6,
+    "refs": [
+     6,
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "A physical robot retains sequentially acquired tasks with mean performance maintenance of at least 0.",
+    "criterion": "After a physical robot acquires new tasks sequentially, require L2M PM ≥ 0: average the changes in earlier-task performance relative to each task's most recent post-learning evaluation, excluding that immediate evaluation. Evaluation blocks exercise all previously learned tasks. The LifelongVLA preprint of 21 July 2026 reports five xArm tasks, 50 training episodes per task and 50 evaluation episodes per seen task after each stage, with final success above 80% on every task. Those final rates alone do not establish PM ≥ 0; the result is not peer reviewed.",
+    "set_by": "Johns Hopkins APL L2M evaluation team, Lifelong Learning Metrics, section 3.4.1; its domain-agnostic criterion is applied here to physical manipulation.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "PM = 0: No forgetting; no additional learning.",
+    "threshold_ref": 6,
+    "refs": [
+     6,
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No external integrated completion criterion or universal instruction budget was found in the programme documents, roadmap, benchmarks and standards or competition searches.",
+   "No opened study establishes acquisition efficiency, retention and subsequent composition of the newly acquired skills in an unseen environment in the same physical learning sequence.",
+   "The opened π0.7 text does not state evaluation episode counts for the coached Toast a Bagel experiment.",
+   "The opened LifelongVLA text does not provide the stagewise physical success values needed to calculate L2M performance maintenance.",
+   "The published Neural Networks article on domain-agnostic lifelong-learning evaluation could not be opened; the separate L2M metrics document was accessible."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2306.03310v2",
+    "doi": "10.48550/arXiv.2306.03310",
+    "title": "LIBERO: Benchmarking Knowledge Transfer for Lifelong Robot Learning",
+    "authors": "Liu B, Zhu Y, Gao C, Feng Y, Liu Q, Zhu Y, et al.",
+    "container": "arXiv",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 2,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s42256-025-00983-2?code=1&error=cookies_not_supported",
+    "doi": "10.1038/s42256-025-00983-2",
+    "title": "Preserving and combining knowledge in robotic lifelong reinforcement learning",
+    "authors": "Meng Y, Bing Z, Yao X, Chen K, Huang K, Gao Y, et al.",
+    "container": "Nat Mach Intell",
+    "year": "2025",
+    "volume": "7",
+    "issue": "2",
+    "pages": "256-269",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 3,
+    "kind": "web",
+    "url": "https://www.darpa.mil/news/2017/machines-improve-experience",
+    "doi": null,
+    "title": "Toward Machines that Improve with Experience",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "DARPA",
+    "year": "2017",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "journal",
+    "url": "https://arxiv.org/abs/2507.19975",
+    "doi": "10.1038/s42256-025-01050-6",
+    "title": "A roadmap for AI in robotics",
+    "authors": "Billard A, Albu-Schaeffer A, Beetz M, Burgard W, Corke P, Ciocarlie M, et al.",
+    "container": "Nat Mach Intell",
+    "year": "2025",
+    "volume": "7",
+    "issue": "6",
+    "pages": "818-824",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 5,
+    "kind": "web",
+    "url": "https://deepmind.google/blog/gemini-robotics-2-brings-whole-body-intelligence-to-robots/",
+    "doi": null,
+    "title": "Gemini Robotics 2 brings whole body intelligence to robots",
+    "authors": "Parada C.",
+    "container": "Google DeepMind",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2201.08278v1",
+    "doi": "10.48550/arXiv.2201.08278",
+    "title": "Lifelong Learning Metrics",
+    "authors": "New A, Baker M, Nguyen E, Vallabha G",
+    "container": "arXiv",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 7,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2604.15483v2",
+    "doi": "10.48550/arXiv.2604.15483",
+    "title": "π0.7: a Steerable Generalist Robotic Foundation Model with Emergent Capabilities",
+    "authors": "Intelligence P, Ai B, Amin A, Aniceto R, Balakrishna A, Balke G, et al.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 8,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2607.14852v2",
+    "doi": "10.48550/arXiv.2607.14852",
+    "title": "Towards Human-like Physical Intelligence: Lifelong Vision-Language-Action Learning for Robotic Manipulation",
+    "authors": "He Y, Sun G, Liang W, Li F, Cong Y",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 4 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 7 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }
