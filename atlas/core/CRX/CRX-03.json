@@ -227,7 +227,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Predicting a molecule’s possible crystal forms",
@@ -336,5 +337,258 @@
    "A reliable stability ranking alone cannot determine which form will crystallize, how quickly it will appear or how preparation history affects it."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "CRX-03",
+  "title": "Molecular crystal structure prediction with free-energy ranking",
+  "definition": "Molecular crystal structure prediction generates candidate packings from chemical structures and specified composition, temperature and pressure, then orders polymorphs—different packings of the same compound—by free energy, which determines equilibrium stability. The scope includes flexible molecules, salts, hydrates, solvates, cocrystals and disorder.",
+  "goal": {
+   "need": "Crystal form affects pharmaceutical dissolution and processing. In Zhou et al.'s validation of 66 molecules, competing structures occupied energy ranges comparable to calculation errors, preventing a confident room-temperature stability assignment for agrochemical target XXXI.",
+   "need_refs": [
+    1
+   ],
+   "figures": {
+    "caption": "Calculated energy scales reported by Zhou et al. on 5 March 2025",
+    "columns": [
+     "System",
+     "Calculated energy separation"
+    ],
+    "rows": [
+     [
+      "Most drug-like molecules examined",
+      "Many candidates within 1.0 kcal/mol (4.2 kJ/mol) of the minimum"
+     ],
+     [
+      "Agrochemical target XXXI",
+      "About 0.4 kcal/mol (1.7 kJ/mol) between two forms at room temperature"
+     ]
+    ],
+    "note": "The target XXXI difference was within the calculation errors.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "Cambridge Crystallographic Data Centre",
+     "year": "2022",
+     "quote": "predict reliably all the crystalline forms that a compound can form starting from the 2D chemical diagram.",
+     "context": "The trustees' report for the year ending 31 December 2021, approved on 23 August 2022, identifies this as the end goal of crystal structure prediction.",
+     "ref": 2,
+     "checked": false
+    },
+    {
+     "body": "ADAM, European Research Council Synergy Grant programme",
+     "year": "2025",
+     "quote": "to explore the relationships between chemical composition, stable crystal structures, and desirable properties.",
+     "context": "The programme assigns this objective to its computational engine, which combines molecular crystal structure prediction with machine learning.",
+     "ref": 3,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "A blind evaluation demonstrates joint structure generation and free-energy ranking across the listed classes.",
+   "criterion": "In a prospective blind evaluation spanning the listed crystal classes, the same workflow generates withheld experimental packings from chemical structures and specified composition and conditions, and reproduces experimentally established polymorph stability relationships at the stated temperatures and pressures. Structural matches use the evaluator's published packing-comparison criterion. Finite-temperature and disorder contributions enter the free-energy ranking where relevant. Experimentally distinguishable stability orderings must be resolved.",
+   "set_by": "Atlas fallback, combining the separately assessed CCDC generation and ranking tasks across the stated scope.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches of CCDC blind-test reports and rules, molecular-CSP roadmaps, standards and prize criteria found no overall completion test or pass fraction spanning these classes. CCDC evaluates generation, proximity to the calculated global minimum, and agreement with measured polymorph stability separately. This fallback joins those tasks prospectively without adopting a universal energy-error tolerance.",
+   "refs": [
+    2,
+    4,
+    5,
+    6
+   ],
+   "threshold_checked": null
+  },
+  "case_label": "Crystal class",
+  "cases": [
+   "Neutral molecular crystals",
+   "Salts",
+   "Hydrates and solvates",
+   "Cocrystals"
+  ],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "An observed crystal is recovered within 0.50 Å over at least 25 molecules and ranks in the top ten.",
+    "criterion": "Recover an observed packing with root-mean-square atomic displacement below 0.50 Å over at least 25 molecules, ranked among the top ten candidates. On 5 March 2025, Zhou et al. reported this retrospective result for all 33 single-form molecules; this subset does not establish performance for the other listed classes.",
+    "set_by": "Schrödinger-led validation protocol, Zhou et al., Results; published for the single-form molecular subset.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "better than 0.50 Å for a cluster of at least 25 molecules was sampled and ranked among the top 10",
+    "threshold_ref": 1,
+    "refs": [
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": false
+   },
+   {
+    "id": "m2",
+    "title": "A blind molecular-crystal search recovers a withheld packing among at most 1,500 candidates.",
+    "criterion": "Recover a withheld packing among at most 1,500 candidates using CCDC structural matching. The 2024 report recorded matches for drug-candidate XXXII Form A in 3/13 submissions, morpholine-salt XXXIII Form A in 5/14, and cocrystal XXX Form A in 2/13; the cocrystal results included a disordered-structure prediction. In the 2016 test, 1/8 submissions recovered a chloride salt hydrate under that test's 100-candidate protocol.",
+    "set_by": "CCDC, seventh blind-test generation protocol, §2.5; the salt-hydrate result used the sixth-test protocol.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "a list of up to 1500 generated structures",
+    "threshold_ref": 4,
+    "refs": [
+     4,
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m3",
+    "title": "Blind rankings place observed molecular crystals near the calculated minimum within expected errors.",
+    "criterion": "Using supplied sets of 100 or 500 structures, rank observed forms at or near the global minimum within the method's expected error bars. No universal numerical tolerance was specified. In the 2024 report, periodic-DFT methods placed flexible drug-candidate XXXII's observed forms more than 4 kJ/mol above that minimum at low and ambient temperatures.",
+    "set_by": "CCDC, seventh blind-test ranking report, §6.1; neutral compounds and a morpholine salt.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "ranked at or close to the global minimum",
+    "threshold_ref": 5,
+    "refs": [
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m4",
+    "title": "Blind free-energy rankings reproduce measured polymorph stability relationships.",
+    "criterion": "Reproduce measured polymorph stability relationships in the supplied-structure ranking exercise. In the 2024 report, 14/17 groups correctly ordered morpholine-salt XXXIII's two forms. The five-target exercise contained no hydrate, solvate or cocrystal and supplied candidate structures rather than testing the complete prediction workflow.",
+    "set_by": "CCDC, seventh blind-test ranking report, §6.1; polymorphic targets XXXI–XXXIII.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "correctly reproduce the relative stability relationship observed experimentally",
+    "threshold_ref": 5,
+    "refs": [
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No prospective validation jointly covering generation and free-energy ranking across all four crystal classes was identified.",
+   "The CCDC seventh-test rules page returned navigation without readable rules text."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41467-025-57479-1.pdf",
+    "doi": "10.1038/s41467-025-57479-1",
+    "title": "A robust crystal structure prediction method to support small molecule drug development with large scale validation and blind study",
+    "authors": "Zhou D, Bier I, Santra B, Jacobson LD, Wu C, Garaizar Suarez A, et al.",
+    "container": "Nat Commun",
+    "year": "2025",
+    "volume": "16",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "report",
+    "url": "https://register-of-charities.charitycommission.gov.uk/en/charity-search?_uk_gov_ccew_onereg_charitydetails_web_portlet_CharityDetailsPortlet_objectiveId=A12446943&_uk_gov_ccew_onereg_charitydetails_web_portlet_CharityDetailsPortlet_priv_r_p_mvcRenderCommandName=%2Ffull-print&_uk_gov_ccew_onereg_charitydetails_web_portlet_CharityDetailsPortlet_priv_r_p_organisationNumber=800579&p_p_cacheability=cacheLevelPage&p_p_id=uk_gov_ccew_onereg_charitydetails_web_portlet_CharityDetailsPortlet&p_p_lifecycle=2&p_p_mode=view&p_p_resource_id=%2Faccounts-resource&p_p_state=maximized",
+    "doi": null,
+    "title": "Trustees’ Report and Financial Statements",
+    "authors": "Cambridge Crystallographic Data Centre",
+    "container": "Cambridge Crystallographic Data Centre",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "report",
+    "url": "https://cordis.europa.eu/project/id/856405/reporting",
+    "doi": "10.3030/856405",
+    "title": "Autonomous Discovery of Advanced Materials",
+    "authors": "ADAM consortium",
+    "container": "European Commission CORDIS",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 4,
+    "kind": "journal",
+    "url": "https://journals.iucr.org/b/issues/2024/06/00/aw5093/index.html",
+    "doi": "10.1107/S2052520624007492",
+    "title": "The seventh blind test of crystal structure prediction: structure generation methods",
+    "authors": "Hunnisett LM, Nyman J, Francia N, Abraham NS, Adjiman CS, Aitipamula S, et al.",
+    "container": "Acta Crystallogr B Struct Sci Cryst Eng Mater",
+    "year": "2024",
+    "volume": "80",
+    "issue": "6",
+    "pages": "517-547",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 5,
+    "kind": "journal",
+    "url": "https://journals.iucr.org/b/issues/2024/06/00/aw5094/index.html",
+    "doi": "10.1107/S2052520624008679",
+    "title": "The seventh blind test of crystal structure prediction: structure ranking methods",
+    "authors": "Hunnisett LM, Francia N, Nyman J, Abraham NS, Aitipamula S, Alkhidir T, et al.",
+    "container": "Acta Crystallogr B Struct Sci Cryst Eng Mater",
+    "year": "2024",
+    "volume": "80",
+    "issue": "6",
+    "pages": "548-574",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://eprints.soton.ac.uk/393981/1/BT_paper_270416.pdf",
+    "doi": "10.1107/S2052520616007447",
+    "title": "Report on the Sixth Blind Test of Organic Crystal-Structure Prediction Methods",
+    "authors": "Reilly AM, Cooper RI, Adjiman CS, Bhattacharya S, Boese AD, Brandenburg JG, et al.",
+    "container": "Acta Crystallogr B Struct Sci Cryst Eng Mater",
+    "year": "2016",
+    "volume": "72",
+    "issue": "4",
+    "pages": "439-459",
+    "citation_source": "crossref"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 5 from Crossref, 0 from PubMed, 0 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 1 found, 2 not found, 3 with no readable copy."
+   }
+  ]
  }
 }

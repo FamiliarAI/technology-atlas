@@ -218,7 +218,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Checking quantum answers with ordinary computers",
@@ -285,5 +286,263 @@
    "Required acceptance rates for honest execution, the comparison baseline, and acceptable client runtime and memory remain to be chosen."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "CRY-06",
+  "title": "Classical verification of quantum computation",
+  "definition": "A classical client verifies one untrusted quantum server’s answer to a yes-or-no computation while preserving a measured runtime advantage over the best known classical solution. Cryptographic soundness bounds false acceptance against efficient dishonest quantum servers under explicit computational hardness assumptions.",
+  "goal": {
+   "need": "A client with only classical hardware needs to check a delegated quantum answer without reproducing the calculation. The laboratory illustration below used fixed two-bit functions without the full protocol’s cryptographic security; its register counts therefore do not establish the cost at secure parameters.",
+   "need_refs": [
+    1
+   ],
+   "figures": {
+    "caption": "Registers in the protocol illustration reported on 14 March 2022",
+    "columns": [
+     "Register",
+     "Qubits"
+    ],
+    "rows": [
+     [
+      "Underlying computation",
+      "1"
+     ],
+     [
+      "History state",
+      "2"
+     ],
+     [
+      "Auxiliary registers",
+      "6"
+     ],
+     [
+      "Processor total",
+      "8"
+     ]
+    ],
+    "note": "The history state encodes the computation; the processor total is history plus auxiliary qubits.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "European Quantum Flagship, Strategic Research Agenda",
+     "year": "2020",
+     "quote": "Finding efficient and scalable ways of certifying their quantum properties and correct performance is crucial for the development of quantum technologies.",
+     "context": "The passage concerns quantum computers and simulators; it does not specify a classical-client cryptographic protocol.",
+     "ref": 2,
+     "checked": false
+    },
+    {
+     "body": "IBM",
+     "year": "2025",
+     "quote": "rigorous validation of the quantum computation and a demonstrable quantum separation measured in terms of efficiency, cost-effectiveness, accuracy, or some combination of the three.",
+     "context": "IBM’s quantum-advantage criterion is broader than verification against a malicious quantum server.",
+     "ref": 3,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "Secure classical verification preserves an end-to-end runtime advantage for a quantum decision computation.",
+   "criterion": "Execute a published single-server protocol for BQP, the decision problems solvable in quantum polynomial time, with a classical client and no trusted server operations. Concrete security parameters must give a proven honest-acceptance bound above the adversarial false-acceptance bound, covering implemented noise and amplification. For at least one specified workload, measured end-to-end runtime, including setup, quantum execution, communication and classical verification, must be below the best known classical solution at matched answer-error probability on declared hardware.",
+   "set_by": "Atlas fallback; no outside body located defines this combined implementation and runtime test.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searched European Quantum Flagship agendas and calls, IBM’s advantage framework, and classical-verification protocols and experiments; none supplied a finite-resource practicality test for a classical client and one untrusted server. This Atlas criterion combines cryptographic verification with a preserved runtime separation. The sources do not prescribe this particular combination or a universal security parameter.",
+   "refs": [
+    2,
+    3,
+    4
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "sequence",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A classical protocol verifies quantum decisions with completeness approaching 1 and soundness approaching 3/4.",
+    "criterion": "Prove a classical-verifier, single-quantum-prover protocol for every BQP language, with completeness 1−negl(λ) and soundness at most 3/4+negl(λ), under quantum-hard Learning with Errors (LWE) with superpolynomial noise ratio. Completeness is honest acceptance; soundness bounds false acceptance. Here λ is the security parameter and negl decreases faster than every inverse polynomial. Mahadev established this theorem. A preprint of 29 September 2026 gives O(g·poly(λ,log g)) total resources for g gates; quasilinear scaling additionally assumes subexponential LWE hardness. That result is not peer reviewed.",
+    "set_by": "Mahadev, Protocol 7.5 and Theorem 7.6, in the manuscript revised on 8 December 2023.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "with completeness negligibly close to $1$ and soundness negligibly close to $\\frac{3}{4}$.",
+    "threshold_ref": 4,
+    "refs": [
+     4,
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": false
+   },
+   {
+    "id": "m2",
+    "title": "A classical verifier estimates energy below 0.4 for a one-qubit decision computation.",
+    "criterion": "Run the eight-qubit illustration for U(α)=cos(α)Z+sin(α)X, where X and Z are Pauli operators. Its promise is p₀>3/5 (“yes”) or p₀<1/10 (“no”), with p₀ the output-0 probability. The classical verifier must estimate the dimensionless Hamiltonian energy below 0.4 for a correct “yes”; a false “yes” has minimum energy above 0.5. The 14 March 2022 preprint reports success for α≤0.12π/2 using 2,000 repetitions per measurement. Its fixed two-bit functions lack full cryptographic security.",
+    "set_by": "Stricker et al., experimental protocol, Figure 2 and Appendix AIII; this threshold applies only to their chosen one-qubit promise problem.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "Points below $0.4$ (dark grey) allow one to verify that $\\sf B$’s claim was indeed correct.",
+    "threshold_ref": 1,
+    "refs": [
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": false
+   },
+   {
+    "id": "m3",
+    "title": "Quantum hardware implements a complete classical-verifier protocol with a proven acceptance gap.",
+    "criterion": "Execute a complete single-server BQP verification protocol at explicit cryptographic parameters on a classically tractable workload. A security analysis covering the implementation must place honest acceptance strictly above the adversarial false-acceptance bound, without trusted server operations or a trusted preparation-noise model. The 14 October 2025 on-chip experiment used 20 qubits and measurement patterns of up to 52 vertices, but assumes preparation noise independent of the secret; it does not establish this stronger milestone.",
+    "set_by": "Atlas fallback: searches of CVQC protocols and experiments found no published hardware acceptance test with these conditions; the acceptance gap follows the protocol definition.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     4,
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m4",
+    "title": "Secure classical verification completes a workload whose bare quantum execution beats classical solvers.",
+    "criterion": "Meet m3 for a specified decision workload whose unverified quantum execution has an independently supported runtime advantage over the best known classical solver at matched answer-error probability on declared hardware. Complete the cryptographic verification, including secure function evaluation and repetitions. Verification overhead may erase the underlying runtime advantage at this stage; preserving it is the completion test.",
+    "set_by": "Atlas fallback: no reviewed roadmap or protocol defined an intermediate hardware test separating a workload’s runtime advantage from verification overhead.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     3,
+     4
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No outside body’s finite-resource completion test or universal security and overhead cutoffs were found for this capability.",
+   "Searches did not locate a hardware demonstration meeting the combined completion test.",
+   "The publisher blocked the Stricker journal full text; changes from the 14 March 2022 preprint remain unchecked."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2203.07395v1",
+    "doi": "10.48550/arXiv.2203.07395",
+    "title": "Towards experimental classical verification of quantum computation",
+    "authors": "Stricker R, Carrasco J, Ringbauer M, Postler L, Meth M, Edmunds C, et al.",
+    "container": "arXiv",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 2,
+    "kind": "report",
+    "url": "https://qt.eu/media/pdf/Strategic_Research-_Agenda_d_FINAL.pdf",
+    "doi": null,
+    "title": "Strategic Research Agenda",
+    "authors": "European Quantum Flagship",
+    "container": "European Quantum Flagship",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "web",
+    "url": "https://www.ibm.com/quantum/blog/qdc-2025",
+    "doi": null,
+    "title": "Scaling for quantum advantage and beyond",
+    "authors": "Mandelbaum R",
+    "container": "IBM Quantum Computing Blog",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "journal",
+    "url": "https://arxiv.org/html/1804.01082v3",
+    "doi": "10.1137/20M1371828",
+    "title": "Classical Verification of Quantum Computations",
+    "authors": "Mahadev U",
+    "container": "SIAM J. Comput.",
+    "year": "2022",
+    "volume": "51",
+    "issue": "4",
+    "pages": "1172-1229",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 5,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2609.38060v1",
+    "doi": "10.48550/arXiv.2609.38060",
+    "title": "Classical Verification of Quantum Computation with Quasilinear Resources, from Compiled Nonlocal Games",
+    "authors": "Holler F, Natarajan A",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://journals.aps.org/prl/abstract/10.1103/jpms-v3kw",
+    "doi": "10.1103/jpms-v3kw",
+    "title": "On-Chip Verified Quantum Computation with an Ion-Trap Quantum Processing Unit",
+    "authors": "Gustiani C, Leichtle D, Miller J, Grassie R, Mills D, Kashefi E",
+    "container": "Phys. Rev. Lett.",
+    "year": "2025",
+    "volume": "135",
+    "issue": "16",
+    "pages": null,
+    "citation_source": "crossref"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 2 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 1 found, 3 not found, 0 with no readable copy."
+   }
+  ]
  }
 }

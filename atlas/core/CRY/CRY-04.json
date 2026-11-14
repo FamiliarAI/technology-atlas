@@ -256,7 +256,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Private computing at close to ordinary cost",
@@ -364,5 +365,270 @@
    "Cheap private execution alone does not determine what released results reveal or hide timing, traffic and participation."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "CRY-04",
+  "title": "Fully homomorphic encryption within 10× plaintext runtime",
+  "definition": "A programmable accelerator runs fully homomorphic encryption (FHE), which evaluates arbitrary circuits on encrypted data without the decryption key, within DARPA’s application runtime targets relative to unencrypted computation.",
+  "goal": {
+   "need": "Li and colleagues’ survey, published on 7 April 2026, reports FHE operation latencies about 10,000× their unencrypted counterparts and representative word-wise bootstrapping times of 4–95 s. Bootstrapping refreshes ciphertext noise so computation can continue. Reducing this overhead addresses the cost of outsourcing computation without disclosing plaintext to its evaluator. These figures concern operations, rather than general-program benchmarks.",
+   "need_refs": [
+    1
+   ],
+   "figures": null,
+   "statements": [
+    {
+     "body": "DARPA, Data Protection in Virtual Environments programme",
+     "year": "2020",
+     "quote": "Execution of government defined FHE applications in time scales 10x or less of unencrypted computation",
+     "context": "One of the technical challenges published in the programme’s special notice dated 12 February 2020.",
+     "ref": 2,
+     "checked": true
+    },
+    {
+     "body": "TREBUCHET project",
+     "year": "2023",
+     "quote": "To be useful, FHE must significantly close the computation gap (within 10x) to make encrypted processing practical.",
+     "context": null,
+     "ref": 3,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "An FHE accelerator meets DPRIVE’s final logistic-regression and CNN runtime targets.",
+   "criterion": "A fabricated, CPU-connected FHE accelerator executes DARPA’s specified seven-layer convolutional neural network on CIFAR-10: inference ≤25 ms per image and training for 10 epochs ≤10 h, each labelled 10× plaintext runtime. It also executes 1,024-point logistic regression in ≤0.1 ms. The specified CNN uses ReLU activations. The accelerator supports BGV and parameter ranges of plaintext modulus 2–1,024, ciphertext modulus 2^15–2^500 and ring dimension 512–16,384.",
+   "set_by": "DARPA, DPRIVE announcement HR001120S0032, amended 19 March 2020, Phase 3; units and training duration appear in its programme-metrics chart.",
+   "set_by_kind": "government_programme",
+   "threshold_quote": "≤ 10 hours (within 10x).",
+   "threshold_ref": 4,
+   "basis": "DPRIVE supplies numerical application tests for encrypted outsourcing. These benchmarks do not establish arbitrary-program efficiency, private memory access or total MPC cost. A 2026 paper reports 22.4 ms CNN inference on an RTX 5090 after replacing ReLU activations with quadratic functions; that result does not establish the specified accelerator or encrypted training test.",
+   "refs": [
+    4,
+    5,
+    6
+   ],
+   "threshold_checked": true
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "sequence",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A working FHE implementation evaluates circuits and refreshes ciphertexts without the decryption key.",
+    "criterion": "Implement correct circuit evaluation with decryption complexity bounded by the security parameter independently of circuit size, including bootstrapping to refresh ciphertexts. Gentry and Halevi’s 2011 implementation tested lattice dimensions 512, 2,048, 8,192 and 32,768. One bootstrap took 30 s at dimension 2,048 and 30 min at dimension 32,768 on a single-CPU 64-bit machine.",
+    "set_by": "Cryptography community convention: compact evaluation of all circuits, formalised in Gentry’s Definition 2.1.4 and implemented by Gentry and Halevi.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "it compactly evaluates all circuits.",
+    "threshold_ref": 7,
+    "refs": [
+     7,
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "An FHE accelerator emulator executes 1,024-point logistic regression in less than 10 ms.",
+    "criterion": "Execute the government-defined encrypted logistic-regression problem on 1,024 data points in <10 ms using a circuit emulator. TREBUCHET’s 2023 paper reports single-tile kernel emulation and modeled logistic-regression training times; it does not establish this complete application test.",
+    "set_by": "DARPA, DPRIVE announcement HR001120S0032, Phase 1.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "less than 10 ms.",
+    "threshold_ref": 4,
+    "refs": [
+     4,
+     5,
+     3
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A full FHE accelerator emulator performs seven-layer CNN inference in less than 250 ms per image.",
+    "criterion": "Execute the government-specified seven-layer CNN on encrypted CIFAR-10 images using full-accelerator emulation in <250 ms per image. DARPA describes this as within 100× plaintext execution on a standard workstation.",
+    "set_by": "DARPA, DPRIVE announcement HR001120S0032, Phase 2.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "less than 250 ms",
+    "threshold_ref": 4,
+    "refs": [
+     4,
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "Hardware performs the specified encrypted seven-layer CNN inference in ≤25 ms per image.",
+    "criterion": "Execute DARPA’s specified seven-layer CNN, including its ReLU activations, on encrypted CIFAR-10 images in ≤25 ms per image. Choi and colleagues’ peer-reviewed 2026 paper reports 22.4 ms CNN inference on one NVIDIA RTX 5090 GPU using quadratic replacements for ReLU. That demonstrates the latency with a modified network, leaving conformity to the specified network unresolved.",
+    "set_by": "DARPA, DPRIVE announcement HR001120S0032, inference component of the Phase 3 application test.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "≤ 25 ms (within 10x).",
+    "threshold_ref": 4,
+    "refs": [
+     4,
+     5,
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "Searches for DARPA programme, homomorphic-encryption standard and MPC roadmap targets found no common completion test covering general-purpose private RAM execution and malicious MPC at near-plaintext total cost.",
+   "No public result establishing all DPRIVE final application metrics on a fabricated accelerator was found.",
+   "No complete DPRIVE accounting rule covering setup, preprocessing, memory, communication and private memory access was found.",
+   "The TREBUCHET Phase Two Performance Estimation Results PDF could not be opened.",
+   "The 2026 CNN-inference paper’s full text was inaccessible at IEEE; its author-university abstract was available."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://link.springer.com/article/10.1186/s42400-026-00571-w",
+    "doi": "10.1186/s42400-026-00571-w",
+    "title": "A survey of optimization techniques for bootstrapping algorithms in FHE",
+    "authors": "Li T, Wang Z, Zhao L, Wang R, Niu Q, Lu X, et al.",
+    "container": "Cybersecurity",
+    "year": "2026",
+    "volume": "9",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "report",
+    "url": "https://imlive.s3.amazonaws.com/Federal%20Government/ID62184416426800133908656852407565494044/DARPA-SN-20-28_DPRIVE%20Proposers%20Day_Final%20for%20Posting_12Feb2020.pdf",
+    "doi": null,
+    "title": "Special Notice DPRIVE Proposers Day DARPA-SN-20-28",
+    "authors": "Defense Advanced Research Projects Agency.",
+    "container": "DARPA",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "preprint",
+    "url": "https://arxiv.org/abs/2304.05237",
+    "doi": "10.48550/arXiv.2304.05237",
+    "title": "TREBUCHET: Fully Homomorphic Encryption Accelerator for Deep Computation",
+    "authors": "Cousins DB, Polyakov Y, Badawi AA, French M, Schmidt A, Jacob A, et al.",
+    "container": "arXiv",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 4,
+    "kind": "report",
+    "url": "https://govtribe.com/file/government-file/hr001120s0032-hr001120s0032-amendment-01-dot-pdf",
+    "doi": null,
+    "title": "Broad Agency Announcement Data Protection in Virtual Environments (DPRIVE)",
+    "authors": "Defense Advanced Research Projects Agency.",
+    "container": "DARPA; document text reproduced by GovTribe",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "report",
+    "url": "https://www.itu.int/en/ITU-T/Workshops-and-Seminars/2022/0901/Documents/IBM%20Research.pdf",
+    "doi": null,
+    "title": "HE Hardware Acceleration Research with a discussion of standardization of SW-HW Interfaces",
+    "authors": "Bose P, Soceanu O, Drucker N, Swaminathan K, Pal S, Buselli J, et al.",
+    "container": "IBM Research; 5th HomomorphicEncryption.org Standards Meeting",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://snu.elsevierpure.com/en/publications/a-five-year-journey-to-accelerate-homomorphic-encryption-with-gpu/",
+    "doi": "10.1109/MM.2026.3665245",
+    "title": "A Five-Year Journey to Accelerate Homomorphic Encryption with GPUs, Demonstrated by Sub-25ms CNN Inference",
+    "authors": "Choi W, Kim S, Park J, Ahn JH",
+    "container": "IEEE Micro",
+    "year": "2026",
+    "volume": "46",
+    "issue": "2",
+    "pages": "51-58",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "report",
+    "url": "https://crypto.stanford.edu/craig/craig-thesis.pdf",
+    "doi": null,
+    "title": "A Fully Homomorphic Encryption Scheme",
+    "authors": "Gentry C.",
+    "container": "Stanford University",
+    "year": "2009",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 8,
+    "kind": "book",
+    "url": "https://link.springer.com/chapter/10.1007/978-3-642-20465-4_9",
+    "doi": "10.1007/978-3-642-20465-4_9",
+    "title": "Implementing Gentry’s Fully-Homomorphic Encryption Scheme",
+    "authors": "Gentry C, Halevi S",
+    "container": "Lecture Notes in Computer Science",
+    "year": "2011",
+    "volume": null,
+    "issue": null,
+    "pages": "129-148",
+    "citation_source": "crossref"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 3 from Crossref, 0 from PubMed, 1 from arXiv, 4 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 7 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }

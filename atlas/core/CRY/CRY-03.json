@@ -223,7 +223,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Software that hides its workings from quantum computers",
@@ -317,5 +318,264 @@
    "Which workloads, security settings and duration of public scrutiny should determine success?"
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "CRY-03",
+  "title": "Post-quantum indistinguishability obfuscation",
+  "definition": "A classical compiler converts Boolean circuits, programs built from logical gates, into equivalent executable code with measured costs. For all polynomial-size circuits, obfuscations of equal-size circuits computing the same function are indistinguishable to quantum polynomial-time attackers, with advantage smaller than every inverse polynomial in a security parameter.",
+  "goal": {
+   "need": "For an n-input Boolean circuit, its complete truth table has 2^n entries. Polynomial-time iO avoids that exponential representation. Its uses include fully homomorphic encryption, functional encryption, multiparty non-interactive key exchange and succinct garbled random-access machines. Quantum resistance is a separate requirement: the 2022 Jain–Lin–Sahai survey states that a quantum computer breaks their bilinear-map construction in polynomial time.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": null,
+   "statements": [
+    {
+     "body": "Jain–Lin–Sahai research team, ICM 2022 invited contribution",
+     "year": "2022",
+     "quote": "in a way that the resulting scheme yields concrete implementable efficiency?",
+     "context": "The developers ask whether their approach, or another construction, can achieve concrete efficiency.",
+     "ref": 1,
+     "checked": true
+    },
+    {
+     "body": "Jain–Lin–Sahai research team, ICM 2022 invited contribution",
+     "year": "2022",
+     "quote": "build iO on any combination of well-studied postquantum assumptions",
+     "context": "The developers identify post-quantum security as a separate open problem.",
+     "ref": 1,
+     "checked": true
+    },
+    {
+     "body": "Branco–Jain–Srinivasan research team",
+     "year": "2026",
+     "quote": "The main pressing question in this area is whether post-quantum i$\\mathcal{O}$ exists.",
+     "context": "The abstract was revised on 28 May 2026.",
+     "ref": 3,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "An independent team reproduces an executable general-circuit post-quantum iO compiler.",
+   "criterion": "An executable classical compiler for all polynomial-size Boolean circuits has peer-reviewed correctness and quantum-security proofs under explicit hardness assumptions. An independent team reproduces compilation and correct evaluation of disclosed programs at concrete parameters, including the reduction's quantum-security bound and measured compilation time, peak memory, output size and evaluation time. The executable implements the proved construction. Finite benchmarks establish execution costs for those programs; the theorem establishes generality and security.",
+   "set_by": "Atlas fallback; no external acceptance test combining general circuits, quantum security and concrete implementation efficiency was found.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches of DARPA SafeWare, NIST material, prize criteria, iO definitions and implementation papers found no combined acceptance test or numerical practicality cutoff. This minimum test combines the published post-quantum security definition with the developers' concrete-efficiency goal and independent replication. It establishes executable feasibility; it does not establish an externally defined level of practical efficiency.",
+   "refs": [
+    1,
+    4,
+    5
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "An implementation of an iO candidate produces and evaluates an obfuscated program.",
+    "criterion": "A software implementation of a candidate iO construction produces an obfuscated program that executes with the original input-output behavior. Apon and colleagues report an implementation in a preprint received on 5 October 2014. This is implementation evidence for a candidate construction, without a post-quantum security claim; it is not evidence that general-circuit iO security was experimentally established.",
+    "set_by": "Atlas fallback: implementation papers provide prototype demonstrations, but no accepted minimum workload or resource threshold for an initial demonstration was found.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m2",
+    "title": "A polynomial-time construction provides conditional classical iO security for all polynomial-size circuits.",
+    "criterion": "A polynomial-time obfuscator preserves outputs with probability 1 and makes obfuscations of equal-size equivalent circuits computationally indistinguishable. Lin's theorem supplies this conditionally on subexponential hardness of learning parity with noise over prime fields, with error rate k^(-δ), δ>0; a constant-locality Boolean pseudorandom generator stretching n bits to n^(1+τ), τ>0; and Decision Linear in symmetric prime-order bilinear groups. The theorem covers all polynomial-size circuits. The bilinear-group construction does not provide quantum resistance.",
+    "set_by": "Cryptographic community's iO definition; the general-circuit threshold is stated in Lin's FSTTCS 2021 theorem.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "Then, (subexponentially secure) indistinguishability obfuscation for all polynomial-size circuits exist.",
+    "threshold_ref": 2,
+    "refs": [
+     2,
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A general-circuit iO construction has negligible distinguishing advantage against quantum attackers.",
+    "criterion": "A classical polynomial-time compiler preserves outputs with probability 1. For every equal-size equivalent circuit pair and quantum polynomial-time distinguisher D, |Pr[D(O(C0))=1]−Pr[D(O(C1))=1]| is negligible in λ: eventually below λ^(-c) for every c>0. Hsieh, Jain and Lin propose a construction under Circular Security with Random Opening, a new lattice assumption; their source is a preprint, not peer reviewed. Branco and colleagues' standard-model reduction additionally assumes post-quantum average-case iO and therefore does not establish iO from learning with errors alone.",
+    "set_by": "Cryptographic community's post-quantum iO definition, as used in Bartusek and colleagues, Definition 3.3.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "|Pr[𝒜𝜆(i𝒪(1𝜆, 𝐶0,𝜆)) = 1] − Pr[𝒜𝜆(i𝒪(1𝜆, 𝐶1,𝜆)) = 1]| = negl(𝜆).",
+    "threshold_ref": 4,
+    "refs": [
+     4,
+     1,
+     7,
+     3
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "A compiler implementing a post-quantum general-circuit iO construction executes disclosed programs.",
+    "criterion": "An executable compiler implements a construction with a correctness proof and a security reduction against quantum polynomial-time adversaries. At explicit finite parameters, it completes compilation and evaluation of disclosed programs, producing the original outputs. The demonstration establishes actual compilation time, peak memory, obfuscated size and evaluation time on identified hardware, together with the reduction's concrete security bound. Independent reproduction is reserved for completion.",
+    "set_by": "Atlas fallback: searches of SafeWare, benchmarking papers and post-quantum iO sources found no externally fixed workload or resource threshold for this implementation stage.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     1,
+     4,
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No external test combining general-circuit post-quantum iO security with numerical limits on compilation time, memory, storage and evaluation time was found.",
+   "No independently reproduced executable general-circuit post-quantum iO implementation with concrete quantum-security parameters was found.",
+   "The CACM article and the full PDFs of ePrint 2014/779, 2025/390 and 2025/2215 could not be opened; their accessible abstracts do not establish full construction details or implementation costs.",
+   "No published sequence of implementation stages leading to a shared practical-efficiency threshold was found."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "book",
+    "url": "https://ems.press/content/book-chapter-files/33314?nt=1",
+    "doi": "10.4171/ICM2022/86",
+    "title": "Indistinguishability obfuscation",
+    "authors": "Jain A, Lin H, Sahai A",
+    "container": "International Congress of Mathematicians",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": "4762-4798",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "report",
+    "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.FSTTCS.2021.4",
+    "doi": "10.4230/LIPIcs.FSTTCS.2021.4",
+    "title": "Indistinguishability Obfuscation from Well-Founded Assumptions (Invited Talk)",
+    "authors": "Lin H.",
+    "container": "LIPIcs",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "preprint",
+    "url": "https://eprint.iacr.org/2025/2215",
+    "doi": null,
+    "title": "Obfuscating Pseudorandom Functions is Post-Quantum Complete",
+    "authors": "Branco P, Jain A, Srinivasan A.",
+    "container": "Cryptology ePrint Archive",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "preprint",
+    "url": "https://ntt-research.com/wp-content/uploads/2023/08/Obfuscation-and-outsourced-computation-with-certified-deletion.pdf",
+    "doi": null,
+    "title": "Obfuscation and Outsourced Computation with Certified Deletion",
+    "authors": "Bartusek J, Garg S, Goyal V, Khurana D, Malavolta G, Raizes J, Roberts B.",
+    "container": "Cryptology ePrint Archive",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/1501.02885",
+    "doi": "10.48550/arXiv.1501.02885",
+    "title": "Benchmarking Obfuscators of Functionality",
+    "authors": "Thomborson C",
+    "container": "arXiv",
+    "year": "2015",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 6,
+    "kind": "preprint",
+    "url": "https://eprint.iacr.org/2014/779",
+    "doi": null,
+    "title": "Implementing Cryptographic Program Obfuscation",
+    "authors": "Apon D, Huang Y, Katz J, Malozemoff AJ.",
+    "container": "Cryptology ePrint Archive",
+    "year": "2014",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 7,
+    "kind": "preprint",
+    "url": "https://eprint.iacr.org/2025/390",
+    "doi": null,
+    "title": "Lattice-Based Post-Quantum iO from Circular Security with Random Opening Assumption (Part II: zeroizing attacks against private-coin evasive LWE assumptions)",
+    "authors": "Hsieh YC, Jain A, Lin H.",
+    "container": "Cryptology ePrint Archive",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 1 from arXiv, 5 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 5 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }

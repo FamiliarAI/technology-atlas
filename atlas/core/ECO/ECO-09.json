@@ -223,7 +223,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Software that designs rules for sharing resources",
@@ -318,5 +319,376 @@
    "Would changes to assumptions that permit stronger guarantees remain defensible in practice?"
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "ECO-09",
+  "title": "Prior-robust automated mechanism design",
+  "definition": "A reusable program converts an economy’s objective, constraints and limited information about participants’ private values into allocation and payment rules with proved guarantees. One synthesis method covers specified domains with goods valued jointly, values affected by others’ information, decisions over time and few traders.",
+  "goal": {
+   "need": "GAO’s fiscal year 2012 procurement data document auctions with only one vendor. Even with one buyer and one seller, Liu et al.’s 2026 arXiv preprint reports a tight 1/2 worst-case ratio of attainable expected gains from trade to efficient gains, under independent private values, Bayesian incentive compatibility, interim participation and budget balance. Mechanism construction must accommodate limited competition, incomplete distributional knowledge and incompatible objectives.",
+   "need_refs": [
+    1,
+    2,
+    3,
+    6
+   ],
+   "figures": {
+    "caption": "Reverse auctions at four US agencies, fiscal year 2012",
+    "columns": [
+     "Measure",
+     "Value"
+    ],
+    "rows": [
+     [
+      "Reverse auctions",
+      "19,688"
+     ],
+     [
+      "Contract awards",
+      "About US$828 million"
+     ],
+     [
+      "Auctions with one vendor",
+      "27%"
+     ]
+    ],
+    "note": "Army, Homeland Security, Interior and Veterans Affairs; GAO analysed transaction data supplied by FedBid.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "Tuomas Sandholm, co-developer of automated mechanism design",
+     "year": "2005",
+     "quote": "the mechanism is computationally created for the specific problem instance at hand.",
+     "context": "Sandholm describes the automated mechanism design approach introduced with Vincent Conitzer.",
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "Carnegie Mellon Software Engineering Institute, Ultra-Large-Scale Systems study team",
+     "year": "2006",
+     "quote": "More research would help us understand the theoretical and practical limits of automated mechanism design.",
+     "context": "Section 6.2.1 identifies automated mechanism design as a research requirement for systems that allocate resources among participants with competing interests.",
+     "ref": 4,
+     "checked": false
+    },
+    {
+     "body": "Tuomas Sandholm, Carnegie Mellon Electronic Marketplaces Laboratory",
+     "year": "2021",
+     "quote": "This is often unrealistic, especially in multi-dimensional settings.",
+     "context": "The preceding sentence identifies the assumption that the designer has a prior probability distribution over participants’ preferences.",
+     "ref": 5,
+     "checked": null
+    }
+   ]
+  },
+  "completion": {
+   "title": "One executable system synthesizes mechanisms with proved guarantees under distributional uncertainty.",
+   "criterion": "For every feasible specification in its declared finite static and dynamic domains, one program generates executable allocation and payment rules meeting the input’s numerical performance target and incentive, participation and budget constraints for every distribution in a specified non-singleton uncertainty set. Supported domains include complementary goods, interdependent values and few traders. Sample-derived uncertainty sets have a stated coverage probability. Correctness and computational bounds apply throughout the admitted domains, and the implementation realizes the proved construction.",
+   "set_by": "Atlas provisional completion criterion, combining published automated-design and robustness objectives; no external combined test located.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches for an automated mechanism design roadmap, standard, prize rule, shared benchmark and robust-synthesis target located no combined completion test. Sandholm specifies instance-specific construction; SEI requests convergence to a chosen quality goal; Albert et al. define constraints over uncertain distributions. Numerical performance targets therefore remain inputs rather than a field-wide approximation factor. Feasible specifications must respect bilateral-trade impossibility.",
+   "refs": [
+    3,
+    4,
+    6,
+    7
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "An algorithm computes an optimal truthful randomized mechanism for 2 agents in polynomial time.",
+    "criterion": "For 2 agents with explicitly represented finite type and outcome sets, known independent type distributions and no side payments, compute a randomized direct mechanism maximizing the supplied expected objective subject to dominant-strategy truthfulness. The objective must be polynomially computable. Runtime is polynomial in the explicit input size. Conitzer and Sandholm established this result in Theorem 3; Theorem 4 establishes the corresponding Bayes–Nash result.",
+    "set_by": "Finite automated mechanism design optimization convention, formalized by Conitzer and Sandholm in Complexity of Mechanism Design, Theorems 3–4.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "is solvable in polynomial time by linear programming, for any (polynomially computable) objective function.",
+    "threshold_ref": 8,
+    "refs": [
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "Mixed-bundling auction revenues generalize within ε from samples with probability at least 1−δ.",
+    "criterion": "For the paper’s class of n-bidder, m-item mixed-bundling auctions, obtain simultaneous absolute error at most ε between sample-average and expected revenue, with probability at least 1−δ over independent valuation-profile samples. If revenue is bounded by U, Theorem 4 gives sufficient sample size N = O((U/ε)²[log(U/ε) + log(1/δ)]). Definition 1 specifies the uniform guarantee. Balcan, Sandholm and Vitercik proved this in 2016.",
+    "set_by": "Statistical uniform-convergence convention applied to automated mechanism design by Balcan, Sandholm and Vitercik, Definition 1 and Theorem 4.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "We do achieve polynomial sample complexity upper bounds for the important classes of mixed bundling auctions",
+    "threshold_ref": 9,
+    "refs": [
+     9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "An algorithm computes an optimal dynamic mechanism in polynomial time when the horizon is fixed.",
+    "criterion": "For a principal interacting with one strategic agent over a constant finite horizon, compute a mechanism maximizing the principal’s expected utility subject to incentive compatibility and the selected participation and payment restrictions. The state and action sets are finite and the environment’s probabilities are inputs. Theorem 2 gives runtime polynomial in |S|^T, |A|^T and parameter encoding length, where T is the horizon. Zhang and Conitzer proved the result in 2021.",
+    "set_by": "Automated dynamic mechanism design optimization problem defined by Zhang and Conitzer, Theorem 2; the published threshold concerns one strategic agent.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "when the time horizon is fixed, there is a polynomial-time algorithm for computing optimal mechanisms",
+    "threshold_ref": 10,
+    "refs": [
+     10
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "A synthesis algorithm maximizes a mechanism’s logical specification in two decidable classes.",
+    "criterion": "Given a Quantitative Strategy Logic specification and a finite set of proposition values, construct a weighted concurrent game structure—a formal model of strategic interaction—with the greatest attainable specification value. Algorithm 1 supplies this construction for bounded-action systems and turn-based systems. Mittelmann et al. established the synthesis result in 2022 and gave auction specifications as examples. The result does not supply polynomial runtime.",
+    "set_by": "Logical synthesis convention instantiated by Mittelmann et al., Automated Synthesis of Mechanisms, Theorems 2–3 and Algorithm 1.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "it works in the case of bounded actions and the case of turn-based systems.",
+    "threshold_ref": 11,
+    "refs": [
+     11
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "An algorithm computes an optimal robust mechanism in polynomial time for finite bidder and signal types.",
+    "criterion": "For one bidder with a finite valuation type and a correlated, externally verifiable finite signal, maximize revenue under the estimated joint distribution while enforcing Bayesian truthfulness and interim participation for every conditional distribution in the specified uncertainty sets. Each conditional set must be a convex polyhedron with polynomially many defining inequalities. Corollary 4 proves polynomial computation within the class of mechanisms depending on the reported type and observed signal.",
+    "set_by": "Albert, Conitzer and Stone’s published robust-mechanism optimization problem, Definition 10, Assumption 1 and Corollary 4; written for one bidder and an external signal.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "the optimal robust mechanism can be computed in time polynomial in the number of types of the bidder and external signal.",
+    "threshold_ref": 6,
+    "refs": [
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m6",
+    "title": "One constructive method meets stated guarantees across static and dynamic domains under prior uncertainty.",
+    "criterion": "A single algorithm computes allocation and payment rules from objective and constraint specifications, with a proof that the input’s numerical performance, incentive, participation and budget conditions hold throughout a non-singleton uncertainty set. Its declared input classes include finite static and dynamic private-information economies admitting complementary goods, interdependent values and few traders. Correctness and computational bounds cover every admitted feasible input. This constructive result leaves executable implementation as the completion step.",
+    "set_by": "Atlas provisional integration milestone; searches of published automated-design, robust-design and dynamic-synthesis criteria located no external test for this combined construction.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     3,
+     4,
+     6,
+     8,
+     9,
+     10,
+     11
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No roadmap, standard, prize rule or shared benchmark specifying completion of a prior-robust compiler across the stated domains was located.",
+   "No external criterion for a unified constructive algorithm immediately preceding executable integration was located.",
+   "No peer-reviewed version of Liu et al.’s 2026 bilateral-trade preprint was located."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "report",
+    "url": "https://www.gao.gov/assets/gao-14-108.pdf",
+    "doi": null,
+    "title": "Reverse Auctions: Guidance Is Needed to Maximize Competition and Achieve Cost Savings",
+    "authors": "United States Government Accountability Office",
+    "container": "US Government Accountability Office",
+    "year": "2013",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 2,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2606.03849v2",
+    "doi": "10.48550/arXiv.2606.03849",
+    "title": "Second-Best Bilateral Trade is 1/2 Efficient",
+    "authors": "Liu Z, Qin Y, Ren Z, Wang Z",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 3,
+    "kind": "report",
+    "url": "https://drops.dagstuhl.de/entities/document/10.4230/DagSemProc.05011.5",
+    "doi": "10.4230/DagSemProc.05011.5",
+    "title": "Automated Mechanism Design",
+    "authors": "Sandholm T",
+    "container": "Dagstuhl Seminar Proceedings",
+    "year": "2005",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "book",
+    "url": "https://insights.sei.cmu.edu/documents/1302/2006_014_001_635801.pdf",
+    "doi": null,
+    "title": "Ultra-Large-Scale Systems: The Software Challenge of the Future",
+    "authors": "Feiler P, Gabriel RP, Goodenough J, Linger R, Longstaff T, Kazman R, et al.",
+    "container": "Software Engineering Institute, Carnegie Mellon University",
+    "year": "2006",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "web",
+    "url": "https://ml.ucsb.edu/tuomas-sandholm",
+    "doi": null,
+    "title": "Tuomas Sandholm",
+    "authors": "University of California, Santa Barbara Center for Responsible Machine Learning",
+    "container": "2021 Responsible Machine Learning Summit",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://www.cs.utexas.edu/~pstone/Papers/bib2html-links/AAAI17-Albert.pdf",
+    "doi": "10.1609/aaai.v31i1.10574",
+    "title": "Automated Design of Robust Mechanisms",
+    "authors": "Albert M, Conitzer V, Stone P",
+    "container": "AAAI",
+    "year": "2017",
+    "volume": "31",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "journal",
+    "url": "https://bpb-us-e1.wpmucdn.com/campuspress-test.yale.edu/dist/3/352/files/2011/01/1983-bilateral-trade.pdf",
+    "doi": "10.1016/0022-0531(83)90048-0",
+    "title": "Efficient Mechanisms for Bilateral Trading",
+    "authors": "Myerson RB, Satterthwaite MA",
+    "container": "Journal of Economic Theory",
+    "year": "1983",
+    "volume": "29",
+    "issue": "2",
+    "pages": "265-281",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 8,
+    "kind": "journal",
+    "url": "https://arxiv.org/pdf/cs/0205075",
+    "doi": "10.48550/arXiv.cs/0205075",
+    "title": "Complexity of Mechanism Design",
+    "authors": "Conitzer V, Sandholm T",
+    "container": "arXiv",
+    "year": "2002",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 9,
+    "kind": "journal",
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2016/file/c667d53acd899a97a85de0c201ba99be-Paper.pdf",
+    "doi": null,
+    "title": "Sample Complexity of Automated Mechanism Design",
+    "authors": "Balcan MF, Sandholm T, Vitercik E",
+    "container": "Adv Neural Inf Process Syst",
+    "year": "2016",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 10,
+    "kind": "journal",
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2021/file/e995f98d56967d946471af29d7bf99f1-Paper.pdf",
+    "doi": null,
+    "title": "Automated Dynamic Mechanism Design",
+    "authors": "Zhang H, Conitzer V",
+    "container": "Adv Neural Inf Process Syst",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 11,
+    "kind": "journal",
+    "url": "https://ijcai.org/proceedings/2022/0061.pdf",
+    "doi": "10.24963/ijcai.2022/61",
+    "title": "Automated Synthesis of Mechanisms",
+    "authors": "Mittelmann M, Maubert B, Murano A, Perrussel L",
+    "container": "Proceedings of the Thirty-First International Joint Conference on Artificial Intelligence",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": "426-432",
+    "citation_source": "crossref"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4",
+   "m5",
+   "m6"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 3 from Crossref, 0 from PubMed, 2 from arXiv, 6 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 6 found, 1 not found, 1 with no readable copy."
+   }
+  ]
  }
 }
