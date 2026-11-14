@@ -230,7 +230,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "A computer that recovers energy while it works",
@@ -320,5 +321,282 @@
    "The best balance between slower switching, accumulated losses and reliable room-temperature operation remains unresolved."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "CPE-02",
+  "title": "Room-temperature general-purpose adiabatic reversible computer",
+  "definition": "A room-temperature general-purpose computer preserves information in its logic and recovers electrical switching energy through gradual, adiabatic state changes. Its complete system consumes less energy for completed programs than a corresponding irreversible computer at the same useful throughput.",
+  "goal": {
+   "need": "Data centres combine computing loads with power conversion and cooling. Their estimated electricity demand below motivates reducing energy per completed computation. The IEEE roadmap identifies power-clock energy recovery as necessary for room-temperature adiabatic logic to produce system-level savings.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": {
+    "caption": "IEA estimates for worldwide data-centre electricity consumption in 2024.",
+    "columns": [
+     "Quantity",
+     "Estimate"
+    ],
+    "rows": [
+     [
+      "Electricity consumed",
+      "415 TWh"
+     ],
+     [
+      "Share of global electricity consumption",
+      "1.5%"
+     ]
+    ],
+    "note": "Facility consumption includes computing equipment and supporting infrastructure; these figures do not estimate recoverable switching energy.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "IEEE International Roadmap for Devices and Systems",
+     "year": "2024",
+     "quote": "Realizing the energy efficiency promise of reversible computing at a system level remains a significant engineering hurdle.",
+     "context": null,
+     "ref": 2,
+     "checked": true
+    },
+    {
+     "body": "Vaire",
+     "year": "Undated; accessed on 14 November 2026",
+     "quote": "We are building hardware to break the rule that says increasing computing power requires increasing energy consumption.",
+     "context": null,
+     "ref": 3,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "A room-temperature reversible computer uses less whole-system energy at matched program throughput.",
+   "criterion": "A general-purpose hardware computer operates at room temperature, approximately 300 K, using information-preserving logic and energy-recovering power clocks. For every program in a disclosed suite, it consumes less total electrical input energy than a specified irreversible reference at matched correct-output throughput and numerical precision; the difference exceeds measurement uncertainty. Energy includes power conversion, clock generation and distribution, memory, control, input/output, cooling, and restoration of reusable working storage. The comparison covers completed tasks, including the work needed to make their execution reversible.",
+   "set_by": "Atlas fallback; no accessible outside acceptance test was found for the complete capability.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "IRDS identifies savings after power-clock losses as the goal. Searches of IRDS, IEEE Rebooting Computing reports, DARPA programmes and Vaire documents found no accessible acceptance test for this complete capability. This fallback therefore requires a positive measured advantage without choosing a gain factor or clock rate. Earley's preprint, revised on 23 October 2022, derives a rate-dependent dissipation bound under its assumptions, not a processor acceptance threshold.",
+   "refs": [
+    2,
+    3,
+    4
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "sequence",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A fabricated circuit maps distinct allowed input states to distinct complete output states.",
+    "criterion": "A physical circuit implements an injective mapping on its permitted logical states: the complete output, including retained auxiliary information, identifies the input uniquely. Vieri's thesis, submitted on 14 May 1999, reports an 8-bit exchange RAM, XRAM, performing addressable exchange operations correctly. The tested chip count and operating temperature are not specified.",
+    "set_by": "Reversible-computing community; the logical reversibility criterion formalised by Frank and Shukla, 2021, sections 2.1.3–2.1.4.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "Reversible computational operations include only one-to-one transitions such as (a).",
+    "threshold_ref": 5,
+    "refs": [
+     5,
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m2",
+    "title": "A reversible logic circuit and its power clock achieve an energy-recovery factor greater than 1.",
+    "criterion": "A fabricated reversible logic circuit and its energy-recovering clock achieve Rf > 1, where Vaire defines Rf as logic energy divided by energy dissipated per cycle. Its CTO identified >1 as Ice River's proof-of-concept cutoff. In an interview published on 3 September 2025, Vaire reported comparison factors of 1.77 for a capacitor array and 1.41 for a shift register in 22 nm CMOS, with a 500 MHz data frequency. These company results are not peer reviewed and do not establish a whole-system advantage or independently verify logical reversibility.",
+    "set_by": "Vaire's Ice River proof-of-concept test, described by its CTO on 3 September 2025; its technology whitepaper defines the zero-recovery boundary at Rf = 1.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "For a traditional system with an R-factor of 1, efficiency is 0: no energy is recovered.",
+    "threshold_ref": 7,
+    "refs": [
+     7,
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A room-temperature processor runs reversible programs with reversible circuits and an energy-recovering clock.",
+    "criterion": "An integrated room-temperature processor executes stored reversible programs, including arithmetic, memory access and branching, using reversible circuitry and an energy-recovering supply. Pendulum's 1999 thesis reports a 10-instruction sequential program, an instruction-encoder fault and no measurement of supply energy recovery. MANA's April 2021 paper reports two four-instruction programs at 100 kHz and 4.2 K on five of six chips across two wafers. That cryogenic adiabatic result does not establish room-temperature, logically reversible integration.",
+    "set_by": "MIT Reversible Computing Project; Vieri's 1999 thesis, section 2.1, states the required integration of supply, circuits, architecture and programs. Applied here within the room-temperature scope.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "Reversible electronic computers must have a reversible power supply, which power reversible circuits, which implement a reversible architecture, which runs reversible programs.",
+    "threshold_ref": 6,
+    "refs": [
+     6,
+     9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "Frank and Edwards' 2025 APL Electronic Devices perspective and the 2014 IEEE Second Rebooting Computing Summit report could not be opened in readable form.",
+   "No peer-reviewed Ice River measurement paper, public measurement dataset or independent replication was found.",
+   "Searches through 14 November 2026 did not locate a room-temperature general-purpose processor demonstrating the stated whole-system comparison."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "report",
+    "url": "https://www.iea.org/reports/energy-and-ai/energy-demand-from-ai",
+    "doi": null,
+    "title": "Energy demand from AI",
+    "authors": "International Energy Agency",
+    "container": "Energy and AI",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 2,
+    "kind": "report",
+    "url": "https://irds.ieee.org/images/files/pdf/2024/2024IRDS_BC.pdf",
+    "doi": null,
+    "title": "International Roadmap for Devices and Systems: 2024 Update — Beyond CMOS and Emerging Research Materials",
+    "authors": "IEEE International Roadmap for Devices and Systems",
+    "container": "IEEE",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "web",
+    "url": "https://vaire.co/",
+    "doi": null,
+    "title": "Near-zero energy computing",
+    "authors": "Vaire",
+    "container": "Vaire",
+    "year": "Undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2208.11196v2",
+    "doi": "10.48550/arXiv.2208.11196",
+    "title": "A Universal Constraint on Computational Rates in Physical Systems",
+    "authors": "Earley H",
+    "container": "arXiv",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 5,
+    "kind": "journal",
+    "url": "https://www.mdpi.com/1099-4300/23/6/701",
+    "doi": "10.3390/e23060701",
+    "title": "Quantum Foundations of Classical Reversible Computing",
+    "authors": "Frank MP, Shukla K",
+    "container": "Entropy",
+    "year": "2021",
+    "volume": "23",
+    "issue": "6",
+    "pages": "701",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 6,
+    "kind": "report",
+    "url": "https://aggregate.org/EE480/pendulum.pdf",
+    "doi": null,
+    "title": "Reversible Computer Engineering and Architecture",
+    "authors": "Vieri CJ",
+    "container": "Massachusetts Institute of Technology",
+    "year": "1999",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 7,
+    "kind": "report",
+    "url": "https://vaire.co/uploads/Technology-Whitepaper_compressed.pdf",
+    "doi": null,
+    "title": "The Technology of Near-Zero Energy Computing",
+    "authors": "Vaire",
+    "container": "Vaire",
+    "year": "Undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 8,
+    "kind": "web",
+    "url": "https://www.eetimes.com/vaire-demos-energy-recovery-with-reversible-computing-test-chip/",
+    "doi": null,
+    "title": "Vaire Demos Energy Recovery With Reversible Computing Test Chip",
+    "authors": "Ward-Foxton S",
+    "container": "EE Times",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 9,
+    "kind": "journal",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/5/5c/MANA_A_Monolithic_Adiabatic_iNtegration_Architecture_Microprocessor_Using_1.4-zJ_op_Unshunted_Superconductor_Josephson_Junction_Devices.pdf",
+    "doi": "10.1109/JSSC.2020.3041338",
+    "title": "MANA: A Monolithic Adiabatic iNtegration Architecture Microprocessor Using 1.4-zJ/op Unshunted Superconductor Josephson Junction Devices",
+    "authors": "Ayala CL, Tanaka T, Saito R, Nozoe M, Takeuchi N, Yoshikawa N",
+    "container": "IEEE J. Solid-State Circuits",
+    "year": "2021",
+    "volume": "56",
+    "issue": "4",
+    "pages": "1152-1165",
+    "citation_source": "crossref"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 1 from arXiv, 6 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 4 found, 0 not found, 1 with no readable copy."
+   }
+  ]
  }
 }

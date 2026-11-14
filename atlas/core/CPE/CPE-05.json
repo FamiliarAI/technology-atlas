@@ -208,7 +208,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "A computer that keeps learning on a brain’s energy budget",
@@ -295,5 +296,394 @@
    "Convincing thresholds for learning quality, retention, operating duration and task breadth remain to be chosen."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "CPE-05",
+  "title": "Human-scale neuromorphic online learning at 20 W",
+  "definition": "A neuromorphic computer stores connection weights beside neural processing and runs at least 10¹¹ spiking units, which communicate by discrete events, and 10¹⁴ adaptive weighted connections. It learns from incoming data using signals available at each connection, in real time and at ≤20 W for the complete computing system.",
+  "goal": {
+   "need": "Across six rodent and primate species, estimated glucose use per neuron varied by 40%; the human brain accounts for about 20% of whole-body energy use at 2% of body mass. NEUROTECH compares a 20 W brain with GPUs consuming several hundred watts and identifies power consumption as a constraint on embedded neural computing.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": {
+    "caption": "Intel’s reported Hala Point capacity and power",
+    "columns": [
+     "Quantity",
+     "Specification"
+    ],
+    "rows": [
+     [
+      "Neuron capacity",
+      "1.15 billion"
+     ],
+     [
+      "Synapse capacity",
+      "128 billion"
+     ],
+     [
+      "Maximum system power",
+      "2,600 W"
+     ]
+    ],
+    "note": "Intel announcement published on 17 April 2024; not peer reviewed. Capacity and maximum power do not establish power consumption during continuous learning.",
+    "ref": 3
+   },
+   "statements": [
+    {
+     "body": "NEUROTECH, European Union Horizon 2020 programme",
+     "year": "2022",
+     "quote": "Neuromorphic computing aims at building systems where weights are self-modified through local rules.",
+     "context": null,
+     "ref": 2,
+     "checked": true
+    },
+    {
+     "body": "DARPA",
+     "year": "2014",
+     "quote": "perform difficult perception and control tasks while at the same time achieving significant energy savings.",
+     "context": "The stated purpose of the brain-inspired chip developed through the SyNAPSE programme.",
+     "ref": 4,
+     "checked": true
+    },
+    {
+     "body": "IEEE International Roadmap for Devices and Systems",
+     "year": "2024",
+     "quote": "One target for a biologically realistic scale is to target billions of neurons",
+     "context": "Section 4.3.1.1 discusses spiking-network architectures; Table BC4.3 specifies approximately 100 billion neurons.",
+     "ref": 5,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "A human-scale neuromorphic system learns locally in real time within 20 W.",
+   "criterion": "One physical system operates an active network of at least 10¹¹ spiking neurons and 10¹⁴ adaptive synapses at 1 ms time resolution, advancing at least as fast as real time. Local updates from incoming data improve a prespecified task score relative to the same network with learning disabled, without separate offline retraining for that adaptation. Average electrical input is ≤20 W during learning, including memory, interconnects, hosts, power conversion and required cooling. Provisioned but unused capacity does not count.",
+   "set_by": "Technology Atlas; operational criterion assembled from separately published architectural and local-learning goals.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches of DARPA SyNAPSE, IEEE IRDS, NEUROTECH, DOE EES2 and neuromorphic benchmarking literature found no joint pass/fail protocol for human-scale local learning, real-time operation and whole-system watts. IRDS supplies approximate scale and timing targets; NEUROTECH supplies a 20 W brain comparison and a local-learning goal. The minimum counts, power cap, accounting boundary and task comparison are Atlas operational choices.",
+   "refs": [
+    2,
+    5,
+    6
+   ],
+   "threshold_checked": null
+  },
+  "case_label": "Hardware architecture",
+  "cases": [
+   "Digital electronic",
+   "Analog and mixed-signal"
+  ],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "An electronic synapse changes its connection strength in response to neural activity.",
+    "criterion": "An electronic synapse implements activity-dependent connection-strength changes. Analog/mixed-signal: Kuzum and colleagues’ 2012 paper demonstrated spike-timing-dependent conductance changes in phase-change devices with 75 nm bottom electrodes; the main text gives no device sample size. Digital: Imam and Cleland demonstrated spike-timing-dependent plasticity on Loihi in their paper published on 16 March 2020.",
+    "set_by": "DARPA SyNAPSE programme, initial component-development phase; its published criterion covers electronic synapses.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "capable of varying connection strength between two neurons",
+    "threshold_ref": 6,
+    "refs": [
+     6,
+     7,
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A single neuromorphic chip executes a connected neural network.",
+    "criterion": "One chip executes a connected neural network in hardware. Digital: the TrueNorth paper published on 8 August 2014 reports 1 million neurons and 256 million synapses on one chip, consuming 63 mW for 400 × 240-pixel video at 30 frames/s. Analog/mixed-signal: the BrainScaleS-2 prototype paper published on 26 March 2019 reports 32 neurons and 1,024 synapses on one chip.",
+    "set_by": "DARPA SyNAPSE programme, published single-chip system-development stage; no minimum neuron count is specified on the programme page.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "single chip system development",
+    "threshold_ref": 6,
+    "refs": [
+     6,
+     9,
+     10
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A neuromorphic system learns through local synaptic updates during operation.",
+    "criterion": "Weights change through local learning rules during operation; NEUROTECH gives no accuracy, retention or duration threshold. Digital: Loihi learned 10 gas-sensor patterns sequentially from one training example each; a replication published on 16 December 2024 found limited generalization to separate recordings. Analog/mixed-signal: BrainScaleS-2 learned simplified Pong smooth pursuit in 10 experiments of 100,000 learning iterations each.",
+    "set_by": "NEUROTECH Horizon 2020 programme, Deliverable D2.6, section 2.5, published local-learning goal.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "weights are self-modified through local rules.",
+    "threshold_ref": 2,
+    "refs": [
+     2,
+     8,
+     10,
+     11
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "A neuromorphic system exchanges spikes between at least two chips.",
+    "criterion": "At least two neuromorphic chips exchange spikes as one system. Digital: Hala Point contains 1,152 Loihi 2 chips; on 26 August 2025, Zhejiang University reported Wukong with 960 Darwin-III chips, more than two billion neurons and 2,000 W typical power. These system specifications are announcements, not peer-reviewed measurements. Analog/mixed-signal: a preprint submitted on 3 December 2025 reports BrainScaleS-2 chip-to-chip spike latencies below 1.3 µs within a backplane.",
+    "set_by": "DARPA SyNAPSE programme, published multichip system-development stage for electronic neuromorphic hardware.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "multi-chip system development",
+    "threshold_ref": 6,
+    "refs": [
+     6,
+     3,
+     12,
+     13
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "An active network of 10¹¹ neurons and 10¹⁴ adaptive synapses learns locally in real time.",
+    "criterion": "One physical system operates an active network of at least 10¹¹ spiking neurons and 10¹⁴ adaptive synapses at 1 ms time resolution, advancing at least as fast as real time. Local updates from incoming data improve a prespecified task score relative to frozen weights, without separate offline retraining for that adaptation. No power ceiling applies at this stage.",
+    "set_by": "Technology Atlas; searches of DARPA SyNAPSE, IEEE IRDS, NEUROTECH and neuromorphic learning benchmarks found no joint full-scale learning criterion. IRDS Table BC4.3 supplies approximately 100 billion neurons, approximately 1,000–10,000 synapses per neuron, 1 kHz network time resolution and spike-timing-dependent plasticity. The minimum counts, simultaneous real-time operation and task comparison are Atlas choices.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     2,
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "Searches found no hardware demonstration combining the stated scale, local learning, real-time operation and complete-system power limit for either case.",
+   "No common numerical threshold was found for learning quality, retention or operating duration at human scale.",
+   "The full DOE EES2 roadmap could not be opened because its download exceeded the browsing tool’s size limit.",
+   "The supplied Nature review’s main text was available only as a subscription preview, and its supplementary PDF could not be retrieved."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0017514",
+    "doi": "10.1371/journal.pone.0017514",
+    "title": "Scaling of Brain Metabolism with a Fixed Energy Budget per Neuron: Implications for Neuronal Activity, Plasticity and Evolution",
+    "authors": "Herculano-Houzel S",
+    "container": "PLoS ONE",
+    "year": "2011",
+    "volume": "6",
+    "issue": "3",
+    "pages": "e17514",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "report",
+    "url": "https://neurotechai.eu/media/filer_public/4b/a4/4ba4b7ec-8c03-4420-b925-bbcd0e55271d/neurotech_roadmap_2022.pdf",
+    "doi": null,
+    "title": "Deliverable D2.6: NEUROTECH Roadmap and Benchmarks updated.",
+    "authors": "NEUROTECH consortium",
+    "container": "European Union Horizon 2020 NEUROTECH",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "press_release",
+    "url": "https://www.intc.com/news-events/press-releases/detail/1691/intel-builds-worlds-largest-neuromorphic-system-to",
+    "doi": null,
+    "title": "Intel Builds World’s Largest Neuromorphic System to Enable More Sustainable AI",
+    "authors": "Intel Corporation",
+    "container": "Intel Corporation",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "press_release",
+    "url": "https://www.darpa.mil/news/2014/synapse-program-brain-inspired-chip",
+    "doi": null,
+    "title": "SyNAPSE Program Develops Advanced Brain-Inspired Chip",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "DARPA",
+    "year": "2014",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "report",
+    "url": "https://irds.ieee.org/images/files/pdf/2024/2024IRDS_BC.pdf",
+    "doi": null,
+    "title": "International Roadmap for Devices and Systems: 2024 Update — Beyond CMOS and Emerging Research Materials",
+    "authors": "IEEE International Roadmap for Devices and Systems",
+    "container": "IEEE",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "web",
+    "url": "https://www.darpa.mil/research/programs/systems-of-neuromorphic-adaptive-plastic-scalable-electronics",
+    "doi": null,
+    "title": "Systems of Neuromorphic Adaptive Plastic Scalable Electronics (SyNAPSE)",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "DARPA",
+    "year": "undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 7,
+    "kind": "journal",
+    "url": "https://datascienceassn.org/sites/default/files/Nanoelectronic%20Programmable%20Synapses%20Based%20on%20Phase%20Change%20Materials%20for%20Brain-Inspired%20Computing.pdf",
+    "doi": "10.1021/nl201040y",
+    "title": "Nanoelectronic Programmable Synapses Based on Phase Change Materials for Brain-Inspired Computing",
+    "authors": "Kuzum D, Jeyasingh RGD, Lee B, Wong HSP",
+    "container": "Nano Lett.",
+    "year": "2012",
+    "volume": "12",
+    "issue": "5",
+    "pages": "2179-2186",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 8,
+    "kind": "journal",
+    "url": "https://arxiv.org/pdf/1906.07067",
+    "doi": "10.1038/s42256-020-0159-4",
+    "title": "Rapid online learning and robust recall in a neuromorphic olfactory circuit",
+    "authors": "Imam N, Cleland TA",
+    "container": "Nat Mach Intell",
+    "year": "2020",
+    "volume": "2",
+    "issue": "3",
+    "pages": "181-191",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 9,
+    "kind": "journal",
+    "url": "https://research.ibm.com/publications/a-million-spiking-neuron-integrated-circuit-with-a-scalable-communication-network-and-interface",
+    "doi": "10.1126/science.1254642",
+    "title": "A million spiking-neuron integrated circuit with a scalable communication network and interface",
+    "authors": "Merolla PA, Arthur JV, Alvarez-Icaza R, Cassidy AS, Sawada J, Akopyan F, et al.",
+    "container": "Science",
+    "year": "2014",
+    "volume": "345",
+    "issue": "6197",
+    "pages": "668-673",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 10,
+    "kind": "journal",
+    "url": "https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2019.00260/full",
+    "doi": "10.3389/fnins.2019.00260",
+    "title": "Demonstrating Advantages of Neuromorphic Computation: A Pilot Study",
+    "authors": "Wunderlich T, Kungl AF, Müller E, Hartel A, Stradmann Y, Aamir SA, et al.",
+    "container": "Front. Neurosci.",
+    "year": "2019",
+    "volume": "13",
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 11,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s42256-024-00952-1?error=cookies_not_supported",
+    "doi": "10.1038/s42256-024-00952-1",
+    "title": "Limitations in odour recognition and generalization in a neuromorphic olfactory circuit",
+    "authors": "Dennler N, van Schaik A, Schmuker M",
+    "container": "Nat Mach Intell",
+    "year": "2024",
+    "volume": "6",
+    "issue": "12",
+    "pages": "1451-1453",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 12,
+    "kind": "press_release",
+    "url": "https://www.zju.edu.cn/english/2025/0910/c19573a3079424/page.psp",
+    "doi": null,
+    "title": "World’s first 2-billion-neuron brain-inspired computer unveiled by ZJU",
+    "authors": "Zhejiang University",
+    "container": "Zhejiang University",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 13,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2512.03781v1",
+    "doi": "10.48550/arXiv.2512.03781",
+    "title": "The BrainScaleS-2 multi-chip system: Interconnecting continuous-time neuromorphic compute substrates",
+    "authors": "Ilmberger J, Schemmel J",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4",
+   "m5"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 6 from Crossref, 0 from PubMed, 1 from arXiv, 6 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 7 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }
