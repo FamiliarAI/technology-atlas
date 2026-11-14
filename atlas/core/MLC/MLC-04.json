@@ -193,7 +193,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "sources": [
   "https://proceedingsoftheieee.ieee.org/toward-causal-representation-learning/",
@@ -290,5 +291,255 @@
    "What experiment budgets, accuracy targets and uncertainty limits would make a decisive test, and which laboratory system would suit it?"
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "MLC-04",
+  "title": "Causal world models for unseen interventions",
+  "definition": "A model learns causal variables and mechanisms from sensory observations under a fixed experimental budget. It predicts mean outcomes of held-out interventions—deliberate changes to variables or mechanisms—within a specified class.",
+  "goal": {
+   "need": "Predicting observations does not determine intervention effects. In an optical benchmark with five causal inputs and 60,000 images, three evaluated method families failed to recover the inputs. The table shows one method's sensitivity to replacing a deterministic simulator with physical observations.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": {
+    "caption": "Factor recovery by contrastive causal representation learning.",
+    "columns": [
+     "Observations",
+     "Mean correlation coefficient"
+    ],
+    "rows": [
+     [
+      "Deterministic simulator",
+      "0.891 ± 0.005"
+     ],
+     [
+      "Physical optical apparatus",
+      "0.285 ± 0.054"
+     ]
+    ],
+    "note": "Mean ± standard deviation over five random initializations, using 60,000 images per condition. The dimensionless score measures correlation between matched learned and ground-truth factors; higher is better.",
+    "ref": 2
+   },
+   "statements": [
+    {
+     "body": "Qualcomm AI Research",
+     "year": "2022",
+     "quote": "whether it is possible to identify high-level concepts and the causal relations between them just from images, without explicit labels.",
+     "context": "Qualcomm describes its research question. The learning setup uses paired images before and after unknown interventions.",
+     "ref": 3,
+     "checked": null
+    },
+    {
+     "body": "Google DeepMind",
+     "year": "2024",
+     "quote": "It has long been hypothesised that causal reasoning plays a fundamental role in robust and general intelligence.",
+     "context": null,
+     "ref": 4,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "An independent laboratory replicates a learned model's predictions of unseen physical interventions.",
+   "criterion": "Learn causal variables and mechanisms from images of one physical system under a predeclared finite intervention budget. For every held-out intervention family, predict the mean of a prespecified measured outcome. Mean squared error on new experiments must be no greater than that of an independently validated physical model supplied the causal variables. An independent laboratory must repeat the entire learning-and-test procedure and satisfy the same inequality without increasing the budget. Test intervention values or combinations must be absent from training; causal-variable value labels cannot be training inputs.",
+   "set_by": "Atlas fallback; no external completion protocol covering the combined capability was located.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches covered DARPA causal-model programmes, NIST/ISO standards, prizes, causal-representation benchmarks and independent laboratory replication. No external test combined sensory learning, a bounded intervention budget and unseen physical interventions. The fallback is restricted to one physical system and mean outcomes. Its comparison with a validated physical model is an Atlas choice; no universal numerical budget or accuracy cutoff was located.",
+   "refs": [
+    1,
+    2,
+    4,
+    5
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A model recovers a simulator's causal graph with zero structural Hamming distance.",
+    "criterion": "Match learned variables to the simulator's variables, then recover its directed causal graph exactly: structural Hamming distance, the number of graph edits, equals 0. Brehmer et al. reported 0 for the four-variable CausalCircuit simulator, using 512 × 512-pixel RGB images compressed through a learned encoder. Three random seeds were trained; the run with median validation loss was retained.",
+    "set_by": "Exact graph-recovery convention, operationalized by Brehmer et al. in Appendix D.1; the reported demonstration concerns the CausalCircuit simulator.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "We then compute the structural Hamming distance (or graph edit distance) between the learned graph and the true graph.",
+    "threshold_ref": 7,
+    "refs": [
+     6,
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A model recovers shared causal factors and excludes unshared factors in a physical optical experiment.",
+    "criterion": "On the light-tunnel benchmark's 60,000 observations and four views, recover shared causal factors while excluding unshared factors. The published test requires R² near 1 for shared factors and significantly lower R² for unshared factors; it specifies neither a numerical tolerance nor a significance level. Five random initializations failed to separate the two polarizer-angle factors.",
+    "set_by": "Gamella, Bing and Runge, Section 3.2 and Figure 5 of their multiview causal-representation benchmark; this criterion was written for the optical system.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "a score near one for the factors in the content block and a significantly lower score for those in the style block.",
+    "threshold_ref": 2,
+    "refs": [
+     2
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A learned model matches a validated physical model's error on unseen interventions in one laboratory.",
+    "criterion": "In one physical system, learn variables and mechanisms from sensory observations under a fixed intervention budget. Predict a prespecified measured outcome for intervention values or combinations absent from training. For each held-out family, mean squared error must not exceed that of an independently validated physical model supplied the causal variables. This Atlas extension adds forward intervention prediction to the published representation and physical-system tests; those tests do not establish this combined result.",
+    "set_by": "Atlas fallback after searching causal-representation and causal-chamber protocols; no published acceptance threshold for this combined physical demonstration was located.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     1,
+     2,
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No independent laboratory replication combining sensory causal-variable learning and held-out physical intervention prediction was located.",
+   "The optical benchmark's publisher-hosted full PDF was inaccessible; its arXiv version 2 was opened.",
+   "The Nature Machine Intelligence page for the causal-chamber study could not be opened; its author preprint was available."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/2102.11107",
+    "doi": "10.48550/arXiv.2102.11107",
+    "title": "Towards Causal Representation Learning",
+    "authors": "Schölkopf B, Locatello F, Bauer S, Ke NR, Kalchbrenner N, Goyal A, et al.",
+    "container": "arXiv",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 2,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/2502.20099v2",
+    "doi": "10.48550/arXiv.2502.20099",
+    "title": "Sanity Checking Causal Representation Learning on a Simple Real-World System",
+    "authors": "Gamella JL, Bing S, Runge J",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 3,
+    "kind": "web",
+    "url": "https://www.qualcomm.com/news/onq/2022/11/neurips-2022-qualcomm-showcases-cutting-edge-advancements-in-machine-learning",
+    "doi": null,
+    "title": "NeurIPS 2022: Qualcomm showcases cutting-edge advancements in machine learning",
+    "authors": "Hou J.",
+    "container": "Qualcomm OnQ Blog",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "web",
+    "url": "https://deepmind.google/research/publications/49666/",
+    "doi": null,
+    "title": "Robust agents learn causal world models",
+    "authors": "Richens J, Everitt T.",
+    "container": "Google DeepMind",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2404.11341",
+    "doi": "10.48550/arXiv.2404.11341",
+    "title": "The Causal Chambers: Real Physical Systems as a Testbed for AI Methodology",
+    "authors": "Gamella JL, Peters J, Bühlmann P",
+    "container": "arXiv",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2022/file/fa567e2b2c870f8f09a87b6e73370869-Paper-Conference.pdf",
+    "doi": "10.52202/068431-2776",
+    "title": "Weakly supervised causal representation learning",
+    "authors": "Brehmer J, Haan PD, Lippe P, Cohen T",
+    "container": "Advances in Neural Information Processing Systems 35",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": "38319-38331",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "report",
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2022/file/fa567e2b2c870f8f09a87b6e73370869-Supplemental-Conference.pdf",
+    "doi": null,
+    "title": "Weakly supervised causal representation learning: Supplementary material",
+    "authors": "Brehmer J, de Haan P, Lippe P, Cohen T.",
+    "container": "Advances in Neural Information Processing Systems",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 3 from arXiv, 3 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 3 found, 0 not found, 1 with no readable copy."
+   }
+  ]
  }
 }

@@ -178,7 +178,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "sources": [
   "https://pubmed.ncbi.nlm.nih.gov/40175544/",
@@ -279,5 +280,242 @@
    "Trials without observed safety violations cannot prove that future violations are impossible."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "MLC-09",
+  "title": "Safe reinforcement learning from limited real-system samples",
+  "definition": "A controller learns an improved policy, a rule for choosing actions, within a real-system interaction budget despite sparse or delayed rewards and without an adequate external simulator. Learning respects explicit safety constraints when experiments consume material or irreversibly change the system.",
+  "goal": {
+   "need": "The 2019 review describes learning regimes where additional data cannot be obtained by freely running parallel copies or accelerating the environment. Its illustrative operating scales below make sample efficiency a deployment constraint. It also identifies potential damage during exploration, requiring safety during learning.",
+   "need_refs": [
+    1
+   ],
+   "figures": {
+    "caption": "Illustrative operating scales in the 2019 real-world reinforcement-learning review",
+    "columns": [
+     "Quantity",
+     "Description"
+    ],
+    "rows": [
+     [
+      "Available system instances",
+      "Often only one"
+     ],
+     [
+      "Decision interval",
+      "1 hour to multiple months"
+     ],
+     [
+      "Reward horizon",
+      "Can be months"
+     ]
+    ],
+    "note": "Examples discussed in a review, not measurements of a population of installations.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "Google Brain and DeepMind researchers",
+     "year": "2019",
+     "quote": "Instead, the agent must perform reasonably well and act safely throughout learning.",
+     "context": "A research requirement proposed by the authors for learning directly on real systems.",
+     "ref": 1,
+     "checked": true
+    },
+    {
+     "body": "DARPA, Assured Autonomy programme",
+     "year": "2017",
+     "quote": "Develop rigorous design and analysis technologies for continual assurance† of learning-enabled autonomous systems, in order to guarantee safety properties in adversarial environments",
+     "context": "Programme goal presented on 15 August 2017. The dagger identifies a footnote defining assurance.",
+     "ref": 2,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "A real-system learner improves on its incumbent within its interaction budget and safety limits.",
+   "criterion": "On one physical task with material consumption or non-resettable consequences, learning from sparse or delayed operational rewards passes a prospectively specified superiority test against the incumbent controller. Exploration, tuning and evaluation fit within the operator's numerical interaction budget; prior data are accounted for separately. No adequate external simulator is available; models learned from permitted data are allowed. Every hard safety constraint has zero observed violations throughout adaptation and evaluation. The application protocol supplies numerical reward timing or sparsity, budget, superiority criteria and operating limits.",
+   "set_by": "Atlas fallback; no outside body located that publishes an acceptance test for this complete combination.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches of DARPA programme documents, ISO/IEC-related reinforcement-learning safety material, realworldrl-suite publications and physical robot-learning protocols found no joint acceptance test or universal interaction/delay threshold. This fallback requires one application-specific demonstration of improvement under the combined restrictions. It does not establish safety outside the tested operating envelope.",
+   "refs": [
+    1,
+    2
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A quadrotor controller improves its response while all evaluated parameters satisfy J ≥ 0.",
+    "criterion": "In the SafeOpt quadrotor protocol, improve the response to a 1 m position command evaluated over 5 s while every tested parameter setting satisfies J ≥ 0; J is the performance function in equations 15–16. The 2016 paper reports 30 experiments without evaluating an unsafe setting. The protocol assumes an initial stabilizing controller and a probabilistic model of performance. Its safety threshold concerns that performance function, rather than every possible physical hazard.",
+    "set_by": "Berkenkamp, Schoellig and Krause, Safe Controller Optimization for Quadrotors with Gaussian Processes, Section V; a quadrotor-specific experimental protocol.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "No unsafe parameters below the threshold Jmin = 0 were evaluated on the real system.",
+    "threshold_ref": 3,
+    "refs": [
+     3
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A robot learns to place objects in the opposite bin using sparse rewards without an external simulator.",
+    "criterion": "Meet the DayDreamer UR5 task endpoint: transfer one of three objects to the opposite bin, earning +10 reward; grasping earns +1 and dropping in the original bin earns −1. Training uses physical observations and a learned internal model, without external simulation. The 2023 paper reports 2.5 objects/min after 8 h on a UR5. Predetermined bin locations and restricted vertical motion reduce collision risks; the study does not establish zero violations of a comprehensive safety specification.",
+    "set_by": "University of California, Berkeley, DayDreamer authors, Section 3.2 and Appendix E; a UR5-specific experimental task definition.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "placing in the opposite bin gives a +10 reward.",
+    "threshold_ref": 4,
+    "refs": [
+     4
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A robot learns USB insertion within 2 mm in x/y, 5 mm in z and 0.15 rad in orientation.",
+    "criterion": "Meet SEVI's USB insertion endpoint using the tool centre point, the controlled reference point on the gripper: pose errors within 2 mm in x/y, 5 mm in z and 0.15 rad in orientation, optionally combined with a visual reward classifier. Three independent 3 h hardware training sessions used prior data, including 50 task demonstrations and 200 recovery trajectories; each final policy had 50 evaluation episodes. The paper reports 83 ± 3% success and 15 ± 4 unsafe events per training session, mean ± SD. These results do not establish zero-violation learning.",
+    "set_by": "Shithil and Liu, Indiana University, SEVI supplementary Sections VII and XIV; a USB-insertion-specific experimental protocol.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "success is determined using TCP pose thresholds of 2 mm in x,y, 5 mm in z, and 0.15 rad in orientation",
+    "threshold_ref": 5,
+    "refs": [
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": false
+   },
+   {
+    "id": "m4",
+    "title": "A learner finishes adaptation under the combined real-system restrictions with zero hard-limit violations.",
+    "criterion": "Complete an online policy-adaptation run on one physical task with sparse or delayed operational outcomes, material consumption or non-resettable consequences, and no adequate external simulator. Obtain the outcomes of the tested actions while remaining inside the operator's numerical interaction budget and every specified hard safety limit, with zero observed violations. This is the safe-adaptation stage immediately before testing whether the changed policy improves on the incumbent.",
+    "set_by": "Atlas fallback; searches of safe-learning benchmarks, DARPA assurance objectives and physical-learning protocols found no published test for this combined precursor.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     1,
+     2,
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No physical-learning study satisfying the complete combination in m4 and the completion criterion was located among the studies examined.",
+   "No numerical contact-force limit or geometric keep-out-region boundary was located in SEVI's published hardware safety description."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/1904.12901",
+    "doi": "10.48550/arXiv.1904.12901",
+    "title": "Challenges of Real-World Reinforcement Learning",
+    "authors": "Dulac-Arnold G, Mankowitz D, Hester T",
+    "container": "arXiv",
+    "year": "2019",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 2,
+    "kind": "report",
+    "url": "https://www.darpa.mil/sites/default/files/AssuredAutonomyProposersDay_Program%2520Brief.pdf",
+    "doi": null,
+    "title": "Assured Autonomy",
+    "authors": "Neema S.",
+    "container": "DARPA",
+    "year": "2017",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "report",
+    "url": "https://las.inf.ethz.ch/files/berkenkamp16safe.pdf",
+    "doi": "10.1109/ICRA.2016.7487170",
+    "title": "Safe Controller Optimization for Quadrotors with Gaussian Processes",
+    "authors": "Berkenkamp F, Schoellig AP, Krause A",
+    "container": "2016 IEEE International Conference on Robotics and Automation (ICRA)",
+    "year": "2016",
+    "volume": null,
+    "issue": null,
+    "pages": "491-496",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 4,
+    "kind": "report",
+    "url": "https://proceedings.mlr.press/v205/wu23c/wu23c.pdf",
+    "doi": null,
+    "title": "DayDreamer: World Models for Physical Robot Learning",
+    "authors": "Wu P, Escontrela A, Hafner D, Abbeel P, Goldberg K.",
+    "container": "Proceedings of Machine Learning Research",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2610.31829v1",
+    "doi": "10.48550/arXiv.2610.31829",
+    "title": "SEVI: Safe Evidential Real-World Reinforcement Learning",
+    "authors": "Shithil SM, Liu L",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 2 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 4 found, 1 not found, 0 with no readable copy."
+   }
+  ]
  }
 }

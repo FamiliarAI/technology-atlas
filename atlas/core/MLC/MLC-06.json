@@ -202,7 +202,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "sources": [
   "https://transformer-circuits.pub/2025/attribution-graphs/biology.html",
@@ -281,5 +282,240 @@
    "Finite tests cannot settle how untested behaviors will change or prove that an explanation is the only correct account."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "MLC-06",
+  "title": "Mechanistic interpretability for model prediction and editing",
+  "definition": "A causal account of a pretrained language model's internal computation lets an independent team predict its outputs and make a lasting edit to its stored numerical weights, with predicted effects on a target behavior and named controls.",
+  "goal": {
+   "need": "On 21 May 2024, Anthropic reported extracting up to 33,554,432 features from Claude 3 Sonnet. On 27 March 2025, it estimated that attribution graphs gave satisfying insight for about one quarter of attempted Claude 3.5 Haiku prompts; this was a subjective estimate without a stated sample size. The goal is to connect internal features to causal accounts that support prediction and model editing.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": null,
+   "statements": [
+    {
+     "body": "National Institute of Standards and Technology, Four Principles of Explainable Artificial Intelligence",
+     "year": "2021",
+     "quote": "An explanation correctly reflects the reason for generating the output and/or accurately reflects the system’s process.",
+     "context": "NIST's explanation-accuracy principle.",
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "DARPA, AI Forge, Challenge 1: Scaling Causal Interpretability for Predictive Diagnostics",
+     "year": "2026",
+     "quote": "This challenge aims to establish a broadly applicable causal science of model behavior.",
+     "context": null,
+     "ref": 4,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "An independent team predicts and reproduces a parameter edit from a model's causal account.",
+   "criterion": "For a fixed pretrained language model and a named published behavior benchmark, freeze a causal algorithm, its mapping to internal components, competing accounts and a stored-weight edit before inspecting test outcomes. An independent team uses the account to predict unedited outputs and edited target/control outputs on the benchmark's complete held-out test sets, including cases distinguishing the accounts, then applies the edit. Every discrete-output prediction must match (100%); target outputs change as specified and control outputs remain unchanged. Fix the benchmark version, model weights and decoding rule. Passing applies only to this tested scope.",
+   "set_by": "Technology Atlas; proposed scoped completion test, without an established external pass criterion.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches covered NIST explainability principles, DARPA XAI and AI Forge, prize criteria, causal-abstraction tests and intervention benchmarks. No published test combining causal explanation, unseen prediction, persistent editing and independent reproduction was found. This proposal combines the published component tests within a declared benchmark scope. The cited results do not establish the combined test.",
+   "refs": [
+    3,
+    4,
+    5,
+    6
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "An algorithm predicts 100% of a neural model's aligned interchange-intervention outputs.",
+    "criterion": "For each specified intermediate variable, the algorithm and neural model must return identical outputs under aligned internal-state swaps for every ordered input pair in the declared finite domain, using a specified output mapping. This is interchange-intervention accuracy of 1. Geiger et al.'s 2022 illustrative Boolean-conjunction network reached 100% after one training update: four inputs, 16 ordered pairs per aligned variable and two aligned variables. Its causal structure was deliberately trained into the network; this was not recovery from a pretrained language model.",
+    "set_by": "Geiger et al., ICML 2022, causal-abstraction relationship and interchange-intervention accuracy, Equations 2–3.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "Where every pair of inputs b and s is considered, and INTINVACC is 1, the two models are in the causal abstraction relationship.",
+    "threshold_ref": 5,
+    "refs": [
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "An internal intervention changes a language model's output as its proposed mechanism predicts.",
+    "criterion": "Change the activity of an interpreted internal feature or feature group in the original language model and observe the predicted behavioral effect. This is a local causal-validation test, without a published aggregate success-rate cutoff. On 27 March 2025, Anthropic reported that, for one Dallas geography prompt in Claude 3.5 Haiku, suppressing Texas-related activations and activating California-related features changed the answer to Sacramento. This intervention changed inference-time activity, not stored weights.",
+    "set_by": "Anthropic's feature-steering validation in Scaling Monosemanticity and original-model perturbation experiments in On the Biology of a Large Language Model.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "establishing that features do have the causal effect we expect them to",
+    "threshold_ref": 1,
+    "refs": [
+     1,
+     2
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "An activation edit swaps a held-out entity's target attribute and preserves its other queried attributes.",
+    "criterion": "For a held-out base/source entity pair, replacing the target feature must produce the source entity's target attribute; control queries must retain the base entity's non-target attribute values. These are RAVEL's per-intervention Cause and Iso success conditions, not a benchmark-wide pass mark. In the 2024 Llama2-7B evaluation (2,800 entities), Multi-task Distributed Alignment Search obtained mean Disentangle scores of 60.1% on Entity and 65.6% on Context. Disentangle averages Cause and Iso; it is not joint success. The intervention changes activations during inference.",
+    "set_by": "Huang et al., ACL 2024, RAVEL Section 2.2; the published protocol concerns entity-attribute representations and activation interventions.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "If F encodes A, then interventions on F should change the value of A.",
+    "threshold_ref": 6,
+    "refs": [
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "A causal account predicts every tested output before and after a specified parameter edit.",
+    "criterion": "The originating team freezes a causal algorithm, its internal alignment, competing accounts and a stored-weight edit for one pretrained language model before inspecting a named benchmark's complete held-out test sets. The account correctly predicts every discrete unedited and edited output (100%), including cases distinguishing the accounts. The intended target outputs change and named control outputs remain unchanged. This combines mechanistic prediction and persistent editing in one demonstration; independent execution remains the completion step.",
+    "set_by": "Technology Atlas; proposed integration test. Searches of NIST, DARPA and mechanistic-intervention protocols found no published joint prediction-and-parameter-edit pass criterion.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     3,
+     4,
+     5,
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No external completion criterion was found for the combined causal-account, prediction, persistent-edit and independent-reproduction capability.",
+   "No published aggregate RAVEL pass score or accepted minimum behavioral breadth and collateral-effect tolerance was found.",
+   "No located publication demonstrated the complete prospective test with an independent team."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "report",
+    "url": "https://transformer-circuits.pub/2024/scaling-monosemanticity/",
+    "doi": null,
+    "title": "Scaling Monosemanticity: Extracting Interpretable Features from Claude 3 Sonnet",
+    "authors": "Templeton A, Conerly T, Marcus J, Lindsey J, Bricken T, Chen B, et al.",
+    "container": "Transformer Circuits Thread",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 2,
+    "kind": "report",
+    "url": "https://transformer-circuits.pub/2025/attribution-graphs/biology.html",
+    "doi": null,
+    "title": "On the Biology of a Large Language Model",
+    "authors": "Lindsey J, Gurnee W, Ameisen E, Chen B, Pearce A, Turner NL, et al.",
+    "container": "Transformer Circuits Thread",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "report",
+    "url": "https://nvlpubs.nist.gov/nistpubs/ir/2021/NIST.IR.8312.pdf",
+    "doi": "10.6028/NIST.IR.8312",
+    "title": "Four Principles of Explainable Artificial Intelligence",
+    "authors": "Phillips PJ, Hahn CA, Fontana PC, Yates AN, Greene K, Broniatowski DA, et al.",
+    "container": "National Institute of Standards and Technology",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 4,
+    "kind": "report",
+    "url": "https://www.darpa.mil/sites/default/files/attachment/2026-06/ai-forge-report.pdf",
+    "doi": null,
+    "title": "AI Forge: Critical AI Challenges for National Security",
+    "authors": "Defense Advanced Research Projects Agency.",
+    "container": "DARPA",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "journal",
+    "url": "https://proceedings.mlr.press/v162/geiger22a/geiger22a.pdf",
+    "doi": null,
+    "title": "Inducing Causal Structure for Interpretable Neural Networks",
+    "authors": "Geiger A, Wu Z, Lu H, Rozner J, Kreiss E, Icard T, Goodman ND, Potts C.",
+    "container": "Proc Mach Learn Res",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://aclanthology.org/2024.acl-long.470.pdf",
+    "doi": "10.18653/v1/2024.acl-long.470",
+    "title": "RAVEL: Evaluating Interpretability Methods on Disentangling Language Model Representations",
+    "authors": "Huang J, Wu Z, Potts C, Geva M, Geiger A",
+    "container": "Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": "8669-8687",
+    "citation_source": "crossref"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 0 from arXiv, 4 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 5 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }
