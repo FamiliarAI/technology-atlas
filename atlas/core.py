@@ -308,10 +308,98 @@ def check(data):
     return problems
 
 
+SECTION_KEYS = (
+    'concept',
+    'significance',
+    'missing_breakthrough',
+    'current_state',
+    'completion_criteria',
+    'related_concepts',
+    'unresolved_issues',
+)
+
+
+def new_breakthrough(prefix, title, note='', sources=(), reason='', core=CORE):
+    """Add one breakthrough to an existing field, with the next free ID, and return it.
+
+    The record holds only what the person adding it knows: the title, and a note with the
+    sources they point to as its concept. The research is done by the page pass
+    (python3 -m atlas.page define ID), which searches for itself; the other sections stay
+    empty. IDs are never reused, so the next ID follows the highest ever given in the field.
+    """
+    data = load(core)
+    if prefix not in data['fields']:
+        raise ValueError(f'No field {prefix}; a new field goes through ingestion (runbook)')
+    title = ' '.join(title.split())
+    if not title:
+        raise ValueError('A title is needed')
+    for identifier, item in data['breakthroughs'].items():
+        if item['field'] == prefix and item['title'].lower() == title.lower():
+            raise ValueError(f'{identifier} already has this title')
+    numbers = [
+        int(identifier.rsplit('-', 1)[1])
+        for identifier in data['breakthroughs']
+        if identifier.startswith(prefix + '-') and identifier.rsplit('-', 1)[1].isdigit()
+    ]
+    identifier = f'{prefix}-{max(numbers, default=0) + 1:02d}'
+    text = ' '.join(note.split())
+    if sources:
+        text = (text + ' ' if text else '') + 'Sources given: ' + ' ; '.join(sources) + '.'
+    item = {
+        'id': identifier,
+        'title': title,
+        **{key: [] for key in SECTION_KEYS},
+        'change_log': [
+            {
+                'change': f'Added by hand to {prefix} on '
+                f'{datetime.now(timezone.utc).date().isoformat()}.',
+                'reason': ' '.join(reason.split()) or 'Named by the owner.',
+            }
+        ],
+        'models': {},
+        'sources': [],
+        'provenance': {},
+        'field': prefix,
+        'status': 'active',
+    }
+    if text:
+        item['concept'] = [{'text': text, 'source_urls': list(sources)}]
+    write_breakthrough(item, core)
+    return identifier
+
+
 def main(argv=None, core=CORE):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('command', choices=['import', 'check'])
+    parser.add_argument('command', choices=['import', 'check', 'new'])
+    parser.add_argument('field', nargs='?', help='new: the field ID, such as MAT')
+    parser.add_argument('title', nargs='?', help='new: the breakthrough title')
+    parser.add_argument('--note', default='', help='new: what it is, in a sentence or two')
+    parser.add_argument('--source', action='append', default=[], help='new: a URL (repeatable)')
+    parser.add_argument('--reason', default='', help='new: why it is added')
+    parser.add_argument('--no-commit', action='store_true')
     args = parser.parse_args(argv)
+    if args.command == 'new':
+        if not (args.field and args.title):
+            parser.error('new needs FIELD and TITLE')
+        try:
+            identifier = new_breakthrough(
+                args.field, args.title, args.note, args.source, args.reason, core
+            )
+        except ValueError as error:
+            print(error)
+            return 1
+        problems = check(load(core))
+        if problems:
+            (Path(core) / args.field / f'{identifier}.json').unlink()
+            print('Not added; the check failed:\n' + '\n'.join(problems))
+            return 1
+        if not args.no_commit:
+            commit(
+                f'Add {identifier}: {args.title}\n\n'
+                'Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>'
+            )
+        print(f'{identifier}: added. Next: python3 -m atlas.page define {identifier}')
+        return 0
     try:
         if args.command == 'import':
             roots = store.completed_fields()

@@ -162,3 +162,23 @@ class AutomaticTests(ReviewTests):
         # A second run changes nothing; a claimed page waits.
         again = review.automatic(core.load(self.core), core=self.core)
         self.assertEqual(again, {'published': [], 'merged': [], 'repointed': []})
+
+
+class NewBreakthroughTests(ReviewTests):
+    def test_a_breakthrough_is_added_with_the_next_id_and_passes_the_check(self):
+        identifier = core.new_breakthrough(
+            'NRL',
+            'Synthetic consciousness test',
+            'A note.',
+            ['https://example.org/a'],
+            core=self.core,
+        )
+        self.assertEqual(identifier, 'NRL-04')
+        item = core.load(self.core)['breakthroughs']['NRL-04']
+        self.assertEqual(item['concept'][0]['source_urls'], ['https://example.org/a'])
+        self.assertIn('Sources given: https://example.org/a', item['concept'][0]['text'])
+        self.assertEqual(core.check(core.load(self.core)), [])
+        with self.assertRaisesRegex(ValueError, 'already has this title'):
+            core.new_breakthrough('NRL', 'synthetic  consciousness test', core=self.core)
+        with self.assertRaisesRegex(ValueError, 'No field'):
+            core.new_breakthrough('XYZ', 'Anything', core=self.core)
