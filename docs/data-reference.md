@@ -386,6 +386,11 @@ python3 -m atlas.review clear SUR-01                 # back to draft (unpublish)
 python3 -m atlas.review auto --locks atlas/data/page/locks   # owner's standing rule, Nov 14:
 #   publish every judged page; of duplicates (similarity >= 0.25) keep the one with more
 #   confirmed results and mark the others merge into it; claimed pages wait
+python3 -m atlas.page merge --pending        # or: merge BIO-01 ...; judge calls, no search
+#   carries a merged duplicate's evidence over: the sources behind its results are judged
+#   again against the kept page's milestones and cases (rows are never copied, since a
+#   result is a verdict on one page's criterion); sources the kept page cites are left out;
+#   the duplicate's review gets `copied`
 python3 -m atlas.similar BME-12 --among all          # the duplicate search alone
 python3 -m atlas.store && python3 -m atlas.export atlas/data/public --public
 python3 -m http.server 8766 --bind 127.0.0.1 --directory atlas/data/public   # production preview
