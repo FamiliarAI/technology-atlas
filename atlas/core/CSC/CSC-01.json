@@ -212,7 +212,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Practical ways to solve hard search problems",
@@ -303,5 +304,322 @@
    "The costs of translating applications, recovering solutions and attacking encryption would depend on the actual algorithm."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "CSC-01",
+  "title": "Deterministic polynomial-time SAT solving",
+  "definition": "A deterministic algorithm decides Boolean satisfiability, whether a true-or-false formula has a satisfying assignment, on every input in polynomial worst-case time, and its implementation wins the SAT Competition main track. SAT is NP-complete: every decision problem with polynomially checkable certificates reduces to it in polynomial time.",
+  "goal": {
+   "need": "The SAT Competition benchmark and its winner’s solved count show that complete solvers leave instances unresolved within a fixed computing budget. Cook cites an appendix containing 300 NP-complete problems, including problems underlying industrial scheduling and routing. A polynomial-time algorithm for one would give polynomial-time decision algorithms for all.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": {
+    "caption": "SAT Competition 2025 main-track evaluation",
+    "columns": [
+     "Quantity",
+     "Result"
+    ],
+    "rows": [
+     [
+      "Benchmark formulas",
+      "400"
+     ],
+     [
+      "Formulas solved by winner AE-Kissat-MAB",
+      "327"
+     ],
+     [
+      "Solver time limit per formula",
+      "5,000 seconds"
+     ]
+    ],
+    "note": "These measurements do not establish a worst-case running-time bound.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "Clay Mathematics Institute",
+     "year": "Undated",
+     "quote": "If it is easy to check that a solution to a problem is correct, is it also easy to solve the problem?",
+     "context": "Clay presents P versus NP as a Millennium Prize Problem. Resolving the question can establish either equality or inequality; this capability requires a constructive equality result.",
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "SAT Competition organizing committee",
+     "year": "2025",
+     "quote": "Promotion of SAT solvers and their development",
+     "context": "One of the competition’s explicitly listed goals.",
+     "ref": 1,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "An implementation of a proved polynomial-time SAT algorithm wins the SAT Competition main track.",
+   "criterion": "One fully specified deterministic algorithm correctly decides every CNF-SAT input with a proved polynomial worst-case bound in encoded input length N. Its correctness and complexity proofs receive acceptance after peer review. An implementation covered by those proofs ranks first in an official SAT Competition main track under that edition’s published hardware, benchmark, timeout, memory and certificate-checking rules. The proof covers all executed procedures, including preprocessing and certificate production.",
+   "set_by": "Atlas fallback combining the complexity community’s polynomial-time criterion with the SAT Competition organizers’ first-place criterion; neither body publishes this combined test.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches of Clay’s problem statement, the SAT handbook, and SAT Competition rules and results found no externally defined practical polynomial-time SAT threshold. This fallback pairs an accepted mathematical proof with an existing competitive evaluation. Competition success establishes performance on its finite benchmark set; it does not establish affordable worst-case computation at every input size.",
+   "refs": [
+    1,
+    2,
+    4,
+    5,
+    6,
+    7
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A complete SAT solver terminates with the correct answer on every finite CNF formula.",
+    "criterion": "A deterministic program terminates and correctly decides satisfiability for every finite input in conjunctive normal form: an AND of clauses, each an OR of variables or their negations. Both satisfiable and unsatisfiable inputs must be handled. The DPLL algorithm, introduced in 1962 and reviewed in the handbook chapter, already meets this correctness-and-termination criterion; the criterion imposes no polynomial-time bound.",
+    "set_by": "SAT-solving community convention of sound and complete algorithms, stated by Darwiche and Pipatsrisawat in Complete Algorithms, section 3.1.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "algorithms that are guaranteed to terminate with a correct decision on the satisfiability/unsatisfiability of the given CNF.",
+    "threshold_ref": 8,
+    "refs": [
+     7,
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A SAT solver achieves first place in the SAT Competition main track.",
+    "criterion": "An eligible sequential SAT solver obtains the organizers’ first-place main-track ranking using PAR-2, which penalizes unsolved instances at twice the timeout. Answers and certificates must pass the required checks. The 2025 protocol allowed 5,000 seconds per solver run, 30 GB RAM and 45,000 seconds for the certificate-checking tool chain. First place was reported in the results presented on 14 August 2025.",
+    "set_by": "SAT Competition organizing committee, published main-track rules and results.",
+    "set_by_kind": "prize",
+    "threshold_quote": "Solvers in all tracks will be ranked based on the PAR-2 score",
+    "threshold_ref": 6,
+    "refs": [
+     1,
+     4,
+     5,
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A deterministic 3-SAT algorithm has a proved subexponential worst-case time bound.",
+    "criterion": "A single deterministic algorithm correctly decides every 3-SAT formula in time 2^{o(n)} times a polynomial in encoded input length, where n counts variables; 3-SAT permits at most three literals per clause. The exponent divided by n must tend to zero. An Anthropic preprint released on 27 October 2026 claims a 2^{O(n log log n / √log n)} algorithm and a Lean formalization. This is a preprint claim, not a peer-reviewed result.",
+    "set_by": "Computational complexity community, through Impagliazzo and Paturi’s Exponential-Time Hypothesis in On the Complexity of k-SAT; this milestone refutes the hypothesis for 3-SAT.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "k-SAT does not have a subexponential-time algorithm.",
+    "threshold_ref": 9,
+    "refs": [
+     9,
+     10
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m4",
+    "title": "A deterministic SAT algorithm has an accepted proof of polynomial worst-case running time.",
+    "criterion": "An explicit deterministic Turing machine correctly decides every CNF-SAT input and has a proved bound T(N) ≤ N^k + k for one fixed k and every encoded input length N. Its correctness and complexity proofs receive acceptance after peer review. This establishes the mathematical condition for P = NP. Clay’s overview lists P versus NP as unsolved; practical implementation performance remains the additional completion condition.",
+    "set_by": "Computational complexity community; Cook’s official Clay problem description, definition of P and Proposition 1(c).",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "(c) If L is NP-complete and L ∈ P, then P=NP.",
+    "threshold_ref": 2,
+    "refs": [
+     2,
+     3
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No outside body was found to define a combined polynomial-time proof and practical-performance completion test for NP-complete algorithms.",
+   "No externally prescribed milestone sequence connecting complete SAT solving, competition performance and polynomial-time proofs was located.",
+   "No peer-reviewed publication of the 27 October 2026 subexponential 3-SAT claim was located."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "report",
+    "url": "https://satcompetition.github.io/2025/satcomp25slides.pdf",
+    "doi": null,
+    "title": "The Results of SAT Competition 2025",
+    "authors": "Codel C, Fazekas K, Heule MJH, Iser M",
+    "container": "SAT Competition",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 2,
+    "kind": "report",
+    "url": "https://www.claymath.org/wp-content/uploads/2022/06/pvsnp.pdf",
+    "doi": null,
+    "title": "The P versus NP Problem",
+    "authors": "Cook SA",
+    "container": "Clay Mathematics Institute",
+    "year": "Undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "web",
+    "url": "https://www.claymath.org/millennium/p-vs-np/",
+    "doi": null,
+    "title": "P vs NP",
+    "authors": "Clay Mathematics Institute",
+    "container": "Clay Mathematics Institute",
+    "year": "Undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "web",
+    "url": "https://satcompetition.github.io/2025/benchcloud.html",
+    "doi": null,
+    "title": "Submission Instructions",
+    "authors": "SAT Competition organizing committee",
+    "container": "SAT Competition 2025",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "web",
+    "url": "https://satcompetition.github.io/2025/rules.html",
+    "doi": null,
+    "title": "Mandatory participation requirements for SAT solvers",
+    "authors": "SAT Competition organizing committee",
+    "container": "SAT Competition 2025",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "web",
+    "url": "https://satcompetition.github.io/2025/tracks.html",
+    "doi": null,
+    "title": "Competition Tracks",
+    "authors": "SAT Competition organizing committee",
+    "container": "SAT Competition 2025",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 7,
+    "kind": "book",
+    "url": "https://ebooks.iospress.nl/volume/handbook-of-satisfiability-second-edition",
+    "doi": "10.3233/FAIA336",
+    "title": "Handbook of Satisfiability - Second Edition",
+    "authors": "Biere A, Heule M, van Maaren H, Walsh T, editors",
+    "container": "Frontiers in Artificial Intelligence and Applications",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 8,
+    "kind": "preprint",
+    "url": "https://ics.uci.edu/~dechter/courses/ics-275a/winter-2016/readings/SATChapter3.pdf",
+    "doi": null,
+    "title": "Complete Algorithms",
+    "authors": "Darwiche A, Pipatsrisawat K",
+    "container": "Handbook of Satisfiability, chapter draft",
+    "year": "2008",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 9,
+    "kind": "journal",
+    "url": "https://courses.cs.washington.edu/courses/cse599i/24sp/papers/ImpagliazzoPaturi_2001_jcss.pdf",
+    "doi": "10.1006/jcss.2000.1727",
+    "title": "On the Complexity of k-SAT",
+    "authors": "Impagliazzo R, Paturi R",
+    "container": "Journal of Computer and System Sciences",
+    "year": "2001",
+    "volume": "62",
+    "issue": "2",
+    "pages": "367-375",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 10,
+    "kind": "preprint",
+    "url": "https://hexagonmath.org/pdf/2610.00577v1",
+    "doi": null,
+    "title": "A 2^{o(n)} Time Algorithm for 3-SAT",
+    "authors": "Claude; Anthropic",
+    "container": "Hexagon",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 0 from arXiv, 8 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 5 found, 0 not found, 1 with no readable copy."
+   }
+  ]
  }
 }

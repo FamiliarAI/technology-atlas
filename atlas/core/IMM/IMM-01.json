@@ -150,7 +150,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "sources": [
   "https://pubmed.ncbi.nlm.nih.gov/41315816/"
@@ -250,5 +251,281 @@
    "How much experimental searching could reliable predictions replace, and would they eventually improve clinical decisions?"
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "IMM-01",
+  "title": "General prediction of TCR–peptide–MHC specificity",
+  "definition": "A sequence-based predictor of binding and antigen-induced activation for αβ T-cell receptors (TCRs), peptides (short protein fragments) and major histocompatibility complex (MHC) display proteins. It generalizes to receptors, peptides and MHC alleles absent from its specificity-training data.",
+  "goal": {
+   "need": "Delaunay et al. compiled binding data covering 1,407 unique epitopes. Their cancer point-mutation model across 34 MHC-I alleles estimated coverage requirements of 135,064–3,035,244 peptide–allele entries, assuming generalization within three amino-acid edits. These are model-dependent estimates. Separately, a 50-model assessment using 21 datasets covering 762 epitopes found that all evaluated models struggled with unseen epitopes.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": {
+    "caption": "Public data and estimated training coverage for cancer point-mutation targets",
+    "columns": [
+     "Quantity",
+     "Number"
+    ],
+    "rows": [
+     [
+      "Unique epitopes in the compiled public binding data",
+      "1,407"
+     ],
+     [
+      "Coverage estimate from expanded experimental ligandomes",
+      "135,064 peptide–allele entries"
+     ],
+     [
+      "Coverage estimate from proteome-derived ligandomes",
+      "3,035,244 peptide–allele entries"
+     ]
+    ],
+    "note": "Estimates cover 34 MHC-I alleles and assume generalization within three amino-acid edits. They are conditional coverage calculations, not experimentally established training requirements.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "Cancer Grand Challenges Scientific Committee",
+     "year": "2023",
+     "quote": "Development and validation of a tool to predict the (neo)antigens recognised based on a TCR sequence",
+     "context": "One of the approaches identified in the T-cell receptor cancer-recognition challenge.",
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "Cancer Grand Challenges MATCHMAKERS programme, in its National Cancer Institute award abstract",
+     "year": "2024",
+     "quote": "WP4 AI-based prediction and design of TCR-pMHC interactions.",
+     "context": "Work package 4 of award OT2CA297463.",
+     "ref": 4,
+     "checked": null
+    }
+   ]
+  },
+  "completion": {
+   "title": "Independent replication confirms recognition prediction for unseen TCRs, peptides and MHC alleles.",
+   "criterion": "A frozen model prospectively predicts binding and antigen-induced activation for test receptors, peptides and MHC alleles all excluded from specificity training and tuning. For each MHC class and each endpoint separately, the lower limit of a 90% confidence interval for AUROC exceeds 0.5. Activation uses the assay's prespecified positive criterion. An independent laboratory reproduces the result on a separately generated test set. This is an Atlas fallback criterion.",
+   "set_by": "Atlas fallback; no outside body was found to have adopted this combined completion test.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searched the Cancer Grand Challenges challenge, MATCHMAKERS work packages and NCI award, IMMREP challenge material, and TCR benchmarking papers; found no published completion test covering joint receptor, peptide and MHC novelty with replicated functional validation. This fallback combines the programme's generalized-prediction goal with the published above-chance test. It establishes generalization without asserting a clinical error-rate standard.",
+   "refs": [
+    1,
+    3,
+    4,
+    5,
+    6
+   ],
+   "threshold_checked": null
+  },
+  "case_label": "MHC class",
+  "cases": [
+   "MHC class I",
+   "MHC class II"
+  ],
+  "milestone_structure": "sequence",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A TCR binding predictor exceeds chance on held-out peptide–MHC pairs.",
+    "criterion": "On held-out peptide–MHC pairs, a binding predictor's AUROC has a lower 90% confidence limit above 0.5; receptors and MHC alleles may be familiar. AUROC measures ranking discrimination. On 13 May 2026, Wang et al. reported AUROC >0.95 and precision–recall area >0.66 across 16 disease-derived, HLA-B*27:05-restricted receptors, using 15% test splits of yeast-display data. Those point estimates do not themselves verify the confidence-limit criterion.",
+    "set_by": "Community convention of above-chance discrimination; Delaunay et al., Results, explicitly apply this confidence-limit test in MHC-I unseen-peptide benchmarking.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "the lower range of a 90% confidence interval (CI) located above the 0.5 threshold.",
+    "threshold_ref": 1,
+    "refs": [
+     1,
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A predicted peptide induces more than 3 percentage points of control-subtracted CD69 expression.",
+    "criterion": "A model-nominated peptide produces >3 percentage points of CD69-positive CD3-positive reporter cells after subtracting the null-peptide response, averaging across replicates. Wang et al. loaded presenting cells with 100 µM peptide for 1–2 hours and cocultured them with TCR-transduced SKW-3 cells for 14–18 hours. Their study, published on 13 May 2026, tested 15 nominated human peptides in an HLA-B*27:05 system and identified activating peptides. CD69 is a cell-surface activation marker.",
+    "set_by": "Wang et al., Methods, experimental activation protocol; this threshold was published for HLA-B*27:05, an MHC-I allele, and is not a class-II validation standard.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "For binarization, peptides eliciting >3% CD69 expression were classified as activators.",
+    "threshold_ref": 7,
+    "refs": [
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A blinded predictor significantly exceeds chance on previously uncharacterized peptide–MHC targets.",
+    "criterion": "Predictions submitted before experimental labels are released significantly outperform matched random predictions on previously uncharacterized peptide–MHC targets. IMMREP25 used the macro-AUC_0.1 metric. Its 2026 preprint reports 126 named submissions, 1,000 TCRs and 20 unseen peptides restricted by HLA-A*02:01 or HLA-B*40:01; the best macro score was 0.60. This result is not peer reviewed and covers MHC class I.",
+    "set_by": "IMMREP25 organisers' blinded unseen-peptide benchmark and the community convention of statistically exceeding random prediction; the published test covers two MHC-I alleles and supplies no universal accuracy requirement.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "The best performing methods showed a macro-AUC_0.1 of 0.60, significantly better than random",
+    "threshold_ref": 5,
+    "refs": [
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "A frozen model predicts binding and activation above chance with all three components unseen.",
+    "criterion": "One laboratory prospectively tests a frozen model on jointly unseen receptors, peptides and MHC alleles. For each MHC class, binding and activation separately have lower 90% AUROC confidence limits >0.5. Independent replication remains the completion step. A preprint posted on 4 June 2026 reported retrospective binding-validation median AUROCs of 0.92 for class I (16 cognate, 181 control complexes) and 0.81 for class II (205 cognate, 1,228 controls); these results do not establish this prospective functional milestone.",
+    "set_by": "Atlas fallback after searching programme goals and published benchmarks; no outside protocol was found that defines success for prospective binding and activation prediction under joint receptor, peptide and MHC novelty.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     1,
+     3,
+     4,
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No adopted completion criterion was found for independently replicated binding and activation prediction with jointly unfamiliar receptors, peptides and MHC alleles.",
+   "No common acceptable error rate or rare-binder prevalence threshold was found for this general capability.",
+   "The IMMREP25 full preprint could not be opened; its abstract was available on a coauthor's publication page.",
+   "The CASP-DREAM TAP challenge protocol on Synapse could not be opened."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41598-025-26454-7",
+    "doi": "10.1038/s41598-025-26454-7",
+    "title": "Assessing data size requirements for training generalizable sequence-based TCR specificity models via pan-allelic MHC-I point-mutation ligandome evaluation",
+    "authors": "Delaunay A, McGibbon M, Djermani B, Gorbushin N, Chaves García-Mascaraque S, Rayment I, et al.",
+    "container": "Sci Rep",
+    "year": "2025",
+    "volume": "15",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41592-025-02910-0?error=cookies_not_supported",
+    "doi": "10.1038/s41592-025-02910-0",
+    "title": "Assessment of computational methods in predicting TCR–epitope binding recognition",
+    "authors": "Lu Y, Wang Y, Xu M, Xie B, Yang Y, Xu H, et al.",
+    "container": "Nat Methods",
+    "year": "2026",
+    "volume": "23",
+    "issue": "1",
+    "pages": "248-259",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 3,
+    "kind": "web",
+    "url": "https://www.cancergrandchallenges.org/challenges/active-challenges/t-cell-receptors",
+    "doi": null,
+    "title": "T-cell receptors",
+    "authors": "Cancer Grand Challenges",
+    "container": "Cancer Grand Challenges",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "registry",
+    "url": "https://taggs.hhs.gov/Detail/AwardDetail?arg_AwardNum=OT2CA297463&arg_ProgOfficeCode=110",
+    "doi": null,
+    "title": "MATCHMAKERS - Creating and training AI tools for TCR binding prediction and design",
+    "authors": "US Department of Health and Human Services",
+    "container": "Tracking Accountability in Government Grants System",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "preprint",
+    "url": "https://janaarts.github.io/publications/",
+    "doi": "10.64898/2026.03.30.715276",
+    "title": "IMMREP25: Unseen Peptides",
+    "authors": "Richardson E, Aarts YJM, Altin JA, Baakman CAB, Bradley P, Chen B, et al.",
+    "container": "bioRxiv; abstract reproduced on Jan Aarts's publication page",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 6,
+    "kind": "preprint",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13252052/",
+    "doi": "10.64898/2026.06.02.729478",
+    "title": "General prediction of T cell receptor antigen specificity from sequence using AlphaFold 3",
+    "authors": "Woods LJ, Neff B, Lahouel K, Goursaud A, Mulazimoglu M, Bates K, et al.",
+    "container": "bioRxiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41587-026-03128-x?code=cdcdfa32-53fb-4700-9d11-88ab97180164&error=cookies_not_supported",
+    "doi": "10.1038/s41587-026-03128-x",
+    "title": "Deep peptide recognition profiling decodes TCR specificity and enables disease-associated antigen discovery",
+    "authors": "Wang N, Yeh H, Lai B, Perera J, Jude KM, Risch I, et al.",
+    "container": "Nat Biotechnol",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 5 from Crossref, 0 from PubMed, 0 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 4 found, 0 not found, 1 with no readable copy."
+   }
+  ]
  }
 }
