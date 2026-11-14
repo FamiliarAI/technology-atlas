@@ -200,8 +200,8 @@ def run(identifiers, work, workers, report=None):
             return 'stopped', None
         try:
             return 'done', work(identifier, stop)
-        except Stopped:
-            return 'stopped', None
+        except Stopped as error:
+            return 'stopped', str(error) or None
         except ProviderExhausted as error:
             stop.set()
             return 'failed', f'{error}; stopping the run'

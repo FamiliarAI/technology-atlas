@@ -880,3 +880,27 @@ class PageRecordTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class ClaimTests(unittest.TestCase):
+    def test_an_entry_claimed_by_a_live_process_is_skipped_and_a_dead_claim_is_taken(self):
+        import os
+        import subprocess
+        import tempfile
+
+        from atlas.page import claimed
+
+        with tempfile.TemporaryDirectory() as folder:
+            with claimed('results', 'BME-01', folder) as first:
+                self.assertTrue(first)
+                with claimed('results', 'BME-01', folder) as second:
+                    self.assertFalse(second)
+                with claimed('results', 'BME-02', folder) as other:
+                    self.assertTrue(other)
+            self.assertEqual(os.listdir(folder), [])
+            # A claim whose process has exited is taken over.
+            gone = subprocess.Popen(['true'])
+            gone.wait()
+            (Path(folder) / 'results-BME-03.lock').write_text(str(gone.pid))
+            with claimed('results', 'BME-03', folder) as taken:
+                self.assertTrue(taken)

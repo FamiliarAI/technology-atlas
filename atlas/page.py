@@ -37,13 +37,14 @@ import argparse
 import copy
 import hashlib
 import json
+import os
 import re
 import threading
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor
-from contextlib import closing
+from contextlib import closing, contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -2383,6 +2384,40 @@ FAILURES = 'failures.json'
 WORKERS = 'workers.json'  # the worker count `--workers auto` settled on
 
 
+LOCKS = 'locks'
+
+
+@contextmanager
+def claimed(step, identifier, folder=None):
+    """Claim one entry for one pass across processes, so two runs (the unattended loop and a
+    field run started by hand) never work on it at once. Yields False when a live process
+    holds it. A claim left by a process that has died is taken over."""
+    folder = Path(folder or CALLS / LOCKS)
+    folder.mkdir(parents=True, exist_ok=True)
+    path = folder / f'{step}-{identifier}.lock'
+    for _ in range(2):
+        try:
+            handle = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        except FileExistsError:
+            try:
+                os.kill(int(path.read_text() or 0), 0)
+            except PermissionError:
+                pass  # alive, owned by another user
+            except (ValueError, OSError):
+                path.unlink(missing_ok=True)  # its process is gone
+                continue
+            yield False
+            return
+        os.write(handle, str(os.getpid()).encode())
+        os.close(handle)
+        try:
+            yield True
+        finally:
+            path.unlink(missing_ok=True)
+        return
+    yield False
+
+
 def worker_count(text):
     """--workers: a number, or `auto` to find the most the provider allows (atlas.batch)."""
     if text == 'auto':
@@ -2444,6 +2479,14 @@ def run_batch(step, identifiers, writer, workers=3, commit=True, replace=False, 
     stats = {}
 
     def work(identifier, stop):
+        with claimed(step, identifier) as mine:
+            if not mine:
+                # Another run is on this entry now: not started here, not a failure; it stays
+                # to do, and a later pass takes it if the other run does not finish it.
+                raise batches.Stopped('another run is working on it')
+            return work_on(identifier, stop)
+
+    def work_on(identifier, stop):
         info = {}
 
         def keep(page):
@@ -2466,7 +2509,7 @@ def run_batch(step, identifiers, writer, workers=3, commit=True, replace=False, 
         text = {
             'done': value,
             'failed': f'{identifier}: failed: {value}',
-            'stopped': f'{identifier}: not started (stopping)',
+            'stopped': f'{identifier}: not started ({value or "stopping"})',
         }[status]
         print(text, flush=True)
         with lock:
