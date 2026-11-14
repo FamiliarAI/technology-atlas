@@ -68,10 +68,13 @@ def routes(files):
         )
     for item in catalog['breakthroughs']:
         record = files[f'b/{item["id"]}.json']
+        brief = record.get('brief') or {}
         summary = record['concept'][0]['text'] if record['concept'] else record['title']
+        if brief.get('possible'):
+            summary = brief['possible'][0]
         yield (
             '/b/' + item['id'],
-            f'{item["title"]} · {item["id"]} · {NAME}',
+            f'{brief.get("title") or item["title"]} · {item["id"]} · {NAME}',
             cut(summary, 200),
             item['id'],
         )

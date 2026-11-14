@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Route, Routes, useParams } from 'react-router-dom';
 import { Locator } from './Chart.jsx';
-import { STATUS, useAtlas, warm as isWarm } from './data.jsx';
+import { STATUS, loadBreakthrough, useAtlas, warm as isWarm } from './data.jsx';
 import { ringSegments, starColor } from './glyphs.jsx';
 import { chartCoord, starRadius } from './sky.js';
 import './share.css';
@@ -260,10 +260,24 @@ export function BreakthroughCard() {
   const { id } = useParams();
   const { atlas, error } = useAtlas();
   const loaded = useAssets();
+  // The card leads with the reader's title, as the page does; the record says whether one exists.
+  const [record, setRecord] = useState(null);
+  useEffect(() => {
+    let live = true;
+    loadBreakthrough(id).then(
+      (data) => live && setRecord({ id, data }),
+      () => live && setRecord({ id, data: null }),
+    );
+    return () => {
+      live = false;
+    };
+  }, [id]);
   if (error) return <Failed reason={'Data: ' + error} />;
-  if (!atlas || !loaded) return null;
+  if (!atlas || !loaded || record?.id !== id) return null;
   const item = atlas.items[id];
   if (!item) return <Failed reason={'No breakthrough ' + id} />;
+  const plain = record.data?.brief?.title;
+  const title = typeof plain === 'string' && plain.trim() ? plain.trim() : item.title;
   const field = atlas.field[item.field];
   const coord = chartCoord(item, atlas.sky);
   const state = stateOf(item);
@@ -280,7 +294,7 @@ export function BreakthroughCard() {
             <span>{field.name}</span>
           </p>
           <FitText className="card-title" max={84} steps={TITLE_STEPS}>
-            <Words text={item.title} />
+            <Words text={title} />
           </FitText>
         </div>
         <footer className={'card-meter ' + state}>
