@@ -16,10 +16,11 @@ server offers the same decisions as buttons (atlas.server, /api/review).
 """
 
 import argparse
+import os
 from datetime import datetime, timezone
 
 from . import core as records
-from .similar import Index, report
+from .similar import LIKELY, Index, cosine, report
 
 STATES = ('published', 'hold', 'merge', 'revise', 'retire')
 VERBS = {
@@ -131,6 +132,76 @@ def listing(data, state='any'):
     return rows
 
 
+def confirmed(item):
+    return sum(1 for r in (item.get('page') or {}).get('results', []) if r.get('confirmed') is True)
+
+
+def automatic(data, claimed=(), core=records.CORE):
+    """Publish judged pages and merge duplicates without a person (owner, 2026-11-14).
+
+    The pool is every published page plus every judged page with no decision that no running
+    pass has claimed. Taking the pool strongest first (most confirmed results, then ID), a
+    page whose closest kept page scores at least similar.LIKELY is marked `merge` into it;
+    otherwise it is kept and published. A published page can therefore give way to a stronger
+    duplicate judged later. Merges that point at a page now merged are pointed on to its
+    target. Decisions a person made other than publishing (hold, revise, retire, merge) are
+    left alone. Returns {'published': [...], 'merged': [(id, into, score)], 'repointed': [...]}.
+    """
+    items = data['breakthroughs']
+
+    def state(identifier):
+        return (items[identifier].get('review') or {}).get('state')
+
+    pool = [
+        identifier
+        for identifier, item in items.items()
+        if item.get('status') == 'active'
+        and item.get('page')
+        and identifier not in claimed
+        and (
+            state(identifier) == 'published'
+            or (state(identifier) is None and item['page'].get('results_run'))
+        )
+    ]
+    pool.sort(key=lambda identifier: (-confirmed(items[identifier]), identifier))
+    index = Index(data)
+    kept, out = [], {'published': [], 'merged': [], 'repointed': []}
+    for identifier in pool:
+        vector = index.vectors[identifier]
+        best = max(
+            ((cosine(vector, index.vectors[other]), other) for other in kept),
+            default=(0, None),
+        )
+        if best[0] >= LIKELY:
+            score, into = round(best[0], 3), best[1]
+            note = (
+                f'Automatic: duplicate of {into} (similarity {score}); {into} has '
+                f'{confirmed(items[into])} confirmed results, this page {confirmed(items[identifier])}.'
+            )
+            items[identifier]['review'] = decide(identifier, 'merge', note, into, data, core)
+            out['merged'].append((identifier, into, score))
+        else:
+            kept.append(identifier)
+            if state(identifier) != 'published':
+                items[identifier]['review'] = decide(identifier, 'published', data=data, core=core)
+                out['published'].append(identifier)
+    # A merge into a page that has itself been merged points on to where that page went.
+    for identifier, item in items.items():
+        review = item.get('review') or {}
+        target = review.get('into')
+        if review.get('state') != 'merge' or state(target) != 'merge':
+            continue
+        seen = {identifier}
+        while state(target) == 'merge' and target not in seen:
+            seen.add(target)
+            target = items[target]['review']['into']
+        if target != review['into'] and target != identifier:
+            note = f'{review.get("note") or ""} Pointed on: {review["into"]} merged into {target}.'
+            item['review'] = decide(identifier, 'merge', note.strip(), target, data, core)
+            out['repointed'].append(identifier)
+    return out
+
+
 def main(argv=None, core=records.CORE):
     parser = argparse.ArgumentParser(description='Review breakthrough pages for publication.')
     steps = parser.add_subparsers(dest='step', required=True)
@@ -146,8 +217,34 @@ def main(argv=None, core=records.CORE):
     clear = steps.add_parser('clear', help='remove the decision (back to draft)')
     clear.add_argument('ids', nargs='+', metavar='ID')
     clear.add_argument('--no-commit', action='store_true')
+    auto = steps.add_parser('auto', help='publish judged pages, merging duplicates')
+    auto.add_argument('--locks', help='folder of claim files (atlas.page); claimed pages wait')
+    auto.add_argument('--no-commit', action='store_true')
     args = parser.parse_args(argv)
     data = records.load(core)
+    if args.step == 'auto':
+        claimed = set()
+        if args.locks and os.path.isdir(args.locks):
+            claimed = {name.split('-', 1)[1].rsplit('.', 1)[0] for name in os.listdir(args.locks)}
+        out = automatic(data, claimed, core)
+        for identifier, into, score in out['merged']:
+            print(f'{identifier}: merge into {into} (similarity {score})')
+        print(
+            f'{len(out["published"])} published, {len(out["merged"])} merged, '
+            f'{len(out["repointed"])} merges pointed on'
+        )
+        changed = out['published'] or out['merged'] or out['repointed']
+        if changed:
+            found = records.check(records.load(core))
+            if found:
+                print('atlas/core check failed:\n' + '\n'.join(found))
+                return 1
+            if not args.no_commit:
+                records.commit(
+                    f'Review (automatic): {len(out["published"])} published, '
+                    f'{len(out["merged"])} merged as duplicates\n\n{TRAILER}'
+                )
+        return 0
     if args.step == 'list':
         rows = listing(data, args.state)
         for row in rows:

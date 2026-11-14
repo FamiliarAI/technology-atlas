@@ -134,3 +134,31 @@ class ReviewTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class AutomaticTests(ReviewTests):
+    def test_the_stronger_duplicate_is_published_and_merges_follow_it(self):
+        data = core.load(self.core)
+        weaker = data['breakthroughs']['NRL-01']
+        stronger = data['breakthroughs']['NRL-02']
+        stronger['page']['results_run'] = '2026-11-14'
+        for result in stronger['page']['results']:
+            result['confirmed'] = True
+        for result in weaker['page']['results']:
+            result['confirmed'] = False
+        core.write_breakthrough(stronger, self.core)
+        core.write_breakthrough(weaker, self.core)
+        review.decide('NRL-01', 'published', core=self.core)
+        review.decide('NRL-03', 'merge', 'same work', 'NRL-01', core=self.core)
+        out = review.automatic(core.load(self.core), core=self.core)
+        self.assertEqual(out['published'], ['NRL-02'])
+        self.assertEqual([(a, b) for a, b, _ in out['merged']], [('NRL-01', 'NRL-02')])
+        self.assertEqual(out['repointed'], ['NRL-03'])
+        items = core.load(self.core)['breakthroughs']
+        self.assertEqual(items['NRL-01']['review']['into'], 'NRL-02')
+        self.assertEqual(items['NRL-03']['review']['into'], 'NRL-02')
+        self.assertIn('Automatic: duplicate of NRL-02', items['NRL-01']['review']['note'])
+        self.assertEqual(core.check(core.load(self.core)), [])
+        # A second run changes nothing; a claimed page waits.
+        again = review.automatic(core.load(self.core), core=self.core)
+        self.assertEqual(again, {'published': [], 'merged': [], 'repointed': []})
