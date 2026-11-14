@@ -187,14 +187,19 @@ class BatchTests(unittest.TestCase):
         again = batch.Adaptive(start=6, path=path, throttled=lambda: 0, load=lambda: 0, log=str)
         self.assertEqual((again.limit, again.settled), (adaptive.limit, True))
 
-    def test_adaptive_without_throttling_rises_to_the_cap_and_saves_nothing(self):
+    def test_adaptive_without_throttling_rises_to_the_cap_and_a_later_run_starts_there(self):
         path = self.root / 'workers.json'
         adaptive = batch.Adaptive(
             start=2, most=10, path=path, throttled=lambda: 0, load=lambda: 0, log=str
         )
         batch.run([str(n) for n in range(200)], lambda identifier, stop: identifier, adaptive)
         self.assertEqual((adaptive.limit, adaptive.settled), (10, False))
-        self.assertFalse(path.exists())
+        # The level reached is kept with no failure point: a later run starts there, still rising.
+        self.assertEqual(json.loads(path.read_text())['ceiling'], None)
+        again = batch.Adaptive(
+            start=2, most=12, path=path, throttled=lambda: 0, load=lambda: 0, log=str
+        )
+        self.assertEqual((again.limit, again.settled), (10, False))
 
     def test_adaptive_backs_off_when_the_machine_is_overloaded(self):
         adaptive = batch.Adaptive(start=10, most=48, throttled=lambda: 0, load=lambda: 3.5, log=str)

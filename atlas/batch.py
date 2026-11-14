@@ -101,7 +101,13 @@ class Adaptive:
         self.settled = False
         self.ceiling = None
         saved = self._saved()
-        if saved:
+        if saved and saved.get('ceiling') is None:
+            # An earlier run rose this far without throttling: start there and keep rising.
+            self.limit = min(saved['workers'], most)
+            self.log(
+                f'Workers: starting at {self.limit}, reached earlier; rising to at most {most}'
+            )
+        elif saved:
             self.limit = min(saved['workers'], most)
             self.ceiling = saved.get('ceiling')
             self.settled = True
@@ -168,6 +174,7 @@ class Adaptive:
             elif not self.settled and self.finished >= self.limit and self.limit < self.most:
                 self.limit = min(self.most, self.limit + max(2, self.limit // 4))
                 self.log(f'Workers: no throttling; rising to {self.limit}')
+                self._save()  # no failure point yet: a later run starts here
                 self._restart()
             self.condition.notify_all()
 
