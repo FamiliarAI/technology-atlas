@@ -142,7 +142,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "sources": [
   "https://pubmed.ncbi.nlm.nih.gov/38718835/"
@@ -242,5 +243,335 @@
    "What workload and computing cost would qualify as routine use across an organism's full set of proteins?"
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "BIF-02",
+  "title": "Sequence-based prediction of protein ensembles and kinetics",
+  "definition": "A method predicts a protein’s accessible structures, their equilibrium populations, transition rates and partner-binding free energies from its amino-acid sequence, specified partners and solution conditions. An ensemble is a collection of structures weighted by their probabilities.",
+  "goal": {
+   "need": "A survey of experimental reproducibility and a separate calculation benchmark show a remaining gap in binding energetics. Predicting molecular motion also requires populations and rates: equilibrium sampling alone supplies no transition times. The goal combines these quantities under specified partners and solution conditions.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": {
+    "caption": "Agreement of relative binding free energies reported on 14 October 2023.",
+    "columns": [
+     "Comparison",
+     "Pairwise values",
+     "Within 1 kcal/mol"
+    ],
+    "rows": [
+     [
+      "Calculations versus experiment",
+      "13,732",
+      "57.5%"
+     ],
+     [
+      "Independent experimental estimates",
+      "314,535",
+      "83.0%"
+     ]
+    ],
+    "note": "The calculation benchmark and experimental survey contain different molecular series; these percentages are not a paired comparison.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "Google DeepMind",
+     "year": "2021",
+     "quote": "predicting the structure of complexes, incorporating non-protein components, and capturing dynamics and the response to point mutations.",
+     "context": "Topics identified under “Future work” in the AlphaFold proteome-scale announcement.",
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "Microsoft Research AI for Science and collaborators",
+     "year": "2025",
+     "quote": "A proper emulator for proteins requires conditioning on experimentally and biologically relevant parameters such as temperature and pH",
+     "context": "The authors describe extending BioEmu beyond single protein chains at 300 K.",
+     "ref": 2,
+     "checked": true
+    },
+    {
+     "body": "Drug Design Data Resource",
+     "year": "2020",
+     "quote": "aims to identify best practice methods for computer aided drug design through blinded ligand pose prediction and affinity challenges.",
+     "context": null,
+     "ref": 4,
+     "checked": null
+    },
+    {
+     "body": "D. E. Shaw Research",
+     "year": "2012",
+     "quote": "to reconstruct its free-energy landscape, given only its primary sequence, through molecular dynamics (MD) simulations based on elementary physical principles.",
+     "context": "The authors state an in-principle objective for predicting protein folding through atomic simulation.",
+     "ref": 5,
+     "checked": null
+    }
+   ]
+  },
+  "completion": {
+   "title": "Independent replication confirms blinded prediction of protein ensembles, kinetics and binding free energies.",
+   "criterion": "One fixed method, given protein sequences, partner identities and solution conditions, passes a blinded evaluation on families and partners excluded from training and tuning; an independent team replicates the pass on another held-out panel. Every discrete reference conformation has global TM-score >0.75. Population-sensitive observables, state populations, transition rate constants and absolute binding free energies agree with independent measurements within their reported experimental uncertainties. Temperature, pH, ionic composition and partners match the experiments.",
+   "set_by": "Technology Atlas; a combined test synthesized from the cited goals and component assessments.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches of CASP ensemble assessments, D3R/SAMPL challenges, molecular-dynamics validation guidance and BioEmu developer documents found no joint test covering populations, kinetics, affinity and generalization from sequence. This test combines the cited goals. Agreement within experimental uncertainty and independent replication are Atlas requirements, not a published field-wide acceptance standard.",
+   "refs": [
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "Protein models recover reference conformations with global TM-score above 0.75 in a blinded CASP test.",
+    "criterion": "Recover the reference states assessed for a multistate protein target with global TM-score >0.75, a measure of overall structural similarity. CASP16 defined successful modeling using this threshold for folds and spatial arrangements. Its assessment, published on 28 October 2025, reported success for five of ten biomolecular ensemble targets. One successful target, T1214, already had a publicly available unbound-state structure. This criterion does not establish population weights or transition rates.",
+    "set_by": "CASP16 conformational-ensemble assessors, Dube et al., Results; the published assessment includes proteins, nucleic acids and complexes.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "with global TM scores > 0.75, corresponding to backbone RMSDs of 1.5 to 2 Å",
+    "threshold_ref": 6,
+    "refs": [
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "GMCSF ensembles predict larger mutation-induced conformational shifts at H15/H83 than at H87.",
+    "criterion": "For granulocyte-macrophage colony-stimulating factor (GMCSF), sequence-derived ensembles predict larger changes in conformational distributions for mutations at histidines 15 and 83 than at histidine 87, matching nuclear magnetic resonance measurements. This is one published validation axis, rather than a test of absolute populations. The paper of 27 March 2024 reported this ordering; across GMCSF and Abl1 kinase it reported >80% accuracy for population-change predictions, with mutation-specific failures.",
+    "set_by": "Monteiro da Silva et al., GMCSF experimental-validation protocol; this criterion was written for one protein.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "if they predicted mutations to H15 and H83 to provoke larger changes in the distribution of conformations than mutations to H87",
+    "threshold_ref": 7,
+    "refs": [
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A sequence-based model predicts protein populations and transition rates within experimental uncertainty.",
+    "criterion": "For a defined protein system under matched solution conditions, predict equilibrium state populations and transition rate constants from sequence. Both agree with independent measurements within their stated uncertainties, without fitting the test measurements. Component evidence: BioEmu’s 14 August 2025 paper reported mean absolute folding-free-energy error <0.9 kcal/mol for mutants drawn from 95 wild types. A study published on 20 July 2012 simulated four villin variants; calculated absolute folding rates were approximately threefold slower than experiment. These results do not establish the joint threshold.",
+    "set_by": "Technology Atlas; the searched ensemble and folding-validation studies supplied component comparisons but no common joint population-and-rate acceptance threshold.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     2,
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m4",
+    "title": "Relative protein–ligand binding free energies have mean unsigned error at most 1 kcal/mol.",
+    "criterion": "For a defined protein–ligand benchmark, the mean absolute difference between predicted and measured relative binding free energies is ≤1 kcal/mol. This is a field-used accuracy target, not a universal acceptance standard. On 14 October 2023, Ross et al. reported weighted pairwise mean unsigned error of 0.98 kcal/mol, with a 95% confidence interval of 0.91–1.05 kcal/mol. These calculations used structural inputs and establish an energetic component rather than prediction of the complete behavior from sequence.",
+    "set_by": "Protein–ligand free-energy prediction convention described explicitly by Khalak et al.; the stated target concerns relative binding free energies.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "state-of-the-art accuracy threshold of 1 kcal mol−1 achievable for relative binding free energy calculations.",
+    "threshold_ref": 8,
+    "refs": [
+     8,
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "One method passes a blinded joint test of protein ensembles, rates and absolute binding free energies.",
+    "criterion": "A frozen method predicts conformations, populations, transition rates and absolute binding free energies from sequences, partners and solution conditions for families and partners withheld from training and tuning. Discrete reference states have global TM-score >0.75; quantitative outputs agree with independent measurements within experimental uncertainties. One blinded evaluation passes before independent replication. Microsoft’s 2026 BioEmu-2 model card supports partner-conditioned structural ensembles but excludes calibrated ensemble probabilities and binding-affinity prediction; this is developer documentation, not peer-reviewed validation.",
+    "set_by": "Technology Atlas; the integration stage preceding independent replication in the completion test.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     6,
+     9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No independently replicated blinded demonstration jointly covering ensembles, populations, transition rates and absolute binding free energies on held-out protein families and partners was located.",
+   "No defined threshold for routine proteome-scale runtime or monetary cost was found.",
+   "No shared uncertainty-calibration criterion spanning populations, rates and binding free energies was found."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10576784/",
+    "doi": "10.1038/s42004-023-01019-9",
+    "title": "The maximal and current accuracy of rigorous protein-ligand binding free energy calculations",
+    "authors": "Ross GA, Lu C, Scarabelli G, Albanese SK, Houang E, Abel R, et al.",
+    "container": "Commun Chem",
+    "year": "2023",
+    "volume": "6",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "journal",
+    "url": "https://aiichironakano.github.io/cs653/Lewis-BioEmu-Science25.pdf",
+    "doi": "10.1126/science.adv9817",
+    "title": "Scalable emulation of protein equilibrium ensembles with generative deep learning",
+    "authors": "Lewis S, Hempel T, Jiménez-Luna J, Gastegger M, Xie Y, Foong AYK, et al.",
+    "container": "Science",
+    "year": "2025",
+    "volume": "389",
+    "issue": "6761",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 3,
+    "kind": "web",
+    "url": "https://deepmind.google/blog/enabling-high-accuracy-protein-structure-prediction-at-the-proteome-scale/",
+    "doi": null,
+    "title": "Enabling high-accuracy protein structure prediction at the proteome scale",
+    "authors": "Google DeepMind",
+    "container": "Google DeepMind",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "journal",
+    "url": "https://escholarship.org/content/qt1wd6z4d2/qt1wd6z4d2_noSplash_8dc459208aabee0c931584c901bcc008.pdf",
+    "doi": "10.1007/s10822-020-00289-y",
+    "title": "D3R Grand Challenge 4: Blind Prediction of Protein-Ligand Poses, Affinity Rankings, and Relative Binding Free Energies",
+    "authors": "Parks CD, Gaieb Z, Chiu M, Yang H, Shao C, Walters WP, et al.",
+    "container": "J Comput Aided Mol Des",
+    "year": "2020",
+    "volume": "34",
+    "issue": "2",
+    "pages": "99-119",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 5,
+    "kind": "journal",
+    "url": "https://www.pnas.org/content/pnas/109/44/17845.full.pdf",
+    "doi": "10.1073/pnas.1201811109",
+    "title": "Protein folding kinetics and thermodynamics from atomistic simulation",
+    "authors": "Piana S, Lindorff-Larsen K, Shaw DE",
+    "container": "Proc. Natl. Acad. Sci. U.S.A.",
+    "year": "2012",
+    "volume": "109",
+    "issue": "44",
+    "pages": "17845-17850",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12901538/",
+    "doi": "10.1002/prot.70065",
+    "title": "Modeling Alternative Conformational States in CASP16",
+    "authors": "Dube N, Ramelot TA, Benavides TL, Huang YJ, Moult J, Kryshtafovych A, et al.",
+    "container": "Proteins",
+    "year": "2026",
+    "volume": "94",
+    "issue": "1",
+    "pages": "330-347",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10973385/",
+    "doi": "10.1038/s41467-024-46715-9",
+    "title": "High-throughput prediction of protein conformational distributions with subsampled AlphaFold2",
+    "authors": "Monteiro da Silva G, Cui JY, Dalgarno DC, Lisi GP, Rubenstein BM",
+    "container": "Nat Commun",
+    "year": "2024",
+    "volume": "15",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 8,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8549785/",
+    "doi": "10.1039/d1sc03472c",
+    "title": "Alchemical absolute protein–ligand binding free energies for drug design",
+    "authors": "Khalak Y, Tresadern G, Aldeghi M, Baumann HM, Mobley DL, de Groot BL, et al.",
+    "container": "Chem. Sci.",
+    "year": "2021",
+    "volume": "12",
+    "issue": "41",
+    "pages": "13958-13971",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 9,
+    "kind": "web",
+    "url": "https://github.com/microsoft/bioemu2/blob/main/MODEL_CARD.md",
+    "doi": null,
+    "title": "BioEmu-2",
+    "authors": "Microsoft Research",
+    "container": "GitHub",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4",
+   "m5"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 7 from Crossref, 0 from PubMed, 0 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 5 found, 0 not found, 2 with no readable copy."
+   }
+  ]
  }
 }

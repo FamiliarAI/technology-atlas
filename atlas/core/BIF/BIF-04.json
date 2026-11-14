@@ -185,7 +185,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "sources": [
   "https://www.nature.com/articles/s42003-025-07764-y.pdf"
@@ -273,5 +274,302 @@
    "Unmeasured common causes and feedback loops may limit which relationships a method can recover."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "BIF-04",
+  "title": "Causal molecular network reconstruction",
+  "definition": "A method reconstructs context-dependent networks of causal influence among cellular molecules from measurements and interventions. It distinguishes direct influences from paths through measured intermediates, retains unresolved alternatives, and transfers across gene regulation and protein signaling.",
+  "goal": {
+   "need": "CausalBench evaluates networks using 325,484 cells from two cell lines and 1,005 cell-line-specific gene interventions. Its statistical metrics cannot distinguish direct effects from indirect paths. Reconstructing those routes would turn perturbation responses into mechanistic explanations, the capability DARPA prioritizes in its cancer-signaling programme.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": {
+    "caption": "Datasets evaluated in CausalBench, published on 11 March 2025",
+    "columns": [
+     "Cell line",
+     "Cells",
+     "Gene interventions"
+    ],
+    "rows": [
+     [
+      "K562",
+      "162,751",
+      "622"
+     ],
+     [
+      "RPE1",
+      "162,733",
+      "383"
+     ]
+    ],
+    "note": "Counts follow Table 4 after preprocessing; cell counts include observational controls.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "DARPA, Big Mechanism programme",
+     "year": "Undated",
+     "quote": "extract pieces of causal mechanisms, assemble these pieces into more complete causal models, and reason over these models to produce explanations.",
+     "context": "The programme description identifies cancer biology, particularly signaling pathways, as its domain.",
+     "ref": 2,
+     "checked": true
+    },
+    {
+     "body": "NIH Common Fund, Bridge2AI Cell Maps for AI programme",
+     "year": "2022",
+     "quote": "seeks to map the spatiotemporal architecture of human cells and use these maps toward the grand challenge of interpretable genotype-phenotype learning.",
+     "context": "The abstract for award OT2OD032742 describes integrating proteomic measurements, cellular imaging and genetic perturbations; the award began on 1 September 2022.",
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "NICHD, Developmental Biology and Congenital Anomalies Branch",
+     "year": "2024",
+     "quote": "allowing causal relationships to be identified and predictively understood.",
+     "context": "The Systems Developmental Biology programme links molecular and mechanistic descriptions into computational models. The page was reviewed on 30 April 2024.",
+     "ref": 4,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "Independent laboratories reproduce causal network reconstruction across molecular systems and contexts.",
+   "criterion": "A single method reconstructs causal networks in gene regulation and protein signaling across declared cellular contexts, using disclosed measurements and interventions. Independent interventions confirm its claimed direct influences and mediated routes by distinguishing them from competing explanations; directness is relative to measured variables. Indistinguishable alternatives remain unresolved. Independent laboratories reproduce the structural findings. This is an Atlas fallback; no external numerical accuracy, coverage or intervention-budget requirement was found.",
+   "set_by": "Technology Atlas fallback; the cited programmes and evaluation protocols do not define completion of this cross-system capability.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searched DARPA Big Mechanism and MITRE evaluations, NIH CM4AI and NICHD programmes, ICP validation, and HPN-DREAM/CausalBench protocols; no cross-context, cross-system reconstruction pass criterion was found. This fallback combines their mechanistic-model goal with intervention validation and independent replication. The two cases delimit its scope; success would not establish universality.",
+   "refs": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "threshold_checked": null
+  },
+  "case_label": "Molecular network class",
+  "cases": [
+   "Gene regulation",
+   "Protein signaling"
+  ],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A predicted molecular intervention–response pair satisfies the strong intervention effect criterion.",
+    "criterion": "A predicted intervention–response pair qualifies as a strong intervention effect when the intervened variable lies outside its range in all other experiments without intervention on it, and the response lies outside its range in all other experiments without intervention on the response. In the 5 July 2016 PNAS issue, ICP's four highest-ranked edges met this test in yeast: 6,170 measured genes, 160 observational samples and 1,479 single-gene-deletion experiments, assessed by fivefold intervention holdout. This validates a total effect.",
+    "set_by": "Meinshausen and colleagues, published strong intervention effect validation protocol; demonstrated for yeast gene regulation.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "the response variable Y has a value below or above the range of values of Y in all other interventional/observational data",
+    "threshold_ref": 6,
+    "refs": [
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "An inferred cellular network's intervention-prediction AUROC is significant at FDR < 0.05.",
+    "criterion": "Compare a network's predicted downstream nodes with held-out intervention data. Its area under the receiver operating characteristic curve (AUROC) must exceed the random-network null at Benjamini–Hochberg FDR < 0.05, correcting across teams within each context. The 22 February 2016 report assessed 74 teams in 32 breast-cancer-cell-line/stimulus contexts using withheld mTOR inhibition; a mean 11.8 teams per context met this test. It validates downstream influence rather than each direct edge.",
+    "set_by": "HPN-DREAM Consortium, network inference challenge statistical evaluation; published for protein signaling.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "a statistically significant (FDR < 0.05) AUROC score",
+    "threshold_ref": 7,
+    "refs": [
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A cellular network explains an intervention through a pathway that meets MITRE's plausibility criteria.",
+    "criterion": "A model explains an intervention's measured response, fully connects the perturbation to the measured molecule, gives an information source for every interaction, respects biological constraints and cell-line context, and uses the same network for other explanations in that cell line. MITRE's 2018 report found that the two leading systems explained 19/20 and 17/20 selected drug–phosphoprotein observations under these criteria. These are plausibility judgments, not prospective confirmation of the routes.",
+    "set_by": "MITRE, Phase III evaluation protocol for DARPA Big Mechanism; published for cancer protein signaling.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "The explanatory pathway(s) had to fully connect the experimental perturbation to the experimentally measured phosphoprotein.",
+    "threshold_ref": 5,
+    "refs": [
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "Interventions distinguish an inferred cellular network's direct influences and mediated routes.",
+    "criterion": "In one declared cellular context, interventions distinguish a reconstructed network's claimed direct influences and mediated routes from competing explanations; indistinguishable structures remain unresolved. Directness is relative to measured variables. Transfer and independent replication remain for completion. RENGE's 28 December 2023 study used a 103-gene network with 23 knockout targets and reported mean held-out expression-change correlation of approximately 0.3; that result does not itself establish this structural test.",
+    "set_by": "Technology Atlas fallback: no prospective acceptance criterion for direct and mediated network reconstruction was found in ICP, HPN-DREAM, RENGE, CausalBench or DARPA evaluations.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     6,
+     7,
+     8,
+     1,
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No published numerical accuracy, coverage, intervention-budget or transfer threshold was found for causal network reconstruction across molecular systems and cellular contexts.",
+   "No result meeting the stated cross-system reconstruction and independent-replication completion test was located."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11897147/",
+    "doi": "10.1038/s42003-025-07764-y",
+    "title": "A large-scale benchmark for network inference from single-cell perturbation data",
+    "authors": "Chevalley M, Roohani YH, Mehrjou A, Leskovec J, Schwab P",
+    "container": "Commun Biol",
+    "year": "2025",
+    "volume": "8",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "web",
+    "url": "https://www.darpa.mil/research/programs/big-mechanism",
+    "doi": null,
+    "title": "Big Mechanism",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "DARPA",
+    "year": "Undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "registry",
+    "url": "https://taggs.hhs.gov/Detail/AwardDetail?arg_AwardNum=OT2OD032742&arg_ProgOfficeCode=205",
+    "doi": null,
+    "title": "Bridge2AI: Cell Maps for AI (CM4AI) Data Generation Project",
+    "authors": "US Department of Health and Human Services",
+    "container": "Tracking Accountability in Government Grants System",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "web",
+    "url": "https://www.nichd.nih.gov/about/org/der/branches/dbcab/programs",
+    "doi": null,
+    "title": "DBCAB Research Programs",
+    "authors": "Eunice Kennedy Shriver National Institute of Child Health and Human Development",
+    "container": "NICHD",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "report",
+    "url": "https://arxiv.org/pdf/2211.03943",
+    "doi": "10.48550/arXiv.2211.03943",
+    "title": "Final Report on MITRE Evaluations for the DARPA Big Mechanism Program",
+    "authors": "Peterson M, Korves T, Garay C, Kozierok R, Hirschman L",
+    "container": "arXiv",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4941490/",
+    "doi": "10.1073/pnas.1510493113",
+    "title": "Methods for causal inference from gene perturbation experiments and validation",
+    "authors": "Meinshausen N, Hauser A, Mooij JM, Peters J, Versteeg P, Bühlmann P",
+    "container": "Proc. Natl. Acad. Sci. U.S.A.",
+    "year": "2016",
+    "volume": "113",
+    "issue": "27",
+    "pages": "7361-7368",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4854847/",
+    "doi": "10.1038/nmeth.3773",
+    "title": "Inferring causal molecular networks: empirical assessment through a community-based effort",
+    "authors": "The HPN-DREAM Consortium, Hill SM, Heiser LM, Cokelaer T, Unger M, Nesser NK, et al.",
+    "container": "Nat Methods",
+    "year": "2016",
+    "volume": "13",
+    "issue": "4",
+    "pages": "310-318",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 8,
+    "kind": "journal",
+    "url": "https://www.researchgate.net/publication/376892134_RENGE_infers_gene_regulatory_networks_using_time-series_single-cell_RNA-seq_data_with_CRISPR_perturbations",
+    "doi": "10.1038/s42003-023-05594-4",
+    "title": "RENGE infers gene regulatory networks using time-series single-cell RNA-seq data with CRISPR perturbations",
+    "authors": "Ishikawa M, Sugino S, Masuda Y, Tarumoto Y, Seto Y, Taniyama N, et al.",
+    "container": "Commun Biol",
+    "year": "2023",
+    "volume": "6",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 4 from Crossref, 0 from PubMed, 1 from arXiv, 3 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 6 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }

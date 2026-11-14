@@ -183,7 +183,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "sources": [
   "https://pmc.ncbi.nlm.nih.gov/articles/PMC13370857/"
@@ -279,5 +280,368 @@
    "Appropriate success thresholds, binding definitions, computing budgets and required protein coverage remain open."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "BIF-09",
+  "title": "Proteome-wide prediction of interactions and binding affinities",
+  "definition": "Computational prediction of binding versus nonbinding, bound geometry and equilibrium affinity—the strength of binding—for protein pairs and protein–small-molecule pairs across a named organism’s complete protein repertoire. Predictions specify environmental conditions and extend to protein families and partners absent from training.",
+  "goal": {
+   "need": "HuRI illustrates the number of candidate pairs a proteome-wide predictor must handle. In CASP16, 28 groups submitted Stage 1 affinity predictions; assessment retained 122 targets after excluding previously disclosed data. The maximum sample-size-weighted Kendall rank correlation was 0.39, versus an estimated experimental-noise ceiling of 0.73 assuming threefold assay uncertainty. Joint predictions would prioritise experimental pairs and quantify binding strength.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": {
+    "caption": "Scale of the HuRI protein interaction screen, published on 8 April 2020.",
+    "columns": [
+     "Quantity",
+     "Count"
+    ],
+    "rows": [
+     [
+      "Protein-coding genes represented",
+      "17,408"
+     ],
+     [
+      "Candidate protein pairs",
+      ">150 million"
+     ],
+     [
+      "Verified interactions",
+      "52,569"
+     ],
+     [
+      "Proteins in verified interactions",
+      "8,275"
+     ]
+    ],
+    "note": "Verified interactions are detected positives; the remaining candidate pairs are not established nonbinders.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "CASP16 pharmaceutical protein–ligand assessment team",
+     "year": "2025",
+     "quote": "we would look for affinity methods to approach the theoretical maximum value of Kendall's τ",
+     "context": "The attainable rank correlation depends on experimental uncertainty and the distribution of measured affinities.",
+     "ref": 2,
+     "checked": true
+    },
+    {
+     "body": "CACHE",
+     "year": "undated",
+     "quote": "accelerate the development of computational approaches to small molecule hit-finding",
+     "context": null,
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "FragFold developers",
+     "year": "2025",
+     "quote": "This approach stands to enable proteome-wide discovery of inhibitory protein fragments",
+     "context": "Protein fragments are peptides taken from longer protein sequences.",
+     "ref": 4,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "Independent experiments reproduce joint binding, structure and affinity predictions across a proteome.",
+   "criterion": "An independent laboratory repeats m4 using the same frozen workflow and new blinded experimental pairs. Predictions cover all protein pairs in the same reference proteome and every protein against the declared small-molecule library. Validation includes both partner classes, protein families absent from training, membrane proteins and disordered regions. All tested binding/nonbinding calls match experimentally determined status at stated assay detection limits; every structurally measured binder passes m1, and every binder with measured equilibrium affinity has absolute binding-free-energy error ≤1 kcal/mol under specified conditions.",
+   "set_by": "Atlas; a finite integrated demonstration and independent experimental replication.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches of CASP/CAPRI criteria, CACHE rules, HuRI verification criteria, DARPA/IARPA programmes and developer material found no combined proteome-wide passing test or aggregate error and computing budget. Known-binder and crystal-input benchmarks do not establish the joint capability. The 2026 evaluation guidelines were accessible only in abstract. Atlas therefore combines published component criteria for one named proteome with independent experimental replication.",
+   "refs": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "threshold_checked": null
+  },
+  "case_label": "Partner class",
+  "cases": [
+   "Small molecules",
+   "Proteins and peptides"
+  ],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A predicted complex has ligand RMSD <2 Å or protein-interface DockQ >0.23, according to partner class.",
+    "criterion": "Against an experimental complex, a small-molecule pose has pocket-aligned heavy-atom RMSD <2 Å; a protein interface has DockQ >0.23, a dimensionless score combining contact recovery and coordinate deviations. These are per-complex criteria. FlowDock’s preprint, revised on 24 March 2025 and not peer reviewed, reported 51% success on 308 complexes at RMSD ≤2 Å plus PoseBusters validity. FragFold, published on 3 February 2025, obtained native-like contacts for 13/15 fragment–protein interactions using its own contact criteria; this is not a DockQ assessment.",
+    "set_by": "Protein–ligand RMSD and protein-interface DockQ conventions, as applied by Google DeepMind and Isomorphic Labs in AlphaFold 3, Figure 1c; the thresholds are specific to the respective partner classes.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "percentage DockQ > 0.23 for protein–protein and protein–antibody interfaces.",
+    "threshold_ref": 8,
+    "refs": [
+     8,
+     9,
+     4
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A predicted interaction has two experimental supports, including a direct or binary binding assay.",
+    "criterion": "A predicted interaction has ≥2 experimental supports, including a binary interaction or direct-binding assay. Small-molecule hits also undergo orthogonal binding confirmation and solubility and aggregation checks. CACHE #1, published on 5 November 2024, tested 1,955 initial molecules and confirmed seven chemical series in two orthogonal assays, with affinities of 18–140 µM. HuRI supplies experimentally verified protein reference pairs; its construction does not evaluate computational predictions.",
+    "set_by": "HuRI consortium, Lit-BM reference-set definition, for protein interactions; CACHE Challenge #1 organisers, experimental hit-confirmation protocol, for small molecules.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "each having ≥2 pieces of experimental evidence, with at least one from a binary assay type",
+    "threshold_ref": 1,
+    "refs": [
+     1,
+     10
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A complex’s binding free energy or an affinity change is predicted within 1 kcal/mol of experiment.",
+    "criterion": "A computed binding free energy, ΔG°, or affinity change, ΔΔG, differs from experiment by ≤1 kcal/mol under specified conditions. Relative results establish affinity changes only. For one M2 ligand transformation, Ioannidis et al. in 2016 reported ΔΔGcalc = 0.68 ± 0.21 and ΔΔGexp = 0.35 ± 0.18 kcal/mol. GEMS reported RMSE 1.308 pK units on 285 complexes on 21 October 2025, a different test. For one protein–protein complex, Ras–Raf, Gohlke and Case in 2004 reported −8.3 versus −9.6 kcal/mol, outside this bar.",
+    "set_by": "Computational chemistry’s chemical-accuracy convention; applied to small-molecule binding by Ioannidis et al. and discussed for protein–protein binding by Gohlke and Case.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "Chemical accuracy of 1 kcal mol−1 is considered to be the limit for a deviation of computed from experimental values.",
+    "threshold_ref": 11,
+    "refs": [
+     11,
+     6,
+     12
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "One proteome-wide screen jointly passes binding, complex-geometry and absolute-affinity tests.",
+    "criterion": "One frozen workflow screens all protein pairs in a named reference proteome and every protein against a declared small-molecule library. Blinded validation includes both partner classes, protein families absent from training, membrane proteins and disordered regions. All tested binding/nonbinding calls match experimentally determined status at stated detection limits; every structurally measured binder passes m1, and every binder with measured equilibrium affinity has absolute binding-free-energy error ≤1 kcal/mol under specified conditions. Eaves and Woldring’s study, published on 23 June 2026, evaluated five pipelines on 285 confirmed binders without nonbinding pairs.",
+    "set_by": "Atlas synthesis; searches of CASP/CAPRI, CACHE and HuRI criteria found no published integrated prospective proteome-wide endpoint.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     1,
+     2,
+     5,
+     8,
+     10,
+     11
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "Only the abstract and references of the evaluation guidelines published on 23 October 2026 were accessible."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7169983/",
+    "doi": "10.1038/s41586-020-2188-x",
+    "title": "A reference map of the human binary protein interactome",
+    "authors": "Luck K, Kim DK, Lambourne L, Spirohn K, Begg BE, Bian W, et al.",
+    "container": "Nature",
+    "year": "2020",
+    "volume": "580",
+    "issue": "7803",
+    "pages": "402-408",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12750038/",
+    "doi": "10.1002/prot.70061",
+    "title": "Assessment of Pharmaceutical Protein–Ligand Pose and Affinity Predictions in CASP16",
+    "authors": "Gilson MK, Eberhardt J, Škrinjar P, Durairaj J, Robin X, Kryshtafovych A",
+    "container": "Proteins",
+    "year": "2026",
+    "volume": "94",
+    "issue": "1",
+    "pages": "249-266",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 3,
+    "kind": "web",
+    "url": "https://cache-challenge.org/sites/default/files/downloadable/forms/CACHE-Terms-of-Participation.pdf",
+    "doi": null,
+    "title": "CACHE Terms of Participation and Use",
+    "authors": "CACHE",
+    "container": "CACHE",
+    "year": "undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11831152/",
+    "doi": "10.1073/pnas.2322412122",
+    "title": "High-throughput discovery of inhibitory protein fragments with AlphaFold",
+    "authors": "Savinov A, Swanson S, Keating AE, Li GW",
+    "container": "Proc. Natl. Acad. Sci. U.S.A.",
+    "year": "2025",
+    "volume": "122",
+    "issue": "6",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 5,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13370857/",
+    "doi": "10.1021/acs.jcim.6c00592",
+    "title": "Robustness of Protein–Ligand Binding Affinity Prediction Models to Docked and Predicted Structures",
+    "authors": "Eaves JN, Woldring DR",
+    "container": "J. Chem. Inf. Model.",
+    "year": "2026",
+    "volume": "66",
+    "issue": "13",
+    "pages": "7405-7413",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s42256-025-01124-5?code=none&error=cookies_not_supported",
+    "doi": "10.1038/s42256-025-01124-5",
+    "title": "Resolving data bias improves generalization in binding affinity prediction",
+    "authors": "Graber D, Stockinger P, Meyer F, Mishra S, Horn C, Buller R",
+    "container": "Nat Mach Intell",
+    "year": "2025",
+    "volume": "7",
+    "issue": "10",
+    "pages": "1713-1725",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s42256-026-01331-8?code=none&error=cookies_not_supported",
+    "doi": "10.1038/s42256-026-01331-8",
+    "title": "Guidelines for evaluating structure-based methods for protein–ligand binding prediction",
+    "authors": "Tran-Nguyen VK, Ballester PJ",
+    "container": "Nat Mach Intell",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 8,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41586-024-07487-w?code=none&error=cookies_not_supported",
+    "doi": "10.1038/s41586-024-07487-w",
+    "title": "Accurate structure prediction of biomolecular interactions with AlphaFold 3",
+    "authors": "Abramson J, Adler J, Dunger J, Evans R, Green T, Pritzel A, et al.",
+    "container": "Nature",
+    "year": "2024",
+    "volume": "630",
+    "issue": "8016",
+    "pages": "493-500",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 9,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2412.10966v3",
+    "doi": "10.48550/arXiv.2412.10966",
+    "title": "FlowDock: Geometric Flow Matching for Generative Protein-Ligand Docking and Affinity Prediction",
+    "authors": "Morehead A, Cheng J",
+    "container": "arXiv",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 10,
+    "kind": "journal",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/39499532/",
+    "doi": "10.1021/acs.jcim.4c01267",
+    "title": "CACHE Challenge #1: Targeting the WDR Domain of LRRK2, A Parkinson's Disease Associated Protein",
+    "authors": "Li F, Ackloo S, Arrowsmith CH, Ban F, Barden CJ, Beck H, et al.",
+    "container": "J. Chem. Inf. Model.",
+    "year": "2024",
+    "volume": "64",
+    "issue": "22",
+    "pages": "8521-8536",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 11,
+    "kind": "journal",
+    "url": "https://cpclab.uni-duesseldorf.de/data/_uploaded/file/paper/131.pdf",
+    "doi": "10.1021/acs.jcim.6b00079",
+    "title": "Alchemical Free Energy Calculations and Isothermal Titration Calorimetry Measurements of Aminoadamantanes Bound to the Closed State of Influenza A/M2TM",
+    "authors": "Ioannidis H, Drakopoulos A, Tzitzoglaki C, Homeyer N, Kolarov F, Gkeka P, et al.",
+    "container": "J. Chem. Inf. Model.",
+    "year": "2016",
+    "volume": "56",
+    "issue": "5",
+    "pages": "862-876",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 12,
+    "kind": "journal",
+    "url": "https://cpclab.uni-duesseldorf.de/data/_uploaded/file/paper/18.pdf",
+    "doi": "10.1002/jcc.10379",
+    "title": "Converging Free Energy Estimates: MM-PB(GB)SA Studies on the Protein–Protein Complex Ras–Raf",
+    "authors": "Gohlke H, Case DA",
+    "container": "J Comput Chem",
+    "year": "2004",
+    "volume": "25",
+    "issue": "2",
+    "pages": "238-250",
+    "citation_source": "crossref"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 10 from Crossref, 0 from PubMed, 1 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 6 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }

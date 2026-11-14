@@ -194,7 +194,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "sources": [
   "https://compbio.hms.harvard.edu/publications/pdf/s41586-026-10105-6.pdf"
@@ -296,5 +297,293 @@
    "When observations fit competing structures equally well, which additional measurements can distinguish them at a practical cost?"
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "BIF-11",
+  "title": "Haplotype-resolved genome assembly with uncertainty quantification",
+  "definition": "Haplotype-resolved assembly reconstructs each chromosome copy separately from DNA reads and assigns probabilities to unresolved alternatives, with lower total workflow cost than a matched method. It covers diploids (two chromosome sets), autopolyploids (extra sets from one species) and allopolyploids (sets from different species).",
+  "goal": {
+   "need": "In the HG002 benchmark study, assembly-based analysis recovered 2–7% more sequence than reference-based variant calling. Nevertheless, 3,172 regions spanning 38.8 Mb of its 6.0 Gb diploid assembly remained low confidence. Sample requirements also affect access: the hifiasm study reports that human ultra-long nanopore sequencing needs about 40 times the DNA input of the standard protocol.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": {
+    "caption": "Assembly wall time for three human trio comparisons, reported on 4 February 2026.",
+    "columns": [
+     "Sample",
+     "hifiasm (h)",
+     "Verkko + HERRO (h)"
+    ],
+    "rows": [
+     [
+      "HG001",
+      "15.0",
+      "126.7"
+     ],
+     [
+      "HG002",
+      "8.4",
+      "103.1"
+     ],
+     [
+      "HG005",
+      "10.8",
+      "86.7"
+     ]
+    ],
+    "note": "Standard nanopore simplex reads were supplemented with parental phasing data. Hardware differed: hifiasm used 64 CPUs; Verkko + HERRO used servers with more than 64 CPUs and multiple GPUs. These timings do not establish total workflow costs.",
+    "ref": 2
+   },
+   "statements": [
+    {
+     "body": "National Human Genome Research Institute sequencing-planning workshop",
+     "year": "2014",
+     "quote": "NHGRI should continue working toward a phased \"telomere to telomere\" genome assembly",
+     "context": "A recommendation from the workshop held on 28 and 29 July 2014.",
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "hifiasm developers",
+     "year": "2026",
+     "quote": "There is an urgent need to develop algorithms to improve the accessibility of T2T genome assembly.",
+     "context": "T2T means telomere-to-telomere: reconstruction between the ends of a chromosome.",
+     "ref": 2,
+     "checked": true
+    },
+    {
+     "body": "Vertebrate Genomes Project",
+     "year": "2021",
+     "quote": "more accurate and complete haplotype phasing, base-call accuracy, and resolution of long repetitive regions",
+     "context": "Items in the project's list of areas needing improvement.",
+     "ref": 4,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "Independent replication combines phased complete assemblies, calibrated alternatives and lower total cost.",
+   "criterion": "An independent laboratory reproduces, for a real genome in each listed class, a workflow meeting the chromosome-completeness, QV >60 and phasing tests below. Alternative structures and phase assignments meet calibration endpoints specified in a published validation protocol using independent truth data. Total cost is lower than for a comparator meeting the same sequence and phasing tests, counting DNA extraction, library preparation, all sequencing and auxiliary data, computation and human curation. The validation protocol must set calibration bounds; no community-wide numerical bound was found.",
+   "set_by": "Technology Atlas; proposed composite demonstration, pending an externally published calibration protocol.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches of VGP and EBP assembly standards, NHGRI planning documents, GIAB benchmark papers and polyploid uncertainty protocols found no joint completion criterion. External documents supply sequence and phasing thresholds, but no acceptance bound combining calibrated alternatives and total cost. This proposal retains those assembly thresholds and requires independent validation and a measured cost reduction; its calibration component remains incompletely specified.",
+   "refs": [
+    4,
+    5,
+    6
+   ],
+   "threshold_checked": null
+  },
+  "case_label": "Genome class",
+  "cases": [
+   "Diploid",
+   "Autopolyploid",
+   "Allopolyploid"
+  ],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A genome reaches 1 Mb contig N50, chromosome-scale scaffolding and QV >40.",
+    "criterion": "Meet EBP's sufficient-material reference standard: contig N50 at least 1 Mb, chromosome-scale scaffold N50, error rate <10^-4, false duplication <5%, and >90% each for k-mer completeness, chromosome assignment, conserved-gene completeness/single-copy status and transcript mapping. N50 is the length at which half the assembly lies in sequences that long or longer. Chromosome-scale contigs replace 1 Mb for smaller chromosomes; biological exceptions apply to duplicated polyploid genes. On 4 February 2026, hifiasm reported QV 47.5/47.1 for HG002's two trio-phased haplotypes (one donor); this alone does not establish every condition.",
+    "set_by": "EBP Sequencing and Assembly Standards committee, Report on Assembly Standards version 7.0, agreed on 31 January 2026; sufficient-material category.",
+    "set_by_kind": "standards_body",
+    "threshold_quote": "minimum reference standard of 6.C.Q40",
+    "threshold_ref": 5,
+    "refs": [
+     5,
+     2
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A haplotype assembler infers a probability distribution over chromosome-copy assignments.",
+    "criterion": "Infer and sample a distribution over assignments of variants to chromosome copies while propagating uncertainty about read origin; phase probabilities follow sampled configuration frequencies. The 11 March 2026 pHapCompass preprint benchmarks 3,120 simulated read datasets, including diploid, autopolyploid and allopolyploid configurations. Experimental tests use one octoploid strawberry biosample, aggregated over seven chromosomes at 8× and 16× coverage. These are reference-aligned variant-phasing results; they establish neither gapless genome reconstruction nor independent probability calibration. The cited results are not peer reviewed.",
+    "set_by": "pHapCompass developers, computational protocol in Methods and section 4.5; the criterion concerns inferred distributions, without a published calibration acceptance threshold.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "In both models, the probability of a phasing is proportional to the number of consistent FFBS samples.",
+    "threshold_ref": 6,
+    "refs": [
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A genome assembly exceeds QV50, contig NG50 10 Mb and phase-block NG50 1 Mb.",
+    "criterion": "Meet the VGP-2020 continuity, phasing and base-accuracy thresholds: contig NG50 >10 Mb, scaffold NG50 equal to chromosome NG50, phase-block NG50 >1 Mb and QV >50 (error rate <10^-5). NG50 uses estimated genome length rather than assembled length. A 10 September 2021 preprint reports HG002 Hi-C hifiasm contig N50s of 57.6/44.9 Mb and haplotype Hamming errors of 0.89/0.99% (one donor). These measurements do not establish all four thresholds or either polyploid case; the cited version is not peer reviewed.",
+    "set_by": "Vertebrate Genomes Project, Table 1, VGP-2020 continuity, base-accuracy and phasing rows. Thresholds occur in a table. Their original scope is vertebrate genomes about 1 Gb or larger; application to plant polyploids extends that scope.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     4,
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m4",
+    "title": "A genome assembly is gapless at QV >60 with chromosome-scale phase-block NG50.",
+    "criterion": "Meet EBP's T2T conditions in every haplotype: all telomeres where applicable, no sequence gaps and QV >60 (estimated base error rate <10^-6), plus VGP's Finished phase-block NG50 equal to chromosome NG50. In the 6 August 2026 HG002 paper (one donor), 99.35% of 6.0 Gb had no detected errors, but nine ribosomal-DNA gaps spanned 31.1 Mb. Its title therefore does not establish this milestone. The cited autopolyploid simulations and allopolyploid variant-phasing experiments do not establish it either.",
+    "set_by": "EBP version 7.0 T2T definition, combined with the VGP Table 1 Finished phasing row. The VGP metric was proposed for vertebrate genomes about 1 Gb or larger; application to plant polyploids extends that scope.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "all telomere sequences (where applicable), the absence of sequence gaps and a QV greater than 60",
+    "threshold_ref": 5,
+    "refs": [
+     5,
+     4,
+     1,
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No external document was found defining a joint pass criterion for complete phased assembly, calibrated alternatives and total workflow cost.",
+   "No numerical acceptance bound was found for independently calibrated structural and polyploid phasing probabilities; a published validation protocol remains necessary.",
+   "No opened study demonstrated the proposed combined completion test across real diploid, autopolyploid and allopolyploid genomes.",
+   "No externally set acceptance test was found for recommending additional measurements that resolve assembly alternatives."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13456413/",
+    "doi": "10.1016/j.cell.2026.06.016",
+    "title": "A complete diploid human genome benchmark for personalized genomics",
+    "authors": "Hansen NF, Dwarshuis N, Ji HJ, Rhie A, Loucks H, Logsdon GA, et al.",
+    "container": "Cell",
+    "year": "2026",
+    "volume": "189",
+    "issue": "16",
+    "pages": "4857-4875.e31",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "journal",
+    "url": "https://compbio.hms.harvard.edu/publications/pdf/s41586-026-10105-6.pdf",
+    "doi": "10.1038/s41586-026-10105-6",
+    "title": "Efficient near-telomere-to-telomere assembly of nanopore simplex reads",
+    "authors": "Cheng H, Qu H, McKenzie S, Lawrence KR, Windsor R, Vella M, et al.",
+    "container": "Nature",
+    "year": "2026",
+    "volume": "655",
+    "issue": "8121",
+    "pages": "166-173",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 3,
+    "kind": "report",
+    "url": "https://www.genome.gov/27559219/future-opportunities-for-genome-sequencing-and-beyond",
+    "doi": null,
+    "title": "Future Opportunities for Genome Sequencing -- Executive Summary",
+    "authors": "National Human Genome Research Institute",
+    "container": "National Human Genome Research Institute",
+    "year": "2014",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8081667/",
+    "doi": "10.1038/s41586-021-03451-0",
+    "title": "Towards complete and error-free genome assemblies of all vertebrate species",
+    "authors": "Rhie A, McCarthy SA, Fedrigo O, Damas J, Formenti G, Koren S, et al.",
+    "container": "Nature",
+    "year": "2021",
+    "volume": "592",
+    "issue": "7856",
+    "pages": "737-746",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 5,
+    "kind": "report",
+    "url": "https://www.earthbiogenome.org/report-on-assembly-standards",
+    "doi": null,
+    "title": "Report on Assembly Standards",
+    "authors": "Earth BioGenome Project Sequencing and Assembly Standards committee",
+    "container": "Earth BioGenome Project",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2512.04393v2",
+    "doi": "10.48550/arXiv.2512.04393",
+    "title": "pHapCompass: Probabilistic Assembly and Uncertainty Quantification of Polyploid Haplotype Phase",
+    "authors": "Hosseini M, Veiner E, Bergendahl T, Yasenpoor T, Smith Z, Staton M, et al.",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 7,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2109.04785v1",
+    "doi": "10.48550/arXiv.2109.04785",
+    "title": "Robust haplotype-resolved assembly of diploid individuals without parental data",
+    "authors": "Cheng H, Jarvis ED, Fedrigo O, Koepfli KP, Urban L, Gemmell NJ, et al.",
+    "container": "arXiv",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 3 from Crossref, 0 from PubMed, 2 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 6 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }

@@ -163,7 +163,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "sources": [
   "https://link.springer.com/article/10.1186/s13059-024-03422-4"
@@ -235,5 +236,303 @@
    "Useful forecast lengths, accuracy targets and acceptable experimental and computing costs remain to be defined."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "BIF-08",
+  "title": "Single-cell fate reconstruction and forecasting",
+  "definition": "A model reconstructs cell ancestry and predicts later distributions of cell states from earlier molecular measurements, including responses to interventions absent from training. Its fate probabilities—chances of reaching specified cell states—agree with independently observed outcome frequencies.",
+  "goal": {
+   "need": "In the mouse blood-cell benchmark below, improved fate discrimination remained below a clonal-data reference. Training used days 2, 4 and 6, so these results leave forecasting before later observations, and responses to untested interventions, as separate experimental goals.",
+   "need_refs": [
+    1
+   ],
+   "figures": {
+    "caption": "Fate discrimination in the published mouse blood-cell benchmark.",
+    "columns": [
+     "Method",
+     "AUROC"
+    ],
+    "rows": [
+     [
+      "Waddington-OT",
+      "0.599"
+     ],
+     [
+      "PRESCIENT",
+      "0.725 ± 0.008"
+     ],
+     [
+      "Clonal-data reference",
+      "0.771"
+     ]
+    ],
+    "note": "AUROC is area under the receiver operating characteristic curve; it measures discrimination, not calibration. PRESCIENT summarizes five random seeds.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "Chan Zuckerberg Initiative",
+     "year": "2024",
+     "quote": "virtual cells that can transfer information across datasets and conditions, serve multiple queries concurrently, and unify data from different modalities.",
+     "context": "CZI describes the intended capabilities of its general-purpose virtual-cell model.",
+     "ref": 2,
+     "checked": true
+    },
+    {
+     "body": "Arc Institute",
+     "year": "2025",
+     "quote": "We have an ambitious goal of predicting cellular response to perturbation,",
+     "context": null,
+     "ref": 3,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "One model passes independent prospective tests of ancestry reconstruction and calibrated fate forecasts.",
+   "criterion": "In one specified biological system, a single model reconstructs ancestry against independent lineage measurements and, using only information available at forecast time, predicts later fate distributions with and without an intervention absent from training. An independent laboratory confirms improvement over expression-only and no-change baselines and probability calibration against newly measured outcomes. The forecast horizon, scoring rules and calibration acceptance criteria are fixed before outcomes are collected. This is a provisional capability test; no universal numerical cutoff is established.",
+   "set_by": "Technology Atlas; provisional test because no external endpoint covering the combined capability was found.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "CZI and Arc goals, Cellular Intelligence’s roadmap, and lineage/fate and Virtual Embryo benchmarks were searched for a joint prospective reconstruction, perturbation and calibration endpoint; none was found. The provisional test limits the claim to one biological system and requires independent experimental validation. The published benchmarks below establish separate components.",
+   "refs": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A model reconstructs worm ancestry across seven time bins with lower error than competing mappings.",
+    "criterion": "Use 6,476 C. elegans ABpxp cells in seven time bins spanning 170–510 minutes after fertilization. Fit cross-time mappings using expression and within-time lineage distances; evaluate against the published cross-time ancestry annotations using mean ancestor/descendant error. Obtain lower error than LineageOT and expression-only transport for every evaluated time-point pair. Moslin reported this result on 21 October 2024; it is retrospective reconstruction.",
+    "set_by": "Lange et al., published C. elegans comparative benchmark in the moslin paper; a study-specific test rather than a field-wide acceptance cutoff.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "For all time point pairs, moslin outperforms other methods and achieves a lower mean error",
+    "threshold_ref": 5,
+    "refs": [
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A model outperforms Waddington-OT and FateID on the published clonal-fate benchmark.",
+    "criterion": "Predict day-6 neutrophil bias for 335 day-2 mouse progenitors: neutrophils divided by neutrophils plus monocytes. Beat Waddington-OT and FateID on both Pearson correlation and discrimination of bias greater than 0.5, using the published test set. PRESCIENT reported this comparison on 28 May 2021; its discrimination score appears above.",
+    "set_by": "Yeo et al., PRESCIENT Figure 2 comparison using the Weinreb clonal-fate benchmark; a study-specific comparative test.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "We show that when accounting for cell proliferation, PRESCIENT outperforms existing methods on predicting cell fate bias.",
+    "threshold_ref": 1,
+    "refs": [
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A model predicts a new fate shift confirmed by two experimental perturbations.",
+    "criterion": "Predict increased prechordal-plate differentiation after loss of noto, then confirm that direction in both mutant and CRISPR-disrupted zebrafish embryos at 10 hours after fertilization. CellOracle reported this on 8 February 2023. Mutant samples pooled 25 embryos, with two biological replicates per condition; the prechordal-plate fraction increased 38.6% relative to controls (chi-square P = 1.07 × 10⁻⁴). CRISPR disruption provided a second experimental validation.",
+    "set_by": "Kamimoto et al., CellOracle experimental validation in Figures 3–4; this test concerns zebrafish noto loss of function specifically.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "Next, we experimentally validated the predicted expansion of prechordal plate after noto LOF.",
+    "threshold_ref": 8,
+    "refs": [
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "One architecture exceeds 150 points across the three Virtual Embryo Challenge tasks.",
+    "criterion": "Use one shared architecture across all three Virtual Embryo Challenge tasks and obtain a final hidden-test total above 150 out of 300. Tasks cover future expression distributions, spatial-temporal prediction and an unseen knockout. Scores average each task’s boards and sum the three task scores; the floor scores 50 per task. Separate training and prediction heads are allowed. This combines the organisers’ prize-eligibility floor with their shared-architecture condition; it does not establish calibration or ancestry reconstruction.",
+    "set_by": "Qiu Lab at Stanford University and collaborators, Virtual Embryo Challenge 2026 Official Rules, sections 13–14; shared architecture is the Generality Award condition.",
+    "set_by_kind": "prize",
+    "threshold_quote": "The floor is published on every board and scores 50 there by construction, so a team entering all three tasks must total more than 150.",
+    "threshold_ref": 6,
+    "refs": [
+     6,
+     7,
+     9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "Cellular Intelligence’s roadmap specifies 80% and 90% accuracy targets without defining the accuracy metric or a fixed evaluation population.",
+   "Virtual Embryo Challenge team scores were not exposed in the accessible leaderboard page on 14 November 2026.",
+   "The publisher-hosted PRESCIENT PDF was inaccessible; its PMC PDF mirror was accessible."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://rcastoragev2.blob.core.windows.net/7f64abccdd2d9eac713838924df36025/PMC8163769.pdf",
+    "doi": "10.1038/s41467-021-23518-w",
+    "title": "Generative modeling of single-cell time series with PRESCIENT enables prediction of cell trajectories with interventions",
+    "authors": "Yeo GHT, Saksena SD, Gifford DK",
+    "container": "Nat Commun",
+    "year": "2021",
+    "volume": "12",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "web",
+    "url": "https://chanzuckerberg.com/blog/2024-ai-sci-tech-convening/",
+    "doi": null,
+    "title": "Exploring the ‘Digital Age of Biology’ With CZI’s Science Technology Team",
+    "authors": "Ghafari N.",
+    "container": "Chan Zuckerberg Initiative",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "web",
+    "url": "https://arcinstitute.org/news/virtual-cell-challenge-2025-wrap-up",
+    "doi": null,
+    "title": "Virtual Cell Challenge 2025 Wrap-Up: Winners and Reflections",
+    "authors": "Arc Institute",
+    "container": "Arc Institute",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "report",
+    "url": "https://www.cellularintelligence.com/engineering-cell-fate",
+    "doi": null,
+    "title": "Engineering Cell Fate: Towards a Foundation Model for Virtual Cell Signaling",
+    "authors": "Cellular Intelligence",
+    "container": "Cellular Intelligence",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "journal",
+    "url": "https://link.springer.com/article/10.1186/s13059-024-03422-4",
+    "doi": "10.1186/s13059-024-03422-4",
+    "title": "Mapping lineage-traced cells across time points with moslin",
+    "authors": "Lange M, Piran Z, Klein M, Spanjaard B, Klein D, Junker JP, et al.",
+    "container": "Genome Biol",
+    "year": "2024",
+    "volume": "25",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 6,
+    "kind": "web",
+    "url": "https://virtualembryo.ai/challenge/rules",
+    "doi": null,
+    "title": "Official Rules",
+    "authors": "Virtual Embryo Challenge Organisers",
+    "container": "Virtual Embryo Challenge",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 7,
+    "kind": "web",
+    "url": "https://virtualembryo.ai/challenge",
+    "doi": null,
+    "title": "Virtual Embryo Challenge",
+    "authors": "Qiu Lab, Stanford University, and collaborators",
+    "container": "Virtual Embryo Challenge",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 8,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9946838/",
+    "doi": "10.1038/s41586-022-05688-9",
+    "title": "Dissecting cell identity via network inference and in silico gene perturbation",
+    "authors": "Kamimoto K, Stringa B, Hoffmann CM, Jindal K, Solnica-Krezel L, Morris SA",
+    "container": "Nature",
+    "year": "2023",
+    "volume": "614",
+    "issue": "7949",
+    "pages": "742-751",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 9,
+    "kind": "web",
+    "url": "https://virtualembryo.ai/challenge/leaderboard",
+    "doi": null,
+    "title": "Leaderboard",
+    "authors": "Virtual Embryo Challenge Organisers",
+    "container": "Virtual Embryo Challenge",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 3 from Crossref, 0 from PubMed, 0 from arXiv, 6 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 6 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }
