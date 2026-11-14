@@ -171,7 +171,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "sources": [
   "https://www.stat.yale.edu/~arb4/publications_files/ABoundOnTheFinancialValueOfInformationIEEEIT.pdf"
@@ -273,5 +274,306 @@
    "Can information available when a decision is made identify future market behavior well enough to calculate a meaningful limit?"
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "FIN-11",
+  "title": "Bounds on the financial value of information",
+  "definition": "Upper bounds, calculated before a financial-data purchase, on the maximum fee an investor could pay without reducing a specified expected utility of wealth. Each bound applies to stated trading strategies and accounts for costs, latency, capital limits, competitors and price impact—the change in prices caused by trading.",
+  "goal": {
+   "need": "A 2025 equilibrium model estimates information values from 140 quarterly observations spanning 1985–2019. For an investor with $250 million trading five US equity portfolios, including price impact changes the dollar value assigned to earnings forecasts. These valuations make the case for purchase limits that specify the investor and trading conditions.",
+   "need_refs": [
+    1
+   ],
+   "figures": {
+    "caption": "Model-based annual dollar value of earnings-forecast data",
+    "columns": [
+     "Trading assumption",
+     "Data value (USD/year)",
+     "Standard error (USD/year)"
+    ],
+    "rows": [
+     [
+      "Price taking",
+      "1,062,690",
+      "254,070"
+     ],
+     [
+      "With price impact",
+      "128,960",
+      "66,080"
+     ]
+    ],
+    "note": "Table 1 values I/B/E/S quarterly earnings forecasts for Growth and S&P 500 portfolios. Standard errors use a wild bootstrap.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "CFA Institute",
+     "year": "2024",
+     "quote": "Members and candidates must make reasonable efforts to test the output of investment models and other preprogrammed analytical tools they use.",
+     "context": "Standard V(A), guidance on quantitative research and techniques. This is a general requirement for investment models.",
+     "ref": 2,
+     "checked": false
+    },
+    {
+     "body": "Two Sigma",
+     "year": "Undated",
+     "quote": "We systematically combine that view, plus trading costs and risks, to create a target allocation.",
+     "context": "The view is the firm's combined forecasts for a portfolio instrument. The passage describes its existing investment process.",
+     "ref": 3,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "A decision-time bound rules out a financial-data purchase and is independently reproduced.",
+   "criterion": "For one specified investor, data stream and market, prove a finite upper bound U on the maximum information fee consistent with retaining the investor's baseline expected utility without that data. Calculate U before purchase, using decision-time information and accounting for trading costs, latency, finite capital, price impact and a specified response by competitors. A quoted fee C exceeds U after allowing for estimation uncertainty, and the bound causes a documented decision to reject the purchase. Independent researchers reproduce the proof and calculation under the same assumptions.",
+   "set_by": "Technology Atlas; an operational acceptance test for one specified information purchase.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches for financial-information-value standards, roadmaps, programme targets and prize rules, including CFA Institute, SIAM, NSF and NIST material, found no combined acceptance test. This Atlas test restricts the claim to one investor and purchase. It connects model-based valuation with the developer's inclusion of costs and risks and CFA Institute's requirement to test models before use.",
+   "refs": [
+    1,
+    2,
+    3
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "Side information increases optimal expected log wealth by at most its mutual information.",
+    "criterion": "Prove 0 ≤ Δ ≤ I(X;Y), where Δ is the increase in optimal expected base-2 log wealth from observing Y before investing and I is mutual information, in bits. Portfolios are nonnegative weights summing to 1; returns are exogenous and trading is frictionless. Independent, identically distributed repetitions give the long-run growth interpretation. Barron and Cover's September 1988 Theorem 2 establishes the inequality, with equality in a horse-race market, where only one asset pays per period.",
+    "set_by": "Barron and Cover, Theorem 2 in IEEE Transactions on Information Theory (1988); a model-specific, peer-reviewed theorem benchmark.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "It will be shown that each bit of information at most doubles the resulting wealth in the general stock market setup.",
+    "threshold_ref": 4,
+    "refs": [
+     4
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m2",
+    "title": "Side information adds I(X;Y) to optimal log-wealth growth in a horse-race market with costs.",
+    "criterion": "In the paper's independent, identically distributed horse-race market, establish g_Y − g = I(X;Y), comparing optimal long-run log-wealth growth with and without side information under the same proportional transaction-cost model. Selling $1 of asset i yields 1−λ_i dollars; buying $1 costs 1+λ_i dollars. Iyengar and Cover's November 2000 Theorem 6 establishes equality. This result concerns that market model, without an information acquisition fee.",
+    "set_by": "Iyengar and Cover, Theorem 6 in IEEE Transactions on Information Theory (2000); the equality is specific to their horse-race market and cost model.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "gY = g + I(X; Y )",
+    "threshold_ref": 5,
+    "refs": [
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": false
+   },
+   {
+    "id": "m3",
+    "title": "Causal side information adds at most directed information to optimal expected log wealth.",
+    "criterion": "For n trading periods, prove W*(X^n||Y^n) − W*(X^n) ≤ I(Y^n→X^n), comparing optimal expected cumulative log wealth with and without observations Y available at each trading time. Directed information is the sum of conditional mutual informations I(Y^i;X_i|X^{i−1}); it accounts for the order in which observations arrive. Theorem 3 of the June 2011 paper establishes the bound for frictionless portfolios; horse-race betting attains equality.",
+    "set_by": "Permuter, Kim and Weissman, Theorem 3 and Corollary 1 in IEEE Transactions on Information Theory (2011); a model-specific, peer-reviewed theorem benchmark.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "directed information is an upper bound on the increment in growth rates of optimal portfolios in a stock market due to causal side information.",
+    "threshold_ref": 6,
+    "refs": [
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "An informed trader attains maximum expected net profit with endogenous prices and quadratic penalties.",
+    "criterion": "Under Assumption 5.1, establish an equilibrium between a privately informed trader and competitive market makers, and prove that the trader's admissible strategies have expected net profit at most J(0,0), with equality for θ*. Net profit includes the penalty (c/2)∫₀¹α_t²dt, with c>0 and trading rate α_t, over the model's normalised horizon [0,1]. Çetin's 2025 Theorem 5.1 and its verification proof establish this model-specific value, incorporating endogenous prices.",
+    "set_by": "Çetin, Theorem 5.1 and its verification proof in Journal of Economic Theory (2025); the criterion concerns the paper's continuous-time Kyle model.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "Thus, 𝜃∗ is optimal provided it is admissible and the stochastic integral above is a martingale.",
+    "threshold_ref": 7,
+    "refs": [
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "A model values data as its expected-utility gain divided by absolute risk aversion.",
+    "criterion": "In the mean-variance model, the dollar-equivalent data value equals [Ũ(I∪data)−Ũ(I)]/ρ, with expected utility Ũ and local absolute risk aversion ρ. Lemma 2 includes price impact; equations (11)–(14) approximate utility using return moments and forecast errors. The 2025 paper implements this valuation on historical equity portfolios.",
+    "set_by": "Farboodi, Singal, Veldkamp and Venkateswaran, Lemma 2, equation (8) and Section 3 of Valuing Financial Data; a published model valuation criterion.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "Dividing the difference in utility by the coefficient of absolute risk aversion delivers a certainty equivalent amount:",
+    "threshold_ref": 1,
+    "refs": [
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m6",
+    "title": "A finite information-value bound includes trading constraints and competitor responses.",
+    "criterion": "Implement a proven, finite upper bound on the maximum information fee compatible with an investor's baseline expected utility, using only information available before purchase. Include trading costs, latency, finite capital, price impact and competitors' specified responses; propagate estimation uncertainty. Test the calculation before use. The cited equilibrium valuations address part of this test; the combined calculation was not found.",
+    "set_by": "Technology Atlas; searches found no published integration threshold covering these constraints. This is the calculation immediately preceding the purchase decision in the completion test.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     1,
+     2,
+     3,
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No explicit institutional goal for the full combined capability was found; the quoted statements concern investment inputs and model validation.",
+   "No regulator, standards body, society, programme or prize acceptance test was found for the combined operational capability.",
+   "No field-wide development sequence was found; the external milestones are published model-specific mathematical benchmarks.",
+   "No published demonstration was found of the combined bound changing a prospective purchase decision with independent reproduction.",
+   "The supplied Yale URL for Barron and Cover returned HTTP 502; an author-hosted Stanford copy was accessible."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://business.columbia.edu/sites/default/files-efs/imce-uploads/lveldkamp/papers/Valuing%20Financial%20Data.pdf",
+    "doi": "10.1093/rfs/hhae034",
+    "title": "Valuing Financial Data",
+    "authors": "Farboodi M, Singal D, Veldkamp L, Venkateswaran V",
+    "container": "The Review of Financial Studies",
+    "year": "2025",
+    "volume": "38",
+    "issue": "3",
+    "pages": "938-980",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "book",
+    "url": "https://www.cfainstitute.org/-/media/documents/code/code-ethics-standards/standards-practice-handbook-12th-edition.pdf",
+    "doi": null,
+    "title": "Standards of Practice Handbook",
+    "authors": "CFA Institute",
+    "container": "CFA Institute",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "web",
+    "url": "https://www.twosigma.com/businesses/investment-management/",
+    "doi": null,
+    "title": "Investment Management",
+    "authors": "Two Sigma",
+    "container": "Two Sigma",
+    "year": "Undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "journal",
+    "url": "https://isl.stanford.edu/~cover/papers/barron_cover_88.pdf",
+    "doi": "10.1109/18.21241",
+    "title": "A Bound on the Financial Value of Information",
+    "authors": "Barron AR, Cover TM",
+    "container": "IEEE Trans. Inform. Theory",
+    "year": "1988",
+    "volume": "34",
+    "issue": "5",
+    "pages": "1097-1100",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 5,
+    "kind": "journal",
+    "url": "https://isl.stanford.edu/~cover/papers/iyengar_cover_00.pdf",
+    "doi": "10.1109/18.887881",
+    "title": "Growth Optimal Investment in Horse Race Markets with Costs",
+    "authors": "Cover TM, Iyengar GN",
+    "container": "IEEE Trans. Inform. Theory",
+    "year": "2000",
+    "volume": "46",
+    "issue": "7",
+    "pages": "2675-2683",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://web.stanford.edu/~tsachy/pdf_files/nterpretations%20of%20Directed%20Information%20in%20Portfolio%20Theory,%20Data%20Compression,%20and%20Hypothesis%20Testing.pdf",
+    "doi": "10.1109/TIT.2011.2136270",
+    "title": "Interpretations of Directed Information in Portfolio Theory, Data Compression, and Hypothesis Testing",
+    "authors": "Permuter HH, Kim YH, Weissman T",
+    "container": "IEEE Trans. Inform. Theory",
+    "year": "2011",
+    "volume": "57",
+    "issue": "6",
+    "pages": "3248-3259",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "journal",
+    "url": "https://eprints.lse.ac.uk/128957/3/1-s2.0-S0022053125001073-main.pdf",
+    "doi": "10.1016/j.jet.2025.106061",
+    "title": "Insider trading with penalties in continuous time",
+    "authors": "Çetin U",
+    "container": "Journal of Economic Theory",
+    "year": "2025",
+    "volume": "228",
+    "issue": null,
+    "pages": "106061",
+    "citation_source": "crossref"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4",
+   "m5",
+   "m6"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 5 from Crossref, 0 from PubMed, 0 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 4 found, 2 not found, 1 with no readable copy."
+   }
+  ]
  }
 }

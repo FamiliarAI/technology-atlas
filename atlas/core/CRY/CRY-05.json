@@ -236,7 +236,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Money and programs that people cannot copy",
@@ -318,5 +319,359 @@
    "Required hardware resources, error tolerance, usable lifetimes and practical acceptance thresholds remain unspecified."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "CRY-05",
+  "title": "Public-key quantum money and quantum copy protection",
+  "definition": "Physical quantum banknotes that anyone can authenticate, and quantum decryption programs that remain usable but resist duplication. Security means that efficient quantum attackers produce extra accepted notes or working decryptors only with negligible probability: eventually smaller than every inverse polynomial in the security parameter λ, which controls scheme size.",
+  "goal": {
+   "need": "A classical program admits unbounded copying. Quantum decryption-key protection instead requires that k authorised keys cannot become k+1 working decryptors, for any polynomial k. Public quantum money would let recipients authenticate a transferred note without returning it to the mint. Laboratory storage results quantify the conditions under which a private-key money protocol has operated.",
+   "need_refs": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "figures": {
+    "caption": "Private-key money storage, published 19 September 2025.",
+    "columns": [
+     "Quantity",
+     "Measured value"
+    ],
+    "rows": [
+     [
+      "Storage duration",
+      "1 μs"
+     ],
+     [
+      "Storage-and-retrieval efficiency",
+      "77 ± 2%"
+     ]
+    ],
+    "note": "Bank-assisted, single-round verification.",
+    "ref": 4
+   },
+   "statements": [
+    {
+     "body": "NTT Secure Platform Laboratories",
+     "year": "2021",
+     "quote": "Achieving secure software copy protection is one of our goals.",
+     "context": null,
+     "ref": 1,
+     "checked": true
+    },
+    {
+     "body": "Peter Shor, MIT, quantum-money developer",
+     "year": "2011",
+     "quote": "anyone (with a quantum computer) can verify that the state came from the mint without sending the money back to the mint.",
+     "context": "Abstract of Shor’s colloquium hosted by NIST on 21 January 2011; this is the speaker’s statement.",
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "ANR quBIC programme",
+     "year": "2017",
+     "quote": "Here, we will study and implement one of the most promising quantum applications, namely unforgeable quantum money.",
+     "context": null,
+     "ref": 5,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "Public quantum money and reusable decryption-key copy protection satisfy their security games on hardware.",
+   "criterion": "Physical implementations of public-key quantum money and reusable quantum decryption keys meet their published games without idealized oracles. Honest operation succeeds with probability ≥1−negl(λ) through polynomially many uses. No polynomial-time quantum adversary can turn q issued notes into >q accepted notes except negligibly, for any polynomial q; from any polynomial k decryption keys, its probability of passing the joint (k+1)-decryptor projective threshold test at 1/2+γ is negligible for every inverse-polynomial γ>0. Proofs cover the implementations’ stated noise models under explicit computational assumptions.",
+   "set_by": "Atlas; joint physical-realisation test combining Aaronson–Christiano’s money definition and Çakan–Goyal’s decryption-key protection definition.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "No joint hardware completion test was found in NIST’s quantum-money material, ANR quBIC, NTT’s goal statement, or the cited money and copy-protection definitions. Atlas combines their two capabilities and requires physical operation of both. The component games supply the security thresholds; no transaction-rate or storage-lifetime target is added. Conditional circuit constructions alone do not meet this physical test.",
+   "refs": [
+    6,
+    2,
+    7,
+    1,
+    3,
+    5
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "Stored private-key quantum money operates inside its proved noise-and-loss security region.",
+    "criterion": "In the Mamann et al. protocol, storage-and-retrieval efficiency η must exceed 50%, and the measured error ε must lie below the security boundary εsec(μ,η) in Figure 2, where μ is mean photons per pulse. These conditions apply to bank-assisted, single-round verification. The experiment published 19 September 2025 used the same 28-state key repeated 4,000 times; at μ=1 its stored-state error was 0.78 ± 0.07%, below the calculated boundary. This is component progress toward reusable public money.",
+    "set_by": "Mamann et al., Wiesner-money protocol security analysis, Figure 2 and Supplementary Text; this threshold is for private-key verification.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "We first observe that, owing to the no-cloning theorem, an efficiency above 50% is required to have a possible range of secure operations.",
+    "threshold_ref": 4,
+    "refs": [
+     4
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A public-money mini-scheme limits one-to-two counterfeiting to negligible probability.",
+    "criterion": "Honest notes are accepted with probability ≥2/3; no polynomial-time quantum attacker given one note produces two states accepted for its serial number except negligibly. Aaronson–Christiano prove this relative to a classical oracle. Zhandry’s paper published 19 August 2025 gives a generic-model proof under a new assumption and an alternative knowledge-assumption argument requiring further analysis. Doliskani’s preprint revised 9 July 2025 reports a group-action discrete-logarithm reduction in the generic model; it is not peer reviewed.",
+    "set_by": "Aaronson and Christiano, Definition 12; the security convention used for public-money mini-schemes.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "We call M secure if it has completeness error ≤ 1/3 and negligible soundness error.",
+    "threshold_ref": 6,
+    "refs": [
+     6,
+     8,
+     9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "Quantum state obfuscation preserves every attainable two-output copy-protection security bound.",
+    "criterion": "For every program family already admitting a copy-protection scheme with joint piracy success ≤δ(λ)+negl(λ) in a specified verification game, quantum state indistinguishability obfuscation preserves that bound and honest evaluation. Coladangelo–Gunn prove this in Theorem 1 and construct the obfuscator relative to an efficient quantum oracle in Theorem 2, in the full version dated 3 May 2024. The result does not make every unlearnable program protectable.",
+    "set_by": "Coladangelo and Gunn, Definition 4 and Theorem 1; Theorem 2 supplies an oracle construction.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "Then, $\\mathsf{qsiO}$ is a $(\\Ver,\\delta)$-secure copy protection scheme for $\\calF$.",
+    "threshold_ref": 10,
+    "refs": [
+     10
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": false
+   },
+   {
+    "id": "m4",
+    "title": "A public-money oracle scheme accepts q-qubit errors with its proved counterfeiting bound.",
+    "criterion": "For n-qubit notes and q≥1, accept every allowed Pauli error X^eZ^e′ with |e|,|e′|≤q with probability 1, while bounding efficient one-to-two counterfeiting by |E|²/exp(n); E is the construction’s tolerated-error set. Parameters must make this bound negligible. Yuen’s Theorem 4.10 establishes the result relative to a classical oracle, published 7 April 2025. It does not instantiate that oracle on hardware.",
+    "set_by": "Yuen, Definitions 3.3–3.4 and Theorem 4.10, in Quantum.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "has perfect completeness and $|\\mathcal{E}|^{2}/\\textsf{exp}(n)$ soundness error.",
+    "threshold_ref": 7,
+    "refs": [
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": false
+   },
+   {
+    "id": "m5",
+    "title": "Reusable decryption keys resist k-to-k+1 piracy for every polynomial number k of issued keys.",
+    "criterion": "Given a public key and any polynomial k quantum decryption keys, a polynomial-time quantum pirate passes the joint projective test for k+1 decryptors at threshold 1/2+γ only with negligible probability, for every inverse-polynomial γ>0. Honest decryption succeeds with probability 1 and permits reuse. Çakan–Goyal’s full version dated 4 November 2024 proves this in the plain model under subexponentially secure post-quantum indistinguishability obfuscation and Learning With Errors assumptions (Theorem 32, Corollary 6).",
+    "set_by": "Çakan and Goyal, Definitions 23 and 26, Theorem 32 and Corollary 6; extends prior anti-piracy games.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "PKE satisfies strong γ-anti-piracy for any inverse polynomial γ.",
+    "threshold_ref": 2,
+    "refs": [
+     2
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": false
+   },
+   {
+    "id": "m6",
+    "title": "Physical public quantum money permits repeated checking and resists q-to-more-than-q counterfeiting.",
+    "criterion": "A physical implementation supplies minting and reusable public verification, with every oracle replaced by explicit algorithms. Under its stated noise model, honest acceptance is ≥1−negl(λ) through polynomially many checks; any polynomial-time quantum adversary given q=poly(λ) issued notes produces >q accepted notes only with negligible probability.",
+    "set_by": "Atlas; hardware extension of Aaronson–Christiano Definition 11 and Appendix 9; no hardware acceptance protocol found in NIST, ANR quBIC or NTT goals.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     6,
+     1,
+     3,
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No joint hardware acceptance criterion was found in the NIST, ANR quBIC or NTT material.",
+   "No physical public-money system meeting m6, or physical reusable decryption-key system meeting the completion criterion, was located.",
+   "The Wiesner Labs prize page yielded no readable rules."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "web",
+    "url": "https://www.rd.ntt/e/research/JN202104_12240.html",
+    "doi": null,
+    "title": "Security Based on Quantum Information Technology and Data Protection of Quantum Information NTT Secure Platform Laboratories",
+    "authors": "NTT Secure Platform Laboratories",
+    "container": "NTT R&D",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 2,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/2311.18318",
+    "doi": "10.48550/arXiv.2311.18318",
+    "title": "Unclonable Cryptography with Unbounded Collusions and Impossibility of Hyperefficient Shadow Tomography",
+    "authors": "Çakan A, Goyal V",
+    "container": "arXiv",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 3,
+    "kind": "web",
+    "url": "https://www.nist.gov/news-events/events/quantum-money",
+    "doi": null,
+    "title": "Quantum Money",
+    "authors": "Shor P",
+    "container": "NIST",
+    "year": "2011",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12448085/",
+    "doi": "10.1126/sciadv.adx3223",
+    "title": "Quantum cryptography integrating an optical quantum memory",
+    "authors": "Mamann H, Nieddu T, Hoffet F, Bozzio M, de Loubresse FG, Kerenidis I, et al.",
+    "container": "Sci. Adv.",
+    "year": "2025",
+    "volume": "11",
+    "issue": "38",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 5,
+    "kind": "web",
+    "url": "https://anr.fr/Project-ANR-17-CE39-0005",
+    "doi": null,
+    "title": "Quantum Banknotes and Information-Theoretic Credit Cards – quBIC",
+    "authors": "Agence nationale de la recherche",
+    "container": "ANR",
+    "year": "2017",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/1203.4740",
+    "doi": "10.48550/arXiv.1203.4740",
+    "title": "Quantum Money from Hidden Subspaces",
+    "authors": "Aaronson S, Christiano P",
+    "container": "arXiv",
+    "year": "2012",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 7,
+    "kind": "journal",
+    "url": "https://arxiv.org/html/2407.06463v2",
+    "doi": "10.22331/q-2025-04-07-1691",
+    "title": "Noise-tolerant public-key quantum money from a classical oracle",
+    "authors": "Yuen P",
+    "container": "Quantum",
+    "year": "2025",
+    "volume": "9",
+    "issue": null,
+    "pages": "1691",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 8,
+    "kind": "journal",
+    "url": "https://arxiv.org/html/2307.12120v5",
+    "doi": "10.46298/theoretics.25.18",
+    "title": "Quantum Money from Abelian Group Actions",
+    "authors": "Zhandry M",
+    "container": "TheoretiCS",
+    "year": "2025",
+    "volume": "Volume 4",
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 9,
+    "kind": "preprint",
+    "url": "https://eprint.iacr.org/2025/092",
+    "doi": null,
+    "title": "Public-Key Quantum Money From Standard Assumptions (In The Generic Model)",
+    "authors": "Doliskani J",
+    "container": "Cryptology ePrint Archive",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 10,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2311.07794v3",
+    "doi": "10.48550/arXiv.2311.07794",
+    "title": "How to Use Quantum Indistinguishability Obfuscation",
+    "authors": "Coladangelo A, Gunn S",
+    "container": "arXiv",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4",
+   "m5",
+   "m6"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 3 from Crossref, 0 from PubMed, 3 from arXiv, 4 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 5 found, 3 not found, 0 with no readable copy."
+   }
+  ]
  }
 }

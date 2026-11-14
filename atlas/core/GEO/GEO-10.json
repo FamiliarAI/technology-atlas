@@ -204,7 +204,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "sources": [
   "https://ddempsey.github.io/papers/2025-ardid-ergodic-seismic-precursors-transfer-learning/"
@@ -288,5 +289,262 @@
    "Some eruptions have subtle or no known warning signs; whether better observations could provide useful warning remains unresolved."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "GEO-10",
+  "title": "Transferable probabilistic eruption forecasting",
+  "definition": "A fixed method estimates the probability that an instrumented volcano will erupt within 48 hours and outperforms a constant eruption-rate forecast on future observations at volcanoes excluded from development. The capability covers magmatic eruptions, which emit new magma, and phreatic eruptions, driven by steam.",
+  "goal": {
+   "need": "Local forecasting models need recorded eruptions from which to learn; the seismic archive below illustrates their scarcity. At Whakaari, the eruption on 9 December 2019 killed 22 tourists and guides and severely injured 26 others. Quantified eruption likelihood informs volcano-access decisions and disaster response.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": {
+    "caption": "Seismic eruption records in Ardid and colleagues’ 2025 study",
+    "columns": [
+     "Seismic eruption history",
+     "Number of volcanoes"
+    ],
+    "rows": [
+     [
+      "All sampled volcanoes",
+      "24"
+     ],
+     [
+      "Only one recorded eruption",
+      "11"
+     ],
+     [
+      "More than three recorded eruptions",
+      "3"
+     ]
+    ],
+    "note": "The last two rows are subsets of the study sample.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "National Academies of Sciences, Engineering, and Medicine",
+     "year": "2017",
+     "quote": "Forecast the onset, size, duration, and hazard of eruptions by integrating observations with quantitative models of magma dynamics.",
+     "context": "The first grand challenge in the committee’s report; this entry addresses eruption onset.",
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "U.S. Geological Survey Volcano Hazards Program",
+     "year": "Undated",
+     "quote": "enhance public safety and minimize social and economic disruption from eruptions by delivering effective forecasts, warnings, and information on volcano hazards",
+     "context": "Passage from the programme’s mission statement.",
+     "ref": 4,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "Transferred eruption probabilities beat a fixed eruption-rate forecast on future observations.",
+   "criterion": "A frozen model issues 48-hour eruption probabilities at instrumented volcanoes whose eruptions were excluded from development, using only information available at issue time. On future eruptive and non-eruptive observations, its mean logarithmic score, mean[y ln(p)+(1−y) ln(1−p)], exceeds that of a local eruption-rate probability fixed before testing; p is the issued probability and y is 1 for eruption within 48 hours and 0 otherwise. The advantage must hold at the declared target volcanoes in both tracked cases. This minimum establishes probability skill; operational warning-time and calibration tolerances remain unspecified.",
+   "set_by": "Atlas minimum combining published forecast-verification tests; no external completion criterion was found.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches of National Academies and USGS forecasting goals, IAVCEI and WMO guidance, prize criteria and validation papers found no external completion threshold for cross-volcano eruption probabilities. This minimum combines “evaluation of a frozen model on future data” with logarithmic skill above the published zero reference. It establishes prospective transfer of probability skill; operational acceptance requirements remain unspecified.",
+   "refs": [
+    1,
+    2,
+    5
+   ],
+   "threshold_checked": null
+  },
+  "case_label": "Eruption mechanism",
+  "cases": [
+   "Magmatic eruptions",
+   "Phreatic eruptions"
+  ],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "Local eruption probabilities achieve logarithmic skill above 0 on a withheld eruption.",
+    "criterion": "For an eruption excluded from forecast-model and probability-calibration training, a local forecast attains scaled logarithmic skill >0 against a constant eruption-rate probability. At Whakaari, a phreatic volcano, Dempsey and colleagues reported 0.33 over 2 December 2019 to 18 December 2019; six earlier eruptions supplied training and the eruption on 9 December 2019 was withheld. This is retrospective evidence.",
+    "set_by": "Community forecast-verification convention, implemented by Dempsey and colleagues in equations (5)–(6). Their published application concerns Whakaari’s phreatic eruptions.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "a reference of 0 for models that perform as well as one uninformed by data",
+    "threshold_ref": 2,
+    "refs": [
+     2
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "Transferred forecasts discriminate pre-eruptive periods at withheld volcanoes with AUC above 0.5.",
+    "criterion": "Without training on the target volcano’s eruptions, a model distinguishes the 48 hours before eruption from non-eruptive intervals with area under the receiver operating characteristic curve (AUC) >0.5. Ardid and colleagues reported AUC 0.81 for the magmatic pool (9 volcanoes, 16 eruptions) and 0.80 for the phreatic pool (6 volcanoes, 15 eruptions). Their tests used full-record normalization, excluded effusive episodes and produced scores rather than probabilities. Rey-Devesa and colleagues evaluated six eruptive datasets from five volcanoes, including effusive activity; this does not establish the same whole-volcano AUC test.",
+    "set_by": "Community discrimination reference of AUC=0.5, explicitly applied to leave-one-volcano-out forecasting by Ardid and colleagues. This is a discrimination test, without an operational acceptance threshold.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "a reference AUC of 0.5, which denotes no discrimination of eruptions.",
+    "threshold_ref": 1,
+    "refs": [
+     1,
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A frozen transferred model discriminates future pre-eruptive periods with AUC above 0.5.",
+    "criterion": "A model frozen before deployment, with target-volcano eruptions excluded from training, achieves AUC >0.5 on future eruptive and non-eruptive observations using a 48-hour eruption window. Inputs and preprocessing use only information available at issue time. This tests prospective discrimination before probability skill. The local Whakaari deployment from February 2020 to August 2021 recorded three false positives and no eruptions. The follow-up published on 26 August 2026 evaluated transferred forecasts at five volcanoes using past observations.",
+    "set_by": "Atlas minimum combining the published frozen-model prospective test and AUC=0.5 reference. Searches found no externally specified acceptance criterion combining prospective testing with cross-volcano transfer.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     5,
+     1,
+     2,
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No prospective evaluation establishing transferred discrimination or probability skill on both eruptive and non-eruptive future observations was located for either tracked mechanism.",
+   "No magmatic result matching the local 48-hour logarithmic-skill test was located in the checked studies.",
+   "The USGS Volcano Hazards Program strategic science plan for 2022–2026 and its PDF could not be opened."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11861682/",
+    "doi": "10.1038/s41467-025-56689-x",
+    "title": "Ergodic seismic precursors and transfer learning for short term eruption forecasting at data scarce volcanoes",
+    "authors": "Ardid A, Dempsey D, Caudron C, Cronin S, Kennedy B, Girona T, et al.",
+    "container": "Nat Commun",
+    "year": "2025",
+    "volume": "16",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "journal",
+    "url": "https://link.springer.com/article/10.1007/s00445-022-01600-5",
+    "doi": "10.1007/s00445-022-01600-5",
+    "title": "Evaluation of short-term probabilistic eruption forecasting at Whakaari, New Zealand",
+    "authors": "Dempsey DE, Kempa-Liehr AW, Ardid A, Li A, Orenia S, Singh J, et al.",
+    "container": "Bull Volcanol",
+    "year": "2022",
+    "volume": "84",
+    "issue": "10",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 3,
+    "kind": "book",
+    "url": "https://www.nationalacademies.org/read/24650/chapter/9",
+    "doi": "10.17226/24650",
+    "title": "Volcanic Eruptions and Their Repose, Unrest, Precursors, and Timing",
+    "authors": "Committee on Improving Understanding of Volcanic Eruptions, Committee on Seismology and Geodynamics, Board on Earth Sciences, Division on Earth and Life Studies, National Academies of Sciences, Engineering, and Medicine",
+    "container": "The National Academies Press",
+    "year": "2017",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 4,
+    "kind": "web",
+    "url": "https://www.usgs.gov/programs/VHP/what-we-do-volcano-hazards-program",
+    "doi": null,
+    "title": "What We Do - Volcano Hazards Program",
+    "authors": "U.S. Geological Survey",
+    "container": "U.S. Geological Survey",
+    "year": "Undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41467-020-17375-2",
+    "doi": "10.1038/s41467-020-17375-2",
+    "title": "Automatic precursor recognition and real-time forecasting of sudden explosive volcanic eruptions at Whakaari, New Zealand",
+    "authors": "Dempsey DE, Cronin SJ, Mei S, Kempa-Liehr AW",
+    "container": "Nat Commun",
+    "year": "2020",
+    "volume": "11",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://www.frontiersin.org/journals/earth-science/articles/10.3389/feart.2024.1342468/full",
+    "doi": "10.3389/feart.2024.1342468",
+    "title": "Universal machine learning approach to volcanic eruption forecasting using seismic features",
+    "authors": "Rey-Devesa P, Carthy J, Titos M, Prudencio J, Ibáñez JM, Benítez C",
+    "container": "Front. Earth Sci.",
+    "year": "2024",
+    "volume": "12",
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13534426/",
+    "doi": "10.1038/s41467-026-77242-4",
+    "title": "Socio-economic value of data-driven eruption forecasts to balance false alarms against catastrophic loss",
+    "authors": "Ardid A, Dempsey D, McDonald G, Cronin S",
+    "container": "Nat Commun",
+    "year": "2026",
+    "volume": "17",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 6 from Crossref, 0 from PubMed, 0 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 4 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }

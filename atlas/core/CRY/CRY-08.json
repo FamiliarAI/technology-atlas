@@ -236,7 +236,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Messaging that hides who you talk to",
@@ -308,5 +309,287 @@
    "The comparison messenger, workloads and acceptable total operating costs remain to be chosen."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "CRY-08",
+  "title": "Cryptographic metadata-private mobile messaging",
+  "definition": "A mobile messenger hides honest users’ sender–receiver relationships from an observer watching all network links, with distinguishing advantage negligible in a cryptographic security parameter. It supports multiple devices and offline recipients without trusted hardware or an individually trusted relay.",
+  "goal": {
+   "need": "Groove’s 2022 prototype demonstrated phone operation with differential privacy, which bounds how much changing a buddy relationship changes an observer’s view. Its server and phone measurements were separate. The goal is to combine that client flexibility with cryptographic relationship privacy and the published 10-second latency criterion for systems serving more than 100,000 clients.",
+   "need_refs": [
+    1,
+    4
+   ],
+   "figures": {
+    "caption": "Groove’s separate prototype measurements, 2022",
+    "columns": [
+     "Experiment",
+     "Reported result"
+    ],
+    "rows": [
+     [
+      "100 servers; 100 million circuits",
+      "32.4 s messaging latency"
+     ],
+     [
+      "Pixel 4; different client schedules",
+      "54–106 MB/month"
+     ]
+    ],
+    "note": "Circuit load represents one million users with 50 buddies each. Latency excludes client scheduling and network round trips.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "Microsoft Research, Private Communication project",
+     "year": "Undated",
+     "quote": "This research project investigates systems that can provably hide all content and metadata while withstanding global adversaries.",
+     "context": "The page dates the project’s establishment to 26 November 2015, but does not date this passage.",
+     "ref": 2,
+     "checked": true
+    },
+    {
+     "body": "DARPA, Resilient Anonymous Communication for Everyone programme",
+     "year": "2018",
+     "quote": "Confidentiality of who talks to who and when",
+     "context": "Table 1 lists this as the desired confidentiality property for user message metadata.",
+     "ref": 3,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "One mobile messenger meets the cryptographic privacy, latency and client bandwidth tests together.",
+   "criterion": "One implementation proves negligible sender–receiver linking advantage in security parameter λ against a global passive observer of all links, with uncompromised correspondents and explicit leakage, corruption and observation-duration assumptions. Leakage excludes their relationships. It supports offline recipients and multiple devices without trusted hardware or an individually trusted relay. For >100,000 clients, 50 contacts/client and one 102-byte message/client/minute, 99th-percentile online delivery is ≤10 s and phone traffic ≤106 MB per 30 days, including setup and cover traffic. Latency includes client scheduling and network delays.",
+   "set_by": "Atlas synthesis; no outside body was found setting this joint test.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches of DARPA RACE/SAFER targets, IETF privacy and MLS documents, prize rules and messaging benchmarks found no joint test. This synthesis combines Sasy and Goldberg’s 10-second, >100,000-client comparison criterion, Groove’s workload and phone bandwidth operating point, and cryptographic relationship privacy. The percentile follows Boomerang’s evaluation. These components do not define an ordinary total operating cost.",
+   "refs": [
+    1,
+    4,
+    5,
+    6
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A messaging protocol hides honest correspondents’ relationships despite compromised infrastructure.",
+    "criterion": "The protocol meets Pung’s relationship-unobservability goal when communicating users follow the protocol and know their peers’ public keys or share secrets, even when all communication infrastructure behaves maliciously. Availability remains conditional on service. Pung’s 2016 prototype reports 135K messages/minute for a 32K-active-user workload on four servers, using generated load for additional clients; K follows the paper’s notation.",
+    "set_by": "Angel and Setty, Pung protocol, §§2.1–2.2 and §7; this is its published security test.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "In particular, Pung’s guarantees hold even if all of the infrastructure that Pung uses (servers, ISPs, DNS, etc.) is compromised and operates arbitrarily.",
+    "threshold_ref": 5,
+    "refs": [
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A mobile messenger supports multiple devices and offline recipients with relationship differential privacy.",
+    "criterion": "The protocol supports asynchronous receipt and multiple devices while satisfying Groove’s §3.2 differential-privacy definition under its §3.1 assumptions. Client schedules remain independent of buddy relationships. Groove’s 2022 prototype implements these functions.",
+    "set_by": "Barman and colleagues, Groove protocol, §§3.1–3.2, 5–6 and 8.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "Groove’s users can send messages to any of their buddies from any device, and can go offline and retrieve messages sent to them later.",
+    "threshold_ref": 1,
+    "refs": [
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "Asynchronous messaging provides cryptographic metadata privacy with O(N log² N) server work.",
+    "criterion": "For N users, an asynchronous protocol provides cryptographic metadata privacy with O(N log² N) server work, holding other workload parameters fixed. Myco uses two servers and permits malicious clients and at most one malicious server; clients’ online patterns are independent of communication. Its 2025 publication reports this construction. The authors’ evaluation used cloud clients with 16 virtual CPUs and 64 GB RAM.",
+    "set_by": "Kaviani and colleagues, Myco protocol and complexity result; security assumptions and evaluation configuration appear in the authors’ accompanying slides.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "We present Myco, a metadata-private messaging system that preserves strong cryptographic guarantees while achieving $O(N \\log^2 N)$ efficiency.",
+    "threshold_ref": 7,
+    "refs": [
+     7,
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "A cryptographically private messenger delivers within 10 s at the 99th percentile for >100,000 clients.",
+    "criterion": "A software prototype proves negligible relationship-linking advantage against a global passive observer under explicit leakage and corruption assumptions, without trusted hardware or an individually trusted relay. It supports offline recipients and multiple devices. With >100,000 clients, 50 contacts/client and one 102-byte message/client/minute, 99th-percentile online delivery, including scheduling and network delays, is ≤10 s. The phone traffic ceiling is the remaining completion requirement. Boomerang’s 2023 evaluation reports 7.76 s at the 99th percentile for a 2²⁰-client workload on 32 machines using trusted enclaves.",
+    "set_by": "Atlas synthesis; searches found no externally specified integrated prototype gate with these security, functionality and performance conditions.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     1,
+     4,
+     5,
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No external joint completion test was found combining cryptographic relationship privacy, mobile flexibility, latency and client bandwidth.",
+   "No published result meeting the integrated prototype gate or completion test was identified.",
+   "No accepted numerical definition of ordinary total messaging cost was found.",
+   "Myco’s full paper PDF could not be opened; its abstract and authors’ slides were accessible."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://www.usenix.org/system/files/osdi22-barman.pdf",
+    "doi": null,
+    "title": "Groove: Flexible Metadata-Private Messaging",
+    "authors": "Barman L, Kol M, Lazar D, Gilad Y, Zeldovich N.",
+    "container": "Proc 16th USENIX Symp Operating Systems Design and Implementation",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 2,
+    "kind": "web",
+    "url": "https://www.microsoft.com/en-us/research/project/private-communication/",
+    "doi": null,
+    "title": "Private Communication",
+    "authors": "Microsoft Research",
+    "container": "Microsoft Research",
+    "year": "Undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "report",
+    "url": "https://research-vp.tau.ac.il/sites/resauth.tau.ac.il/files/DARPA-%20RACE%202019.pdf",
+    "doi": null,
+    "title": "Broad Agency Announcement: Resilient Anonymous Communication for Everyone (RACE), HR001118S0052",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "DARPA",
+    "year": "2018",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "journal",
+    "url": "https://petsymposium.org/popets/2024/popets-2024-0030.pdf",
+    "doi": "10.56553/popets-2024-0030",
+    "title": "SoK: Metadata-Protecting Communication Systems",
+    "authors": "Sasy S, Goldberg I",
+    "container": "PoPETs",
+    "year": "2024",
+    "volume": "2024",
+    "issue": "1",
+    "pages": "509-524",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 5,
+    "kind": "journal",
+    "url": "https://www.cis.upenn.edu/~sga001/papers/pung-osdi16.pdf",
+    "doi": null,
+    "title": "Unobservable communication over fully untrusted infrastructure",
+    "authors": "Angel S, Setty S.",
+    "container": "Proc 12th USENIX Symp Operating Systems Design and Implementation",
+    "year": "2016",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://www.usenix.org/system/files/nsdi23-jiang.pdf",
+    "doi": null,
+    "title": "Boomerang: Metadata-Private Messaging under Hardware Trust",
+    "authors": "Jiang P, Wang Q, Cheng J, Wang C, Xu L, Wang X, et al.",
+    "container": "Proc 20th USENIX Symp Networked Systems Design and Implementation",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 7,
+    "kind": "preprint",
+    "url": "https://eprint.iacr.org/2025/687",
+    "doi": null,
+    "title": "Myco: Unlocking Polylogarithmic Accesses in Metadata-Private Messaging",
+    "authors": "Kaviani D, Rathee D, Annem B, Popa RA.",
+    "container": "IACR Cryptology ePrint Archive",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 8,
+    "kind": "report",
+    "url": "https://people.eecs.berkeley.edu/~daryakaviani/myco.pdf",
+    "doi": null,
+    "title": "Myco: Unlocking Polylogarithmic Accesses in Metadata-Private Messaging",
+    "authors": "Kaviani D, Rathee D, Annem B, Popa RA.",
+    "container": "IEEE Symposium on Security and Privacy presentation slides",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 0 from arXiv, 7 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 5 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }
