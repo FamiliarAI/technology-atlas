@@ -6,6 +6,7 @@ reports exhaustion sets `stop`: workers not yet started return without calling a
 run keeps what is done and commits it.
 """
 
+import fcntl
 import json
 import os
 import threading
@@ -17,9 +18,40 @@ from ingestion.providers import ProviderExhausted
 
 from . import core as records
 
-# The capture archive (atlas/data/added/captures.json) is one file rewritten whole on every
-# change, so captures from several threads take turns.
-ARCHIVE_LOCK = threading.RLock()
+
+class SharedLock:
+    """A re-entrant lock held across threads and processes: a thread lock, and an exclusive
+    flock on a file while the outermost holder is inside."""
+
+    def __init__(self, path):
+        self.path = Path(path)
+        self.thread = threading.RLock()
+        self.depth = 0
+        self.handle = None
+
+    def __enter__(self):
+        self.thread.acquire()
+        if self.depth == 0:
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            self.handle = open(self.path, 'a')
+            fcntl.flock(self.handle, fcntl.LOCK_EX)
+        self.depth += 1
+        return self
+
+    def __exit__(self, *exc):
+        self.depth -= 1
+        if self.depth == 0:
+            fcntl.flock(self.handle, fcntl.LOCK_UN)
+            self.handle.close()
+            self.handle = None
+        self.thread.release()
+        return False
+
+
+# The capture archive (atlas/data/added/captures.json) is one file read, changed and rewritten
+# whole, so captures take turns: across threads, and across processes (the unattended runner
+# and a field run started by hand both capture).
+ARCHIVE_LOCK = SharedLock(records.ROOT / 'atlas/data/added/.captures.lock')
 
 
 class Stopped(Exception):

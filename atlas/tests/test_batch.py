@@ -494,3 +494,29 @@ class BatchTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class SharedLockTests(unittest.TestCase):
+    def test_two_processes_take_turns_and_one_thread_may_reenter(self):
+        import subprocess
+        import sys
+
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'lock'
+            lock = batch.SharedLock(path)
+            with lock, lock:  # re-entrant in one thread
+                child = subprocess.Popen(
+                    [
+                        sys.executable,
+                        '-c',
+                        'import sys, time; from atlas import batch; '
+                        't = time.time(); lock = batch.SharedLock(sys.argv[1]); '
+                        'lock.__enter__(); print(round(time.time() - t, 1))',
+                        str(path),
+                    ],
+                    stdout=subprocess.PIPE,
+                    text=True,
+                )
+                time.sleep(0.6)
+            waited = float(child.communicate(timeout=10)[0])
+            self.assertGreaterEqual(waited, 0.4)
