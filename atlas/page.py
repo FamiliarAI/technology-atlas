@@ -1448,6 +1448,17 @@ class Judgement:
         log = actor_rows + [cited_row(citations), checked_row(quotes, 'result quotations')]
         if merged:
             log.append(merged_row(merged))
+        # A reference added for a candidate whose row was then dropped (not relevant) or
+        # replaced is cited by nothing; it goes, and the rest are renumbered.
+        unused = sorted({r['id'] for r in self.page['references']} - cited_refs(self.page))
+        if unused:
+            self.page['references'] = [
+                r for r in self.page['references'] if r['id'] not in set(unused)
+            ]
+            compact(self.page)
+            log.append(
+                row('atlas.page', f'Removed {len(unused)} references no longer cited; renumbered.')
+            )
         self.page['log'] += log + length_rows(over_length(self.page, self.added))
         return citations, quotes
 
