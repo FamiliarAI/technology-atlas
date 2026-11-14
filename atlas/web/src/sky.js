@@ -23,7 +23,7 @@ export const FIELD_ORDER = [
   'CSC', 'CRY', 'QUA', 'CPE', 'SWE', 'HCI', 'MLC',
   'ECO', 'FIN', 'ACT', 'PSY',
   'AST', 'ROC', 'OCE', 'GEO', 'AGR',
-  'CRX', 'CHEMREV', 'MAS', 'MET', 'CRM', 'CHE', 'RHE',
+  'CRX', 'CHM', 'MAS', 'MET', 'CRM', 'CHE', 'RHE',
   'BIF', 'GEN', 'BCH', 'NEU', 'MIC', 'VIR', 'IMM', 'BIO', 'BOT', 'ZOO', 'LON',
   'PHA', 'ONC', 'INF', 'NRL', 'CAR', 'END', 'NEP', 'CLM', 'EMR', 'ANS', 'SUR', 'ORT', 'OPH',
   'DER', 'OBG', 'PED',

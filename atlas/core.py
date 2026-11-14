@@ -247,6 +247,10 @@ def check(data):
     for prefix, field in fields.items():
         if field.get('id') != prefix:
             problems.append(f'Field ID does not match folder: {prefix}')
+        # Field IDs are three capital letters (owner, November 14, 2026), so breakthrough IDs
+        # read ABC-NN.
+        if not (len(prefix) == 3 and prefix.isascii() and prefix.isalpha() and prefix.isupper()):
+            problems.append(f'Field ID is not three capital letters: {prefix}')
     for identifier, item in items.items():
         if item.get('id') != identifier:
             problems.append(f'Breakthrough ID does not match file: {identifier}')

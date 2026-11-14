@@ -289,7 +289,7 @@ AS_OF = '2026-11-01'
 REGIONS = {
     'Computing and Information': ['CSC', 'SWE', 'CPE', 'MLC', 'HCI', 'CRY', 'QUA'],
     'Mathematics and Physics': ['MAT', 'PHY', 'OPT', 'THR'],
-    'Chemistry and Materials': ['CHEMREV', 'CHE', 'CRX', 'CRM', 'MAS', 'MET', 'RHE'],
+    'Chemistry and Materials': ['CHM', 'CHE', 'CRX', 'CRM', 'MAS', 'MET', 'RHE'],
     'Engineering and Energy': [
         'AER',
         'BME',

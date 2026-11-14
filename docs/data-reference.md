@@ -23,7 +23,7 @@ Counts on November 11: 66 fields, 742 breakthroughs, 2,800 milestones, 1,676 sou
 
 ## 2. Glossary
 
-**Field.** A discipline and the folder that holds its breakthroughs. Its ID is a prefix of 2 to 8 capitals: `QUA` (Quantum Computing), `CHEMREV` (Chemistry). Fields are navigation labels.
+**Field.** A discipline and the folder that holds its breakthroughs. Its ID is a prefix of 2 to 8 capitals: `QUA` (Quantum Computing), `CHM` (Chemistry). Fields are navigation labels.
 
 **Region.** One of eight groups of neighbouring fields, such as "Computing and Information". Regions are a constant (`REGIONS` in `atlas/store.py`), not core data. A field missing from the constant falls into "Engineering and Energy".
 
@@ -87,7 +87,7 @@ Common writers and readers, used in the tables below:
 | `name` | string | yes | Display name. `"Quantum Computing"` | `import_field` (from the run's `field`) | `rebuild` → `fields.name`; catalog, field file |
 | `color` | string | yes | CSS colour fixed at import, such as `"hsl(145 60% 74%)"`; four early fields have hex colours. Never recoloured. | `import_field` via `atlas.core.next_color` | `rebuild` → `fields.color`; `next_color`. Not in the site data (colour on the site means progress only). |
 | `as_of` | string | yes | Date the field's batch was prepared. `"2026-11-01"` for all 66. | `import_field` (copied from the run's `field.json`) | Nothing. The site's `as_of` is the constant `AS_OF` in `store.py`. |
-| `boundaries` | string | yes | The field's scope as given to the research prompt. In 65 of 66 fields this is the prompt's fixed instruction, "<Name>: fundamental discoveries and enabling technologies within this field. Include cross-field consequences…"; only `CHEMREV` has a real scope. | `import_field` (from the run's `field.json`) | `rebuild` → `fields.boundaries`; field file `boundaries`, which is empty when the text is that instruction (`store.scope`) → Field page "scope" |
+| `boundaries` | string | yes | The field's scope as given to the research prompt. In 65 of 66 fields this is the prompt's fixed instruction, "<Name>: fundamental discoveries and enabling technologies within this field. Include cross-field consequences…"; only `CHM` (Chemistry) has a real scope. | `import_field` (from the run's `field.json`) | `rebuild` → `fields.boundaries`; field file `boundaries`, which is empty when the text is that instruction (`store.scope`) → Field page "scope" |
 | `created_at` | string | yes | ISO time the final record was merged. | `import_field` (from `final-innovations.json`) | `rebuild`: `added_at` of research citation rows |
 | `imported_from` | object | yes | `run_hash`: SHA-256 of the `final-innovations.json` bytes imported; `imported_at`: ISO time of import. | `import_field` | Nothing in code; an audit trail. |
 | `original_dispositions` | list | yes (660 items) | What happened to each entry of the field's original (pre-pipeline) list: `original_number` (int), `original_title`, `status` (`covered` 256, `added` 159, `not_added` 245), `concept_ids` (list of breakthrough IDs), `reason`. | Format stage (`FORMAT_SCHEMA` in `ingestion/field_workflow.py`) → `final_rewrite` → `import_field` | Nothing in `atlas/`; `ingestion.batch` validates it. |
