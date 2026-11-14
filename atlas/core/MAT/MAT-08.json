@@ -199,7 +199,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "sources": [
   "https://doi.org/10.1103/RevModPhys.92.015003",
@@ -276,5 +277,306 @@
    "How can accuracy be certified efficiently when an exact reference calculation is infeasible?"
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "MAT-08",
+  "title": "Polynomial-time chemical accuracy for molecular electronic structure",
+  "definition": "An algorithm calculates the lowest electronic energy of a specified, unbounded molecular family to chemical accuracy: less than 1.6 millihartree error for its finite-basis Hamiltonian. With nuclei fixed, the total computation, including state preparation, has a proved polynomial cost bound.",
+  "goal": {
+   "need": "Full configuration interaction expands an N-electron state over C(M,N) determinants, where M counts spin-orbitals, or one-electron states including spin. At N=54 and M=108 this is about 2.5×10^31 determinants. The energy tolerance used here is 1.6×10−3 hartree, approximately 1 kcal/mol. The target is a proved cost bound at that tolerance without storing this full expansion.",
+   "need_refs": [
+    1
+   ],
+   "figures": {
+    "caption": "Illustrative sizes of the full configuration-interaction expansion",
+    "columns": [
+     "Electrons N",
+     "Spin-orbitals M",
+     "Determinants C(M,N)"
+    ],
+    "rows": [
+     [
+      "20",
+      "40",
+      "1.38×10^11"
+     ],
+     [
+      "40",
+      "80",
+      "1.08×10^23"
+     ],
+     [
+      "54",
+      "108",
+      "2.49×10^31"
+     ]
+    ],
+    "note": "Calculated from the source's binomial formula, before restricting spin or spatial symmetry. These counts are not runtime lower bounds.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "National Academies of Sciences, Engineering, and Medicine",
+     "year": "2023",
+     "quote": "Develop more efficient quantum algorithms for fault-tolerant quantum computers to simulate molecular systems, including those with QIS relevance.",
+     "context": "A research direction in Chapter 4. QIS means quantum information science.",
+     "ref": 2,
+     "checked": true
+    },
+    {
+     "body": "United States Department of Energy",
+     "year": "2026",
+     "quote": "A fundamental goal of chemistry is to predict and control chemical transformations across electronic, atomic, and molecular scales.",
+     "context": "The Chemistry domain of Quantum Genesis Priority Applications identifies reaction mechanisms and reaction dynamics as quantum-computing targets.",
+     "ref": 3,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "A molecular ground-energy algorithm has proved chemical accuracy and polynomial total cost.",
+   "criterion": "A peer-reviewed proof gives a uniform algorithm for a structurally defined, unbounded family of fixed-nuclei molecular Coulomb Hamiltonians covering interacting transition-metal complexes and bond dissociation as size grows. With N electrons, M spin-orbitals and B-bit integrals, it returns |E−E0|<ε≤1.6×10−3 hartree with probability ≥2/3 at total cost polynomial in N, M, B and 1/ε. E0 is the specified finite-basis ground energy. Preprocessing, preparation, repetitions and numerical error are included; all gap or overlap assumptions are proved for the family. Basis incompleteness and physical-model errors are excluded.",
+   "set_by": "Technology Atlas; combined acceptance test and required family breadth are Atlas-defined.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches of NASEM, DOE, DARPA and NIST roadmaps and benchmarks, and searches for standards and prizes, found no combined acceptance rule or prescribed molecular family. This test combines the published accuracy convention with full cost accounting. Its family must cover the bond-breaking and transition-metal problems identified by NASEM. Fixed-basis worst-case hardness does not settle restricted families.",
+   "refs": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A molecular ground-state energy is measured within 1.6 millihartree of its finite-basis exact value.",
+    "criterion": "A quantum processor estimates a molecular ground-state energy within 1.6×10−3 hartree of full configuration interaction in the same basis. Published on 10 January 2010, Lanyon et al.'s experiment used H2 with 2 electrons and 4 STO-3G spin-orbitals, encoded on 2 photonic qubits. It obtained 20-bit energies using 31 samples per bit; at 73.48 pm, agreement with the classical reference had a reported uncertainty of 0.03 kJ/mol. State preparation and evolution operators used classical precompilation.",
+    "set_by": "Quantum-chemistry chemical-accuracy convention; its finite-basis energy interpretation is explicit in Weaving et al. (2023).",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "energy errors to within 1.6 mHa of full configuration interaction.",
+    "threshold_ref": 5,
+    "refs": [
+     5,
+     6,
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A molecular energy difference reaches 1.6 millihartree accuracy without exponential precompilation.",
+    "criterion": "A quantum-hardware calculation obtains a molecular energy difference within 1.6×10−3 hartree of its finite-basis exact value without exponentially costly circuit precompilation. Published on 18 July 2016, O'Malley et al. used 2 superconducting qubits for H2 in STO-3G, with 2 electrons and 4 spin-orbitals. The variational calculation's dissociation-energy error was (8±5)×10−4 hartree. This finite demonstration does not establish polynomial convergence of the classical parameter optimization.",
+    "set_by": "Quantum-chemistry hardware convention distinguishing compiled demonstrations from calculations without exponential precompilation, explicitly applied by O'Malley et al. (2016).",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "We report the first electronic structure calculation performed on a quantum computer without exponentially costly precompilation.",
+    "threshold_ref": 7,
+    "refs": [
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A molecular ground-energy estimator has polynomial cost given a trial state with nonzero overlap.",
+    "criterion": "Given a trial state with ground-state overlap amplitude S>0, a finite-basis molecular energy-estimation routine has a proved gate cost polynomial in orbital count, inverse energy error and 1/S, with controlled simulation error. Trial-state preparation remains a separate cost. Published on 9 September 2005, Aspuru-Guzik et al. simulated quantum energy calculations for water and lithium hydride and adiabatic preparation for stretched H2 on a classical computer.",
+    "set_by": "Quantum phase-estimation complexity convention, established in molecular algorithms by Aspuru-Guzik et al. (2005) and reviewed by McArdle et al., Sections V.1.1–V.1.3.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "the number of gates required grows polynomially with the number of quantum bits.",
+    "threshold_ref": 8,
+    "refs": [
+     8,
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "Molecular trial states retain inverse-polynomial ground-state overlap at polynomial preparation cost.",
+    "criterion": "Prepare trial states at polynomial total cost with squared ground-state overlap p0≥1/poly(N,M,B) throughout the completion family. Bounds must follow from the family's structural conditions. A preprint submitted on 31 October 2026 supplies a conditional adiabatic-preparation bound assuming polynomial Hartree–Fock convergence, a size-independent gap along the interpolation and an extensive Hamiltonian norm. Numerical gap evidence includes alanine chains up to 64 monomers. This is a conditional result, not a proof for the completion family; it is not peer reviewed.",
+    "set_by": "Quantum phase-estimation state-preparation convention, stated by McArdle et al., Section V.1.2; polynomial preparation cost is required for polynomial total cost.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "at worst a polynomially decreasing overlap with the FCI ground state, as the system size increases.",
+    "threshold_ref": 1,
+    "refs": [
+     1,
+     9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": false
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No outside body's acceptance test was found that fixes both a molecular family and a chemical-accuracy guarantee at polynomial total cost.",
+   "No proof was found establishing the required preparation and energy-error bounds across an unbounded, structurally defined family covering both interacting transition-metal complexes and bond dissociation."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://arxiv.org/html/1808.10402",
+    "doi": "10.1103/RevModPhys.92.015003",
+    "title": "Quantum computational chemistry",
+    "authors": "McArdle S, Endo S, Aspuru-Guzik A, Benjamin SC, Yuan X",
+    "container": "Rev. Mod. Phys.",
+    "year": "2020",
+    "volume": "92",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "book",
+    "url": "https://www.nationalacademies.org/read/26850/chapter/6",
+    "doi": "10.17226/26850",
+    "title": "Advancing Chemistry and Quantum Information Science: An Assessment of Research Opportunities at the Interface of Chemistry and Quantum Information Science in the United States",
+    "authors": "Committee on Identifying Opportunities at the Interface of Chemistry and Quantum Information Science, Board on Chemical Sciences and Technology, Board on Life Sciences, Division on Earth and Life Studies, National Academies of Sciences, Engineering, and Medicine",
+    "container": "National Academies Press",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 3,
+    "kind": "report",
+    "url": "https://www.energy.gov/documents/quantum-genesis-priority-applications",
+    "doi": null,
+    "title": "Quantum Genesis Priority Applications",
+    "authors": "United States Department of Energy",
+    "container": "United States Department of Energy",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "journal",
+    "url": "https://journals.aps.org/prxquantum/pdf/10.1103/PRXQuantum.3.020322",
+    "doi": "10.1103/PRXQuantum.3.020322",
+    "title": "Intractability of Electronic Structure in a Fixed Basis",
+    "authors": "O’Gorman B, Irani S, Whitfield J, Fefferman B",
+    "container": "PRX Quantum",
+    "year": "2022",
+    "volume": "3",
+    "issue": "2",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 5,
+    "kind": "journal",
+    "url": "https://journals.aps.org/prresearch/abstract/10.1103/PhysRevResearch.5.043054",
+    "doi": "10.1103/PhysRevResearch.5.043054",
+    "title": "Benchmarking noisy intermediate scale quantum error mitigation strategies for ground state preparation of the HCl molecule",
+    "authors": "Weaving T, Ralli A, Kirby WM, Love PJ, Succi S, Coveney PV",
+    "container": "Phys. Rev. Research",
+    "year": "2023",
+    "volume": "5",
+    "issue": "4",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://www.kassal.group/assets/papers/kassal006.pdf",
+    "doi": "10.1038/nchem.483",
+    "title": "Towards quantum chemistry on a quantum computer",
+    "authors": "Lanyon BP, Whitfield JD, Gillett GG, Goggin ME, Almeida MP, Kassal I, et al.",
+    "container": "Nature Chem",
+    "year": "2010",
+    "volume": "2",
+    "issue": "2",
+    "pages": "106-111",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "journal",
+    "url": "https://journals.aps.org/prx/pdf/10.1103/PhysRevX.6.031007",
+    "doi": "10.1103/PhysRevX.6.031007",
+    "title": "Scalable Quantum Simulation of Molecular Energies",
+    "authors": "O’Malley PJJ, Babbush R, Kivlichan ID, Romero J, McClean JR, Barends R, et al.",
+    "container": "Phys. Rev. X",
+    "year": "2016",
+    "volume": "6",
+    "issue": "3",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 8,
+    "kind": "journal",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/16151006/",
+    "doi": "10.1126/science.1113479",
+    "title": "Simulated quantum computation of molecular energies",
+    "authors": "Aspuru-Guzik A, Dutoi AD, Love PJ, Head-Gordon M",
+    "container": "Science",
+    "year": "2005",
+    "volume": "309",
+    "issue": "5741",
+    "pages": "1704-1707",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 9,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2611.00751v1",
+    "doi": "10.48550/arXiv.2611.00751",
+    "title": "Quantum algorithm for weakly correlated molecular electronic ground states with sub-quintic scaling in the system size",
+    "authors": "Leimkuhler O, Kronenberger M, Castaldo D, Stroschein T, Patil S, Tomann R, et al.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 7 from Crossref, 0 from PubMed, 1 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 5 found, 1 not found, 0 with no readable copy."
+   }
+  ]
  }
 }

@@ -201,7 +201,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Predicting how well AI will learn before training",
@@ -289,5 +290,343 @@
    "Which measures adequately capture generated quality and novelty, and which chance comparisons suit each task?"
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "CSC-06",
+  "title": "A predictive theory of deep learning generalization",
+  "definition": "A mathematical theory predicts performance on new examples drawn from a specified distribution before a neural network is trained, from its architecture, training data and training procedure. Its assumptions and prediction errors are explicit, and its predictions distinguish learning from memorization within a stated domain.",
+  "goal": {
+   "need": "ImageNet experiments separate memorization from transfer: the same architecture fits real and randomized labels, with different held-out accuracy. Predicting that difference could inform training choices. OpenAI reports predicting GPT-4’s held-out code loss from runs using at most 1/10,000 of its compute. The prediction used a scaling law fitted to smaller runs.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": {
+    "caption": "Inception v3 accuracy on ImageNet, reported on 26 February 2017.",
+    "columns": [
+     "Training labels",
+     "Training accuracy",
+     "Held-out accuracy"
+    ],
+    "rows": [
+     [
+      "Real",
+      "99.53%",
+      "59.80%"
+     ],
+     [
+      "Randomized",
+      "95.20%",
+      "0.11%"
+     ]
+    ],
+    "note": "1,281,167 training images; 50,000 validation images; 1,000 classes. Data augmentation, dropout and weight decay were disabled. Values are top-1 accuracy.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "National Science Foundation, Mathematical Foundations of Artificial Intelligence solicitation",
+     "year": "2024",
+     "quote": "rigorous approaches for characterizing and validating machine learning algorithms and their predictions",
+     "context": null,
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "OpenAI",
+     "year": "2023",
+     "quote": "A large focus of the GPT-4 project was building a deep learning stack that scales predictably.",
+     "context": null,
+     "ref": 2,
+     "checked": true
+    },
+    {
+     "body": "NeurIPS 2020 Predicting Generalization in Deep Learning competition organisers",
+     "year": "2020",
+     "quote": "design metrics that accurately predict the generalization performance of deep neural networks without using a test set.",
+     "context": "The competition takes trained networks and their training data as inputs.",
+     "ref": 4,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "Independent experiments confirm a theory’s numerical predictions made before training.",
+   "criterion": "An independent group validates a published mathematical theory’s predictions of performance on a specified unseen-data distribution for finite neural networks, from architecture, training data and training procedure. Predictions are fixed before target training begins and meet error tolerances fixed before outcomes are observed, across the theory’s stated range of datasets, sample sizes and training choices. They distinguish useful performance from a stated baseline. Assumptions and uncertainty are explicit; prediction parameters are not fitted to validation outcomes. Generative or distribution-shift claims require corresponding metrics or specified shifts.",
+   "set_by": "Atlas fallback; no external completion test for this combined capability was located.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searched NSF foundations solicitations, DARPA AIQ requirements, NeurIPS PGDL rules and generalization surveys for a pretraining prediction standard; none supplied a completion test or common accuracy tolerance. The 2021 survey establishes results in restricted regimes. AIQ’s 5% target permits evaluation results as inputs. The learning-mechanics preprint calls for first-principles predictions; diffusion work questions test loss as a generation metric. This fallback requires independent prospective validation within a declared domain.",
+   "refs": [
+    3,
+    5,
+    4,
+    6,
+    7,
+    8
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "An overparameterized neural classifier receives a proved error bound below 100%.",
+    "criterion": "For a neural classifier with more parameters than training examples, prove an upper bound below 1 on expected error on new examples, with sampling assumptions and confidence specified. This is nonvacuity, not accurate error prediction. Dziugaite and Roy’s 2017 binary-MNIST experiment used 55,000 training and 10,000 test images. For approximately 2.384 million parameters, the stochastic-classifier bound was 0.223 at confidence 0.965; its test-error upper estimate was 0.035. The bound was computed after training.",
+    "set_by": "Statistical-learning convention of a nonvacuous classification-risk bound, stated by Dziugaite and Roy in UAI 2017.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "before the generalization error falls below 1.",
+    "threshold_ref": 9,
+    "refs": [
+     9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A generalization predictor ranks first on the PGDL competition’s four final tasks.",
+    "criterion": "Achieve the highest final-phase score under the NeurIPS 2020 PGDL protocol, predicting relative generalization from trained networks and training data without test-set access. The conditional-mutual-information score measures information about pairwise performance rankings after conditioning on training settings, averaged across four hidden image-classification tasks. Interpex ranked first with 22.92 points out of 100 among 24 final-phase teams. The complete benchmark contained 454 networks across eight tasks. This tests ranking after training.",
+    "set_by": "NeurIPS 2020 PGDL organisers, final-phase competition scoring and winner selection; the benchmark covers convolutional image classifiers.",
+    "set_by_kind": "prize",
+    "threshold_quote": "the highest scoring solution is used for determining the final winners.",
+    "threshold_ref": 10,
+    "refs": [
+     10
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "An AIQ method predicts an unevaluated test value within 5% of that value.",
+    "criterion": "Meet DARPA AIQ’s specific-problem target: predict test values from training data and evaluation results within 5% of the test value. The programme requires results for more than one model and evaluation on Llama plus another listed model family. This permits measurements of trained models. On 5 October 2026, Kitware reported evaluating a method across approximately 100 models and benchmarks, but published no prediction-error values establishing the 5% target. That account is not peer reviewed.",
+    "set_by": "DARPA AIQ, BAA HR001124S0029, Amendment 04, Section I, specific-problem evaluation; DARPA’s document text is reproduced by GovTribe.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "predictions should be within 5% of the test value.",
+    "threshold_ref": 5,
+    "refs": [
+     5,
+     11
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m4",
+    "title": "A theory’s predictions made before training agree with experiments within its stated error tolerance.",
+    "criterion": "The theory’s developers obtain numerical agreement on new training runs within tolerances fixed in advance, using architecture, training data and training procedure without target-run outcomes. The demonstration covers the theory’s declared domain; independent confirmation remains the completion test. GPT-4’s reported code-loss extrapolation used no partial target-run results, but was fitted to smaller runs and made after target training began. Its report does not establish this pretraining test.",
+    "set_by": "Atlas fallback; no externally specified stage testing theory-derived numerical predictions fixed before target training begins was found in NSF, AIQ or PGDL requirements.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     2,
+     3,
+     5,
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No external completion criterion or accuracy tolerance for generalization predictions made before training was found.",
+   "No external protocol defining the prospective-validation milestone was found.",
+   "The SAM.gov attachment was not readable; DARPA’s BAA was available as document text extracted by GovTribe.",
+   "Figure 2 of the AIQ BAA was absent from the extracted text, so its additional metrics could not be checked.",
+   "No published prediction errors establishing AIQ’s 5% target, or independent validation meeting the completion test, were located."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/1611.03530",
+    "doi": "10.48550/arXiv.1611.03530",
+    "title": "Understanding deep learning requires rethinking generalization",
+    "authors": "Zhang C, Bengio S, Hardt M, Recht B, Vinyals O",
+    "container": "arXiv",
+    "year": "2016",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 2,
+    "kind": "report",
+    "url": "https://cdn.openai.com/papers/gpt-4.pdf",
+    "doi": "10.48550/arXiv.2303.08774",
+    "title": "GPT-4 Technical Report",
+    "authors": "OpenAI, Achiam J, Adler S, Agarwal S, Ahmad L, Akkaya I, et al.",
+    "container": "arXiv",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 3,
+    "kind": "web",
+    "url": "https://www.nsf.gov/funding/opportunities/mfai-mathematical-foundations-artificial-intelligence/nsf24-569/solicitation",
+    "doi": null,
+    "title": "NSF 24-569: Mathematical Foundations of Artificial Intelligence",
+    "authors": "National Science Foundation",
+    "container": "National Science Foundation",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "web",
+    "url": "https://neurips.cc/Conferences/2020/CompetitionTrack",
+    "doi": null,
+    "title": "NeurIPS Competition Track",
+    "authors": "NeurIPS",
+    "container": "NeurIPS",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "report",
+    "url": "https://govtribe.com/file/government-file/hr001124s0029-hr001124s0029-amendment-04-dot-pdf",
+    "doi": null,
+    "title": "Broad Agency Announcement Artificial Intelligence Quantified",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "DARPA; document text reproduced by GovTribe",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://www.cambridge.org/core/journals/acta-numerica/article/deep-learning-a-statistical-viewpoint/7BCB89D860CEDDD5726088FAD64F2A5A",
+    "doi": "10.1017/S0962492921000027",
+    "title": "Deep learning: a statistical viewpoint",
+    "authors": "Bartlett PL, Montanari A, Rakhlin A",
+    "container": "Acta Numerica",
+    "year": "2021",
+    "volume": "30",
+    "issue": null,
+    "pages": "87-201",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2604.21691v2",
+    "doi": "10.48550/arXiv.2604.21691",
+    "title": "There Will Be a Scientific Theory of Deep Learning",
+    "authors": "Simon J, Kunin D, Atanasov A, Boix-Adserà E, Bordelon B, Cohen J, et al.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 8,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2605.06077v1",
+    "doi": "10.48550/arXiv.2605.06077",
+    "title": "Understanding diffusion models requires rethinking (again) generalization",
+    "authors": "Marion P, Wu YH",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 9,
+    "kind": "journal",
+    "url": "https://www.auai.org/uai2017/proceedings/papers/173.pdf",
+    "doi": null,
+    "title": "Computing Nonvacuous Generalization Bounds for Deep (Stochastic) Neural Networks with Many More Parameters than Training Data",
+    "authors": "Dziugaite GK, Roy DM.",
+    "container": "Proceedings of the Thirty-Third Conference on Uncertainty in Artificial Intelligence",
+    "year": "2017",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 10,
+    "kind": "journal",
+    "url": "https://proceedings.mlr.press/v133/jiang21a/jiang21a.pdf",
+    "doi": null,
+    "title": "Methods and Analysis of The First Competition in Predicting Generalization of Deep Learning",
+    "authors": "Jiang Y, Natekar P, Sharma M, Aithal SK, Kashyap D, Subramanyam N, et al.",
+    "container": "Proc. Mach. Learn. Res.",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 11,
+    "kind": "web",
+    "url": "https://www.kitware.com/evaluating-ai-for-real-world-performance/",
+    "doi": null,
+    "title": "Evaluating AI for Real-World Performance",
+    "authors": "Hoogs A, Fieldhouse K, Hu B, Richardwebster B, Veenhuis E, Sheedy R.",
+    "container": "Kitware",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 4 from arXiv, 6 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 5 found, 0 not found, 1 with no readable copy."
+   }
+  ]
  }
 }

@@ -191,7 +191,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "sources": [
   "https://doi.org/10.48550/arXiv.2601.13256"
@@ -297,5 +298,282 @@
    "Growth by fixed powers can still be unaffordable; the powers and multiplying constants will determine practical value."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "MAT-04",
+  "title": "Polynomial-complexity approximation of semilinear parabolic PDEs",
+  "definition": "An algorithm approximates specified semilinear parabolic PDEs—diffusion equations nonlinear in the solution or its first spatial derivatives—with root-mean-square error ε using polynomially many function evaluations and random draws in dimension d and ε⁻¹. The guarantee applies separately at each requested space-time point under published coefficient and input-cost assumptions.",
+  "goal": {
+   "need": "The review gives conventional tensor-product discretizations computational complexity O(N^d), where N is the number of degrees of freedom per coordinate and d the dimension. A polynomial error–cost theorem identifies equation families for which this exponential dependence can be avoided.",
+   "need_refs": [
+    1
+   ],
+   "figures": {
+    "caption": "Illustrative tensor-product counts with 10 degrees of freedom per coordinate",
+    "columns": [
+     "Dimension d",
+     "Unknowns N^d"
+    ],
+    "rows": [
+     [
+      "2",
+      "100"
+     ],
+     [
+      "10",
+      "10¹⁰"
+     ],
+     [
+      "100",
+      "10¹⁰⁰"
+     ]
+    ],
+    "note": "Calculated from N^d; these are illustrative grid counts, not measured solver resources.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "US Department of Energy, Exascale Requirements Reviews committee",
+     "year": "2017",
+     "quote": "High-dimensional PDE solvers (3.3.2).",
+     "context": "Listed among Fusion Energy Sciences methods-development requirements; the report does not prescribe a polynomial-complexity threshold.",
+     "ref": 2,
+     "checked": false
+    },
+    {
+     "body": "Institute for Pure and Applied Mathematics, High Dimensional Hamilton-Jacobi Methods workshop",
+     "year": "2020",
+     "quote": "Ideas to be explored in the workshop include different computational methodologies for efficient real-time solution of nonlinear HJ equations",
+     "context": "HJ means Hamilton–Jacobi; the workshop concerns reachability, optimal control and differential games.",
+     "ref": 3,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "Variable-coefficient semilinear PDEs admit proved polynomial-cost approximations at requested points.",
+   "criterion": "For fixed T>0 and k≥0, satisfy Neufeld–Nguyen–Wu Theorem 1.1, including assumptions (1)–(9), polynomial input costs (16), and recurrence (17). For every d≥1 and ε∈(0,1), the maximum componentwise RMS error for the solution and its gradient is <ε uniformly over query locations in [0,T)×[−k,k]^d, with gradient errors weighted by √(T−t). The counted cost per query is ≤C_δ η d^η ε⁻⁽⁴⁺δ⁾ for every δ∈(0,1); C_δ and η are independent of d and ε. Cost counts function evaluations and scalar random draws.",
+   "set_by": "The numerical-complexity literature’s convention for overcoming the curse of dimensionality, instantiated by Neufeld, Nguyen and Wu, Theorem 1.1.",
+   "set_by_kind": "community_convention",
+   "threshold_quote": "its computational complexity only grows polynomially in the dimension $d\\in\\mathbb{N}$ and the reciprocal of the accuracy $\\varepsilon$",
+   "threshold_ref": 4,
+   "basis": "Theorem 1.1 achieves this restricted capability; an author lists its journal publication in 2025. The supremum is outside the expectation: this bounds error separately at each query, rather than the expected supremum error of one computed field. A preprint dated 30 June 2025 proves failure of one MLP scheme on a different Hamilton–Jacobi–Bellman family; that counterexample does not establish impossibility for other algorithms.",
+   "refs": [
+    4,
+    5,
+    6
+   ],
+   "threshold_checked": false
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "sequence",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "An MLP solver approximates gradient-independent semilinear heat equations with cost O(dε⁻⁽⁴⁺δ⁾).",
+    "criterion": "Prove the Corollary 3.19 bound for multilevel Picard (MLP), a recursive Monte Carlo method: scalar normal draws plus evaluations of the nonlinearity and terminal data grow as O(dε⁻⁽⁴⁺δ⁾), for every δ>0, at requested space-time points. The error is root mean square. The corollary assumes an infinitely differentiable solution and dimension-uniform bounds on the data, nonlinearity and derivatives rescaled by (k!)⁻³⁄⁴. E, Hutzenthaler, Jentzen and Kruse established this result in their 2021 article.",
+    "set_by": "MLP developers E, Hutzenthaler, Jentzen and Kruse, Corollary 3.19; the field’s polynomial-complexity convention applied to gradient-independent semilinear heat equations.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "our proposed algorithm is \\(O(d\\,{\\varepsilon }^{-(4+\\delta )})\\) for any \\(\\delta \\in (0,\\infty )\\).",
+    "threshold_ref": 7,
+    "refs": [
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A gradient-dependent semilinear heat solver reaches RMS error ε with ≤cdᶜε⁻⁽²⁺δ⁾ random draws.",
+    "criterion": "Satisfy Hutzenthaler–Jentzen–Kruse Theorem 1.1 for ∂ₜu=Δu+f(u,∇u), under its weighted coordinatewise Lipschitz and growth assumptions, including a dimension-independent bound on the sum of Lipschitz weights. For every d≥1 and ε∈(0,1], the square root of the value’s mean-square error plus the largest gradient-component mean-square error at (T,0) is ≤ε. The cumulative number of scalar random draws is ≤cdᶜε⁻⁽²⁺δ⁾ for every fixed δ>0. Published on 13 July 2021.",
+    "set_by": "MLP developers Hutzenthaler, Jentzen and Kruse, Theorem 1.1; the published test covers gradient-dependent semilinear heat equations.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "is bounded by \\(c d^c {\\varepsilon }^{ -( 2 + \\delta ) }\\)",
+    "threshold_ref": 8,
+    "refs": [
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "An MLP solver converges in mean square for variable-coefficient, gradient-dependent semilinear PDEs.",
+    "criterion": "Under Neufeld–Wu Assumptions 2.1, 2.4 and 2.6, prove Theorem 3.4(i): for each fixed dimension d, location x and ε∈(0,1], there is an iteration threshold after which the Euler-based MLP approximation of the solution and its gradient has L² error <ε. This establishes convergence when drift and diffusion vary with position, without the dimension-polynomial cost conclusion required for completion. The full proof appears in the version dated 18 February 2025.",
+    "set_by": "MLP developers Neufeld and Wu, Theorem 3.4(i); the field’s mean-square convergence criterion for their variable-coefficient equation class.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "proves the convergence together with the corresponding convergence rate for our MLP approximations",
+    "threshold_ref": 9,
+    "refs": [
+     9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No agency, society, standards-body or prize criterion was found specifying a joint runtime-and-memory target for a defined broader nonlinear Hamilton–Jacobi–Bellman family.",
+   "No external criterion was found requiring a single constructed space-time approximation with polynomial total runtime and peak memory for that broader target.",
+   "The Journal of Complexity publisher page was inaccessible; its full author manuscript and an author’s publication record were accessible."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2601.13256v3",
+    "doi": "10.48550/arXiv.2601.13256",
+    "title": "Deep Neural networks for solving high-dimensional parabolic partial differential equations",
+    "authors": "Zhang W, Hu Z, Cai W, Karniadakis GE",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 2,
+    "kind": "report",
+    "url": "https://science.osti.gov/-/media/ascr/pdf/programdocuments/docs/2018/DOE-ExascaleReport-CrossCut.pdf",
+    "doi": null,
+    "title": "Exascale Requirements Reviews Crosscut Report",
+    "authors": "US Department of Energy.",
+    "container": "US Department of Energy",
+    "year": "2017",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "web",
+    "url": "https://www.ipam.ucla.edu/programs/workshops/workshop-i-high-dimensional-hamilton-jacobi-methods-in-control-and-differential-games/",
+    "doi": null,
+    "title": "Workshop I: High Dimensional Hamilton-Jacobi Methods in Control and Differential Games",
+    "authors": "Institute for Pure and Applied Mathematics.",
+    "container": "IPAM",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2311.11579v4",
+    "doi": "10.48550/arXiv.2311.11579",
+    "title": "Multilevel Picard approximations overcome the curse of dimensionality in the numerical approximation of general semilinear PDEs with gradient-dependent nonlinearities",
+    "authors": "Neufeld A, Nguyen TA, Wu S",
+    "container": "arXiv",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 5,
+    "kind": "web",
+    "url": "https://sites.google.com/view/sizhou-wu/publications",
+    "doi": null,
+    "title": "Publications",
+    "authors": "Wu S.",
+    "container": "Sizhou Wu",
+    "year": "undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2506.23969v1",
+    "doi": "10.48550/arXiv.2506.23969",
+    "title": "Full history recursive multilevel Picard approximations suffer from the curse of dimensionality for the Hamilton-Jacobi-Bellman equation of a stochastic control problem",
+    "authors": "Hutzenthaler M, Nguyen TA",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 7,
+    "kind": "journal",
+    "url": "https://link.springer.com/article/10.1007/s42985-021-00089-5",
+    "doi": "10.1007/s42985-021-00089-5",
+    "title": "Multilevel Picard iterations for solving smooth semilinear parabolic heat equations",
+    "authors": "E W, Hutzenthaler M, Jentzen A, Kruse T",
+    "container": "Partial Differ. Equ. Appl.",
+    "year": "2021",
+    "volume": "2",
+    "issue": "6",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 8,
+    "kind": "journal",
+    "url": "https://link.springer.com/article/10.1007/s10208-021-09514-y",
+    "doi": "10.1007/s10208-021-09514-y",
+    "title": "Overcoming the Curse of Dimensionality in the Numerical Approximation of Parabolic Partial Differential Equations with Gradient-Dependent Nonlinearities",
+    "authors": "Hutzenthaler M, Jentzen A, Kruse T",
+    "container": "Found Comput Math",
+    "year": "2022",
+    "volume": "22",
+    "issue": "4",
+    "pages": "905-966",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 9,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2310.12545v5",
+    "doi": "10.48550/arXiv.2310.12545",
+    "title": "Multilevel Picard algorithm for general semilinear parabolic PDEs with gradient-dependent nonlinearities",
+    "authors": "Neufeld A, Wu S",
+    "container": "arXiv",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 4 from arXiv, 3 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 4 found, 2 not found, 0 with no readable copy."
+   }
+  ]
  }
 }

@@ -160,7 +160,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "sources": [
   "https://doi.org/10.48550/arXiv.1611.03530"
@@ -266,5 +267,298 @@
    "How to establish that real application data satisfy the mathematical assumptions remains an open question."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "MAT-07",
+  "title": "Prescriptive theory of neural-network feature learning",
+  "definition": "A mathematical theory prescribes a finite neural network and its training procedure from assumptions about a data distribution, with a proved bound on error on unseen data. It covers feature learning, in which training changes the network’s internal representations; its guarantee applies only to the stated data model.",
+  "goal": {
+   "need": "In Zhang et al.’s CIFAR-10 experiments, the same 1,649,402-parameter Inception architecture attained 100% training accuracy with genuine or randomized labels. Without augmentation or weight decay, test accuracy was 85.75% with genuine labels and 9.78% with randomized labels, on 10,000 held-out images after training on 50,000 images. Architecture size therefore did not explain this difference; a design theory must account for the data and training-selected solution.",
+   "need_refs": [
+    1
+   ],
+   "figures": {
+    "caption": "Inception on CIFAR-10 without data augmentation or weight decay.",
+    "columns": [
+     "Training labels",
+     "Training accuracy",
+     "Test accuracy"
+    ],
+    "rows": [
+     [
+      "Genuine",
+      "100.0%",
+      "85.75%"
+     ],
+     [
+      "Randomized",
+      "100.0%",
+      "9.78%"
+     ]
+    ],
+    "note": "Both configurations have 1,649,402 parameters, 50,000 training images and 10,000 held-out images. Values are from Table 1.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "US National Science Foundation, Mathematical Foundations of Artificial Intelligence programme",
+     "year": "2024",
+     "quote": "The development of mathematically grounded design and analysis principles for the current and next generations of AI;",
+     "context": "One of the programme’s explicitly enumerated research goals.",
+     "ref": 2,
+     "checked": true
+    },
+    {
+     "body": "NSF–Simons THEORINET collaboration, described in the Simons Foundation annual report",
+     "year": "2020",
+     "quote": "the design of algorithms that can be guaranteed to satisfy particular constraints",
+     "context": "The collaboration seeks to use rigorous analysis of neural networks to guide algorithm design and transfer between domains.",
+     "ref": 3,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "A finite neural-network prescription has a proved feature-learning and population-risk guarantee.",
+   "criterion": "A peer-reviewed theorem supplies distribution and loss assumptions, a finite architecture, initialization and training rule, and finite sufficient bounds on sample size, width and training steps for a specified population risk. It must analyze training-induced representation changes. This is achieved under restricted assumptions: Frei et al. prove classification error ≤ η+C√(log(1/δ)/n) after T=1+1/(4α) gradient steps, with probability ≥1−4δ, under assumptions (A1)–(A7); η is the label-noise rate, α the step size and n the sample count.",
+   "set_by": "Technology Atlas; minimal operational interpretation of the cited mathematical-design goals, limited to explicitly specified data models.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches of NSF MoDL/MFAI solicitations, NSF–Simons materials, NIST standards and theory-prize rules located no common completion criterion. The narrow interpretation is a proved design prescription within declared data models, achieved by the cited 2022–2024 results. These cover low-dimensional polynomials, noisy clusters and hierarchical features. No externally specified breadth test supports declaring a general theory complete.",
+   "refs": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A neural network achieves zero training error on 50,000 randomized CIFAR-10 labels.",
+    "criterion": "A trained network interpolates the randomized classification dataset: every training image receives its assigned label. Zhang et al.’s ICLR 2017 experiment meets this test with an Inception network containing 1,649,402 parameters and 50,000 CIFAR-10 training images in 10 classes. Table 1 reports 100.0% training accuracy and 9.78% test accuracy without augmentation or weight decay. This establishes the memorization phenomenon that a generalization theory must distinguish from learning signal.",
+    "set_by": "Community convention of interpolation as zero training error; instantiated by Zhang et al., ICLR 2017, Section 1.1 and Table 1.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "More precisely, when trained on a completely random labeling of the true data, neural networks achieve 0 training error.",
+    "threshold_ref": 1,
+    "refs": [
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "Gradient descent provably converges to zero training loss in a finite two-layer ReLU network.",
+    "criterion": "Du et al.’s Theorem 4.1 proves geometric convergence for squared loss on n unit-norm, pairwise nonparallel inputs with bounded labels. With width m=Ω(n⁶/(λ₀⁴δ³)), independent Gaussian hidden-weight initialization, fixed independent output signs and step size η=O(λ₀/n²), squared prediction error after k updates is at most (1−ηλ₀/2)ᵏ times its initial value, with probability ≥1−δ. Here λ₀>0 is the smallest eigenvalue of the paper’s population Gram matrix. The result appeared at ICLR 2019.",
+    "set_by": "Community convention of a peer-reviewed convergence proof; Du et al., ICLR 2019, Theorem 4.1, for two-layer rectified-linear-unit networks.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "randomly initialized gradient descent converges to a globally optimal solution at a linear convergence rate for the quadratic loss function.",
+    "threshold_ref": 9,
+    "refs": [
+     9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A finite neural network has a certified classification error at most 23% on binary MNIST.",
+    "criterion": "A data-dependent generalization bound certifies population misclassification probability below the trivial bound of 1. Dziugaite and Roy’s UAI 2017 result reports bounds of 0.161–0.223 with confidence 0.965 for stochastic networks trained on 55,000 MNIST images, grouping digits 0–4 against 5–9. Their largest network has approximately 2.384 million parameters. The PAC-Bayes certificate applies to a distribution over network weights and assumes independent training draws from the evaluation distribution; it does not prove that gradient descent discovers specified features.",
+    "set_by": "Community convention of a nonvacuous probability bound; Dziugaite and Roy, UAI 2017, Introduction, Section 5 and Table 1. The numerical result is specific to binary MNIST.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "all true label experiments have classification error bounded by 0.23.",
+    "threshold_ref": 10,
+    "refs": [
+     10
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No external coverage requirement was found that distinguishes a completed general design theory from the restricted theorems cited here.",
+   "The ONR MURI Foundations of Deep Learning project’s About page could not be opened."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://arxiv.org/pdf/1611.03530",
+    "doi": "10.48550/arXiv.1611.03530",
+    "title": "Understanding deep learning requires rethinking generalization",
+    "authors": "Zhang C, Bengio S, Hardt M, Recht B, Vinyals O",
+    "container": "arXiv",
+    "year": "2016",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 2,
+    "kind": "report",
+    "url": "https://www.nsf.gov/funding/opportunities/mfai-mathematical-foundations-artificial-intelligence/nsf24-569/solicitation",
+    "doi": null,
+    "title": "NSF 24-569: Mathematical Foundations of Artificial Intelligence (MFAI)",
+    "authors": "National Science Foundation.",
+    "container": "National Science Foundation",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "report",
+    "url": "https://annualreports.simonsfoundation.org/2020/the-quest-for-a-deeper-understanding-of-deep-learning/",
+    "doi": null,
+    "title": "The Quest for a Deeper Understanding of Deep Learning",
+    "authors": "Simons Foundation.",
+    "container": "Simons Foundation 2020 Annual Report",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "report",
+    "url": "https://www.nsf.gov/funding/opportunities/modl-nsf-simons-research-collaborations-mathematical-scientific/505750/nsf20-540/solicitation",
+    "doi": null,
+    "title": "NSF 20-540: NSF-Simons Research Collaborations on the Mathematical and Scientific Foundations of Deep Learning (MoDL)",
+    "authors": "National Science Foundation.",
+    "container": "National Science Foundation",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "journal",
+    "url": "https://proceedings.mlr.press/v178/damian22a.html",
+    "doi": null,
+    "title": "Neural Networks can Learn Representations with Gradient Descent",
+    "authors": "Damian A, Lee J, Soltanolkotabi M.",
+    "container": "Proc Mach Learn Res",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://www.jmlr.org/papers/volume24/22-1132/22-1132.pdf",
+    "doi": null,
+    "title": "Random Feature Amplification: Feature Learning and Generalization in Neural Networks",
+    "authors": "Frei S, Chatterji NS, Bartlett PL.",
+    "container": "J Mach Learn Res",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 7,
+    "kind": "journal",
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2023/file/236b6a814a1d2c0ff504ca7bf380f7ff-Paper-Conference.pdf",
+    "doi": "10.52202/075280-0477",
+    "title": "Provable Guarantees for Nonlinear Feature Learning in Three-Layer Neural Networks",
+    "authors": "Nichani E, Damian A, Lee J",
+    "container": "Advances in Neural Information Processing Systems 36",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": "10828-10875",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 8,
+    "kind": "journal",
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2024/file/6bd5fca2074dcd9ede9de50f71f7ec28-Paper-Conference.pdf",
+    "doi": "10.52202/079017-1872",
+    "title": "Neural network learns low-dimensional polynomials with SGD near the information-theoretic limit",
+    "authors": "Lee J, Oko K, Suzuki T, Wu D",
+    "container": "Advances in Neural Information Processing Systems 37",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": "58716-58756",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 9,
+    "kind": "journal",
+    "url": "https://arxiv.org/pdf/1810.02054",
+    "doi": "10.48550/arXiv.1810.02054",
+    "title": "Gradient Descent Provably Optimizes Over-parameterized Neural Networks",
+    "authors": "Du SS, Zhai X, Poczos B, Singh A",
+    "container": "arXiv",
+    "year": "2018",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 10,
+    "kind": "journal",
+    "url": "https://arxiv.org/pdf/1703.11008",
+    "doi": "10.48550/arXiv.1703.11008",
+    "title": "Computing Nonvacuous Generalization Bounds for Deep (Stochastic) Neural Networks with Many More Parameters than Training Data",
+    "authors": "Dziugaite GK, Roy DM",
+    "container": "arXiv",
+    "year": "2017",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 3 from arXiv, 5 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 5 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }

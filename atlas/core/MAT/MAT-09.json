@@ -191,7 +191,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "sources": [
   "https://doi.org/10.6028/NIST.FIPS.203",
@@ -279,5 +280,280 @@
    "An attack exploiting ML-KEM’s particular structure could have a narrower reach than a general solution to lattice problems."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "MAT-09",
+  "title": "Classical polynomial-time Module-LWE secret recovery",
+  "definition": "A classical algorithm recovers secrets from Module Learning with Errors, noisy linear equations over polynomial rings, with computation bounded by a fixed power of input size. Its scope includes an executed attack on unmodified ML-KEM-1024, a standardized mechanism for establishing shared secret keys.",
+  "goal": {
+   "need": "FIPS 203 specifies three ML-KEM parameter sets, assigned security categories 1, 3 and 5, each establishing a 32-byte shared secret. Their security rests on Module-LWE. Classical secret recovery applicable to these parameters would defeat the computational assumption protecting this standardized key-establishment mechanism.",
+   "need_refs": [
+    1
+   ],
+   "figures": {
+    "caption": "ML-KEM parameter sets specified in FIPS 203.",
+    "columns": [
+     "Parameter set",
+     "Secret coefficients",
+     "Security category"
+    ],
+    "rows": [
+     [
+      "ML-KEM-512",
+      "512",
+      "1"
+     ],
+     [
+      "ML-KEM-768",
+      "768",
+      "3"
+     ],
+     [
+      "ML-KEM-1024",
+      "1024",
+      "5"
+     ]
+    ],
+    "note": "Coefficient counts are n×k, with n=256. Categories express claimed security levels.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "National Institute of Standards and Technology",
+     "year": "2024",
+     "quote": "The security of ML-KEM is related to the computational difficulty of the Module Learning with Errors problem.",
+     "context": null,
+     "ref": 1,
+     "checked": true
+    },
+    {
+     "body": "TU Darmstadt LWE Challenge steering committee",
+     "year": "Undated",
+     "quote": "The main goal of this challenge is to help assessing the hardness of the LWE problem in practice.",
+     "context": null,
+     "ref": 2,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "A classical Module-LWE solver has a polynomial bound and breaks unmodified ML-KEM-1024.",
+   "criterion": "A peer-reviewed classical algorithm recovers s from (A,t=As+e) over R=Z_3329[X]/(X^256+1), for every rank k≥4, with A uniform in R^{k×k} and independent CBD₂ coefficients for s,e∈R^k. Success is at least 1/poly(k), and total bit cost, including preprocessing, is poly(k). CBD₂ is the difference of two sums of two independent unbiased bits. The same algorithm executes shared-key recovery from only an unmodified FIPS 203 ML-KEM-1024 encapsulation key and ciphertext, violating NIST's category-5 security floor.",
+   "set_by": "Atlas fallback; no outside body located that specifies this joint asymptotic and executed-attack test.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches of NIST's standard and evaluation criteria, Module-LWE definitions, and Darmstadt, SVP and Bochum challenge rules found no joint polynomial-time-and-executed-attack criterion. Extending the fixed polynomial ring to all ranks k≥4 is an Atlas choice; ML-KEM-1024 fixes k=4. The test combines the field's asymptotic success convention with NIST's concrete security comparator without assigning an unsupported computing budget.",
+   "refs": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "sequence",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A classical algorithm recovers a key from a 128-coefficient Bochum Kyber challenge.",
+    "criterion": "Recover the secret key of a published Kyber-128 challenge without changing its parameters. The organiser lists one Kyber-128-k4 instance, with polynomial degree n=32 and module rank k=4, solved by Nour-eddine Rahmani on August 2, 2023: approximately 2 hours 44 minutes on an Intel i7-12700KF with 16 GB RAM. This is an organiser-listed result, not peer reviewed.",
+    "set_by": "Bochum Challenges team, secret-key recovery rule and Kyber-128 parameter cards.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "we consider a parameter set solved when you recover its secret key",
+    "threshold_ref": 5,
+    "refs": [
+     5,
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A classical algorithm recovers a key from a 256-coefficient Bochum Kyber challenge.",
+    "criterion": "Recover the secret key of a published Kyber-256 challenge, with n×k=256, without changing its parameters. The organiser lists one Kyber-256-k1 instance, with n=256 and k=1, solved by Jintai Ding and Ziyu Zhao on March 2, 2026, at an estimated cost of 15 RTX 4090 GPU-months. This organiser-listed result is not peer reviewed and concerns module rank 1.",
+    "set_by": "Bochum Challenges team, secret-key recovery rule and the Complex category's Kyber-256 parameter cards.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "we consider a parameter set solved when you recover its secret key",
+    "threshold_ref": 5,
+    "refs": [
+     5,
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A classical attack on ML-KEM-1024 violates NIST's category-5 security floor.",
+    "criterion": "Execute shared-secret recovery from public ML-KEM-1024 encapsulation keys and ciphertexts with resources that fail NIST's category-5 comparison against AES-256 key search. Account for success probability, preprocessing and memory in the comparison. A preprint submitted on October 8, 2026 claims subexponential algorithms for related growing families but explicitly establishes no reduction in concrete security of the specified parameter sets; it is not peer reviewed.",
+    "set_by": "NIST, PQC Security Evaluation Criteria, section 4.A.5, category 5; this milestone tests violation of the published security requirement.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "must require computational resources comparable to or greater than those required for key search on a block cipher with a 256-bit key",
+    "threshold_ref": 7,
+    "refs": [
+     1,
+     7,
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "Targeted searches located no peer-reviewed classical polynomial-time solver meeting the completion criterion.",
+   "Targeted searches located no executed public-transcript attack on unmodified ML-KEM-1024 meeting the final milestone.",
+   "NIST's category-5 criterion supplies a reference attack but no numerical factor defining “comparable” resources."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "report",
+    "url": "https://doi.org/10.6028/NIST.FIPS.203",
+    "doi": "10.6028/NIST.FIPS.203",
+    "title": "Module-Lattice-Based Key-Encapsulation Mechanism Standard",
+    "authors": "National Institute of Standards and Technology (US)",
+    "container": "National Institute of Standards and Technology",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "web",
+    "url": "https://www.latticechallenge.org/lwe_challenge/",
+    "doi": null,
+    "title": "TU Darmstadt LWE Challenge",
+    "authors": "TU Darmstadt LWE Challenge steering committee",
+    "container": "Lattice Challenge",
+    "year": "n.d.",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "report",
+    "url": "https://pq-crystals.org/kyber/data/kyber-specification-round3-20210804.pdf",
+    "doi": null,
+    "title": "CRYSTALS-Kyber Algorithm Specifications And Supporting Documentation (version 3.02)",
+    "authors": "Avanzi R, Bos J, Ducas L, Kiltz E, Lepoint T, Lyubashevsky V, Schanck JM, Schwabe P, Seiler G, Stehlé D",
+    "container": "CRYSTALS",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "journal",
+    "url": "https://perso.ens-lyon.fr/damien.stehle/downloads/MSIS.pdf",
+    "doi": "10.1007/s10623-014-9938-4",
+    "title": "Worst-Case to Average-Case Reductions for Module Lattices",
+    "authors": "Langlois A, Stehlé D",
+    "container": "Des. Codes Cryptogr.",
+    "year": "2015",
+    "volume": "75",
+    "issue": "3",
+    "pages": "565-599",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 5,
+    "kind": "web",
+    "url": "https://bochum-challeng.es/",
+    "doi": null,
+    "title": "Bochum Challenges",
+    "authors": "The Bochum Challenges Team",
+    "container": "Bochum Challenges",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "web",
+    "url": "https://bochum-challeng.es/challenges/kyber",
+    "doi": null,
+    "title": "Kyber Parameters",
+    "authors": "The Bochum Challenges Team",
+    "container": "Bochum Challenges",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 7,
+    "kind": "web",
+    "url": "https://csrc.nist.gov/Projects/Post-Quantum-Cryptography/Post-Quantum-Cryptography-Standardization/Evaluation-Criteria/Security-(Evaluation-Criteria)",
+    "doi": null,
+    "title": "Security (Evaluation Criteria)",
+    "authors": "National Institute of Standards and Technology",
+    "container": "Computer Security Resource Center",
+    "year": "2016",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 8,
+    "kind": "preprint",
+    "url": "https://arxiv.org/abs/2610.11254",
+    "doi": "10.48550/arXiv.2610.11254",
+    "title": "Provable Subexponential Algorithms for NIST Third-Round Lattice Families",
+    "authors": "Gao Y, Han X, Hu H",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 1 from arXiv, 5 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 5 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }
