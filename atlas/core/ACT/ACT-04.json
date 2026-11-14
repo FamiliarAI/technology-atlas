@@ -201,7 +201,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "sources": [
   "https://www.demogr.mpg.de/papers/working/wp-2023-020.pdf"
@@ -286,5 +287,282 @@
    "How far can success in tested populations and historical conditions support confidence under future changes?"
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "ACT-04",
+  "title": "Probabilistic mortality forecasting under structural change",
+  "definition": "Population forecasts of age-specific death rates and life expectancy extend 20 years ahead using mortality histories and risk-factor evidence. Their probability intervals cover outcomes at least as often as stated, and responses to detected changes in mortality trends improve forecast scores.",
+  "goal": {
+   "need": "Pension valuation depends on how long payments continue. The IMF quantified this exposure with a three-year longevity shock in a pension model; the table gives liability increases at two discount rates. The model assumed entry at age 20, retirement at 60, and inflation-indexed benefits linked to final salary.",
+   "need_refs": [
+    1
+   ],
+   "figures": {
+    "caption": "IMF pension-model sensitivity to increased longevity, April 2012",
+    "columns": [
+     "Discount rate",
+     "Increase in pension liabilities"
+    ],
+    "rows": [
+     [
+      "6%",
+      "8%"
+     ],
+     [
+      "2%",
+      "Almost 14%"
+     ]
+    ],
+    "note": "Conditional model calculations, expressed relative to liabilities before the longevity shock.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "International Monetary Fund",
+     "year": "2012",
+     "quote": "Appropriate longevity assumptions should use the most recent longevity data and allow for future increases in longevity.",
+     "context": null,
+     "ref": 1,
+     "checked": null
+    },
+    {
+     "body": "Organisation for Economic Co-operation and Development",
+     "year": "2022",
+     "quote": "Standard mortality tables need to account for future expected improvements in mortality,",
+     "context": "Guidance for mortality assumptions used for pensioners and annuitants.",
+     "ref": 2,
+     "checked": null
+    },
+    {
+     "body": "Society of Actuaries Research Institute",
+     "year": "2026",
+     "quote": "improving the ability to anticipate mortality improvement under varying economic conditions, including potential turning points, is a key area of interest",
+     "context": "The research call concerns macroeconomic indicators for mortality forecasting.",
+     "ref": 3,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "Independent validation confirms 20-year mortality forecast gains through changes in mortality trends.",
+   "criterion": "Independent investigators evaluate a fixed risk-factor mortality framework on withheld 20-year periods spanning mortality-trend changes, in populations excluded from development. Using only forecast-origin information, it beats Lee–Carter on life-expectancy mean absolute error and mean 95% interval score; its nominal 95% intervals attain at least 95% coverage. Enabling its structural-change warning response lowers mean interval score versus disabling it. The findings are independently reproduced and accepted after peer review; uncertainty in comparisons accounts for overlapping forecast periods.",
+   "set_by": "Atlas fallback; no outside body located defines an acceptance test for this combined capability.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches of OECD mortality-table guidance, SOA research calls and mortality-validation studies found no acceptance test for the combined capability. This Atlas fallback joins published 20-year backtesting, benchmark comparison and interval evaluation to SOA's turning-point objective. Neither the combined test nor the choice of 20 years is a professional certification standard.",
+   "refs": [
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "sequence",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A risk-factor model forecasts life expectancy with lower mean absolute error than Lee–Carter.",
+    "criterion": "Life-expectancy forecasts have lower mean absolute error than Lee–Carter on the same countries, sexes and withheld periods. Li and Raftery's smoking-adjusted model met this comparison in 67 countries for 2000–2015: errors were 0.962 versus 2.043 years for males and 0.728 versus 1.210 years for females. Training covered 1950–2000; observations were organised in five-year periods.",
+    "set_by": "Mortality-forecast evaluation convention: lower out-of-sample error than an established benchmark, applied by Li and Raftery (2021), section 4, and Schnürch and Korn (2022), section 4.2. These comparisons specify no universal minimum effect size.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "Our method had the smallest MAE for both sexes and both choices of test period among the five methods.",
+    "threshold_ref": 7,
+    "refs": [
+     5,
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "Nominal 95% mortality prediction intervals attain at least 95% empirical coverage.",
+    "criterion": "Observed death rates fall inside nominal 95% prediction intervals at least 95% of the time; interval width is assessed separately. Schnürch and Korn evaluated 54 sex-specific national populations, ages 60–89, over 2007–2016, training through 2006. Feedforward and convolutional neural networks achieved pooled coverage of 97.0% and 98.0%, respectively. Pooled coverage does not establish coverage within every population or horizon.",
+    "set_by": "Nominal-coverage evaluation convention, applied at 95% by Schnürch and Korn (2022), section 4.3. The at-least-95% cutoff is their study-specific implementation; coverage and width are also evaluated by Li and Raftery (2021).",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "Good prediction intervals should minimize MPIW under the constraint that PICP is at or above the specified threshold a.",
+    "threshold_ref": 5,
+    "refs": [
+     5,
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "One mortality model combines 20-year forecast gains, 95% coverage and improved scores after warnings.",
+    "criterion": "A developer demonstrates one risk-factor mortality model on withheld 20-year periods spanning changes in mortality trends. Using only forecast-origin information, it beats Lee–Carter on life-expectancy mean absolute error and mean 95% interval score, attains at least 95% coverage for nominal 95% intervals, and lowers mean interval score when its warning response is enabled rather than disabled. The interval score penalizes width and missed observations. Fu et al. reported retrospective structural-change analysis in six countries and 5- and 10-year forecast comparisons; those results do not establish this combined test.",
+    "set_by": "Atlas fallback: searches of OECD guidance, SOA research calls and mortality-validation papers found no external criterion for a combined developer demonstration. The 20-year horizon follows Duerst et al.'s published example, not a field-wide requirement.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     3,
+     4,
+     5,
+     6,
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No regulator, actuarial standard, government programme or prize acceptance test was found for the combined capability.",
+   "No published independent validation was located that satisfies the combined completion test.",
+   "No external numerical acceptance thresholds were found for warning lead time, false alarms or transfer to pension and insured populations.",
+   "No published validation was located establishing the combined capability over a 50-year horizon.",
+   "The SOA-hosted 2023 Living to 100 mortality-methodology PDF returned HTTP 404."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "report",
+    "url": "https://www.imf.org/-/media/websites/imf/imported-flagship-issues/external/pubs/ft/gfsr/2012/01/pdf/_c4pdf.pdf",
+    "doi": null,
+    "title": "The Financial Impact of Longevity Risk",
+    "authors": "International Monetary Fund",
+    "container": "Global Financial Stability Report, April 2012",
+    "year": "2012",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 2,
+    "kind": "report",
+    "url": "https://www.oecd.org/en/publications/oecd-pensions-outlook-2022_20c7f443-en/full-report/component-7.html",
+    "doi": "10.1787/20c7f443-en",
+    "title": "Good practices for developing standard mortality tables for retirement income arrangements",
+    "authors": "OECD",
+    "container": "OECD Pensions Outlook",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 3,
+    "kind": "web",
+    "url": "https://www.soa.org/research/opportunities/2026/macroeconomic-indicators-mortality/",
+    "doi": null,
+    "title": "Macroeconomic Indicators for Mortality Forecasting",
+    "authors": "Society of Actuaries Research Institute",
+    "container": "Society of Actuaries",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "report",
+    "url": "https://www.demogr.mpg.de/papers/working/wp-2023-020.pdf",
+    "doi": "10.4054/MPIDR-WP-2023-020",
+    "title": "A Validation Workflow for Mortality Forecasting",
+    "authors": "Duerst R, Schöley J, Bohk-Ewald C",
+    "container": "Max Planck Institute for Demographic Research Working Paper WP 2023-020",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 5,
+    "kind": "journal",
+    "url": "https://www.cambridge.org/core/journals/astin-bulletin-journal-of-the-iaa/article/point-and-interval-forecasts-of-death-rates-using-neural-networks/62F3A5B07463E5257E20B4FBD9115C6A",
+    "doi": "10.1017/asb.2021.34",
+    "title": "POINT AND INTERVAL FORECASTS OF DEATH RATES USING NEURAL NETWORKS",
+    "authors": "Schnürch S, Korn R",
+    "container": "ASTIN Bull.",
+    "year": "2022",
+    "volume": "52",
+    "issue": "1",
+    "pages": "333-360",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://sites.stat.washington.edu/people/raftery/Research/PDF/Gneiting2007jasa.pdf",
+    "doi": "10.1198/016214506000001437",
+    "title": "Strictly Proper Scoring Rules, Prediction, and Estimation",
+    "authors": "Gneiting T, Raftery AE",
+    "container": "Journal of the American Statistical Association",
+    "year": "2007",
+    "volume": "102",
+    "issue": "477",
+    "pages": "359-378",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8048146/",
+    "doi": "10.1214/20-AOAS1381",
+    "title": "Accounting for Smoking in Forecasting Mortality and Life Expectancy",
+    "authors": "Li Y, Raftery AE",
+    "container": "Ann. Appl. Stat.",
+    "year": "2021",
+    "volume": "15",
+    "issue": "1",
+    "pages": "437-459",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 8,
+    "kind": "journal",
+    "url": "https://www.mdpi.com/2227-9091/10/8/161",
+    "doi": "10.3390/risks10080161",
+    "title": "A New Mortality Framework to Identify Trends and Structural Changes in Mortality Improvement and Its Application in Forecasting",
+    "authors": "Fu W, Smith BR, Brewer P, Droms S",
+    "container": "Risks",
+    "year": "2022",
+    "volume": "10",
+    "issue": "8",
+    "pages": "161",
+    "citation_source": "crossref"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 6 from Crossref, 0 from PubMed, 0 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 3 found, 0 not found, 2 with no readable copy."
+   }
+  ]
  }
 }
