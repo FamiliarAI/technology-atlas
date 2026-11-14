@@ -182,7 +182,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Checkable delays that resist quantum shortcuts",
@@ -244,5 +245,273 @@
    "How reliably can computational work translate into elapsed time across different hardware and adversarial resources?"
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "CRY-09",
+  "title": "Post-quantum verifiable delay functions",
+  "definition": "A verifiable delay function (VDF) requires sequential computation and produces one output per input that anyone can check much faster. A concrete implementation has a security theorem bounding quantum shortcuts under a named hardness assumption, including preprocessing and parallel resources.",
+  "goal": {
+   "need": "Papercraft's 2025 measurements distinguish evaluation, proof generation and verification costs, shown below. Quantum order-finding breaks both group-based VDFs surveyed in 2018. In 2024, cryptanalysis also falsified the original lattice-based proof-of-sequential-work assumption. Timing measurements therefore need a separate quantum sequentiality argument.",
+   "need_refs": [
+    1,
+    2,
+    3
+   ],
+   "figures": {
+    "caption": "Papercraft timings reported in its 2025 developer poster",
+    "columns": [
+     "Operation",
+     "Reported time"
+    ],
+    "rows": [
+     [
+      "Delay-function evaluation",
+      "Over 6 minutes"
+     ],
+     [
+      "Proof generation",
+      "Approximately 4 hours"
+     ],
+     [
+      "Proof verification",
+      "7 seconds"
+     ]
+    ],
+    "note": "These are separate operations. The poster describes experiments on a high-performance computing node; it does not give the complete processor configuration or repetition count.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "Ethereum Foundation, Supranational and Johns Hopkins University researchers developing RootPack",
+     "year": "2021",
+     "quote": "a proof of a delay statement, should be post-quantum secure.",
+     "context": null,
+     "ref": 4,
+     "checked": true
+    },
+    {
+     "body": "Lai–Malavolta lattice timed-cryptography developers",
+     "year": "2024",
+     "quote": "This is a single point of failure in the classical setting and is even false against quantum adversaries.",
+     "context": "The antecedent is the assumption that repeated squaring in groups of unknown order cannot be parallelised.",
+     "ref": 5,
+     "checked": true
+    },
+    {
+     "body": "Papercraft developers: Osadnik, Kaviani, Cini, Lai and Malavolta",
+     "year": "2026",
+     "quote": "In this work, we investigate the practicality of VDFs with plausible post-quantum security.",
+     "context": null,
+     "ref": 6,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "An implemented VDF has a peer-reviewed quantum sequentiality reduction and fast public verification.",
+   "criterion": "A concrete VDF has correctness, quantum soundness and quantum sequentiality theorems. After poly(λ,T) quantum preprocessing, an online quantum circuit of polynomial total size and depth below an explicit σ(T)<T computes the correct output only with negligible probability in security parameter λ. A reduction connects higher success to breaking a named quantum hardness assumption and quantifies its depth loss. The theorem specifies T, σ, gate set, width, memory and preprocessing. Public verification takes poly(λ,log T) time; measured verification is faster than evaluation. Security remains conditional on the assumptions.",
+   "set_by": "Atlas synthesis; no outside body was found to have published this combined implementation-and-quantum-sequentiality test.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches of IACR VDF definitions, Ethereum's RootPack requirements, lattice timed-cryptography papers, quantum PoSW theorems, and standards/prize targets found no joint test. This criterion combines published VDF properties with a quantum reduction for the implemented function. The 2023 Lai–Malavolta manuscript leaves its quantum proof open. Whether later implementations satisfy the combined test remains unresolved because their full papers could not be opened.",
+   "refs": [
+    2,
+    4,
+    6,
+    5,
+    7
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A length-N hash sequence resists N−1 rounds of quantum queries to an ideal hash function.",
+    "criterion": "For random H:{0,1}*→{0,1}^λ and δ≥1, a quantum adversary making at most q total oracle queries over N−1 rounds outputs a sequence x0,…,xN, with |xi|≤δλ and H(xi−1) a substring of xi, with probability p≤(64q³δλ+2N)/2^λ. Blocki, Lee and Zhou prove this bound in Theorem 3. The oracle is ideal; the result does not establish security of a particular hash implementation or a full VDF.",
+    "set_by": "Blocki, Lee and Zhou, ITC 2021, Theorem 3; a peer-reviewed lower bound in the parallel quantum random oracle model.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "any quantum attacker running in sequential time T-1 will fail to produce an ℋ-sequence except with negligible probability",
+    "threshold_ref": 7,
+    "refs": [
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": false
+   },
+   {
+    "id": "m2",
+    "title": "A VDF implementation verifies its output faster than recomputing it.",
+    "criterion": "At a fixed parameter setting, an implemented candidate has public verification time below its evaluation time. Papercraft is a reported lattice-based example. This establishes a measured verification advantage; producing the proof is a separate operation, and the timing comparison does not establish resistance to quantum shortcuts.",
+    "set_by": "VDF research community, fast public verification requirement stated by Boneh, Bünz and Fisch in Section 1 of A Survey of Two Verifiable Delay Functions.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "However once computed, the output can be quickly verified by anyone.",
+    "threshold_ref": 2,
+    "refs": [
+     2,
+     1,
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A VDF's evaluation proof has at least 80 bits of soundness in the quantum random oracle model.",
+    "criterion": "A candidate's proof of correct evaluation meets the RootPack requirement of at least 80 bits of provable soundness in the quantum random oracle model, which permits hash queries in superposition. This requirement concerns acceptance of incorrect outputs. Completion additionally requires a quantum sequentiality reduction excluding fast computation of correct outputs.",
+    "set_by": "RootPack developers at the Ethereum Foundation, Supranational and Johns Hopkins University, Not So Slowth, Section 2.3, requirement 2; published for Ethereum 2.0.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "at least 80 bits of provable soundness in a quantum random oracle model",
+    "threshold_ref": 4,
+    "refs": [
+     4
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "Papercraft's full paper and the revised 2024 Lai–Malavolta PDF could not be opened; the 2023 Lai–Malavolta accepted manuscript was accessible.",
+   "The accessible Papercraft poster and abstract do not specify complete benchmark hardware, security parameters or repetition counts.",
+   "No independent reproduction or complete quantum security assessment of the Papercraft implementation was found."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "report",
+    "url": "https://haic.fi/wp-content/uploads/2025/06/Papercraft.pdf",
+    "doi": null,
+    "title": "Papercraft: Lattice-based Verifiable Delay Function",
+    "authors": "Osadnik M, Kaviani D, Cini V, Lai RWF, Malavolta G.",
+    "container": "Helsinki-Aalto Institute for Cybersecurity",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 2,
+    "kind": "preprint",
+    "url": "https://crypto.stanford.edu/~dabo/pubs/papers/VDFsurvey.pdf",
+    "doi": null,
+    "title": "A Survey of Two Verifiable Delay Functions",
+    "authors": "Boneh D, Bünz B, Fisch B.",
+    "container": "Stanford University",
+    "year": "2018",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "book",
+    "url": "https://link.springer.com/chapter/10.1007/978-3-031-68388-6_6",
+    "doi": "10.1007/978-3-031-68388-6_6",
+    "title": "Cryptanalysis of Lattice-Based Sequentiality Assumptions and Proofs of Sequential Work",
+    "authors": "Peikert C, Tang Y",
+    "container": "Lecture Notes in Computer Science",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": "129-157",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 4,
+    "kind": "report",
+    "url": "https://www.pratyush.site/publication/invertiblevdf/invertiblevdf.pdf",
+    "doi": null,
+    "title": "Not So Slowth: Invertible VDF for Ethereum 2.0",
+    "authors": "Feist D, Khovratovich D, Maller M, Olson K, Tiwari PR.",
+    "container": "Ethereum Foundation, Supranational and Johns Hopkins University",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "preprint",
+    "url": "https://eprint.iacr.org/2024/540",
+    "doi": "10.1007/978-3-031-38554-4_25",
+    "title": "Lattice-Based Timed Cryptography",
+    "authors": "Lai RWF, Malavolta G",
+    "container": "Lecture Notes in Computer Science",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": "782-804",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 6,
+    "kind": "preprint",
+    "url": "https://eprint.iacr.org/2025/879",
+    "doi": "10.1109/SP61157.2025.00159",
+    "title": "Papercraft: Lattice-based Verifiable Delay Function Implemented",
+    "authors": "Osadnik M, Kaviani D, Cini V, Lai RWF, Malavolta G",
+    "container": "2025 IEEE Symposium on Security and Privacy (SP)",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": "1603-1621",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "book",
+    "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ITC.2021.22",
+    "doi": "10.4230/LIPIcs.ITC.2021.22",
+    "title": "On the Security of Proofs of Sequential Work in a Post-Quantum World",
+    "authors": "Blocki J, Lee S, Zhou S.",
+    "container": "Schloss Dagstuhl – Leibniz-Zentrum für Informatik",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 4 from Crossref, 0 from PubMed, 0 from arXiv, 4 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 5 found, 1 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Merged references with the same DOI (7 into 5); renumbered."
+   }
+  ]
  }
 }

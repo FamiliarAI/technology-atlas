@@ -217,7 +217,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Computer-checkable guarantees about AI behavior",
@@ -295,5 +296,411 @@
    "Can a smaller model's error be measured tightly enough to preserve the original model's required behavior?"
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "CSC-10",
+  "title": "Machine-checked behavioral guarantees for frontier AI models",
+  "definition": "A deployed model whose capabilities match the most advanced general-purpose AI models has an independently checkable proof that it obeys a specified safety rule for every allowed input and execution. The proof covers the arithmetic, output generation and system assumptions used in deployment.",
+  "goal": {
+   "need": "SDP-CROWN reports certification experiments on classifiers with up to 2.47 million parameters. A preprint revised on 9 June 2026 computes bounds through a synthetic layer with over a billion weights. At implementation level, eight software verifiers evaluated on 912 neural-network examples returned 3% incorrect outcomes. A domain-wide behavioral proof requires both a valid argument and trustworthy checking of the computation it describes.",
+   "need_refs": [
+    1,
+    2,
+    3
+   ],
+   "figures": {
+    "caption": "Evaluation of software verifiers on NeuroCodeBench 2.0",
+    "columns": [
+     "Quantity",
+     "Reported value"
+    ],
+    "rows": [
+     [
+      "Software verifiers",
+      "8"
+     ],
+     [
+      "Neural-network verification examples",
+      "912"
+     ],
+     [
+      "Incorrect tool–example outcomes",
+      "3%"
+     ]
+    ],
+    "note": "The percentage includes all outcomes, including inconclusive ones. Each example had a 900-second limit. The preprint was revised on 10 August 2026 and is not peer reviewed.",
+    "ref": 3
+   },
+   "statements": [
+    {
+     "body": "Advanced Research and Invention Agency, original Safeguarded AI programme",
+     "year": "2024",
+     "quote": "The primary purpose is to certify safety properties of cyber-physical systems with learned components,",
+     "context": "Technical Area 2(c); the guarantees depend on assumptions supplied by the programme's world models.",
+     "ref": 4,
+     "checked": true
+    },
+    {
+     "body": "Advanced Research and Invention Agency, Safeguarded AI programme",
+     "year": "2026",
+     "quote": "Our goal is to equip AI-produced code, control systems, and models with quantitative guarantees of correctness and fail-safety.",
+     "context": "The programme's May 2026 revision focuses on assurance tooling and cybersecurity.",
+     "ref": 5,
+     "checked": true
+    },
+    {
+     "body": "DARPA, Assured Neuro Symbolic Learning and Reasoning programme",
+     "year": "2022",
+     "quote": "assure that autonomous systems will operate safely and perform as intended",
+     "context": "Programme manager Sandeep Neema described the assurance goal on 3 June 2022. ANSR targets systems combining neural learning with symbolic reasoning.",
+     "ref": 6,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "An independent checker validates a deployed frontier model's domain-wide behavioral guarantee.",
+   "criterion": "For one identified deployed general-purpose model meeting Article 3(64)'s high-impact capability definition, an independent, formally verified checker accepts a certificate proving that every permitted input and execution satisfies an application safety specification excluding a named hazardous behavior. The application authority fixes the specification and operating domain. The theorem identifies the weights, arithmetic, decoding, allowed random choices and included system components. Its semantics cover deployment directly or through proved refinement or error bounds; a surrogate route must prove property transfer to the original model.",
+   "set_by": "Atlas fallback; no outside body located defines this combined acceptance test. Article 3(64) of the EU AI Act supplies the capability definition, not the verification requirement.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches of ARIA's original and May 2026 programmes, DARPA ANSR, NIST AI RMF, VNN-COMP rules and the 2024 LLM verification survey found no joint acceptance test covering frontier capability, universal behavior and deployment-faithful proof checking. This fallback follows ARIA's assurance goal, uses the EU capability definition and includes the implementation obligation examined by NeuroCodeBench. It imposes no parameter-count cutoff.",
+   "refs": [
+    7,
+    4,
+    5,
+    6,
+    8,
+    9,
+    10,
+    3
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A neural network satisfies its output constraints for every input in a benchmark region.",
+    "criterion": "For a network and a VNN-LIB specification encoding violations, establish UNSAT: no permitted input produces a forbidden output. Each benchmark fixes its input region and output constraints. SDP-CROWN reports classifier certification experiments up to 65,000 neurons and 2.47 million parameters in 2025. The preprint revised on 9 June 2026 proves a CIFAR-100 ResNet-large benchmark property at initialization, without branch-and-bound; it is not peer reviewed.",
+    "set_by": "VNN-COMP 2026 organizers, competition rules, Terminology: the established UNSAT convention for neural-network verification.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "unsat: all the constraints in the .vnnlib cannot be met at the same time",
+    "threshold_ref": 9,
+    "refs": [
+     9,
+     1,
+     2
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "Encoded neural-network constraints have an UNSAT certificate accepted by a formally verified checker.",
+    "criterion": "A checker with a machine-proved soundness theorem accepts a certificate establishing that the encoded polynomial constraints have no solution. The 2025 Imandra evaluation certified 276 collision-avoidance queries for a 137-ReLU network and 180 robotics queries for a 32-ReLU network, restricting evaluation to proofs smaller than 5 MB. ReLU is the activation max(0,x). Certification of translation from the original model and specification remains a separate obligation.",
+    "set_by": "Proof-carrying neural-network verification convention; Desmartin et al., ITP 2025, Theorem 15, and Duong et al., NeurIPS 2025.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "if this algorithm returns UNSAT then indeed the given set of polynomial constraints at the root of the tree has no solution.",
+    "threshold_ref": 11,
+    "refs": [
+     11,
+     12
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A floating-point neural-network program satisfies its safety assertion on every modeled execution.",
+    "criterion": "Under specified C execution semantics and mathematical-library models, no permitted execution of the neural-network program violates its safety assertion. This applies SV-COMP's TRUE semantics to neural-network code; the Floats category does not support correctness witnesses. The NeuroCodeBench 2.0 preprint revised on 10 August 2026 reports 76 correct safe ESBMC outcomes among 912 examples, with 900 seconds per example. These outcomes were compared with known answers rather than independently checked proofs.",
+    "set_by": "SV-COMP 2026 organizers, Definition of Verification Task. The criterion covers C programs generally; NeuroCodeBench applies it to neural-network implementations.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "The specification is satisfied (i.e., there is no path that violates the specification)",
+    "threshold_ref": 13,
+    "refs": [
+     13,
+     3
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "A language model's output-safety probability is bounded soundly for a specified prompt.",
+    "criterion": "For a specified prompt, safety predicate and decoding distribution, compute L and U with L ≤ Pr[satisfies predicate] ≤ U, supported by a soundness proof. BEAVER's preprint revised on 7 May 2026 evaluates 12 models on 100 privacy, 204 code, 320 stereotype and 318 toxicity instances. For Llama-3.1-8B at temperature 1 and a 16-token limit, its bounds expose violation probability above 10% on 66 of 100 email-leakage prompts. The paper supplies no proof-assistant-checked deployment certificate and is not peer reviewed.",
+    "set_by": "Sound probability-enclosure convention, instantiated by BEAVER's Theorem D.3. ARIA's original Technical Area 2(c) also specifies sound probability bounds.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "BEAVER’s bounds are sound at every iteration",
+    "threshold_ref": 14,
+    "refs": [
+     14,
+     4
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "A frontier model has a checked behavioral proof under explicit mathematical execution semantics.",
+    "criterion": "For an identified model meeting Article 3(64)'s high-impact capability definition, an independent, formally verified checker accepts a proof that every input and execution in an application authority's stated domain satisfies a safety specification excluding a named hazardous behavior. The theorem may use explicitly idealized arithmetic or decoding. The remaining obligation is a proved connection from these semantics to the deployed implementation.",
+    "set_by": "Atlas fallback after searches of ARIA, DARPA, NIST and VNN-COMP criteria; no outside body located prescribes this frontier-model precursor test.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     7,
+     4,
+     5,
+     6,
+     8,
+     9,
+     10,
+     11,
+     14
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No externally prescribed frontier-model milestone was found that fixes the required operating-domain breadth or parameter count.",
+   "Targeted searches located no certificate satisfying the completion test, directly or through proved surrogate transfer, through 14 November 2026."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://proceedings.mlr.press/v267/chiu25a.html",
+    "doi": null,
+    "title": "SDP-CROWN: Efficient Bound Propagation for Neural Network Verification with Tightness of Semidefinite Programming",
+    "authors": "Chiu HM, Chen H, Zhang H, Zhang RY.",
+    "container": "Proceedings of Machine Learning Research",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 2,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2606.09377v2",
+    "doi": "10.48550/arXiv.2606.09377",
+    "title": "Scaling Neural Network Verification with Tensor Parallelism and Fully Sharded Data Parallelism",
+    "authors": "Vorobyov S, Ilyushin E",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 3,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2510.23389v2",
+    "doi": "10.48550/arXiv.2510.23389",
+    "title": "Floating-Point Neural Network Verification at the Software Level",
+    "authors": "Manino E, Farias B, Menezes RS, Shmarov F, Cordeiro LC",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 4,
+    "kind": "report",
+    "url": "https://www.aria.org.uk/media/3nhijno4/aria-safeguarded-ai-programme-thesis-v1.pdf",
+    "doi": null,
+    "title": "Safeguarded AI: constructing guaranteed safety",
+    "authors": "Advanced Research and Invention Agency.",
+    "container": "ARIA",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "web",
+    "url": "https://aria.org.uk/opportunity-spaces/trust-everything-everywhere/safeguarded-ai",
+    "doi": null,
+    "title": "Safeguarded AI",
+    "authors": "Advanced Research and Invention Agency.",
+    "container": "ARIA",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "press_release",
+    "url": "https://www.darpa.mil/news/2022/ansr-trustworthy-ai",
+    "doi": null,
+    "title": "DARPA seeks proposals for Assured Neuro Symbolic Learning and Reasoning (ANSR) program",
+    "authors": "Defense Advanced Research Projects Agency.",
+    "container": "DARPA",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 7,
+    "kind": "web",
+    "url": "https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-3",
+    "doi": null,
+    "title": "Article 3: Definitions",
+    "authors": "European Commission.",
+    "container": "AI Act Service Desk",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 8,
+    "kind": "report",
+    "url": "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.100-1.pdf",
+    "doi": "10.6028/NIST.AI.100-1",
+    "title": "Artificial Intelligence Risk Management Framework (AI RMF 1.0)",
+    "authors": "Tabassi E",
+    "container": "NIST",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 9,
+    "kind": "web",
+    "url": "https://github.com/VNN-COMP/vnncomp2026/blob/main/rules.md",
+    "doi": null,
+    "title": "vnncomp2026/rules.md",
+    "authors": "VNN-COMP.",
+    "container": "GitHub",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 10,
+    "kind": "journal",
+    "url": "https://link.springer.com/article/10.1007/s10462-024-10824-0",
+    "doi": "10.1007/s10462-024-10824-0",
+    "title": "A survey of safety and trustworthiness of large language models through the lens of verification and validation",
+    "authors": "Huang X, Ruan W, Huang W, Jin G, Dong Y, Wu C, et al.",
+    "container": "Artif Intell Rev",
+    "year": "2024",
+    "volume": "57",
+    "issue": "7",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 11,
+    "kind": "journal",
+    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol352-itp2025/html/LIPIcs.ITP.2025.1/LIPIcs.ITP.2025.1.html",
+    "doi": "10.4230/LIPIcs.ITP.2025.1",
+    "title": "A Certified Proof Checker for Deep Neural Network Verification in Imandra",
+    "authors": "Desmartin R, Isac O, Passmore G, Komendantskaya E, Stark K, Katz G.",
+    "container": "Leibniz International Proceedings in Informatics",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 12,
+    "kind": "journal",
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2025/hash/5f326d2e040a20d52438873f5d727e58-Abstract-Conference.html",
+    "doi": "10.52202/085713-2212",
+    "title": "Generating and Checking DNN Verification Proofs",
+    "authors": "Duong H, Nguyen T, Dwyer M",
+    "container": "Advances in Neural Information Processing Systems 38",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": "73452-73474",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 13,
+    "kind": "web",
+    "url": "https://sv-comp.sosy-lab.org/2026/rules.php",
+    "doi": null,
+    "title": "SV-COMP 2026 - 15th International Competition on Software Verification",
+    "authors": "SV-COMP.",
+    "container": "SV-COMP",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 14,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2512.05439v2",
+    "doi": "10.48550/arXiv.2512.05439",
+    "title": "BEAVER: An Efficient Deterministic LLM Verifier",
+    "authors": "Suresh T, Wadhwa N, Banerjee D, Singh G",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4",
+   "m5"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 3 from Crossref, 0 from PubMed, 3 from arXiv, 8 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 7 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }
