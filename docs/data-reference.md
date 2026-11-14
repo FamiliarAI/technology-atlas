@@ -326,6 +326,16 @@ python3 -m ingestion.batch run --fields MLC
 python3 -m atlas.core import      # no model calls: import every batch-complete field not yet in core; does not rebuild or commit
 ```
 
+**Add one breakthrough to an existing field** (no model call; the page pass then researches it). Gives the next ID after the highest ever used in the field, writes a record with the title and, as its concept, the note and the source URLs given; the other sections stay empty. Refuses an unknown field (a new field goes through ingestion, above) and a title the field already has. Checks and commits. Then write, judge and publish its page as for any other:
+
+```bash
+python3 -m atlas.core new MAT "Resolution of the Riemann Hypothesis" \
+  --note "A proof or disproof that every nontrivial zero of ζ has real part 1/2." \
+  --source https://www.claymath.org/millennium-problems/ --reason "Millennium Prize Problem"
+python3 -m atlas.page define MAT-10 && python3 -m atlas.page results MAT-10
+python3 -m atlas.review auto && python3 -m atlas.page merge --pending
+```
+
 **Add a paper** (one model call). Saves a copy, ranks milestones, judges, writes `sources.jsonl` and `progress.jsonl`, rebuilds, commits `atlas/core/`. The model answers with a milestone number per row, or 0 for a step toward the breakthrough as a whole (never with `meets`); it is told to prefer a specific milestone. Every quote is checked against the saved copy. The command prints "whole breakthrough" for criterion-0 rows.
 
 ```bash
