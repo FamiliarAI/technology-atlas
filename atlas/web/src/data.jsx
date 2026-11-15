@@ -66,6 +66,14 @@ export async function loadAtlas() {
       recent: raw.moved_at ? TODAY - new Date(raw.moved_at) < 30 * DAY : false,
     };
   }
+  // Only the latest movements pulse on the chart: when most of the atlas moved in one month
+  // (its first judging), a pulse on every recent star drew rings round half the sky.
+  const PULSES = 12;
+  const latest = Object.values(items)
+    .filter((i) => i.moved_at)
+    .sort((a, b) => (a.moved_at < b.moved_at ? 1 : a.moved_at > b.moved_at ? -1 : a.id.localeCompare(b.id)))
+    .slice(0, PULSES);
+  for (const i of latest) i.pulse = true;
   const sky = layout(catalog.fields, items);
   for (const [id, point] of Object.entries(sky.placed)) Object.assign(items[id], point);
   const fields = sky.order.map((id) => {

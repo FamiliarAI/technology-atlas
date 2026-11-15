@@ -205,7 +205,7 @@ const Star = memo(function Star({ item, lod, state, plan, interactive, tabbable,
       {...props}
     >
       {live && <circle r={r + 2.5} className="sky-star-hit" />}
-      {item.recent && <circle r={r + 0.6} className="sky-pulse" />}
+      {item.pulse && <circle r={r + 0.6} className="sky-pulse" />}
       {lod >= 1 ? (
         // Close up, a star stays a point of light: its core is sized on screen, not in the sky.
         <g className="sky-screen">
@@ -240,6 +240,32 @@ const Star = memo(function Star({ item, lod, state, plan, interactive, tabbable,
 });
 
 // ---------- Constellations ----------
+
+// A field's milestones as one bar under its name: met, in progress, none. It lets the whole
+// sky be compared field by field before any star is looked at.
+const BAR_W = 46;
+function FieldBar({ field, y }) {
+  let met = 0;
+  let moving = 0;
+  let total = 0;
+  for (const i of field.items) {
+    met += i.met;
+    moving += i.moving;
+    total += i.status.length;
+  }
+  if (!total) return null;
+  const wMet = (BAR_W * met) / total;
+  const wMoving = (BAR_W * moving) / total;
+  const x0 = -BAR_W / 2;
+  return (
+    <g className="sky-field-bar" transform={`translate(0 ${y})`}>
+      <rect x={x0} width={BAR_W} height="2.4" className="none" />
+      <rect x={x0} width={wMet} height="2.4" className="met" />
+      <rect x={x0 + wMet} width={wMoving} height="2.4" className="moving" />
+      <title>{`${field.items.length} breakthroughs; ${met} of ${total} milestones met, ${moving} in progress`}</title>
+    </g>
+  );
+}
 
 const Constellation = memo(function Constellation({
   field,
@@ -325,6 +351,7 @@ const Constellation = memo(function Constellation({
                   </tspan>
                 ))}
               </text>
+              <FieldBar field={field} y={fig.label.lines.length * LABEL.line + 3} />
             </g>
           </g>
         )}
@@ -452,8 +479,10 @@ export default function Chart({
     [atlas],
   );
 
-  // Stars with any judged progress get a beacon, findable from the widest view.
-  const warm = useMemo(() => Object.values(atlas.items).filter((i) => i.glow > 0), [atlas]);
+  // Only breakthroughs with every milestone met get a beacon. With most stars showing some
+  // progress, a beacon for each turned the wide view into blobs; the rest show their progress
+  // in their rings up close, and in their field's bar from afar.
+  const warm = useMemo(() => Object.values(atlas.items).filter((i) => i.glow >= 1), [atlas]);
 
   const apply = useCallback(() => {
     if (!size || !worldRef.current) return;
@@ -886,13 +915,8 @@ export default function Chart({
               {warm.map((i) => (
                 <g key={i.id} transform={`translate(${i.x.toFixed(2)} ${i.y.toFixed(2)})`}>
                   <g className="sky-screen">
-                    <circle r={lod >= 1 ? 20 : 16} fill={i.glow >= 1 ? 'url(#sky-halo-met)' : 'url(#sky-halo)'} />
-                    {lod === 0 && (
-                      <>
-                        <circle r="6.5" className={'sky-beacon-ring' + (i.glow >= 1 ? ' met' : '')} />
-                        <circle r="2.2" fill={starColor(i.glow)} />
-                      </>
-                    )}
+                    <circle r={lod >= 1 ? 18 : 9} fill="url(#sky-halo-met)" />
+                    {lod === 0 && <circle r="1.8" fill={starColor(i.glow)} />}
                   </g>
                 </g>
               ))}
