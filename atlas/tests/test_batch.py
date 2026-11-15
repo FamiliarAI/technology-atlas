@@ -520,3 +520,26 @@ class SharedLockTests(unittest.TestCase):
                 time.sleep(0.6)
             waited = float(child.communicate(timeout=10)[0])
             self.assertGreaterEqual(waited, 0.4)
+
+
+class AdaptiveDrainTests(unittest.TestCase):
+    def test_throttling_from_calls_started_before_a_drop_does_not_drop_it_again(self):
+        throttled = [0]
+        guard = threading.Lock()
+        lines = []
+        adaptive = batch.Adaptive(
+            start=10, most=10, throttled=lambda: throttled[0], load=lambda: 0, log=lines.append
+        )
+
+        def work(identifier, stop):
+            started_at = adaptive.limit
+            time.sleep(0.005)
+            if started_at >= 10:  # every call begun at the old level was throttled
+                with guard:
+                    throttled[0] += 1
+            return identifier
+
+        batch.run([str(n) for n in range(120)], work, adaptive)
+        drops = [line for line in lines if 'settling at' in line]
+        self.assertEqual(len(drops), 1, lines)
+        self.assertEqual((adaptive.ceiling, adaptive.limit), (10, 8))

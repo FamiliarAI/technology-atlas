@@ -149,6 +149,7 @@ class Adaptive:
             self.log(f'Workers: starting at {self.limit}, rising to at most {most}')
         self.base = self.throttled()
         self.finished = 0
+        self.draining = 0
 
     @staticmethod
     def _load():
@@ -187,6 +188,14 @@ class Adaptive:
         with self.condition:
             self.active -= 1
             self.finished += 1
+            if self.draining:
+                # Calls started before the last drop are still finishing; their throttling
+                # belongs to the old level. Judge the new level only once they are all done.
+                self.draining -= 1
+                if not self.draining:
+                    self._restart()
+                self.condition.notify_all()
+                return
             throttled = self.throttled() - self.base
             # Load is a minute's average: judge it only once calls at the current level finish.
             overloaded = self.finished >= max(1, self.limit // 2) and self.load() > 2
@@ -203,6 +212,7 @@ class Adaptive:
                     f'settling at {self.limit} ({round(100 * (1 - self.share))}% below)'
                 )
                 self._restart()
+                self.draining = self.active
             elif not self.settled and self.finished >= self.limit and self.limit < self.most:
                 self.limit = min(self.most, self.limit + max(2, self.limit // 4))
                 self.log(f'Workers: no throttling; rising to {self.limit}')
