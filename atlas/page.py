@@ -424,9 +424,11 @@ Rules
   the finding; at most 320 characters, with nothing omitted inside it. null if the text gives
   the finding only in a table or figure.
 - confirmed: true when the finding is established by a peer-reviewed paper, by independent
-  replication, or by an official record of fact (a regulator's decision, a trial registry, a
-  company's statutory filing reporting a regulator's action); false when it is a claim by its
-  own authors not yet reviewed (a preprint, a press release, a blog).
+  replication, by an official record of fact (a regulator's decision, a trial registry, a
+  company's statutory filing reporting a regulator's action), or, for a mathematical result, by
+  a proof checked in a proof assistant (Lean, Coq, Isabelle or similar) whose formal statement
+  is the result claimed; false when it is a claim by its own authors not yet reviewed (a
+  preprint, a press release, a blog) and not machine-checked.
 - peer_reviewed: true for a paper in a peer-reviewed journal; false for a preprint, registry
   record, filing or release.
 - kind: what the document is: journal, preprint, book, report, web, registry, filing or

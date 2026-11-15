@@ -363,7 +363,8 @@ def status_of(verdicts):
 
 def page_milestones(page):
     """A page's active milestones with a status each, by the rule of Page.jsx progress():
-    only confirmed results count; met if any is met, in progress if any is partial."""
+    every result counts, a claim too (owner, November 15, 2026); met if any is met, in
+    progress if any is partial."""
     order = page.get('milestone_order') or [m['id'] for m in page['milestones']]
     known = {m['id']: m for m in page['milestones'] if m.get('status', 'active') == 'active'}
     out = []
@@ -371,9 +372,7 @@ def page_milestones(page):
         if identifier not in known:
             continue
         verdicts = {
-            row['verdict']
-            for row in page.get('results', [])
-            if row.get('confirmed') is True and row['milestone'] == identifier
+            row['verdict'] for row in page.get('results', []) if row['milestone'] == identifier
         }
         status = 'met' if 'met' in verdicts else 'in_progress' if verdicts else 'none'
         out.append({'id': identifier, 'label': known[identifier]['title'], 'status': status})

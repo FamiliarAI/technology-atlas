@@ -29,21 +29,24 @@ export function activeMilestones(page) {
 
 // Progress, calculated.
 //   unit                = each active milestone, and the completion test
-//   counted results     = confirmed results only; an unconfirmed claim is listed and moves no mark
-//   cell(unit, case)    = met if any counted result on it is met, else partial if any, else none
+//   counted results     = every result; a claim (not independently confirmed) counts too, and
+//                         a mark that rests only on claims is flagged † (owner, November 15)
+//   cell(unit, case)    = met if any result on it is met, else partial if any, else none
 //   state(unit)         = the best cell across cases (one implicit case when there are none)
-//   percent             = 50 × (milestones met / milestones); 100 when completion is met
+//   percent             = 50 × (milestones met / milestones); 100 when completion is met;
+//                         flagged † when a mark it counts rests only on claims
 //   percent for a case  = the same, using that case's cells
 export function progress(page) {
   const cases = page.cases.length ? page.cases : [null];
   const units = [...activeMilestones(page).map((m) => m.id), 'completion'];
-  const cells = units.map((unit) =>
-    cases.map((c) =>
-      best(
-        page.results
-          .filter((r) => r.confirmed === true && r.milestone === unit && r.case === c)
-          .map((r) => r.verdict),
-      ),
+  const on = (unit, c) => page.results.filter((r) => r.milestone === unit && r.case === c);
+  const cells = units.map((unit) => cases.map((c) => best(on(unit, c).map((r) => r.verdict))));
+  // A cell is claimed when no confirmed result reaches its state.
+  const claimedCells = units.map((unit, n) =>
+    cases.map(
+      (c, k) =>
+        cells[n][k] !== 'none' &&
+        !on(unit, c).some((r) => r.confirmed === true && RANK[r.verdict] >= RANK[cells[n][k]]),
     ),
   );
   // Completion carries half the weight; the milestones share the other half equally. Only
@@ -53,14 +56,26 @@ export function progress(page) {
     const steps = states.slice(0, -1);
     return Math.round((50 * steps.filter((s) => s === 'met').length) / steps.length);
   };
+  // Whether a score leans on a claim: completion met by claims only, or a counted met
+  // milestone with no confirmed met result in any case.
+  const leans = (k) => {
+    const pick = (n) => (k === null ? claimedCells[n].every((x, j) => x || cells[n][j] !== 'met') : claimedCells[n][k]);
+    const last = units.length - 1;
+    const metAt = (n) => (k === null ? states[n] : cells[n][k]) === 'met';
+    if (metAt(last)) return pick(last);
+    return units.slice(0, -1).some((_, n) => metAt(n) && pick(n));
+  };
   const states = cells.map(best);
   return {
     cases,
     units,
     cells,
+    claimedCells,
     states,
     percent: score(states),
+    claimed: leans(null),
     perCase: cases.map((_, k) => score(cells.map((row) => row[k]))),
+    perCaseClaimed: cases.map((_, k) => leans(k)),
     met: states.filter((s) => s === 'met').length,
     partial: states.filter((s) => s === 'partial').length,
     none: states.filter((s) => s === 'none').length,
@@ -80,11 +95,18 @@ function Mark({ state }) {
   );
 }
 
-function Ring({ percent }) {
+function Ring({ percent, claimed }) {
   const r = 26;
   const length = 2 * Math.PI * r;
   return (
-    <svg className="page-ring" viewBox="-32 -32 64 64" width="76" height="76" role="img" aria-label={`${percent}% complete`}>
+    <svg
+      className="page-ring"
+      viewBox="-32 -32 64 64"
+      width="76"
+      height="76"
+      role="img"
+      aria-label={`${percent}% complete${claimed ? ', counting results not yet independently confirmed' : ''}`}
+    >
       <circle r={r} className="page-ring-track" />
       <circle
         r={r}
@@ -93,7 +115,7 @@ function Ring({ percent }) {
         transform="rotate(-90)"
       />
       <text textAnchor="middle" dy="0.35em">
-        {percent}%
+        {percent}%{claimed && <tspan className="page-ring-flag">{CLAIMED}</tspan>}
       </text>
     </svg>
   );
@@ -153,30 +175,39 @@ function Reference({ r, accessed }) {
   );
 }
 
+// Footnote marks, explained once in the key under the milestone grid.
+export const CLAIMED = '†'; // claimed, not independently confirmed
+export const UNREVIEWED = '‡'; // not peer-reviewed
+export function Flags({ claimed, unreviewed }) {
+  if (!claimed && !unreviewed) return null;
+  return (
+    <sup className="page-flags" title={[claimed && 'Claimed, not independently confirmed', unreviewed && 'Not peer-reviewed'].filter(Boolean).join('; ')}>
+      <a href="#marks-key">
+        {claimed && CLAIMED}
+        {unreviewed && UNREVIEWED}
+      </a>
+    </sup>
+  );
+}
+
 function Results({ items }) {
   if (!items.length) return <span className="ideal-none">None yet.</span>;
   return (
     <ul className="ideal-evidence">
       {items.map((e, k) => (
-        <li key={k} className={e.confirmed === true ? '' : 'page-claimed'}>
+        <li key={k}>
           <span className="ideal-verdict">
-            <Mark state={e.confirmed === true ? e.verdict : 'claimed'} />
-            <span className="visually-hidden">{e.confirmed === true ? WORD[e.verdict] : WORD.claimed}: </span>
+            <Mark state={e.verdict} />
+            <span className="visually-hidden">{WORD[e.verdict]}: </span>
           </span>
           <span className="ideal-head">
             {e.case && <span className="page-case">{e.case}. </span>}
             {e.finding}
             <Refs ns={[e.ref]} />
+            <Flags claimed={e.confirmed !== true} unreviewed={!e.peer_reviewed} />
           </span>
-          {e.confirmed !== true && (
-            <span className="ideal-detail page-flag">
-              Claimed, not confirmed{e.verdict === 'partial' ? ' (partial)' : ''}.
-            </span>
-          )}
           {e.detail && <span className="ideal-detail">{e.detail}</span>}
           {e.quote && e.checked !== false && <span className="ideal-detail page-quote">“{e.quote}”</span>}
-          {e.quote && e.checked === false && <span className="ideal-detail page-flag">Quotation not confirmed.</span>}
-          {!e.peer_reviewed && <span className="ideal-detail page-flag">Not peer reviewed.</span>}
         </li>
       ))}
     </ul>
@@ -256,15 +287,24 @@ export default function PageBody({ page }) {
       </section>
 
       <section className="ideal-status-line page-status" aria-label="Progress">
-        <Ring percent={at.percent} />
+        <Ring percent={at.percent} claimed={at.claimed} />
         <div>
           <p className="ideal-status-main">
             {at.complete ? 'Complete.' : `${at.met} of ${at.units.length} met, ${at.partial} partial, ${at.none} with no result.`}
+            <Flags claimed={at.claimed} />
           </p>
           <p className="ideal-status-sub">
             {hasCases && (
               <>
-                By {page.case_label.toLowerCase()}: {page.cases.map((c, k) => `${c} ${at.perCase[k]}%`).join(' · ')}.{' '}
+                By {page.case_label.toLowerCase()}:{' '}
+                {page.cases.map((c, k) => (
+                  <Fragment key={c}>
+                    {k > 0 && ' · '}
+                    {c} {at.perCase[k]}%
+                    <Flags claimed={at.perCaseClaimed[k]} />
+                  </Fragment>
+                ))}
+                .{' '}
               </>
             )}
             {at.next >= 0 && !at.complete && (
@@ -275,8 +315,8 @@ export default function PageBody({ page }) {
           </p>
           <p className="ideal-status-sub">
             Calculated from the results below. Completion counts for 50%; the {milestones.length}{' '}
-            milestones share the other 50% equally. A partial result adds nothing, and only confirmed
-            results count.
+            milestones share the other 50% equally. A partial result adds nothing. Claimed results
+            count and are marked {CLAIMED}.
           </p>
         </div>
       </section>
@@ -321,8 +361,8 @@ export default function PageBody({ page }) {
                 {s.body}, {s.year}
               </p>
               {s.checked === false ? (
-                <p className="ideal-note page-flag">
-                  Quotation not confirmed.
+                // A passage that was not found on its page is not shown; the source still is.
+                <p className="ideal-note">
                   <Refs ns={[s.ref]} />
                 </p>
               ) : (
@@ -384,6 +424,7 @@ export default function PageBody({ page }) {
                     <td key={k}>
                       <Mark state={g} />
                       <span className="visually-hidden">{WORD[g]}</span>
+                      <Flags claimed={at.claimedCells[n][k]} />
                     </td>
                   ))}
                 </tr>
@@ -399,10 +440,16 @@ export default function PageBody({ page }) {
             <Mark state="partial" /> Partial: a result bears on the criterion without satisfying it.
           </span>
           <span>
-            <Mark state="none" /> None: no confirmed result.
+            <Mark state="none" /> None: no result yet.
+          </span>
+        </p>
+        <p className="ideal-legend page-key" id="marks-key">
+          <span>
+            <strong>{CLAIMED}</strong> Claimed, not yet independently confirmed: a preprint, a company or
+            agency announcement, or a ruling still to come. It counts; full confirmation can take years.
           </span>
           <span>
-            <Mark state="claimed" /> Claimed, not confirmed: listed under its milestone; changes no mark.
+            <strong>{UNREVIEWED}</strong> Not peer-reviewed.
           </span>
         </p>
         <ol className="ideal-ms">
