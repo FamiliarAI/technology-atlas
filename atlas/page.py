@@ -499,14 +499,23 @@ def writer_entry(model=None, effort=None):
     entry = dict(ENTRY)
     if model:
         entry['model'] = model
+        # A model named provider/name (deepseek/..., anthropic/...) runs through OpenRouter.
+        if '/' in model:
+            entry['provider'] = 'openrouter'
     if effort:
         entry['effort'] = effort
     return entry
 
 
+JUDGE = {}  # --judge MODEL: replaces the config's judge for this run
+
+
 def judge_entry(settings, writer=ENTRY['model']):
     """The `format` entry of the atlas config, without search; another format model of the
-    config when the `format` model is the one that wrote the definition."""
+    config when the `format` model is the one that wrote the definition. --judge overrides."""
+    if JUDGE.get('model'):
+        model = JUDGE['model']
+        return {'provider': 'openrouter' if '/' in model else 'codex', 'model': model}
     entry = {'provider': 'codex', **settings['format']}
     if entry['model'] == writer:
         others = [e for e in settings.get('stages', {}).get('format', []) if e['model'] != writer]
@@ -2649,8 +2658,12 @@ def main(argv=None):
     steps = parser.add_subparsers(dest='step', required=True)
 
     def writer_options(sub):
-        sub.add_argument('--model', help=f'writer model (default {ENTRY["model"]})')
+        sub.add_argument(
+            '--model',
+            help=f'writer model (default {ENTRY["model"]}); provider/name runs through OpenRouter',
+        )
         sub.add_argument('--effort', help=f'writer effort (default {ENTRY["effort"]})')
+        sub.add_argument('--judge', help='judge model for this run (default: the config)')
 
     def batch_options(sub):
         sub.add_argument('ids', nargs='*', metavar='ID')
@@ -2720,6 +2733,8 @@ def main(argv=None):
                 )
         return 1 if failed else 0
     writer = writer_entry(getattr(args, 'model', None), getattr(args, 'effort', None))
+    if getattr(args, 'judge', None):
+        JUDGE['model'] = args.judge
     if args.step in ('define', 'results'):
         if args.step == 'define' and args.out:
             # A comparison run: files in --out, nothing written to the records.

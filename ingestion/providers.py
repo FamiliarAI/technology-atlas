@@ -16,6 +16,7 @@ import signal
 import subprocess
 import tempfile
 import threading
+import time
 
 from .sources import now, read_json, write_json
 
@@ -372,6 +373,84 @@ def grok(config, entry, text, directory, session, resume, workdir, timeout):
     return {'session_id': session, 'text': raw['text']}
 
 
+OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
+OPENROUTER_KEY = 'OPENROUTER_API_KEY'
+
+
+def openrouter_key():
+    """The OpenRouter key from the environment, else from the repository's gitignored .env.
+    It is never written to a log."""
+    if os.environ.get(OPENROUTER_KEY):
+        return os.environ[OPENROUTER_KEY]
+    path = Path(__file__).resolve().parents[1] / '.env'
+    if path.is_file():
+        for line in path.read_text().splitlines():
+            name, _, value = line.partition('=')
+            if name.strip() == OPENROUTER_KEY and value.strip():
+                return value.strip().strip('"\'')
+    raise ValueError(f'No {OPENROUTER_KEY} in the environment or .env')
+
+
+def openrouter(config, entry, text, directory, schema=None, timeout=DEFAULT_TIMEOUT_S):
+    """One chat call through the OpenRouter API (for models no signed-in CLI serves, such as
+    DeepSeek). `search: true` adds OpenRouter's web plugin; `effort` sets reasoning effort;
+    a schema asks for strict structured output. The response is kept in stdout.log."""
+    import urllib.error
+    import urllib.request
+
+    body = {'model': entry['model'], 'messages': [{'role': 'user', 'content': text}]}
+    if entry.get('effort'):
+        body['reasoning'] = {'effort': entry['effort']}
+    if entry.get('search'):
+        body['plugins'] = [{'id': 'web', 'max_results': entry.get('search_results', 10)}]
+    if schema is not None:
+        write_json(directory / 'schema.json', schema)
+        body['response_format'] = {
+            'type': 'json_schema',
+            'json_schema': {'name': 'answer', 'strict': True, 'schema': schema},
+        }
+    request = urllib.request.Request(
+        OPENROUTER_URL,
+        data=json.dumps(body).encode(),
+        headers={
+            'Authorization': 'Bearer ' + openrouter_key(),
+            'Content-Type': 'application/json',
+            'X-Title': 'Technology Atlas',
+        },
+    )
+    waits = [10, 30, 90]
+    while True:
+        try:
+            with urllib.request.urlopen(request, timeout=min(timeout, 1800)) as response:
+                raw = response.read().decode()
+            break
+        except urllib.error.HTTPError as error:
+            detail = error.read().decode(errors='replace')
+            (directory / 'stderr.log').write_text(f'HTTP {error.code}\n{detail}')
+            if error.code == 402:
+                raise ProviderExhausted('openrouter', 'OpenRouter credits exhausted') from None
+            if error.code in (429, 500, 502, 503, 504) and waits:
+                time.sleep(waits.pop(0))
+                continue
+            raise RuntimeError(f'OpenRouter HTTP {error.code}; inspect stderr.log') from None
+    (directory / 'stdout.log').write_text(raw)
+    value = json.loads(raw)
+    if value.get('error'):
+        raise RuntimeError(f'OpenRouter error: {str(value["error"])[:300]}')
+    choice = value['choices'][0]
+    content = choice['message'].get('content') or ''
+    if schema is None:
+        if not content.strip():
+            raise ValueError('OpenRouter returned no text')
+        (directory / 'response.md').write_text(content)
+        return {'text': content}
+    # Some models wrap JSON in a code fence even under structured output.
+    content = re.sub(r'^\s*```(?:json)?\s*|\s*```\s*$', '', content)
+    answer = json.loads(content)
+    write_json(directory / 'response.json', answer)
+    return answer
+
+
 class Models:
     """Run one entry. Without an entry, the older single config key for the role is used."""
 
@@ -384,7 +463,7 @@ class Models:
         write_json(directory / 'model.json', entry)
         timeout = entry.get('timeout_s', DEFAULT_TIMEOUT_S)
         provider = entry.get('provider', 'codex')
-        calls = {'codex': codex, 'claude': claude}
+        calls = {'codex': codex, 'claude': claude, 'openrouter': openrouter}
         if provider not in calls:
             raise ValueError(f'{provider} cannot run the {role} stage')
         try:
