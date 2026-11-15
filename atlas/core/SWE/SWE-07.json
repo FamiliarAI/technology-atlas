@@ -741,6 +741,34 @@
     "issue": null,
     "pages": null,
     "citation_source": "model"
+   },
+   {
+    "id": 16,
+    "kind": "journal",
+    "url": "https://trustworthy.systems/publications/papers/Wistoff_SGHB_23.pdf",
+    "doi": null,
+    "title": "Systematic Prevention of On-Core Timing Channels by Full Temporal Partitioning",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 17,
+    "kind": "preprint",
+    "url": "https://trustworthy.systems/publications/papers/Wistoff_HB_24.pdf",
+    "doi": null,
+    "title": "fence.t.s: Closing Timing Channels in High-Performance Out-of-Order Cores through ISA-Supported Temporal Partitioning",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
    }
   ],
   "milestone_order": [
@@ -751,8 +779,318 @@
    "m5",
    "m6"
   ],
-  "results": [],
-  "judged": [],
+  "results": [
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One seL4 kernel confidentiality proof covers all in-kernel storage channels.",
+    "detail": "The page says proofs reach C code, but does not establish the specific nonleakage theorem or all its required conditions.",
+    "quote": "As mentioned above, in practice the proof covers all\n    in-kernel storage channels but does not cover timing channels",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 8,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-15"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "seL4: machine-checked nonleakage proof applies to 8,830 lines of C code.",
+    "detail": "The theorem assumes initial invariants, a consistent well-formed policy, safe cross-partition capabilities and only timer interrupts, as well as correct compiler, assembly, hardware and boot code. It covers storage channels and logical time; fine-grained hardware timing is outside the model. The text does not establish peer review.",
+    "quote": "Theorem 2: seL4’s C implementation enforces infor-\nmation ﬂow security.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 7,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-15"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "Haswell interrupt timing channel, n = 11,029: estimated leakage was 0.5 millibit per input.",
+    "detail": "IRQ partitioning was enabled. The estimate was below the tool’s 1-millibit resolution. The paper also reports a detectable Haswell L2 channel under time protection. The supplied text identifies a conference publication but does not state whether it was peer reviewed.",
+    "quote": "IRQ partitioning results in an\nuninterrupted time slice for the spy, and a closed channel\n(M = 0.5 mb,M0 = 0.7 mb, n = 11, 029).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 1,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-15"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "CVA6 branch-history-table channel with MICRORESET: 1 million attacks; mutual information 0.0 millibit per input.",
+    "detail": "The result is for an individual tested channel. The authors used 1,000 randomized datasets to estimate the zero-leakage limit; it is not an aggregate leakage bound.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 16,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-15"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "OpenC910 L1 instruction-cache timing channel: sample size not stated; mutual information was 3.2 millibits per input.",
+    "detail": "With fence.t.s, M was below the reported zero-leakage bound of 3.5 millibits. The text does not establish that the bound was the specified 95% limit obtained from 100 shuffled datasets, and M exceeded 1 millibit.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 17,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-15"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "met",
+    "finding": "Theorem 1 proves observer-relative confidentiality for every user domain in a generic OS model; sample size: not applicable.",
+    "detail": "The Isabelle/HOL proof is model-level and depends on stated hardware, OS, scheduling and timing assumptions. The model includes an instantiation with two system calls for one-way messaging.",
+    "quote": "Formally, we then prove that Deﬁnition 1 holds\nat all times as seen by every possible user domain:\nTheorem 1 (OS model enforces conﬁdentiality with time protection).\n∀u. obs-conﬁdentiality u",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-15"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One I2C controller’s address-decoding submodule was proved behaviorally equivalent to its specification.",
+    "detail": "The proof for the controller’s core was still in progress, and driver verification was a future goal. The source is an ACM workshop paper; the supplied text does not establish peer review.",
+    "quote": "For the i2c_reg_top submodule, we have completed all the\nthree steps of Section 3.1, resulting in a proof of behavioural\nequivalence between the spec and the original Verilog design.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-15"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One Ethernet driver was verified against encoded device and OS interfaces.",
+    "detail": "The device protocol was translated from the hardware manual. The paper does not prove that the device implementation refines the interface used to verify the driver.",
+    "quote": "We verify two LionsOS components: the NIC driver and\nthe library implementing the SPSC queues (Section 3.1). We\nprove all properties discussed in Section 3.3, without assum-\ning that the driver executes on the same core as the rest of\nthe OS, i.e. the system is multicore-safe.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 14,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-15"
+   }
+  ],
+  "judged": [
+   {
+    "url": "https://sel4.systems/About/FAQ.html",
+    "milestone": "m1",
+    "hash": "a0cac82efb48",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://sel4.systems/About/FAQ.html",
+    "milestone": "m2",
+    "hash": "41656ef2d788",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://sel4.systems/About/FAQ.html",
+    "milestone": "m3",
+    "hash": "d48758eb9983",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://sel4.systems/About/FAQ.html",
+    "milestone": "m4",
+    "hash": "c8b35001b4ac",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://sel4.systems/About/FAQ.html",
+    "milestone": "m5",
+    "hash": "dcf19035e2e9",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://sel4.systems/About/FAQ.html",
+    "milestone": "m6",
+    "hash": "282754120fc3",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://sel4.systems/About/FAQ.html",
+    "milestone": "completion",
+    "hash": "a6ca6236cf9c",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://sel4.systems/Verification/assumptions.html",
+    "milestone": "m1",
+    "hash": "a0cac82efb48",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://sel4.systems/Verification/assumptions.html",
+    "milestone": "m2",
+    "hash": "41656ef2d788",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://sel4.systems/Verification/assumptions.html",
+    "milestone": "m3",
+    "hash": "d48758eb9983",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://sel4.systems/Verification/assumptions.html",
+    "milestone": "m4",
+    "hash": "c8b35001b4ac",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://sel4.systems/Verification/assumptions.html",
+    "milestone": "m5",
+    "hash": "dcf19035e2e9",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://sel4.systems/Verification/assumptions.html",
+    "milestone": "m6",
+    "hash": "282754120fc3",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://sel4.systems/Verification/assumptions.html",
+    "milestone": "completion",
+    "hash": "a6ca6236cf9c",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
+    "milestone": "m1",
+    "hash": "a0cac82efb48",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
+    "milestone": "m2",
+    "hash": "41656ef2d788",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
+    "milestone": "m3",
+    "hash": "d48758eb9983",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
+    "milestone": "m4",
+    "hash": "c8b35001b4ac",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
+    "milestone": "m5",
+    "hash": "dcf19035e2e9",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
+    "milestone": "m6",
+    "hash": "282754120fc3",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
+    "milestone": "completion",
+    "hash": "a6ca6236cf9c",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.ieee-security.org/TC/SP2013/papers/4977a415.pdf",
+    "milestone": "m1",
+    "hash": "a0cac82efb48",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/full_text/Ge_YCH_19.pdf",
+    "milestone": "m2",
+    "hash": "41656ef2d788",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Wistoff_SGHB_23.pdf",
+    "milestone": "m2",
+    "hash": "41656ef2d788",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Wistoff_HB_24.pdf",
+    "milestone": "m2",
+    "hash": "41656ef2d788",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.robs-cse.com/publications/FM23_accepted.pdf",
+    "milestone": "m3",
+    "hash": "d48758eb9983",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Murphy_RRGTPTH_25.pdf",
+    "milestone": "m5",
+    "hash": "dcf19035e2e9",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Tyler_LZSWTH_26.pdf",
+    "milestone": "m5",
+    "hash": "dcf19035e2e9",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   }
+  ],
   "version": 1,
   "accessed": "2026-11-15",
   "log": [
@@ -770,6 +1108,44 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked goal statements and threshold quotations against saved copies: 9 found, 1 not found, 1 with no readable copy."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "gpt-6.1-terra",
+    "action": "Judged 3 sources the entry already uses against the milestones they had not been judged against, without search."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "gpt-6.1-sol",
+    "action": "Searched for results on the open cells: 7 candidates returned, 0 dropped as sources already used, 7 to judge."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "gpt-6.1-terra",
+    "action": "Judged 7 of 7 new candidates, without search. Skipped: 1 no readable saved copy. Dropped rows: none. Replaced 0 earlier rows. Added 8 results: 1 from sources already used, 7 from newly found sources."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 6 found, 0 not found, 0 with no readable copy."
+   }
+  ],
+  "results_run": "2026-11-15"
+ },
+ "review": {
+  "state": "published",
+  "note": null,
+  "into": null,
+  "at": "2026-11-15",
+  "log": [
+   {
+    "date": "2026-11-15",
+    "state": "published"
    }
   ]
  }
