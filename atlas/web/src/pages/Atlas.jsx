@@ -6,6 +6,7 @@ import Starfield from '../Starfield.jsx';
 import { useAtlas, useField, warm as isWarm } from '../data.jsx';
 import { FieldEmblem, StarGlyph, StatusMark, ringSegments } from '../glyphs.jsx';
 import { chartCoord, REGION_GRID } from '../sky.js';
+import { whenText } from './Page.jsx';
 import { EASE } from '../motion.js';
 import '../sky.css';
 
@@ -185,6 +186,9 @@ function StarCard({ atlas, id, onClose }) {
         </button>
       </div>
       <h2 id="sa-card-title">{item.title}</h2>
+      {item.complete && (
+        <p className="sa-card-complete">Complete{item.completed ? ` · ${whenText(item.completed)}` : ''}</p>
+      )}
       <p className="sa-card-coord mono">
         Chart {coord.text}
         {item.recent && <span className="sa-card-recent">moved in the last 30 days</span>}

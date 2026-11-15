@@ -872,6 +872,8 @@ def ref_slots(page):
         slots += [(milestone, 'refs', True), (milestone, 'threshold_ref', False)]
     slots += [(m, 'ref', False) for m in page['measures']]
     slots += [(r, 'ref', False) for r in page.get('results', [])]
+    if page.get('completed'):
+        slots.append((page['completed'], 'ref', False))
     return slots
 
 
@@ -1749,6 +1751,118 @@ def add(identifier, urls, judge=None, titles=None, note=None):
         f'quotes {quotes[0]} found / {quotes[1]} not found / {quotes[2]} unreadable; '
         f'citations {citations}'
     )
+
+
+# dates: when a met completion test was first met.
+
+DATE_SCHEMA = obj(
+    {
+        'date': TEXT,
+        'precision': {'type': 'string', 'enum': ['day', 'month', 'year']},
+        'event': TEXT,
+        'url': TEXT,
+        'title': TEXT,
+        'kind': KIND,
+        'quote': MAYBE,
+    }
+)
+
+DATE_PROMPT = """\
+A breakthrough in the Technology Atlas has met its completion test. Find the date on which the
+test was first met, as accurately as the record allows.
+
+Breakthrough: {title}
+Completion test: {criterion}
+Set by: {set_by}
+
+Results the Atlas holds that meet it:
+{results}
+
+Rules:
+- The date is when the event the test names happened: an award announced, an approval granted,
+  a proof completed and made public, a result published. For a test met by publication or peer
+  review, it is the publication date (online first, if earlier). For a ruling or approval, the
+  date of the ruling. If the results above are later than the first event that meets the test,
+  find the first. When every result above is claimed (the ruling or confirmation the test names
+  is still to come), date the claim instead: when the claimed result was first made public; the
+  Atlas marks such a date as claimed.
+- date: YYYY-MM-DD when a source states the day; YYYY-MM when only the month; YYYY when only
+  the year. precision: day, month or year to match. Never guess a finer date than a source
+  states.
+- event: one line saying what happened on that date, with who and where.
+- url and title: the source that states the date, best first: the deciding body's own record,
+  the journal's page, then a reputable report. kind: its kind.
+- quote: one passage copied exactly, character for character, from that source, that states
+  the date (or the month or year); at most 320 characters. null only if the source gives the
+  date in a form that cannot be quoted (a metadata field).
+"""
+
+
+def completion_results(page):
+    return [
+        r
+        for r in page.get('results', [])
+        if r['milestone'] == 'completion' and r['verdict'] == 'met'
+    ]
+
+
+def date_completion(identifier, call=None, writer=None):
+    """Find and store when the page's met completion test was first met: page['completed'] =
+    {date, precision, event, ref, quote, checked}. Searches with the writer model; the quote is
+    checked against a saved copy of the source; its source becomes a cited reference. Returns
+    a line."""
+    page = load(identifier)
+    met = completion_results(page)
+    if not met:
+        return f'{identifier}: completion not met; no date'
+    refs = {r['id']: r for r in page['references']}
+    text = DATE_PROMPT.format(
+        title=page['title'],
+        criterion=page['completion']['criterion'],
+        set_by=page['completion']['set_by'],
+        results='\n'.join(
+            f'- {r["finding"]} ({refs[r["ref"]]["url"]}; '
+            f'{"confirmed" if r.get("confirmed") else "claimed"})'
+            for r in met
+        ),
+    )
+    entry = dict(writer or ENTRY)
+    entry['search'] = True
+    answer = (call or model_call(DATE_SCHEMA, entry, folder(identifier, 'date')))(text)
+    shape = {'day': r'\d{4}-\d{2}-\d{2}', 'month': r'\d{4}-\d{2}', 'year': r'\d{4}'}
+    if not re.fullmatch(shape[answer['precision']], answer['date']):
+        raise ValueError(
+            f'{identifier}: date {answer["date"]} does not match {answer["precision"]}'
+        )
+    source = read(answer['url'], answer['title'])
+    checked = check(answer['quote'], source) if answer['quote'] and source else None
+    before = snapshot(page)
+    first_new = len(page['references']) + 1
+    ref = refer(page['references'], answer['url'], answer['title'], answer['kind'], None, source)
+    citations = cite_all(page['references'][first_new - 1 :])
+    page['completed'] = {
+        'date': answer['date'],
+        'precision': answer['precision'],
+        'event': flat(answer['event']),
+        'ref': ref,
+        'quote': answer['quote'],
+        'checked': checked,
+        'by': entry['model'],
+    }
+    assert snapshot(page) == before, 'dating must not change the definition'
+    state = {True: 'quotation found', False: 'quotation not found', None: 'no readable copy'}[
+        checked
+    ]
+    page['log'].append(
+        row(
+            entry['model'],
+            f'Dated the completion: {answer["date"]} ({answer["precision"]}); {state}.',
+        )
+    )
+    if citations:
+        page['log'].append(cited_row(citations))
+    save(page)
+    return f'{identifier}: completed {answer["date"]} ({answer["precision"]}); {state}; {answer["event"]}'
 
 
 # recover: sources an earlier search proposed that could not be read then.
@@ -2766,7 +2880,48 @@ def main(argv=None):
     eight.add_argument('--workers', type=int, default=4)
     eight.add_argument('--judge', help='judge model for this run (default: the config)')
     eight.add_argument('--no-commit', action='store_true')
+    nine = steps.add_parser('dates', help='date each met completion test (search call each)')
+    nine.add_argument('ids', nargs='*', metavar='ID')
+    nine.add_argument('--missing', action='store_true', help='complete pages with no date yet')
+    nine.add_argument('--all', action='store_true', help='every complete page, again')
+    nine.add_argument('--workers', type=int, default=4)
+    nine.add_argument('--no-commit', action='store_true')
+    writer_options(nine)
     args = parser.parse_args(argv)
+    if args.step == 'dates':
+        writer = writer_entry(args.model, args.effort)
+        data = records.load(CORE)
+        identifiers = args.ids or [
+            identifier
+            for identifier, item in sorted(data['breakthroughs'].items())
+            if item.get('status') == 'active'
+            and item.get('page')
+            and completion_results(item['page'])
+            and (args.all or (args.missing and not item['page'].get('completed')))
+        ]
+        if not identifiers:
+            print('Nothing to date.')
+            return 0
+
+        def work(identifier, stop):
+            with claimed('results', identifier) as mine:
+                if not mine:
+                    raise batches.Stopped('another run is working on it')
+                return date_completion(identifier, writer=writer)
+
+        def report(identifier, outcome):
+            status, value = outcome
+            print(value if status == 'done' else f'{identifier}: {status}: {value}', flush=True)
+
+        outcomes, exhausted = batches.run(identifiers, work, args.workers, report)
+        failed = sum(1 for status, _ in outcomes.values() if status == 'failed')
+        problems_ = records.check(records.load(CORE))
+        if problems_:
+            print('atlas/core check failed:\n' + '\n'.join(problems_))
+            return 1
+        if not args.no_commit:
+            records.commit(f'Date completion for {len(identifiers)} breakthroughs\n\n{TRAILER}')
+        return EXHAUSTED if exhausted else (1 if failed else 0)
     if args.step == 'recover':
         if args.judge:
             JUDGE['model'] = args.judge

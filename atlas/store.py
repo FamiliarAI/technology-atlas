@@ -448,6 +448,9 @@ def _site_view(db):
                 row['milestone'] == 'completion' and row['verdict'] == 'met'
                 for row in page.get('results', [])
             )
+            if item['complete'] and page.get('completed'):
+                done = page['completed']
+                item['completed_on'] = {'date': done['date'], 'precision': done['precision']}
         # Any judged row counts as movement, including one about the breakthrough as a whole.
         item['moved_at'] = max((entry['added_at'] for entry in rows), default=None)
         item['progress_count'] = counts.get(row['id'], 0)
@@ -487,8 +490,9 @@ def catalog(db, view=None):
             'milestones': [milestone['status'] for milestone in item['milestones']],
             'overall': item['overall'],
             'moved_at': item['moved_at'],
-            # Only when true, to keep the catalog small: its completion test is met.
+            # Only when true, to keep the catalog small: its completion test is met, and when.
             **({'complete': True} if item.get('complete') else {}),
+            **({'completed': item['completed_on']} if item.get('completed_on') else {}),
         }
         for identifier, item in sorted(items.items())
     ]

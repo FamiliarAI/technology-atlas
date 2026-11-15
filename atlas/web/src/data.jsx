@@ -67,6 +67,7 @@ export async function loadAtlas() {
       moving,
       overall,
       complete,
+      completed: raw.completed || null,
       glow: complete ? 1 : glow || (overall ? 0.5 / Math.max(n, 4) : 0),
       recent: raw.moved_at ? TODAY - new Date(raw.moved_at) < 30 * DAY : false,
     };

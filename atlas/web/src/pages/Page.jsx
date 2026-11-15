@@ -149,6 +149,18 @@ function Section({ id, title, children, className = '' }) {
 
 const stop = (text) => (text ? text.replace(/[.\s]+$/, '') + '.' : '');
 
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+// A completion date at the precision its source states: "8 September 2026", "May 1995", "2010".
+export function whenText(completed) {
+  if (!completed?.date) return '';
+  const [y, m, d] = completed.date.split('-').map(Number);
+  if (completed.precision === 'day') return `${d} ${MONTHS[m - 1]} ${y}`;
+  if (completed.precision === 'month') return `${MONTHS[m - 1]} ${y}`;
+  return String(y);
+}
+// "on 8 September 2026", "in May 1995", "in 2010".
+const whenPhrase = (completed) => (completed.precision === 'day' ? 'on ' : 'in ') + whenText(completed);
+
 // Vancouver (NLM) style, from the reference's fields.
 function Reference({ r, accessed }) {
   const journal = r.kind === 'journal' || r.kind === 'preprint';
@@ -232,7 +244,7 @@ function Threshold({ unit }) {
   );
 }
 
-function Unit({ number, id, title, criterion, setBy, kind, refs, results, basis, unit }) {
+function Unit({ number, id, title, criterion, setBy, kind, refs, results, basis, unit, completed }) {
   return (
     <li id={id}>
       <h3>
@@ -257,6 +269,18 @@ function Unit({ number, id, title, criterion, setBy, kind, refs, results, basis,
           <div>
             <dt>Basis</dt>
             <dd>{basis}</dd>
+          </div>
+        )}
+        {completed && (
+          <div>
+            <dt>Completed</dt>
+            <dd>
+              <strong>{whenText(completed)}</strong>. {completed.event}
+              <Refs ns={[completed.ref]} />
+              {completed.quote && completed.checked !== false && (
+                <span className="ideal-detail page-quote">“{completed.quote}”</span>
+              )}
+            </dd>
           </div>
         )}
         <div>
@@ -290,7 +314,12 @@ export default function PageBody({ page }) {
         <Ring percent={at.percent} claimed={at.claimed} />
         <div>
           <p className="ideal-status-main">
-            {at.complete ? 'Complete.' : `${at.met} of ${at.units.length} met, ${at.partial} partial, ${at.none} with no result.`}
+            {at.complete
+              ? page.completed
+                ? `Complete ${whenPhrase(page.completed)}.`
+                : 'Complete.'
+              : `${at.met} of ${at.units.length} met, ${at.partial} partial, ${at.none} with no result.`}
+            {at.complete && page.completed && <Refs ns={[page.completed.ref]} />}
             <Flags claimed={at.claimed} />
           </p>
           <p className="ideal-status-sub">
@@ -388,6 +417,7 @@ export default function PageBody({ page }) {
             refs={completion.refs}
             basis={completion.basis}
             unit={completion}
+            completed={at.complete ? page.completed : null}
             results={on('completion')}
           />
         </ol>
