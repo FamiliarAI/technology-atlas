@@ -254,11 +254,11 @@ function Legend() {
       <p className="sa-legend-row">
         <svg width="34" height="18" viewBox="-17 -9 34 18" aria-hidden="true">
           <circle r="11" fill="url(#sky-halo-met)" />
-          <circle r="2.2" fill="#FFF1C9" />
-          <circle r="7" className="sky-seg legend met sky-complete" />
+          <path d="M0 -9L0 9M-9 0L9 0" className="sky-sparkle-spikes legend" />
+          <circle r="4.5" className="sky-sparkle-disc" />
         </svg>
         <span>
-          <b>Closed ring</b> complete: its completion test met
+          <b>Bright star</b> complete: its completion test met
         </span>
       </p>
     </div>

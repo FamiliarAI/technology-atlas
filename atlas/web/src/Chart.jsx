@@ -222,6 +222,18 @@ function StarLabel({ item, plan }) {
   );
 }
 
+// A complete breakthrough: a filled disc the size of the ring, and four thin spikes.
+function Sparkle({ r }) {
+  const s = r * 2.6;
+  return (
+    <g className="sky-sparkle">
+      <path d={`M0 ${-s}L0 ${s}M${-s} 0L${s} 0`} className="sky-sparkle-spikes" />
+      <circle r={r * 0.95} className="sky-sparkle-disc" />
+      <circle r={r * 0.4} className="sky-sparkle-heart" />
+    </g>
+  );
+}
+
 const Star = memo(function Star({ item, lod, state, plan, interactive, tabbable, onSelect, onHover }) {
   const r = starRadius(item.status.length);
   const core = coreRadius(item.status.length);
@@ -269,8 +281,9 @@ const Star = memo(function Star({ item, lod, state, plan, interactive, tabbable,
       )}
       {lod >= 1 &&
         (item.complete ? (
-          // Complete: one unbroken ring. Segments, even all met, mean milestones only.
-          <circle r={r} className="sky-seg met sky-complete" />
+          // Complete: a different kind of mark, a solid bright disc with four spikes, so it
+          // reads apart from every ring (all milestones met included) at a glance.
+          <Sparkle r={r} />
         ) : (
           ringSegments(item.status, r).map((seg, n) => <path key={n} d={seg.d} className={'sky-seg ' + seg.status} />)
         ))}
@@ -999,7 +1012,12 @@ export default function Chart({
                 <g key={i.id} transform={`translate(${i.x.toFixed(2)} ${i.y.toFixed(2)})`}>
                   <g className="sky-screen">
                     <circle r={lod >= 1 ? 18 : 9} fill="url(#sky-halo-met)" />
-                    {lod === 0 && <circle r="1.8" fill={starColor(i.glow)} />}
+                    {lod === 0 && (
+                      <>
+                        <path d="M0 -7L0 7M-7 0L7 0" className="sky-sparkle-spikes far" />
+                        <circle r="2.6" className="sky-sparkle-disc" />
+                      </>
+                    )}
                   </g>
                 </g>
               ))}
