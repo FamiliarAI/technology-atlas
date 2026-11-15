@@ -241,7 +241,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Software built from clear rules, with proof it follows them",
@@ -344,5 +345,281 @@
    "A proof guarantees only the modeled behavior; it does not establish that the rules capture real needs or that the program always finishes."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "SWE-02",
+  "title": "Proof-producing synthesis of systems software",
+  "definition": "A synthesizer constructs a systems program from an expert-reviewed formal behavioral specification and produces a proof that its modeled behavior satisfies that specification. The specification leaves implementation choices open; a checker separate from the synthesizer checks the proof.",
+  "goal": {
+   "need": "Verus's systems case studies contain 6.1K implementation lines and 31K proof lines: approximately 5.1 proof lines per implementation line. These are artifact sizes, not measurements of labor. Proof-producing synthesis targets production of both artifacts from specifications, as DARPA's HACMS programme explicitly proposed.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": {
+    "caption": "Implementation and proof artifacts in the Verus systems case studies",
+    "columns": [
+     "Artifact",
+     "Lines"
+    ],
+    "rows": [
+     [
+      "Implementation",
+      "6,100"
+     ],
+     [
+      "Proof",
+      "31,000"
+     ]
+    ],
+    "note": "Aggregate counts across the reported case studies; these do not measure human effort.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "DARPA, High-Assurance Cyber Military Systems programme",
+     "year": "2012",
+     "quote": "HACMS seeks a synthesizer capable of producing a machine-checkable proof that the generated code satisfies functional specifications",
+     "context": null,
+     "ref": 2,
+     "checked": true
+    },
+    {
+     "body": "Microsoft Research and the Verus development team",
+     "year": "2024",
+     "quote": "we aim to enable faster, cheaper verification of rich properties for realistic systems.",
+     "context": null,
+     "ref": 1,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "Independent checking establishes refinement for a complete synthesized systems program.",
+   "criterion": "Generate a complete systems program and a functional-refinement proof from a fixed, expert-reviewed behavioral specification. Refinement means every modeled implementation behavior is permitted by the specification, including its specified progress and failure behavior. Cover the selected system's full public interface and failure model. The specification leaves algorithms and data representations open; imported assumptions and libraries are included in review. A separate checker accepts the proof, and the evaluated executable is connected to the proved artifact. The executable meets workload and resource constraints specified before synthesis.",
+   "set_by": "Technology Atlas; proposed integrated demonstration rather than an externally established completion threshold.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searched HACMS goals, the trusted-software roadmap, and Fiat, IDS and Vero evaluations for a combined test of systems scope, specification compactness, human review and runtime performance; none supplied one. This proposal retains their shared synthesis-and-proof objective without assigning numerical compactness or review-time limits. Vero reports 27 of 43 repositories fully solved by its strongest configuration, but its endpoint does not establish executable performance.",
+   "refs": [
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "An imperative routine is synthesized with functional correctness and loop termination.",
+    "criterion": "From supplied atomic operations and templates constraining loops, stack space and resource use, synthesize an imperative routine satisfying its input-output specification, termination conditions and syntactic constraints. The 2010 paper demonstrates this formulation for arithmetic, sorting and dynamic programming, including Strassen matrix multiplication.",
+    "set_by": "Srivastava, Gulwani and Foster, published proof-theoretic synthesis formulation in From Program Verification to Program Synthesis.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "partial correctness, loop termination, and well-formedness conditions on program guards.",
+    "threshold_ref": 7,
+    "refs": [
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A synthesized data structure has a refinement proof accepted by the Coq kernel.",
+    "criterion": "Refine a declarative specification of an abstract data type, which packages operations with private state, into an implementation while producing a refinement proof checked by Coq's kernel. Fiat reports this for SQL-like query and insertion structures in 2015. Its automated synthesis requires programmer-supplied index choices; the kernel-checked derivation does not itself certify subsequent OCaml compilation.",
+    "set_by": "Fiat developers, using the established proof-assistant convention of kernel acceptance for refinement proofs; the published demonstration concerns query structures.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "Each refinement process leaves a proof trail, checkable by the normal Coq kernel, justifying its soundness.",
+    "threshold_ref": 4,
+    "refs": [
+     4
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "Synthesized, linked assembly satisfies its original high-level specification.",
+    "criterion": "Produce a fully linked assembly program together with a Coq-checked proof that it meets its original high-level specification. The 2020 pipeline demonstrates this for SQL-style specifications, including manual memory management and calls to separately verified foreign data structures. The correctness theorem covers the linked assembly rather than stopping at extracted functional code.",
+    "set_by": "Pit-Claudel and colleagues, foundational refinement and linking criterion in Extensible Extraction of Efficient Imperative Programs with Foreign Functions, Manually Managed Memory, and Proofs.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "The pipeline runs entirely within the Coq proof assistant, leading to final, linked assembly code with overall full-functional-correctness proofs in separation logic.",
+    "threshold_ref": 8,
+    "refs": [
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "A synthesized distributed store passes proof, audit and execution checks in at least 2 of 3 runs.",
+    "criterion": "At least 2 of 3 independent runs for a fixed distributed-store specification must close the Rocq proof without unproved placeholders, pass the non-vacuity and interface audit, and execute the extracted OCaml implementation on the harness; budget exhaustion fails. Table 1 of the preprint dated 22 May 2026 records 20 successful runs out of 21 across seven specifications, passing all seven. Runtime evaluation used five Google Cloud virtual machines. The specifications omit production reconfiguration and fault recovery.",
+    "set_by": "IDS benchmark authors, Section 5.1 and Table 1; the published cutoff and execution tests concern distributed key-value-store specifications.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "Rocq Qed accepted, audit step passed, extracted OCaml runs on the harness",
+    "threshold_ref": 5,
+    "refs": [
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No external completion test was located that jointly bounds specification compactness, human review effort, systems scope and runtime performance."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://www.microsoft.com/en-us/research/publication/verus-a-practical-foundation-for-systems-verification/",
+    "doi": "10.1145/3694715.3695952",
+    "title": "Verus: A Practical Foundation for Systems Verification",
+    "authors": "Lattuada A, Hance T, Bosamiya J, Brun M, Cho C, LeBlanc H, et al.",
+    "container": "Proceedings of the ACM SIGOPS 30th Symposium on Operating Systems Principles",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": "438-454",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "journal",
+    "url": "https://tupl.cs.tufts.edu/papers/hacms-keynote-HILT-2012.pdf",
+    "doi": "10.1145/2402676.2402695",
+    "title": "HACMS: High Assurance Cyber Military Systems",
+    "authors": "Fisher K",
+    "container": "Proceedings of the 2012 ACM conference on High integrity language technology",
+    "year": "2012",
+    "volume": null,
+    "issue": null,
+    "pages": "51-52",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 3,
+    "kind": "journal",
+    "url": "https://people.cs.umass.edu/brun/pubs/pubs/Brun26tosem.pdf",
+    "doi": "10.1145/3779132",
+    "title": "Automatically Engineering Trusted Software: A Research Roadmap",
+    "authors": "Brun Y, Chakraborty S, Le Goues C, Păsăreanu C, Singla A",
+    "container": "ACM Trans. Softw. Eng. Methodol.",
+    "year": "2026",
+    "volume": "35",
+    "issue": "9",
+    "pages": "1-30",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 4,
+    "kind": "journal",
+    "url": "https://dspace.mit.edu/entities/publication/537c74a3-d35f-4468-8d02-d7717a4dd9b9",
+    "doi": "10.1145/2676726.2677006",
+    "title": "Fiat: Deductive Synthesis of Abstract Data Types in a Proof Assistant",
+    "authors": "Delaware B, Pit-Claudel C, Gross J, Chlipala A",
+    "container": "Proceedings of the 42nd Annual ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages",
+    "year": "2015",
+    "volume": null,
+    "issue": null,
+    "pages": "689-700",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 5,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2605.23109v1",
+    "doi": "10.48550/arXiv.2605.23109",
+    "title": "Inductive Deductive Synthesis: Enabling AI to Generate Formally Verified Systems",
+    "authors": "Agarwal S, Krentsel A, Liu S, Cemri M, Cheng A, Meng R, et al.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 6,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2608.13522v1",
+    "doi": "10.48550/arXiv.2608.13522",
+    "title": "Vero: Can AI Agents Build Formally Verified Software Repositories?",
+    "authors": "Ye Z, Lou H, Sun Y, Song P, Yan Z, Kasriel T, et al.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 7,
+    "kind": "journal",
+    "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/12/popl10_synthesis.pdf",
+    "doi": "10.1145/1706299.1706337",
+    "title": "From Program Verification to Program Synthesis",
+    "authors": "Srivastava S, Gulwani S, Foster JS",
+    "container": "Proceedings of the 37th annual ACM SIGPLAN-SIGACT symposium on Principles of programming languages",
+    "year": "2010",
+    "volume": null,
+    "issue": null,
+    "pages": "313-326",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 8,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7324049/",
+    "doi": "10.1007/978-3-030-51054-1_7",
+    "title": "Extensible Extraction of Efficient Imperative Programs with Foreign Functions, Manually Managed Memory, and Proofs",
+    "authors": "Pit-Claudel C, Wang P, Delaware B, Gross J, Chlipala A",
+    "container": "Lecture Notes in Computer Science",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": "119-137",
+    "citation_source": "crossref"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-15",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 6 from Crossref, 0 from PubMed, 2 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 6 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }

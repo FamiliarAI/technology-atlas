@@ -241,7 +241,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Software that spreads safely across computers",
@@ -332,5 +333,330 @@
    "Can proof automation and runtime costs make the approach practical across different applications?"
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "SWE-08",
+  "title": "Verified synthesis of fault-tolerant distributed programs",
+  "definition": "A tool derives a distributed service from sequential application code and explicit consistency, availability and fault requirements. Machine-checked proofs establish refinement—observable executions obey the source specification—and progress under stated communication and failure assumptions.",
+  "goal": {
+   "need": "Building IronFleet's methodology and verifying two systems took approximately 3.7 person-years. Automating distributed implementation must address proof construction as well as code generation.",
+   "need_refs": [
+    1
+   ],
+   "figures": {
+    "caption": "IronFleet code sizes, reported in 2015",
+    "columns": [
+     "Category",
+     "Source lines of code"
+    ],
+    "rows": [
+     [
+      "Executable implementation",
+      "5,114"
+     ],
+     [
+      "Proof annotations",
+      "39,253"
+     ]
+    ],
+    "note": "Totals from Figure 12 include shared libraries; proof annotations exclude the separate specification column.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "Microsoft Research, IronFleet developers",
+     "year": "2015",
+     "quote": "raise the standard for distributed systems from “tested” to “correct.”",
+     "context": "The aim concerns verification of distributed implementations.",
+     "ref": 1,
+     "checked": true
+    },
+    {
+     "body": "DARPA, High Assurance Cyber Military Systems programme",
+     "year": "2012",
+     "quote": "HACMS seeks a synthesizer capable of producing a machine-checkable proof that the generated code satisfies functional specifications",
+     "context": "The programme addresses networked embedded systems and also requires safety and security properties.",
+     "ref": 2,
+     "checked": true
+    },
+    {
+     "body": "University of California, Berkeley, Katara developers",
+     "year": "2022",
+     "quote": "converting familiar sequential logic into scalable distributed code.",
+     "context": "The conclusion proposes verified lifting as a way to automate this conversion; Katara addresses replicated data types.",
+     "ref": 3,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "Sequential service code is synthesized into distributed code with checked refinement and progress proofs.",
+   "criterion": "For a declared source-language class containing monotonic computations and decisions requiring coordination, a tool accepts sequential code and explicit consistency, availability and fault requirements, including crashes and network partitions. It chooses distributed representations and coordination and generates executable code without application-specific distributed code or proofs supplied by the programmer. Machine-checked proofs establish refinement under the declared operation-order relation and fault model, and the specified progress under explicit communication and failure assumptions.",
+   "set_by": "Atlas synthesis of the cited goals; no external body was found to define the combined acceptance test.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searched DARPA HACMS, CALM/Bloom, Blazes, IronFleet, Verdi, Katara and recent verified-synthesis papers for a combined sequential-input, coordination-synthesis, fault-tolerance and progress test; none was found. This test joins their stated aims without adding a performance or coordination-minimality threshold. Katara covers data types; IDS requires formal distributed specifications and omits fault recovery.",
+   "refs": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "Automatically inserted coordination prevents a distributed dataflow's replicas from diverging.",
+    "criterion": "For a supplied dataflow with accurate component and stream annotations, generate ordering or sealing coordination that prevents replica divergence. Replicas agree on stored values after delivery of all messages; sealing additionally requires complete finite input partitions. Blazes reports two case studies in ICDE 2014: Storm word counting and a Bloom ad-tracking network.",
+    "set_by": "Blazes developers, ICDE 2014, sections III.B–III.C, V and VIII; convergence is a field convention and coordination generation is specific to Blazes.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "when all messages have been delivered, all replicas agree on the set of stored values",
+    "threshold_ref": 5,
+    "refs": [
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A distributed service has checked refinement proofs and a conditional progress theorem.",
+    "criterion": "Prove implementation and protocol refinement plus conditional liveness. IronRSL's progress theorem requires eventual synchrony of a live quorum and repeated client submissions. SOSP 2015 reports these proofs, while the reduction from interleaved execution to atomic host steps remains an informal argument.",
+    "set_by": "Microsoft Research, IronFleet, sections 3–5; refinement and conditional-liveness proof conventions.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "the implementation of a distributed system meets a high-level, centralized specification.",
+    "threshold_ref": 1,
+    "refs": [
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A verified transformer preserves a sequential state machine's linearizability despite crashes and reboot.",
+    "criterion": "Transform an arbitrary state machine into replicated code whose operation histories match legal sequential executions and respect response-before-request order. Safety covers message reordering, duplication, delay and loss, and node crashes and reboots under the stated runtime and storage assumptions. The CPP 2016 Verdi/Raft paper completes the earlier conditional proof by proving 90 invariants; extracted OCaml code runs on networks. Liveness is a separate obligation.",
+    "set_by": "Verdi developers, PLDI 2015, section 7, and CPP 2016, section 3.3; linearizability is the published Raft-transformer correctness relation.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "the traces it generates linearize (see below) to traces generated by the single-node state machine.",
+    "threshold_ref": 8,
+    "refs": [
+     6,
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "A synthesizer produces replicated data types that satisfy unbounded sequential-equivalence checks.",
+    "criterion": "Given a sequential data type and user-defined ordering constraints for conflicting operations, synthesize a convergent replicated data type and inductive invariants establishing identical query results for every permitted operation sequence, of unbounded length. Katara reports successful synthesis for nine benchmark specifications at OOPSLA 2022. Ordering annotations determine concurrency semantics; the result covers data-type designs.",
+    "set_by": "Katara developers, OOPSLA 2022, sections 3–5; their published CRDT correctness and synthesis conditions.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "the sequential type and the CRDT respond identically to any query.",
+    "threshold_ref": 3,
+    "refs": [
+     3
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "A synthesizer produces verified distributed services in at least 2 of 3 runs per specification.",
+    "criterion": "Under the IDS evaluation protocol, each formal service specification passes when at least two of three synthesis runs yield a complete Rocq proof, pass the unchanged-specification and nonvacuity audit, and produce extracted OCaml code that executes the harness. The preprint submitted on 22 May 2026 reports all seven specifications passing: six at 3/3 and one at 2/3. Inputs are formal Rocq specifications; fault recovery is outside their scope.",
+    "set_by": "IDS developers, Table 1 and appendices F.2–F.3; this is their published evaluation protocol, not a field-wide acceptance standard.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "Rocq Qed accepted, audit step passed, extracted OCaml runs on the harness",
+    "threshold_ref": 7,
+    "refs": [
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m6",
+    "title": "A tool synthesizes fault-tolerant distributed code from sequential code with a checked refinement proof.",
+    "criterion": "Atlas integration test: for a declared source class, synthesize executable distributed service code from sequential code and consistency, availability and fault requirements, including crashes and partitions. The tool chooses representations and coordination and supplies a machine-checked refinement proof without application-specific distributed code or proofs from the programmer. Progress verification remains the completion step. No located source establishes this integration: Katara covers data types, Verdi applies predefined transformers, and IDS starts from formal distributed specifications.",
+    "set_by": "Atlas; searches of CALM/Bloom/Blazes, IronFleet, Verdi, Katara and IDS found no published criterion for this integration gate.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     3,
+     4,
+     5,
+     6,
+     7,
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No external acceptance test was located for the combined completion test or its integration milestone.",
+   "The searched literature did not establish a system meeting either combined test.",
+   "A peer-reviewed publication or independent replication of the IDS evaluation was not located."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2015/10/ironfleet.pdf",
+    "doi": "10.1145/2815400.2815428",
+    "title": "IronFleet: Proving Practical Distributed Systems Correct",
+    "authors": "Hawblitzel C, Howell J, Kapritsos M, Lorch JR, Parno B, Roberts ML, et al.",
+    "container": "Proceedings of the 25th Symposium on Operating Systems Principles",
+    "year": "2015",
+    "volume": null,
+    "issue": null,
+    "pages": "1-17",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "journal",
+    "url": "https://tupl.cs.tufts.edu/papers/hacms-keynote-HILT-2012.pdf",
+    "doi": "10.1145/2402676.2402695",
+    "title": "HACMS: High Assurance Cyber Military Systems",
+    "authors": "Fisher K",
+    "container": "Proceedings of the 2012 ACM conference on High integrity language technology",
+    "year": "2012",
+    "volume": null,
+    "issue": null,
+    "pages": "51-52",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 3,
+    "kind": "journal",
+    "url": "https://www.shadaj.me/papers/katara.pdf",
+    "doi": "10.1145/3563336",
+    "title": "Katara: Synthesizing CRDTs with Verified Lifting",
+    "authors": "Laddad S, Power C, Milano M, Cheung A, Hellerstein JM",
+    "container": "Proc. ACM Program. Lang.",
+    "year": "2022",
+    "volume": "6",
+    "issue": "OOPSLA2",
+    "pages": "1349-1377",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 4,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/1901.01930v2",
+    "doi": "10.48550/arXiv.1901.01930",
+    "title": "Keeping CALM: When Distributed Consistency is Easy",
+    "authors": "Hellerstein JM, Alvaro P.",
+    "container": "arXiv",
+    "year": "2019",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "journal",
+    "url": "https://www.neilconway.org/docs/icde2014_blazes.pdf",
+    "doi": "10.1109/ICDE.2014.6816639",
+    "title": "Blazes: Coordination Analysis for Distributed Programs",
+    "authors": "Alvaro P, Conway N, Hellerstein JM, Maier D",
+    "container": "2014 IEEE 30th International Conference on Data Engineering",
+    "year": "2014",
+    "volume": null,
+    "issue": null,
+    "pages": "52-63",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://www.cs.columbia.edu/~junfeng/17sp-e6121/papers/verdi.pdf",
+    "doi": "10.1145/2737924.2737958",
+    "title": "Verdi: A Framework for Implementing and Formally Verifying Distributed Systems",
+    "authors": "Wilcox JR, Woos D, Panchekha P, Tatlock Z, Wang X, Ernst MD, et al.",
+    "container": "Proceedings of the 36th ACM SIGPLAN Conference on Programming Language Design and Implementation",
+    "year": "2015",
+    "volume": null,
+    "issue": null,
+    "pages": "357-368",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2605.23109v1",
+    "doi": "10.48550/arXiv.2605.23109",
+    "title": "Inductive Deductive Synthesis: Enabling AI to Generate Formally Verified Systems",
+    "authors": "Agarwal S, Krentsel A, Liu S, Cemri M, Cheng A, Meng R, et al.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 8,
+    "kind": "journal",
+    "url": "https://sandcat.cs.washington.edu/web/papers/raft-cpp16.pdf",
+    "doi": "10.1145/2854065.2854081",
+    "title": "Planning for Change in a Formal Verification of the Raft Consensus Protocol",
+    "authors": "Woos D, Wilcox JR, Anton S, Tatlock Z, Ernst MD, Anderson T",
+    "container": "Proceedings of the 5th ACM SIGPLAN Conference on Certified Programs and Proofs",
+    "year": "2016",
+    "volume": null,
+    "issue": null,
+    "pages": "154-165",
+    "citation_source": "crossref"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4",
+   "m5",
+   "m6"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-15",
+  "log": [
+   {
+    "date": "2026-11-15",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 6 from Crossref, 0 from PubMed, 1 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 8 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }

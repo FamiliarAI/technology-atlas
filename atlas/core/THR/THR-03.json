@@ -225,7 +225,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Computers that reuse energy as they calculate",
@@ -308,5 +309,305 @@
    "The temperature threshold alone does not define room-temperature performance; the intended operating range still needs to be specified."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "THR-03",
+  "title": "General-purpose sub-Landauer computing",
+  "definition": "A programmable classical computer dissipates less than kBT ln 2 per elementary reversible gate, including memory, power supply and cooling, where kB is Boltzmann’s constant and T is the final heat-sink temperature. Reversible gates preserve enough information to reconstruct their inputs.",
+  "goal": {
+   "need": "At 300 K, kBT ln 2 is 2.87 × 10⁻²¹ J, the ideal mean heat cost of erasing one initially unbiased bit. Conventional CMOS dissipates stored signal energy, ½CV², when nodes switch. Reversible circuits seek to recover and reuse that energy. Savings per completed program depend on losses in memory, timing, control and power delivery.",
+   "need_refs": [
+    1,
+    2,
+    3
+   ],
+   "figures": null,
+   "statements": [
+    {
+     "body": "IEEE International Roadmap for Devices and Systems",
+     "year": "2024",
+     "quote": "logically reversible (no loss of known information) and thermodynamically reversible (minimal increase in physical entropy per operation, ideally approaching zero).",
+     "context": "Section 4.3.4 identifies these as the two aims of reversible computing.",
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "US Department of Energy Office of Science workshop committee",
+     "year": "2018",
+     "quote": "we have barely begun to explore reversible computing, which could, in principle, reduce energy dissipation in computing below the Landauer limit",
+     "context": "Priority Research Direction 4 discusses using physical phenomena to perform computation.",
+     "ref": 4,
+     "checked": false
+    }
+   ]
+  },
+  "completion": {
+   "title": "A general-purpose computer dissipates less than kBT ln 2 per reversible gate across its full system.",
+   "criterion": "A processor with a computationally universal instruction set correctly executes programs with Etotal/N < kBT ln 2, beyond measurement uncertainty. N counts NOT, controlled-NOT and Toffoli (controlled-controlled-NOT) gates in fixed reversible program circuits, including uncomputation and excluding padding. Etotal includes memory, communication, clock, control, error correction, power conversion and refrigeration; T is the final heat-sink temperature. Temporary memory returns to its initial state. Throughput and output-error rate are measured.",
+   "set_by": "Atlas fallback extending the published sub-Landauer device benchmark to general-purpose computation and the complete operating system boundary.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches of IEEE IRDS chapters, DOE research reports, Vaire technical material, agency targets, standards and prize rules found no general-purpose system acceptance test. This fallback extends the field’s sub-Landauer device benchmark to completed programs and all operating energy. The gate library and counting rule are Atlas choices. The erasure scale supplies a comparison scale for reversible gates; it does not impose their minimum dissipation.",
+   "refs": [
+    2,
+    3,
+    4,
+    5,
+    8
+   ],
+   "threshold_checked": null
+  },
+  "case_label": "Hardware platform",
+  "cases": [
+   "Semiconductor circuits",
+   "Superconducting circuits",
+   "Nanomechanical mechanisms"
+  ],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A one-bit memory’s mean erasure heat approaches kBT ln 2 as erasure becomes quasistatic.",
+    "criterion": "An initially equiprobable classical bit is reset isothermally while the memory potential completes a cycle. Mean dissipated heat approaches kBT ln 2 as cycle duration increases and erasure success approaches unity. For success probability p, the comparison is kBT[ln 2 + p ln p + (1−p) ln(1−p)]. Bérut and colleagues reported this approach using one trapped colloidal particle on 7 March 2012. This establishes a memory-erasure benchmark.",
+    "set_by": "The Landauer erasure benchmark used in experimental information thermodynamics; Bérut and colleagues’ published experiment and subsequent experimental account.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "the mean dissipated heat saturates at the Landauer bound in the limit of long erasure cycles.",
+    "threshold_ref": 6,
+    "refs": [
+     6,
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A physical logic gate passes tests of logical reversibility and reversed information propagation.",
+    "criterion": "The gate’s outputs uniquely determine its inputs, and reversing its excitation sequence reverses information propagation. The published superconducting test checks ordinary operation, reconstruction through two serial gates, and reconstruction through a physically mirrored pair. Takeuchi and colleagues reported three circuit configurations operating at 100 kHz and 4.2 K on 15 September 2014. Their low-dissipation values were simulations; the experiment established gate functionality.",
+    "set_by": "Reversible-gate convention demonstrated by Takeuchi, Yamanashi and Yoshikawa in Scientific Reports; the published experimental arrangement was written for superconducting quantum-flux-parametron gates.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "Another difficulty is that reversible logic gates must be both logically and physically reversible.",
+    "threshold_ref": 7,
+    "refs": [
+     7,
+     3
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A circuit transports a bit through one stage while dissipating less than kBT ln 2.",
+    "criterion": "Measured dissipation per elementary bit-shift operation is below kBT ln 2 at the circuit temperature, without destroying the transported information. Tolpygo and colleagues reported a uniform circular register containing 256 Josephson junctions at 4.2 K, with sub-Landauer dissipation per junction phase advance and circulation frequencies up to approximately 1.4 GHz. The manuscript was submitted on 28 December 2025 and published in a journal in 2026. Refrigeration energy is outside this device-level result.",
+    "set_by": "The sub-Landauer bit-transport benchmark explicitly identified as a prerequisite for more complex reversible operations by Tolpygo, Golden and Semenov; their published implementation was superconducting.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "we demonstrate the energy dissipation per bit-shift operation below the Landauer’s thermodynamic limit",
+    "threshold_ref": 8,
+    "refs": [
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "A general-purpose processor dissipates less than kBT ln 2 per reversible gate inside its chip.",
+    "criterion": "A general-purpose processor correctly executes programs and reversibly clears temporary data. Total measured chip dissipation, including on-chip memory, interconnect, control and timing, divided by completion’s gate count N, is below kBT ln 2 at final heat-sink temperature T. External supply and cooling losses are excluded. Herr’s preprint, submitted on 5 April 2025, models 10⁹ AQFP devices at 4.2 K with 1% junction-current and 5% inductance fabrication spreads (1σ); termination losses rise to about seven times the ideal value. This is a model rather than a measured processor.",
+    "set_by": "Atlas fallback; no integrated-processor acceptance threshold was found in the searched roadmaps or developer documents. This applies the completion benchmark at the chip boundary before external operating losses are added.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     3,
+     5,
+     9,
+     10
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No external acceptance test combined general-purpose programmability, a Landauer-scale energy threshold and complete system energy accounting.",
+   "No published definition of “near Landauer” fixed an allowed multiplier, workload, throughput or output-error rate.",
+   "No experimental result satisfying the integrated-processor milestone or completion test was located through 14 November 2026.",
+   "A primary operating-data publication for Vaire’s Ice River chip was not located.",
+   "The full 2012 Nature article remained subscription restricted; its abstract and the authors’ 2015 experimental account were accessible."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://arxiv.org/pdf/1503.06537",
+    "doi": "10.1088/1742-5468/2015/06/P06015",
+    "title": "Information and thermodynamics: Experimental verification of Landauer’s erasure principle",
+    "authors": "Bérut A, Petrosyan A, Ciliberto S",
+    "container": "J. Stat. Mech.",
+    "year": "2015",
+    "volume": "2015",
+    "issue": "6",
+    "pages": "P06015",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "journal",
+    "url": "https://pubs.aip.org/aip/aed/article-pdf/doi/10.1063/5.0279617/20717572/030902_1_5.0279617.pdf",
+    "doi": "10.1063/5.0279617",
+    "title": "Industry perspective: Limits of energy efficiency for conventional CMOS and the need for adiabatic reversible computing",
+    "authors": "Frank MP, Edwards AJ",
+    "container": "APL Electronic Devices",
+    "year": "2025",
+    "volume": "1",
+    "issue": "3",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 3,
+    "kind": "report",
+    "url": "https://irds.ieee.org/images/files/pdf/2024/2024IRDS_BC.pdf",
+    "doi": null,
+    "title": "International Roadmap for Devices and Systems: 2024 Update—Beyond CMOS and Emerging Research Materials",
+    "authors": "IEEE.",
+    "container": "IEEE",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "report",
+    "url": "https://science.osti.gov/-/media/bes/pdf/reports/2019/BRN_Microelectronics_rpt.pdf",
+    "doi": null,
+    "title": "Basic Research Needs for Microelectronics",
+    "authors": "US Department of Energy Office of Science.",
+    "container": "US Department of Energy",
+    "year": "2018",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "report",
+    "url": "https://people.csail.mit.edu/nhm/10.1.1.35.474.pdf",
+    "doi": null,
+    "title": "A Fully Reversible Asymptotically Zero Energy Microprocessor",
+    "authors": "Vieri C, Ammer MJ, Frank M, Margolus N, Knight T.",
+    "container": "MIT Artificial Intelligence Laboratory",
+    "year": "1998",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/nature10872?error=cookies_not_supported",
+    "doi": "10.1038/nature10872",
+    "title": "Experimental verification of Landauer’s principle linking information and thermodynamics",
+    "authors": "Bérut A, Arakelyan A, Petrosyan A, Ciliberto S, Dillenschneider R, Lutz E",
+    "container": "Nature",
+    "year": "2012",
+    "volume": "483",
+    "issue": "7388",
+    "pages": "187-189",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/srep06354?error=cookies_not_supported",
+    "doi": "10.1038/srep06354",
+    "title": "Reversible logic gate using adiabatic superconducting devices",
+    "authors": "Takeuchi N, Yamanashi Y, Yoshikawa N",
+    "container": "Sci Rep",
+    "year": "2014",
+    "volume": "4",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 8,
+    "kind": "journal",
+    "url": "https://arxiv.org/pdf/2512.22791",
+    "doi": "10.1109/TASC.2026.3653711",
+    "title": "Demonstration of Superconductor Shift Registers with Energy Dissipation Below Landauer’s Thermodynamic Limit",
+    "authors": "Tolpygo SK, Golden EB, Semenov VK",
+    "container": "IEEE Trans. Appl. Supercond.",
+    "year": "2026",
+    "volume": "36",
+    "issue": "5",
+    "pages": "1-11",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 9,
+    "kind": "journal",
+    "url": "https://www.dna.caltech.edu/courses/cs191/paperscs191/bennett1973.pdf",
+    "doi": "10.1147/rd.176.0525",
+    "title": "Logical Reversibility of Computation",
+    "authors": "Bennett CH",
+    "container": "IBM J. Res. &amp; Dev.",
+    "year": "1973",
+    "volume": "17",
+    "issue": "6",
+    "pages": "525-532",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 10,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/2504.04284",
+    "doi": "10.48550/arXiv.2504.04284",
+    "title": "Landauer-Limited Dissipation in Quantum-Flux-Parametron Logic",
+    "authors": "Herr Q.",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-15",
+  "log": [
+   {
+    "date": "2026-11-15",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 6 from Crossref, 0 from PubMed, 0 from arXiv, 4 as the model gave them."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 4 found, 1 not found, 0 with no readable copy."
+   }
+  ]
  }
 }

@@ -211,7 +211,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Checking that software rules match people's needs",
@@ -307,5 +308,344 @@
    "How reliably can a method detect shared omissions and obtain independent support for assumptions about people and physical systems?"
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "SWE-03",
+  "title": "Validation of formal software specifications",
+  "definition": "A repeatable method establishes whether a formal specification—a mathematical description of required software behavior—captures recorded stakeholder intent under evidenced environmental assumptions. It produces a mechanically checkable adequacy argument or a concrete disagreement within declared observable behaviors and scenarios.",
+  "goal": {
+   "need": "Two independent review teams missed the A-7 aircraft requirements errors tabulated below; automated consistency checking found them in minutes. A study posted on 11 February 2021 covered two industrial examples and reported about 40 issues in a train-control requirements document. These results motivate validating requirements themselves alongside proving implementation conformance.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": {
+    "caption": "Automated consistency-checking findings reported in November 1998",
+    "columns": [
+     "Error class",
+     "Number found"
+    ],
+    "rows": [
+     [
+      "Missing cases",
+      "17"
+     ],
+     [
+      "Instances of nondeterminism",
+      "57"
+     ]
+    ],
+    "note": "Both counts concern one revised A-7 aircraft requirements document.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "NASA, Office of the Chief Engineer",
+     "year": "2022",
+     "quote": "The project manager shall perform requirements validation to ensure that the software will perform as intended in the customer environment.",
+     "context": "Requirement 4.1.7 of NPR 7150.2D, effective 8 March 2022.",
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "Anthropic",
+     "year": "2026",
+     "quote": "The difficulty of obtaining a comprehensive and unambiguous spec is a significant obstacle to verifying software at a larger scale.",
+     "context": "Research report published on 22 October 2026.",
+     "ref": 4,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "An independent team reproduces a bounded adequacy argument for a formal software specification.",
+   "criterion": "For one bounded software application, a published method links recorded stakeholder intent and environmental evidence to separate requirements R, domain assumptions K and machine specification S. A proof checker accepts both S ∧ K ⇒ R and the consistency of S ∧ K. Stakeholders validate R, its interpretation and the design choices permitted by S; evidence independent of those proofs supports K. A separate team reconstructs these links and reproduces the checks from the recorded inputs. The claim covers only the declared observable behaviors and scenarios.",
+   "set_by": "Technology Atlas; provisional test restricted to one bounded application.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches of NASA requirements-validation guidance, the accessible ISO/IEC/IEEE 29148 preview, Zave–Jackson completion rules, the Brun roadmap and validation-obligation studies found no published acceptance test for an independently reproduced method combining mechanical adequacy checks with stakeholder and environmental validation. This test combines their constituent checks within one bounded application.",
+   "refs": [
+    5,
+    6,
+    7,
+    8,
+    3,
+    2
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "An abstract counterexample exposes a confirmed violation in the original requirements specification.",
+    "criterion": "An abstract counterexample is executed against the original requirements specification and confirmed to violate a stated requirement. This excludes discrepancies introduced solely by abstraction. In November 1998, NRL reported this result for one contractor specification of a weapons-control panel: Spin found a safety-property violation and SCR simulation confirmed the corresponding behavior.",
+    "set_by": "U.S. Naval Research Laboratory, SCR research programme, 1998 SCR/Spin study. The published demonstration concerns a weapons-control-panel specification.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "Simulation demonstrated that the safety violation was not spurious but an actual defect in the original specification.",
+    "threshold_ref": 1,
+    "refs": [
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A specification admits an implementation that meets its guarantees for every allowed environmental input.",
+    "criterion": "For a reactive system, an implementation strategy exists that satisfies the specified guarantees for every input sequence satisfying the environmental assumptions. This is stronger than finding one jointly satisfying execution. In 2022, FRET researchers reported that 11 corrected requirements for one lift-plus-cruise concept aircraft were shown realizable in about 8 seconds.",
+    "set_by": "Reactive-synthesis community; realizability definition stated by NASA Ames in Compositional Realizability Checking within FRET. The criterion concerns reactive systems, which continually respond to environmental inputs.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "for any sequence of inputs that satisfy the assumptions on the environment, the guarantees always hold.",
+    "threshold_ref": 9,
+    "refs": [
+     9,
+     10
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A machine specification and domain assumptions imply the requirements without contradiction.",
+    "criterion": "For requirements R, domain knowledge K and machine specification S, prove S ∧ K ⇒ R and prove S ∧ K consistent. S uses shared phenomena, does not constrain the environment and does not refer to the future. Evidence for implication includes one Arrival Manager example in a preprint posted on 11 August 2023: Event-B proof obligations establish modeled aircraft spacing of at least 3 minutes. A separate preprint, revised on 7 October 2026 and not peer reviewed, reports 12 clean/defective package pairs whose K proofs all pass, illustrating why proof success alone does not establish adequacy.",
+    "set_by": "Requirements-engineering community, Zave and Jackson's completion rules, Section 6.3, criteria 3–5; author manuscript dated 16 July 1996.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "This proof ensures that an implementation of S will satisfy the requirements.\n(5) There is a proof that S and K are consistent.",
+    "threshold_ref": 5,
+    "refs": [
+     5,
+     8,
+     11
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "Stakeholders validate the requirements, and reviewers check their traceability and environmental assumptions.",
+    "criterion": "Reviewers check bidirectional traceability to stakeholder expectations and valid assumptions. All relevant stakeholder groups identify and remove defects; requirements are feasible, verifiable, unique and necessary. Evidence includes domain-expert use of visualizations to correct ETCS train-control requirements in the 2021 validation-obligation study. That study does not establish empirical validation of every environmental assumption.",
+    "set_by": "NASA Systems Engineering Handbook, Section 4.2.1.2.4, steps 2–6. These are requirements-review criteria; they do not prescribe a mechanically checked adequacy argument.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "Do the Requirements Satisfy Stakeholders? All relevant stakeholder groups identify and remove defects.",
+    "threshold_ref": 12,
+    "refs": [
+     12,
+     2
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No independent reproduction establishing the combined completion criterion was located.",
+   "The full normative text of ISO/IEC/IEEE 29148:2018 was not accessible; its public preview was available.",
+   "The ACM-hosted roadmap and Zave–Jackson documents returned access errors; author-hosted copies were available."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://homepages.laas.fr/kader/Heitmeyer.pdf",
+    "doi": "10.1109/32.730543",
+    "title": "Using Abstraction and Model Checking to Detect Safety Violations in Requirements Specifications",
+    "authors": "Heitmeyer C, Kirby J, Labaw B, Archer M, Bharadwaj R",
+    "container": "IIEEE Trans. Software Eng.",
+    "year": "1998",
+    "volume": "24",
+    "issue": "11",
+    "pages": "927-948",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2102.06037v1",
+    "doi": "10.48550/arXiv.2102.06037",
+    "title": "Validation Obligations: A Novel Approach to Check Compliance between Requirements and their Formal Specification",
+    "authors": "Mashkoor A, Leuschel M, Egyed A",
+    "container": "arXiv",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 3,
+    "kind": "report",
+    "url": "https://nodis3.gsfc.nasa.gov/displayDir.cfm?Internal_ID=N_PR_7150_002D_&page_name=Chapter4",
+    "doi": null,
+    "title": "NASA Software Engineering Requirements: Chapter 4: Software Engineering Life Cycle Requirements",
+    "authors": "NASA.",
+    "container": "NASA",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "report",
+    "url": "https://www.anthropic.com/research/formal-verification",
+    "doi": null,
+    "title": "LLMs are making formal software verification feasible at a much larger scale",
+    "authors": "Anthropic.",
+    "container": "Anthropic",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "journal",
+    "url": "https://pamelazave.com/4dc.pdf",
+    "doi": "10.1145/237432.237434",
+    "title": "Four dark corners of requirements engineering",
+    "authors": "Zave P, Jackson M",
+    "container": "ACM Trans. Softw. Eng. Methodol.",
+    "year": "1997",
+    "volume": "6",
+    "issue": "1",
+    "pages": "1-30",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://people.cs.umass.edu/brun/pubs/pubs/Brun26tosem.pdf",
+    "doi": "10.1145/3779132",
+    "title": "Automatically Engineering Trusted Software: A Research Roadmap",
+    "authors": "Brun Y, Chakraborty S, Le Goues C, Păsăreanu C, Singla A",
+    "container": "ACM Trans. Softw. Eng. Methodol.",
+    "year": "2026",
+    "volume": "35",
+    "issue": "9",
+    "pages": "1-30",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "report",
+    "url": "https://cdn.standards.iteh.ai/samples/72089/d67a2360308046938cad282e229a39ca/ISO-IEC-IEEE-29148-2018.pdf",
+    "doi": null,
+    "title": "Systems and software engineering — Life cycle processes — Requirements engineering",
+    "authors": "ISO, IEC, IEEE.",
+    "container": "ISO/IEC/IEEE",
+    "year": "2018",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 8,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2308.06028v1",
+    "doi": "10.48550/arXiv.2308.06028",
+    "title": "Validation-Driven Development",
+    "authors": "Stock S, Mashkoor A, Egyed A",
+    "container": "arXiv",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 9,
+    "kind": "report",
+    "url": "https://ntrs.nasa.gov/citations/20210013008",
+    "doi": null,
+    "title": "Compositional Realizability Checking within FRET",
+    "authors": "Giannakopoulou D, Katis A, Mavridou A, Pressburger T.",
+    "container": "NASA",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 10,
+    "kind": "book",
+    "url": "https://link.springer.com/chapter/10.1007/978-3-031-13188-2_24",
+    "doi": "10.1007/978-3-031-13188-2_24",
+    "title": "Capture, Analyze, Diagnose: Realizability Checking Of Requirements in FRET",
+    "authors": "Katis A, Mavridou A, Giannakopoulou D, Pressburger T, Schumann J",
+    "container": "Lecture Notes in Computer Science",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": "490-504",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 11,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2609.39022v3",
+    "doi": "10.48550/arXiv.2609.39022",
+    "title": "From Verification Failures to Reusable Guidance for Coding Agents",
+    "authors": "Zhai Y, Chen X, Zhang L, Vishwanath S, Rosu G",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 12,
+    "kind": "web",
+    "url": "https://www.nasa.gov/reference/4-2-technical-requirements-definition/",
+    "doi": null,
+    "title": "4.2 Technical Requirements Definition",
+    "authors": "NASA.",
+    "container": "NASA",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-15",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 4 from Crossref, 0 from PubMed, 3 from arXiv, 5 as the model gave them."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 6 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }

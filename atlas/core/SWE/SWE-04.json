@@ -223,7 +223,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Software guarantees that survive changes and failures",
@@ -316,5 +317,295 @@
    "The exact rules for memory, messages, recovery and scheduling, and which tools must be trusted, remain unspecified."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "SWE-04",
+  "title": "Compositional verification of concurrent crash-recovering services",
+  "definition": "Machine-checked rules derive a service's safety and progress guarantees from component contracts: formal statements of assumptions and guarantees. The rules cover shared-memory threads, messages and independent crashes with recovery, and engineers without formal-methods expertise can preserve the proof through a compatible component replacement.",
+  "goal": {
+   "need": "Grove's 2023 extended manuscript reports the source and verification artifacts tabulated below for one distributed-systems library. Its client proofs use component specifications, allowing implementation changes without reconstructing every client argument. These counts illustrate the amount of verification material whose reuse matters; line counts do not establish labour costs.",
+   "need_refs": [
+    1
+   ],
+   "figures": {
+    "caption": "Verification artifacts for Grove's component library, 2023",
+    "columns": [
+     "Artifact",
+     "Lines"
+    ],
+    "rows": [
+     [
+      "Verified Go implementation",
+      "2,435"
+     ],
+     [
+      "Coq specifications and proofs",
+      "28,077"
+     ]
+    ],
+    "note": "Figure 17 totals. Trusted network and filesystem wrappers are excluded from the verified implementation count.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "DeepSpec project",
+     "year": "Undated",
+     "quote": "Therefore, we envision this network of verified software components, connected by deep specifications—specifications that are rich, live, formal, and two-sided.",
+     "context": "Here, 'live' means connected mechanically to implementation code; 'two-sided' means exercised by implementations and clients.",
+     "ref": 2,
+     "checked": true
+    },
+    {
+     "body": "DARPA, PROVERS programme",
+     "year": "2023",
+     "quote": "A goal of the PROVERS program is to enable traditional software developers to incrementally produce and maintain high-assurance national security systems.",
+     "context": "FAQ answer 23 concerns usability and maintenance; it does not prescribe the combined concurrency and failure model of this entry.",
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "US National Science Foundation, Software and Hardware Foundations programme",
+     "year": "Undated",
+     "quote": "SHF supports research projects focusing on program analysis and synthesis, compositionality, verifiability and adaptability of software",
+     "context": "Programme scope includes compositional verification; this passage sets no acceptance threshold.",
+     "ref": 4,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "Non-experts preserve a service's compositional safety and progress proof through component replacement.",
+   "criterion": "For one executable service using shared-memory threads and network messages, developers without formal-methods expertise replace a component with another implementation verified against the same contract and successfully recheck the system proof. Machine-checked composition rules derive safety, crash-recovery correctness and eventual completion of specified client operations from verified contracts, including independent node crashes and recovery under stated scheduler, communication and failure assumptions. Unchanged client proofs remain valid. The trusted tools and execution model delimit the guarantee.",
+   "set_by": "Atlas fallback combining DeepSpec's integration goal with PROVERS' non-expert maintenance goal.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches of NSF SHF, DeepSpec, DARPA PROVERS and the CertiKOS, Perennial, Grove and Welder papers found no acceptance test joining shared memory, messages, crash recovery, liveness, substitution and non-expert maintenance. This fallback uses one service and one compatible replacement, without assigning an unsupported effort, training or adoption threshold.",
+   "refs": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "Concurrent components refine their contracts under every permitted client and thread interleaving.",
+    "criterion": "Machine-check contextual refinement: a component implementation composed with any permitted client has only behaviours allowed by its specification, under the stated environment assumptions. This permits composition through specification interfaces. CertiKOS reported the result for its mC2 kernel, comprising 6,500 lines of C and x86 assembly, in 2016; its ticket-lock and MCS-lock implementations share an interchangeable interface.",
+    "set_by": "Contextual-refinement convention, instantiated by the CertiKOS developers in OSDI 2016, abstract and §2.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "the implementation of each such function will behave like its specification under any kernel/user context with any valid interleaving.",
+    "threshold_ref": 5,
+    "refs": [
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A concurrent storage implementation refines its specification across crashes and recovery.",
+    "criterion": "Machine-check concurrent recovery refinement: every code execution corresponds to specification transitions with identical external I/O. A crash followed by recovery, including further crashes during recovery, simulates one atomic specification crash. Perennial demonstrated this for Mailboat's mailbox library in 2019. The SMTP/POP3 implementation was unverified; the prototype proved safety and did not support composing abstraction layers.",
+    "set_by": "Refinement convention, extended to concurrent recovery refinement by the Perennial developers, SOSP 2019, §3.1 and theorem 2.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "every sequence of code transitions must correspond to some interleaving of spec transitions with the same external I/O",
+    "threshold_ref": 6,
+    "refs": [
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A distributed key-value store remains linearizable through concurrent operations and node recovery.",
+    "criterion": "Prove replica crash-idempotence, safe reconfiguration with valid replicas, correct client initialization and linearizable Put/Get/CondPut operations by composing component specifications. Linearizable operations appear atomic and respect real-time ordering. Grove's 2023 vKV development meets these four obligations with threads, unreliable messages and independent node crashes; it does not prove liveness.",
+    "set_by": "Linearizability and crash-safety conventions, instantiated by Grove's published top-level specifications, §5.1.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "A clerk’s Put(k,v), Get(k), and CondPut(k,e,v) functions behave as though accessing a local in-memory key-value map with linearizable operations.",
+    "threshold_ref": 1,
+    "refs": [
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "Compatible controller contracts compose to prove eventual stable reconciliation of a cluster.",
+    "criterion": "Under Welder's weak-fairness, eventual fault-cessation and Pod-naming assumptions, prove CORE: compatible controllers eventually reach and maintain their desired states when those desired states stabilize, while respecting non-interference guarantees. Discharge their liveness dependencies and verify Rust implementation conformance to the models. Welder reported this for four composed controllers in 2026: ReplicaSet, Deployment, StatefulSet and RabbitMQ. The model uses API-server-mediated state; direct shared-memory threads lie outside its scope.",
+    "set_by": "Machine-checked specification-satisfaction convention; Welder developers' controller-specific CORE criterion and composition rules, SOSP 2026, §§3–5.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "CORE states that a set of controllers 𝑆 collectively reconcile the cluster state to eventually match the desired state stably.",
+    "threshold_ref": 7,
+    "refs": [
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "One service composes safety, recovery and progress proofs that survive a compatible replacement.",
+    "criterion": "One executable service has checked implementation-conformance proofs and sound composition rules covering shared-memory threads, network messages, independent node crashes and recovery together. Its component contracts derive system safety, recovery correctness and eventual completion of specified client operations under explicit environmental assumptions. Replacing a component with another implementation verified against the same contract preserves the client derivation. This establishes the technical integration before the non-expert maintenance test.",
+    "set_by": "Atlas fallback: searches of DeepSpec, PROVERS and the cited correctness papers found no published gate for this combined technical integration.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     1,
+     2,
+     3,
+     5,
+     6,
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No published demonstration was found of non-experts maintaining a service proof that covers the complete technical scope.",
+   "The supplied deep-specification article's PMC full text and attempted publisher and repository copies could not be retrieved."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2309.03046v2",
+    "doi": "10.48550/arXiv.2309.03046",
+    "title": "Grove: a Separation-Logic Library for Verifying Distributed Systems (Extended Version)",
+    "authors": "Sharma U, Jung R, Tassarotti J, Kaashoek MF, Zeldovich N",
+    "container": "arXiv",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 2,
+    "kind": "web",
+    "url": "https://deepspec.org/page/Research/",
+    "doi": null,
+    "title": "Research Overview",
+    "authors": "DeepSpec.",
+    "container": "The Science of Deep Specification",
+    "year": "Undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "report",
+    "url": "https://www.darpa.mil/sites/default/files/PROVERS-FAQ_05042023_FINAL.pdf",
+    "doi": null,
+    "title": "Pipelined Reasoning of Verifiers Enabling Robust Systems (PROVERS) HR001123S0020 Frequently Asked Questions (FAQ)",
+    "authors": "Defense Advanced Research Projects Agency.",
+    "container": "DARPA",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "web",
+    "url": "https://www.nsf.gov/funding/opportunities/shf-software-hardware-foundations",
+    "doi": null,
+    "title": "Software and Hardware Foundations (SHF)",
+    "authors": "National Science Foundation.",
+    "container": "NSF",
+    "year": "Undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "journal",
+    "url": "https://www.cs.columbia.edu/~rgu/publications/osdi16-gu.pdf",
+    "doi": null,
+    "title": "CertiKOS: An Extensible Architecture for Building Certified Concurrent OS Kernels",
+    "authors": "Gu R, Shao Z, Chen H, Wu X, Kim J, Sjöberg V, Costanzo D.",
+    "container": "Proc OSDI",
+    "year": "2016",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://people.csail.mit.edu/nickolai/papers/chajed-perennial.pdf",
+    "doi": "10.1145/3341301.3359632",
+    "title": "Verifying concurrent, crash-safe systems with Perennial",
+    "authors": "Chajed T, Tassarotti J, Kaashoek MF, Zeldovich N",
+    "container": "Proceedings of the 27th ACM Symposium on Operating Systems Principles",
+    "year": "2019",
+    "volume": null,
+    "issue": null,
+    "pages": "243-258",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "journal",
+    "url": "https://www.wisdom.weizmann.ac.il/~padon/welder-sosp2026.pdf",
+    "doi": "10.1145/3830418.3843868",
+    "title": "Welder: Compositional Liveness Verification of Cluster Control Planes",
+    "authors": "Cai ZC, Date N, Gu JT, Rivera C, Chajed T, Padon O, et al.",
+    "container": "Proceedings of the ACM SIGOPS 32nd Symposium on Operating Systems Principles",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": "713-729",
+    "citation_source": "crossref"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4",
+   "m5"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-15",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 1 from arXiv, 4 as the model gave them."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 7 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }

@@ -204,7 +204,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Useful random samples with very little energy",
@@ -271,5 +272,265 @@
    "The numerical thresholds are proposed criteria; concrete workloads, accuracy targets and rules for counting independent samples still need definition."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "THR-08",
+  "title": "Equilibrium sampling at kBT per independent sample",
+  "definition": "A programmable physical computer samples a user-specified probability distribution by relaxing toward thermal equilibrium. Its total energy per effectively independent output, after correcting for correlations, is at most kBT, where kB is Boltzmann’s constant and T is the measured operating temperature.",
+  "goal": {
+   "need": "Z1’s circuit analysis assigns 7.09 fJ to a probabilistic-bit Gibbs cycle, 1.692 pJ to reading its state and 153.6 pJ to programming it, excluding host energy. At an illustrative 300 K, kBT is 4.142 × 10⁻²¹ J: the cycle alone costs about 1.71 million kBT. These quantities distinguish reducing internal sampling cost from reaching thermal energy per useful output.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": {
+    "caption": "Z1 per-node circuit energy accounting in Appendix B.",
+    "columns": [
+     "Operation",
+     "Energy"
+    ],
+    "rows": [
+     [
+      "Gibbs cycle at 50 MHz",
+      "7.09 fJ"
+     ],
+     [
+      "Read state",
+      "1.692 pJ"
+     ],
+     [
+      "Write parameters or clamp state",
+      "153.6 pJ"
+     ]
+    ],
+    "note": "These preprint values exclude host contributions and are not measured total energy per independent output.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "Computing Community Consortium",
+     "year": "2019",
+     "quote": "Enable computation near fundamental limits of efficiency",
+     "context": "A stated scientific objective for thermodynamic computing generally; no energy-per-sample threshold is specified.",
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "Extropic",
+     "year": "2026",
+     "quote": "bringing the first Z1 clusters online and demonstrating chip performance on generative-AI benchmarks.",
+     "context": "An objective described in the company’s announcement on 29 July 2026 of a non-binding funding letter of intent with the United States Department of Commerce.",
+     "ref": 4,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "A programmable equilibrium sampler consumes at most kBT per effective independent output.",
+   "criterion": "For a declared multivariate target and prespecified distributional error tolerance, a reprogrammable equilibrium sampler achieves Etotal/Neff ≤ kBT and consumes less energy than a tuned digital sampler at the same target, tolerance and effective output count. Etotal includes programming, initialization, equilibration, readout, required host work and cooling over a fixed batch, with amortization fixed beforehand. Neff is the minimum effective sample size across the observables in the accuracy protocol, accounting for temporal correlations. T is the measured physical operating temperature; kB = 1.380649 × 10⁻²³ J K⁻¹.",
+   "set_by": "Atlas fallback; no external end-to-end thermal-energy-per-sample acceptance test was found.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searched the CCC roadmap, Extropic’s Z1 and CHIPS documents, sampling papers, and DARPA, NIST and benchmark searches for an end-to-end kBT-per-independent-sample acceptance test; none was found. The ≤kBT boundary is an Atlas fallback, not a published sampling bound. External goals concern thermodynamic efficiency and benchmarked sampling; they do not supply this numerical completion threshold.",
+   "refs": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "threshold_checked": null
+  },
+  "case_label": "State space",
+  "cases": [
+   "Discrete state spaces",
+   "Continuous state spaces"
+  ],
+  "milestone_structure": "sequence",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A classical host operates physical stochastic elements in a hybrid thermodynamic computer.",
+    "criterion": "CCC Stage 2 joins a classical computer to physical stochastic state variables. Continuous case: Normal Computing reported an eight-cell coupled Gaussian sampler with injected noise on 22 April 2025. Discrete case: Extropic’s preprint version posted on 13 August 2026 reports 20,000 hardware-drawn samples for an eight-site Ising ring, using host Metropolis–Hastings or importance sampling. This establishes hardware randomness, not native relaxation of the joint target. Extropic also reports shipping dozens of XTR-0 systems; that vendor statement is not peer reviewed.",
+    "set_by": "Computing Community Consortium, Thermodynamic Computing, Section 1.5.1, Stage 2: Thermodynamically Augmented Classical Computation.",
+    "set_by_kind": "professional_society",
+    "threshold_quote": "collections of relatively simple thermodynamic elements representing evolvable state variables within the classical computing system.",
+    "threshold_ref": 3,
+    "refs": [
+     3,
+     5,
+     6,
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A coupled equilibrium sampler produces outputs with residual autocorrelation magnitude below 1%.",
+    "criterion": "After equilibration, a coupled sampler’s normalized temporal autocorrelation magnitude is below 0.01 at its output spacing. Normal Computing illustrates this with five correlation times for Gaussian exponential relaxation. That spacing is not universal, and low autocorrelation alone does not verify the target law. Its eight-cell SPU records two-cell voltages at 12 MHz using injected noise; that rate alone does not establish decorrelated outputs. The X0 host-assisted Ising example does not establish this native-equilibrium sampling test.",
+    "set_by": "Normal Computing, Melanson et al., SPU relaxation model; an illustrative criterion published for Gaussian variables, not a field-wide sampling-accuracy standard.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "the correlation function to decay to less than one percent of its original magnitude",
+    "threshold_ref": 5,
+    "refs": [
+     5,
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A physical sampler consumes less measured energy than a digital sampler at matched output quality.",
+    "criterion": "For a specified programmed distribution, measured energy per effective independent output is lower than for a tuned digital sampler at matched distributional error: Edigital/Ephysical > 1. Compare the same effective output count and required system operations. This uses the energy-efficiency branch of Normal Computing’s definition. Its Gaussian comparison estimates SPU energy; Amico et al. execute all compiler demonstrations in software. Neither establishes this measured test.",
+    "set_by": "Normal Computing, definition of thermodynamic advantage in Melanson et al.; the energy-efficiency branch. The source specifies no universal accuracy tolerance or system-energy boundary.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "outperform digital ones in either speed or energy efficiency.",
+    "threshold_ref": 5,
+    "refs": [
+     5,
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No measured end-to-end kBT-per-effective-sample result was found in the opened papers and device disclosures.",
+   "No common distributional-error tolerance or amortization rule covering both state-space cases was found.",
+   "ThermoBench’s public page opened without readable benchmark rules."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2608.01615v2",
+    "doi": "10.48550/arXiv.2608.01615",
+    "title": "Thermalizing Stochastic Programs",
+    "authors": "Amico M, Jelinčič A, Nancarrow CO, Tyrpak L, Roberts D, Morton S, Sakthivadivel D, Gopal A, Verdon G.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 2,
+    "kind": "web",
+    "url": "https://www.bipm.org/en/si-base-units/kelvin",
+    "doi": null,
+    "title": "SI base unit: kelvin (K)",
+    "authors": "Bureau International des Poids et Mesures",
+    "container": "BIPM",
+    "year": "n.d.",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "report",
+    "url": "https://arxiv.org/pdf/1911.01968",
+    "doi": "10.48550/arXiv.1911.01968",
+    "title": "Thermodynamic Computing",
+    "authors": "Conte T, DeBenedictis E, Ganesh N, Hylton T, Strachan JP, Williams RS, et al.",
+    "container": "arXiv",
+    "year": "2019",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 4,
+    "kind": "press_release",
+    "url": "https://extropic.ai/writing/thermodynamic-computing-chips-in-america",
+    "doi": null,
+    "title": "Extropic Signs $75 Million Letter of Intent with U.S. Department of Commerce to Scale and Onshore Thermodynamic Computing",
+    "authors": "Extropic Corporation",
+    "container": "Extropic",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12015238/",
+    "doi": "10.1038/s41467-025-59011-x",
+    "title": "Thermodynamic computing system for AI applications",
+    "authors": "Melanson D, Abu Khater M, Aifer M, Donatella K, Hunter Gordon M, Ahle T, et al.",
+    "container": "Nat Commun",
+    "year": "2025",
+    "volume": "16",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 6,
+    "kind": "press_release",
+    "url": "https://extropic.ai/writing/from-one-to-one-billion/",
+    "doi": null,
+    "title": "From One to One Billion",
+    "authors": "Extropic Corporation",
+    "container": "Extropic",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 7,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2608.01612v2",
+    "doi": "10.48550/arXiv.2608.01612",
+    "title": "A Framework for Stochastic Differentiable Programming",
+    "authors": "Verdon G, Tyrpak L, Lockwood O, Morton S, Neagoe A, Sugolov A, et al.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-15",
+  "log": [
+   {
+    "date": "2026-11-15",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 2 from arXiv, 4 as the model gave them."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 5 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }

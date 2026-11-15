@@ -198,7 +198,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Recovering the rules old software lives by",
@@ -286,5 +287,291 @@
    "Comparison tests can reveal disagreements but cannot establish that every possible disagreement falls within the declared unproved behavior."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "SWE-06",
+  "title": "Specification inference for verified legacy modernization",
+  "definition": "Recover modular contracts—formal statements of component behavior and assumptions—from existing source code, with machine-checked evidence that the legacy implementation satisfies them and that replacements preserve stated interface behavior.",
+  "goal": {
+   "need": "A 2024 comparison tested five annotation generators on three Java examples against hand-written specifications sufficient for OpenJML verification. Each generator recovered less than one quarter of that baseline. DARPA identifies missing legacy specifications as an obstacle to verified component replacement.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": {
+    "caption": "Coverage of verification annotations in the 2024 comparison",
+    "columns": [
+     "Generator",
+     "Baseline annotations covered"
+    ],
+    "rows": [
+     [
+      "Daikon",
+      "19%"
+     ],
+     [
+      "Strongarm",
+      "15%"
+     ],
+     [
+      "ChatGPT, GPT-4",
+      "24%"
+     ]
+    ],
+    "note": "The three examples were a counter, binary search and an arraylist. These percentages count baseline annotations; they do not measure the fraction of program behavior proved.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "DARPA, V-SPELLS programme",
+     "year": "2020",
+     "quote": "Provably safe composition of enhancements with the rest of the system.",
+     "context": "The solicitation lists this challenge alongside specification inference and recovery of domain models from legacy code.",
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "Aptos Labs",
+     "year": "2026",
+     "quote": "Our goal is a methodology in which AI, mechanical deduction, and users collaborate on writing and verifying Move specifications.",
+     "context": "The authors address specification inference for Move smart contracts.",
+     "ref": 4,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "Recovered contracts justify a verified legacy replacement at V-SPELLS’s final code scale.",
+   "criterion": "Machine-check legacy conformance to recovered modular contracts and replacement conformance to the same contracts, and prove that these contracts imply preservation of the stated interface observations. State the language semantics, environmental assumptions and trusted dependencies. Discharge every proof obligation needed for that compatibility claim; identify other unproved behavior separately. Demonstrate the conjunction at V-SPELLS’s final scale of 1000Ks source lines.",
+   "set_by": "Technology Atlas; synthesis using DARPA’s final code-scale target and the static-verification criterion.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searched V-SPELLS’s solicitation and completion page, the 2024 annotation-generator survey, and contract-inference papers for an acceptance test combining legacy conformance, contract sufficiency and verified replacement. No such integrated test was found. This synthesis retains V-SPELLS’s published final code scale and the field’s static-verification criterion.",
+   "refs": [
+    3,
+    2,
+    1,
+    5,
+    4
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "sequence",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "Recovered candidate invariants survive every observed run of a program’s test suite.",
+    "criterion": "Infer candidate preconditions, postconditions and loop invariants from executions. Retain candidates without falsifying observations and with sufficient samples for the detector’s plausibility test. In 2001, Daikon rediscovered the specified invariants of one array-sum example using 100 randomly generated input arrays. These are candidates supported by executions, rather than proofs over all executions.",
+    "set_by": "Dynamic invariant-detection convention described by Ernst and colleagues, Sections 2 and 3.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "those invariants that are tested to a sufficient degree without falsification are reported to the programmer.",
+    "threshold_ref": 6,
+    "refs": [
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A static verifier establishes inferred contracts under its stated assumptions.",
+    "criterion": "Feed inferred contracts to a static verifier and retain those it establishes under its assumptions. In 2001, ESC/Java accepted 70 invariants for StackAr (40 non-comment source lines, seven methods) and 80 for DisjSets (30 lines, four methods); heuristically added ownership annotations were potentially unsafe. A preprint revised on 13 May 2026 reports successful verification of inferred specifications for one Move vector-search function; it is not peer reviewed.",
+    "set_by": "Static-verification convention described by Nimmer and Ernst, Section 1, and applied in the Move Prover inference workflow.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "A static verifier can indicate which proposed invariants are guaranteed to be true.",
+    "threshold_ref": 5,
+    "refs": [
+     5,
+     4
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "Legacy-code understanding reaches at least 60% accuracy and over 70% code coverage.",
+    "criterion": "At V-SPELLS Phase 1 scale, 10Ks source lines, instrument all domain-data accesses and operations; achieve at least 60% accuracy and over 70% code coverage.",
+    "set_by": "DARPA, V-SPELLS solicitation, Table 1, Phase 1; thresholds appear only in the table.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     3
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m4",
+    "title": "Legacy-code composition reaches 80% program-understanding accuracy and 90% coverage.",
+    "criterion": "At V-SPELLS Phase 2 scale, 100Ks source lines, make all domain operations programmable in a domain-specific language, with native-code compatibility; achieve 80% accuracy and 90% coverage. Galois describes C-to-model lifting and memory-safety checking, without reporting these metrics; its developer account is undated and not peer reviewed.",
+    "set_by": "DARPA, V-SPELLS solicitation, Table 1, Phase 2; thresholds appear only in the table.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     3,
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m5",
+    "title": "Legacy-code recovery reaches 95% accuracy and 99.9% coverage at V-SPELLS’s final code scale.",
+    "criterion": "At V-SPELLS Phase 3 scale, 1000Ks source lines, translate all code to a domain-specific language or virtual machine, except a few effectively analyzed enclaves; achieve 95% accuracy and 99.9% coverage.",
+    "set_by": "DARPA, V-SPELLS solicitation, Table 1, Phase 3; thresholds appear only in the table.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     3
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No published acceptance test was found for the integrated completion criterion.",
+   "No operational definitions of V-SPELLS’s accuracy and coverage percentages were found in its public solicitation.",
+   "Searches for V-SPELLS evaluations and final reports found no public result establishing attainment of its Phase 1, 2 or 3 recovery targets."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://ris.utwente.nl/ws/portalfiles/portal/357562435/1-s2.0-S0164121224000153-main.pdf",
+    "doi": "10.1016/j.jss.2024.111972",
+    "title": "Survey of annotation generators for deductive verifiers",
+    "authors": "Lathouwers S, Huisman M",
+    "container": "Journal of Systems and Software",
+    "year": "2024",
+    "volume": "211",
+    "issue": null,
+    "pages": "111972",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "web",
+    "url": "https://www.darpa.mil/research/programs/verified-security-and-performance-enhancement-of-large-legacy-software",
+    "doi": null,
+    "title": "V-SPELLS",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "DARPA",
+    "year": "undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "report",
+    "url": "https://imlive.s3.amazonaws.com/Federal%20Government/ID295011957732437144315448100587755673337/HR001120S0058-Amendment-02.pdf",
+    "doi": null,
+    "title": "Verified Security and Performance Enhancement of Large Legacy Software (V-SPELLS)",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "Broad Agency Announcement HR001120S0058, Amendment 2, amended 1 September 2020",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2605.10005v2",
+    "doi": "10.48550/arXiv.2605.10005",
+    "title": "Combining Mechanical and Agentic Specification Inference for Move",
+    "authors": "Grieskamp W, Zhang T, Kashyap V.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "preprint",
+    "url": "https://www.cs.purdue.edu/homes/xyzhang/fall07/Papers/invariants-verify-rv2001.pdf",
+    "doi": null,
+    "title": "Static verification of dynamically detected program invariants: Integrating Daikon and ESC/Java",
+    "authors": "Nimmer JW, Ernst MD.",
+    "container": "RV’01 Preliminary Version",
+    "year": "2001",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://homes.cs.washington.edu/~mernst/pubs/invariants-tse2001.pdf",
+    "doi": "10.1109/32.908957",
+    "title": "Dynamically Discovering Likely Program Invariants to Support Program Evolution",
+    "authors": "Ernst MD, Cockrell J, Griswold WG, Notkin D",
+    "container": "IIEEE Trans. Software Eng.",
+    "year": "2001",
+    "volume": "27",
+    "issue": "2",
+    "pages": "99-123",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "web",
+    "url": "https://www.galois.com/project/v-spells",
+    "doi": null,
+    "title": "V-SPELLS",
+    "authors": "Galois",
+    "container": "Galois",
+    "year": "undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4",
+   "m5"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-15",
+  "log": [
+   {
+    "date": "2026-11-15",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 0 from arXiv, 5 as the model gave them."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 4 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }

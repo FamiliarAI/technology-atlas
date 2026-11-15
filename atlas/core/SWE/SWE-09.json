@@ -203,7 +203,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Software that behaves the same when tasks overlap",
@@ -271,5 +272,358 @@
    "The performance baseline and workloads remain to be chosen; success in a subsystem would leave broader systems performance open."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "SWE-09",
+  "title": "Deterministic-by-default systems programming",
+  "definition": "A systems language and runtime make externally visible event sequences, excluding wall-clock timing, independent of thread scheduling for fixed initial states, external inputs and explicit choices. They support kernel, browser and database code with parallel performance matching corresponding conventional implementations.",
+  "goal": {
+   "need": "In a 2008 study of 105 concurrency bugs from MySQL, Apache, Mozilla and OpenOffice, about 92% could be triggered by enforcing orders among at most four memory accesses. Schedule-independent observations address this dependence on execution order. Data-race prevention alone is insufficient: the Rustonomicon shows Safe Rust code whose outcome depends on thread order.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": {
+    "caption": "Concurrency bugs examined in the 2008 study",
+    "columns": [
+     "Application",
+     "Non-deadlock bugs",
+     "Deadlock bugs"
+    ],
+    "rows": [
+     [
+      "MySQL",
+      "14",
+      "9"
+     ],
+     [
+      "Apache",
+      "13",
+      "4"
+     ],
+     [
+      "Mozilla",
+      "41",
+      "16"
+     ],
+     [
+      "OpenOffice",
+      "6",
+      "2"
+     ],
+     [
+      "Total",
+      "74",
+      "31"
+     ]
+    ],
+    "note": "Counts describe the study sample, not bug prevalence in these applications.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "University of Illinois at Urbana-Champaign, Deterministic Parallel Java project",
+     "year": "2009",
+     "quote": "deterministic behavior is guaranteed unless the programmer explicitly uses nondeterministic constructs.",
+     "context": "The developers propose this default in a research agenda for imperative, object-oriented parallel languages.",
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "Yale University, Determinator developers",
+     "year": "2010",
+     "quote": "Determinator’s basic goal is to offer a programming model that is naturally and pervasively deterministic.",
+     "context": null,
+     "ref": 4,
+     "checked": true
+    },
+    {
+     "body": "Lingua Franca project",
+     "year": "Undated; documentation version 0.13.0",
+     "quote": "When nondeterministic interactions are tolerable or desired, they must be explicitly coded.",
+     "context": "The statement concerns interactions between reactors, the language's event-triggered components.",
+     "ref": 5,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "A systems language matches conventional performance while enforcing observable determinism.",
+   "criterion": "A single language/runtime executes at least one parallel subsystem from each of an operating-system kernel, a browser and a database. For fixed initial states, external inputs and explicit choices, every schedule allowed by stated fairness assumptions preserves the specified output-event sequence and termination/progress contract. On identical hardware and resource limits, execution time is no greater than the corresponding lock-based or lock-free baseline for batch workloads; throughput is no lower for service workloads. These conditions hold for every workload in the declared comparison suite. A semantic and enforcement argument covers all permitted schedules.",
+   "set_by": "Technology Atlas fallback; no external acceptance test for the combined capability was located.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches for standards, government programme targets, prize rules, roadmaps and benchmark acceptance criteria, and inspection of DPJ, Determinator and Lingua Franca publications, found no test for this combination or agreed performance margin. This fallback combines their published goals for determinism, explicit nondeterminism and execution efficiency. Performance parity and the three application classes are Atlas thresholds. The survey distinguishes agreement on results from agreement on execution traces.",
+   "refs": [
+    3,
+    4,
+    5,
+    6
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "Checked parallel tasks produce the same results as their sequential composition.",
+    "criterion": "For well-typed programs, noninterfering effects make parallel composition produce the same results as sequential composition, assuming declared method commutativity is correct. DPJ's 2009 paper gives a core-calculus soundness result and a compiler implementation. Six programs were evaluated with up to 22 workers on a 24-core machine, taking the minimum of five runs per data point. This establishes result determinism within the model, without establishing event-trace or progress determinism.",
+    "set_by": "DPJ developers, OOPSLA 2009, Sections 6.3–6.4; the published semantic criterion applies to checked fork–join programs.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "This guarantees determinism of execution regardless of the order of parallel execution.",
+    "threshold_ref": 7,
+    "refs": [
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "Deterministic constructs retain input-output determinism when they execute no nondeterministic construct.",
+    "criterion": "A language permits explicitly marked nondeterministic tasks while guaranteeing input-output determinism for deterministic constructs that execute no marked construct, sequential equivalence of deterministic parallel constructs, and strong isolation of atomic statements. The DPJ extension published in 2011 establishes these properties in Theorems 4–6 and evaluates four benchmark variants: two travelling-salesman implementations, Delaunay triangulation and OO7. A surrounding computation that executes a nondeterministic construct can have nondeterministic results.",
+    "set_by": "DPJ developers, POPL 2011, Section 4.3, Theorems 4–6; the criterion concerns the paper's language and execution model.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "any deterministic construct that does not execute any nd construct has deterministic input-output behavior.",
+    "threshold_ref": 8,
+    "refs": [
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "An operating system enforces deterministic execution of unprivileged parallel applications.",
+    "criterion": "A system boundary makes unprivileged parallel computations repeatable for fixed inputs, including faulty application code, assuming correct kernel and processor behavior. External nondeterminism enters through mediated input/output. Determinator's 2010 prototype implements this boundary on 32-bit x86 using three system calls and reports byte-identical console/log output under output redirection. The paper supplies a Kahn-network argument, explicitly leaves a formal proof out of scope, and documents limited input/output support.",
+    "set_by": "Determinator developers, OSDI 2010, Sections 3.1–3.2 and 4.3; the guarantee applies inside the unprivileged application boundary.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "cannot behave nondeterministically even by deliberate design.",
+    "threshold_ref": 4,
+    "refs": [
+     4
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "A reactor runtime gives deterministic logical event behavior for fixed timestamped inputs.",
+    "criterion": "For deterministic reaction code obeying declared dependencies, reactor composition yields deterministic logical event behavior for fixed initial states and timestamped inputs; physical execution times are outside the guarantee. Lingua Franca implements this model. Its preprint of 9 January 2023 ports 22 of 30 Savina benchmarks and presents 20, retaining 30 iterations per data point on a Core i9-10900K. The subsequent journal abstract reports speedups of 1.86× over Akka and 1.42× over CAF. These actor-benchmark results do not establish the combined systems criterion.",
+    "set_by": "Lingua Franca developers, Introduction, Reactor-Oriented Programming; the published criterion concerns reactor composition, not arbitrary target-language code.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "concurrent composition of reactors is deterministic by default.",
+    "threshold_ref": 5,
+    "refs": [
+     5,
+     9,
+     10
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "One language runs kernel, browser and database subsystems with schedule-independent event traces.",
+    "criterion": "One language/runtime implements at least one multicore subsystem in each of a kernel, a browser and a database. For fixed initial states, external inputs and declared choices, its semantics and implementation preserve output-event order and termination behavior under stated scheduling assumptions; ongoing services have a defined progress contract. This integrated prototype supplies the implementations required for the completion performance comparison.",
+    "set_by": "Technology Atlas fallback: searches of determinism surveys, language specifications and DPJ, Determinator and Lingua Franca publications found no published acceptance test for integration across these three application classes.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     3,
+     4,
+     5,
+     6,
+     9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No publication located establishes the combined kernel, browser and database criterion with performance parity.",
+   "No externally specified workload suite or baseline-selection rule was found for the combined systems comparison.",
+   "The ACM full text of the 2023 Lingua Franca journal article returned HTTP 403; its developers' abstract and the preprint of 9 January 2023 were accessible."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://www.cse.iitd.ac.in/~rijurekha/col380/concurrency-bugs.pdf",
+    "doi": "10.1145/1346281.1346323",
+    "title": "Learning from Mistakes — A Comprehensive Study on Real World Concurrency Bug Characteristics",
+    "authors": "Lu S, Park S, Seo E, Zhou Y",
+    "container": "Proceedings of the 13th international conference on Architectural support for programming languages and operating systems",
+    "year": "2008",
+    "volume": null,
+    "issue": null,
+    "pages": "329-339",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "web",
+    "url": "https://doc.rust-lang.org/nomicon/races.html",
+    "doi": null,
+    "title": "Data Races and Race Conditions",
+    "authors": "The Rust Project",
+    "container": "The Rustonomicon",
+    "year": "Undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "journal",
+    "url": "https://dpj.cs.illinois.edu/DPJ/Home_files/DPJ-HotPar-2009.html",
+    "doi": null,
+    "title": "Parallel Programming Must Be Deterministic by Default",
+    "authors": "Bocchino RL Jr, Adve VS, Adve SV, Snir M.",
+    "container": "Proc. HotPar",
+    "year": "2009",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "journal",
+    "url": "https://dedis.cs.yale.edu/2010/det/papers/osdi10.pdf",
+    "doi": null,
+    "title": "Efficient System-Enforced Deterministic Parallelism",
+    "authors": "Aviram A, Weng SC, Hu S, Ford B.",
+    "container": "Proc. OSDI",
+    "year": "2010",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "web",
+    "url": "https://www.lf-lang.org/docs/",
+    "doi": null,
+    "title": "Introduction",
+    "authors": "The Lingua Franca project",
+    "container": "Lingua Franca documentation",
+    "year": "Undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://arxiv.org/pdf/2210.15202",
+    "doi": "10.1145/3564529",
+    "title": "A Survey on Parallelism and Determinism",
+    "authors": "Gonnord L, Henrio L, Morel L, Radanne G",
+    "container": "ACM Comput. Surv.",
+    "year": "2023",
+    "volume": "55",
+    "issue": "10",
+    "pages": "1-28",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "journal",
+    "url": "https://dpj.cs.illinois.edu/DPJ/Publications_files/DPJ-OOPSLA-2009.pdf",
+    "doi": "10.1145/1640089.1640097",
+    "title": "A Type and Effect System for Deterministic Parallel Java",
+    "authors": "Bocchino RL, Adve VS, Dig D, Adve SV, Heumann S, Komuravelli R, et al.",
+    "container": "Proceedings of the 24th ACM SIGPLAN conference on Object oriented programming systems languages and applications",
+    "year": "2009",
+    "volume": null,
+    "issue": null,
+    "pages": "97-116",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 8,
+    "kind": "journal",
+    "url": "https://dpj.cs.illinois.edu/DPJ/Publications_files/DPJ-POPL-2011-Nondet.pdf",
+    "doi": "10.1145/1926385.1926447",
+    "title": "Safe Nondeterminism in a Deterministic-by-Default Parallel Language",
+    "authors": "Bocchino RL, Heumann S, Honarmand N, Adve SV, Adve VS, Welc A, et al.",
+    "container": "Proceedings of the 38th annual ACM SIGPLAN-SIGACT symposium on Principles of programming languages",
+    "year": "2011",
+    "volume": null,
+    "issue": null,
+    "pages": "535-548",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 9,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/2301.02444",
+    "doi": "10.48550/arXiv.2301.02444",
+    "title": "High-Performance Deterministic Concurrency using Lingua Franca",
+    "authors": "Menard C, Lohstroh M, Bateni S, Chorlian M, Deng A, Donovan P, et al.",
+    "container": "arXiv",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 10,
+    "kind": "journal",
+    "url": "https://www.icyphy.org/publications/2023_MenardEtAl_TACO/",
+    "doi": "10.1145/3617687",
+    "title": "High-Performance Deterministic Concurrency using Lingua Franca",
+    "authors": "Menard C, Lohstroh M, Bateni S, Chorlian M, Deng A, Donovan P, et al.",
+    "container": "ACM Trans. Archit. Code Optim.",
+    "year": "2023",
+    "volume": "20",
+    "issue": "4",
+    "pages": "1-29",
+    "citation_source": "crossref"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4",
+   "m5"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-15",
+  "log": [
+   {
+    "date": "2026-11-15",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 5 from Crossref, 0 from PubMed, 0 from arXiv, 5 as the model gave them."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 7 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }
