@@ -577,6 +577,62 @@
     "issue": null,
     "pages": "713-729",
     "citation_source": "crossref"
+   },
+   {
+    "id": 8,
+    "kind": "journal",
+    "url": "https://research.tudelft.nl/en/publications/iris-from-the-ground-up-a-modular-foundation-for-higher-order-con/",
+    "doi": "10.1017/S0956796818000151",
+    "title": "Iris from the ground up",
+    "authors": "JUNG R, KREBBERS R, JOURDAN JH, BIZJAK A, BIRKEDAL L, DREYER D",
+    "container": "J. Funct. Prog.",
+    "year": "2018",
+    "volume": "28",
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 9,
+    "kind": "report",
+    "url": "https://www.cs.columbia.edu/~rgu/publications/pldi18-gu.pdf",
+    "doi": "10.1145/3192366.3192381",
+    "title": "Certified Concurrent Abstraction Layers",
+    "authors": "Gu R, Shao Z, Kim J, Wu X(, Koenig J, Sjöberg V, et al.",
+    "container": "Proceedings of the 39th ACM SIGPLAN Conference on Programming Language Design and Implementation",
+    "year": "2018",
+    "volume": null,
+    "issue": null,
+    "pages": "646-661",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 10,
+    "kind": "preprint",
+    "url": "https://cs.nyu.edu/~jt4767/papers/perennial/daisynfs.pdf",
+    "doi": null,
+    "title": "Verifying the DaisyNFS concurrent and crash-safe file system with sequential reasoning",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 11,
+    "kind": "preprint",
+    "url": "https://pdos.csail.mit.edu/6.824/papers/grove.pdf",
+    "doi": null,
+    "title": "Grove: a Separation-Logic Library for Verifying Distributed Systems (Extended Version)",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
    }
   ],
   "milestone_order": [
@@ -586,8 +642,360 @@
    "m4",
    "m5"
   ],
-  "results": [],
-  "judged": [],
+  "results": [
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Iris 3.1 provides a Coq-implemented framework for concurrent separation logic; no component sample size is stated.",
+    "detail": "The reported framework bears on machine-checked reasoning about concurrency, but the supplied text does not report contextual refinement of a component under arbitrary permitted clients.",
+    "quote": "Iris is a framework for higher-order concurrent separation logic, which has been implemented in the Coq proof assistant and deployed very effectively in a wide variety of verification projects.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 8,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-15"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "CertiKOS machine-checked contextual refinement for the mC2 concurrent kernel, comprising 6,500 lines of C and x86 assembly.",
+    "detail": "The proof applies to permitted clients in the modeled x86 subset and assumes sequential consistency for atomic instructions. The machine does not model TLBs, and the assembler, bootloader, pre-initialization module and ELF loader were not verified.",
+    "quote": "All our proofs (including every step in Fig. 5 and Fig. 2)\nare implemented, composed, and machine-checked in\nCoq.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 5,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-15"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "CCAL machine-checks contextual refinement for 6 verified concurrent components, including ticket and MCS locks.",
+    "detail": "The model assumes strong sequential consistency for shared primitives; its multithreaded model does not allow preemption. The supplied text identifies a conference paper but does not state its peer-review status.",
+    "quote": "To evaluate the framework itself, we have\nimplemented, specified, and verified various concurrent pro-\ngrams in the framework.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-15"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "Mailboat: 1 concurrent mailbox library verified for crash recovery using Perennial in 2019.",
+    "detail": "The proof covers safety under Goose’s process-crash model. The SMTP/POP3 protocol implementation was unverified, and Perennial did not support composing abstraction layers. The source identifies conference proceedings but does not state whether the paper was peer reviewed.",
+    "quote": "The proof is machine-checked and, if correct, implies that\nall possible code executions are allowed by the specification.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 6,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-15"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "DaisyNFS: 1 concurrent file-system implementation has a stated crash-safe refinement theorem.",
+    "detail": "The theorem covers matching network I/O traces across crashes and restarts. The supplied text does not explicitly establish that crashes during recovery simulate one atomic specification crash. The proof also relies on trusted assumptions connecting Dafny and Coq, and the network dispatch loop is unverified.",
+    "quote": "Execution might involve crashing and restarting a program\n(potentially multiple times), wiping out any in-memory state\nafter each crash.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-15"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Grove verifies one distributed key-value store, vKV, using composable component proofs.",
+    "detail": "The text describes linearizability, reconfiguration, unreliable messages and independent crashes, including during recovery. It does not explicitly establish replica crash-idempotence or prove correct client initialization. Grove does not verify liveness.",
+    "quote": "Nevertheless,\nthese proofs still compose into a complete proof of the entire\ndistributed system.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-15"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Welder verified CORE for a composition of 4 Kubernetes controllers.",
+    "detail": "The paper reports composition and resolved liveness dependencies, but the provided text does not explicitly establish Rust implementation conformance to the models. It also assumes Retry-on-Conflict loop termination to address version-conflict starvation.",
+    "quote": "We verified that the composition of the four controllers\nimplements CORE.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 7,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-15"
+   }
+  ],
+  "judged": [
+   {
+    "url": "https://www.nsf.gov/funding/opportunities/shf-software-hardware-foundations",
+    "milestone": "m1",
+    "hash": "e5c086c42d84",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.nsf.gov/funding/opportunities/shf-software-hardware-foundations",
+    "milestone": "m2",
+    "hash": "a13ebbeb2ab7",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.nsf.gov/funding/opportunities/shf-software-hardware-foundations",
+    "milestone": "m3",
+    "hash": "22ac8263e153",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.nsf.gov/funding/opportunities/shf-software-hardware-foundations",
+    "milestone": "m4",
+    "hash": "e50366546fac",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.nsf.gov/funding/opportunities/shf-software-hardware-foundations",
+    "milestone": "m5",
+    "hash": "11dced225ab9",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.nsf.gov/funding/opportunities/shf-software-hardware-foundations",
+    "milestone": "completion",
+    "hash": "ddd7e56762ab",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
+    "milestone": "m1",
+    "hash": "e5c086c42d84",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
+    "milestone": "m2",
+    "hash": "a13ebbeb2ab7",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
+    "milestone": "m3",
+    "hash": "22ac8263e153",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
+    "milestone": "m4",
+    "hash": "e50366546fac",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
+    "milestone": "m5",
+    "hash": "11dced225ab9",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
+    "milestone": "completion",
+    "hash": "ddd7e56762ab",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://deepspec.org/page/Research/",
+    "milestone": "m1",
+    "hash": "e5c086c42d84",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://deepspec.org/page/Research/",
+    "milestone": "m2",
+    "hash": "a13ebbeb2ab7",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://deepspec.org/page/Research/",
+    "milestone": "m3",
+    "hash": "22ac8263e153",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://deepspec.org/page/Research/",
+    "milestone": "m4",
+    "hash": "e50366546fac",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://deepspec.org/page/Research/",
+    "milestone": "m5",
+    "hash": "11dced225ab9",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://deepspec.org/page/Research/",
+    "milestone": "completion",
+    "hash": "ddd7e56762ab",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5597730/",
+    "milestone": "m1",
+    "hash": "e5c086c42d84",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5597730/",
+    "milestone": "m2",
+    "hash": "a13ebbeb2ab7",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5597730/",
+    "milestone": "m3",
+    "hash": "22ac8263e153",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5597730/",
+    "milestone": "m4",
+    "hash": "e50366546fac",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5597730/",
+    "milestone": "m5",
+    "hash": "11dced225ab9",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5597730/",
+    "milestone": "completion",
+    "hash": "ddd7e56762ab",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://research.tudelft.nl/en/publications/iris-from-the-ground-up-a-modular-foundation-for-higher-order-con/",
+    "milestone": "m1",
+    "hash": "e5c086c42d84",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://research.tudelft.nl/en/publications/iris-from-the-ground-up-a-modular-foundation-for-higher-order-con/",
+    "milestone": "m2",
+    "hash": "a13ebbeb2ab7",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://research.tudelft.nl/en/publications/iris-from-the-ground-up-a-modular-foundation-for-higher-order-con/",
+    "milestone": "m3",
+    "hash": "22ac8263e153",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://research.tudelft.nl/en/publications/iris-from-the-ground-up-a-modular-foundation-for-higher-order-con/",
+    "milestone": "m4",
+    "hash": "e50366546fac",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://research.tudelft.nl/en/publications/iris-from-the-ground-up-a-modular-foundation-for-higher-order-con/",
+    "milestone": "m5",
+    "hash": "11dced225ab9",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://research.tudelft.nl/en/publications/iris-from-the-ground-up-a-modular-foundation-for-higher-order-con/",
+    "milestone": "completion",
+    "hash": "ddd7e56762ab",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.cs.columbia.edu/~rgu/publications/osdi16-gu.pdf",
+    "milestone": "m1",
+    "hash": "e5c086c42d84",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.cs.columbia.edu/~rgu/publications/pldi18-gu.pdf",
+    "milestone": "m1",
+    "hash": "e5c086c42d84",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://people.csail.mit.edu/nickolai/papers/chajed-perennial.pdf",
+    "milestone": "m2",
+    "hash": "a13ebbeb2ab7",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://cs.nyu.edu/~jt4767/papers/perennial/daisynfs.pdf",
+    "milestone": "m2",
+    "hash": "a13ebbeb2ab7",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://pdos.csail.mit.edu/6.824/papers/grove.pdf",
+    "milestone": "m3",
+    "hash": "22ac8263e153",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.wisdom.weizmann.ac.il/~padon/welder-sosp2026.pdf",
+    "milestone": "m4",
+    "hash": "e50366546fac",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   }
+  ],
   "version": 1,
   "accessed": "2026-11-14",
   "log": [
@@ -605,7 +1013,33 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked goal statements and threshold quotations against saved copies: 7 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "gpt-6.1-terra",
+    "action": "Judged 5 sources the entry already uses against the milestones they had not been judged against, without search."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "gpt-6.1-sol",
+    "action": "Searched for results on the open cells: 6 candidates returned, 0 dropped as sources already used, 6 to judge."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "gpt-6.1-terra",
+    "action": "Judged 6 of 6 new candidates, without search. Skipped: none. Dropped rows: none. Replaced 0 earlier rows. Added 7 results: 1 from sources already used, 6 from newly found sources."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 0 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 7 found, 0 not found, 0 with no readable copy."
    }
-  ]
+  ],
+  "results_run": "2026-11-15"
  }
 }
