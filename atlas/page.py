@@ -428,7 +428,10 @@ Rules
   company's statutory filing reporting a regulator's action), or, for a mathematical result, by
   a proof checked in a proof assistant (Lean, Coq, Isabelle or similar) whose formal statement
   is the result claimed; false when it is a claim by its own authors not yet reviewed (a
-  preprint, a press release, a blog) and not machine-checked.
+  preprint, a press release, a blog) and not machine-checked. When a mathematical criterion
+  requires a prize body's ruling or the community's acceptance that has not been recorded, and
+  the text reports a complete proof of the result checked in a proof assistant, the verdict is
+  met with confirmed false: the proof is in hand, the ruling is still to come.
 - peer_reviewed: true for a paper in a peer-reviewed journal; false for a preprint, registry
   record, filing or release.
 - kind: what the document is: journal, preprint, book, report, web, registry, filing or
