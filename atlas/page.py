@@ -1746,6 +1746,45 @@ def add(identifier, urls, judge=None, titles=None, note=None):
     )
 
 
+# recover: sources an earlier search proposed that could not be read then.
+
+
+def recoverable(identifier, page, calls=None):
+    """{url: title} of the candidates every earlier results search proposed for identifier
+    that the page neither cites nor has judged: the ones skipped for having no readable
+    saved copy. Candidates that were judged (including those dropped as not relevant) are
+    left out, so nothing is judged twice."""
+    calls = Path(calls or CALLS)
+    seen = {normal(j['url']) for j in page.get('judged', [])}
+    seen |= {normal(r['url']) for r in page['references']}
+    out = {}
+    for path in sorted(calls.glob(f'{identifier}-results-*/find/response.json')):
+        try:
+            candidates = json.loads(path.read_text()).get('candidates', [])
+        except ValueError:
+            continue
+        for candidate in candidates:
+            url = candidate.get('url')
+            if url and normal(url) not in seen and url not in out:
+                out[url] = candidate.get('title') or ''
+    return out
+
+
+def recover(identifier, judge=None):
+    """Try the skipped sources again, now that unreadable pages fall back to open-access copies
+    (Europe PMC, the ClinicalTrials.gov API), and judge each one that reads against every
+    active milestone (add). A source still unreadable costs no judge call. Returns a line."""
+    urls = recoverable(identifier, load(identifier))
+    if not urls:
+        return f'{identifier}: nothing to recover'
+    note = (
+        'atlas.page',
+        f'Recovery: {len(urls)} sources an earlier search proposed but could not read were '
+        'tried again through open-access copies.',
+    )
+    return add(identifier, list(urls), judge, urls, note)
+
+
 # merge: a breakthrough marked as a duplicate (atlas.review, state merge) gives its evidence to
 # the page it merges into.
 
@@ -2714,7 +2753,50 @@ def main(argv=None):
     seven.add_argument('ids', nargs='*', metavar='ID', help='breakthroughs marked merge')
     seven.add_argument('--pending', action='store_true', help='every merge not yet carried over')
     seven.add_argument('--no-commit', action='store_true')
+    eight = steps.add_parser(
+        'recover', help='judge sources skipped earlier as unreadable, via open-access copies'
+    )
+    eight.add_argument('ids', nargs='*', metavar='ID')
+    eight.add_argument('--all', action='store_true', help='every breakthrough with a page')
+    eight.add_argument('--workers', type=int, default=4)
+    eight.add_argument('--judge', help='judge model for this run (default: the config)')
+    eight.add_argument('--no-commit', action='store_true')
     args = parser.parse_args(argv)
+    if args.step == 'recover':
+        if args.judge:
+            JUDGE['model'] = args.judge
+        data = records.load(CORE)
+        identifiers = args.ids or [
+            identifier
+            for identifier, item in sorted(data['breakthroughs'].items())
+            if args.all and item.get('status') == 'active' and item.get('page')
+        ]
+        if not identifiers:
+            parser.error('name breakthroughs, or pass --all')
+
+        def work(identifier, stop):
+            with claimed('results', identifier) as mine:
+                if not mine:
+                    raise batches.Stopped('another run is working on it')
+                return recover(identifier)
+
+        def report(identifier, outcome):
+            status, value = outcome
+            print(value if status == 'done' else f'{identifier}: {status}: {value}', flush=True)
+
+        outcomes, exhausted = batches.run(identifiers, work, args.workers, report)
+        failed = sum(1 for status, _ in outcomes.values() if status == 'failed')
+        problems_ = records.check(records.load(CORE))
+        if problems_:
+            print('atlas/core check failed:\n' + '\n'.join(problems_))
+            return 1
+        if not args.no_commit:
+            records.commit(
+                f'Recover sources skipped as unreadable for {len(identifiers)} breakthroughs\n\n'
+                f'Judge: {judge_entry(config())["model"]}\n\n{TRAILER}'
+            )
+        print(f'Done: {len(identifiers)} breakthroughs, {failed} failed', flush=True)
+        return EXHAUSTED if exhausted else (1 if failed else 0)
     if args.step == 'merge':
         identifiers = args.ids or (pending_merges(records.load(CORE)) if args.pending else [])
         if not identifiers:

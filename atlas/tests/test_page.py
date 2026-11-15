@@ -565,6 +565,34 @@ class PageTests(unittest.TestCase):
         self.assertTrue(merged['copied'])
         self.assertEqual(pages.pending_merges(core.load(self.core)), [])
 
+    def test_recover_takes_only_candidates_never_cited_nor_judged(self):
+        self.define()
+        page = self.stored()
+        page['judged'] = [{'url': 'https://dropped.example/x', 'milestone': 'm1', 'hash': 'h'}]
+        self.write(page)
+        run = self.calls / 'BME-99-results-20261115T000000Z' / 'find'
+        run.mkdir(parents=True)
+        candidates = [
+            {'url': 'https://added.example/x', 'title': 'Readable now'},
+            {'url': 'https://dropped.example/x', 'title': 'Judged, dropped'},
+            {'url': page['references'][0]['url'], 'title': 'Already cited'},
+        ]
+        (run / 'response.json').write_text(json.dumps({'candidates': candidates}))
+        self.assertEqual(
+            pages.recoverable('BME-99', self.stored()), {'https://added.example/x': 'Readable now'}
+        )
+        prompts = []
+
+        def judge(text):
+            prompts.append(text)
+            return {'kind': 'journal', 'doi': None, 'rows': [held_row('m3', 'Heart')]}
+
+        line = pages.recover('BME-99', judge)
+        self.assertEqual(len(prompts), 1)
+        self.assertIn('judged 1 of 1 sources', line)
+        self.assertTrue(any('Recovery:' in r['action'] for r in self.stored()['log']))
+        self.assertEqual(pages.recover('BME-99', judge), 'BME-99: nothing to recover')
+
     # revise
 
     def test_revise_stores_a_proposal_and_applies_nothing(self):
