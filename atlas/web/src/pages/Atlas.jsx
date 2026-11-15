@@ -251,6 +251,16 @@ function Legend() {
           <b>Ring</b> one segment per milestone
         </span>
       </p>
+      <p className="sa-legend-row">
+        <svg width="34" height="18" viewBox="-17 -9 34 18" aria-hidden="true">
+          <circle r="11" fill="url(#sky-halo-met)" />
+          <circle r="2.2" fill="#FFF1C9" />
+          <circle r="7" className="sky-seg legend met sky-complete" />
+        </svg>
+        <span>
+          <b>Closed ring</b> complete: its completion test met
+        </span>
+      </p>
     </div>
   );
 }

@@ -268,7 +268,12 @@ const Star = memo(function Star({ item, lod, state, plan, interactive, tabbable,
         <circle r={core} fill={starFill(item)} opacity={starAlpha(item)} className="sky-star-core" />
       )}
       {lod >= 1 &&
-        ringSegments(item.ring || item.status, r).map((seg, n) => <path key={n} d={seg.d} className={'sky-seg ' + seg.status} />)}
+        (item.complete ? (
+          // Complete: one unbroken ring. Segments, even all met, mean milestones only.
+          <circle r={r} className="sky-seg met sky-complete" />
+        ) : (
+          ringSegments(item.status, r).map((seg, n) => <path key={n} d={seg.d} className={'sky-seg ' + seg.status} />)
+        ))}
       {active && (
         <g className="sky-reticle">
           <circle r={r + 2.2} />
@@ -536,7 +541,7 @@ export default function Chart({
   // Only breakthroughs with every milestone met get a beacon. With most stars showing some
   // progress, a beacon for each turned the wide view into blobs; the rest show their progress
   // in their rings up close, and in their field's bar from afar.
-  const warm = useMemo(() => Object.values(atlas.items).filter((i) => i.glow >= 1), [atlas]);
+  const warm = useMemo(() => Object.values(atlas.items).filter((i) => i.complete), [atlas]);
 
   const apply = useCallback(() => {
     if (!size || !worldRef.current) return;

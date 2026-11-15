@@ -38,8 +38,10 @@ export function StarMark({ item, r, ring = true, core }) {
       <circle r={c} fill={color} opacity={starOpacity(item.glow)} />
       {item.glow > 0 && <circle r={c * 0.45} fill="#FFF8E6" />}
       {ring &&
-        ringSegments(item.ring || item.status, r).map((seg, n) => (
-          <path key={n} d={seg.d} className={'seg ' + seg.status} />
+        (item.complete ? (
+          <circle r={r} className="seg met complete" />
+        ) : (
+          ringSegments(item.status, r).map((seg, n) => <path key={n} d={seg.d} className={'seg ' + seg.status} />)
         ))}
     </>
   );
