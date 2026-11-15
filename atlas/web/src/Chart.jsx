@@ -232,7 +232,7 @@ const Star = memo(function Star({ item, lod, state, plan, interactive, tabbable,
     ? {
         tabIndex: tabbable ? 0 : -1,
         role: 'button',
-        'aria-label': `${item.id}: ${item.title}. ${item.met} of ${item.status.length} milestones met, ${item.moving} in progress.`,
+        'aria-label': `${item.id}: ${item.title}. ${item.complete ? 'Complete; ' : ''}${item.met} of ${item.status.length} milestones met, ${item.moving} in progress.`,
         onClick: (e) => {
           e.stopPropagation();
           onSelect(item.id);
@@ -268,7 +268,7 @@ const Star = memo(function Star({ item, lod, state, plan, interactive, tabbable,
         <circle r={core} fill={starFill(item)} opacity={starAlpha(item)} className="sky-star-core" />
       )}
       {lod >= 1 &&
-        ringSegments(item.status, r).map((seg, n) => <path key={n} d={seg.d} className={'sky-seg ' + seg.status} />)}
+        ringSegments(item.ring || item.status, r).map((seg, n) => <path key={n} d={seg.d} className={'sky-seg ' + seg.status} />)}
       {active && (
         <g className="sky-reticle">
           <circle r={r + 2.2} />

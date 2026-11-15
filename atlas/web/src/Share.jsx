@@ -247,7 +247,7 @@ function BigStar({ item, size = 300 }) {
       <circle r="136" className="dial" />
       <path d={ticks} className="dial-ticks" />
       {item.glow > 0 && <circle r={R * 1.25} fill="url(#card-halo)" opacity={0.5 + item.glow * 0.5} />}
-      {ringSegments(item.status, R).map((s, k) => (
+      {ringSegments(item.ring || item.status, R).map((s, k) => (
         <path key={k} d={s.d} className={'cseg ' + s.status} strokeWidth={s.status === 'none' ? 2.4 : 7} />
       ))}
       <circle r={9 + n * 1.2} fill={color} opacity={item.glow > 0 ? 1 : 0.8} />

@@ -53,6 +53,10 @@ export async function loadAtlas() {
     // 0 = nothing judged; 1 = every milestone met. In progress counts half. A star whose only
     // progress is a step toward the whole is warm, as warm as one milestone in progress.
     const glow = n ? (met + moving * 0.5) / n : 0;
+    // A breakthrough whose completion test is met is drawn complete: its whole ring met and
+    // full brightness, whatever milestones were passed over on the way. The counts stay as
+    // they are.
+    const complete = raw.complete === true;
     items[raw.id] = {
       id: raw.id,
       field: raw.field,
@@ -62,7 +66,9 @@ export async function loadAtlas() {
       met,
       moving,
       overall,
-      glow: glow || (overall ? 0.5 / Math.max(n, 4) : 0),
+      complete,
+      ring: complete ? status.map(() => 'met') : status,
+      glow: complete ? 1 : glow || (overall ? 0.5 / Math.max(n, 4) : 0),
       recent: raw.moved_at ? TODAY - new Date(raw.moved_at) < 30 * DAY : false,
     };
   }

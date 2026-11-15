@@ -443,6 +443,11 @@ def _site_view(db):
             item['concept'] = [{'text': page['definition'], 'source_urls': []}]
             item['milestones'] = page_milestones(page)
             item['overall'] = 0
+            # Its completion test met (a claim counts, as on the page): the star reads complete.
+            item['complete'] = any(
+                row['milestone'] == 'completion' and row['verdict'] == 'met'
+                for row in page.get('results', [])
+            )
         # Any judged row counts as movement, including one about the breakthrough as a whole.
         item['moved_at'] = max((entry['added_at'] for entry in rows), default=None)
         item['progress_count'] = counts.get(row['id'], 0)
@@ -482,6 +487,8 @@ def catalog(db, view=None):
             'milestones': [milestone['status'] for milestone in item['milestones']],
             'overall': item['overall'],
             'moved_at': item['moved_at'],
+            # Only when true, to keep the catalog small: its completion test is met.
+            **({'complete': True} if item.get('complete') else {}),
         }
         for identifier, item in sorted(items.items())
     ]

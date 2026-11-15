@@ -121,7 +121,7 @@ function BreakthroughList({ atlas, field, selected, onSelect, onHighlight, links
                   (item.overall ? `; ${item.overall} toward the whole` : '')
                 }
               >
-                {item.met + item.moving}/{item.status.length}
+                {item.complete ? 'Done' : `${item.met + item.moving}/${item.status.length}`}
                 {item.overall > 0 && <span className="sa-b-whole">+{item.overall}</span>}
               </span>
             </>
