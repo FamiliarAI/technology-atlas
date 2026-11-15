@@ -499,9 +499,12 @@ def writer_entry(model=None, effort=None):
     entry = dict(ENTRY)
     if model:
         entry['model'] = model
-        # A model named provider/name (deepseek/..., anthropic/...) runs through OpenRouter.
+        # A model named provider/name (deepseek/..., anthropic/...) runs through OpenRouter;
+        # opus, sonnet or claude-... through the signed-in Claude Code CLI.
         if '/' in model:
             entry['provider'] = 'openrouter'
+        elif model in ('opus', 'sonnet') or model.startswith('claude-'):
+            entry['provider'] = 'claude'
     if effort:
         entry['effort'] = effort
     return entry
@@ -514,8 +517,10 @@ def judge_entry(settings, writer=ENTRY['model']):
     """The `format` entry of the atlas config, without search; another format model of the
     config when the `format` model is the one that wrote the definition. --judge overrides."""
     if JUDGE.get('model'):
-        model = JUDGE['model']
-        return {'provider': 'openrouter' if '/' in model else 'codex', 'model': model}
+        entry = writer_entry(JUDGE['model'])
+        entry.pop('search', None)
+        entry.pop('effort', None)
+        return entry
     entry = {'provider': 'codex', **settings['format']}
     if entry['model'] == writer:
         others = [e for e in settings.get('stages', {}).get('format', []) if e['model'] != writer]
@@ -612,6 +617,10 @@ def read(url, title='', capture=True):
                 if capture and not held:
                     archive.capture(url)
                     archive.pubmed(url)
+                if capture and url in archive.state:
+                    # A paywall, cookie wall or page built in the browser: a free full copy
+                    # (Europe PMC, the ClinicalTrials.gov API) when one exists.
+                    archive.open_access(url, title or source.get('title', ''))
                 items = archive.evidence(url) if url in archive.state else []
         except ValueError:
             items = []

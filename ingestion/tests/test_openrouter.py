@@ -9,6 +9,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from ingestion import providers
+from ingestion import sources as providers_sources
 
 
 class Response(io.BytesIO):
@@ -65,3 +66,45 @@ class OpenRouterTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class OpenAccessTests(unittest.TestCase):
+    def test_europe_pmc_by_doi_or_exact_title_only(self):
+        def getter(url):
+            hit = {'pmcid': 'PMC1', 'inPMC': 'Y', 'title': 'A paper about broad immunity.'}
+            return json.dumps({'resultList': {'result': [hit]}}).encode(), 'application/json', url
+
+        self.assertEqual(
+            providers_sources.europe_pmc('https://doi.org/10.1000/abc', '', getter), 'PMC1'
+        )
+        self.assertEqual(
+            providers_sources.europe_pmc('https://x.org/a', 'A paper about broad immunity', getter),
+            'PMC1',
+        )
+        self.assertIsNone(
+            providers_sources.europe_pmc('https://x.org/a', 'A paper about other immunity', getter)
+        )
+        self.assertIsNone(providers_sources.europe_pmc('https://x.org/a', 'short', getter))
+
+    def test_a_trial_record_is_kept_as_text_from_the_registry_api(self):
+        match = providers_sources.CLINICAL_TRIAL.search(
+            'https://clinicaltrials.gov/study/NCT04784767'
+        )
+        self.assertEqual(
+            providers_sources.CT_API.format(match.group(1)),
+            'https://clinicaltrials.gov/api/v2/studies/NCT04784767?format=json',
+        )
+        ext, text, issues, _ = providers_sources.extract(b'{"a": "b"}', 'application/json')
+        self.assertEqual((ext, issues), ('txt', []))
+        self.assertIn('"a"', text)
+
+    def test_claude_and_openrouter_names_choose_their_provider(self):
+        from atlas import page
+
+        self.assertEqual(page.writer_entry('opus')['provider'], 'claude')
+        page.JUDGE['model'] = 'deepseek/x'
+        try:
+            judge = page.judge_entry({})
+        finally:
+            page.JUDGE.clear()
+        self.assertEqual((judge['provider'], 'search' in judge), ('openrouter', False))

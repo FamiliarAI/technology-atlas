@@ -27,6 +27,46 @@ EFETCH = (
     '&rettype=abstract&retmode=xml'
 )
 PMC_PAGE = 'https://pmc.ncbi.nlm.nih.gov/articles/{}/'
+# Free full copies for sources whose own page cannot be read (Archive.open_access).
+CLINICAL_TRIAL = re.compile(r'clinicaltrials\.gov/.*?(NCT\d{8})', re.I)
+CT_API = 'https://clinicaltrials.gov/api/v2/studies/{}?format=json'
+EPMC_SEARCH = (
+    'https://www.ebi.ac.uk/europepmc/webservices/rest/search?query={}&format=json'
+    '&resultType=lite&pageSize=5'
+)
+EPMC_FULLTEXT = 'https://www.ebi.ac.uk/europepmc/webservices/rest/{}/fullTextXML'
+DOI = re.compile(r'\b(10\.\d{4,9}/[^\s?#"<>]+)', re.I)
+
+
+def _plain(text):
+    return re.sub(r'[^a-z0-9]+', ' ', (text or '').lower()).strip()
+
+
+def europe_pmc(url, title='', getter=None):
+    """The PMC ID of the paper at url when Europe PMC holds its full text: looked up by the DOI
+    in the URL, else by the title (at least 20 letters, matched exactly after folding case and
+    punctuation, so another paper is never taken for it). None when not found."""
+    getter = getter or fetch
+    doi = DOI.search(urllib.parse.unquote(url))
+    if doi:
+        query = f'DOI:"{doi.group(1).rstrip(".")}"'
+    elif len(_plain(title)) >= 20:
+        query = f'TITLE:"{title.strip()}"'
+    else:
+        return None
+    try:
+        body, _, _ = getter(EPMC_SEARCH.format(urllib.parse.quote(query)))
+        results = json.loads(body).get('resultList', {}).get('result', [])
+    except (OSError, ValueError):
+        return None
+    for result in results:
+        if not result.get('pmcid') or 'Y' not in (result.get('inPMC'), result.get('isOpenAccess')):
+            continue
+        if doi or _plain(result.get('title')) == _plain(title):
+            return result['pmcid']
+    return None
+
+
 NCBI_INTERVAL_S = 0.34  # NCBI allows 3 requests a second without a key.
 MIN_TEXT = 1000  # Shorter extracted text is a cookie wall or error page, not a paper.
 
@@ -213,6 +253,9 @@ def extract(body, content_type):
             return 'xml', '', ['XML extraction failed; inspect original'], []
     if content_type.startswith('text/plain'):
         return 'txt', decoded, [], []
+    if 'json' in content_type:
+        # A structured record (the ClinicalTrials.gov API) is kept and read as its text.
+        return 'txt', decoded, [] if decoded.strip() else ['No extractable text'], []
     raise ValueError(f'Unsupported source format {content_type}; obtain a readable copy')
 
 
@@ -346,6 +389,25 @@ class Archive:
         page = PMC_PAGE.format(pmc)
         self.alternative(url, page, retry=retry)
         return page
+
+    def open_access(self, url, title='', retry=False):
+        """For a source whose saved text is short (a paywall, a cookie wall, a page built in the
+        browser), keep a free full copy as an alternative: a ClinicalTrials.gov study's record
+        from its public API, or a paper's full text from Europe PMC when it holds one (found by
+        the DOI in the URL, else by exact title). Returns the alternative URL or None."""
+        texts = [len(item['text'].strip()) for item in self.evidence(url)]
+        if max(texts, default=0) >= MIN_TEXT:
+            return None
+        trial = CLINICAL_TRIAL.search(url)
+        if trial:
+            target = CT_API.format(trial.group(1))
+        else:
+            pmcid = europe_pmc(url, title, self.getter)
+            if pmcid is None:
+                return None
+            target = EPMC_FULLTEXT.format(pmcid)
+        self.alternative(url, target, retry=retry)
+        return target
 
     def attach(self, url, file):
         file = Path(file)
