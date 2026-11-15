@@ -238,7 +238,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Reliable quantum computing with bounded hardware needs",
@@ -332,5 +333,356 @@
    "Can hardware savings survive increasingly demanding computations under realistic noise and connection constraints?"
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "QUA-08",
+  "title": "Constant-space-overhead fault-tolerant quantum computation",
+  "definition": "A quantum computer performs arbitrary computations while keeping all physical qubits per logical qubit bounded as computations grow and errors per operation fall; logical qubits encode information across physical qubits. Protection covers storage and gates, with bounded-range gates in a fixed-dimensional lattice and long-range gates assessed separately.",
+  "goal": {
+   "need": "IBM’s simulated bivariate-bicycle memory needs about one tenth of the physical qubits of its surface-code comparator for the same storage task. The task protects 12 logical qubits for nearly one million correction cycles at 0.1% physical error. Extending that resource advantage through universal operations requires including gate ancillas and routing as logical errors fall.",
+   "need_refs": [
+    1
+   ],
+   "figures": {
+    "caption": "IBM’s simulated quantum-memory resource comparison.",
+    "columns": [
+     "Encoding",
+     "Physical qubits"
+    ],
+    "rows": [
+     [
+      "Bivariate bicycle code",
+      "288"
+     ],
+     [
+      "Surface code",
+      "Nearly 3,000"
+     ]
+    ],
+    "note": "Includes data and check qubits; these are resource estimates, not hardware results.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "Intelligence Advanced Research Projects Activity, LogiQ programme",
+     "year": "2015",
+     "quote": "Demonstrate a single logical qubit with dynamic and repetitive error correction.",
+     "context": null,
+     "ref": 2,
+     "checked": null
+    },
+    {
+     "body": "IBM Quantum",
+     "year": "2026",
+     "quote": "For the same logical error rate, Starling’s qLDPC architecture requires about 10x fewer physical qubits.",
+     "context": "An architectural resource comparison, rather than a measured hardware result or an asymptotic bound.",
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "Microsoft Quantum and Qolab",
+     "year": "2026",
+     "quote": "Error-corrected logical qubits are needed to achieve this goal.",
+     "context": "The goal is executing long algorithms with end-to-end errors below those supported directly by physical qubits.",
+     "ref": 4,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "Hardware realizes universal fault tolerance with an asymptotically bounded total physical-qubit ratio.",
+   "criterion": "For polynomial-size circuit families and each fixed total output-error bound ε>0, implement growing universal circuits on k logical qubits using at most Ck physical qubits, with C independent of k, at fixed physical noise below a proved nonzero threshold. Count check, routing and gate ancillas. Hardware must execute correction, gates and feedback within the proof’s noise, connectivity and timing assumptions. A proof establishes the asymptotic bound; experiments establish implementation over their tested range. In the bounded-range case, lattice dimension, qubit density and gate range remain fixed.",
+   "set_by": "Atlas fallback: physical realization of the constant-space-overhead threshold-theorem criterion.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searched IARPA LogiQ requirements, IBM’s qLDPC roadmap, Microsoft/Qolab’s logical-qubit criteria, and local and nonlocal constant-overhead threshold theorems. No external document found defines hardware acceptance for this combined capability. The theorems establish scaling under specified assumptions. The fallback requires physical realization of a proved protocol; a finite qubit-ratio comparison alone cannot establish its asymptotic bound.",
+   "refs": [
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "threshold_checked": null
+  },
+  "case_label": "Connectivity model",
+  "cases": [
+   "Bounded-range gates",
+   "Long-range gates"
+  ],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A quantum memory supports nondestructive readout of its error checks.",
+    "criterion": "Measure error checks without destroying the encoded information and verify readout efficacy. Related long-range result: Kunlun encoded four distance-4 logical qubits using 32 transmons. Its report of 14 May 2025 gives (8.91±0.17)% errors per logical qubit per cycle after leakage rejection, using more than 40,000 retained instances. Corrections were offline; 1.0% of instances remained after six cycles.",
+    "set_by": "IARPA, LogiQ Proposers’ Day, 19 May 2015, slide 31: quantum-nondemolition stabilizer readout; no numerical efficacy is specified in this milestone.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "Demonstrate QND stabilizer readout and verify its required efficacy.",
+    "threshold_ref": 2,
+    "refs": [
+     2,
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m2",
+    "title": "A corrected quantum memory outlives its best constituent physical qubit.",
+    "criterion": "Require effective-lifetime gain G=T_logical/T_best physical>1. Google’s bounded-range memory gave G=2.4±0.3: 291±6 μs versus 119±13 μs, using 101 physical qubits for one logical qubit. Memory datasets contained 50,000 shots per code, basis and cycle count.",
+    "set_by": "Memory break-even convention, defined in Google Quantum AI’s Supplementary Information, section IV.2; published on 9 December 2024.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "with the break-even point corresponding to $G=1$",
+    "threshold_ref": 8,
+    "refs": [
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": false
+   },
+   {
+    "id": "m3",
+    "title": "Logical memory errors fall with code distance while decoding keeps pace with incoming error checks.",
+    "criterion": "Require decreasing memory error as code distance grows and decoder throughput at least equal to syndrome production. Google’s 72-qubit bounded-range processor gave Λ=ε3/ε5=2.0±0.1 and ε5=(0.35±0.01)% per cycle with real-time decoding, using 5,000 shots per dataset. At 1.1 μs per cycle, mean latency was 63±17 μs for runs up to one million cycles; logical feedback was absent.",
+    "set_by": "Finite-size error-suppression and decoder-throughput criteria used by Google Quantum AI, Introduction and real-time decoding experiment.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "syndrome information produced by the quantum device must be decoded as fast as it is generated",
+    "threshold_ref": 8,
+    "refs": [
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "Encoded qubits support universal gates that prevent single faults from causing uncorrectable errors.",
+    "criterion": "Implement universal logical gates with circuits in which a single physical fault leaves a correctable error or heralds rejected preparation. Postler et al. reported two seven-qubit logical registers and two ancillas on 25 May 2022, with Clifford gates and a teleported T gate, in the long-range trapped-ion case. Final correction used destructive readout and software interpretation; these gadget experiments do not establish sustained universal error correction.",
+    "set_by": "Single-fault containment and universal-gate criteria used by Postler et al., Introduction and universal fault-tolerant operations; the experiment used trapped-ion colour codes.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "may under no circumstances turn into a non-correctable error on two or more qubits.",
+    "threshold_ref": 9,
+    "refs": [
+     9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "A universal fault-tolerance protocol has constant total qubit overhead and a nonzero noise threshold.",
+    "criterion": "Under stated local-stochastic noise models, prove a positive threshold and O(k) total physical qubits for growing universal circuits at fixed output error ε>0, including ancillas. Long-range: Tamiya et al., Theorem 1, proves this with polylogarithmic time overhead and nonzero classical runtime, published on 26 November 2025. Bounded-range: Gidney–Bergamaschi, Theorem 1.2, gives ≤20k qubits on a nearest-neighbour line for ε≥d exp[-exp(O((log k)^(1/3)))], for logical depth d, assuming noiseless, nonlocal, instantaneous classical control; the cited version of 22 February 2025 is a preprint, not peer reviewed.",
+    "set_by": "Fault-tolerance threshold-theorem criterion: Tamiya et al., Theorem 1, for unrestricted pairwise gates; Gidney and Bergamaschi, Theorem 1.2, for nearest-neighbour gates.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "achieves constant space overhead and polylogarithmic time overhead, even when accounting for the required classical processing.",
+    "threshold_ref": 5,
+    "refs": [
+     5,
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m6",
+    "title": "A processor runs universal logical operations with repeated error correction and online feedback.",
+    "criterion": "On one processor, sustain logical qubits with repeated error correction and perform universal fault-tolerant operations with measurement-conditioned branching and online decoding and feedback. Microsoft/Qolab published this capability criterion on 22 September 2026. Related long-range result: Bluvstein et al., published on 10 November 2025, used up to 448 reconfigurable atoms to demonstrate repeated correction, universal-logic elements and qubit reuse. That result does not establish this full integrated criterion or bounded total qubit overhead.",
+    "set_by": "Microsoft Quantum and Qolab, Scalable logical qubits, Capability criterion and its explanation of repeated correction and measurement-conditioned control flow.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "with classical processing fast enough to stay in the feedback loop.",
+    "threshold_ref": 4,
+    "refs": [
+     4,
+     10
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No external hardware completion test combining universal fault tolerance, bounded total qubit overhead and specified connectivity was found.",
+   "No hardware result establishing that combined capability in either connectivity case was found.",
+   "The Kunlun journal page provides a subscription preview; its detailed postselection and processing results were checked in the accessible author preprint."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41586-024-07107-7?error=cookies_not_supported",
+    "doi": "10.1038/s41586-024-07107-7",
+    "title": "High-threshold and low-overhead fault-tolerant quantum memory",
+    "authors": "Bravyi S, Cross AW, Gambetta JM, Maslov D, Rall P, Yoder TJ",
+    "container": "Nature",
+    "year": "2024",
+    "volume": "627",
+    "issue": "8005",
+    "pages": "778-782",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "report",
+    "url": "https://www.iarpa.gov/images/PropsersDayPDFs/LogiQ/LogiQ_proposers_day_briefing.pdf",
+    "doi": null,
+    "title": "Logical Qubits (LogiQ) Program",
+    "authors": "Intelligence Advanced Research Projects Activity",
+    "container": "IARPA",
+    "year": "2015",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "web",
+    "url": "https://www.ibm.com/quantum/blog/path-to-ibm-quantum-starling",
+    "doi": null,
+    "title": "Tracking progress on the path to IBM Quantum Starling",
+    "authors": "Steffen M, Marwick M.",
+    "container": "IBM Quantum Computing Blog",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "web",
+    "url": "https://quantum.microsoft.com/en-us/insights/blogs/scalable-logical-qubits",
+    "doi": null,
+    "title": "Scalable logical qubits",
+    "authors": "Troyer M, Nayak C, Martinis J.",
+    "container": "Microsoft Quantum",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41567-025-03102-5",
+    "doi": "10.1038/s41567-025-03102-5",
+    "title": "Fault-tolerant quantum computation with polylogarithmic time and constant space overheads",
+    "authors": "Tamiya S, Koashi M, Yamasaki H",
+    "container": "Nat. Phys.",
+    "year": "2026",
+    "volume": "22",
+    "issue": "1",
+    "pages": "27-32",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 6,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2502.16132v1",
+    "doi": "10.48550/arXiv.2502.16132",
+    "title": "A Constant Rate Quantum Computer on a Line",
+    "authors": "Gidney C, Bergamaschi T",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 7,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2505.09684v1",
+    "doi": "10.48550/arXiv.2505.09684",
+    "title": "Demonstration of low-overhead quantum error correction codes",
+    "authors": "Wang K, Lu Z, Zhang C, Liu G, Chen J, Wang Y, et al.",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 8,
+    "kind": "journal",
+    "url": "https://arxiv.org/html/2408.13687v1",
+    "doi": "10.1038/s41586-024-08449-y",
+    "title": "Quantum error correction below the surface code threshold",
+    "authors": "Google Quantum AI and Collaborators, Acharya R, Abanin DA, Aghababaie-Beni L, Aleiner I, Andersen TI, et al.",
+    "container": "Nature",
+    "year": "2025",
+    "volume": "638",
+    "issue": "8052",
+    "pages": "920-926",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 9,
+    "kind": "journal",
+    "url": "https://arxiv.org/html/2111.12654v3",
+    "doi": "10.1038/s41586-022-04721-1",
+    "title": "Demonstration of fault-tolerant universal quantum gate operations",
+    "authors": "Postler L, Heuβen S, Pogorelov I, Rispler M, Feldker T, Meth M, et al.",
+    "container": "Nature",
+    "year": "2022",
+    "volume": "605",
+    "issue": "7911",
+    "pages": "675-680",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 10,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41586-025-09848-5?error=cookies_not_supported",
+    "doi": "10.1038/s41586-025-09848-5",
+    "title": "A fault-tolerant neutral-atom architecture for universal quantum computation",
+    "authors": "Bluvstein D, Geim AA, Li SH, Evered SJ, Bonilla Ataides JP, Baranes G, et al.",
+    "container": "Nature",
+    "year": "2026",
+    "volume": "649",
+    "issue": "8095",
+    "pages": "39-46",
+    "citation_source": "crossref"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4",
+   "m5",
+   "m6"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 5 from Crossref, 0 from PubMed, 2 from arXiv, 3 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 6 found, 1 not found, 2 with no readable copy."
+   }
+  ]
  }
 }

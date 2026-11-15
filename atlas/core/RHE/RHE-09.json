@@ -183,7 +183,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Reliable predictions of elastic liquids in manufacturing",
@@ -249,5 +250,289 @@
    "Process-relevant elasticity, acceptable errors, simulation duration and computing budgets still need application-specific choices."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "RHE-09",
+  "title": "Mesh-converged simulation of viscoelastic processing flows",
+  "definition": "A three-dimensional calculation of a liquid whose stress relaxes over time would resolve velocity and polymer stress for a stated stress–deformation law at manufacturing conditions as mesh spacing, time step and artificial stress diffusion vanish. Independent methods recover the same limits; Wi = λU/L compares relaxation time λ with flow time L/U, using reference speed U and length L.",
+  "goal": {
+   "need": "A preprint submitted on 16 July 2026 reports a two-dimensional Oldroyd-B calculation surviving 120 convective times at nominal Wi = 50 while retaining an unresolved stress strand. At nominal Wi = 20, its local elasticity still changes with grid refinement. These results leave numerical accuracy unsettled despite survival. Processing calculations also require constitutive properties appropriate to the operating shear rates.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": {
+    "caption": "Local elasticity under grid refinement at nominal Wi = 20.",
+    "columns": [
+     "Grid points",
+     "Stagnation-point Wi_eff"
+    ],
+    "rows": [
+     [
+      "65 × 65",
+      "0.8028"
+     ],
+     [
+      "129 × 129",
+      "0.8737"
+     ],
+     [
+      "257 × 257",
+      "0.9094"
+     ]
+    ],
+    "note": "Wi_eff is relaxation time multiplied by the measured principal extension rate. Sc = 10^5, Re = 1 and solvent-viscosity fraction β = 2/3. The preprint is not peer reviewed.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "Ansys, Polyflow User’s Guide, section 10.2.3.1.4",
+     "year": "2025",
+     "quote": "should reproduce the experimental behavior for shear rates in the vicinity of the characteristic shear rate",
+     "context": "This requirement concerns the constitutive model selected for the flow being simulated.",
+     "ref": 2,
+     "checked": true
+    },
+    {
+     "body": "Technische Universität Darmstadt, BASF-supported numerical-stabilization-library project",
+     "year": "2015 (project term)",
+     "quote": "Our purpose is to present mesh converged solutions on different computational meshes",
+     "context": null,
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "American Society of Mechanical Engineers, V&V 20",
+     "year": "2009; reaffirmed 2021",
+     "quote": "quantifies the degree of accuracy inferred from the comparison of solution and data for a specified variable at a specified validation point.",
+     "context": "The standard concerns comparisons with experiments under specified conditions.",
+     "ref": 4,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "Independent methods reproduce the resolved fields of a three-dimensional processing flow.",
+   "criterion": "Two independently implemented numerical methods agree within quantified numerical uncertainties on velocity and polymer-stress fields for one specified three-dimensional manufacturing flow at measured material parameters and operating rates. Each method reaches the same limit under mesh and time-step refinement and vanishing added stress diffusivity. Fix geometry, boundary and initial conditions, Wi definition, local strain-rate diagnostics, field norms and time horizon before comparison. Agreement covers stress concentrations, velocity profiles and process observables.",
+   "set_by": "Technology Atlas synthesis; no external completion criterion for this combined capability was located.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searched ASME V&V 20, NASA/NPARC verification guidance, Ansys Polyflow guidance and published contraction/cavity benchmarks for a completion test specifying three-dimensional processing conditions, elasticity and field-error limits; none was found. The criterion combines convergence and independent-code checks for one fixed flow and constitutive model. Experimental validation is a separate requirement for establishing agreement with a real liquid.",
+   "refs": [
+    2,
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "threshold_checked": null
+  },
+  "case_label": "Constitutive model",
+  "cases": [
+   "Oldroyd-B",
+   "Phan–Thien–Tanner"
+  ],
+  "milestone_structure": "sequence",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A viscoelastic solver converges to an exact velocity-and-stress solution.",
+    "criterion": "For a viscoelastic problem with an analytic solution, computed velocity and polymer-stress errors approach zero under discretization refinement. Partial evidence: the 16 July 2026 preprint reports velocity verification at Wi = 8 and Sc = 10^5, with relative L2 errors 3.05 × 10^-3, 7.99 × 10^-4 and 2.18 × 10^-4 at N = 33, 65 and 129. These numbers establish a velocity check; stress verification requires its own comparison.",
+    "set_by": "NASA Glenn/NPARC Alliance, Verification Assessment tutorial; the published criterion concerns general CFD and is applied here to viscoelastic equations.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "These cases should be analytic or numeric solution to ordinary and partial differential equations.",
+    "threshold_ref": 5,
+    "refs": [
+     5,
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A viscoelastic benchmark reaches asymptotic grid convergence of velocity and stress diagnostics.",
+    "criterion": "For a two-dimensional benchmark with concentrated stress, velocity and polymer-stress diagnostics enter the asymptotic regime E = Ch^p with constant C and positive p. On three grids with refinement ratio r ≥ 1.1, grid-convergence indices satisfy GCI23/(r^p GCI12) ≈ 1. NASA supplies no numerical tolerance for ≈. Alves et al. refined the Oldroyd-B contraction on six meshes and tabulated Phan–Thien–Tanner benchmarks; scalar errors are generally below 1%. The 2026 Oldroyd-B four-roll-mill stress strand remains unresolved.",
+    "set_by": "NASA Glenn/NPARC Alliance, Examining Spatial (Grid) Convergence; this is a general CFD test, applied here to a viscoelastic benchmark.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "A ratio of 1.0 indicates asymptotic range.",
+    "threshold_ref": 6,
+    "refs": [
+     6,
+     7,
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "One solver resolves a three-dimensional processing flow as artificial stress diffusion vanishes.",
+    "criterion": "For the specified three-dimensional processing flow, one solver obtains limiting velocity and polymer-stress fields under mesh and time-step refinement and removal of added stress diffusion over a fixed time horizon. Hold material and boundary data fixed; assess concentrated stresses in stated norms and track local elasticity. In 2019, Varchanis et al. compared Oldroyd-B cavity velocities at Wi = 0.4, 1.2 and 2 on meshes of 8,000–64,000 hexahedra; the independent comparison supplied no stress-field reference. Their Phan–Thien–Tanner tests were two-dimensional.",
+    "set_by": "Technology Atlas synthesis; no external protocol combining a three-dimensional processing condition with field convergence and removal of artificial stress diffusion was located.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     2,
+     5,
+     6,
+     8,
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "The full text of Renardy and Thomases’ 2021 review could not be opened.",
+   "No combined completion demonstration was found for either tracked constitutive model."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2607.15334v1",
+    "doi": "10.48550/arXiv.2607.15334",
+    "title": "Loss of positive definiteness is a symptom, not the cause, of high-Weissenberg-number breakdown",
+    "authors": "Yu Y, Lian L, Chu F",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 2,
+    "kind": "web",
+    "url": "https://ansyshelp.ansys.com/public/Views/Secured/corp/v251/en/poly_pf/pf_ug_sec_visco_differential_choosing.html",
+    "doi": null,
+    "title": "10.2.3. Choosing the Differential Viscoelastic Model",
+    "authors": "Ansys, Inc.",
+    "container": "Ansys Polyflow User’s Guide",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "web",
+    "url": "https://www.hkhlr.de/en/projects/231",
+    "doi": null,
+    "title": "Numerical Methods for Viscoelastic Single- and Multiphase Flows",
+    "authors": "HKHLR.",
+    "container": "HKHLR",
+    "year": "undated; project term 2015",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "web",
+    "url": "https://www.asme.org/codes-standards/find-codes-standards/standard-for-verification-and-validation-in-computational-fluid-dynamics-and-heat-transfer",
+    "doi": null,
+    "title": "V V 20 - Standard for Verification and Validation in Computational Fluid Dynamics and Heat Transfer",
+    "authors": "American Society of Mechanical Engineers.",
+    "container": "ASME",
+    "year": "2009",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "web",
+    "url": "https://www.grc.nasa.gov/www/wind/valid/tutorial/verassess.html",
+    "doi": null,
+    "title": "Verification Assessment",
+    "authors": "NASA Glenn Research Center; NPARC Alliance.",
+    "container": "NASA",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "web",
+    "url": "https://www.grc.nasa.gov/www/wind/valid/tutorial/spatconv.html",
+    "doi": null,
+    "title": "Examining Spatial (Grid) Convergence",
+    "authors": "Slater JW.",
+    "container": "NASA Glenn Research Center; NPARC Alliance",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 7,
+    "kind": "journal",
+    "url": "https://www.academia.edu/105435441/Benchmark_solutions_for_the_flow_of_Oldroyd_B_and_PTT_fluids_in_planar_contractions",
+    "doi": "10.1016/S0377-0257(02)00191-X",
+    "title": "Benchmark solutions for the flow of Oldroyd-B and PTT fluids in planar contractions",
+    "authors": "Alves MA, Oliveira PJ, Pinho FT",
+    "container": "Journal of Non-Newtonian Fluid Mechanics",
+    "year": "2003",
+    "volume": "110",
+    "issue": "1",
+    "pages": "45-75",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 8,
+    "kind": "journal",
+    "url": "https://www.researchgate.net/publication/332397333_A_new_finite_element_formulation_for_viscoelastic_flows_Circumventing_simultaneously_the_LBB_condition_and_the_high-Weissenberg_number_problem",
+    "doi": "10.1016/j.jnnfm.2019.04.003",
+    "title": "A new finite element formulation for viscoelastic flows: Circumventing simultaneously the LBB condition and the high-Weissenberg number problem",
+    "authors": "Varchanis S, Syrakos A, Dimakopoulos Y, Tsamopoulos J",
+    "container": "Journal of Non-Newtonian Fluid Mechanics",
+    "year": "2019",
+    "volume": "267",
+    "issue": null,
+    "pages": "78-97",
+    "citation_source": "crossref"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 1 from arXiv, 5 as the model gave them."
+   },
+   {
+    "date": "2026-11-14",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 5 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }

@@ -203,7 +203,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Robots that predict what their touch will do",
@@ -288,5 +289,289 @@
    "How broadly one model can cover rigid and soft-object interactions remains open."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "ROB-07",
+  "title": "Contact dynamics models for zero-shot manipulation planning",
+  "definition": "A fixed dynamics model predicts the forces and object motion caused by robot contact and supplies those predictions to a planner for previously unseen real tasks involving rigid and deformable objects. It transfers without task-specific identification or real-robot fine-tuning, with prediction errors and uncertainty tested over the planner's prediction horizons.",
+  "goal": {
+   "need": "ContactWorld trained each physical-task model on 50 demonstrations and evaluated 30 held-out conditions per task. Its Panda experiments covered four tasks. The results below quantify task-trained predictive planning; they do not establish transfer to unseen tasks or calibrated contact-force forecasts.",
+   "need_refs": [
+    1
+   ],
+   "figures": {
+    "caption": "ContactWorld predictive planning on a Panda robot",
+    "columns": [
+     "Model observations",
+     "Task success"
+    ],
+    "rows": [
+     [
+      "Point clouds",
+      "31.7%"
+     ],
+     [
+      "Point clouds and tactile images",
+      "45.0%"
+     ],
+     [
+      "Point clouds and tactile fields",
+      "55.8%"
+     ]
+    ],
+    "note": "120 physical trials per configuration. Preprint version dated 24 September 2026.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "National Institute of Standards and Technology",
+     "year": "2007",
+     "quote": "In order for simulation results to be valid for implementation, model accuracy is important.",
+     "context": "NIST's publication abstract addresses validation of robot simulation against physical experiments.",
+     "ref": 2,
+     "checked": false
+    },
+    {
+     "body": "NVIDIA",
+     "year": "2026",
+     "quote": "predict what’s likely to happen next, and generate actions for specific environments, embodiments, and tasks.",
+     "context": "The passage states requirements for physical AI systems, including robots.",
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "Princeton University Intelligent Robot Motion Lab",
+     "year": "Undated",
+     "quote": "How do we rigorously quantify a world model's uncertainty for robust RL, planning, and evaluation?",
+     "context": "A question in the laboratory's published world-model research roadmap; RL means reinforcement learning.",
+     "ref": 4,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "One frozen contact model passes force-and-motion-validated planning tests for rigid and deformable objects.",
+   "criterion": "A single model, fixed before evaluation, supports a planner that attains an outside protocol's task endpoints on unseen real tasks involving both rigid and deformable objects, without per-task system identification or real-robot fine-tuning. At the horizons used to choose actions, measured contact forces and object motion satisfy that protocol's prediction-error tolerances and uncertainty-coverage requirements. Reusable robot and sensor calibration is fixed beforehand. This provisional test cannot certify achievement until an external protocol supplies those acceptance requirements.",
+   "set_by": "Atlas; provisional synthesis because no external test covering the combined capability was found.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searched ASME V&V 10's public scope, NIST simulation-validation guidance and ASTM F45.05 listings, and PointWorld and ContactWorld protocols. No combined acceptance test or common numerical force-and-motion tolerances was found. The test joins demonstrated task transfer to experimentally tested physical prediction, within a declared domain. The inspected results do not establish this combination.",
+   "refs": [
+    5,
+    6,
+    7,
+    8,
+    1,
+    2,
+    4
+   ],
+   "threshold_checked": null
+  },
+  "case_label": "Object class",
+  "cases": [
+   "Rigid objects",
+   "Deformable objects"
+  ],
+  "milestone_structure": "sequence",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A predictive planner completes a hardware task after model training on 50 demonstrations of that task.",
+    "criterion": "Train on 50 demonstrations per task and evaluate 30 held-out initial–goal pairs. A rigid connector must be fully seated; an elastic clip must be grasped and disengaged from its fixture. ContactWorld reports 9/30 USB insertions and 18/30 clip removals using point clouds and tactile fields on a Panda robot. Its version dated 24 September 2026 is a preprint. These are trial-level endpoints; no suite-wide passing fraction is specified.",
+    "set_by": "ContactWorld authors, version 3, Sections V-B–D. These endpoints concern connector insertion and elastic-clip removal, respectively.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "Elastic-clip removal is successful if the gripper securely grasps the clip and disengages it from the fixture.",
+    "threshold_ref": 1,
+    "refs": [
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "One pretrained model plans rigid and deformable hardware tasks without additional training.",
+    "criterion": "Use one pretrained dynamics checkpoint with a planner that selects actions through predicted motion, without additional demonstrations or post-training. PointWorld reports rigid pushing with a book and tissue box, and deformable manipulation with scarf folding and pillow placement, on a Franka robot. Its protocol evaluates ten feasible initial configurations per task and counts unsafe plans as failures. The arXiv report dated 7 January 2026 evaluates motion prediction, without a contact-force prediction test.",
+    "set_by": "PointWorld authors, Section 5.4 and Appendix A.6. The protocol covers both object classes but specifies no aggregate passing fraction.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "We consider the trial successful if the task objective is met.",
+    "threshold_ref": 8,
+    "refs": [
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": false
+   },
+   {
+    "id": "m3",
+    "title": "A frozen contact model meets force and motion prediction limits while planning unseen hardware tasks.",
+    "criterion": "Within an object class, a frozen model drives a planner to externally specified endpoints on real tasks excluded from fitting, without per-task identification or fine-tuning. Its force and object-motion predictions meet an external task protocol's error tolerances and uncertainty-coverage requirements at the horizons used for planning. Separate models may establish this result for the two object classes. No inspected protocol supplies this joint acceptance test, and no inspected result establishes it.",
+    "set_by": "Atlas; provisional integration milestone. Searches of ASME/NIST guidance and the inspected manipulation protocols found no joint prediction-and-transfer acceptance threshold.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     5,
+     6,
+     7,
+     4,
+     1,
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No external protocol was found setting joint force-error, motion-error, uncertainty-coverage and task-transfer acceptance thresholds for a shared rigid/deformable contact model.",
+   "The full normative text of ASME V&V 10 was not retrieved; its public scope was accessible.",
+   "The publisher page for Trends and challenges in robot manipulation returned HTTP 403.",
+   "The CVPR 2026 PointWorld pages could not be opened; its arXiv text was accessible."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2606.13877v3",
+    "doi": "10.48550/arXiv.2606.13877",
+    "title": "ContactWorld: What Representations Matter for Vision–Tactile Latent World Models in Contact-Rich Manipulation",
+    "authors": "Zhang Z, Zhou P, Zhang K, Desai A, Amosa T, Soleymanzadeh D, et al.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 2,
+    "kind": "report",
+    "url": "https://www.nist.gov/publications/robot-simulation-physics-validation",
+    "doi": "10.1145/1660877.1660890",
+    "title": "Robot Simulation Physics Validation",
+    "authors": "Pepper C, Balakirsky S, Scrapper C",
+    "container": "Proceedings of the 2007 Workshop on Performance Metrics for Intelligent Systems",
+    "year": "2007",
+    "volume": null,
+    "issue": null,
+    "pages": "97-104",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 3,
+    "kind": "web",
+    "url": "https://developer.nvidia.com/blog/develop-physical-ai-reasoning-world-and-action-models-with-nvidia-cosmos-3",
+    "doi": null,
+    "title": "Develop Physical AI Reasoning, World, and Action Models with NVIDIA Cosmos 3",
+    "authors": "Bhide A, Schwarz A.",
+    "container": "NVIDIA Technical Blog",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "web",
+    "url": "https://irom-lab.princeton.edu/research/",
+    "doi": null,
+    "title": "Research",
+    "authors": "Princeton University Intelligent Robot Motion Lab",
+    "container": "Princeton University",
+    "year": "Undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "web",
+    "url": "https://www.asme.org/codes-standards/find-codes-standards/standard-for-verification-and-validation-in-computational-solid-mechanics/2019",
+    "doi": null,
+    "title": "V V 10 - Standard for Verification and Validation in Computational Solid Mechanics",
+    "authors": "American Society of Mechanical Engineers",
+    "container": "ASME",
+    "year": "2019; reaffirmed 2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "web",
+    "url": "https://www.nist.gov/programs-projects/grasping-manipulation-and-contact-safety-performance-robotic-systems",
+    "doi": null,
+    "title": "Grasping, Manipulation, and Contact Safety Performance of Robotic Systems",
+    "authors": "National Institute of Standards and Technology",
+    "container": "NIST",
+    "year": "Undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 7,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2510.16732v3",
+    "doi": "10.48550/arXiv.2510.16732",
+    "title": "A Comprehensive Survey on World Models for Embodied AI",
+    "authors": "Li X, He X, Zhang L, Wu M, Li X, Liu Y",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 8,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2601.03782v1",
+    "doi": "10.48550/arXiv.2601.03782",
+    "title": "PointWorld: Scaling 3D World Models for In-The-Wild Robotic Manipulation",
+    "authors": "Huang W, Chao YW, Mousavian A, Liu MY, Fox D, Mo K, et al.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-15",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 3 from arXiv, 4 as the model gave them."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 3 found, 2 not found, 0 with no readable copy."
+   }
+  ]
  }
 }
