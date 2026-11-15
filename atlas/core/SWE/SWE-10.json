@@ -253,7 +253,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Software parts with proofs they work together",
@@ -360,5 +361,322 @@
    "Rejecting deliberately broken examples would test enforcement, but would not by itself prove that the checker’s reasoning is sound."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "SWE-10",
+  "title": "Compositional proof-carrying code",
+  "definition": "Executable components from independent suppliers carry machine-checkable proofs of behavioral contracts: what each component assumes and guarantees. A consumer checks proofs tied to the installed bytes and combines compatible contracts into a proof of an application property under stated execution assumptions.",
+  "goal": {
+   "need": "On 22 October 2026, Anthropic and Theorem reported checked proofs for 239 fuzzing entry points across 123 libraries. Their appendix says each proof repeats verification of startup, allocation and other support code; checking one proof takes 30 minutes to several CPU hours. These developer-reported results are not peer reviewed. Reusing component proofs addresses this repeated verification.",
+   "need_refs": [
+    1,
+    2
+   ],
+   "figures": {
+    "caption": "Two examples of verification overhead reported on 22 October 2026.",
+    "columns": [
+     "Library",
+     "Code described",
+     "Rocq proof lines"
+    ],
+    "rows": [
+     [
+      "cJSON",
+      "391-line parser entry point",
+      "630,000"
+     ],
+     [
+      "fftw3",
+      "51,000 lines of linked code",
+      "480,000"
+     ]
+    ],
+    "note": "These are two illustrative examples, not a representative sample; the code measurements have different boundaries.",
+    "ref": 2
+   },
+   "statements": [
+    {
+     "body": "DeepSpec consortium",
+     "year": "undated",
+     "quote": "we envision this network of verified software components, connected by deep specifications",
+     "context": "The research overview defines specifications exercised against both implementations and clients.",
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "DARPA V-SPELLS programme",
+     "year": "2020",
+     "quote": "proofs of their safety and correctness, and safely compose these artifacts with the legacy system.",
+     "context": "The programme scope concerns executable enhancements to legacy software.",
+     "ref": 4,
+     "checked": true
+    },
+    {
+     "body": "MOBIUS consortium",
+     "year": "undated",
+     "quote": "allows code consumers to formally check functional and security properties of code before executing it.",
+     "context": "The objective of Work Package 4 is a proof-carrying-code infrastructure; Task 4.1 explicitly includes components from different sources.",
+     "ref": 5,
+     "checked": true
+    }
+   ]
+  },
+  "completion": {
+   "title": "A consumer derives an application guarantee from independent suppliers' executable-component proofs.",
+   "criterion": "A consumer independent of the producers checks certificates supplied with executable components from independent suppliers. Each certificate proves an explicit behavioral contract for the exact installed bytes. A sound composition theorem establishes a specified application-level functional or security property from those contracts, discharging their mutual assumptions under stated platform semantics. The consumer checks supplied proofs and composition obligations without repeating suppliers' source-level verification.",
+   "set_by": "Technology Atlas; fallback synthesis of PCC, DeepSpec, V-SPELLS and MOBIUS objectives.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches of DeepSpec, V-SPELLS's announcement and metrics, MOBIUS and PCC/linking literature, and searches for NIST/ISO criteria, found no published acceptance test combining independent binary suppliers, behavioral contracts and consumer composition, nor a checking-time bound relative to linking. This is the narrow existence test joining those objectives. The 2024 server establishes integrated machine-code verification, rather than the supplier-to-consumer certificate workflow.",
+   "refs": [
+    3,
+    4,
+    5,
+    6
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "sequence",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A receiver checks a producer-supplied proof that native code satisfies its safety policy.",
+    "criterion": "The receiver derives a verification condition from the received machine code and accepts a supplied proof only for that condition, using its safety policy's axioms and inference rules. Necula's POPL 1997 paper demonstrates PCC for assembly-language extensions of ML; his project documentation also records native packet filters and Java-to-x86 certification. Acceptance establishes the specified policy relative to the code semantics and checker.",
+    "set_by": "Necula's PCC acceptance protocol; POPL 1997 and the project description revised on 22 July 2002, Overview and Implementation.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "a formal safety proof that proves, for the untrusted code, adherence to the safety rules.",
+    "threshold_ref": 7,
+    "refs": [
+     7,
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "A low-level component has a checked proof of its behavioral precondition and postcondition.",
+    "criterion": "Bedrock's foundational theorem establishes that execution starting at a code label in a state satisfying its specification satisfies a destination label's specification whenever it reaches that label. The ICFP 2013 paper demonstrates this approach with destructive linked-list append, whose postcondition is the concatenation of the two input lists. These guarantees concern Bedrock's intermediate assembly language; its AMD64 translation was unverified.",
+    "set_by": "Chlipala's Bedrock verification framework, ICFP 2013, section 2 and Figure 2; a framework-specific criterion.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "we verify absence of assertion failures, giving us functional correctness.",
+    "threshold_ref": 9,
+    "refs": [
+     9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "Two separately verified modules link while preserving their behavioral specifications.",
+    "criterion": "Apply Bedrock's linking rule to two modules proved correct under their respective assumption maps: their defined code labels must be disjoint, and specifications must agree wherever the assumption maps overlap. Their union then satisfies the union of the assumptions. Wang, Cuellar and Chlipala demonstrate functional-correctness reasoning across Cito-compiled and independently verified Bedrock modules in OOPSLA 2014. The theorem concerns Bedrock's intermediate assembly language.",
+    "set_by": "Wang, Cuellar and Chlipala's Bedrock linking rule, OOPSLA 2014, section 3.2; a framework-specific criterion.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "we have proved the concatenation of the modules correct, under the union of their assumptions.",
+    "threshold_ref": 10,
+    "refs": [
+     10
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "Composed component proofs establish an executable application's machine-code input-output contract.",
+    "criterion": "Prove garagedoor_correct: from initial_conditions, every reachable RISC-V state eventually reaches a state whose I/O trace satisfies io_spec. The initial program counter is 0x20400000; the I/O log starts empty; memory must contain the verified code and required storage. Erbsen and colleagues establish this theorem for one bare-metal cryptographic server in PLDI 2024 by integrating component and compiler proofs. The guarantee covers functional behavior and liveness under the model, without proving cryptographic protocol security.",
+    "set_by": "Erbsen and colleagues, PLDI 2024, Figure 2 and section 2; a criterion published for one bare-metal cryptographic server.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "our specification guarantees liveness and crash-freedom: io_spec will be repeatedly reestablished",
+    "threshold_ref": 6,
+    "refs": [
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No published numerical limit for certificate size or consumer checking time relative to conventional linking was found.",
+   "No field-wide certification ladder for compositional proof-carrying code was found.",
+   "No opened result demonstrated the complete independent-supplier binary-certificate workflow specified in the completion test."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "report",
+    "url": "https://www.anthropic.com/research/formal-verification",
+    "doi": null,
+    "title": "LLMs are making formal software verification feasible at a much larger scale",
+    "authors": "Anthropic; Theorem",
+    "container": "Anthropic",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 2,
+    "kind": "report",
+    "url": "https://assets.claude.com/6867eadf760258fa8b42a504600cd3c036d16358.pdf",
+    "doi": null,
+    "title": "Appendix: LLMs are making formal software verification feasible at a much larger scale",
+    "authors": "Anthropic; Theorem",
+    "container": "Anthropic",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "web",
+    "url": "https://deepspec.org/page/Research/",
+    "doi": null,
+    "title": "Research Overview",
+    "authors": "DeepSpec consortium",
+    "container": "The Science of Deep Specification",
+    "year": "undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "report",
+    "url": "https://imlive.s3.amazonaws.com/Federal%20Government/ID295011957732437144315448100587755673337/HR001120S0058-Amendment-02.pdf",
+    "doi": null,
+    "title": "Verified Security and Performance Enhancement of Large Legacy Software (V-SPELLS)",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "DARPA",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "web",
+    "url": "https://www-sop.inria.fr/marelle/Mobius/mobius.inria.fr/twiki/bin/view/WorkPackage/WorkPackage4a62c.html?raw=on",
+    "doi": null,
+    "title": "Work Package 4 Proof Carrying Code",
+    "authors": "MOBIUS consortium",
+    "container": "MOBIUS",
+    "year": "undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://adam.chlipala.net/papers/GarageDoorPLDI24/GarageDoorPLDI24.pdf",
+    "doi": "10.1145/3656446",
+    "title": "Foundational Integration Verification of a Cryptographic Server",
+    "authors": "Erbsen A, Philipoom J, Jamner D, Lin A, Gruetter S, Pit-Claudel C, et al.",
+    "container": "Proc. ACM Program. Lang.",
+    "year": "2024",
+    "volume": "8",
+    "issue": "PLDI",
+    "pages": "1704-1729",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "web",
+    "url": "https://people.eecs.berkeley.edu/~necula/pcc.html",
+    "doi": null,
+    "title": "Proof-Carrying Code",
+    "authors": "Necula GC.",
+    "container": "University of California, Berkeley",
+    "year": "2002",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 8,
+    "kind": "journal",
+    "url": "https://homes.cs.washington.edu/~mernst/teaching/6.893/readings/necula-popl97.pdf",
+    "doi": "10.1145/263699.263712",
+    "title": "Proof-Carrying Code",
+    "authors": "Necula GC",
+    "container": "Proceedings of the 24th ACM SIGPLAN-SIGACT symposium on Principles of programming languages  - POPL '97",
+    "year": "1997",
+    "volume": null,
+    "issue": null,
+    "pages": "106-119",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 9,
+    "kind": "journal",
+    "url": "https://adam.chlipala.net/papers/BedrockICFP13/BedrockICFP13.pdf",
+    "doi": "10.1145/2500365.2500592",
+    "title": "The Bedrock Structured Programming System: Combining Generative Metaprogramming and Hoare Logic in an Extensible Program Verifier",
+    "authors": "Chlipala A",
+    "container": "Proceedings of the 18th ACM SIGPLAN international conference on Functional programming",
+    "year": "2013",
+    "volume": null,
+    "issue": null,
+    "pages": "391-402",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 10,
+    "kind": "journal",
+    "url": "https://people.csail.mit.edu/wangpeng/oopsla031-wang.pdf",
+    "doi": "10.1145/2660193.2660201",
+    "title": "Compiler Verification Meets Cross-Language Linking via Data Abstraction",
+    "authors": "Wang P, Cuellar S, Chlipala A",
+    "container": "Proceedings of the 2014 ACM International Conference on Object Oriented Programming Systems Languages &amp; Applications",
+    "year": "2014",
+    "volume": null,
+    "issue": null,
+    "pages": "675-690",
+    "citation_source": "crossref"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-15",
+  "log": [
+   {
+    "date": "2026-11-15",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 4 from Crossref, 0 from PubMed, 0 from arXiv, 6 as the model gave them."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 7 found, 0 not found, 0 with no readable copy."
+   }
+  ]
  }
 }

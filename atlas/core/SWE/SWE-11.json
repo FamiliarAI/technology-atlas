@@ -240,7 +240,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Software rewrites with proof they preserve behavior",
@@ -379,5 +380,311 @@
    "A rejected transformation may be correct but beyond the tool's ability to prove."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "SWE-11",
+  "title": "Proof-producing program transformation",
+  "definition": "Tools refactor or migrate existing software systems while automatically producing proofs that an independent checker accepts. The proofs establish observational equivalence—matching modeled external behavior—or a stated refinement, which permits only behavior allowed by the source semantics.",
+  "goal": {
+   "need": "In a three-year study published in 2011, Csmith researchers reported more than 325 previously unknown C-compiler bugs. Every compiler tested crashed and silently generated incorrect code on some valid inputs. These findings motivate checking that transformations preserve behavior beyond compiling successfully or passing fixed tests.",
+   "need_refs": [
+    1
+   ],
+   "figures": null,
+   "statements": [
+    {
+     "body": "DARPA’s V-SPELLS programme sets verified incremental modernization of legacy systems as a goal.",
+     "year": "2020",
+     "quote": "V-SPELLS tools will enable developers to deliver assured incremental modernization of legacy systems",
+     "context": null,
+     "ref": 2,
+     "checked": true
+    },
+    {
+     "body": "DARPA’s TRACTOR programme identifies formal models of translation equivalence as a research objective.",
+     "year": "2024",
+     "quote": "We need formal modeling tools that allow us to reason about “equivalence” of the translated code.",
+     "context": "This passage concerns translating concurrent C programs into Rust.",
+     "ref": 3,
+     "checked": null
+    }
+   ]
+  },
+  "completion": {
+   "title": "A deployed legacy system is modernized with automatically produced, independently checked preservation proofs.",
+   "criterion": "A reusable tool refactors or migrates a deployed legacy system within declared source and target semantics and a supported transformation family. It automatically produces a preservation certificate accepted by a checker independent of the transformer, or rejects the transformation. The theorem states observational equivalence or refinement and covers the system’s modeled external interactions. Proof automation is reusable after configuring the semantics and transformation family; a bespoke proof for one migrated program does not suffice.",
+   "set_by": "Atlas; provisional demonstration test because no external test covering this combination was found.",
+   "set_by_kind": "atlas",
+   "threshold_quote": null,
+   "threshold_ref": null,
+   "basis": "Searches of DARPA V-SPELLS and TRACTOR goals and metrics, verified-compilation definitions, and certified-refactoring literature found no joint completion test for this capability. This test is bounded by declared semantics. The sources provide no agreed numerical cutoff for transformation breadth, recurring proof cost, or adoption effort.",
+   "refs": [
+    2,
+    3,
+    4
+   ],
+   "threshold_checked": null
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "An executable refactoring is derived from a machine-checked preservation theorem.",
+    "criterion": "For every program satisfying a refactoring rule’s preconditions, its output is behaviorally equivalent to its input; the executable refactoring is generated from a machine-checked correctness theory. Sultana and Thompson’s 2008 prototype generated Haskell code for one refactoring over PCF, a typed functional calculus extended here with sum and unit types.",
+    "set_by": "Certified-programming convention, instantiated by Sultana and Thompson in A Certified Refactoring Engine, Sections 11.1–11.4; the demonstrated language is restricted.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "Software produced in this manner – that is, generated from a machine-checked theory proving its correctness – is said to be certified",
+    "threshold_ref": 5,
+    "refs": [
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m2",
+    "title": "An optimizing compiler has a machine-checked preservation theorem for its composed passes.",
+    "criterion": "The compiler’s composed passes have a machine-checked preservation theorem under explicit source and target semantics. CompCert version 3.18, dated 31 August 2026, supplies this for its C subset through assembly generation. Its relation permits reducing source nondeterminism and replacing undefined behavior; it does not require equality of all source and target behavior sets.",
+    "set_by": "Verified-compilation convention, instantiated by Inria and AbsInt’s CompCert development and explained in AbsInt’s The structure of CompCert.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "The property that is formally verified is semantic preservation between the input code and output code of every pass.",
+    "threshold_ref": 7,
+    "refs": [
+     6,
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "A formally verified validator accepts the result of an untrusted program transformation.",
+    "criterion": "A validator has a machine-checked theorem that accepting a source/target pair implies the declared preservation relation; an accepted transformation instantiates that theorem. Tristan and Leroy’s 2009 Coq-verified validator establishes this for lazy code motion, an optimization that can move computations across loops.",
+    "set_by": "Verified translation-validation convention, formalized by Leroy in Formal verification of a realistic compiler, Section 2.2, equation 7.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "∀S, C, Validate(S, C) = true =⇒ S ≈ C",
+    "threshold_ref": 4,
+    "refs": [
+     4,
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "A migrated legacy program’s preservation and companion correctness proofs pass an independent kernel.",
+    "criterion": "A migrated program’s preservation theorem and companion safety/termination theorem pass the proof assistant’s kernel under explicit assumptions. A November 2026 preprint reports 16 certified translations of 8 CardDemo COBOL batch programs, totaling 2,878 source lines, into Rust and Java. The front ends, semantics, statement generator and Aeneas extraction remain trusted; file opens are assumed to succeed. Proof construction required program-specific work. The report is not peer reviewed.",
+    "set_by": "Mechanized-verification convention of kernel-checked proofs; Tomar’s Sections 2–5 instantiate the certification test for COBOL batch-program migrations.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "We call a translation certified when its migration theorem and its composite theorem are proved",
+    "threshold_ref": 9,
+    "refs": [
+     9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "A deployed system’s complete modernization has an independently checked preservation proof.",
+    "criterion": "A proof accepted by an independent checker relates a deployed system’s complete refactored or migrated implementation to its original, including modeled external interfaces. Per-system proof engineering is allowed. The cited examples are narrower: the COBOL report certifies selected batch-program migrations; Scylla’s 2026 C-to-Rust paper reports case studies but explicitly lacks formal guarantees of translation correctness.",
+    "set_by": "Atlas; no external whole-system modernization stage with this proof requirement was found. This is the precursor to completion, allowing bespoke proof construction.",
+    "set_by_kind": "atlas",
+    "threshold_quote": null,
+    "threshold_ref": null,
+    "refs": [
+     2,
+     9,
+     10
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No external completion test jointly specifying deployed-system modernization, automatic preservation proofs and independent certificate checking was found.",
+   "No external milestone test for complete deployed-system modernization with bespoke preservation proofs was found.",
+   "No agreed numerical thresholds for supported transformation breadth, recurring proof cost or preparation effort were found.",
+   "The Zenodo landing page for the November 2026 modernization preprint could not be opened; its author-hosted paper was accessible."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "journal",
+    "url": "https://www.flux.utah.edu/paper/yang-pldi11",
+    "doi": "10.1145/1993498.1993532",
+    "title": "Finding and Understanding Bugs in C Compilers",
+    "authors": "Yang X, Chen Y, Eide E, Regehr J",
+    "container": "Proceedings of the 32nd ACM SIGPLAN Conference on Programming Language Design and Implementation",
+    "year": "2011",
+    "volume": null,
+    "issue": null,
+    "pages": "283-294",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "report",
+    "url": "https://imlive.s3.amazonaws.com/Federal%20Government/ID295011957732437144315448100587755673337/HR001120S0058-Amendment-02.pdf",
+    "doi": null,
+    "title": "Broad Agency Announcement: Verified Security and Performance Enhancement of Large Legacy Software (V-SPELLS)",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "DARPA",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 3,
+    "kind": "report",
+    "url": "https://govtribe.com/file/government-file/darpa-ps-24-20-dot-pdf",
+    "doi": null,
+    "title": "Program Solicitation: Translating All C TO Rust (TRACTOR)",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "DARPA; document text hosted by GovTribe",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "journal",
+    "url": "https://xavierleroy.org/publi/compcert-CACM.pdf",
+    "doi": "10.1145/1538788.1538814",
+    "title": "Formal verification of a realistic compiler",
+    "authors": "Leroy X",
+    "container": "Commun. ACM",
+    "year": "2009",
+    "volume": "52",
+    "issue": "7",
+    "pages": "107-115",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 5,
+    "kind": "report",
+    "url": "https://www.cs.kent.ac.uk/pubs/2008/2778/content.pdf",
+    "doi": null,
+    "title": "A Certified Refactoring Engine",
+    "authors": "Sultana N, Thompson S.",
+    "container": "Draft Proceedings of the Ninth Symposium on Trends in Functional Programming",
+    "year": "2008",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 6,
+    "kind": "web",
+    "url": "https://compcert.org/doc/index.html",
+    "doi": null,
+    "title": "The CompCert verified compiler",
+    "authors": "Inria; AbsInt Angewandte Informatik GmbH",
+    "container": "CompCert",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 7,
+    "kind": "web",
+    "url": "https://www.absint.com/compcert/structure.htm",
+    "doi": null,
+    "title": "The structure of CompCert",
+    "authors": "AbsInt Angewandte Informatik GmbH",
+    "container": "AbsInt",
+    "year": "undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 8,
+    "kind": "journal",
+    "url": "https://xavierleroy.org/publi/validation-LCM.pdf",
+    "doi": "10.1145/1542476.1542512",
+    "title": "Verified Validation of Lazy Code Motion",
+    "authors": "Tristan JB, Leroy X",
+    "container": "Proceedings of the 30th ACM SIGPLAN Conference on Programming Language Design and Implementation",
+    "year": "2009",
+    "volume": null,
+    "issue": null,
+    "pages": "316-326",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 9,
+    "kind": "preprint",
+    "url": "https://www.mefyi.com/papers/proof-carrying-modernization/proof-carrying-modernization.pdf",
+    "doi": "10.5281/zenodo.23996134",
+    "title": "Proof-Carrying Modernization: LLM Translations of COBOL Batch Programs, Each Proved Against the Original in Lean",
+    "authors": "Tomar TS.",
+    "container": "Author-hosted preprint",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 10,
+    "kind": "journal",
+    "url": "https://arxiv.org/html/2412.15042v2",
+    "doi": "10.1145/3798229",
+    "title": "Scylla: Translating an Applicative Subset of C to Safe Rust",
+    "authors": "Fromherz A, Protzenko J",
+    "container": "Proc. ACM Program. Lang.",
+    "year": "2026",
+    "volume": "10",
+    "issue": "OOPSLA1",
+    "pages": "823-849",
+    "citation_source": "crossref"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4",
+   "m5"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-15",
+  "log": [
+   {
+    "date": "2026-11-15",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 4 from Crossref, 0 from PubMed, 0 from arXiv, 6 as the model gave them."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 5 found, 0 not found, 1 with no readable copy."
+   }
+  ]
  }
 }
