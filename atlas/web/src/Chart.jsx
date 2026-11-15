@@ -72,7 +72,32 @@ const meets = (a, b) => !(a.x >= b.x + b.w || b.x >= a.x + a.w || a.y >= b.y + b
 
 // ---------- The sky's structure: frame, graticule, region boundaries and names ----------
 
-const Graticule = memo(function Graticule({ world, regions, fine, bare, names }) {
+// Each region is a click target behind its constellations: a click on its open sky (or its
+// name) zooms to the region; a click on a constellation still goes to that field.
+const RegionTargets = memo(function RegionTargets({ regions, focusRegion, onFocusRegion }) {
+  return (
+    <g className="sky-region-hits">
+      {regions.map((r) => (
+        <rect
+          key={r.name}
+          x={r.x}
+          y={r.y}
+          width={r.w}
+          height={r.h}
+          className={'sky-region-hit' + (focusRegion === r.name ? ' focus' : '')}
+          onClick={(e) => {
+            e.stopPropagation();
+            onFocusRegion(r.name);
+          }}
+        >
+          <title>{`${r.name}: zoom in`}</title>
+        </rect>
+      ))}
+    </g>
+  );
+});
+
+const Graticule = memo(function Graticule({ world, regions, fine, bare, names, focusRegion, onFocusRegion }) {
   const { frame, unit } = world;
   const x1 = world.w - frame;
   const y1 = world.h - frame;
@@ -114,15 +139,42 @@ const Graticule = memo(function Graticule({ world, regions, fine, bare, names })
     if (row > 0) bounds += `M${frame} ${mine[0].y.toFixed(1)}H${x1}`;
   }
   return (
-    <g className="sky-structure" aria-hidden="true">
-      <g className="sky-grid">{lines}</g>
-      <path d={bounds} className="sky-bounds" />
-      <rect x={frame} y={frame} width={x1 - frame} height={y1 - frame} className="sky-frame" />
-      {!fine && <g className="sky-ticks">{ticks}</g>}
+    <g className="sky-structure">
+      <g aria-hidden="true">
+        <g className="sky-grid">{lines}</g>
+        <path d={bounds} className="sky-bounds" />
+        <rect x={frame} y={frame} width={x1 - frame} height={y1 - frame} className="sky-frame" />
+        {!fine && <g className="sky-ticks">{ticks}</g>}
+      </g>
       {names && (
-        <g className="sky-regions">
+        <g className="sky-regions" aria-hidden={onFocusRegion ? undefined : 'true'}>
           {regions.map((r) => (
-            <g key={r.name} transform={`translate(${r.label.x.toFixed(1)} ${r.label.y.toFixed(1)})`}>
+            <g
+              key={r.name}
+              transform={`translate(${r.label.x.toFixed(1)} ${r.label.y.toFixed(1)})`}
+              className={'sky-region-name' + (focusRegion === r.name ? ' focus' : '')}
+              role={onFocusRegion ? 'button' : undefined}
+              tabIndex={onFocusRegion ? 0 : undefined}
+              aria-label={onFocusRegion ? `${r.name}: zoom in` : undefined}
+              onClick={
+                onFocusRegion
+                  ? (e) => {
+                      e.stopPropagation();
+                      onFocusRegion(r.name);
+                    }
+                  : undefined
+              }
+              onKeyDown={
+                onFocusRegion
+                  ? (e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        onFocusRegion(r.name);
+                      }
+                    }
+                  : undefined
+              }
+            >
               <g className="sky-label-scale">
                 <text style={{ fontSize: REGION_TYPE.size }}>
                   {r.label.lines.map((w, n) => (
@@ -423,11 +475,13 @@ export default function Chart({
   atlas,
   interactive = false,
   focusField = null,
+  focusRegion = null,
   selected = null,
   highlight = null,
   highlightField = null,
   onSelect = () => {},
   onFocusField = () => {},
+  onFocusRegion = null,
   onHover = () => {},
   intro = false,
   inset = { right: 0 },
@@ -563,9 +617,14 @@ export default function Chart({
     if (focusField && sky.figures[focusField]) {
       return fitBox(sky.figures[focusField].box, w, size.h - insetTop - insetBottom, Math.max(pad, 120), whole.k, 6.4);
     }
+    const region = focusRegion && sky.regions.find((r) => r.name === focusRegion);
+    if (region) {
+      // A region fills the view, its constellations large enough to read and pick.
+      return fitBox(region, w, size.h - insetTop - insetBottom, Math.max(pad, 40), whole.k, 4.2);
+    }
     return whole;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [atlas, sky, size, whole, focusField, selected, insetRight, pad]);
+  }, [atlas, sky, size, whole, focusField, focusRegion, selected, insetRight, pad]);
 
   const lastSize = useRef(null);
   useLayoutEffect(() => {
@@ -654,7 +713,8 @@ export default function Chart({
   const reset = () => {
     onSelect(null);
     onFocusField(null);
-    if (!selected && !focusField && whole) {
+    onFocusRegion?.(null);
+    if (!selected && !focusField && !focusRegion && whole) {
       glide.current?.stop();
       const from = { ...view.current };
       glide.current = animate(0, 1, {
@@ -726,6 +786,7 @@ export default function Chart({
     else if (e.key === 'Escape') {
       if (selected) onSelect(null);
       else if (focusField) onFocusField(null);
+      else if (focusRegion) onFocusRegion?.(null);
     }
   };
 
@@ -881,16 +942,33 @@ export default function Chart({
             className={
               'sky-world lod-' +
               lod +
-              (focusField ? ' focused' : '') +
+              (focusField ? ' focused' : focusRegion ? ' region-focused' : '') +
               (active ? ' has-active' : '') +
               (introOn && !still ? ' intro' : '')
             }
           >
-            <Graticule world={world} regions={sky.regions} fine={lod >= 1} bare={bare} names={names} />
+            <Graticule
+              world={world}
+              regions={sky.regions}
+              fine={lod >= 1}
+              bare={bare}
+              names={names}
+              focusRegion={focusField ? null : focusRegion}
+              onFocusRegion={interactive ? onFocusRegion : null}
+            />
+            {interactive && onFocusRegion && !focusField && (
+              <RegionTargets regions={sky.regions} focusRegion={focusRegion} onFocusRegion={onFocusRegion} />
+            )}
             {fields.map((f) => {
               const fig = sky.figures[f.id];
               const state =
-                focusField === f.id ? 'focus' : focusField ? 'dim' : liftField === f.id ? 'hover' : 'rest';
+                focusField === f.id
+                  ? 'focus'
+                  : focusField || (focusRegion && f.region !== focusRegion)
+                    ? 'dim'
+                    : liftField === f.id
+                      ? 'hover'
+                      : 'rest';
               return (
                 <Constellation
                   key={f.id}

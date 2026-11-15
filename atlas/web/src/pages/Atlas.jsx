@@ -40,7 +40,7 @@ function Arrow({ back = false }) {
 
 // ---------- Lists ----------
 
-function FieldList({ atlas, regions, filter, onPick, onHover }) {
+function FieldList({ atlas, regions, filter, onPick, onHover, onRegion }) {
   const q = filter.trim().toLowerCase();
   const match = (f) => !q || f.name.toLowerCase().includes(q) || f.id.toLowerCase().includes(q);
   const shown = regions.map((r) => ({ ...r, fields: r.fields.filter(match) })).filter((r) => r.fields.length);
@@ -49,7 +49,13 @@ function FieldList({ atlas, regions, filter, onPick, onHover }) {
       {shown.map((r) => (
         <section key={r.name} aria-label={r.name}>
           <h2 className="sa-region-head">
-            {r.name}
+            {onRegion ? (
+              <button type="button" onClick={() => onRegion(r.name)} title={`Zoom to ${r.name}`}>
+                {r.name}
+              </button>
+            ) : (
+              r.name
+            )}
             <span className="mono">{r.fields.length}</span>
           </h2>
           <ul className="sa-fields">
@@ -251,15 +257,23 @@ function Legend() {
 
 // ---------- Desktop ----------
 
-function DesktopAtlas({ atlas, field, star, setParams }) {
+function DesktopAtlas({ atlas, field, region, star, setParams }) {
   const [filter, setFilter] = useState('');
   const [highlight, setHighlight] = useState(null);
   const [highlightField, setHighlightField] = useState(null);
   const regions = useRegions(atlas);
   const f = field && atlas.field[field];
+  // The region in view: a field's own region when a field is open.
+  const inRegion = f ? f.region : region;
+  const r = inRegion && regions.find((x) => x.name === inRegion);
   const pick = (id) => {
     setHighlightField(null);
-    setParams(id ? { field: id } : {});
+    // Stepping back from a field goes to its region, not the whole sky.
+    setParams(id ? { field: id } : f ? { region: f.region } : {});
+  };
+  const zoomRegion = (name) => {
+    setHighlightField(null);
+    setParams(name ? { region: name } : {});
   };
   const select = (id) => {
     if (!id) return setParams(field ? { field } : {});
@@ -282,7 +296,7 @@ function DesktopAtlas({ atlas, field, star, setParams }) {
             >
               <button type="button" className="sa-back" onClick={() => pick(null)}>
                 <Arrow back />
-                All constellations
+                {f.region}
               </button>
               <div className="sa-rail-field">
                 <FieldEmblem field={f} atlas={atlas} size={46} />
@@ -302,6 +316,27 @@ function DesktopAtlas({ atlas, field, star, setParams }) {
                 <Arrow />
               </Link>
               <BreakthroughList atlas={atlas} field={f} selected={star} onSelect={select} onHighlight={setHighlight} />
+            </motion.div>
+          ) : r ? (
+            <motion.div
+              key={'region:' + r.name}
+              className="sa-rail-inner"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+            >
+              <button type="button" className="sa-back" onClick={() => zoomRegion(null)}>
+                <Arrow back />
+                All regions
+              </button>
+              <p className="eyebrow">Region</p>
+              <h1>{r.name}</h1>
+              <p className="sa-rail-meta">
+                {r.fields.reduce((n, x) => n + x.items.length, 0)} breakthroughs in {r.fields.length}{' '}
+                constellations. Pick one to see its breakthroughs.
+              </p>
+              <FieldList atlas={atlas} regions={[r]} filter="" onPick={pick} onHover={setHighlightField} />
             </motion.div>
           ) : (
             <motion.div
@@ -343,7 +378,14 @@ function DesktopAtlas({ atlas, field, star, setParams }) {
                   placeholder="Filter constellations"
                 />
               </label>
-              <FieldList atlas={atlas} regions={regions} filter={filter} onPick={pick} onHover={setHighlightField} />
+              <FieldList
+                atlas={atlas}
+                regions={regions}
+                filter={filter}
+                onPick={pick}
+                onHover={setHighlightField}
+                onRegion={zoomRegion}
+              />
             </motion.div>
           )}
         </AnimatePresence>
@@ -355,6 +397,8 @@ function DesktopAtlas({ atlas, field, star, setParams }) {
           interactive
           intro
           focusField={field}
+          focusRegion={field ? null : region}
+          onFocusRegion={zoomRegion}
           selected={star}
           highlight={highlight}
           highlightField={highlightField}
@@ -364,9 +408,17 @@ function DesktopAtlas({ atlas, field, star, setParams }) {
           pad={10}
         />
         <nav className="sa-crumb" aria-label="Chart position">
-          <button type="button" onClick={() => pick(null)}>
+          <button type="button" onClick={() => zoomRegion(null)}>
             Sky
           </button>
+          {r && (
+            <>
+              <span aria-hidden="true">/</span>
+              <button type="button" onClick={() => zoomRegion(r.name)}>
+                {r.name}
+              </button>
+            </>
+          )}
           {f && (
             <>
               <span aria-hidden="true">/</span>
@@ -433,11 +485,16 @@ export default function Atlas() {
   const [params, setParams] = useSearchParams();
   const narrow = useNarrow();
   const field = params.get('field');
+  const region = params.get('region');
   const star = params.get('star');
   useEffect(() => {
     const f = field && atlas?.field[field];
-    document.title = f ? `${f.name} · Technology Atlas` : 'The atlas · Technology Atlas';
-  }, [atlas, field]);
+    document.title = f
+      ? `${f.name} · Technology Atlas`
+      : region
+        ? `${region} · Technology Atlas`
+        : 'The atlas · Technology Atlas';
+  }, [atlas, field, region]);
   useEffect(() => {
     if (narrow) window.scrollTo(0, 0);
   }, [narrow, field]);
@@ -450,6 +507,7 @@ export default function Atlas() {
     <DesktopAtlas
       atlas={atlas}
       field={atlas.field[field] ? field : null}
+      region={atlas.fields.some((x) => x.region === region) ? region : null}
       star={atlas.items[star] ? star : null}
       setParams={set}
     />
