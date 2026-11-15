@@ -245,7 +245,8 @@
   "format": "gpt-6.1-terra",
   "review": "gpt-6.1-sol",
   "rewrite": "gpt-6.1-sol",
-  "brief": "gpt-6.1-sol"
+  "brief": "gpt-6.1-sol",
+  "page": "gpt-6.1-sol"
  },
  "brief": {
   "title": "Running untrusted software with limits on data leaks",
@@ -338,5 +339,438 @@
    "The cost of controlling hidden communication across useful workloads, and the hardware assumptions required, remain open."
   ],
   "prompt": "5e97d4b8dfc3"
+ },
+ "page": {
+  "id": "SWE-07",
+  "title": "Confinement of untrusted programs",
+  "definition": "An execution environment prevents untrusted programs from releasing information contrary to a specified policy. Its guarantee covers storage and covert timing channels—communication through execution timing or shared hardware—under an explicit hardware/software model.",
+  "goal": {
+   "need": "A 2019 seL4 experiment found an estimated 395 bits/s shared-kernel channel despite application-memory partitioning. Kernel cloning pushed measured leakage below the tool's resolution. Confinement must address kernel and hardware effects alongside application memory; undetected leakage is not proved absence.",
+   "need_refs": [
+    1
+   ],
+   "figures": {
+    "caption": "Measured shared-kernel timing channel on x86 in the 2019 seL4 experiment.",
+    "columns": [
+     "Configuration",
+     "Mutual information (bits/input)",
+     "Samples"
+    ],
+    "rows": [
+     [
+      "User-space colouring only",
+      "0.79",
+      "255,790"
+     ],
+     [
+      "Full time protection",
+      "0.0006",
+      "255,040"
+     ]
+    ],
+    "note": "Mutual information estimates information revealed per input symbol. The protected measurement is below the tool's approximately 0.001-bit resolution; it does not establish zero capacity.",
+    "ref": 1
+   },
+   "statements": [
+    {
+     "body": "Xerox Palo Alto Research Center, Butler W. Lampson",
+     "year": "1973",
+     "quote": "We want to be able to confine an arbitrary program.",
+     "context": "Lampson's research formulation permits confinement to stop programs whose behaviour requires forbidden communication.",
+     "ref": 2,
+     "checked": true
+    },
+    {
+     "body": "UNSW Sydney Trustworthy Systems, seL4 developer",
+     "year": "n.d.",
+     "quote": "Design, implementation, evaluation and verification of black-box OS abstractions and mechanisms for time protection: the prevention of timing channels.",
+     "context": null,
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "PISTIs-V project, UNSW Sydney Trustworthy Systems",
+     "year": "n.d.",
+     "quote": "It aims to develop a reference system with proofs of strong safety and security properties covering hardware and software and their interaction.",
+     "context": "PISTIs-V is funded through the German Cyberagentur's ÖvIT programme and targets embedded and cyber-physical systems.",
+     "ref": 4,
+     "checked": true
+    },
+    {
+     "body": "National Institute of Standards and Technology",
+     "year": "2020",
+     "quote": "Reduce the maximum bandwidth for identified covert [Selection (one or more): storage; timing] channels to [Assignment: organization-defined values].",
+     "context": "Control SC-31(2) specifies organisation-selected leakage limits rather than a universal acceptable bandwidth.",
+     "ref": 5,
+     "checked": false
+    }
+   ]
+  },
+  "completion": {
+   "title": "A reference system proves confinement of untrusted programs, including microarchitectural timing channels.",
+   "criterion": "An implemented reference system proves that untrusted programs cannot disclose protected information contrary to its security policy, including through microarchitectural timing channels. The confinement argument spans the OS, critical drivers, relevant device hardware and processor mechanisms, with explicit hardware/software assumptions. The system supplies the embedded-system OS services specified by PISTIs-V. The guarantee applies to supported programs on the specified platform; policy-authorised releases remain allowed.",
+   "set_by": "German Cyberagentur, ÖvIT programme, PISTIs-V project description; detailed project goals published by UNSW Trustworthy Systems. The published target concerns a LionsOS/RISC-V embedded reference system.",
+   "set_by_kind": "government_programme",
+   "threshold_quote": "Die verifizierten Eigenschaften von LionsOS beinhalten den Beweis, dass nicht vertrauenswürdige Komponenten eingeschränkt werden. Dadurch werden keine geschützten Informationen preisgegeben, auch nicht durch mikroarchitektonische Timing-Kanäle.",
+   "threshold_ref": 6,
+   "basis": "PISTIs-V joins confinement, timing-channel prevention and verified hardware/software integration in an operating-system reference system. This supplies an external test for the core capability. Its scope is embedded systems; it defines no general-program workload suite, acceptable slowdown or nonzero leakage allowance. Lampson supplies the general confinement formulation; NIST leaves permitted channel bandwidths to each organisation.",
+   "refs": [
+    6,
+    4,
+    2,
+    5
+   ],
+   "threshold_checked": true
+  },
+  "case_label": null,
+  "cases": [],
+  "milestone_structure": "parallel",
+  "milestones": [
+   {
+    "id": "m1",
+    "title": "A kernel's C implementation proves nonleakage for its storage channels.",
+    "criterion": "Prove Murray and colleagues' nonleakage theorem: partition observations depend only on authorised sources and the scheduler, given initial kernel invariants, a consistent well-formed policy, safe cross-partition capabilities and only timer interrupts. In 2013 this was machine-checked for 8,830 lines of seL4 C code, assuming correct compiler, assembly, hardware and boot code. The theorem covers storage channels and logical time; fine-grained hardware timing is outside its model.",
+    "set_by": "Information-flow verification convention: a machine-checked noninterference theorem. The specific test is Murray and colleagues' 2013 seL4 Theorem 2, published for the stated seL4 configuration.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "Theorem 2: seL4’s C implementation enforces information flow security.",
+    "threshold_ref": 7,
+    "refs": [
+     7,
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m2",
+    "title": "A tested timing channel passes the published 95% zero-leakage test or falls below 1 millibit.",
+    "criterion": "For a tested channel, estimate mutual information M in bits per input. Below 0.001 bit, Ge and colleagues' tool cannot resolve leakage. Otherwise compare M with M0, the 95% zero-leakage limit obtained from 100 shuffled datasets; M ≤ M0 gives no evidence of leakage. Their 2019 experiment passes for individual channels but retains a detectable Haswell L2 channel. This is a per-channel experimental result, not an aggregate leakage bound.",
+    "set_by": "Ge and colleagues, published experimental protocol in Time Protection: The Missing OS Abstraction, Sections 5.1 and 5.3. The detection criterion belongs to this experiment.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "Otherwise we conclude that the dataset does not contain evidence of an information leak.",
+    "threshold_ref": 1,
+    "refs": [
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "An OS model proves time protection while allowing specified communication.",
+    "criterion": "Prove observer-relative confidentiality for every user domain over a model including observable time, flushable and partitioned microarchitectural state, interrupts and permitted communication. Sison and colleagues' FM 2023 Theorem 1 establishes this in Isabelle/HOL for a generic OS model, including an instantiation with two system calls for one-way messaging. It establishes the model-level property under its hardware and OS assumptions.",
+    "set_by": "Formal-verification convention: a machine-checked security theorem. The specific property is Sison and colleagues' observer-relative confidentiality definition and Theorem 1, peer reviewed at FM 2023.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "Theorem 1 (OS model enforces confidentiality with time protection).",
+    "threshold_ref": 9,
+    "refs": [
+     9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "A kernel's C implementation proves time protection, including permitted cross-domain communication.",
+    "criterion": "Complete the developer's roadmap tasks 2B and 2C, carrying time protection through refinement to C code, and task 2D, preserving it across permitted cross-domain communication. Retain the stated hardware contract. Sison's seL4 Summit 2026 abstract reports implementation and evaluation of shared-memory and notification mechanisms and describes their formal verification as continuing work. The conference talk is not a peer-reviewed implementation proof.",
+    "set_by": "UNSW Trustworthy Systems, seL4 verification roadmap tasks 2B–2D, published in 2024; time-protection verification is an activity of the government-funded PISTIs-V project.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "2C Verify for C implementation",
+    "threshold_ref": 10,
+    "refs": [
+     10,
+     4,
+     11
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "Device hardware refines the formal interface used to verify its driver.",
+    "criterion": "Prove that a device implementation refines its formal interface model, then verify its driver against that interface. This combines PISTIs-V's driver/hardware objective with its published device-refinement test. Murphy and colleagues' 2025 paper demonstrates the specification approach on one I2C controller. Tyler and colleagues' 2026 paper verifies one Pancake Ethernet driver under encoded device and OS interfaces. These establish separate component results.",
+    "set_by": "PISTIs-V project goals 2–3 and UNSW Trustworthy Systems' Formalisation of Device Interfaces project, Solution section.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "the implementation refines the specification.",
+    "threshold_ref": 12,
+    "refs": [
+     4,
+     12,
+     13,
+     14
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m6",
+    "title": "Composing OS-service proofs establishes a system-wide information-flow property.",
+    "criterion": "Derive an assembled OS's global information-flow property from local proofs of its services and communication protocols, with kernel and hardware contracts explicit. This instantiates the developer's compositional-verification objective and roadmap task 1E for confidentiality. It precedes completion because the reference system must also establish the relevant kernel, device and timing-protection contracts for its implementation. The project describes its proof approach as work in progress.",
+    "set_by": "UNSW Trustworthy Systems, Compositional Proof Methods project Aim and verification roadmap task 1E; a PISTIs-V activity published for component-based OSes including LionsOS.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "Scalable verification of global safety and security guarantees for component-based OSes by composing local per-component proof efforts.",
+    "threshold_ref": 15,
+    "refs": [
+     15,
+     10,
+     4
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   }
+  ],
+  "measures": [],
+  "not_found": [
+   "No external general-workload slowdown limit or universal aggregate covert-leakage budget was found in the standards, programme descriptions and prize searches.",
+   "No completed published hardware/software confinement proof meeting the integrated PISTIs-V target was located.",
+   "The supplied IEEE Computer Society page yielded no readable article text for the attributed CHERI/Morello study."
+  ],
+  "references": [
+   {
+    "id": 1,
+    "kind": "book",
+    "url": "https://www.sel4.systems/Research/pdfs/time-protection-missing-os-abstraction.pdf",
+    "doi": "10.1145/3302424.3303976",
+    "title": "Time Protection: The Missing OS Abstraction",
+    "authors": "Ge Q, Yarom Y, Chothia T, Heiser G",
+    "container": "Proceedings of the Fourteenth EuroSys Conference 2019",
+    "year": "2019",
+    "volume": null,
+    "issue": null,
+    "pages": "1-17",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 2,
+    "kind": "journal",
+    "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
+    "doi": "10.1145/362375.362389",
+    "title": "A Note on the Confinement Problem",
+    "authors": "Lampson BW",
+    "container": "Commun. ACM",
+    "year": "1973",
+    "volume": "16",
+    "issue": "10",
+    "pages": "613-615",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 3,
+    "kind": "web",
+    "url": "https://trustworthy.systems/projects/timeprotection/home.pml",
+    "doi": null,
+    "title": "Time Protection",
+    "authors": "UNSW Sydney Trustworthy Systems.",
+    "container": "Trustworthy Systems",
+    "year": "n.d.",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 4,
+    "kind": "web",
+    "url": "https://trustworthy.systems/projects/PISTIs-V/",
+    "doi": null,
+    "title": "PISTIs-V: Protected Integrity and Security of Transmissions Integrating seL4 and RISC-V",
+    "authors": "UNSW Sydney Trustworthy Systems.",
+    "container": "Trustworthy Systems",
+    "year": "n.d.",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 5,
+    "kind": "report",
+    "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf",
+    "doi": "10.6028/NIST.SP.800-53r5",
+    "title": "Security and Privacy Controls for Information Systems and Organizations",
+    "authors": "Joint Task Force Interagency Working Group",
+    "container": "National Institute of Standards and Technology",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 6,
+    "kind": "web",
+    "url": "https://www.cyberagentur.de/programme/oevit/",
+    "doi": null,
+    "title": "Ökosystem Vertrauenswürdige IT – Beweisbare Cybersicherheit (ÖvIT)",
+    "authors": "Cyberagentur.",
+    "container": "Cyberagentur",
+    "year": "n.d.",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 7,
+    "kind": "book",
+    "url": "https://sel4.systems/Research/pdfs/sel4-from-general-purpose-to-proof-information-flow-enforcement.pdf",
+    "doi": "10.1109/SP.2013.35",
+    "title": "seL4: from General Purpose to a Proof of Information Flow Enforcement",
+    "authors": "Murray T, Matichuk D, Brassil M, Gammie P, Bourke T, Seefried S, et al.",
+    "container": "2013 IEEE Symposium on Security and Privacy",
+    "year": "2013",
+    "volume": null,
+    "issue": null,
+    "pages": "415-429",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 8,
+    "kind": "web",
+    "url": "https://sel4.systems/Verification/assumptions.html",
+    "doi": null,
+    "title": "What the Proofs Assume",
+    "authors": "seL4 Foundation.",
+    "container": "seL4",
+    "year": "n.d.",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 9,
+    "kind": "book",
+    "url": "https://trustworthy.systems/publications/papers/Sison_BMKH_23.pdf",
+    "doi": "10.1007/978-3-031-27481-7_8",
+    "title": "Formalising the Prevention of Microarchitectural Timing Channels by Operating Systems",
+    "authors": "Sison R, Buckley S, Murray T, Klein G, Heiser G",
+    "container": "Lecture Notes in Computer Science",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": "103-121",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 10,
+    "kind": "report",
+    "url": "https://sel4.systems/Summit/2024/slides/verification-status.pdf",
+    "doi": null,
+    "title": "Verification Status of Time Protection and Microkit-based OS Services",
+    "authors": "Sison R.",
+    "container": "seL4 Summit 2024",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 11,
+    "kind": "web",
+    "url": "https://sel4.org/Summit/2026/abstracts2026.html",
+    "doi": null,
+    "title": "seL4 Summit 2026 Abstracts",
+    "authors": "seL4 Foundation.",
+    "container": "seL4",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 12,
+    "kind": "web",
+    "url": "https://trustworthy.systems/projects/deviceformalisation",
+    "doi": null,
+    "title": "Formalisation of Device Interfaces",
+    "authors": "UNSW Sydney Trustworthy Systems.",
+    "container": "Trustworthy Systems",
+    "year": "n.d.",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 13,
+    "kind": "book",
+    "url": "https://trustworthy.systems/publications/papers/Murphy_RRGTPTH_25.abstract",
+    "doi": "10.1145/3764860.3768335",
+    "title": "High-fidelity specification of real-world devices",
+    "authors": "Murphy L, Rizaldi A, Rossouw L, George C, Treloar J, Pearce H, et al.",
+    "container": "Proceedings of the 13th Workshop on Programming Languages and Operating Systems",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": "60-67",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 14,
+    "kind": "book",
+    "url": "https://trustworthy.systems/publications/papers/Tyler_LZSWTH_26.pdf",
+    "doi": "10.1145/3831586.3838153",
+    "title": "SMT-based Deductive Verification of Device Drivers using the Pancake-to-Viper Transpiler",
+    "authors": "Tyler S, Legnani A, Zhao J, Shen Z, Wu R, Tanaka M, et al.",
+    "container": "Proceedings of the 14th Workshop on Programming Languages and Operating Systems",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": "103-111",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 15,
+    "kind": "web",
+    "url": "https://trustworthy.systems/projects/compositionality/",
+    "doi": null,
+    "title": "Compositional Proof Methods",
+    "authors": "UNSW Sydney Trustworthy Systems.",
+    "container": "Trustworthy Systems",
+    "year": "n.d.",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   }
+  ],
+  "milestone_order": [
+   "m1",
+   "m2",
+   "m3",
+   "m4",
+   "m5",
+   "m6"
+  ],
+  "results": [],
+  "judged": [],
+  "version": 1,
+  "accessed": "2026-11-15",
+  "log": [
+   {
+    "date": "2026-11-15",
+    "actor": "gpt-6.1-sol",
+    "action": "Wrote the base definition from web research (1 attempt(s))."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 7 from Crossref, 0 from PubMed, 0 from arXiv, 8 as the model gave them."
+   },
+   {
+    "date": "2026-11-15",
+    "actor": "atlas.page",
+    "action": "Checked goal statements and threshold quotations against saved copies: 9 found, 1 not found, 1 with no readable copy."
+   }
+  ]
  }
 }
