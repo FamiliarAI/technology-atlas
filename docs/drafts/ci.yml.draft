@@ -1,0 +1,79 @@
+# Draft, November 16, 2026. Inactive: it lives outside .github/workflows on purpose.
+# To activate: copy to .github/workflows/ci.yml, pin trufflehog to a release tag (or commit SHA),
+# push on a branch and watch with `gh run watch`. See docs/runbooks/Publishing_Runbook.md, section 4.
+# No job needs a secret: the tests use temporary data, stub every model call and mock git.
+
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install 'ruff==0.11.13'
+      - run: ruff format --check atlas ingestion
+
+  atlas-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      # atlas is standard-library only; the ingestion requirements cover modules it imports in tests.
+      - run: python -m pip install -r ingestion/requirements.txt
+      - run: python3 -m unittest discover -s atlas/tests -v
+      - run: python3 -m atlas.core check
+
+  ingestion-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r ingestion/requirements.txt
+      - run: python3 -m unittest discover -s ingestion/tests -v
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: atlas/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: atlas/web/package-lock.json
+      - run: npm ci
+      - run: npm run build
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # Scans the commits in the push or pull request. Pin to a release tag before activating:
+      # https://github.com/trufflesecurity/trufflehog/releases
+      # (gitleaks/gitleaks-action needs a paid license for organization repositories.)
+      - uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --results=verified,unknown
