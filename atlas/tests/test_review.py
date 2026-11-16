@@ -163,6 +163,20 @@ class AutomaticTests(ReviewTests):
         again = review.automatic(core.load(self.core), core=self.core)
         self.assertEqual(again, {'published': [], 'merged': [], 'repointed': []})
 
+    def test_pages_kept_apart_are_never_merged(self):
+        data = core.load(self.core)
+        stronger = data['breakthroughs']['NRL-02']
+        stronger['page']['results_run'] = '2026-11-14'
+        core.write_breakthrough(stronger, self.core)
+        review.decide('NRL-01', 'published', core=self.core)
+        review.keep_apart(['NRL-01', 'NRL-02'], core=self.core)
+        out = review.automatic(core.load(self.core), core=self.core)
+        self.assertNotIn(('NRL-01', 'NRL-02'), [(a, b) for a, b, _ in out['merged']])
+        self.assertNotIn(('NRL-02', 'NRL-01'), [(a, b) for a, b, _ in out['merged']])
+        items = core.load(self.core)['breakthroughs']
+        self.assertEqual(items['NRL-01']['distinct'], ['NRL-02'])
+        self.assertEqual(core.check(core.load(self.core)), [])
+
 
 class NewBreakthroughTests(ReviewTests):
     def test_a_breakthrough_is_added_with_the_next_id_and_passes_the_check(self):

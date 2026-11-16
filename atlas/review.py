@@ -136,6 +136,24 @@ def confirmed(item):
     return sum(1 for r in (item.get('page') or {}).get('results', []) if r.get('confirmed') is True)
 
 
+def distinct(items, one, other):
+    """Has a person said these two pages are different breakthroughs (record key `distinct`)?"""
+    return other in items[one].get('distinct', []) or one in items[other].get('distinct', [])
+
+
+def keep_apart(identifiers, core=records.CORE):
+    """Mark each page distinct from the others, so automatic review never merges them."""
+    data = records.load(core)
+    for identifier in identifiers:
+        if identifier not in data['breakthroughs']:
+            raise Refused(f'No breakthrough {identifier}')
+    for identifier in identifiers:
+        item = data['breakthroughs'][identifier]
+        others = [other for other in identifiers if other != identifier]
+        item['distinct'] = sorted(set(item.get('distinct', [])) | set(others))
+        records.write_breakthrough(item, core)
+
+
 def automatic(data, claimed=(), core=records.CORE):
     """Publish judged pages and merge duplicates without a person (owner, 2026-11-14).
 
@@ -169,7 +187,11 @@ def automatic(data, claimed=(), core=records.CORE):
     for identifier in pool:
         vector = index.vectors[identifier]
         best = max(
-            ((cosine(vector, index.vectors[other]), other) for other in kept),
+            (
+                (cosine(vector, index.vectors[other]), other)
+                for other in kept
+                if not distinct(items, identifier, other)
+            ),
             default=(0, None),
         )
         if best[0] >= LIKELY:
@@ -217,6 +239,9 @@ def main(argv=None, core=records.CORE):
     clear = steps.add_parser('clear', help='remove the decision (back to draft)')
     clear.add_argument('ids', nargs='+', metavar='ID')
     clear.add_argument('--no-commit', action='store_true')
+    apart = steps.add_parser('distinct', help='mark pages as different breakthroughs')
+    apart.add_argument('ids', nargs='+', metavar='ID')
+    apart.add_argument('--no-commit', action='store_true')
     auto = steps.add_parser('auto', help='publish judged pages, merging duplicates')
     auto.add_argument('--locks', help='folder of claim files (atlas.page); claimed pages wait')
     auto.add_argument('--no-commit', action='store_true')
@@ -244,6 +269,16 @@ def main(argv=None, core=records.CORE):
                     f'Review (automatic): {len(out["published"])} published, '
                     f'{len(out["merged"])} merged as duplicates\n\n{TRAILER}'
                 )
+        return 0
+    if args.step == 'distinct':
+        try:
+            keep_apart(args.ids, core)
+        except Refused as error:
+            print(error)
+            return 1
+        print(f'Kept apart: {", ".join(args.ids)}')
+        if not args.no_commit:
+            records.commit(f'Review: keep {", ".join(args.ids)} apart\n\n{TRAILER}')
         return 0
     if args.step == 'list':
         rows = listing(data, args.state)
