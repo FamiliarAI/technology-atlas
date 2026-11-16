@@ -194,7 +194,7 @@ kill %1
 python3 -m atlas.export atlas/data/public --public --share atlas/data/share-public --base-url https://YOUR_DOMAIN
 ```
 
-Until a custom domain exists, use `https://<project>.pages.dev` as the base URL, and re-export with the final domain later: `og:image` and `og:url` are absolute only with `--base-url`, and link previews on most networks need them absolute.
+Until a custom domain exists, use `https://technology-atlas-icq.pages.dev` as the base URL, and re-export with the final domain later: `og:image` and `og:url` are absolute only with `--base-url`, and link previews on most networks need them absolute.
 
 Checks:
 
@@ -230,8 +230,10 @@ The owner creates the Cloudflare account and logs in; nothing here does it for t
 ```bash
 npx wrangler login                 # wrangler 4.90.0 is installed globally; `wrangler` works too
 npx wrangler whoami
-npx wrangler pages project create technology-atlas --production-branch master
+npx wrangler pages project create technology-atlas --production-branch master --force
 ```
+
+Done on November 16, 2026: the project exists and is served at `https://technology-atlas-icq.pages.dev` (the plain name was taken). Wrangler 4.163 sends `pages` commands to Workers unless `--force` is given at project creation; later `pages deploy` commands go to Pages without it. Credentials: `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` in the ignored `.env`; load them with `set -a; . ./.env; set +a`.
 
 ### Option A: Direct Upload (recommended)
 
@@ -243,7 +245,7 @@ npx wrangler pages deploy atlas/data/public --project-name technology-atlas --br
   --commit-hash "$(git rev-parse HEAD)" --commit-message "$(git log -1 --format=%s)"
 ```
 
-Each deploy prints a preview URL and updates `technology-atlas.pages.dev`. A deploy with `--branch` other than `master` is a preview, useful for checking an export before it goes live.
+Each deploy prints a preview URL and updates `technology-atlas-icq.pages.dev`. A deploy with `--branch` other than `master` is a preview, useful for checking an export before it goes live.
 
 ### Option B: GitHub Actions builds and deploys
 
@@ -255,7 +257,7 @@ Publishing is an editorial act: the site design says publishing needs the owner'
 
 ### Custom domain
 
-In the Cloudflare dashboard: Workers & Pages, `technology-atlas`, Custom domains, Set up a custom domain. If the domain's DNS is on Cloudflare the record is added for you; otherwise add a `CNAME` from the name to `technology-atlas.pages.dev` at the DNS host. Wait for the certificate to show Active. Then re-export with `--base-url https://YOUR_DOMAIN` (1e) and deploy again, so share tags point at the final domain.
+In the Cloudflare dashboard: Workers & Pages, `technology-atlas`, Custom domains, Set up a custom domain. If the domain's DNS is on Cloudflare the record is added for you; otherwise add a `CNAME` from the name to `technology-atlas-icq.pages.dev` at the DNS host. Wait for the certificate to show Active. Then re-export with `--base-url https://YOUR_DOMAIN` (1e) and deploy again, so share tags point at the final domain.
 
 ### 404 page
 
