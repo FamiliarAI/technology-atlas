@@ -260,6 +260,10 @@ export default function About() {
                   The repository is private for now; the link will appear here when it opens.
                 </p>
               )}
+              <p className="muted">
+                The code is under the MIT License; the atlas’s data is under CC BY 4.0, to reuse
+                with credit. Quotations from sources remain their authors’.
+              </p>
             </div>
             <p className="page-ways">
               <Link to="/atlas" className="text-link">

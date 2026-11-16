@@ -2,10 +2,9 @@
 
 export const AUTHOR = 'Prakash Narayanan';
 
-// The repository is private today. When it is made public, set REPOSITORY_PUBLIC to true and
-// the Method page and footer link to it and to its issue tracker.
+// The repository is public: the Method page and footer link to it and to its issue tracker.
 export const REPOSITORY_URL = 'https://github.com/FamiliarAI/technology-atlas';
 export const ISSUES_URL = REPOSITORY_URL + '/issues';
-export const REPOSITORY_PUBLIC = false;
+export const REPOSITORY_PUBLIC = true;
 
 export const SITE = 'Technology Atlas';

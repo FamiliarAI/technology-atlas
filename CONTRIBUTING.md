@@ -1,8 +1,5 @@
 # Contributing to the Technology Atlas
 
-<!-- Draft, November 16, 2026. Becomes CONTRIBUTING.md at the repository root when the repository
-is public (docs/runbooks/Publishing_Runbook.md, section 3). Check the license names and links first. -->
-
 The Technology Atlas is a map of the breakthroughs worth working towards, and of the milestones that show how close each one is. It is a map, not a forecast: it makes no claims about order or dates. Every breakthrough, milestone and judgement on the site is the atlas's own proposal, written with models and published by the owner.
 
 Corrections are the most useful contribution: a milestone set by the wrong body, a quote that does not say what it is cited for, a result the atlas missed, a breakthrough that is missing or is really two.
@@ -20,7 +17,7 @@ Corrections are the most useful contribution: a milestone set by the wrong body,
 You need Git and Python 3.10 or later; the `atlas` package uses only the standard library.
 
 ```bash
-git clone https://github.com/PUBLIC_REPO.git && cd technology-atlas
+git clone https://github.com/FamiliarAI/technology-atlas.git && cd technology-atlas
 git switch -c propose-mat-riemann
 python3 -m atlas.core new MAT "Resolution of the Riemann Hypothesis" \
   --note "A proof or disproof that every nontrivial zero of ζ has real part 1/2." \
@@ -80,4 +77,4 @@ The decision is stored on the record as `review` (`published`, `hold`, `merge`, 
 
 - Never commit `.env`, keys, tokens, `atlas/data/` or `ingestion/runs/` (all ignored). Never commit a saved copy of a publisher's page or PDF.
 - One proposal per pull request. Say what changed and why, with a source.
-- By contributing you agree your contribution is licensed under the repository's terms: code under LICENSE, data in `atlas/core/` under LICENSE-DATA. <!-- confirm names after the license decision -->
+- By contributing you agree your contribution is licensed under the repository's terms: code under the MIT License (LICENSE), data in `atlas/core/` under CC BY 4.0 (LICENSE-DATA).
