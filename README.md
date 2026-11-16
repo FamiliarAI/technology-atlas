@@ -8,4 +8,4 @@ A map of the breakthroughs worth working towards, and of the milestones that sho
 
 ## License
 
-Code under the [MIT License](LICENSE). The atlas's data (`atlas/core/` and the exported `data/`) under [CC BY 4.0](LICENSE-DATA); quotations from cited sources remain their authors'.
+Code under the [MIT License](LICENSE): everything in the repository except the data. The atlas's data (`atlas/core/` and the exported `data/`) under [CC BY 4.0](LICENSE-DATA); quotations from cited sources remain their authors'.
