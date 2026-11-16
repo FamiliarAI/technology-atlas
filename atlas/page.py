@@ -63,7 +63,10 @@ DRAFTS = ROOT / 'atlas/web/src/pages/drafts'
 CALLS = ROOT / 'atlas/data/page'
 ENTRY = {'provider': 'codex', 'model': 'gpt-6.1-sol', 'effort': 'high', 'search': True}
 CANDIDATES = 24
-JUDGE_TEXT = 60000
+# Characters of a source the judge reads. Regulator labels and WHO position papers put the
+# deciding section (clinical studies, recommendations) past 60,000 characters, where an earlier
+# limit cut it off (HLT-01, HLT-09, 16 November 2026).
+JUDGE_TEXT = 150000
 JUDGES = 4
 DEFINITION = [
     'title',
