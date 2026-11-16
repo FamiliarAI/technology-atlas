@@ -3,6 +3,7 @@ import { Route, Routes, useParams } from 'react-router-dom';
 import { Locator } from './Chart.jsx';
 import { STATUS, loadBreakthrough, useAtlas, warm as isWarm } from './data.jsx';
 import { ringSegments, starColor } from './glyphs.jsx';
+import { whenText } from './pages/Page.jsx';
 import { chartCoord, starRadius } from './sky.js';
 import './share.css';
 
@@ -199,6 +200,8 @@ const plural = (n, one, many = one + 's') => `${n.toLocaleString('en-GB')} ${n =
 export function meterWords(item) {
   const n = item.status.length;
   const noun = n === 1 ? 'milestone' : 'milestones';
+  // A met completion test outranks the milestone count, as on the page.
+  if (item.complete) return item.completed ? `Complete, ${whenText(item.completed)}` : 'Complete';
   if (!item.met && !item.moving) {
     if (!item.overall) return STATUS.none;
     return `${item.overall === 1 ? '1 paper' : `${item.overall} papers`} toward the whole`;
@@ -220,7 +223,7 @@ function MeterMark({ status }) {
 }
 
 const stateOf = (item) =>
-  item.status.length && item.met === item.status.length ? 'met' : isWarm(item) ? 'in_progress' : 'none';
+  item.complete || (item.status.length && item.met === item.status.length) ? 'met' : isWarm(item) ? 'in_progress' : 'none';
 
 // One star, large: its point, its halo when warm, its ring of milestones, a graduated dial.
 function BigStar({ item, size = 300 }) {
@@ -247,7 +250,7 @@ function BigStar({ item, size = 300 }) {
       <circle r="136" className="dial" />
       <path d={ticks} className="dial-ticks" />
       {item.glow > 0 && <circle r={R * 1.25} fill="url(#card-halo)" opacity={0.5 + item.glow * 0.5} />}
-      {ringSegments(item.status, R).map((s, k) => (
+      {ringSegments(item.complete ? item.status.map(() => 'met') : item.status, R).map((s, k) => (
         <path key={k} d={s.d} className={'cseg ' + s.status} strokeWidth={s.status === 'none' ? 2.4 : 7} />
       ))}
       <circle r={9 + n * 1.2} fill={color} opacity={item.glow > 0 ? 1 : 0.8} />
