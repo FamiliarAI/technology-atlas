@@ -313,6 +313,7 @@ REGIONS = {
         'DER',
         'EMR',
         'END',
+        'HLT',
         'INF',
         'NEP',
         'NRL',
