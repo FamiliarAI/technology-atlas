@@ -129,15 +129,68 @@ KIND = {'type': 'string', 'enum': KINDS}
 FLAG = {'type': 'boolean'}
 # The answers to NEED_GUIDE's ten questions that goal.need is written from. Kept with the call,
 # not in the page.
-NEED_ANSWERS = array(obj({'question': REF, 'answer': MAYBE, 'ref': MAYBE_REF, 'quote': MAYBE}))
+NEED_QUESTIONS = {
+    'held_back': 'Who or what is held back without this breakthrough: which people, industry or '
+    'science? Name them; not the researchers working on it.',
+    'how_much': 'How big is that, in numbers: people, deaths, cost, energy, or share of a '
+    "field's work?",
+    'relied_on_now': 'What do they rely on instead today, and where exactly does it fall short?',
+    'what_changes': 'What would be different for them if it existed: cheaper, safer, faster, or '
+    'available to whom? A benefit to people, not a property of the device.',
+    'newly_possible': 'What would become possible that is not possible now? For an open '
+    'question, what would each possible answer mean?',
+    'depends_on_it': 'Which fields, technologies or other breakthroughs depend on it?',
+    'uses': 'If it has several uses, which do the people working on it pursue it for? Name '
+    'each, the main one first.',
+    'conditions': 'What has to be true for the benefit to happen?',
+    'not_do': 'What would it not do that a reader might assume?',
+    'why_this': 'Why can the present approach not simply be improved instead? What does only '
+    'this breakthrough provide?',
+}
+ANSWER = {
+    'type': 'object',
+    'properties': {
+        'answer': {
+            'type': ['string', 'null'],
+            'description': 'One sentence that answers the question asked, or null when no '
+            'source answers it.',
+        },
+        'ref': {
+            'type': ['integer', 'null'],
+            'description': 'The reference the answer rests on, or null.',
+        },
+        'quote': {
+            'type': ['string', 'null'],
+            'description': 'A passage of at most 300 characters copied exactly from that '
+            'reference that supports the answer, or null.',
+        },
+    },
+    'required': ['answer', 'ref', 'quote'],
+    'additionalProperties': False,
+}
+# The answers goal.need is written from, one named property per question, each described by its
+# question. Kept with the call, not in the page.
+NEED_ANSWERS = {
+    'type': 'object',
+    'description': 'Answer every question before writing goal.need; goal.need is written from '
+    'these answers alone.',
+    'properties': {key: {**ANSWER, 'description': q} for key, q in NEED_QUESTIONS.items()},
+    'required': list(NEED_QUESTIONS),
+    'additionalProperties': False,
+}
 
 SCHEMA = obj(
     {
+        'need_answers': NEED_ANSWERS,
         'title': TEXT,
         'definition': TEXT,
         'goal': obj(
             {
-                'need': TEXT,
+                'need': {
+                    'type': 'string',
+                    'description': 'Why it is a goal: one coherent paragraph written from '
+                    'need_answers, not a summary of sources and not a list of answers.',
+                },
                 'need_refs': REFS,
                 'figures': {
                     'anyOf': [
@@ -170,7 +223,6 @@ SCHEMA = obj(
                 'refs': REFS,
             }
         ),
-        'need_answers': NEED_ANSWERS,
         'case_label': MAYBE,
         'cases': array(TEXT),
         'milestone_structure': {'type': 'string', 'enum': ['sequence', 'parallel']},
@@ -249,25 +301,15 @@ HELD_SCHEMA = obj(
 
 NEED_GUIDE = """\
 need, shown under the heading "Why it is a goal", tells a reader why the world would be better
-with this breakthrough. It is not a summary of the sources. First answer these ten questions
-in need_answers, one item each, question 1 to 10: answer in one sentence; ref, the reference it
-rests on; quote, a passage of at most 300 characters copied exactly from that reference that
-supports it. When no source answers a question, set answer, ref and quote to null.
-  1. Who or what is held back without it: which people, industry or science?
-  2. How big is that, in numbers: people, deaths, cost, energy, share of a field's work?
-  3. What do they rely on instead, and where does that fall short?
-  4. What would be different for them if it existed: cheaper, safer, faster, open to whom?
-  5. What would become possible that is not possible now? For an open question, what would
-     each answer mean?
-  6. What else depends on it: fields, technologies, other breakthroughs?
-  7. If it has several uses, which do the people working on it pursue it for?
-  8. What has to be true for the benefit to happen?
-  9. What would it not do that a reader might assume?
-  10. Why can the present approach not simply be improved instead?
+with this breakthrough. It is not a summary of the sources. First fill need_answers: each of
+its properties is a question, and each answer is one sentence that answers that question, with
+the reference it rests on and a passage copied exactly from that reference; null when no source
+answers it.
 Then write need from those answers alone, as one coherent, well-written paragraph, not a list
 of answers: the problem and its size, what would change, the conditions and limits. Use the
 answers that matter most for this breakthrough; a reader should finish knowing what is at stake
-and why this particular breakthrough, rather than a general improvement, is needed. Write from the reader's side: what is at stake and for whom.
+and why this particular breakthrough, rather than a general improvement, is needed. Write from
+the reader's side: what is at stake and for whom.
 Never "researchers pursue", "X proposes" or "X cautions", and no names of authors or
 institutions. Leave out what other parts carry: what it is (definition), how it will be judged
 achieved (completion), who has named it a goal (statements), prize amounts and the history of
@@ -721,7 +763,7 @@ def check_answers(answers, references):
     """Mark each answer's quote checked (True), not found (False) or unreadable (None) against
     the saved copy of its reference."""
     refs = {r['id']: r for r in references}
-    for item in answers:
+    for item in (answers or {}).values():
         reference = refs.get(item['ref'])
         if not item['quote'] or reference is None:
             item['checked'] = None
@@ -1282,7 +1324,7 @@ def define(
         return f'{identifier}: rejected after {attempts} attempts: {"; ".join(wrong)}'
     for milestone in answer['milestones']:
         milestone.update(status='active', replaced_by=[])
-    answers = answer.pop('need_answers', [])
+    answers = answer.pop('need_answers', None)
     check_answers(answers, answer['references'])
     calls.mkdir(parents=True, exist_ok=True)
     (calls / 'need_answers.json').write_text(
@@ -2084,6 +2126,12 @@ OPERATIONS = [
 ]
 REVISE_SCHEMA = obj(
     {
+        'need_answers': {
+            'anyOf': [
+                {'type': 'null', 'description': 'null when goal.need is not changed.'},
+                NEED_ANSWERS,
+            ]
+        },
         'operations': array(
             obj(
                 {
@@ -2125,7 +2173,6 @@ REVISE_SCHEMA = obj(
                 }
             )
         ),
-        'need_answers': NEED_ANSWERS,
         'new_references': array(
             obj(
                 {
@@ -2183,7 +2230,7 @@ How to revise
 
 {note}
 
-When you write or change goal.need (otherwise need_answers is an empty list):
+When you write or change goal.need (otherwise need_answers is null):
 {need_guide}
 Operations. Every operation has op and reason; fill only the fields its op uses and set the
 others to null or an empty list.
@@ -2268,7 +2315,7 @@ def revise(identifier, note=None, call=None, writer=None):
     writer = writer or ENTRY
     run = call or model_call(REVISE_SCHEMA, writer, calls / 'call')
     proposal = run(text)
-    proposal.setdefault('need_answers', [])
+    proposal.setdefault('need_answers', None)
     check_answers(proposal['need_answers'], page['references'] + proposal['new_references'])
     calls.mkdir(parents=True, exist_ok=True)
     stored = {
@@ -2331,12 +2378,12 @@ def show_proposal(stored):
     for r in stored['new_references']:
         lines.append(f'   New reference {r["id"]}: {r["title"]} ({r["url"]})')
     marks = {True: 'quote found', False: 'QUOTE NOT FOUND', None: 'no quote checked'}
-    for item in stored.get('need_answers', []):
+    for key, item in (stored.get('need_answers') or {}).items():
         if item['answer'] is None:
-            lines.append(f'   Q{item["question"]}: not found')
+            lines.append(f'   {key}: not found')
         else:
             where = f'ref {item["ref"]}, {marks[item.get("checked")]}'
-            lines.append(f'   Q{item["question"]}: {item["answer"]} ({where})')
+            lines.append(f'   {key}: {item["answer"]} ({where})')
     if not stored['operations']:
         lines.append('(no operations proposed)')
     return '\n'.join(lines)

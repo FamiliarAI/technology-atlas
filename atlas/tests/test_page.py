@@ -281,13 +281,13 @@ class PageTests(unittest.TestCase):
         line = pages.results('BME-99', search=search, judge=judge, everything=everything)
         return line, prompts
 
-    def propose(self, operations, new_references=(), need_answers=()):
+    def propose(self, operations, new_references=(), need_answers=None):
         def call(text):
             self.revise_prompt = text
             return {
                 'operations': operations,
                 'new_references': list(new_references),
-                'need_answers': list(need_answers),
+                'need_answers': need_answers,
             }
 
         line, path = pages.revise('BME-99', note='Add the missing stage.', call=call)
@@ -612,20 +612,23 @@ class PageTests(unittest.TestCase):
 
     def test_revise_shows_the_answers_behind_a_new_goal_and_checks_their_quotes(self):
         self.define()
-        answers = [
-            {'question': 1, 'answer': 'Recipients wait.', 'ref': 2, 'quote': FOUND},
-            {'question': 2, 'answer': 'Many wait.', 'ref': 2, 'quote': 'a passage nowhere in it'},
-            {'question': 3, 'answer': None, 'ref': None, 'quote': None},
-        ]
+        empty = {'answer': None, 'ref': None, 'quote': None}
+        answers = {key: dict(empty) for key in pages.NEED_QUESTIONS}
+        answers['held_back'] = {'answer': 'Recipients wait.', 'ref': 2, 'quote': FOUND}
+        answers['how_much'] = {'answer': 'Many wait.', 'ref': 2, 'quote': 'nowhere in it at all'}
         operations = [op('edit_text', field='goal.need', value='Why it matters.')]
         line, path = self.propose(operations, need_answers=answers)
-        self.assertIn('ten questions', self.revise_prompt)
         self.assertIn('movable metal type', self.revise_prompt)
-        self.assertIn('Q1: Recipients wait. (ref 2, quote found)', line)
-        self.assertIn('Q2: Many wait. (ref 2, QUOTE NOT FOUND)', line)
-        self.assertIn('Q3: not found', line)
-        stored = json.loads(path.read_text())
-        self.assertEqual([a['checked'] for a in stored['need_answers']], [True, False, None])
+        self.assertIn('held_back: Recipients wait. (ref 2, quote found)', line)
+        self.assertIn('how_much: Many wait. (ref 2, QUOTE NOT FOUND)', line)
+        self.assertIn('why_this: not found', line)
+        stored = json.loads(path.read_text())['need_answers']
+        self.assertEqual(
+            [stored['held_back']['checked'], stored['how_much']['checked']], [True, False]
+        )
+        schema = pages.REVISE_SCHEMA['properties']['need_answers']['anyOf'][1]
+        self.assertEqual(list(schema['properties']), list(pages.NEED_QUESTIONS))
+        self.assertIn('Who or what is held back', schema['properties']['held_back']['description'])
 
     def test_apply_runs_every_operation_and_keeps_ids_permanent(self):
         self.define()
