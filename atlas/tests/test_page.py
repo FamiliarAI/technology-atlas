@@ -281,13 +281,13 @@ class PageTests(unittest.TestCase):
         line = pages.results('BME-99', search=search, judge=judge, everything=everything)
         return line, prompts
 
-    def propose(self, operations, new_references=(), need_answers=None):
+    def propose(self, operations, new_references=(), answers=None):
         def call(text):
             self.revise_prompt = text
             return {
                 'operations': operations,
                 'new_references': list(new_references),
-                'need_answers': need_answers,
+                'answers': answers,
             }
 
         line, path = pages.revise('BME-99', note='Add the missing stage.', call=call)
@@ -610,25 +610,35 @@ class PageTests(unittest.TestCase):
         self.assertTrue(path.is_file())
         self.assertEqual(pages.latest_proposal('BME-99'), path)
 
-    def test_revise_shows_the_answers_behind_a_new_goal_and_checks_their_quotes(self):
+    def test_revise_shows_the_answers_behind_a_change_and_checks_their_quotes(self):
         self.define()
         empty = {'answer': None, 'ref': None, 'quote': None}
-        answers = {key: dict(empty) for key in pages.NEED_QUESTIONS}
-        answers['held_back'] = {'answer': 'Recipients wait.', 'ref': 2, 'quote': FOUND}
-        answers['how_much'] = {'answer': 'Many wait.', 'ref': 2, 'quote': 'nowhere in it at all'}
+        why = {key: dict(empty) for key in pages.QUESTIONS['why_it_matters']}
+        why['held_back'] = {'answer': 'Recipients wait.', 'ref': 2, 'quote': FOUND}
+        why['relied_on_now'] = {'answer': 'Dialysis.', 'ref': 2, 'quote': 'nowhere in it at all'}
+        answers = {part: None for part in pages.QUESTIONS}
+        answers['why_it_matters'] = why
         operations = [op('edit_text', field='goal.need', value='Why it matters.')]
-        line, path = self.propose(operations, need_answers=answers)
-        self.assertIn('movable metal type', self.revise_prompt)
-        self.assertIn('held_back: Recipients wait. (ref 2, quote found)', line)
-        self.assertIn('how_much: Many wait. (ref 2, QUOTE NOT FOUND)', line)
-        self.assertIn('why_this: not found', line)
-        stored = json.loads(path.read_text())['need_answers']
+        line, path = self.propose(operations, answers=answers)
+        self.assertIn('reusable metal type', self.revise_prompt)
+        self.assertIn('why_it_matters.held_back: Recipients wait. (ref 2, quote found)', line)
+        self.assertIn('why_it_matters.relied_on_now: Dialysis. (ref 2, QUOTE NOT FOUND)', line)
+        self.assertIn('why_it_matters.why_this: not found', line)
+        self.assertNotIn('what_it_is', line)
+        stored = json.loads(path.read_text())['answers']['why_it_matters']
         self.assertEqual(
-            [stored['held_back']['checked'], stored['how_much']['checked']], [True, False]
+            [stored['held_back']['checked'], stored['relied_on_now']['checked']], [True, False]
         )
-        schema = pages.REVISE_SCHEMA['properties']['need_answers']['anyOf'][1]
-        self.assertEqual(list(schema['properties']), list(pages.NEED_QUESTIONS))
-        self.assertIn('Who or what is held back', schema['properties']['held_back']['description'])
+
+    def test_every_part_is_written_from_questions_in_the_schema(self):
+        answers = pages.SCHEMA['properties']['answers']
+        self.assertEqual(list(pages.SCHEMA['properties'])[0], 'answers')
+        self.assertEqual(list(answers['properties']), list(pages.QUESTIONS))
+        held = answers['properties']['why_it_matters']['properties']['held_back']
+        self.assertIn('Who or what is held back', held['description'])
+        self.assertEqual(
+            list(pages.JUDGE_SCHEMA['properties'])[:3], ['shown', 'against_criterion', 'verdict']
+        )
 
     def test_apply_runs_every_operation_and_keeps_ids_permanent(self):
         self.define()

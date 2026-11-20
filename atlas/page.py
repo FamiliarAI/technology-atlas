@@ -127,32 +127,66 @@ MAYBE_REF = {'type': ['integer', 'null']}
 REFS = array(REF)
 KIND = {'type': 'string', 'enum': KINDS}
 FLAG = {'type': 'boolean'}
-# The answers to NEED_GUIDE's ten questions that goal.need is written from. Kept with the call,
-# not in the page.
-NEED_QUESTIONS = {
-    'held_back': 'Who or what is held back without this breakthrough: which people, industry or '
-    'science? Name them; not the researchers working on it.',
-    'how_much': 'How big is that, in numbers: people, deaths, cost, energy, or share of a '
-    "field's work?",
-    'relied_on_now': 'What do they rely on instead today, and where exactly does it fall short?',
-    'what_changes': 'What would be different for them if it existed: cheaper, safer, faster, or '
-    'available to whom? A benefit to people, not a property of the device.',
-    'newly_possible': 'What would become possible that is not possible now? For an open '
-    'question, what would each possible answer mean?',
-    'depends_on_it': 'Which fields, technologies or other breakthroughs depend on it?',
-    'uses': 'If it has several uses, which do the people working on it pursue it for? Name '
-    'each, the main one first.',
-    'conditions': 'What has to be true for the benefit to happen?',
-    'not_do': 'What would it not do that a reader might assume?',
-    'why_this': 'Why can the present approach not simply be improved instead? What does only '
-    'this breakthrough provide?',
+# The questions each part of an entry is written from, one named schema property per question,
+# with the question as its description. The model answers them first, each from a source, and
+# then writes the parts from its answers. The answers are kept with the call, not in the page.
+QUESTIONS = {
+    'what_it_is': {
+        'would_exist': "What exactly would exist or be true, in the field's own terms?",
+        'closest_today': 'What is the closest thing that exists today, and how does this differ '
+        'from it?',
+        'edges': 'What is included and what is not: where are its edges?',
+        'terms': 'Which terms would an expert in another field not know, and what do they mean?',
+    },
+    'why_it_matters': {
+        'held_back': 'Who or what is held back without it, and by how much: which people, '
+        "industry or science, in numbers (people, deaths, cost, energy, share of a field's "
+        'work)? Not the researchers working on it.',
+        'relied_on_now': 'What do they rely on instead today, and where exactly does it fall short?',
+        'what_changes': 'What would change for them, or become possible, if it existed: a '
+        'benefit to people, not a property of the device? For an open question, what would '
+        'each possible answer mean?',
+        'uses': 'Which uses is it pursued for, the main one first?',
+        'conditions_and_limits': 'What has to be true for the benefit to happen, and what would '
+        'it not do that a reader might assume?',
+        'why_this': 'Why can the present approach not simply be improved instead? What does only '
+        'this breakthrough provide?',
+    },
+    'named_as_goal': {
+        'who_named_it': 'Which bodies with standing (academies, regulators, societies, '
+        'programmes, prize committees, roadmap committees) have named this a goal, in which '
+        'document and year?',
+        'disputed': 'Does any body with standing doubt that it is worth pursuing or achievable, '
+        'and what does it say?',
+    },
+    'completion_test': {
+        'who_decides': 'Who in this field decides that something like this has been achieved: '
+        'a regulator, standards body, society, programme, prize, registered protocol, or a '
+        'convention the field applies?',
+        'their_test': 'What is their test, in their own words, with its numbers and conditions?',
+        'near_miss': 'What would come close to the test but not count?',
+        'already_met': 'Does any published result already meet the test? Which?',
+    },
+    'cases': {
+        'separate_cases': 'Does the field pursue this separately in distinct sub-cases (organs, '
+        'material classes, hardware platforms, problem classes)? Which?',
+        'carries_over': 'Would a result in one case count for the others?',
+    },
+    'milestones': {
+        'first_demonstration': 'What is the first demonstration in the laboratory, and has it '
+        'happened?',
+        'recognised_stages': 'Which stages between that and completion does the field or its '
+        'regulator itself recognise, and who defines each?',
+        'order': 'Does each stage normally follow the one before, or are they separate parts '
+        'that can be reached in any order?',
+    },
 }
 ANSWER = {
     'type': 'object',
     'properties': {
         'answer': {
             'type': ['string', 'null'],
-            'description': 'One sentence that answers the question asked, or null when no '
+            'description': 'One or two sentences that answer the question asked, or null when no '
             'source answers it.',
         },
         'ref': {
@@ -168,20 +202,39 @@ ANSWER = {
     'required': ['answer', 'ref', 'quote'],
     'additionalProperties': False,
 }
-# The answers goal.need is written from, one named property per question, each described by its
-# question. Kept with the call, not in the page.
-NEED_ANSWERS = {
+
+
+def part_schema(part):
+    questions = QUESTIONS[part]
+    return {
+        'type': 'object',
+        'properties': {key: {**ANSWER, 'description': q} for key, q in questions.items()},
+        'required': list(questions),
+        'additionalProperties': False,
+    }
+
+
+ANSWERS = {
     'type': 'object',
-    'description': 'Answer every question before writing goal.need; goal.need is written from '
-    'these answers alone.',
-    'properties': {key: {**ANSWER, 'description': q} for key, q in NEED_QUESTIONS.items()},
-    'required': list(NEED_QUESTIONS),
+    'description': 'Answer every question before writing the entry; each part of the entry is '
+    'written from the answers for it.',
+    'properties': {part: part_schema(part) for part in QUESTIONS},
+    'required': list(QUESTIONS),
+    'additionalProperties': False,
+}
+# A revision answers only the parts its operations change.
+REVISE_ANSWERS = {
+    'type': 'object',
+    'description': 'Answer the questions of every part your operations change, before the '
+    'operations; null for a part you leave as it is.',
+    'properties': {part: {'anyOf': [{'type': 'null'}, part_schema(part)]} for part in QUESTIONS},
+    'required': list(QUESTIONS),
     'additionalProperties': False,
 }
 
 SCHEMA = obj(
     {
-        'need_answers': NEED_ANSWERS,
+        'answers': ANSWERS,
         'title': TEXT,
         'definition': TEXT,
         'goal': obj(
@@ -189,7 +242,7 @@ SCHEMA = obj(
                 'need': {
                     'type': 'string',
                     'description': 'Why it is a goal: one coherent paragraph written from '
-                    'need_answers, not a summary of sources and not a list of answers.',
+                    'answers.why_it_matters, not a summary of sources and not a list of answers.',
                 },
                 'need_refs': REFS,
                 'figures': {
@@ -276,8 +329,23 @@ FINDING = {
     'confirmed': FLAG,
     'peer_reviewed': FLAG,
 }
+# Before a verdict the judge says what the source showed and how it compares with the criterion.
+# Used only to reach the verdict; not stored in results.
+SHOWN = {
+    'shown': {
+        'type': 'string',
+        'description': 'What exactly the source shows, with its subject, conditions and numbers; '
+        'empty when it reports no result.',
+    },
+    'against_criterion': {
+        'type': 'string',
+        'description': 'Which parts of the criterion, as written, this result satisfies and '
+        'which it does not.',
+    },
+}
 JUDGE_SCHEMA = obj(
     {
+        **SHOWN,
         'verdict': {'type': 'string', 'enum': ['met', 'partial', 'not_relevant']},
         **FINDING,
         **SOURCE,
@@ -291,6 +359,7 @@ HELD_SCHEMA = obj(
                 {
                     'milestone': TEXT,
                     'case': MAYBE,
+                    **SHOWN,
                     'verdict': {'type': 'string', 'enum': ['met', 'partial']},
                     **FINDING,
                 }
@@ -299,32 +368,60 @@ HELD_SCHEMA = obj(
     }
 )
 
-NEED_GUIDE = """\
-need, shown under the heading "Why it is a goal", tells a reader why the world would be better
-with this breakthrough. It is not a summary of the sources. First fill need_answers: each of
-its properties is a question, and each answer is one sentence that answers that question, with
-the reference it rests on and a passage copied exactly from that reference; null when no source
-answers it.
-Then write need from those answers alone, as one coherent, well-written paragraph, not a list
-of answers: the problem and its size, what would change, the conditions and limits. Use the
-answers that matter most for this breakthrough; a reader should finish knowing what is at stake
-and why this particular breakthrough, rather than a general improvement, is needed. Write from
-the reader's side: what is at stake and for whom.
-Never "researchers pursue", "X proposes" or "X cautions", and no names of authors or
-institutions. Leave out what other parts carry: what it is (definition), how it will be judged
-achieved (completion), who has named it a goal (statements), prize amounts and the history of
-attempts. Plain declarative sentences, at most 600 characters; need_refs lists the references
-behind it.
+GUIDE = """\
+How to write the entry: answer first, then write
+The schema's answers object holds the questions each part is written from; each property is a
+question. Research until you can answer them. Answer each in one or two sentences, with the
+reference the answer rests on and a passage copied exactly from it; null when no source
+answers it, and add what you searched for to not_found. Then write each part from its answers
+alone: definition from what_it_is, goal.need from why_it_matters, statements from
+named_as_goal, completion from completion_test, cases from cases, milestones from milestones.
+Write each part as coherent, well-written prose for the reader, not as a list of answers and
+not as a summary of sources.
 
-An example of the kind, for an imaginary entry on printing books from movable metal type, as
-it would read before the printing press (its figures are illustrative; a real entry takes every
-figure from a cited source):
-  Books are copied by hand. One Bible takes a scribe more than a year, so a book costs as much
-  as a farm and few people outside monasteries and universities own one. Every copy adds
-  errors, so no two readers can be sure they hold the same text. Printing from reusable metal
-  type would produce hundreds of identical copies in the time a scribe makes one, lowering the
-  price of books and giving readers in many cities the same words on the same pages. That
-  depends on cheap paper and on people who can read; printing alone teaches no one to read.
+goal.need, shown under the heading "Why it is a goal", tells a reader why the world would be
+better with this breakthrough: the problem and its size, what would change, the conditions and
+limits, and why this breakthrough rather than a general improvement. Write from the reader's
+side. Never "researchers pursue", "X proposes" or "X cautions", and no names of authors or
+institutions. Leave out what other parts carry: what it is, how it will be judged achieved,
+who has named it a goal, prize amounts and the history of attempts. At most 600 characters;
+need_refs lists the references behind it.
+
+An example of the kind, for an imaginary entry written before the printing press existed. Its
+figures and sources are illustrative; a real entry takes each from a source it opened.
+  Some answers:
+    what_it_is.closest_today: Woodblock printing, in which each page is carved as one block
+      that serves that page only.
+    why_it_matters.held_back: Readers outside monasteries and universities; a hand-copied
+      Bible takes a scribe more than a year and costs as much as a farm.
+    why_it_matters.why_this: Faster scribes or more of them still copy one book at a time, and
+      each copy adds errors.
+    completion_test.who_decides: The stationers' guild, whose rule for a fair copy is that it
+      matches the master copy letter for letter.
+    completion_test.near_miss: A woodblock book, or a single printed page.
+    milestones.recognised_stages: Even casting of letters, an ink that holds to metal, one
+      page printed and reset, a whole book printed in an edition.
+  The entry written from them:
+    title: Printing books from reusable metal type
+    definition: Pages are set from individual cast metal letters, inked and pressed onto paper;
+      the letters are then reused for the next page. Unlike a carved woodblock, which serves one
+      page only, the same letters make every page of every book.
+    goal.need: Books are copied by hand. One Bible takes a scribe more than a year, so a book
+      costs as much as a farm and few people outside monasteries and universities own one.
+      Every copy adds errors, so no two readers can be sure they hold the same text. Printing
+      from reusable metal type would produce hundreds of identical copies in the time a scribe
+      makes one, lowering the price of books and giving readers in many cities the same words
+      on the same pages. That depends on cheap paper and on people who can read; printing alone
+      teaches no one to read.
+    completion: An edition of at least 100 copies of a complete book of at least 300 pages,
+      each matching the master copy letter for letter, printed from type that is then reused.
+      Set by the stationers' guild's rule for a fair copy.
+    milestones, in sequence:
+      m1 Letters are cast in metal at one height, so that a line of them prints evenly.
+      m2 An ink holds to metal type and transfers cleanly to paper.
+      m3 A full page is printed legibly from type set by hand, which is then broken up and reset.
+      m4 A book of at least 300 pages is printed in an edition of at least 10 identical copies.
+    not_found: No record of metal type surviving the printing of more than one book.
 """
 
 PROMPT = """\
@@ -357,6 +454,7 @@ prize's rules, the endpoint of a registered protocol, or a convention the field 
 5-sigma observation, a proof accepted after peer review, independent replication). Your work is
 to find those tests and report them with their source. Do not invent thresholds.
 
+{guide}
 Write these parts.
 
 title
@@ -368,7 +466,7 @@ definition
   passing any term that an expert in another field would not know.
 
 goal
-  need and need_refs: see "Why it is a goal" below.
+  need and need_refs: see "Why it is a goal" above.
   figures: a small table (at most 4 columns and 5 rows) when two or three numbers make the need
     plain, with a caption, an optional note on how to read it, and its reference. Otherwise null.
   statements: 2 to 5 statements by bodies with standing in the field (an academy, a professional
@@ -377,7 +475,6 @@ goal
     the body, the year, one passage quoted exactly, its reference, and context only when the
     quotation cannot be understood without it.
 
-{need_guide}
 completion
   The single test by which the breakthrough counts as achieved.
   title: the test as a sentence that can be read alone, at most 110 characters.
@@ -500,6 +597,9 @@ Sources the Atlas already holds:
 JUDGE_RULES = """\
 Rules
 - Judge only from the text given, not from what you know from elsewhere.
+- First say in shown what the source shows, and in against_criterion which parts of the
+  criterion as written it satisfies and which it does not. Then give the verdict that follows
+  from that comparison.
 - verdict "met" only if the finding satisfies the criterion as written; "partial" if it bears
   on the criterion without satisfying it. Never "partial" on the completion test: a result on
   completion is "met", or it is not relevant.
@@ -759,11 +859,18 @@ def check_definition(page, only_new=False):
     return counts
 
 
+def each_answer(answers):
+    """(part.question, answer) for every answered part of an answers object."""
+    for part, questions in (answers or {}).items():
+        for key, item in (questions or {}).items():
+            yield f'{part}.{key}', item
+
+
 def check_answers(answers, references):
     """Mark each answer's quote checked (True), not found (False) or unreadable (None) against
     the saved copy of its reference."""
     refs = {r['id']: r for r in references}
-    for item in (answers or {}).values():
+    for _, item in each_answer(answers):
         reference = refs.get(item['ref'])
         if not item['quote'] or reference is None:
             item['checked'] = None
@@ -1297,7 +1404,7 @@ def define(
             )
     record, held = held_sources(identifier)
     text = PROMPT.format(
-        need_guide=NEED_GUIDE,
+        guide=GUIDE,
         id=identifier,
         title=record['title'],
         record=describe(record),
@@ -1324,12 +1431,10 @@ def define(
         return f'{identifier}: rejected after {attempts} attempts: {"; ".join(wrong)}'
     for milestone in answer['milestones']:
         milestone.update(status='active', replaced_by=[])
-    answers = answer.pop('need_answers', None)
+    answers = answer.pop('answers', None)
     check_answers(answers, answer['references'])
     calls.mkdir(parents=True, exist_ok=True)
-    (calls / 'need_answers.json').write_text(
-        json.dumps(answers, indent=2, ensure_ascii=False) + '\n'
-    )
+    (calls / 'answers.json').write_text(json.dumps(answers, indent=2, ensure_ascii=False) + '\n')
     page = {
         'id': identifier,
         **answer,
@@ -2126,12 +2231,7 @@ OPERATIONS = [
 ]
 REVISE_SCHEMA = obj(
     {
-        'need_answers': {
-            'anyOf': [
-                {'type': 'null', 'description': 'null when goal.need is not changed.'},
-                NEED_ANSWERS,
-            ]
-        },
+        'answers': REVISE_ANSWERS,
         'operations': array(
             obj(
                 {
@@ -2230,8 +2330,9 @@ How to revise
 
 {note}
 
-When you write or change goal.need (otherwise need_answers is null):
-{need_guide}
+Before the operations, fill answers for every part your operations change; null for the
+others.
+{guide}
 Operations. Every operation has op and reason; fill only the fields its op uses and set the
 others to null or an empty list.
 - add_milestone: milestone (title, criterion, set_by, set_by_kind, threshold_quote,
@@ -2304,7 +2405,7 @@ def revise(identifier, note=None, call=None, writer=None):
     """Ask for proposed operations and store them; applies nothing. Returns (line, path)."""
     page = load(identifier)
     text = REVISE_PROMPT.format(
-        need_guide=NEED_GUIDE,
+        guide=GUIDE,
         id=identifier,
         version=page['version'],
         next_ref=len(page['references']) + 1,
@@ -2315,8 +2416,8 @@ def revise(identifier, note=None, call=None, writer=None):
     writer = writer or ENTRY
     run = call or model_call(REVISE_SCHEMA, writer, calls / 'call')
     proposal = run(text)
-    proposal.setdefault('need_answers', None)
-    check_answers(proposal['need_answers'], page['references'] + proposal['new_references'])
+    proposal.setdefault('answers', None)
+    check_answers(proposal['answers'], page['references'] + proposal['new_references'])
     calls.mkdir(parents=True, exist_ok=True)
     stored = {
         'id': identifier,
@@ -2378,7 +2479,7 @@ def show_proposal(stored):
     for r in stored['new_references']:
         lines.append(f'   New reference {r["id"]}: {r["title"]} ({r["url"]})')
     marks = {True: 'quote found', False: 'QUOTE NOT FOUND', None: 'no quote checked'}
-    for key, item in (stored.get('need_answers') or {}).items():
+    for key, item in each_answer(stored.get('answers')):
         if item['answer'] is None:
             lines.append(f'   {key}: not found')
         else:
