@@ -30,7 +30,7 @@ If the test is already right, make no revision and say so; that is a valid outco
 
 ## Steps
 
-1. **Revise, if needed.** Write atlas/data/page/<ID>-revise-fable-<UTC stamp>/proposal.json. The note reads "Rewritten by Claude Fable 5.2 at the owner's request, <date>, under the completed-breakthrough standard", followed by why. Apply it with `python3 -m atlas.page revise <ID> --apply <path>`.
+1. **Revise, if needed.** First answer the questions in `QUESTIONS` (atlas/page.py) for every part you change, each with a reference and an exact quote, and put them in the proposal's `answers` (same shape as the revise schema); write each changed part from its answers, following `GUIDE` and its printing-press example. Then write atlas/data/page/<ID>-revise-fable-<UTC stamp>/proposal.json. The note reads "Rewritten by Claude Fable 5.2 at the owner's request, <date>, under the completed-breakthrough standard", followed by why. Apply it with `python3 -m atlas.page revise <ID> --apply <path>`.
 2. **Add new primary sources.** Judge them with Astra:
    `python3 -c "from atlas import page; page.JUDGE['model']='gpt-6-astra'; print(page.add('<ID>', ['URL']))"`
 3. **Re-judge, in every case.** Run it once, in the background, and wait for it:
