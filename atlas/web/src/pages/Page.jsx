@@ -382,7 +382,9 @@ export default function PageBody({ page }) {
             {goal.figures.note && <p className="ideal-note">{goal.figures.note}</p>}
           </>
         )}
-        <h3 className="ideal-sub">Who has stated it as a goal</h3>
+      </Section>
+
+      <Section id="who-title" title="Who has stated it as a goal">
         <ul className="ideal-stated">
           {goal.statements.map((s, n) => (
             <li key={n}>
