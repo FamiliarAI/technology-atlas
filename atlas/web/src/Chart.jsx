@@ -1036,7 +1036,9 @@ export default function Chart({
 // point, the field's figure drawn and bracketed, the star fixed by crosshairs to the frame.
 // `size` is the locator's height-equivalent from the old square locator; the flat sky is
 // drawn about one and a half times as wide.
-export function Locator({ atlas, field, star, size = 132, width, names = false }) {
+// With `onPick`, a tap on the locator picks the constellation under or nearest it (within a
+// finger's width), else the region it falls in: onPick({ field }) or onPick({ region }).
+export function Locator({ atlas, field, star, size = 132, width, names = false, onPick }) {
   const sky = atlas.sky;
   const { w, h, frame } = sky.world;
   const f = field && atlas.field[field];
@@ -1070,9 +1072,28 @@ export function Locator({ atlas, field, star, size = 132, width, names = false }
   const corner = (x, y, dx, dy) => `M${x + dx} ${y}H${x}V${y + dy}`;
   const box = fig?.box;
   const m = stroke(5);
+  const pick = (e) => {
+    const svgEl = e.currentTarget;
+    const ctm = svgEl.getScreenCTM();
+    if (!ctm) return;
+    const pt = new DOMPoint(e.clientX, e.clientY).matrixTransform(ctm.inverse());
+    const reach = stroke(14);
+    let best = null;
+    for (const x of atlas.fields) {
+      const b = sky.figures[x.id].box;
+      const dx = Math.max(b.x - pt.x, 0, pt.x - (b.x + b.w));
+      const dy = Math.max(b.y - pt.y, 0, pt.y - (b.y + b.h));
+      const d = Math.hypot(dx, dy);
+      if (d <= reach && (!best || d < best.d)) best = { d, id: x.id };
+    }
+    if (best) return onPick({ field: best.id });
+    const r = sky.regions.find((q) => pt.x >= q.x && pt.x <= q.x + q.w && pt.y >= q.y && pt.y <= q.y + q.h);
+    if (r) onPick({ region: r.name });
+  };
   return (
     <svg
-      className="sky-locator"
+      onClick={onPick ? pick : undefined}
+      className={'sky-locator' + (onPick ? ' pickable' : '')}
       width={px}
       height={Math.round((px * vh) / vw)}
       viewBox={`${vx} ${vx} ${vw} ${vh}`}

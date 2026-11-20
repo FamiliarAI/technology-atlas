@@ -41,6 +41,8 @@ function Arrow({ back = false }) {
 
 // ---------- Lists ----------
 
+const regionAnchor = (name) => 'region-' + name.toLowerCase().replace(/[^a-z]+/g, '-');
+
 function FieldList({ atlas, regions, filter, onPick, onHover, onRegion }) {
   const q = filter.trim().toLowerCase();
   const match = (f) => !q || f.name.toLowerCase().includes(q) || f.id.toLowerCase().includes(q);
@@ -48,7 +50,7 @@ function FieldList({ atlas, regions, filter, onPick, onHover, onRegion }) {
   return (
     <div className="sa-regions">
       {shown.map((r) => (
-        <section key={r.name} aria-label={r.name}>
+        <section key={r.name} aria-label={r.name} id={regionAnchor(r.name)}>
           <h2 className="sa-region-head">
             {onRegion ? (
               <button type="button" onClick={() => onRegion(r.name)} title={`Zoom to ${r.name}`}>
@@ -474,7 +476,17 @@ function PhoneAtlas({ atlas, field, setParams }) {
         </p>
       </header>
       <figure className="sa-phone-sky">
-        <Locator atlas={atlas} field={field} width={358} names />
+        <Locator
+          atlas={atlas}
+          field={field}
+          width={358}
+          names
+          onPick={(hit) => {
+            if (hit.field) setParams({ field: hit.field });
+            else if (!f) document.getElementById(regionAnchor(hit.region))?.scrollIntoView({ behavior: 'smooth' });
+            else setParams({});
+          }}
+        />
         <figcaption className="mono">
           {f ? `${f.name} in the sky` : `The whole sky · ${atlas.fields.length} constellations`}
         </figcaption>
