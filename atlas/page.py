@@ -243,6 +243,40 @@ HELD_SCHEMA = obj(
     }
 )
 
+NEED_GUIDE = """\
+need, shown under the heading "Why it is a goal", tells a reader why the world would be better
+with this breakthrough. It is not a summary of the sources. Before writing it, answer these
+questions for yourself, each from a source you opened; leave out what no source answers.
+  1. Who or what is held back without it: which people, industry or science?
+  2. How big is that, in numbers: people, deaths, cost, energy, share of a field's work?
+  3. What do they rely on instead, and where does that fall short?
+  4. What would be different for them if it existed: cheaper, safer, faster, open to whom?
+  5. What would become possible that is not possible now? For an open question, what would
+     each answer mean?
+  6. What else depends on it: fields, technologies, other breakthroughs?
+  7. If it has several uses, which do the people working on it pursue it for?
+  8. What has to be true for the benefit to happen?
+  9. What would it not do that a reader might assume?
+  10. Why can the present approach not simply be improved instead?
+Then write one paragraph from the answers, in that order: the problem and its size, what would
+change, the conditions and limits. Write from the reader's side: what is at stake and for whom.
+Never "researchers pursue", "X proposes" or "X cautions", and no names of authors or
+institutions. Leave out what other parts carry: what it is (definition), how it will be judged
+achieved (completion), who has named it a goal (statements), prize amounts and the history of
+attempts. Plain declarative sentences, at most 600 characters; need_refs lists the references
+behind it.
+
+An example of the kind, for an imaginary entry on printing books from movable metal type, as
+it would read before the printing press (its figures are illustrative; a real entry takes every
+figure from a cited source):
+  Books are copied by hand. One Bible takes a scribe more than a year, so a book costs as much
+  as a farm and few people outside monasteries and universities own one. Every copy adds
+  errors, so no two readers can be sure they hold the same text. Printing from reusable metal
+  type would produce hundreds of identical copies in the time a scribe makes one, lowering the
+  price of books and giving readers in many cities the same words on the same pages. That
+  depends on cheap paper and on people who can read; printing alone teaches no one to read.
+"""
+
 PROMPT = """\
 You are writing one entry of the Technology Atlas, a public reference that maps breakthroughs
 worth working towards. For each breakthrough an entry states what it is, who has set it as a
@@ -284,16 +318,16 @@ definition
   passing any term that an expert in another field would not know.
 
 goal
-  need: one paragraph of at most 600 characters on why this is a goal, resting on quantities
-    with sources and not on adjectives. need_refs: the references it uses.
+  need and need_refs: see "Why it is a goal" below.
   figures: a small table (at most 4 columns and 5 rows) when two or three numbers make the need
     plain, with a caption, an optional note on how to read it, and its reference. Otherwise null.
   statements: 2 to 5 statements by bodies with standing in the field (an academy, a professional
     society, a government agency or programme, a standards body, a decadal survey or roadmap
-    committee, a prize committee, or a leading developer) that set this as a goal or say why it
-    matters. For each: the body, the year, one passage quoted exactly, its reference, and
-    context only when the quotation cannot be understood without it.
+    committee, a prize committee, or a leading developer) that set this as a goal. For each:
+    the body, the year, one passage quoted exactly, its reference, and context only when the
+    quotation cannot be understood without it.
 
+{need_guide}
 completion
   The single test by which the breakthrough counts as achieved.
   title: the test as a sentence that can be read alone, at most 110 characters.
@@ -1200,6 +1234,7 @@ def define(
             )
     record, held = held_sources(identifier)
     text = PROMPT.format(
+        need_guide=NEED_GUIDE,
         id=identifier,
         title=record['title'],
         record=describe(record),
@@ -2120,6 +2155,8 @@ How to revise
 
 {note}
 
+When you write or change goal.need:
+{need_guide}
 Operations. Every operation has op and reason; fill only the fields its op uses and set the
 others to null or an empty list.
 - add_milestone: milestone (title, criterion, set_by, set_by_kind, threshold_quote,
@@ -2192,6 +2229,7 @@ def revise(identifier, note=None, call=None, writer=None):
     """Ask for proposed operations and store them; applies nothing. Returns (line, path)."""
     page = load(identifier)
     text = REVISE_PROMPT.format(
+        need_guide=NEED_GUIDE,
         id=identifier,
         version=page['version'],
         next_ref=len(page['references']) + 1,
