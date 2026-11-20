@@ -474,7 +474,7 @@ function PhoneAtlas({ atlas, field, setParams }) {
         </p>
       </header>
       <figure className="sa-phone-sky">
-        <Locator atlas={atlas} field={field} width={358} />
+        <Locator atlas={atlas} field={field} width={358} names />
         <figcaption className="mono">
           {f ? `${f.name} in the sky` : `The whole sky · ${atlas.fields.length} constellations`}
         </figcaption>

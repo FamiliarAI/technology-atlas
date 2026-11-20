@@ -1036,7 +1036,7 @@ export default function Chart({
 // point, the field's figure drawn and bracketed, the star fixed by crosshairs to the frame.
 // `size` is the locator's height-equivalent from the old square locator; the flat sky is
 // drawn about one and a half times as wide.
-export function Locator({ atlas, field, star, size = 132, width }) {
+export function Locator({ atlas, field, star, size = 132, width, names = false }) {
   const sky = atlas.sky;
   const { w, h, frame } = sky.world;
   const f = field && atlas.field[field];
@@ -1095,13 +1095,29 @@ export function Locator({ atlas, field, star, size = 132, width }) {
         style={{ strokeWidth: stroke(0.7), strokeDasharray: `${stroke(2.5)} ${stroke(2.5)}` }}
       />
       <path d={all} className="loc-figures" style={{ strokeWidth: stroke(0.6) }} />
+      {names &&
+        sky.regions.map((r) => (
+          <text
+            key={r.name}
+            className="loc-region"
+            style={{ fontSize: stroke(5.6), letterSpacing: stroke(0.6) }}
+          >
+            {r.label.lines.map((line, n) => (
+              <tspan key={n} x={r.label.x} y={r.label.y + stroke(6 + n * 8)}>
+                {line.toUpperCase()}
+              </tspan>
+            ))}
+          </text>
+        ))}
+      {/* As on the chart, only a breakthrough with every milestone met is lit: with most stars
+          showing some progress, lighting each turned the small sky into blobs. */}
       {Object.values(atlas.items).map((i) => (
         <circle
           key={i.id}
           cx={i.x}
           cy={i.y}
-          r={stroke(i.glow > 0 ? 1.6 : f && i.field === field ? 1.1 : 0.75)}
-          className={'loc-dot' + (f && i.field === field ? ' in' : '') + (i.glow > 0 ? ' lit' : '')}
+          r={stroke(i.complete ? 1.6 : f && i.field === field ? 1.1 : 0.75)}
+          className={'loc-dot' + (f && i.field === field ? ' in' : '') + (i.complete ? ' lit' : '')}
         />
       ))}
       {fig && (
