@@ -2538,10 +2538,22 @@ def apply(identifier, path=None):
     citations = cite_all(page['references'][first_new - 1 :])
     applied = 0
     rejudge = []
-    for n, op in enumerate(stored['operations'], 1):
+    # Statement removals come last, highest index first: their indices refer to the entry as
+    # proposed, and a statement replaced by one the same proposal adds is not refused for
+    # leaving fewer than 2 on the way.
+    steps = list(enumerate(stored['operations'], 1))
+    removals = sorted(
+        (step for step in steps if step[1]['op'] == 'remove_statement'),
+        key=lambda step: -(step[1]['index'] if isinstance(step[1]['index'], int) else -1),
+    )
+    steps = [step for step in steps if step[1]['op'] != 'remove_statement'] + removals
+    removing = len(removals)
+    for n, op in steps:
+        if op['op'] == 'remove_statement':
+            removing -= 1
         trial = copy.deepcopy(page)
         try:
-            changed = operate(trial, op, numbers)
+            changed = operate(trial, op, numbers, removing)
         except (Invalid, KeyError, TypeError, ValueError, IndexError) as error:
             log.append(
                 row(
@@ -2669,8 +2681,9 @@ def retire(page, identifier, replaced_by):
     page['milestone_order'].remove(identifier)
 
 
-def operate(page, op, numbers):
-    """Apply one operation to page in place; returns the milestone ids to re-judge."""
+def operate(page, op, numbers, removing=0):
+    """Apply one operation to page in place; returns the milestone ids to re-judge. removing:
+    statement removals still to be applied after this operation."""
     kind = op['op']
     order = page['milestone_order']
     if kind == 'add_milestone':
@@ -2729,7 +2742,7 @@ def operate(page, op, numbers):
         statement = dict(op['statement'] or {})
         if not statement:
             raise Invalid('no statement given')
-        if len(page['goal']['statements']) >= 5:
+        if len(page['goal']['statements']) - removing >= 5:
             raise Invalid('the entry already has 5 statements')
         statement['ref'] = renumber(statement['ref'], numbers)
         check_refs(page, [statement['ref']])

@@ -640,6 +640,18 @@ class PageTests(unittest.TestCase):
             list(pages.JUDGE_SCHEMA['properties'])[:3], ['shown', 'against_criterion', 'verdict']
         )
 
+    def test_a_statement_replaced_in_one_proposal_is_removed_after_the_new_one_is_added(self):
+        self.define()
+        before = self.stored()['goal']['statements']
+        self.assertEqual(len(before), 2)
+        new = {'body': 'A new body', 'year': '2020', 'quote': FOUND, 'context': None, 'ref': 2}
+        operations = [op('remove_statement', index=0), op('add_statement', statement=new)]
+        self.propose(operations)
+        line = pages.apply('BME-99')
+        self.assertIn('applied 2 of 2', line)
+        after = self.stored()['goal']['statements']
+        self.assertEqual([s['body'] for s in after], [before[1]['body'], 'A new body'])
+
     def test_apply_runs_every_operation_and_keeps_ids_permanent(self):
         self.define()
         page = self.stored()
