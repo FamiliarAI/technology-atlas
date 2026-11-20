@@ -150,7 +150,7 @@ The `page` object (shape: `SCHEMA` in `atlas/page.py` plus the keys code adds). 
 |---|---|---|
 | `id` | string | The breakthrough ID. |
 | `title`, `definition` | string | The capability in the field's terms (at most 70 characters); what would exist or be true (at most 420). |
-| `goal` | object | `need` (at most 600 characters) with `need_refs`; `figures` (a small table with caption, columns, rows, note, ref, or null); `statements`: 2 to 5 `{body, year, quote, context, ref, checked}` by bodies with standing. |
+| `goal` | object | `need` (at most 600 characters, written from the answers to the ten questions in `NEED_GUIDE`, which the model returns as `need_answers` with a reference and a quote each; code checks the quotes and keeps the answers with the call, in `need_answers.json` for define and `proposal.json` for revise, not in the page) with `need_refs`; `figures` (a small table with caption, columns, rows, note, ref, or null); `statements`: 2 to 5 `{body, year, quote, context, ref, checked}` by bodies with standing. |
 | `completion` | object | `title`, `criterion`, `set_by`, `set_by_kind` (`regulator`, `standards_body`, `professional_society`, `government_programme`, `prize`, `protocol`, `community_convention`, or `atlas` when no outside test was found), `threshold_quote` (the setting body's own passage), `threshold_ref`, `threshold_checked`, `basis`, `refs`. |
 | `case_label`, `cases` | string or null, list | Sub-cases tracked apart (2 to 5, each at most 4 words), or none. |
 | `milestone_structure` | string | `sequence` or `parallel`. |

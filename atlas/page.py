@@ -127,6 +127,9 @@ MAYBE_REF = {'type': ['integer', 'null']}
 REFS = array(REF)
 KIND = {'type': 'string', 'enum': KINDS}
 FLAG = {'type': 'boolean'}
+# The answers to NEED_GUIDE's ten questions that goal.need is written from. Kept with the call,
+# not in the page.
+NEED_ANSWERS = array(obj({'question': REF, 'answer': MAYBE, 'ref': MAYBE_REF, 'quote': MAYBE}))
 
 SCHEMA = obj(
     {
@@ -167,6 +170,7 @@ SCHEMA = obj(
                 'refs': REFS,
             }
         ),
+        'need_answers': NEED_ANSWERS,
         'case_label': MAYBE,
         'cases': array(TEXT),
         'milestone_structure': {'type': 'string', 'enum': ['sequence', 'parallel']},
@@ -245,8 +249,10 @@ HELD_SCHEMA = obj(
 
 NEED_GUIDE = """\
 need, shown under the heading "Why it is a goal", tells a reader why the world would be better
-with this breakthrough. It is not a summary of the sources. Before writing it, answer these
-questions for yourself, each from a source you opened; leave out what no source answers.
+with this breakthrough. It is not a summary of the sources. First answer these ten questions
+in need_answers, one item each, question 1 to 10: answer in one sentence; ref, the reference it
+rests on; quote, a passage of at most 300 characters copied exactly from that reference that
+supports it. When no source answers a question, set answer, ref and quote to null.
   1. Who or what is held back without it: which people, industry or science?
   2. How big is that, in numbers: people, deaths, cost, energy, share of a field's work?
   3. What do they rely on instead, and where does that fall short?
@@ -258,8 +264,10 @@ questions for yourself, each from a source you opened; leave out what no source 
   8. What has to be true for the benefit to happen?
   9. What would it not do that a reader might assume?
   10. Why can the present approach not simply be improved instead?
-Then write one paragraph from the answers, in that order: the problem and its size, what would
-change, the conditions and limits. Write from the reader's side: what is at stake and for whom.
+Then write need from those answers alone, as one coherent, well-written paragraph, not a list
+of answers: the problem and its size, what would change, the conditions and limits. Use the
+answers that matter most for this breakthrough; a reader should finish knowing what is at stake
+and why this particular breakthrough, rather than a general improvement, is needed. Write from the reader's side: what is at stake and for whom.
 Never "researchers pursue", "X proposes" or "X cautions", and no names of authors or
 institutions. Leave out what other parts carry: what it is (definition), how it will be judged
 achieved (completion), who has named it a goal (statements), prize amounts and the history of
@@ -707,6 +715,19 @@ def check_definition(page, only_new=False):
         item[flag] = check(item[quote], text)
         counts[2 if item[flag] is None else 0 if item[flag] else 1] += 1
     return counts
+
+
+def check_answers(answers, references):
+    """Mark each answer's quote checked (True), not found (False) or unreadable (None) against
+    the saved copy of its reference."""
+    refs = {r['id']: r for r in references}
+    for item in answers:
+        reference = refs.get(item['ref'])
+        if not item['quote'] or reference is None:
+            item['checked'] = None
+            continue
+        item['checked'] = check(item['quote'], read(reference['url'], reference['title']))
+    return answers
 
 
 # Citations from registries.
@@ -1261,6 +1282,12 @@ def define(
         return f'{identifier}: rejected after {attempts} attempts: {"; ".join(wrong)}'
     for milestone in answer['milestones']:
         milestone.update(status='active', replaced_by=[])
+    answers = answer.pop('need_answers', [])
+    check_answers(answers, answer['references'])
+    calls.mkdir(parents=True, exist_ok=True)
+    (calls / 'need_answers.json').write_text(
+        json.dumps(answers, indent=2, ensure_ascii=False) + '\n'
+    )
     page = {
         'id': identifier,
         **answer,
@@ -2098,6 +2125,7 @@ REVISE_SCHEMA = obj(
                 }
             )
         ),
+        'need_answers': NEED_ANSWERS,
         'new_references': array(
             obj(
                 {
@@ -2155,7 +2183,7 @@ How to revise
 
 {note}
 
-When you write or change goal.need:
+When you write or change goal.need (otherwise need_answers is an empty list):
 {need_guide}
 Operations. Every operation has op and reason; fill only the fields its op uses and set the
 others to null or an empty list.
@@ -2240,6 +2268,8 @@ def revise(identifier, note=None, call=None, writer=None):
     writer = writer or ENTRY
     run = call or model_call(REVISE_SCHEMA, writer, calls / 'call')
     proposal = run(text)
+    proposal.setdefault('need_answers', [])
+    check_answers(proposal['need_answers'], page['references'] + proposal['new_references'])
     calls.mkdir(parents=True, exist_ok=True)
     stored = {
         'id': identifier,
@@ -2300,6 +2330,13 @@ def show_proposal(stored):
         lines.append(f'{n}. {describe_op(op)}\n   Reason: {op["reason"]}')
     for r in stored['new_references']:
         lines.append(f'   New reference {r["id"]}: {r["title"]} ({r["url"]})')
+    marks = {True: 'quote found', False: 'QUOTE NOT FOUND', None: 'no quote checked'}
+    for item in stored.get('need_answers', []):
+        if item['answer'] is None:
+            lines.append(f'   Q{item["question"]}: not found')
+        else:
+            where = f'ref {item["ref"]}, {marks[item.get("checked")]}'
+            lines.append(f'   Q{item["question"]}: {item["answer"]} ({where})')
     if not stored['operations']:
         lines.append('(no operations proposed)')
     return '\n'.join(lines)

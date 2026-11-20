@@ -281,10 +281,14 @@ class PageTests(unittest.TestCase):
         line = pages.results('BME-99', search=search, judge=judge, everything=everything)
         return line, prompts
 
-    def propose(self, operations, new_references=()):
+    def propose(self, operations, new_references=(), need_answers=()):
         def call(text):
             self.revise_prompt = text
-            return {'operations': operations, 'new_references': list(new_references)}
+            return {
+                'operations': operations,
+                'new_references': list(new_references),
+                'need_answers': list(need_answers),
+            }
 
         line, path = pages.revise('BME-99', note='Add the missing stage.', call=call)
         return line, path
@@ -605,6 +609,23 @@ class PageTests(unittest.TestCase):
         self.assertEqual(self.stored(), before)
         self.assertTrue(path.is_file())
         self.assertEqual(pages.latest_proposal('BME-99'), path)
+
+    def test_revise_shows_the_answers_behind_a_new_goal_and_checks_their_quotes(self):
+        self.define()
+        answers = [
+            {'question': 1, 'answer': 'Recipients wait.', 'ref': 2, 'quote': FOUND},
+            {'question': 2, 'answer': 'Many wait.', 'ref': 2, 'quote': 'a passage nowhere in it'},
+            {'question': 3, 'answer': None, 'ref': None, 'quote': None},
+        ]
+        operations = [op('edit_text', field='goal.need', value='Why it matters.')]
+        line, path = self.propose(operations, need_answers=answers)
+        self.assertIn('ten questions', self.revise_prompt)
+        self.assertIn('movable metal type', self.revise_prompt)
+        self.assertIn('Q1: Recipients wait. (ref 2, quote found)', line)
+        self.assertIn('Q2: Many wait. (ref 2, QUOTE NOT FOUND)', line)
+        self.assertIn('Q3: not found', line)
+        stored = json.loads(path.read_text())
+        self.assertEqual([a['checked'] for a in stored['need_answers']], [True, False, None])
 
     def test_apply_runs_every_operation_and_keeps_ids_permanent(self):
         self.define()
