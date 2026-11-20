@@ -434,7 +434,10 @@ Rules
   preprint, a press release, a blog) and not machine-checked. When a mathematical criterion
   requires a prize body's ruling or the community's acceptance that has not been recorded, and
   the text reports a complete proof of the result checked in a proof assistant, the verdict is
-  met with confirmed false: the proof is in hand, the ruling is still to come.
+  met with confirmed false: the proof is in hand, the ruling is still to come. The same holds
+  when the authors report a complete proof with a proof-assistant formalization but say that a
+  certificate or a computation it relies on is still to be released or is checked outside the
+  proof assistant: the verdict is met with confirmed false, and the detail says what is pending.
 - peer_reviewed: true for a paper in a peer-reviewed journal; false for a preprint, registry
   record, filing or release.
 - kind: what the document is: journal, preprint, book, report, web, registry, filing or
