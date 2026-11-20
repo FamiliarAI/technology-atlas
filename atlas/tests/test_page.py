@@ -178,6 +178,7 @@ def op(kind, reason='It fixes a gap.', **fields):
         'index': None,
         'field': None,
         'value': None,
+        'refs': None,
         'rename_from': None,
         'rename_to': None,
     }
@@ -651,6 +652,25 @@ class PageTests(unittest.TestCase):
         self.assertIn('applied 2 of 2', line)
         after = self.stored()['goal']['statements']
         self.assertEqual([s['body'] for s in after], [before[1]['body'], 'A new body'])
+
+    def test_a_new_goal_text_carries_its_own_references(self):
+        self.define()
+        new_ref = {
+            'id': 3,
+            'kind': 'journal',
+            'url': 'https://new.example/good',
+            'doi': None,
+            'title': 'A new paper',
+            'authors': 'Doe J',
+            'container': 'J New',
+            'year': '2026',
+        }
+        operations = [op('edit_text', field='goal.need', value='Why it matters.', refs=[3, 2])]
+        self.propose(operations, new_references=[new_ref])
+        pages.apply('BME-99')
+        goal = self.stored()['goal']
+        self.assertEqual(goal['need'], 'Why it matters.')
+        self.assertEqual(goal['need_refs'], [3, 2])
 
     def test_apply_runs_every_operation_and_keeps_ids_permanent(self):
         self.define()

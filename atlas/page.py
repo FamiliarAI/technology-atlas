@@ -2268,6 +2268,12 @@ REVISE_SCHEMA = obj(
                         'enum': ['title', 'definition', 'goal.need', None],
                     },
                     'value': MAYBE,
+                    'refs': {
+                        'type': ['array', 'null'],
+                        'items': REF,
+                        'description': 'For edit_text on goal.need: the references the new text '
+                        'rests on (its need_refs); null for other operations.',
+                    },
                     'rename_from': MAYBE,
                     'rename_to': MAYBE,
                 }
@@ -2346,7 +2352,8 @@ others to null or an empty list.
   "parallel" if they are separate parts of the problem that can be reached in any order.
 - edit_completion: fields with the values that change (basis may change too).
 - add_statement: statement (body, year, quote, context, ref). remove_statement: index, from 0.
-- edit_text: field ("title", "definition" or "goal.need") and value.
+- edit_text: field ("title", "definition" or "goal.need") and value; for goal.need also refs,
+  the references the new text rests on.
 - add_case: value, a case name of at most 4 words. rename_case: rename_from and rename_to.
 - add_not_found: value, one short sentence. remove_not_found: index, from 0.
 Milestone ids are permanent: never reuse one, and refer to milestones only by id.
@@ -2758,6 +2765,10 @@ def operate(page, op, numbers, removing=0):
             raise Invalid('no value given')
         if op['field'] == 'goal.need':
             page['goal']['need'] = op['value']
+            if op.get('refs'):
+                refs = [renumber(n, numbers) for n in op['refs']]
+                check_refs(page, refs)
+                page['goal']['need_refs'] = refs
         elif op['field'] in ('title', 'definition'):
             page[op['field']] = op['value']
         else:
