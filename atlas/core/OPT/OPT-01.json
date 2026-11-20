@@ -310,12 +310,24 @@
   ],
   "prompt": "5e97d4b8dfc3"
  },
+ "review": {
+  "state": "published",
+  "note": null,
+  "into": null,
+  "at": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "state": "published"
+   }
+  ]
+ },
  "page": {
   "id": "OPT-01",
   "title": "Cascadable solid-state single-photon optical transistors",
-  "definition": "A solid-state switch in which one gate photon—a quantum of the control light—controls a larger optical signal. Its output directly drives further logic gates, which restore degraded signals and can each drive at least two subsequent gates; connecting gates in succession is cascading.",
+  "definition": "A solid-state optical transistor in which one gate photon changes the mean output of a separate signal beam by more than one photon. In a cascade, the optical output of one logic gate serves as the control input to the next. Each gate restores degraded signals to valid logic levels and supplies enough light to drive at least two subsequent gates.",
   "goal": {
-   "need": "POLLOC's final report identifies processor clocks of a few gigahertz as a constraint. Its programme objective specifies cascadable optical gates switching below 100 attojoules and in less than one picosecond. Single-photon control addresses optical input energy, but an energy advantage requires counting the total energy per logic operation.",
+   "need": "Processor clocks have stayed at a few gigahertz since shrinking transistors stopped delivering higher speeds at constant power. Electronic logic spends energy both switching gates and charging the wires between them. An optical connection can carry a control signal of less than one attojoule to the next gate. A processor could then perform more operations within the same power budget if the saving survives a comparison that includes the energy used to power every gate.",
    "need_refs": [
     1,
     2,
@@ -324,19 +336,27 @@
    "figures": null,
    "statements": [
     {
-     "body": "European Commission Horizon 2020 POLLOC project, coordinated by IBM Research",
-     "year": "2025",
-     "quote": "we aim for optically programmable, cascadable logic gates with less than 100 attojoule switching energy and sub-picosecond switching speed.",
-     "context": "The CORDIS fact sheet, updated on 1 September 2025, states the objective of the project that ran from 1 October 2020 to 30 September 2023.",
-     "ref": 2,
-     "checked": true
-    },
-    {
      "body": "Purdue University, Shalaev–Boltasseva research group",
      "year": "2025",
      "quote": "Now our goal is to make a device which will be optimized to work as a single-photon switch.",
      "context": "Demid Sychev describes development following the group's silicon electron-avalanche modulation experiment.",
      "ref": 4,
+     "checked": true
+    },
+    {
+     "body": "European Commission Horizon 2020 POLLOC project, coordinated by IBM Research GmbH",
+     "year": "2020",
+     "quote": "we aim for optically programmable, cascadable logic gates with less than 100 attojoule switching energy and sub-picosecond switching speed.",
+     "context": "The grant specified exciton-polariton condensates in inorganic perovskite microcavities. Its energy target applied to switching a gate.",
+     "ref": 2,
+     "checked": true
+    },
+    {
+     "body": "European Research Council SCALE project, coordinated by the University of Copenhagen",
+     "year": "2015",
+     "quote": "The nonlinearity will enable constructing a deterministic CNOT gate for photons or a single-photon transistor.",
+     "context": "The objective specified a single quantum dot coupled to a photonic-crystal waveguide for quantum information processing.",
+     "ref": 18,
      "checked": true
     }
    ]
@@ -362,14 +382,17 @@
   "cases": [
    "Silicon devices",
    "Quantum-dot cavities",
-   "Organic polariton cavities"
+   "Organic polariton cavities",
+   "Quantum-dot waveguides",
+   "Single-molecule cavities",
+   "Inorganic polariton cavities"
   ],
   "milestone_structure": "parallel",
   "milestones": [
    {
     "id": "m1",
     "title": "One gate photon changes the optical output of a solid-state device.",
-    "criterion": "One gate photon changes an optical output; conditioned events and weak-pulse averages remain distinct evidence. On 6 July 2018, Sun et al. reported a cavity-coupled quantum-dot spin at 3.6 K, using 63 ps gate pulses with mean 0.21 coupled photons and gate-photon coincidence conditioning. On 22 September 2021, Zasedatelev et al. reported single-photon-level polariton nonlinearity. On 17 November 2025, Sychev et al. reported silicon avalanche modulation at single-photon intensities; their preprint required averaging and could not resolve single-shot events.",
+    "criterion": "Compare the optical signal output with and without one gate photon under otherwise identical conditions. Specify where the gate photon number is defined and whether the measurement resolves individual events, conditions on detection of a gate photon, or averages over weak pulses with a known photon-number distribution.",
     "set_by": "Single-photon switching convention, operationalized by Sun et al. in their quantum-dot experiment and accompanying manuscript.",
     "set_by_kind": "community_convention",
     "threshold_quote": "a single gate photon controls the transmittance",
@@ -379,7 +402,10 @@
      6,
      8,
      9,
-     10
+     10,
+     19,
+     21,
+     22
     ],
     "status": "active",
     "replaced_by": [],
@@ -388,7 +414,7 @@
    {
     "id": "m2",
     "title": "One gate photon changes a solid-state transistor's mean optical output by more than one photon.",
-    "criterion": "The gain G, defined as the change in mean transmitted signal-photon number per gate photon, exceeds 1. Sun et al.'s 2018 quantum-dot manuscript reports G = 3.3 ± 0.4 at 29.2 ± 3.2 signal photons, measured by preparing the two spin states; collection losses limit usable gain. The Rydberg-ensemble transistor published on 22 December 2025 reports gain 151, outside the solid-state cases. The silicon modulation coefficient and polariton nonlinearity alone do not establish this photon-count gain.",
+    "criterion": "For the same incident signal, compare the mean number of transmitted signal photons with and without one gate photon. The magnitude of the difference must exceed one signal photon. Identify where the signal photons are counted so that device gain can be distinguished from the gain available after collection losses.",
     "set_by": "Single-photon-transistor gain convention, explicitly defined and applied by Sun et al.; their numerical experiment concerns a quantum-dot cavity.",
     "set_by_kind": "community_convention",
     "threshold_quote": "An important feature of transistors is that they exhibit a gain above unity.",
@@ -406,16 +432,19 @@
    {
     "id": "m3",
     "title": "The optical output of one solid-state gate controls a second gate.",
-    "criterion": "The first gate's optical output controls a second gate with compatible wavelength, spatial mode and pulse shape. On 25 June 2024, Sannikov et al. reported two cascaded organic-polariton NOT gates, using approximately 4 pJ for the interstage control beam. On 12 January 2026, Tassan et al. reported two coupled polymer-filled resonators with amplification up to 60 and extinction ratio up to 8:1 at femtojoule input energies. The cited silicon avalanche and quantum-dot studies do not demonstrate cascading.",
+    "criterion": "Connect the optical output of a first solid-state gate to the control input of a second. Vary the first gate’s output and measure the resulting change in the second gate’s output. The interstage signal must reach the second gate with compatible wavelength, spatial mode and temporal profile.",
     "set_by": "Optical-logic cascadability convention, stated and tested by Sannikov et al. in Nature Communications; their experiment used organic polariton gates.",
     "set_by_kind": "community_convention",
     "threshold_quote": "the output of one gate to act as an input to another gate",
     "threshold_ref": 12,
     "refs": [
+     3,
      6,
      10,
      12,
-     13
+     13,
+     20,
+     23
     ],
     "status": "active",
     "replaced_by": [],
@@ -424,7 +453,7 @@
    {
     "id": "m4",
     "title": "A solid-state NAND or NOR gate restores signals and drives at least two subsequent gates.",
-    "criterion": "A solid-state NAND or NOR gate jointly provides compatible optical inputs and outputs, fan-out of at least 2, restoration of logic levels and beam/pulse quality, and input/output isolation. This milestone imposes no single-photon input condition. A 2012 silicon-microring experiment showed approximately 2 dB gate variation producing approximately 18 dB output contrast, a restoration result. That component result and the cited quantum-dot and polariton demonstrations do not establish the combined gate test.",
+    "criterion": "Demonstrate NAND or NOR in a solid-state gate whose optical output matches the inputs of at least two subsequent gates in wavelength, mode and pulse shape and is sufficient to drive both. Show that degraded inputs produce valid output logic levels with restored beam or pulse quality, and that light reflected into the output does not act as a control input. The control pulse may contain multiple photons.",
     "set_by": "Miller's published optical-logic criteria, Box 1 of Nature Photonics, applied subsequently by Varghese et al. to silicon optical transistors.",
     "set_by_kind": "community_convention",
     "threshold_quote": "fan-out or signal gain of at least two",
@@ -439,6 +468,22 @@
     "status": "active",
     "replaced_by": [],
     "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "A solid-state optical gate implements NAND or NOR for all four two-input combinations.",
+    "criterion": "Apply the optical input pairs 00, 01, 10 and 11 and measure the output logic level for each. In that order, the outputs must be 1, 1, 1, 0 for NAND or 1, 0, 0, 0 for NOR.",
+    "set_by": "The NAND and NOR truth tables, applied to two independently controlled optical inputs by Sannikov and colleagues.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "basic complete logic functionality such as NOR or NAND gates",
+    "threshold_ref": 3,
+    "refs": [
+     3,
+     12
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
    }
   ],
   "measures": [],
@@ -446,7 +491,7 @@
    "No external acceptance test was found that combines single-photon control with all six circuit criteria in a solid-state optical logic family.",
    "No external numerical acceptance thresholds were found for the combined capability's error probability, fabrication yield or circuit stage count.",
    "The full silicon journal article and its final supplementary PDF were unavailable; its publisher abstract and preprint were readable.",
-   "The full 2021 polariton journal article and its supplementary PDF were unavailable; its publisher abstract was readable."
+   "The publisher’s supplementary PDF for the 2021 polariton study could not be retrieved."
   ],
   "references": [
    {
@@ -686,12 +731,167 @@
     "issue": null,
     "pages": null,
     "citation_source": "model"
+   },
+   {
+    "id": 18,
+    "kind": "registry",
+    "url": "https://cordis.europa.eu/project/id/669758",
+    "doi": "10.3030/669758",
+    "title": "Scalable Quantum Photonic Networks",
+    "authors": "European Commission",
+    "container": "CORDIS",
+    "year": "2015",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 19,
+    "kind": "journal",
+    "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.127.133603",
+    "doi": "10.1103/PhysRevLett.127.133603",
+    "title": "Single-Molecule Vacuum Rabi Splitting: Four-Wave Mixing and Optical Switching at the Single-Photon Level",
+    "authors": "Pscherer A, Meierhofer M, Wang D, Kelkar H, Martín-Cano D, Utikal T, et al.",
+    "container": "Phys. Rev. Lett.",
+    "year": "2021",
+    "volume": "127",
+    "issue": "13",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 20,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41566-019-0392-8?code=none&error=cookies_not_supported",
+    "doi": "10.1038/s41566-019-0392-8",
+    "title": "A room-temperature organic polariton transistor",
+    "authors": "Zasedatelev AV, Baranikov AV, Urbonas D, Scafirimuto F, Scherf U, Stöferle T, et al.",
+    "container": "Nat. Photonics",
+    "year": "2019",
+    "volume": "13",
+    "issue": "6",
+    "pages": "378-383",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 21,
+    "kind": "journal",
+    "url": "https://authors.library.caltech.edu/records/7xnzn-erk30",
+    "doi": "10.1126/science.1154643",
+    "title": "Controlled Phase Shifts with a Single Quantum Dot",
+    "authors": "Fushman I, Englund D, Faraon A, Stoltz N, Petroff P, Vučković J",
+    "container": "Science",
+    "year": "2008",
+    "volume": "320",
+    "issue": "5877",
+    "pages": "769-772",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 22,
+    "kind": "journal",
+    "url": "https://eprints.gla.ac.uk/253203/",
+    "doi": "10.1038/nphoton.2012.181",
+    "title": "Ultrafast all-optical switching by single photons",
+    "authors": "Volz T, Reinhard A, Winger M, Badolato A, Hennessy KJ, Hu EL, et al.",
+    "container": "Nature Photon",
+    "year": "2012",
+    "volume": "6",
+    "issue": "9",
+    "pages": "605-609",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 23,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/ncomms2734.pdf",
+    "doi": "10.1038/ncomms2734",
+    "title": "All-optical polariton transistor",
+    "authors": "Ballarini D, De Giorgi M, Cancellieri E, Houdré R, Giacobino E, Cingolani R, et al.",
+    "container": "Nat Commun",
+    "year": "2013",
+    "volume": "4",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 24,
+    "kind": "preprint",
+    "url": "https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=921467",
+    "doi": null,
+    "title": "Quadrature Demodulation of a Quantum Dot Optical Response to Faint Light Fields",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 25,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/1201.4071",
+    "doi": null,
+    "title": "All-optical polariton transistor",
+    "authors": "Ballarini D, Giorgi MD, Cancellieri E, Houdré R, Giacobino E, Cingolani R, et al.",
+    "container": "arXiv",
+    "year": "2012",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 26,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/2305.10194",
+    "doi": null,
+    "title": "Experimental realization of topologically-protected all-optical logic gates based on silicon photonic crystal slabs",
+    "authors": "Zhang F, He L, Zhang H, Kong LJ, Xu X, Zhang X",
+    "container": "arXiv",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 27,
+    "kind": "report",
+    "url": "https://www.photonics.intec.ugent.be/download/pub_1973.pdf",
+    "doi": null,
+    "title": "All-Optical High Speed NOR Gate Based on Two Photon Absorption in Silicon Wire Waveguides",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 28,
+    "kind": "journal",
+    "url": "https://media.springernature.com/original/springer-static/esm/art:10.1038%2Fnnano.2012.144/MediaObjects/41565_2012_BFnnano2012144_MOESM301_ESM.pdf",
+    "doi": "10.1038/NNANO.2012.144",
+    "title": "Supplementary Information: All-Optical Active Switching in Individual Semiconductor Nanowires",
+    "authors": "Piccione B, Cho CH, van Vugt LK, Agarwal R",
+    "container": "Nature Nanotech",
+    "year": "2012",
+    "volume": "7",
+    "issue": "10",
+    "pages": "640-645",
+    "citation_source": "crossref"
    }
   ],
   "milestone_order": [
    "m1",
    "m2",
    "m3",
+   "m5",
    "m4"
   ],
   "results": [
@@ -711,62 +911,6 @@
    },
    {
     "milestone": "m1",
-    "case": "Silicon devices",
-    "verdict": "met",
-    "finding": "A silicon device showed optical modulation at single-photon-level control intensity; sample size not stated.",
-    "detail": "The result is reported at single-photon intensity. The research notes say the preprint required averaging and could not resolve single-shot events.",
-    "quote": "This behavior effectively mimics a photonic transistor, where a single-photon-level signal modulates a macroscopic optical beam,",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": false,
-    "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
-   },
-   {
-    "milestone": "m2",
-    "case": "Silicon devices",
-    "verdict": "partial",
-    "finding": "A single-photon-level signal modulated a macroscopic optical beam; sample size and photon-count gain not stated.",
-    "detail": "The source does not quantify the change in mean output photon number per gate photon, so it does not establish gain greater than 1.",
-    "quote": "This behavior effectively mimics a photonic transistor, where a single-photon-level signal modulates a macroscopic optical beam,",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": false,
-    "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
-   },
-   {
-    "milestone": "m1",
-    "case": "Quantum-dot cavities",
-    "verdict": "met",
-    "finding": "One quantum-dot cavity device showed a gate-conditioned signal transmittance change of 0.21 ± 0.02.",
-    "detail": "At 3.6 K, 63 ps gate pulses averaged 0.21 photons coupled to the cavity. The signal measurement was conditioned on detection of a reflected gate photon; the weak coherent gate had a small multiphoton probability.",
-    "quote": "At both conditions, the gate \npulse induces a change in the  signal transmittance by 0.21 0.02± .",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
-   },
-   {
-    "milestone": "m2",
-    "case": "Quantum-dot cavities",
-    "verdict": "met",
-    "finding": "One quantum-dot cavity transistor achieved a maximum gain of 3.3 ± 0.4.",
-    "detail": "Gain was determined from the difference between prepared spin-up and spin-down states, at 29.2 ± 3.2 signal photons. Low coupling and collection efficiency limit usable gain.",
-    "quote": "We achieve the maximum \ngain of 3.3 0.4G= ±  with a photon number of 29.2 3.2sN = ± .",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
-   },
-   {
-    "milestone": "m1",
     "case": "Organic polariton cavities",
     "verdict": "met",
     "finding": "Organic polariton cavity: 900 seeded and 900 unseeded realizations showed 11% contrast at one average seed photon per pulse.",
@@ -780,109 +924,249 @@
     "judged_on": "2026-11-14"
    },
    {
+    "milestone": "m1",
+    "case": "Silicon devices",
+    "verdict": "partial",
+    "finding": "Silicon modulation at single-photon light intensities; sample size not stated.",
+    "detail": "The abstract reports modulation but does not establish the photon-number definition or measurement method required by the criterion.",
+    "quote": "Here we demonstrate all-optical modulation of the refractive index enabled by the electron avalanche process in silicon using a control beam with single-photon light intensities.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 9,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-20"
+   },
+   {
+    "milestone": "m1",
+    "case": "Silicon devices",
+    "verdict": "partial",
+    "finding": "One silicon detector showed reflected-beam modulation at single-photon-level control intensity.",
+    "detail": "The text does not quantify the modulation or establish how individual gate photons were measured.",
+    "quote": "The team then shone a second beam onto their device and showed that it also experienced the change in reflected intensity triggered by the initial control beam.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-20"
+   },
+   {
+    "milestone": "m2",
+    "case": "Silicon devices",
+    "verdict": "partial",
+    "finding": "One silicon detector modulated a macroscopic beam at single-photon-level control intensity.",
+    "detail": "No signal-photon gain or collection-loss accounting is reported.",
+    "quote": "This behavior effectively mimics a photonic transistor, where a single-photon-level signal modulates a macroscopic optical beam,",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-20"
+   },
+   {
+    "milestone": "m1",
+    "case": "Quantum-dot cavities",
+    "verdict": "met",
+    "finding": "One quantum-dot cavity: gate-conditioned signal transmittance changed by 0.21 ± 0.02.",
+    "detail": "The gate was a weak coherent pulse, and detection post-selected reflected photons coupled to the cavity. The corrected single-photon contrast was 0.24 ± 0.02.",
+    "quote": "At both conditions, the gate \npulse induces a change in the  signal transmittance by 0.21 0.02± .",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 6,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-20"
+   },
+   {
+    "milestone": "m2",
+    "case": "Quantum-dot cavities",
+    "verdict": "met",
+    "finding": "One quantum-dot cavity: the inferred signal-output change was about 2.8 photons.",
+    "detail": "The 2.8-photon change is 23.0 × 0.12, using the corrected switching contrast. The separately reported 3.3 ± 0.4 maximum gain uses coherently prepared spin states; low collection efficiency limits usable gain.",
+    "quote": "The transmittance shows clear switching \nbehavior for all cases. We calculate the switching contrast at the three signal photon numbers to \nbe 0.22 0.03ξ = ± , 0.17 0.02ξ = ±  and 0.12 0.02ξ = ±  respectively.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 6,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-20"
+   },
+   {
     "milestone": "m3",
     "case": "Organic polariton cavities",
     "verdict": "met",
-    "finding": "Two cascaded organic-polariton NOT gates used an interstage control beam of approximately 4 pJ.",
-    "detail": "The first gate’s emission was redirected through a prism and spatially and temporally overlapped with the second gate; the emission angle was chosen to maximize spectral overlap.",
-    "quote": "Evidently, the condensate control beam induces polariton amplification at a non-ground-state of the lower polariton dispersion of the second gate, whilst quenching the emission of condensate. We note here that in this instance the control beam energy is ≈4 pJ.",
+    "finding": "Two coupled organic polariton NOT gates reached approximately −13 dB extinction in the second gate.",
+    "detail": "The first gate’s emission was redirected through a prism; the second gate’s extinction was measured as a function of incident seed energy.",
+    "quote": "We observe that the extinction ratio reaches a plateau at ≈−13 dB due to the exciton-reservoir depletion at the second gate.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 12,
     "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_on": "2026-11-20"
+   },
+   {
+    "milestone": "m5",
+    "case": "Organic polariton cavities",
+    "verdict": "met",
+    "finding": "One two-input organic polariton gate demonstrated the NOR truth table across four input combinations.",
+    "detail": "The gate used two equal-power seed beams and non-resonant optical pumping at room temperature.",
+    "quote": "Figure\n4\na shows the spatial profile of the emission intensity for the four input configurations of the two seed beams, and the corresponding dispersions demonstrating that in the presence of either of the inputs, non-ground-state amplification supersedes spontaneous ground-state condensation, resulting at the truth-table of the universal NOR gate, see inset of Fig.\n3\nd.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 12,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-20"
+   },
+   {
+    "milestone": "m4",
+    "case": "Organic polariton cavities",
+    "verdict": "partial",
+    "finding": "One organic polariton NOR gate was demonstrated; fan-out to at least two gates was inferred for a NOT gate.",
+    "detail": "The fan-out estimate assumes −5 dB is a workable NOT-gate threshold; the experiment coupled one output to one subsequent gate.",
+    "quote": "Assuming that an extinction ratio of −5 dB is the threshold for a workable NOT gate, it should be possible to cascade one gate to at least 2 other gates without regeneration of the output of the first gate.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 12,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-20"
    },
    {
     "milestone": "m3",
     "case": "Organic polariton cavities",
     "verdict": "met",
-    "finding": "Two coupled organic-polariton resonators demonstrated optical control with amplification up to 60×.",
-    "detail": "The seed cavity output entered the same mode of a matched transistor cavity; amplification required the seed excitation to precede transistor excitation by about 1 ps.",
-    "quote": "We demonstrate ultrafast all-optical transistor action by \ncoupling two resonators and utilizing seeded polariton condensation. With a device area as small as 2×2 \nµm2, we realize picosecond switching and amplification up to 60x , with extinction ratio up to 8:1 .",
+    "finding": "One pair of organic polariton cavities: the seed reduced the second cavity’s threshold by about 15%.",
+    "detail": "The reported reduction used seed excitation at 1.5 Pth; amplification occurred when the seed was excited approximately 1 ps before the transistor.",
+    "quote": "Furthermore, we observe a significant  \nthreshold reduction of the transistor cavity (Fig. 3e), which for this seed fluence is about 15%, but can reach \nmore than 30% with stronger seed (Pseed = 2 Pth).",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 16,
     "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_on": "2026-11-20"
    },
    {
     "milestone": "m3",
     "case": "Organic polariton cavities",
-    "verdict": "met",
-    "finding": "Two coupled organic-polymer resonators achieved up to 60× amplification, with one supplying the signal to the other transistor.",
-    "detail": "The authors also report validating cascadability using three excitation pulses; the abstract does not specify their energies.",
+    "verdict": "partial",
+    "finding": "Two coupled organic polariton resonators achieved switching in under 2 ps.",
+    "detail": "The abstract reports a three-pulse cascadability test but does not describe its interstage measurements or signal compatibility.",
     "quote": "Coupling two resonators where one generates the signal and the other serves as transistor, we demonstrate ultrafast switching within less than 2 ps and achieve up to 60X amplification and 8:1 extinction ratio.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 17,
     "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_on": "2026-11-20"
+   },
+   {
+    "milestone": "m1",
+    "case": "Organic polariton cavities",
+    "verdict": "met",
+    "finding": "Organic polariton cavity: 900 seeded and 900 unseeded shots gave about 11% contrast at one incident seed photon per pulse on average.",
+    "detail": "The output was analyzed pulse by pulse, but the incident seed had a Poissonian photon-number distribution and individual seed photon numbers were not resolved.",
+    "quote": "At the single average photon level, we observe all-optical polariton switching with a con-\ntrast of ~20−30% as shown by time-integrated measurements, and ~11%  \nfollowing a pulse-to-pulse analysis of single-shot condensate reali -\nzations.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 8,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-20"
+   },
+   {
+    "milestone": "m2",
+    "case": "Organic polariton cavities",
+    "verdict": "partial",
+    "finding": "Organic polariton cavity: approximately 23,000 polaritons per injected polariton; sample size not stated.",
+    "detail": "The reported polariton amplification is not a measured difference in transmitted signal-photon counts, and the output collection efficiency needed to assess available photon gain is not specified.",
+    "quote": "Our investigation demonstrates few-photon control over the \npolariton condensate occupancy with a record amplification of ~23,000 \npolaritons for every resonantly injected polariton.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 8,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-20"
+   },
+   {
+    "milestone": "m1",
+    "case": "Quantum-dot waveguides",
+    "verdict": "partial",
+    "finding": "One quantum-dot waveguide, addressing approximately 3–5 dots, showed a maximum probe phase modulation of 0.09π radians at about 10 pump photons per dot lifetime.",
+    "detail": "The pump was a modulated continuous-wave field, and the probe was measured by heterodyne detection. The reported phase value is near 10 average pump photons per lifetime, not an isolated one-photon result.",
+    "quote": "For large N \napproaching 10 (~1 aJ pump energy), we observe an asymptotic value \nof ∆𝜑̂ =0.09×rad.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 24,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-20"
+   },
+   {
+    "milestone": "m3",
+    "case": "Inorganic polariton cavities",
+    "verdict": "met",
+    "finding": "Two polariton transistor regions 40 µm apart switched on and off in cascade.",
+    "detail": "The interstage signal remained inside the microcavity; the experiment used continuous-wave excitation at 10 K.",
+    "quote": "When the density of C is \nincreased the switching  of A results in  a polariton fluid  moving towards point B, bringing above \nthreshold the second Address B, which in turn propagates in the perpendicular direction.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 25,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-20"
+   },
+   {
+    "milestone": "m5",
+    "case": "Silicon devices",
+    "verdict": "met",
+    "finding": "Silicon NOR gate, sample size not stated: measured output intensity was 0.0625 for each of the three logic-0 inputs.",
+    "detail": "The reported logic-1 intensity for input 00 was 0.5625. Fiber phase modulators were used because the input phases were unstable.",
+    "quote": "In the other three cases (Figs. S14(c)-S14(h)), the logic output intensity can be \ncalculated and measured as 0.0625 (1/9 of 0.5625).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 26,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-20"
+   },
+   {
+    "milestone": "m5",
+    "case": "Silicon devices",
+    "verdict": "met",
+    "finding": "One silicon waveguide produced the NOR output sequence 1000 for input pairs 00, 01, 10 and 11.",
+    "detail": "The equivalent data rate was 80 Gbps. The detector bandwidth prevented direct measurement of the actual modulation depth.",
+    "quote": "It is apparent from Fig. 4(c) that the output logic NOR operation was \n“0100”.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 27,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-20"
+   },
+   {
+    "milestone": "m5",
+    "case": "Inorganic polariton cavities",
+    "verdict": "met",
+    "finding": "One CdS nanowire device produced the NAND output sequence 1, 1, 1, 0 for four optical input pairs.",
+    "detail": "Inputs were defined by whether each switch's argon-ion pump was on. Output 1 meant an integrated intensity drop below 66%; output 0 meant a drop above 83%.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 28,
+    "judged_by": "gpt-6.1-terra",
+    "judged_on": "2026-11-20"
    }
   ],
   "judged": [
    {
     "url": "https://doi.org/10.1038/nphoton.2009.240",
-    "milestone": "m1",
-    "hash": "a5136341279c",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://doi.org/10.1038/nphoton.2009.240",
-    "milestone": "m2",
-    "hash": "6546139aa88e",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://doi.org/10.1038/nphoton.2009.240",
-    "milestone": "m3",
-    "hash": "259581a8b53e",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://doi.org/10.1038/nphoton.2009.240",
-    "milestone": "m4",
-    "hash": "52c004d8b44b",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://doi.org/10.1038/nphoton.2009.240",
     "milestone": "completion",
     "hash": "20738d0907f5",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://dabm.stanford.edu/wp-content/uploads/2020/11/O11.pdf",
-    "milestone": "m1",
-    "hash": "a5136341279c",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://dabm.stanford.edu/wp-content/uploads/2020/11/O11.pdf",
-    "milestone": "m2",
-    "hash": "6546139aa88e",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://dabm.stanford.edu/wp-content/uploads/2020/11/O11.pdf",
-    "milestone": "m3",
-    "hash": "259581a8b53e",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://dabm.stanford.edu/wp-content/uploads/2020/11/O11.pdf",
-    "milestone": "m4",
-    "hash": "52c004d8b44b",
     "date": "2026-11-14",
     "by": "gpt-6.1-terra"
    },
@@ -895,64 +1179,8 @@
    },
    {
     "url": "https://doi.org/10.1038/s41565-025-02056-2",
-    "milestone": "m1",
-    "hash": "a5136341279c",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://doi.org/10.1038/s41565-025-02056-2",
-    "milestone": "m2",
-    "hash": "6546139aa88e",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://doi.org/10.1038/s41565-025-02056-2",
-    "milestone": "m3",
-    "hash": "259581a8b53e",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://doi.org/10.1038/s41565-025-02056-2",
-    "milestone": "m4",
-    "hash": "52c004d8b44b",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://doi.org/10.1038/s41565-025-02056-2",
     "milestone": "completion",
     "hash": "20738d0907f5",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://phys.org/news/2025-12-optical-modulation-silicon-electron-avalanche.html",
-    "milestone": "m1",
-    "hash": "a5136341279c",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://phys.org/news/2025-12-optical-modulation-silicon-electron-avalanche.html",
-    "milestone": "m2",
-    "hash": "6546139aa88e",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://phys.org/news/2025-12-optical-modulation-silicon-electron-avalanche.html",
-    "milestone": "m3",
-    "hash": "259581a8b53e",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://phys.org/news/2025-12-optical-modulation-silicon-electron-avalanche.html",
-    "milestone": "m4",
-    "hash": "52c004d8b44b",
     "date": "2026-11-14",
     "by": "gpt-6.1-terra"
    },
@@ -961,52 +1189,395 @@
     "milestone": "completion",
     "hash": "20738d0907f5",
     "date": "2026-11-14",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://doi.org/10.1038/nphoton.2009.240",
+    "milestone": "m1",
+    "hash": "3bd63b0155aa",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://doi.org/10.1038/nphoton.2009.240",
+    "milestone": "m2",
+    "hash": "c19c2203eba7",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://doi.org/10.1038/nphoton.2009.240",
+    "milestone": "m3",
+    "hash": "bc48a9415822",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://doi.org/10.1038/nphoton.2009.240",
+    "milestone": "m5",
+    "hash": "edaf5abb7aab",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://doi.org/10.1038/nphoton.2009.240",
+    "milestone": "m4",
+    "hash": "69baaab0b8c0",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://dabm.stanford.edu/wp-content/uploads/2020/11/O11.pdf",
+    "milestone": "m1",
+    "hash": "3bd63b0155aa",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://dabm.stanford.edu/wp-content/uploads/2020/11/O11.pdf",
+    "milestone": "m2",
+    "hash": "c19c2203eba7",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://dabm.stanford.edu/wp-content/uploads/2020/11/O11.pdf",
+    "milestone": "m3",
+    "hash": "bc48a9415822",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://dabm.stanford.edu/wp-content/uploads/2020/11/O11.pdf",
+    "milestone": "m5",
+    "hash": "edaf5abb7aab",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://dabm.stanford.edu/wp-content/uploads/2020/11/O11.pdf",
+    "milestone": "m4",
+    "hash": "69baaab0b8c0",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://doi.org/10.1038/s41565-025-02056-2",
+    "milestone": "m1",
+    "hash": "3bd63b0155aa",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://doi.org/10.1038/s41565-025-02056-2",
+    "milestone": "m2",
+    "hash": "c19c2203eba7",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://doi.org/10.1038/s41565-025-02056-2",
+    "milestone": "m3",
+    "hash": "bc48a9415822",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://doi.org/10.1038/s41565-025-02056-2",
+    "milestone": "m5",
+    "hash": "edaf5abb7aab",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://doi.org/10.1038/s41565-025-02056-2",
+    "milestone": "m4",
+    "hash": "69baaab0b8c0",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://phys.org/news/2025-12-optical-modulation-silicon-electron-avalanche.html",
+    "milestone": "m1",
+    "hash": "3bd63b0155aa",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://phys.org/news/2025-12-optical-modulation-silicon-electron-avalanche.html",
+    "milestone": "m2",
+    "hash": "c19c2203eba7",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://phys.org/news/2025-12-optical-modulation-silicon-electron-avalanche.html",
+    "milestone": "m3",
+    "hash": "bc48a9415822",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://phys.org/news/2025-12-optical-modulation-silicon-electron-avalanche.html",
+    "milestone": "m5",
+    "hash": "edaf5abb7aab",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://phys.org/news/2025-12-optical-modulation-silicon-electron-avalanche.html",
+    "milestone": "m4",
+    "hash": "69baaab0b8c0",
+    "date": "2026-11-20",
     "by": "gpt-6.1-terra"
    },
    {
     "url": "https://arxiv.org/pdf/1805.01964",
     "milestone": "m1",
-    "hash": "a5136341279c",
-    "date": "2026-11-14",
+    "hash": "3bd63b0155aa",
+    "date": "2026-11-20",
     "by": "gpt-6.1-terra"
    },
    {
     "url": "https://arxiv.org/pdf/1805.01964",
     "milestone": "m2",
-    "hash": "6546139aa88e",
-    "date": "2026-11-14",
+    "hash": "c19c2203eba7",
+    "date": "2026-11-20",
     "by": "gpt-6.1-terra"
    },
    {
-    "url": "https://einstein.nju.edu.cn/upload/uploadify/20211020/20210922-Nature-Single-photon%20nonlinearity%20at%20room%20temperature_202110201447540094.pdf",
+    "url": "https://arxiv.org/pdf/1805.01964",
+    "milestone": "m3",
+    "hash": "bc48a9415822",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1805.01964",
+    "milestone": "m5",
+    "hash": "edaf5abb7aab",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1805.01964",
+    "milestone": "m4",
+    "hash": "69baaab0b8c0",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1805.01964",
+    "milestone": "completion",
+    "hash": "20738d0907f5",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11199649/",
     "milestone": "m1",
-    "hash": "a5136341279c",
-    "date": "2026-11-14",
+    "hash": "3bd63b0155aa",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11199649/",
+    "milestone": "m2",
+    "hash": "c19c2203eba7",
+    "date": "2026-11-20",
     "by": "gpt-6.1-terra"
    },
    {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11199649/",
     "milestone": "m3",
-    "hash": "259581a8b53e",
-    "date": "2026-11-14",
+    "hash": "bc48a9415822",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11199649/",
+    "milestone": "m5",
+    "hash": "edaf5abb7aab",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11199649/",
+    "milestone": "m4",
+    "hash": "69baaab0b8c0",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11199649/",
+    "milestone": "completion",
+    "hash": "20738d0907f5",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2404.01868",
+    "milestone": "m1",
+    "hash": "3bd63b0155aa",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2404.01868",
+    "milestone": "m2",
+    "hash": "c19c2203eba7",
+    "date": "2026-11-20",
     "by": "gpt-6.1-terra"
    },
    {
     "url": "https://arxiv.org/pdf/2404.01868",
     "milestone": "m3",
-    "hash": "259581a8b53e",
-    "date": "2026-11-14",
+    "hash": "bc48a9415822",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2404.01868",
+    "milestone": "m5",
+    "hash": "edaf5abb7aab",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2404.01868",
+    "milestone": "m4",
+    "hash": "69baaab0b8c0",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2404.01868",
+    "milestone": "completion",
+    "hash": "20738d0907f5",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://research.ibm.com/publications/integrated-ultrafast-all-optical-transistors-and-gates-with-organic-exciton-polariton-condensates",
+    "milestone": "m1",
+    "hash": "3bd63b0155aa",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://research.ibm.com/publications/integrated-ultrafast-all-optical-transistors-and-gates-with-organic-exciton-polariton-condensates",
+    "milestone": "m2",
+    "hash": "c19c2203eba7",
+    "date": "2026-11-20",
     "by": "gpt-6.1-terra"
    },
    {
     "url": "https://research.ibm.com/publications/integrated-ultrafast-all-optical-transistors-and-gates-with-organic-exciton-polariton-condensates",
     "milestone": "m3",
-    "hash": "259581a8b53e",
-    "date": "2026-11-14",
+    "hash": "bc48a9415822",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://research.ibm.com/publications/integrated-ultrafast-all-optical-transistors-and-gates-with-organic-exciton-polariton-condensates",
+    "milestone": "m5",
+    "hash": "edaf5abb7aab",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://research.ibm.com/publications/integrated-ultrafast-all-optical-transistors-and-gates-with-organic-exciton-polariton-condensates",
+    "milestone": "m4",
+    "hash": "69baaab0b8c0",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://research.ibm.com/publications/integrated-ultrafast-all-optical-transistors-and-gates-with-organic-exciton-polariton-condensates",
+    "milestone": "completion",
+    "hash": "20738d0907f5",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://einstein.nju.edu.cn/upload/uploadify/20211020/20210922-Nature-Single-photon%20nonlinearity%20at%20room%20temperature_202110201447540094.pdf",
+    "milestone": "m1",
+    "hash": "3bd63b0155aa",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://einstein.nju.edu.cn/upload/uploadify/20211020/20210922-Nature-Single-photon%20nonlinearity%20at%20room%20temperature_202110201447540094.pdf",
+    "milestone": "m2",
+    "hash": "c19c2203eba7",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://einstein.nju.edu.cn/upload/uploadify/20211020/20210922-Nature-Single-photon%20nonlinearity%20at%20room%20temperature_202110201447540094.pdf",
+    "milestone": "m3",
+    "hash": "bc48a9415822",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://einstein.nju.edu.cn/upload/uploadify/20211020/20210922-Nature-Single-photon%20nonlinearity%20at%20room%20temperature_202110201447540094.pdf",
+    "milestone": "m5",
+    "hash": "edaf5abb7aab",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://einstein.nju.edu.cn/upload/uploadify/20211020/20210922-Nature-Single-photon%20nonlinearity%20at%20room%20temperature_202110201447540094.pdf",
+    "milestone": "m4",
+    "hash": "69baaab0b8c0",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://einstein.nju.edu.cn/upload/uploadify/20211020/20210922-Nature-Single-photon%20nonlinearity%20at%20room%20temperature_202110201447540094.pdf",
+    "milestone": "completion",
+    "hash": "20738d0907f5",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=921467",
+    "milestone": "m1",
+    "hash": "3bd63b0155aa",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1201.4071",
+    "milestone": "m3",
+    "hash": "bc48a9415822",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2305.10194",
+    "milestone": "m5",
+    "hash": "edaf5abb7aab",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.photonics.intec.ugent.be/download/pub_1973.pdf",
+    "milestone": "m5",
+    "hash": "edaf5abb7aab",
+    "date": "2026-11-20",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://media.springernature.com/original/springer-static/esm/art:10.1038%2Fnnano.2012.144/MediaObjects/41565_2012_BFnnano2012144_MOESM301_ESM.pdf",
+    "milestone": "m5",
+    "hash": "edaf5abb7aab",
+    "date": "2026-11-20",
     "by": "gpt-6.1-terra"
    }
   ],
-  "version": 1,
+  "version": 3,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1048,20 +1619,153 @@
     "date": "2026-11-14",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 9 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"A solid-state optical transistor in which one gate photon changes the mean output of a separate signal beam by more than one photon. In a cascade, the optical output of one logic gate serves as the control input to the next. Each gate restores degraded signals to valid logic levels and supplies enough light to drive at least two subsequent gates.\". Reason: A bright signal beam can undergo a very small change, so its brightness alone does not specify transistor gain."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Processor clocks have stayed at a few gigahertz since shrinking transistors stopped delivering higher speeds at constant power. Electronic logic spends energy both switching gates and charging the wires between them. An optical connection can carry a control signal of less than one attojoule to the next gate. A processor could then perform more operations within the same power budget if the saving survives a comparison that includes the energy used to power every gate.\". Reason: The current rationale gives programme targets but leaves out what lower energy per operation would buy a power-limited processor."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "atlas.page",
+    "action": "Skipped proposed operation 3 (remove statement 0): the entry needs at least 2 statements. Its reason: The 2025 date places the POLLOC objective after the grant ended in September 2023."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by European Commission Horizon 2020 POLLOC project, coordinated by IBM Research GmbH, 2020: \"we aim for optically programmable, cascadable logic gates with less than 100 attojoule switching energy and sub-picosecond switching speed.\". Reason: The grant record dates the objective to the project signed in 2020 and identifies its intended material platform."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by European Research Council SCALE project, coordinated by the University of Copenhagen, 2015: \"The nonlinearity will enable constructing a deterministic CNOT gate for photons or a single-photon transistor.\". Reason: SCALE explicitly named a solid-state single-photon transistor in a funded project objective."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "gpt-6.2-astra",
+    "action": "add case \"Quantum-dot waveguides\". Reason: SCALE specified a waveguide-coupled quantum dot, a geometry outside the existing cavity case."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "gpt-6.2-astra",
+    "action": "add case \"Single-molecule cavities\". Reason: Pscherer and colleagues measured optical switching mediated by a single dye molecule embedded in an anthracene crystal."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "gpt-6.2-astra",
+    "action": "add case \"Inorganic polariton cavities\". Reason: The quantum-well polariton cascade demonstrated by Ballarini and colleagues and the perovskite cavities specified by POLLOC fall outside the organic polariton case."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Compare the optical signal output with and without one gate photon under otherwise identical conditions. Specify where the gate photon number is defined and whether the measurement resolves individual events, conditions on detection of a gate photon, or averages over weak pulses with a known photon-number distribution.\"; refs = [5, 6, 8, 9, 10, 20, 22, 23]. Reason: The criterion mixes the one-photon test with later results and omits earlier quantum-dot experiments that distinguish cavity occupation from incident photon number."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"For the same incident signal, compare the mean number of transmitted signal photons with and without one gate photon. The magnitude of the difference must exceed one signal photon. Identify where the signal photons are counted so that device gain can be distinguished from the gain available after collection losses.\". Reason: The gain test should specify which photons are counted without embedding a measured gain or a comparison with an atomic ensemble."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Connect the optical output of a first solid-state gate to the control input of a second. Vary the first gate\\u2019s output and measure the resulting change in the second gate\\u2019s output. The interstage signal must reach the second gate with compatible wavelength, spatial mode and temporal profile.\"; refs = [3, 6, 10, 12, 13, 21, 24]. Reason: The two-gate test is independent of the reported pulse energies, and both inorganic and organic polariton cascades predate the examples in the criterion."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m3: \"A solid-state optical gate implements NAND or NOR for all four two-input combinations.\". Reason: A measured universal-gate truth table marks progress that neither a two-inverter cascade nor the combined fan-out and restoration test records on its own."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"Demonstrate NAND or NOR in a solid-state gate whose optical output matches the inputs of at least two subsequent gates in wavelength, mode and pulse shape and is sufficient to drive both. Show that degraded inputs produce valid output logic levels with restored beam or pulse quality, and that light reflected into the output does not act as a control input. The control pulse may contain multiple photons.\". Reason: The silicon inverter measurement illustrates one component of the test, while the milestone requires circuit properties demonstrated together in a universal gate."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 3. Reason: The published 2021 polariton article, including the single-shot measurements in Figure 4 and the Methods, is available in [the full paper](https://einstein.nju.edu.cn/upload/uploadify/20211020/20210922-Nature-Single-photon%20nonlinearity%20at%20room%20temperature_202110201447540094.pdf)."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"The publisher’s supplementary PDF for the 2021 polariton study could not be retrieved.\". Reason: Only the separately published supplement remains an access gap for the 2021 polariton result."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "atlas.page",
+    "action": "Applied 14 of 15 proposed operations from OPT-01-revise-20261120T224307891737Z; now version 2."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m3, m5, m4."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 7 from Crossref, 0 from PubMed, 0 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 3 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "claude-opus-5-5",
+    "action": "remove statement 0. Reason: The 2025 date places the POLLOC objective after the grant ended in September 2023; the 2020 statement replaces it (operation 3 of the Astra proposal, skipped then because the entry needs at least 2 statements)."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "atlas.page",
+    "action": "Applied 1 of 1 proposed operations from OPT-01-revise-opus-20261120T230000Z; now version 3."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 0 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "gpt-6.1-terra",
+    "action": "Judged 9 sources the entry already uses against the milestones they had not been judged against, without search."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "gpt-6.1-sol",
+    "action": "Searched for results on the open cells: 6 candidates returned, 0 dropped as sources already used, 6 to judge."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "gpt-6.1-terra",
+    "action": "Judged 5 of 6 new candidates, without search. Skipped: 5 no readable saved copy. Dropped rows: none. Replaced 7 earlier rows. Added 17 results: 12 from sources already used, 5 from newly found sources."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 2 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 16 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-20",
+    "actor": "atlas.page",
+    "action": "result on m5 from reference 12: quote is 373 characters, over its limit of 320; kept."
    }
   ],
-  "results_run": "2026-11-14"
- },
- "review": {
-  "state": "published",
-  "note": null,
-  "into": null,
-  "at": "2026-11-14",
-  "log": [
-   {
-    "date": "2026-11-14",
-    "state": "published"
-   }
-  ]
+  "results_run": "2026-11-20"
  }
 }
