@@ -281,14 +281,31 @@
   ],
   "prompt": "5e97d4b8dfc3"
  },
+ "review": {
+  "state": "published",
+  "note": null,
+  "into": null,
+  "at": "2026-11-15",
+  "log": [
+   {
+    "date": "2026-11-15",
+    "state": "published"
+   }
+  ]
+ },
  "page": {
   "id": "MAT-09",
   "title": "Classical polynomial-time Module-LWE secret recovery",
-  "definition": "A classical algorithm recovers secrets from Module Learning with Errors, noisy linear equations over polynomial rings, with computation bounded by a fixed power of input size. Its scope includes an executed attack on unmodified ML-KEM-1024, a standardized mechanism for establishing shared secret keys.",
+  "definition": "A classical algorithm recovers a secret vector of polynomials from noisy linear equations over a fixed polynomial ring. For every module rank k ≥ 4, where k is the number of polynomials in the vector, a fixed power of the input size bounds the growth of the computational cost. At rank four, the same algorithm also recovers the shared secret of an unmodified ML-KEM-1024 exchange from its public encapsulation key and ciphertext.",
   "goal": {
-   "need": "FIPS 203 specifies three ML-KEM parameter sets, assigned security categories 1, 3 and 5, each establishing a 32-byte shared secret. Their security rests on Module-LWE. Classical secret recovery applicable to these parameters would defeat the computational assumption protecting this standardized key-establishment mechanism.",
+   "need": "U.S. national security systems specify ML-KEM-1024 for key establishment at every classification level under CNSA 2.0. Hybrid ML-KEM also protected about 70% of browser traffic reaching one large web network in September 2026. A demonstrated weakness at the parameters a system uses would give its operators grounds to switch to a scheme based on a different problem, such as the code-based backup HQC. Faster results on reduced instances alone cannot guide that decision. A hybrid TLS session can remain secure while its elliptic-curve exchange holds.",
    "need_refs": [
-    1
+    3,
+    6,
+    7,
+    8,
+    9,
+    10
    ],
    "figures": {
     "caption": "ML-KEM parameter sets specified in FIPS 203.",
@@ -327,11 +344,11 @@
      "checked": true
     },
     {
-     "body": "TU Darmstadt LWE Challenge steering committee",
-     "year": "Undated",
-     "quote": "The main goal of this challenge is to help assessing the hardness of the LWE problem in practice.",
-     "context": null,
-     "ref": 2,
+     "body": "Bochum Challenge team",
+     "year": "2023",
+     "quote": "We would be very happy to see more cryptanalysis of our challenges, with the goal to foster confidence in PQ parameter selection.",
+     "context": "The October 24 statement to the NIST post-quantum cryptography forum concerns the team's reduced Kyber parameter sets. It specifies no polynomial-time target.",
+     "ref": 11,
      "checked": true
     }
    ]
@@ -343,15 +360,11 @@
    "set_by_kind": "atlas",
    "threshold_quote": null,
    "threshold_ref": null,
-   "basis": "Searches of NIST's standard and evaluation criteria, Module-LWE definitions, and Darmstadt, SVP and Bochum challenge rules found no joint polynomial-time-and-executed-attack criterion. Extending the fixed polynomial ring to all ranks k≥4 is an Atlas choice; ML-KEM-1024 fixes k=4. The test combines the field's asymptotic success convention with NIST's concrete security comparator without assigning an unsupported computing budget.",
+   "basis": "The Atlas fixes the polynomial ring and varies the module rank to give the running-time claim a defined family of inputs. That family uses a uniform public matrix. FIPS 203 fixes the rank of ML-KEM-1024 at four and generates its matrix pseudorandomly from a public seed. The concrete test therefore requires a separate demonstration on the standardized exchange. NIST supplies the category 5 resource comparison.",
    "refs": [
     1,
     2,
-    3,
-    4,
-    5,
-    6,
-    7
+    5
    ],
    "threshold_checked": null
   },
@@ -362,14 +375,14 @@
    {
     "id": "m1",
     "title": "A classical algorithm recovers a key from a 128-coefficient Bochum Kyber challenge.",
-    "criterion": "Recover the secret key of a published Kyber-128 challenge without changing its parameters. The organiser lists one Kyber-128-k4 instance, with polynomial degree n=32 and module rank k=4, solved by Nour-eddine Rahmani on August 2, 2023: approximately 2 hours 44 minutes on an Intel i7-12700KF with 16 GB RAM. This is an organiser-listed result, not peer reviewed.",
+    "criterion": "Recover the secret key of one published Bochum Kyber-128 instance by classical computation using its published parameters. The secret contains n × k = 128 coefficients, where n is the polynomial ring degree and k is the module rank.",
     "set_by": "Bochum Challenges team, secret-key recovery rule and Kyber-128 parameter cards.",
     "set_by_kind": "protocol",
     "threshold_quote": "we consider a parameter set solved when you recover its secret key",
-    "threshold_ref": 5,
+    "threshold_ref": 3,
     "refs": [
-     5,
-     6
+     3,
+     4
     ],
     "status": "active",
     "replaced_by": [],
@@ -378,14 +391,14 @@
    {
     "id": "m2",
     "title": "A classical algorithm recovers a key from a 256-coefficient Bochum Kyber challenge.",
-    "criterion": "Recover the secret key of a published Kyber-256 challenge, with n×k=256, without changing its parameters. The organiser lists one Kyber-256-k1 instance, with n=256 and k=1, solved by Jintai Ding and Ziyu Zhao on March 2, 2026, at an estimated cost of 15 RTX 4090 GPU-months. This organiser-listed result is not peer reviewed and concerns module rank 1.",
+    "criterion": "Recover the secret key of one published Bochum Kyber-256 instance by classical computation using its published parameters. The secret contains n × k = 256 coefficients. Any module rank offered in the Kyber-256 challenge qualifies.",
     "set_by": "Bochum Challenges team, secret-key recovery rule and the Complex category's Kyber-256 parameter cards.",
     "set_by_kind": "protocol",
     "threshold_quote": "we consider a parameter set solved when you recover its secret key",
-    "threshold_ref": 5,
+    "threshold_ref": 3,
     "refs": [
-     5,
-     6
+     3,
+     4
     ],
     "status": "active",
     "replaced_by": [],
@@ -394,15 +407,46 @@
    {
     "id": "m3",
     "title": "A classical attack on ML-KEM-1024 violates NIST's category-5 security floor.",
-    "criterion": "Execute shared-secret recovery from public ML-KEM-1024 encapsulation keys and ciphertexts with resources that fail NIST's category-5 comparison against AES-256 key search. Account for success probability, preprocessing and memory in the comparison. A preprint submitted on October 8, 2026 claims subexponential algorithms for related growing families but explicitly establishes no reduction in concrete security of the specified parameter sets; it is not peer reviewed.",
-    "set_by": "NIST, PQC Security Evaluation Criteria, section 4.A.5, category 5; this milestone tests violation of the published security requirement.",
+    "criterion": "Demonstrate classical recovery of the shared secret from only a public encapsulation key and ciphertext produced by unmodified ML-KEM-1024. Show that the resources required fall below NIST's category 5 comparison with AES-256 key search, accounting for success probability, preprocessing and memory on a common cost model.",
+    "set_by": "NIST defines the category 5 comparison in section 4.A.5 of its PQC Security Evaluation Criteria. The Atlas requires an executed demonstration using public inputs.",
     "set_by_kind": "government_programme",
     "threshold_quote": "must require computational resources comparable to or greater than those required for key search on a block cipher with a 256-bit key",
-    "threshold_ref": 7,
+    "threshold_ref": 5,
     "refs": [
      1,
-     7,
-     8
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "A classical algorithm recovers the secret key of one Advanced Bochum Kyber instance.",
+    "criterion": "Recover the secret key of one published Bochum Kyber instance labelled Advanced, using classical computation and the published parameters. The listed instances have 208, 224 or 240 secret coefficients.",
+    "set_by": "Bochum Challenges team, secret-key recovery rule and Advanced Kyber parameter cards.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "we consider a parameter set solved when you recover its secret key",
+    "threshold_ref": 3,
+    "refs": [
+     3,
+     4
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "A classical algorithm recovers the secret key of one Intermediate Bochum Kyber instance.",
+    "criterion": "Recover the secret key of one published Bochum Kyber instance labelled Intermediate, using classical computation and the published parameters. The listed instances have 144, 160, 176 or 192 secret coefficients.",
+    "set_by": "Bochum Challenges team, secret-key recovery rule and Intermediate Kyber parameter cards.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "we consider a parameter set solved when you recover its secret key",
+    "threshold_ref": 3,
+    "refs": [
+     3,
+     4
     ],
     "status": "active",
     "replaced_by": [],
@@ -413,7 +457,8 @@
   "not_found": [
    "Targeted searches located no peer-reviewed classical polynomial-time solver meeting the completion criterion.",
    "Targeted searches located no executed public-transcript attack on unmodified ML-KEM-1024 meeting the final milestone.",
-   "NIST's category-5 criterion supplies a reference attack but no numerical factor defining “comparable” resources."
+   "NIST's category-5 criterion supplies a reference attack but no numerical factor defining “comparable” resources.",
+   "No NIST programme or published challenge rule was found that names both classical polynomial-time Module-LWE recovery and an executed ML-KEM-1024 break as its goal."
   ],
   "references": [
    {
@@ -432,34 +477,6 @@
    },
    {
     "id": 2,
-    "kind": "web",
-    "url": "https://www.latticechallenge.org/lwe_challenge/",
-    "doi": null,
-    "title": "TU Darmstadt LWE Challenge",
-    "authors": "TU Darmstadt LWE Challenge steering committee",
-    "container": "Lattice Challenge",
-    "year": "n.d.",
-    "volume": null,
-    "issue": null,
-    "pages": null,
-    "citation_source": "model"
-   },
-   {
-    "id": 3,
-    "kind": "report",
-    "url": "https://pq-crystals.org/kyber/data/kyber-specification-round3-20210804.pdf",
-    "doi": null,
-    "title": "CRYSTALS-Kyber Algorithm Specifications And Supporting Documentation (version 3.02)",
-    "authors": "Avanzi R, Bos J, Ducas L, Kiltz E, Lepoint T, Lyubashevsky V, Schanck JM, Schwabe P, Seiler G, Stehlé D",
-    "container": "CRYSTALS",
-    "year": "2021",
-    "volume": null,
-    "issue": null,
-    "pages": null,
-    "citation_source": "model"
-   },
-   {
-    "id": 4,
     "kind": "journal",
     "url": "https://perso.ens-lyon.fr/damien.stehle/downloads/MSIS.pdf",
     "doi": "10.1007/s10623-014-9938-4",
@@ -473,7 +490,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 5,
+    "id": 3,
     "kind": "web",
     "url": "https://bochum-challeng.es/",
     "doi": null,
@@ -487,7 +504,7 @@
     "citation_source": "model"
    },
    {
-    "id": 6,
+    "id": 4,
     "kind": "web",
     "url": "https://bochum-challeng.es/challenges/kyber",
     "doi": null,
@@ -501,7 +518,7 @@
     "citation_source": "model"
    },
    {
-    "id": 7,
+    "id": 5,
     "kind": "web",
     "url": "https://csrc.nist.gov/Projects/Post-Quantum-Cryptography/Post-Quantum-Cryptography-Standardization/Evaluation-Criteria/Security-(Evaluation-Criteria)",
     "doi": null,
@@ -515,7 +532,7 @@
     "citation_source": "model"
    },
    {
-    "id": 8,
+    "id": 6,
     "kind": "preprint",
     "url": "https://arxiv.org/abs/2610.11254",
     "doi": "10.48550/arXiv.2610.11254",
@@ -527,10 +544,82 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 7,
+    "kind": "web",
+    "url": "https://blog.cloudflare.com/post-quantum-visibility/",
+    "doi": null,
+    "title": "Is your domain using post-quantum encryption? Now you can see for yourself",
+    "authors": "Andrew Depke, Sophie Park, and Sharon Goldberg",
+    "container": "The Cloudflare Blog",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 8,
+    "kind": "report",
+    "url": "https://media.defense.gov/2022/Sep/07/2003071836/-1/-1/1/CSI_CNSA_2.0_FAQ_.PDF",
+    "doi": null,
+    "title": "Commercial National Security Algorithm Suite 2.0 and Quantum Computing Frequently Asked Questions",
+    "authors": "National Security Agency",
+    "container": "Cybersecurity Information Sheet",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 9,
+    "kind": "press_release",
+    "url": "https://www.nist.gov/news-events/news/2025/03/nist-selects-hqc-fifth-algorithm-post-quantum-encryption",
+    "doi": null,
+    "title": "NIST Selects HQC as Fifth Algorithm for Post-Quantum Encryption",
+    "authors": "National Institute of Standards and Technology",
+    "container": null,
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 10,
+    "kind": "report",
+    "url": "https://datatracker.ietf.org/doc/html/rfc10024",
+    "doi": "10.17487/RFC10024",
+    "title": "Post-Quantum Traditional (PQ/T) Hybrid Key Agreement Mechanisms for TLS 1.3",
+    "authors": "Kwiatkowski K, Kampanakis P, E. Westerbaan B, Stebila D",
+    "container": "RFC 10024",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 11,
+    "kind": "web",
+    "url": "https://groups.google.com/a/list.nist.gov/g/pqc-forum/c/W2VOzy0wz_E/m/4yArnctiAQAJ",
+    "doi": null,
+    "title": "Re: Kyber security level?",
+    "authors": "Alexander May, on behalf of the Bochum Challenge team",
+    "container": "pqc-forum",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
    }
   ],
   "milestone_order": [
    "m1",
+   "m5",
+   "m4",
    "m2",
    "m3"
   ],
@@ -539,146 +628,230 @@
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "One Kyber-128-k4 challenge was solved in approximately 2 hours 44 minutes.",
-    "detail": "The organiser lists Nour-eddine Rahmani’s solution, submitted August 2, 2023, using BKZ on an i7-12700KF with 16 GB RAM. The challenge parameters are n=32 and k=4.",
-    "quote": "Kyber-128-k4\nSolved",
-    "checked": true,
+    "finding": "Classical secret-key recovery on four published Bochum Kyber instances with 128 secret coefficients each.",
+    "detail": null,
+    "quote": null,
+    "checked": null,
     "confirmed": true,
     "peer_reviewed": false,
-    "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 4,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "met",
+    "finding": "Classical secret-key recovery on seven Intermediate Bochum Kyber instances.",
+    "detail": null,
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 4,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "met",
+    "finding": "Classical secret-key recovery on one Advanced Bochum Kyber instance with 208 secret coefficients.",
+    "detail": null,
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 4,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "Ding and Zhao solved 1 Kyber-256-k1 challenge with 256 coefficients.",
-    "detail": "The organiser lists the instance as solved, with n=256 and k=1. The estimated computation cost was 15 RTX 4090 GPU-months; the result is not peer reviewed.",
-    "quote": "Kyber-256-k1\nSolved\nCategory: Complex\nBKZ blocksize: 167\nbit complexity: 49\nn\n256\nk\n1",
-    "checked": true,
+    "finding": "Classical secret-key recovery on one published Bochum Kyber instance with 256 secret coefficients.",
+    "detail": null,
+    "quote": null,
+    "checked": null,
     "confirmed": true,
     "peer_reviewed": false,
-    "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 4,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    }
   ],
   "judged": [
    {
     "url": "https://doi.org/10.6028/NIST.FIPS.203",
     "milestone": "m1",
-    "hash": "657857d93ca2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "638bd7faa6b7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doi.org/10.6028/NIST.FIPS.203",
+    "milestone": "m5",
+    "hash": "f0d209a4578a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doi.org/10.6028/NIST.FIPS.203",
+    "milestone": "m4",
+    "hash": "c59f001bdd48",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.6028/NIST.FIPS.203",
     "milestone": "m2",
-    "hash": "a95d87804088",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fe06a44f06e4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.6028/NIST.FIPS.203",
     "milestone": "m3",
-    "hash": "77acca210982",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9c8ab8fd666f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.6028/NIST.FIPS.203",
     "milestone": "completion",
     "hash": "179351906f13",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://apelletm.pages.math.cnrs.fr/page-perso/documents/enseignement/PEPR_school/lecture_1.pdf",
     "milestone": "m1",
-    "hash": "657857d93ca2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "638bd7faa6b7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://apelletm.pages.math.cnrs.fr/page-perso/documents/enseignement/PEPR_school/lecture_1.pdf",
+    "milestone": "m5",
+    "hash": "f0d209a4578a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://apelletm.pages.math.cnrs.fr/page-perso/documents/enseignement/PEPR_school/lecture_1.pdf",
+    "milestone": "m4",
+    "hash": "c59f001bdd48",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://apelletm.pages.math.cnrs.fr/page-perso/documents/enseignement/PEPR_school/lecture_1.pdf",
     "milestone": "m2",
-    "hash": "a95d87804088",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fe06a44f06e4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://apelletm.pages.math.cnrs.fr/page-perso/documents/enseignement/PEPR_school/lecture_1.pdf",
     "milestone": "m3",
-    "hash": "77acca210982",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9c8ab8fd666f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://apelletm.pages.math.cnrs.fr/page-perso/documents/enseignement/PEPR_school/lecture_1.pdf",
     "milestone": "completion",
     "hash": "179351906f13",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://mathoverflow.net/questions/468811/polynomial-time-quantum-algorithms-for-lattice-problems-gapsvp-sivp-lwe",
     "milestone": "m1",
-    "hash": "657857d93ca2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "638bd7faa6b7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://mathoverflow.net/questions/468811/polynomial-time-quantum-algorithms-for-lattice-problems-gapsvp-sivp-lwe",
+    "milestone": "m5",
+    "hash": "f0d209a4578a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://mathoverflow.net/questions/468811/polynomial-time-quantum-algorithms-for-lattice-problems-gapsvp-sivp-lwe",
+    "milestone": "m4",
+    "hash": "c59f001bdd48",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://mathoverflow.net/questions/468811/polynomial-time-quantum-algorithms-for-lattice-problems-gapsvp-sivp-lwe",
     "milestone": "m2",
-    "hash": "a95d87804088",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fe06a44f06e4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://mathoverflow.net/questions/468811/polynomial-time-quantum-algorithms-for-lattice-problems-gapsvp-sivp-lwe",
     "milestone": "m3",
-    "hash": "77acca210982",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9c8ab8fd666f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://mathoverflow.net/questions/468811/polynomial-time-quantum-algorithms-for-lattice-problems-gapsvp-sivp-lwe",
     "milestone": "completion",
     "hash": "179351906f13",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://bochum-challeng.es/challenges/kyber",
     "milestone": "m1",
-    "hash": "657857d93ca2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "638bd7faa6b7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://bochum-challeng.es/challenges/kyber",
+    "milestone": "m5",
+    "hash": "f0d209a4578a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://bochum-challeng.es/challenges/kyber",
+    "milestone": "m4",
+    "hash": "c59f001bdd48",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://bochum-challeng.es/challenges/kyber",
     "milestone": "m2",
-    "hash": "a95d87804088",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fe06a44f06e4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://bochum-challeng.es/challenges/kyber",
     "milestone": "m3",
-    "hash": "77acca210982",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9c8ab8fd666f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://bochum-challeng.es/challenges/kyber",
     "milestone": "completion",
     "hash": "179351906f13",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -745,20 +918,128 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 0 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"A classical algorithm recovers a secret vector of polynomials from noisy linear equations over a fixed polynomial ring. For every module rank k \\u2265 4, where k is the number of polynomials in the vector, a fixed power of the input size bounds the growth of the computational cost. At rank four, the same algorithm also recovers the shared secret of an unmodified ML-KEM-1024 exchange from its public encapsulation key and ciphertext.\". Reason: The definition leaves the growing parameter unspecified and uses the same word for the mathematical secret and the key established by ML-KEM."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"U.S. national security systems specify ML-KEM-1024 for key establishment at every classification level under CNSA 2.0. Hybrid ML-KEM also protected about 70% of browser traffic reaching one large web network in September 2026. A demonstrated weakness at the parameters a system uses would give its operators grounds to switch to a scheme based on a different problem, such as the code-based backup HQC. Faster results on reduced instances alone cannot guide that decision. A hybrid TLS session can remain secure while its elliptic-curve exchange holds.\". Reason: The current rationale lists parameter sets and key sizes but omits who relies on them, what evidence would change an operator's decision and how hybrid exchanges limit exposure."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Bochum Challenge team, 2023: \"We would be very happy to see more cryptanalysis of our challenges, with the goal to foster confidence in PQ parameter selection.\". Reason: The challenge organisers explicitly state why they invite cryptanalysis of reduced Kyber instances."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No NIST programme or published challenge rule was found that names both classical polynomial-time Module-LWE recovery and an executed ML-KEM-1024 break as its goal.\". Reason: The existing search notes cover missing results and leave the status of the goal attribution unclear."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit completion: basis = \"The Atlas fixes the polynomial ring and varies the module rank to give the running-time claim a defined family of inputs. That family uses a uniform public matrix. FIPS 203 fixes the rank of ML-KEM-1024 at four and generates its matrix pseudorandomly from a public seed. The concrete test therefore requires a separate demonstration on the standardized exchange. NIST supplies the category 5 resource comparison.\"; refs = [1, 4, 7]. Reason: The basis explains the difference in rank but omits the difference between the uniform matrix in the mathematical test and the seed-generated matrix in the standard."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Recover the secret key of one published Bochum Kyber-128 instance by classical computation using its published parameters. The secret contains n \\u00d7 k = 128 coefficients, where n is the polynomial ring degree and k is the module rank.\". Reason: The criterion embeds one solver's result and leaves unclear that any published Kyber-128 parameter set qualifies."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"Recover the secret key of one published Bochum Kyber-256 instance by classical computation using its published parameters. The secret contains n \\u00d7 k = 256 coefficients. Any module rank offered in the Kyber-256 challenge qualifies.\". Reason: The hardware estimate and the rank of one successful submission describe evidence for the milestone rather than conditions for meeting it."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m1: \"A classical algorithm recovers the secret key of one Advanced Bochum Kyber instance.\". Reason: Bochum's Advanced tier supplies a published benchmark between the 128- and 256-coefficient challenges."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m1: \"A classical algorithm recovers the secret key of one Intermediate Bochum Kyber instance.\". Reason: Bochum's Intermediate tier covers a distinct group of published instances immediately above the Simple tier."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Demonstrate classical recovery of the shared secret from only a public encapsulation key and ciphertext produced by unmodified ML-KEM-1024. Show that the resources required fall below NIST's category 5 comparison with AES-256 key search, accounting for success probability, preprocessing and memory on a common cost model.\"; set_by = \"NIST defines the category 5 comparison in section 4.A.5 of its PQC Security Evaluation Criteria. The Atlas requires an executed demonstration using public inputs.\"; refs = [1, 7]. Reason: The criterion mixes the resource comparison with a preprint about a different family and leaves the source of the execution requirement implicit."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "remove statement 1. Reason: The Darmstadt challenge asks participants to solve ordinary LWE over integers modulo q, a different problem from the Module-LWE family in this entry."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Skipped proposed operation 4 (remove statement 0): the entry needs at least 2 statements. Its reason: The quoted FIPS 203 sentence identifies ML-KEM's security assumption and does not designate classical secret recovery as a NIST goal."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Applied 11 of 12 proposed operations from MAT-09-revise-20261121T133815514481Z; now version 2."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m4, m5, m3."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 0 from arXiv, 5 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 3 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Structural problems after applying: references never cited: [2, 3]"
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "definition is 430 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 4 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 0 candidates returned, 0 dropped as sources already used, 0 to judge."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 0 of 0 new candidates, without search. Skipped: none. Dropped rows: none. Replaced 2 earlier rows. Added 4 results: 4 from sources already used, 0 from newly found sources."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 0 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Removed 2 references no longer cited; renumbered."
    }
   ],
-  "results_run": "2026-11-15"
- },
- "review": {
-  "state": "published",
-  "note": null,
-  "into": null,
-  "at": "2026-11-15",
-  "log": [
-   {
-    "date": "2026-11-15",
-    "state": "published"
-   }
-  ]
+  "results_run": "2026-11-21"
  }
 }
