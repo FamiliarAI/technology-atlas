@@ -288,12 +288,15 @@
  "page": {
   "id": "SWE-09",
   "title": "Deterministic-by-default systems programming",
-  "definition": "A systems language and runtime make externally visible event sequences, excluding wall-clock timing, independent of thread scheduling for fixed initial states, external inputs and explicit choices. They support kernel, browser and database code with parallel performance matching corresponding conventional implementations.",
+  "definition": "A systems language and runtime let parallel threads run in different orders while producing the same externally visible events in the same order. This holds for a fixed starting state, external inputs and outcomes of explicitly marked nondeterministic operations. Elapsed time may vary. A clock reading used by the program counts as an input. The target is parallel kernel, browser and database code with performance matching conventional implementations.",
   "goal": {
-   "need": "In a 2008 study of 105 concurrency bugs from MySQL, Apache, Mozilla and OpenOffice, about 92% could be triggered by enforcing orders among at most four memory accesses. Schedule-independent observations address this dependence on execution order. Data-race prevention alone is insufficient: the Rustonomicon shows Safe Rust code whose outcome depends on thread order.",
+   "need": "Across five open-source projects, concurrency bugs took an average of 82 calendar days from report to resolution, compared with 66 for other bugs in the sample. In a separate study of 105 concurrency bugs, about 92% could be triggered by ordering at most four memory accesses. Even code free of data races can fail under one thread order and succeed under another. Given the same starting state, inputs and explicit choices, maintainers could reproduce a visible failure and test a fix without having to recreate the original thread schedule.",
    "need_refs": [
+    16,
     1,
-    2
+    2,
+    3,
+    4
    ],
    "figures": {
     "caption": "Concurrency bugs examined in the 2008 study",
@@ -382,10 +385,10 @@
    {
     "id": "m1",
     "title": "Checked parallel tasks produce the same results as their sequential composition.",
-    "criterion": "For well-typed programs, noninterfering effects make parallel composition produce the same results as sequential composition, assuming declared method commutativity is correct. DPJ's 2009 paper gives a core-calculus soundness result and a compiler implementation. Six programs were evaluated with up to 22 workers on a 24-core machine, taking the minimum of five runs per data point. This establishes result determinism within the model, without establishing event-trace or progress determinism.",
+    "criterion": "In a well-typed fork–join program, the checker requires noninterfering effects for tasks whose execution order is unspecified. Running those tasks in parallel must produce the same result as running them in sequence. If the checker relies on a declaration that two method calls commute, the calls must behave atomically with respect to each other and give the same result in either order.",
     "set_by": "DPJ developers, OOPSLA 2009, Sections 6.3–6.4; the published semantic criterion applies to checked fork–join programs.",
     "set_by_kind": "community_convention",
-    "threshold_quote": "This guarantees determinism of execution regardless of the order of parallel execution.",
+    "threshold_quote": "parallel composition of noninterfering expressions produces the same result as sequential composition of those expressions.",
     "threshold_ref": 7,
     "refs": [
      7
@@ -405,14 +408,18 @@
     "refs": [
      8
     ],
-    "status": "active",
-    "replaced_by": [],
+    "status": "retired",
+    "replaced_by": [
+     "m7",
+     "m8",
+     "m9"
+    ],
     "threshold_checked": true
    },
    {
     "id": "m3",
     "title": "An operating system enforces deterministic execution of unprivileged parallel applications.",
-    "criterion": "A system boundary makes unprivileged parallel computations repeatable for fixed inputs, including faulty application code, assuming correct kernel and processor behavior. External nondeterminism enters through mediated input/output. Determinator's 2010 prototype implements this boundary on 32-bit x86 using three system calls and reports byte-identical console/log output under output redirection. The paper supplies a Kahn-network argument, explicitly leaves a formal proof out of scope, and documents limited input/output support.",
+    "criterion": "For fixed initial state and inputs, the operating system makes parallel execution repeatable for every unprivileged process restricted to its deterministic kernel interface. The guarantee covers faulty application code and assumes correct kernel and processor behavior. The system mediates external inputs, including clock readings.",
     "set_by": "Determinator developers, OSDI 2010, Sections 3.1–3.2 and 4.3; the guarantee applies inside the unprivileged application boundary.",
     "set_by_kind": "community_convention",
     "threshold_quote": "cannot behave nondeterministically even by deliberate design.",
@@ -426,15 +433,14 @@
    },
    {
     "id": "m4",
-    "title": "A reactor runtime gives deterministic logical event behavior for fixed timestamped inputs.",
-    "criterion": "For deterministic reaction code obeying declared dependencies, reactor composition yields deterministic logical event behavior for fixed initial states and timestamped inputs; physical execution times are outside the guarantee. Lingua Franca implements this model. Its preprint of 9 January 2023 ports 22 of 30 Savina benchmarks and presents 20, retaining 30 iterations per data point on a Core i9-10900K. The subsequent journal abstract reports speedups of 1.86× over Akka and 1.42× over CAF. These actor-benchmark results do not establish the combined systems criterion.",
+    "title": "A reactor runtime produces the same tagged outputs for the same tagged inputs.",
+    "criterion": "Fix the reactors’ initial states and the values and logical time tags of their inputs. With deterministic reaction code that obeys its declared dependencies, every permitted parallel execution must produce the same values at the same tags on each output port. Within a reactor, reactions triggered at the same tag follow their declared order. Independent reactions may execute in parallel, and their physical execution times may vary.",
     "set_by": "Lingua Franca developers, Introduction, Reactor-Oriented Programming; the published criterion concerns reactor composition, not arbitrary target-language code.",
     "set_by_kind": "community_convention",
-    "threshold_quote": "concurrent composition of reactors is deterministic by default.",
+    "threshold_quote": "Given the same input data, a composition of reactors has exactly one correct behavior.",
     "threshold_ref": 5,
     "refs": [
      5,
-     9,
      10
     ],
     "status": "active",
@@ -459,13 +465,72 @@
     "status": "active",
     "replaced_by": [],
     "threshold_checked": null
+   },
+   {
+    "id": "m6",
+    "title": "A process network produces the same output streams under sequential and parallel execution.",
+    "criterion": "For fixed input streams, sequential and parallel execution of a network of deterministic processes produce the same sequence of values on each output channel. Processes communicate through conceptually unbounded first-in, first-out channels. A read waits for the next item on its specified channel, and a process cannot test whether an item is available before reading.",
+    "set_by": "Gilles Kahn and David B. MacQueen, Coroutines and Networks of Parallel Processes, abstract and sections 2.1–2.3.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "These networks exhibit the same input/output behavior whether they are executed sequentially or in parallel.",
+    "threshold_ref": 17,
+    "refs": [
+     17
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m7",
+    "title": "A deterministic construct gives one result when its execution encounters no marked choice.",
+    "criterion": "The language admits explicitly marked nondeterministic parallel constructs. If execution of a deterministic construct from a given input heap encounters no such construct, executions from that input heap produce the same result value and output heap, up to renaming newly allocated object references.",
+    "set_by": "DPJ developers, POPL 2011, section 4.3, Theorem 6.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "any deterministic construct that does not execute any nd construct has deterministic input-output behavior.",
+    "threshold_ref": 8,
+    "refs": [
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m8",
+    "title": "A deterministic parallel block retains sequential semantics when nested with nondeterministic code.",
+    "criterion": "In a well-typed program, replacing a deterministic parallel block with an atomic sequential execution of its tasks in program order preserves its possible results. The equivalence must hold both when the block executes a marked nondeterministic operation and when it runs inside one.",
+    "set_by": "DPJ developers, POPL 2011, section 4.3, Theorem 5.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "Semantic equivalence of cobegin and atomic seq",
+    "threshold_ref": 8,
+    "refs": [
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m9",
+    "title": "An atomic statement executes in isolation from every concurrent task.",
+    "criterion": "In a well-typed program that uses explicitly nondeterministic parallel tasks, each atomic statement has the same effect as an uninterrupted execution. Isolation covers concurrent accesses both inside and outside other atomic statements.",
+    "set_by": "DPJ developers, POPL 2011, sections 1 and 4.3, strong isolation and Theorem 4.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "is provided with respect to all concurrent operations, not just other ones occurring in atomic statements.",
+    "threshold_ref": 8,
+    "refs": [
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
    }
   ],
   "measures": [],
   "not_found": [
    "No publication located establishes the combined kernel, browser and database criterion with performance parity.",
-   "No externally specified workload suite or baseline-selection rule was found for the combined systems comparison.",
-   "The ACM full text of the 2023 Lingua Franca journal article returned HTTP 403; its developers' abstract and the preprint of 9 January 2023 were accessible."
+   "No externally specified workload suite or baseline-selection rule was found for the combined systems comparison."
   ],
   "references": [
    {
@@ -677,30 +742,145 @@
     "issue": null,
     "pages": null,
     "citation_source": "model"
+   },
+   {
+    "id": 16,
+    "kind": "journal",
+    "url": "https://link.springer.com/article/10.1186/s13174-017-0055-2",
+    "doi": "10.1186/s13174-017-0055-2",
+    "title": "Concurrency bugs in open source software: a case study",
+    "authors": "Abbaspour Asadollah S, Sundmark D, Eldh S, Hansson H",
+    "container": "J Internet Serv Appl",
+    "year": "2017",
+    "volume": "8",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 17,
+    "kind": "book",
+    "url": "https://pdos.csail.mit.edu/~rsc/kahn77parallel.pdf",
+    "doi": null,
+    "title": "Coroutines and Networks of Parallel Processes",
+    "authors": "Gilles Kahn, David B. MacQueen",
+    "container": "Information Processing 77",
+    "year": "1977",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 18,
+    "kind": "book",
+    "url": "https://doc.rust-lang.org/rustonomicon/races.html",
+    "doi": null,
+    "title": "Data Races and Race Conditions",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 19,
+    "kind": "journal",
+    "url": "https://groups.csail.mit.edu/tds/papers/Lynch/ic89.pdf",
+    "doi": null,
+    "title": "A Proof of the Kahn Principle for Input/Output Automata",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 20,
+    "kind": "preprint",
+    "url": "https://ranjitjhala.github.io/static/deterministic_parallelism_via_liquid_effects.pdf",
+    "doi": null,
+    "title": "Deterministic Parallelism via Liquid Effects",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 21,
+    "kind": "report",
+    "url": "https://rob-bocchino.net/Professional/Bocchino-PhD-Thesis.pdf",
+    "doi": null,
+    "title": "An Effect System and Language for Deterministic-by-Default Parallel Programming",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 22,
+    "kind": "report",
+    "url": "https://static.usenix.org/events/osdi10/tech/full_papers/Bergan.pdf",
+    "doi": null,
+    "title": "Deterministic Process Groups in dOS",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 23,
+    "kind": "journal",
+    "url": "https://par.nsf.gov/servlets/purl/10311568",
+    "doi": "10.1145/3448128",
+    "title": "Toward a Lingua Franca for Deterministic Concurrent Systems",
+    "authors": "Lohstroh M, Menard C, Bateni S, Lee EA",
+    "container": "ACM Trans. Embed. Comput. Syst.",
+    "year": "2021",
+    "volume": "20",
+    "issue": "4",
+    "pages": "1-27",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 24,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2606.09203v1",
+    "doi": null,
+    "title": "Deterministic Execution of ROS 2 Applications via Lingua Franca",
+    "authors": "Teper H, Lin S, Li S, Lee EA, Chen JJ",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
    }
   ],
   "milestone_order": [
+   "m6",
    "m1",
-   "m2",
+   "m7",
+   "m8",
+   "m9",
    "m3",
    "m4",
    "m5"
   ],
   "results": [
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "partial",
-    "finding": "DPJ guarantees deterministic results under its effect model; six parallel programs were evaluated.",
-    "detail": "The paper describes a core soundness proof and a prototype compiler. The supplied text does not report the criterion’s 22-worker limit or five-run measurement method. The document is an OOPSLA conference paper; the supplied text does not establish its peer-review status.",
-    "quote": "Our effect system does guarantee deterministic results for\nan application using a commutative operation, assuming that\nthe operation declared commutative is indeed commutative.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
    {
     "milestone": "m2",
     "case": null,
@@ -712,20 +892,6 @@
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "met",
-    "finding": "One Determinator OS prototype enforces repeatable unprivileged execution using 3 system calls.",
-    "detail": "The 32-bit x86 prototype mediates external I/O and reports byte-identical console and log output across reruns with and without redirection. The paper gives a Kahn-network argument but leaves formal proof out of scope; I/O support is limited. The supplied text does not establish peer review.",
-    "quote": "Barring kernel or processor bugs, unprivileged spaces\nconstrained to use the above kernel API alone cannot\nbehave nondeterministically even by deliberate design.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 4,
     "judged_by": "gpt-6.1-terra",
     "judged_on": "2026-11-15"
    },
@@ -744,20 +910,6 @@
     "judged_on": "2026-11-15"
    },
    {
-    "milestone": "m4",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Lingua Franca synchronous-subset benchmarks (sample size not stated): quasi-static scheduling improved runtime overhead by an average of 9×.",
-    "detail": "The paper implements quasi-static scheduling for a synchronous subset of Lingua Franca, excluding actions and physical connections. The excerpt does not establish deterministic logical event behavior under the full criterion for fixed initial states and timestamped inputs.",
-    "quote": "Our results\ndemonstrate that quasi-statically scheduled LF programs reduce runtime overhead, achieving\nan average improvement of nine times (Section6.1).",
-    "checked": false,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
@@ -768,34 +920,6 @@
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "partial",
-    "finding": "In 3 formal language variants, deterministic parallel composition is equivalent to sequential composition.",
-    "detail": "The paper presents a soundness argument and a prototype compiler extending DPJ, but it does not report the specified 2009 evaluation of six programs with up to 22 workers.",
-    "quote": "Moreover, deterministic parallel constructs are always equivalent to a sequential c omposi-\ntion of their constituent tasks, even if they enclose, or are enclosed\nby, nd constructs.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": false,
-    "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m5",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Determinator tested 7 multicore benchmarks; MD5 achieved 2.25× Linux performance on 12 cores.",
-    "detail": "The proof-of-concept OS enforces deterministic execution for unprivileged code, but the source reports no browser or database subsystem and does not establish the full event-order and progress contract. It gives an informal argument rather than a formal proof.",
-    "quote": "The md5 benchmark shows better scaling on De-\nterminator than on Linux, achieving a 2.25× speedup\nover Linux on 12 cores.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 4,
     "judged_by": "gpt-6.1-terra",
     "judged_on": "2026-11-15"
    },
@@ -817,363 +941,1000 @@
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "A parallelization theorem proves contextual equivalence for 2 expressions with suitably disjoint effects; no program sample was evaluated.",
-    "detail": "The theorem concerns may-equivalence in a higher-order language. The text also permits nondeterministic pure expressions and reports neither the DPJ compiler nor the six-program evaluation specified in the criterion.",
-    "quote": "The theorem then says, that if the expressions ei only write and\nallocate in their private regions (item 2) and only read in private\nor shared regions (item 3), then, running e1 in parallel with e2\nis contextually equivalent with running e1 and e2 sequentially, if\nthe context is not allowed to access any locations used by the two\nexpressions",
+    "finding": "One Safe Rust example has 2 schedule-dependent outcomes: printing a value or panicking.",
+    "detail": "The atomic accesses are sequentially consistent. The array access is bounds-checked and uses a single loaded index, so the schedule affects the program result while preserving memory safety.",
+    "quote": "However our program may panic if the thread we spawned\n// managed to increment before this ran. A race condition because correct\n// program execution (panicking is rarely correct) depends on order of\n// thread execution.",
     "checked": true,
     "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "DPJ gives checked fork–join tasks the same results as their sequential composition. The prototype evaluation covers 6 programs.",
+    "detail": "The compiler trusts commutativity declarations. The formal theorem covers sequential Core DPJ, and the paper sketches the extension to parallel composition.",
+    "quote": "It follows directly from Theorem 2 that parallel composi-\ntion of noninterfering expressions produces the same resul t\nas sequential composition of those expressions.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "For every well-typed cobegin in the deterministic calculus, its 2 tasks give the same results in parallel and in sequence.",
+    "detail": "The formal result concerns completed reductions in the paper’s deterministic calculus.",
+    "quote": "Theorem 1 (Equivalence of cobegin and seq).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "A qualifying reduction with 0 marked choices gives a unique value up to reference renaming. Whole-heap equivalence requires a nonparallel enclosing context.",
+    "detail": "Theorem 6 compares serializable reductions from the same initial state. Its final-heap clause adds a restriction on where the expression occurs.",
+    "quote": "Moreover, if (e, Σ, ∅)i is not a subexpression of any\ncobegin or cobegin nd expression, then H ′ ∼= H ′′.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m8",
+    "case": null,
+    "verdict": "met",
+    "finding": "A well-typed deterministic cobegin preserves its possible results under atomic, program-order execution of its 2 tasks in either nesting direction.",
+    "detail": "The formal execution model assumes weak isolation for the underlying transactional runtime.",
+    "quote": "Theorem 5 (Semantic equivalence of cobegin and atomic seq ).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m9",
+    "case": null,
+    "verdict": "met",
+    "finding": "Every atomic expression in a well-typed, weakly isolated execution has an equivalent history with 0 intervening steps from concurrent tasks.",
+    "detail": "The theorem assumes weakly isolated execution histories. Compile-time checks extend the guarantee to unguarded accesses by excluding conflicting accesses across that boundary.",
+    "quote": "A statement atomic S indicates that S is to be run\nas if all other concurrent execution were suspended while S is\nexecuting. This is called strong isolation [40, 47].",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Determinator's space hierarchy is argued to form a deterministic Kahn network through 3 kernel primitives.",
+    "detail": "The kernel implements parent–child rendezvous. The paper does not demonstrate that these rendezvous preserve each channel's value sequence under the two execution modes in the criterion.",
+    "quote": "While a formal proof is out of scope, one straightforward\nargument is that the above Get/Put/Ret primitives reduce\nto blocking, one-to-one message channels, making the\nspace hierarchy a deterministic Kahn network [36].",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 4,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "met",
+    "finding": "Determinator enforces repeatable parallel execution for unprivileged code restricted to its 3-call kernel interface.",
+    "detail": "The paper supports the guarantee with an implementation and an informal design argument. It is an OSDI conference paper, so confirmed reflects conference peer review and peer_reviewed follows the journal-only definition.",
+    "quote": "Barring kernel or processor bugs, unprivileged spaces\nconstrained to use the above kernel API alone cannot\nbehave nondeterministically even by deliberate design.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 4,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Across 8 Lingua Franca benchmarks, the authors ran dependency-preserving multicore schedules and measured reaction-start lag.",
+    "detail": "The implemented subset excludes actions and physical connections. The benchmark traces contain reaction-start timestamps and omit output-port values.",
+    "quote": "The generated instruction streams are compiled into binary programs; each core interprets its\nstream at runtime, coordinating to preserve the deterministic behavior of the original LF program.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Theorem 1 proves parallel–sequential contextual may-equivalence for 2 well-typed expressions with suitably disjoint effects.",
+    "detail": "This is a theorem about a pair of expressions, with no empirical sample. The paper also gives a well-typed parallel expression whose masked effects are empty and whose result can be true or false.",
+    "quote": "is contextually equivalent with running e1 and e2 sequentially, if\nthe context is not allowed to access any locations used by the two\nexpressions",
+    "checked": true,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "partial",
-    "finding": "Proper reactors: formal proof of deterministic execution; sample size not applicable.",
-    "detail": "The Lean-mechanized proof covers executions from the same state at the same logical tag and reaction progress. The paper formalizes the abstract Reactor model, not a concrete LF compiler or runtime, and does not report the specified benchmark results.",
-    "quote": "Determinism All executions of a proper reactor up to the same point result in\nthe same state. That is, the nondeterministic order of execution steps does not\naffect an execution’s outcome.",
+    "finding": "For every proper reactor, Lean proves that any 2 executions from the same state agree at each completed tag.",
+    "detail": "The small-step semantics model concurrency by varying the order of eligible reaction steps. Physical actions are outside the semantics, and the paper leaves verified runtime implementations to future work. The supplied manuscript does not identify a publication venue.",
+    "quote": "All executions of a proper reactor up to the same point result in\nthe same state. That is, the nondeterministic order of execution steps does not\naffect an execution’s outcome.",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "partial",
-    "finding": "Lingua Franca timing enclaves preserved determinism in a baseband benchmark using 10,000 subframes per traffic scenario.",
-    "detail": "The paper describes coordination intended to preserve deterministic logical behavior, but reports that zero-delay cycles between enclaves deadlock. Its evaluation does not establish the general composition guarantee for fixed initial states and timestamped inputs.",
+    "finding": "Lingua Franca demonstrates deterministic tag coordination in a two-enclave example.",
+    "detail": "A tag release promises that the upstream enclave can produce only later-tagged events. When a requested tag has no upstream event, the scheduler can insert an empty event to release that tag.",
     "quote": "This protocol ensures both determinism and timely\nexecution.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Lingua Franca’s parallel reactor runtime ran Savina 1.86× faster than Akka. The excerpt gives no benchmark count.",
+    "detail": "The reported number measures execution time. The excerpt gives no tagged-output comparison or semantic argument covering every permitted schedule.",
+    "quote": "We compare against Akka and CAF, which LF outperforms by 1.86× and 1.42×, respectively.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For any finite or countably infinite compatible network of determinate port automata, Theorem 2 gives one output history per port for each fixed input history.",
+    "detail": "This is a general theorem with no empirical sample. It assumes single-valued component input/output relations and proves schedule independence for fair executions. The specified read and buffer semantics are left implicit.",
+    "quote": "and that networks of determinate processes obey Kahn’s\nfixed-point principle.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "CSOLVE verified determinism and memory safety for all 6 C benchmarks under the supplied effect and commutativity annotations.",
+    "detail": "For accumLog, the implementation is external. The authors assume atomicity and declare that accumulation commutes, so the reported determinism depends on those assumptions.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Deterministic Parallel Java reports deterministic execution when neither of its 2 marked nondeterministic parallel constructs is encountered. No empirical sample applies.",
+    "detail": "The excerpt lists Chapter 6’s soundness section but does not include its theorem statement, so the precise heap and reference-renaming guarantee cannot be verified from the supplied text.",
+    "quote": "The language is determin-\nistic by default, because a statement S executes deterministically unless the execution of S encoun-\ntered a dynamic instance offoreach nd orcobegin nd.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The racey stress test on dOS produced identical output in 500 of 500 runs.",
+    "detail": "Externally writable shared pages and /proc memory modifications can bypass shim mediation. mmap can also fail nondeterministically when physical memory is scarce. The source is a reviewed conference paper.",
+    "quote": "We tested our dOS implementation by run-\nning the racey [20, 45] deterministic stress test 500\ntimes and verifying thatracey always produces the same\noutput.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 22,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "met",
+    "finding": "Lingua Franca’s C reactor runtime yields exactly 1 set of tagged output signals per fixed input and initial state. Sample size is inapplicable to the proof.",
+    "detail": "The proof assumes non-Zeno executions. When reactions overwrite an output at the same tag, downstream reactors observe only the final value. Clock-derived input tags are fixed as part of the inputs.",
+    "quote": "A classic fixed point theorem [55] tells\nus that such a function has exactly one fixed point, and hence there can be only one set of signals\nthat satisfy the program.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 23,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "With Lingua Franca, Autoware’s BehaviorPlanner showed 0% callback-pair order drift across 20 runs.",
+    "detail": "The converted programs carry application payloads over DDS and use dummy events on Lingua Franca ports to coordinate callback activation and ordering. The evaluation does not compare tagged payload traces.",
+    "quote": "Under LF the order of every pair is identical across all twenty runs. Each subscription callback fires at a deterministic logical-time tag, and ties at the same tag are resolved by the static reaction order inside the reactor.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 24,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    }
   ],
   "judged": [
    {
     "url": "https://arxiv.org/pdf/2210.15202",
-    "milestone": "m1",
-    "hash": "74c5b731a3ee",
+    "milestone": "m2",
+    "hash": "1cd06185ddcb",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://doc.rust-lang.org/rustonomicon/races.html",
+    "milestone": "m2",
+    "hash": "1cd06185ddcb",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://compas.cs.stonybrook.edu/~nhonarmand/pubs/dpj_popl11.pdf",
+    "milestone": "m2",
+    "hash": "1cd06185ddcb",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://dpj.cs.illinois.edu/DPJ/Publications_files/DPJ-OOPSLA-2009.pdf",
+    "milestone": "m2",
+    "hash": "1cd06185ddcb",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://dedis.cs.yale.edu/2010/det/papers/osdi10.pdf",
+    "milestone": "m2",
+    "hash": "1cd06185ddcb",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://backend.orbit.dtu.dk/ws/portalfiles/portal/417057366/3762653.pdf",
+    "milestone": "m2",
+    "hash": "1cd06185ddcb",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://asu.elsevierpure.com/en/publications/high-performance-deterministic-concurrency-using-lingua-franca/",
+    "milestone": "m2",
+    "hash": "1cd06185ddcb",
     "date": "2026-11-15",
     "by": "gpt-6.1-terra"
    },
    {
     "url": "https://arxiv.org/pdf/2210.15202",
-    "milestone": "m2",
-    "hash": "1cd06185ddcb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m6",
+    "hash": "258671e10f71",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2210.15202",
+    "milestone": "m1",
+    "hash": "caf5848ece5f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2210.15202",
+    "milestone": "m7",
+    "hash": "df0a98f6451c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2210.15202",
+    "milestone": "m8",
+    "hash": "ed68d31866e6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2210.15202",
+    "milestone": "m9",
+    "hash": "3147dc15e6af",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2210.15202",
     "milestone": "m3",
-    "hash": "5c9d88711ee5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "17112c395de3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2210.15202",
     "milestone": "m4",
-    "hash": "aa3e26f44dfb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3070a252cc9e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2210.15202",
     "milestone": "m5",
     "hash": "60d43f77f25c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2210.15202",
     "milestone": "completion",
     "hash": "912ed5af0ff0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doc.rust-lang.org/rustonomicon/races.html",
+    "milestone": "m6",
+    "hash": "258671e10f71",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doc.rust-lang.org/rustonomicon/races.html",
     "milestone": "m1",
-    "hash": "74c5b731a3ee",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "caf5848ece5f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doc.rust-lang.org/rustonomicon/races.html",
-    "milestone": "m2",
-    "hash": "1cd06185ddcb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m7",
+    "hash": "df0a98f6451c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doc.rust-lang.org/rustonomicon/races.html",
+    "milestone": "m8",
+    "hash": "ed68d31866e6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doc.rust-lang.org/rustonomicon/races.html",
+    "milestone": "m9",
+    "hash": "3147dc15e6af",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doc.rust-lang.org/rustonomicon/races.html",
     "milestone": "m3",
-    "hash": "5c9d88711ee5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "17112c395de3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doc.rust-lang.org/rustonomicon/races.html",
     "milestone": "m4",
-    "hash": "aa3e26f44dfb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3070a252cc9e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doc.rust-lang.org/rustonomicon/races.html",
     "milestone": "m5",
     "hash": "60d43f77f25c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doc.rust-lang.org/rustonomicon/races.html",
     "milestone": "completion",
     "hash": "912ed5af0ff0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://dpj.cs.illinois.edu/DPJ/Publications_files/DPJ-OOPSLA-2009.pdf",
+    "milestone": "m6",
+    "hash": "258671e10f71",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://dpj.cs.illinois.edu/DPJ/Publications_files/DPJ-OOPSLA-2009.pdf",
     "milestone": "m1",
-    "hash": "74c5b731a3ee",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://compas.cs.stonybrook.edu/~nhonarmand/pubs/dpj_popl11.pdf",
-    "milestone": "m2",
-    "hash": "1cd06185ddcb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://dedis.cs.yale.edu/2010/det/papers/osdi10.pdf",
-    "milestone": "m3",
-    "hash": "5c9d88711ee5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://asu.elsevierpure.com/en/publications/high-performance-deterministic-concurrency-using-lingua-franca/",
-    "milestone": "m4",
-    "hash": "aa3e26f44dfb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://backend.orbit.dtu.dk/ws/portalfiles/portal/417057366/3762653.pdf",
-    "milestone": "m4",
-    "hash": "aa3e26f44dfb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "caf5848ece5f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://dpj.cs.illinois.edu/DPJ/Publications_files/DPJ-OOPSLA-2009.pdf",
-    "milestone": "m2",
-    "hash": "1cd06185ddcb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m7",
+    "hash": "df0a98f6451c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://dpj.cs.illinois.edu/DPJ/Publications_files/DPJ-OOPSLA-2009.pdf",
+    "milestone": "m8",
+    "hash": "ed68d31866e6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://dpj.cs.illinois.edu/DPJ/Publications_files/DPJ-OOPSLA-2009.pdf",
+    "milestone": "m9",
+    "hash": "3147dc15e6af",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://dpj.cs.illinois.edu/DPJ/Publications_files/DPJ-OOPSLA-2009.pdf",
     "milestone": "m3",
-    "hash": "5c9d88711ee5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "17112c395de3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://dpj.cs.illinois.edu/DPJ/Publications_files/DPJ-OOPSLA-2009.pdf",
     "milestone": "m4",
-    "hash": "aa3e26f44dfb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3070a252cc9e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://dpj.cs.illinois.edu/DPJ/Publications_files/DPJ-OOPSLA-2009.pdf",
     "milestone": "m5",
     "hash": "60d43f77f25c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://dpj.cs.illinois.edu/DPJ/Publications_files/DPJ-OOPSLA-2009.pdf",
     "milestone": "completion",
     "hash": "912ed5af0ff0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://compas.cs.stonybrook.edu/~nhonarmand/pubs/dpj_popl11.pdf",
+    "milestone": "m6",
+    "hash": "258671e10f71",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://compas.cs.stonybrook.edu/~nhonarmand/pubs/dpj_popl11.pdf",
     "milestone": "m1",
-    "hash": "74c5b731a3ee",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "caf5848ece5f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://compas.cs.stonybrook.edu/~nhonarmand/pubs/dpj_popl11.pdf",
+    "milestone": "m7",
+    "hash": "df0a98f6451c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://compas.cs.stonybrook.edu/~nhonarmand/pubs/dpj_popl11.pdf",
+    "milestone": "m8",
+    "hash": "ed68d31866e6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://compas.cs.stonybrook.edu/~nhonarmand/pubs/dpj_popl11.pdf",
+    "milestone": "m9",
+    "hash": "3147dc15e6af",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://compas.cs.stonybrook.edu/~nhonarmand/pubs/dpj_popl11.pdf",
     "milestone": "m3",
-    "hash": "5c9d88711ee5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "17112c395de3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://compas.cs.stonybrook.edu/~nhonarmand/pubs/dpj_popl11.pdf",
     "milestone": "m4",
-    "hash": "aa3e26f44dfb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3070a252cc9e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://compas.cs.stonybrook.edu/~nhonarmand/pubs/dpj_popl11.pdf",
     "milestone": "m5",
     "hash": "60d43f77f25c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://compas.cs.stonybrook.edu/~nhonarmand/pubs/dpj_popl11.pdf",
     "milestone": "completion",
     "hash": "912ed5af0ff0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://dedis.cs.yale.edu/2010/det/papers/osdi10.pdf",
+    "milestone": "m6",
+    "hash": "258671e10f71",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://dedis.cs.yale.edu/2010/det/papers/osdi10.pdf",
     "milestone": "m1",
-    "hash": "74c5b731a3ee",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "caf5848ece5f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://dedis.cs.yale.edu/2010/det/papers/osdi10.pdf",
-    "milestone": "m2",
-    "hash": "1cd06185ddcb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m7",
+    "hash": "df0a98f6451c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://dedis.cs.yale.edu/2010/det/papers/osdi10.pdf",
+    "milestone": "m8",
+    "hash": "ed68d31866e6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://dedis.cs.yale.edu/2010/det/papers/osdi10.pdf",
+    "milestone": "m9",
+    "hash": "3147dc15e6af",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://dedis.cs.yale.edu/2010/det/papers/osdi10.pdf",
+    "milestone": "m3",
+    "hash": "17112c395de3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://dedis.cs.yale.edu/2010/det/papers/osdi10.pdf",
     "milestone": "m4",
-    "hash": "aa3e26f44dfb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3070a252cc9e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://dedis.cs.yale.edu/2010/det/papers/osdi10.pdf",
     "milestone": "m5",
     "hash": "60d43f77f25c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://dedis.cs.yale.edu/2010/det/papers/osdi10.pdf",
     "milestone": "completion",
     "hash": "912ed5af0ff0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://backend.orbit.dtu.dk/ws/portalfiles/portal/417057366/3762653.pdf",
+    "milestone": "m6",
+    "hash": "258671e10f71",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://backend.orbit.dtu.dk/ws/portalfiles/portal/417057366/3762653.pdf",
     "milestone": "m1",
-    "hash": "74c5b731a3ee",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "caf5848ece5f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://backend.orbit.dtu.dk/ws/portalfiles/portal/417057366/3762653.pdf",
-    "milestone": "m2",
-    "hash": "1cd06185ddcb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m7",
+    "hash": "df0a98f6451c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://backend.orbit.dtu.dk/ws/portalfiles/portal/417057366/3762653.pdf",
+    "milestone": "m8",
+    "hash": "ed68d31866e6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://backend.orbit.dtu.dk/ws/portalfiles/portal/417057366/3762653.pdf",
+    "milestone": "m9",
+    "hash": "3147dc15e6af",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://backend.orbit.dtu.dk/ws/portalfiles/portal/417057366/3762653.pdf",
     "milestone": "m3",
-    "hash": "5c9d88711ee5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "17112c395de3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://backend.orbit.dtu.dk/ws/portalfiles/portal/417057366/3762653.pdf",
+    "milestone": "m4",
+    "hash": "3070a252cc9e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://backend.orbit.dtu.dk/ws/portalfiles/portal/417057366/3762653.pdf",
     "milestone": "m5",
     "hash": "60d43f77f25c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://backend.orbit.dtu.dk/ws/portalfiles/portal/417057366/3762653.pdf",
     "milestone": "completion",
     "hash": "912ed5af0ff0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
-    "url": "https://asu.elsevierpure.com/en/publications/high-performance-deterministic-concurrency-using-lingua-franca/",
-    "milestone": "m1",
-    "hash": "74c5b731a3ee",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://asu.elsevierpure.com/en/publications/high-performance-deterministic-concurrency-using-lingua-franca/",
-    "milestone": "m2",
-    "hash": "1cd06185ddcb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://asu.elsevierpure.com/en/publications/high-performance-deterministic-concurrency-using-lingua-franca/",
-    "milestone": "m3",
-    "hash": "5c9d88711ee5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://asu.elsevierpure.com/en/publications/high-performance-deterministic-concurrency-using-lingua-franca/",
-    "milestone": "m5",
-    "hash": "60d43f77f25c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://asu.elsevierpure.com/en/publications/high-performance-deterministic-concurrency-using-lingua-franca/",
-    "milestone": "completion",
-    "hash": "912ed5af0ff0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "url": "https://iris-project.org/pdfs/2017-popl-effects-final.pdf",
+    "milestone": "m6",
+    "hash": "258671e10f71",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://iris-project.org/pdfs/2017-popl-effects-final.pdf",
     "milestone": "m1",
-    "hash": "74c5b731a3ee",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "caf5848ece5f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://iris-project.org/pdfs/2017-popl-effects-final.pdf",
+    "milestone": "m7",
+    "hash": "df0a98f6451c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://iris-project.org/pdfs/2017-popl-effects-final.pdf",
+    "milestone": "m8",
+    "hash": "ed68d31866e6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://iris-project.org/pdfs/2017-popl-effects-final.pdf",
+    "milestone": "m9",
+    "hash": "3147dc15e6af",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://iris-project.org/pdfs/2017-popl-effects-final.pdf",
+    "milestone": "m3",
+    "hash": "17112c395de3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://iris-project.org/pdfs/2017-popl-effects-final.pdf",
+    "milestone": "m4",
+    "hash": "3070a252cc9e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://iris-project.org/pdfs/2017-popl-effects-final.pdf",
+    "milestone": "m5",
+    "hash": "60d43f77f25c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://iris-project.org/pdfs/2017-popl-effects-final.pdf",
+    "milestone": "completion",
+    "hash": "912ed5af0ff0",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://goens.org/publications/vstte23.pdf",
+    "milestone": "m6",
+    "hash": "258671e10f71",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://goens.org/publications/vstte23.pdf",
+    "milestone": "m1",
+    "hash": "caf5848ece5f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://goens.org/publications/vstte23.pdf",
+    "milestone": "m7",
+    "hash": "df0a98f6451c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://goens.org/publications/vstte23.pdf",
+    "milestone": "m8",
+    "hash": "ed68d31866e6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://goens.org/publications/vstte23.pdf",
+    "milestone": "m9",
+    "hash": "3147dc15e6af",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://goens.org/publications/vstte23.pdf",
+    "milestone": "m3",
+    "hash": "17112c395de3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://goens.org/publications/vstte23.pdf",
     "milestone": "m4",
-    "hash": "aa3e26f44dfb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3070a252cc9e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://goens.org/publications/vstte23.pdf",
+    "milestone": "m5",
+    "hash": "60d43f77f25c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://goens.org/publications/vstte23.pdf",
+    "milestone": "completion",
+    "hash": "912ed5af0ff0",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cfaed.tu-dresden.de/files/Images/people/chair-cc/publications/2409_Robledo_FDL.pdf",
+    "milestone": "m6",
+    "hash": "258671e10f71",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cfaed.tu-dresden.de/files/Images/people/chair-cc/publications/2409_Robledo_FDL.pdf",
+    "milestone": "m1",
+    "hash": "caf5848ece5f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cfaed.tu-dresden.de/files/Images/people/chair-cc/publications/2409_Robledo_FDL.pdf",
+    "milestone": "m7",
+    "hash": "df0a98f6451c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cfaed.tu-dresden.de/files/Images/people/chair-cc/publications/2409_Robledo_FDL.pdf",
+    "milestone": "m8",
+    "hash": "ed68d31866e6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cfaed.tu-dresden.de/files/Images/people/chair-cc/publications/2409_Robledo_FDL.pdf",
+    "milestone": "m9",
+    "hash": "3147dc15e6af",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cfaed.tu-dresden.de/files/Images/people/chair-cc/publications/2409_Robledo_FDL.pdf",
+    "milestone": "m3",
+    "hash": "17112c395de3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://cfaed.tu-dresden.de/files/Images/people/chair-cc/publications/2409_Robledo_FDL.pdf",
     "milestone": "m4",
-    "hash": "aa3e26f44dfb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3070a252cc9e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cfaed.tu-dresden.de/files/Images/people/chair-cc/publications/2409_Robledo_FDL.pdf",
+    "milestone": "m5",
+    "hash": "60d43f77f25c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cfaed.tu-dresden.de/files/Images/people/chair-cc/publications/2409_Robledo_FDL.pdf",
+    "milestone": "completion",
+    "hash": "912ed5af0ff0",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://asu.elsevierpure.com/en/publications/high-performance-deterministic-concurrency-using-lingua-franca/",
+    "milestone": "m6",
+    "hash": "258671e10f71",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://asu.elsevierpure.com/en/publications/high-performance-deterministic-concurrency-using-lingua-franca/",
+    "milestone": "m1",
+    "hash": "caf5848ece5f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://asu.elsevierpure.com/en/publications/high-performance-deterministic-concurrency-using-lingua-franca/",
+    "milestone": "m7",
+    "hash": "df0a98f6451c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://asu.elsevierpure.com/en/publications/high-performance-deterministic-concurrency-using-lingua-franca/",
+    "milestone": "m8",
+    "hash": "ed68d31866e6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://asu.elsevierpure.com/en/publications/high-performance-deterministic-concurrency-using-lingua-franca/",
+    "milestone": "m9",
+    "hash": "3147dc15e6af",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://asu.elsevierpure.com/en/publications/high-performance-deterministic-concurrency-using-lingua-franca/",
+    "milestone": "m3",
+    "hash": "17112c395de3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://asu.elsevierpure.com/en/publications/high-performance-deterministic-concurrency-using-lingua-franca/",
+    "milestone": "m4",
+    "hash": "3070a252cc9e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://asu.elsevierpure.com/en/publications/high-performance-deterministic-concurrency-using-lingua-franca/",
+    "milestone": "m5",
+    "hash": "60d43f77f25c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://asu.elsevierpure.com/en/publications/high-performance-deterministic-concurrency-using-lingua-franca/",
+    "milestone": "completion",
+    "hash": "912ed5af0ff0",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://groups.csail.mit.edu/tds/papers/Lynch/ic89.pdf",
+    "milestone": "m6",
+    "hash": "258671e10f71",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ranjitjhala.github.io/static/deterministic_parallelism_via_liquid_effects.pdf",
+    "milestone": "m1",
+    "hash": "caf5848ece5f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://rob-bocchino.net/Professional/Bocchino-PhD-Thesis.pdf",
+    "milestone": "m7",
+    "hash": "df0a98f6451c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://static.usenix.org/events/osdi10/tech/full_papers/Bergan.pdf",
+    "milestone": "m3",
+    "hash": "17112c395de3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://par.nsf.gov/servlets/purl/10311568",
+    "milestone": "m4",
+    "hash": "3070a252cc9e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2606.09203v1",
+    "milestone": "m4",
+    "hash": "3070a252cc9e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://marioskogias.github.io/docs/doradd.pdf",
+    "milestone": "completion",
+    "hash": "912ed5af0ff0",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-15",
   "log": [
    {
@@ -1245,8 +2006,98 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "result on m1 from reference 13: quote is 343 characters, over its limit of 320; kept."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"A systems language and runtime let parallel threads run in different orders while producing the same externally visible events in the same order. This holds for a fixed starting state, external inputs and outcomes of explicitly marked nondeterministic operations. Elapsed time may vary. A clock reading used by the program counts as an input. The target is parallel kernel, browser and database code with performance matching conventional implementations.\". Reason: The definition leaves “explicit choices” unexplained and gives no example of the boundary between scheduling and external input."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Across five open-source projects, concurrency bugs took an average of 82 calendar days from report to resolution, compared with 66 for other bugs in the sample. In a separate study of 105 concurrency bugs, about 92% could be triggered by ordering at most four memory accesses. Even code free of data races can fail under one thread order and succeed under another. Given the same starting state, inputs and explicit choices, maintainers could reproduce a visible failure and test a fix without having to recreate the original thread schedule.\". Reason: The current rationale describes how bugs are triggered but omits their measured impact on maintainers and the benefit of reproducing a failure from its inputs."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after None: \"A process network produces the same output streams under sequential and parallel execution.\". Reason: The 1977 process-network implementation supplies an earlier laboratory milestone with a guarantee about the sequence of values on each channel."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"In a well-typed fork\\u2013join program, the checker requires noninterfering effects for tasks whose execution order is unspecified. Running those tasks in parallel must produce the same result as running them in sequence. If the checker relies on a declaration that two method calls commute, the calls must behave atomically with respect to each other and give the same result in either order.\"; threshold_quote = \"parallel composition of noninterfering expressions produces the same result as sequential composition of those expressions.\"; threshold_ref = 7. Reason: The worker count and run-selection procedure describe an experiment, while the milestone tests equivalence to sequential composition."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "split m2 into \"A deterministic construct gives one result when its execution encounters no marked choice.\" | \"A deterministic parallel block retains sequential semantics when nested with nondeterministic code.\" | \"An atomic statement executes in isolation from every concurrent task.\". Reason: The criterion joins three independently testable DPJ guarantees, so a result about an atomic block can be mistaken for evidence that a computation has only one possible output."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"For fixed initial state and inputs, the operating system makes parallel execution repeatable for every unprivileged process restricted to its deterministic kernel interface. The guarantee covers faulty application code and assumes correct kernel and processor behavior. The system mediates external inputs, including clock readings.\"; threshold_quote = \"cannot behave nondeterministically even by deliberate design.\"; threshold_ref = 4. Reason: The architecture, system-call count and console observations describe one prototype and obscure which code the operating system must constrain."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: title = \"A reactor runtime produces the same tagged outputs for the same tagged inputs.\"; criterion = \"Fix the reactors\\u2019 initial states and the values and logical time tags of their inputs. With deterministic reaction code that obeys its declared dependencies, every permitted parallel execution must produce the same values at the same tags on each output port. Within a reactor, reactions triggered at the same tag follow their declared order. Independent reactions may execute in parallel, and their physical execution times may vary.\"; threshold_quote = \"Given the same input data, a composition of reactors has exactly one correct behavior.\"; threshold_ref = 5; refs = [5, 18]. Reason: The Savina speedups measure execution time, while the reactor guarantee concerns which values appear at which logical event tags."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 2. Reason: The NSF Public Access Repository provides the full published Lingua Franca article, including its methods and results."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Applied 8 of 8 proposed operations from SWE-09-revise-20261121T161924662998Z; now version 2."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m6, m1, m7, m8, m9, m3, m4."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 0 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 6 found, 0 not found, 1 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "definition is 455 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 10 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 8 candidates returned, 0 dropped as sources already used, 8 to judge."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 7 of 8 new candidates, without search. Skipped: 2 no readable saved copy. Dropped rows: 1 partial on completion. Replaced 8 earlier rows. Added 19 results: 13 from sources already used, 6 from newly found sources."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 1 from arXiv, 5 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 18 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-21"
  }
 }
