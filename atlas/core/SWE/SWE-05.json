@@ -300,12 +300,14 @@
  "page": {
   "id": "SWE-05",
   "title": "Automated proof repair during software evolution",
-  "definition": "Developers without formal-methods expertise maintain machine-checked proofs as software code and requirements change. Proof repair—updating an invalidated mathematical argument—meets DARPA’s PROVERS target of manual changes to 1% of proof lines on its high complexity systems.",
+  "definition": "When a change to a program or its specification breaks a proof, a tool adapts the argument and a proof assistant checks that it establishes the required property for the revised program under its stated assumptions. Developers without formal-methods expertise could use this process during routine maintenance.",
   "goal": {
-   "need": "The 2018 s2n study reports initial verification efforts of roughly three to eight months per component, including specification, proof and integration work. Maintaining those proofs is a separate task when code changes invalidate them. DARPA’s PEARLS goal is to make proof maintenance comparable in effort to software maintenance.",
+   "need": "Adding interrupts, ARM page tables and address spaces to the seL4 operating-system kernel took several person-months to design and implement and 1.5–2 person-years to re-verify. Teams can rerun proof scripts with each update, but a broken argument still needs repair. Automating that work would help developers keep guarantees about specified behaviour current as they release changes, with specialist help reserved for difficult cases. Each guarantee depends on the assumptions of its proof.",
    "need_refs": [
+    12,
     1,
-    2
+    2,
+    13
    ],
    "figures": {
     "caption": "Initial s2n verification effort reported in 2018",
@@ -332,14 +334,6 @@
    },
    "statements": [
     {
-     "body": "DARPA, PEARLS AI Exploration",
-     "year": "Undated",
-     "quote": "using a comparable effort of maintaining a proof to that of maintaining the software.",
-     "context": null,
-     "ref": 2,
-     "checked": true
-    },
-    {
      "body": "DARPA, PROVERS programme",
      "year": "2023",
      "quote": "Tools are expected to be engineered so that as software is developed or updated, (re)assessment effort is comparable to the effort of maintaining the software.",
@@ -348,43 +342,57 @@
      "checked": null
     },
     {
-     "body": "Proofcraft",
-     "year": "2025",
-     "quote": "This progress is part of Proofcraft’s initiative to reduce reliance on experts, as part of DARPA’s PROVERS program.",
-     "context": "The announcement on 2 September 2025 reports seL4 proof reuse across Arm platforms, including a 23rd platform requiring no new proof work. This company announcement is not peer reviewed; platform reuse does not establish proof repair after a behavioral change.",
-     "ref": 4,
+     "body": "DARPA, PEARLS Artificial Intelligence Exploration opportunity",
+     "year": "2021",
+     "quote": "to support, and if possible automate, the generation and maintenance of proofs used in the formal verification of software.",
+     "context": "Opportunity DARPA-PA-21-04-04 invited proposals on using AI and machine learning for proof engineering.",
+     "ref": 14,
      "checked": true
+    },
+    {
+     "body": "DARPA, fiscal year 2026 budget justification for PROVERS",
+     "year": "2025",
+     "quote": "at a cost that is proportionate to code change",
+     "context": "The objective applies to proof maintenance and repair.",
+     "ref": 13,
+     "checked": null
     }
    ]
   },
   "completion": {
    "title": "Traditional developers meet the 1% manual-change target for proofs of high complexity software.",
-   "criterion": "Meet PROVERS Phase 3’s 1% target for proof lines requiring manual change following software update and maintenance, on high complexity systems used by traditional developers. The FAQ specifies demonstration by developers without formal-methods expertise.",
-   "set_by": "DARPA, PROVERS solicitation HR001123S0020, Table 1; the numerical threshold appears only in the table.",
+   "criterion": "Developers without formal-methods expertise carry out the Phase 3 demonstration on a high-complexity system. Following software update and maintenance, the target is 1% of proof lines requiring manual change.",
+   "set_by": "DARPA, PROVERS solicitation HR001123S0020, Table 1, Phase 3 column and proof-maintenance row. FAQ A59 specifies who carries out the demonstration.",
    "set_by_kind": "government_programme",
-   "threshold_quote": null,
-   "threshold_ref": null,
-   "basis": "DARPA’s final proof-maintenance target is explicitly tentative. Manual-edit share does not establish labor-cost proportionality or structural stability.",
+   "threshold_quote": "20% 10% 1%",
+   "threshold_ref": 3,
+   "basis": "DARPA labels the table’s targets tentative. Its quantitative evaluation team assesses cost and efficiency separately. The percentage measures manual proof-line edits and supplies no bound on labour or on how changes propagate through the software.",
    "refs": [
     3,
-    5
+    4,
+    15
    ],
    "threshold_checked": null
   },
-  "case_label": null,
-  "cases": [],
+  "case_label": "Change type",
+  "cases": [
+   "Data type",
+   "Specification or invariant",
+   "Implementation logic"
+  ],
   "milestone_structure": "sequence",
   "milestones": [
    {
     "id": "m1",
-    "title": "A proof assistant accepts an automatically repaired proof after a definition changes.",
-    "criterion": "Automation produces a proof of the updated theorem that passes the proof assistant’s checker under its stated assumptions. Ringer and colleagues demonstrated Pumpkin Pi in eight Coq case studies in 2021, repairing proofs across type equivalences. These are restricted changes, rather than arbitrary changes in required behavior.",
+    "title": "A proof assistant accepts an automatically repaired proof after a program or its specification changes.",
+    "criterion": "A change invalidates an existing proof. Automation adapts the proof, and the proof assistant accepts it for the required claim about the revised version under the stated assumptions.",
     "set_by": "Interactive theorem-proving community convention: proof-checker acceptance, described for Coq by Ringer and colleagues in Section 2.",
     "set_by_kind": "community_convention",
     "threshold_quote": "Coq compiles it to a low-level representation called a proof term, then checks that the proof term has the expected type.",
-    "threshold_ref": 6,
+    "threshold_ref": 5,
     "refs": [
-     6
+     5,
+     16
     ],
     "status": "active",
     "replaced_by": [],
@@ -392,29 +400,32 @@
    },
    {
     "id": "m2",
-    "title": "Software updates pass their proof checks within a continuous integration workflow.",
-    "criterion": "Code updates and pull requests pass the proof-script checks required by the development workflow. Manual proof repair remains permitted. The 2018 s2n paper reports 956 proof replays and three manual proof updates over a year; some replays did not modify verified code. These counts measure replays and updates, rather than successful repairs of 956 changed implementations.",
-    "set_by": "Amazon Web Services and Galois, published s2n continuous-verification workflow, Section 4; this protocol concerns s2n.",
-    "set_by_kind": "protocol",
-    "threshold_quote": "all code updates now must successfully verify with our proof scripts.",
-    "threshold_ref": 1,
+    "title": "A development workflow automatically adapts a broken proof and checks it on the software update.",
+    "criterion": "Submit an update that invalidates an existing proof. As part of the development workflow, a repair tool adapts the proof and the proof check passes for the updated software and applicable specification. Developers may resolve obligations left by the tool.",
+    "set_by": "DARPA, PROVERS solicitation HR001123S0020, TA1.2 Workflow Integration.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "automatically adapt those proofs in response to changes.",
+    "threshold_ref": 3,
     "refs": [
-     1
+     3,
+     1,
+     8
     ],
     "status": "active",
     "replaced_by": [],
-    "threshold_checked": true
+    "threshold_checked": null
    },
    {
     "id": "m3",
     "title": "Experts maintain proofs for low complexity software at the 20% manual-change target.",
-    "criterion": "Meet PROVERS Phase 1’s target: 20% of proof lines require manual change following software update and maintenance, using low complexity systems and expert developers.",
-    "set_by": "DARPA, PROVERS, Table 1; the threshold is tabulated.",
+    "criterion": "Demonstrate proof maintenance after a software update on an open, unclassified system of low complexity. Formal-methods experts may participate fully. The Phase 1 target is 20% of proof lines requiring manual change.",
+    "set_by": "DARPA, PROVERS solicitation HR001123S0020, Table 1, Phase 1 column and proof-maintenance row. FAQ A59 describes expert participation.",
     "set_by_kind": "government_programme",
-    "threshold_quote": null,
-    "threshold_ref": null,
+    "threshold_quote": "20%",
+    "threshold_ref": 3,
     "refs": [
-     3
+     3,
+     4
     ],
     "status": "active",
     "replaced_by": [],
@@ -423,11 +434,11 @@
    {
     "id": "m4",
     "title": "Journeyman developers maintain proofs for moderate complexity software at the 10% manual-change target.",
-    "criterion": "Meet PROVERS Phase 2’s target: 10% of proof lines require manual change following software update and maintenance, using moderate complexity systems and journeyman developers.",
-    "set_by": "DARPA, PROVERS, Table 1; the threshold is tabulated.",
+    "criterion": "Demonstrate proof maintenance on a system of moderate complexity with a team that includes programmers without substantial formal-methods backgrounds. Phase 2 includes four specification-change cycles. Its target is 10% of proof lines requiring manual change following software update and maintenance.",
+    "set_by": "DARPA, PROVERS solicitation HR001123S0020, Table 1, Phase 2 column and proof-maintenance row. Section I.B describes the team and change cycles.",
     "set_by_kind": "government_programme",
-    "threshold_quote": null,
-    "threshold_ref": null,
+    "threshold_quote": "10%",
+    "threshold_ref": 3,
     "refs": [
      3
     ],
@@ -441,9 +452,7 @@
    "No numerical definitions of system complexity or detailed proof-line counting and aggregation rules were found in the PROVERS solicitation or FAQ.",
    "No public evaluation establishing attainment of the PROVERS phase maintenance targets was found in searches of DARPA, the programme portal, performer announcements and papers.",
    "No external completion test combining a proof-repair effort ratio with a longitudinal software-coupling bound was found in PEARLS, PROVERS or proof-maintenance benchmark searches.",
-   "The retained PEARLS programme page does not give its publication year.",
-   "The DARPA fiscal year 2026 budget justification could not be opened because its server returned HTTP 403.",
-   "The supplied IEEE page for Software aging returned no readable paper text."
+   "No academy, professional society or programme statement disputing the value or feasibility of automated proof repair was found."
   ],
   "references": [
    {
@@ -490,20 +499,6 @@
    },
    {
     "id": 4,
-    "kind": "press_release",
-    "url": "https://proofcraft.systems/news-2025/",
-    "doi": null,
-    "title": "Proofcraft News - 2025",
-    "authors": "Proofcraft",
-    "container": "Proofcraft",
-    "year": "2025",
-    "volume": null,
-    "issue": null,
-    "pages": null,
-    "citation_source": "model"
-   },
-   {
-    "id": 5,
     "kind": "report",
     "url": "https://www.darpa.mil/sites/default/files/PROVERS-FAQ_05042023_FINAL.pdf",
     "doi": null,
@@ -517,7 +512,7 @@
     "citation_source": "model"
    },
    {
-    "id": 6,
+    "id": 5,
     "kind": "journal",
     "url": "https://dependenttyp.es/pdf/repair.pdf",
     "doi": "10.1145/3453483.3454033",
@@ -531,7 +526,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 7,
+    "id": 6,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2607.28928",
     "doi": null,
@@ -545,7 +540,7 @@
     "citation_source": "model"
    },
    {
-    "id": 8,
+    "id": 7,
     "kind": "journal",
     "url": "https://dependenttyp.es/pdf/quotients.pdf",
     "doi": "10.1145/3763164",
@@ -559,7 +554,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 9,
+    "id": 8,
     "kind": "journal",
     "url": "https://ilyasergey.net/assets/pdf/papers/sisyphus-pldi23.pdf",
     "doi": "10.1145/3591221",
@@ -573,7 +568,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 10,
+    "id": 9,
     "kind": "report",
     "url": "https://www.doc.ic.ac.uk/~afd/papers/2025/FormaliSE.pdf",
     "doi": null,
@@ -587,7 +582,7 @@
     "citation_source": "model"
    },
    {
-    "id": 11,
+    "id": 10,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2601.03768",
     "doi": null,
@@ -601,7 +596,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 12,
+    "id": 11,
     "kind": "report",
     "url": "https://sos-vo.org/system/files/2024-05/Formal%20Verification%20of%20AWS-LibCrypto_1.pdf",
     "doi": null,
@@ -613,6 +608,146 @@
     "issue": null,
     "pages": null,
     "citation_source": "model"
+   },
+   {
+    "id": 12,
+    "kind": "journal",
+    "url": "https://cgi.cse.unsw.edu.au/~kleing/papers/cacm10.pdf",
+    "doi": "10.1145/1743546.1743574",
+    "title": "seL4: Formal Verification of an Operating-System Kernel",
+    "authors": "Klein G, Andronick J, Elphinstone K, Heiser G, Cock D, Derrin P, et al.",
+    "container": "Commun. ACM",
+    "year": "2010",
+    "volume": "53",
+    "issue": "6",
+    "pages": "107-115",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 13,
+    "kind": "report",
+    "url": "https://comptroller.war.gov/Portals/45/Documents/defbudget/FY2026/budget_justification/pdfs/03_RDT_and_E/RDTE_Vol1_DARPA_MasterJustificationBook_PB_2026.pdf",
+    "doi": null,
+    "title": "Department of Defense Fiscal Year (FY) 2026 Budget Estimates",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "Defense-Wide Justification Book Volume 1 of 5, Research, Development, Test & Evaluation, Defense-Wide",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 14,
+    "kind": "filing",
+    "url": "https://www.cleat.ai/government/contracts/proof-engineering-adaptation-repair-and-learning-for-software-pearls-hqpg",
+    "doi": null,
+    "title": "Proof Engineering, Adaptation, Repair, and Learning for Software (PEARLS)",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "DARPA-PA-21-04-04",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 15,
+    "kind": "web",
+    "url": "https://www.darpa.mil/research/programs/pipelined-reasoning-of-verifiers-enabling-robust-systems",
+    "doi": null,
+    "title": "Pipelined Reasoning of Verifiers Enabling Robust Systems",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "DARPA",
+    "year": "Undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 16,
+    "kind": "book",
+    "url": "https://homes.cs.washington.edu/~djg/papers/pumpkin2018.pdf",
+    "doi": "10.1145/3167094",
+    "title": "Adapting Proof Automation to Adapt Proofs",
+    "authors": "Ringer T, Yazdani N, Leo J, Grossman D",
+    "container": "Proceedings of the 7th ACM SIGPLAN International Conference on Certified Programs and Proofs",
+    "year": "2018",
+    "volume": null,
+    "issue": null,
+    "pages": "115-129",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 17,
+    "kind": "journal",
+    "url": "https://verse-lab.org/papers/regex-borrows-oopsla26.pdf",
+    "doi": "10.1145/3839521",
+    "title": "Tracking Borrows with Regular Expressions",
+    "authors": "Nowacki T, Blackshear S, Mitchell J, Qadeer S, Sergey I",
+    "container": "Proc. ACM Program. Lang.",
+    "year": "2026",
+    "volume": "10",
+    "issue": "OOPSLA2",
+    "pages": "2077-2103",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 18,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2606.21167",
+    "doi": null,
+    "title": "AI-Assisted Completion of CertiGC Proofs: An Experience Report",
+    "authors": "Wang S",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 19,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2609.04043",
+    "doi": null,
+    "title": "Extending concurrent separation logic to the hardware level to verify the xv6 OS kernel on RISC-V with AI agents",
+    "authors": "Kaashoek MF, Zeldovich N",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 20,
+    "kind": "book",
+    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol141-itp2019/LIPIcs.ITP.2019.26/LIPIcs.ITP.2019.26.pdf",
+    "doi": "10.4230/LIPIcs.ITP.2019.26",
+    "title": "Ornaments for Proof Reuse in Coq",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 21,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2610.36328",
+    "doi": null,
+    "title": "How Stable Are LLM-Generated Proofs Under Program Refactoring? A Stress Test for Verifiable Code Generation",
+    "authors": "Mandiga A, Li G",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
    }
   ],
   "milestone_order": [
@@ -624,575 +759,932 @@
   "results": [
    {
     "milestone": "m1",
-    "case": null,
-    "verdict": "met",
-    "finding": "In one Axon compiler campaign, a coding agent repaired correctness proofs for 7 certificate checker changes in Lean.",
-    "detail": "The checker repairs changed verified compiler code and updated its mechanically verified correctness proofs. The study used a relatively small language and a single coding agent.",
-    "quote": "Six repairs targeted an optimization pass (its transform or certificate generator) and seven targeted the certificate checker; every checker repair also updated the checker’s correctness proof.",
+    "case": "Implementation logic",
+    "verdict": "partial",
+    "finding": "Amazon s2n automatically corrected proof scripts in 953 of 956 code-change instances over one year.",
+    "detail": "Q40 describes prior AWS work as a basis for the program. The FAQ supplies no proof-check records or independent replication.",
+    "quote": "AWS demonstrated that changes to code resulted in \nautomatic corrections to the corresponding proof scripts 953/956 times",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "met",
-    "finding": "Extended Pumpkin Pi automatically repaired proofs across definition changes in 3 Rocq case studies.",
-    "detail": "The changes were restricted to setoid equivalences. Users supplied configurations and annotations; some properness proofs and workarounds required manual effort. Rocq checks plugin-produced terms.",
-    "quote": "We use our extended version ofPumpkin Pi to automatically repair proofs on three case studies that\nuse quotient type equivalences.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Sisyphus repaired proofs for 10 evolved OCaml library functions, with residual proof obligations.",
-    "detail": "The tool generated invariants and proof structure, but residual obligations required manual proof. The text does not establish that an automatically completed proof passed Coq’s checker.",
-    "quote": "Sisyphus has managed to repair proofs for all those functions,\nsuggesting correct invariants and generating a small number of easy-to-prove residual obligations.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "met",
-    "finding": "Pumpkin Pi automatically repaired 1 Coq proof after the list type’s constructors were swapped.",
-    "detail": "The change was between equivalent types. The paper reports eight case studies; some configurations and suggested proof scripts required human assistance.",
-    "quote": "This suggests a proof script that succeeds (in\nlight blue to denote Pumpkin Pi produces it automatically):",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "In one compiler, a coding agent updated correctness proofs for seven certificate-checker repairs.",
-    "detail": "The compiler targets a relatively small language, but the paper does not classify the system under PROVERS complexity levels, measure the percentage of proof lines manually changed, or demonstrate maintenance by expert developers.",
-    "quote": "Six repairs targeted an optimization pass (its transform or certificate generator) and seven targeted the certificate checker; every checker repair also updated the checker’s correctness proof.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Pumpkin Pi automatically repaired proofs across 3 case studies, including a queue implementation change.",
-    "detail": "The case studies demonstrate proof repair, but do not report the proportion of proof lines changed manually or establish the PROVERS Phase 1 conditions.",
-    "quote": "We use our extended version ofPumpkin Pi to automatically repair proofs on three case studies that\nuse quotient type equivalences.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Sisyphus repaired proofs for 10 evolved OCaml library functions.",
-    "detail": "The study reports residual manual proof obligations but does not measure the percentage of proof lines manually changed or establish the PROVERS low-complexity and expert-developer conditions.",
-    "quote": "Sisyphus has managed to repair proofs for all those functions, suggesting correct invariants and generating a small number of easy-to-prove residual obligations.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Pumpkin Pi repaired functions and proofs after a constructor swap in 1 simple language benchmark.",
-    "detail": "The repair required human guidance to select a permutation. The paper does not report the percentage of proof lines changed manually or establish the PROVERS Phase 1 test conditions.",
-    "quote": "With a bit\nof human guidance to choose the permutation from a list\nof suggestions, Pumpkin Pi repaired everything, though the\noriginal tactics would have also worked, so there was not a\ndifference in development time.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": false,
-    "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
-    "case": null,
+    "case": "Implementation logic",
+    "verdict": "partial",
+    "finding": "Amazon s2n's development workflow automatically corrected proof scripts in 953 of 956 code-change instances.",
+    "detail": "The reported ratio measures automatic proof-script corrections. The FAQ gives no separate count of passing checks on updated software.",
+    "quote": "AWS demonstrated that changes to code resulted in \nautomatic corrections to the corresponding proof scripts 953/956 times",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": "Specification or invariant",
     "verdict": "met",
-    "finding": "s2n CI recorded 956 proof replays and required 3 manual proof updates.",
-    "detail": "Proof checks ran on code updates and pull requests. Some replays did not involve changes to verified code; the count is not a count of repaired implementations.",
-    "quote": "Since deployment of the proof to the CI system in November of 2016 our\nproofs have been re-played 956 times. This number does not account for proof re-\nplays performed in forks of the repository. We have had to update the proof three\ntimes.",
+    "finding": "For one Axon floating-point comparison repair, the agent replaced 24 proof lines and Lean accepted the revised proofs.",
+    "detail": "The operational semantics models the target machine. The repair restated an existing trusted axiom, added no new axiom, and preserved the headline theorem statements.",
+    "quote": "The proof updates (\n+\n24\n/\n−\n24\n+24/{-}24\nlines) reclose the semantics mirrors and the axiom\nagainst the new flags. No headline theorem statement changed and no new axiom was introduced.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 6,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": "Implementation logic",
+    "verdict": "met",
+    "finding": "Across the Csmith and SPE campaigns, ACDC updated the Lean correctness proof in all 8 Axon certificate-checker repairs.",
+    "detail": "The relevant proofs establish soundness of the revised checker itself. The optimization certificates checked by Axon are separate from these Lean proofs.",
+    "quote": "Six repairs targeted an optimization pass (its transform or certificate generator) and seven targeted the certificate checker; every checker repair also updated the checker’s correctness proof.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 6,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": "Specification or invariant",
+    "verdict": "partial",
+    "finding": "In one Axon Fcmp repair, ACDC’s automated campaign replaced 24 proof lines and validated the revised compiler.",
+    "detail": "The campaign began with a discrepancy between the assembly model and machine execution and produced the specification change and proof repair together.",
+    "quote": "The proof updates (\n+\n24\n/\n−\n24\n+24/{-}24\nlines) reclose the semantics mirrors and the axiom\nagainst the new flags. No headline theorem statement changed and no new axiom was introduced.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 6,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": "Implementation logic",
+    "verdict": "partial",
+    "finding": "ACDC’s detect-and-repair workflow updated the Lean proof for 8 Axon certificate-checker fixes.",
+    "detail": "The agents produced the checker changes and proof repairs together within the experimental workflow.",
+    "quote": "Six repairs targeted an optimization pass (its transform or certificate generator) and seven targeted the certificate checker; every checker repair also updated the checker’s correctness proof.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 6,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": "Data type",
+    "verdict": "met",
+    "finding": "Pumpkin Pi automatically repaired Rocq proofs in 3 data-type migration case studies.",
+    "detail": "The authors supplied setoid configurations and some properness proofs. The integer and polynomial cases also required reconfiguration for specialized dependent eliminators.",
+    "quote": "We use our extended version ofPumpkin Pi to automatically repair proofs on three case studies that\nuse quotient type equivalences.",
     "checked": true,
     "confirmed": true,
-    "peer_reviewed": false,
-    "ref": 1,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "peer_reviewed": true,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": "Implementation logic",
+    "verdict": "partial",
+    "finding": "Rocq proofs were adapted to faster operation logic in 2 case studies using pointwise equivalence and rewriting.",
+    "detail": "The two-list queue case automatically repairs proofs for the generated dequeue. The switch to the hand-written amortized constant-time dequeue uses the separate equivalence-and-rewrite step.",
+    "quote": "We first show pointwise equality of the functions, and\nthen rewrite inside of our proofs, giving us repaired proofs about the fast dequeue function.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": "Data type",
+    "verdict": "partial",
+    "finding": "Pumpkin Pi demonstrated in-assistant repair and checking in 3 data-type migrations.",
+    "detail": "The paper shows how to invoke the Rocq plugin and provides a reproducible artifact. It does not report an update submission exercising an integrated workflow.",
+    "quote": "We use our extended version ofPumpkin Pi to automatically repair proofs on three case studies that\nuse quotient type equivalences.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": "Implementation logic",
+    "verdict": "met",
+    "finding": "Sisyphus fully repaired Coq proofs automatically for 4 of 14 evolved OCaml functions.",
+    "detail": "The four zero-admit cases used a domain-specific Coq solver as part of automated repair. The remaining cases required manual proofs for residual goals.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": "Implementation logic",
+    "verdict": "partial",
+    "finding": "Sisyphus produced repaired Coq proofs for all 14 updated OCaml benchmarks with manual discharge where needed.",
+    "detail": "The authors extracted library functions and dependencies into standalone files and created the original proofs for the evaluation.",
+    "quote": "Sisyphus was able to automatically construct new proofs for all\nprograms in our benchmarks: all synthesised invariants were valid, and we were able to manually\nprove any remaining proof obligations.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
-    "case": null,
+    "case": "Implementation logic",
     "verdict": "partial",
-    "finding": "For s2n, three manual proof updates were needed over one year of code changes.",
-    "detail": "The paper does not report the percentage of proof lines changed or establish the PROVERS low-complexity classification. It describes experienced proof writers but does not measure the Phase 1 target.",
+    "finding": "Across 14 OCaml benchmarks, manually discharging residual Coq goals took under 20 minutes per benchmark.",
+    "detail": null,
+    "quote": "As can be seen from the table, all obligations took fewer than 20 minutes to dispatch",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": "Data type",
+    "verdict": "met",
+    "finding": "Pumpkin Pi repaired 1 broken Coq library lemma after the list constructors were swapped.",
+    "detail": "The paper is a peer-reviewed PLDI conference proceedings paper, classified as book because the schema has no proceedings category.",
+    "quote": "This suggests a proof script that succeeds",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": "Specification or invariant",
+    "verdict": "met",
+    "finding": "Pumpkin Pi used 2 automatically configured transformations in one case study to port Coq proofs to fixed-length vector specifications.",
+    "detail": "Proof engineers handled length obligations separately and adjusted the suggested tactic scripts. Coq checks the transformed proof terms independently of those scripts.",
+    "quote": "By composition, this\ntransported proofs across the equivalence from Section 3.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": "Data type",
+    "verdict": "partial",
+    "finding": "Pumpkin Pi’s interactive Repair command restored 1 broken Coq list lemma after a constructor swap.",
+    "detail": "The authors describe version-control and IDE integration as future work.",
+    "quote": "To repair this proof with Pumpkin Pi, we run this command:\nRepair Old.list New.list in rev_app_distr.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": "Specification or invariant",
+    "verdict": "partial",
+    "finding": "One hs-to-coq case study used 2 automated repair steps to port proofs to fixed-length vector specifications.",
+    "detail": "The development workflow was interactive, and the suggested tactics required manual adjustments.",
+    "quote": "We supported this inPumpkin\nPi by chaining the previous change with an automatic con-\nfiguration for unpacking sigma types.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": "Implementation logic",
+    "verdict": "partial",
+    "finding": "s2n HMAC function-body changes often needed 0 proof-script edits. The number of such changes was unreported.",
+    "detail": null,
+    "quote": "In particular, changes to the\ncode in function bodies often requires no corresponding speciﬁcation or proof\nscript change.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 1,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": "Data type",
+    "verdict": "partial",
+    "finding": "s2n HMAC changes to unreferenced struct fields needed 0 proof updates. The number of changes was unreported.",
+    "detail": null,
+    "quote": "Similarly, changes that add ﬁelds or change aspects of in-memory\ndata structures that are not referenced by the speciﬁcation do not require proof\nupdates.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 1,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": "Implementation logic",
+    "verdict": "partial",
+    "finding": "s2n CI logged 956 proof replays across HMAC, DRBG, and TLS handshake, including runs without changes to verified code.",
+    "detail": "The replay count covers the entire CI deployment and gives no count of automatically repaired failures.",
+    "quote": "Since deployment of the proof to the CI system in November of 2016 our\nproofs have been re-played 956 times.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 1,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": "Data type",
+    "verdict": "partial",
+    "finding": "s2n CI needed 0 proof-script edits for struct changes that left the verified computation unaffected. The number of changes was unreported.",
+    "detail": null,
+    "quote": "we have structured the veriﬁcation so that\nproof scripts do not require updates when the modiﬁed portions of the state do\nnot aﬀect the computation being proved.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 1,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": "Implementation logic",
+    "verdict": "partial",
+    "finding": "One open-source s2n system required 3 manual proof updates during a year of code changes.",
+    "detail": "The count is of update events across change types. The paper gives neither a proof-line denominator nor a breakdown by change type.",
     "quote": "In one year of code changes only three manual\nupdates to the proof were required.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 1,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
-    "milestone": "m4",
-    "case": null,
+    "milestone": "m1",
+    "case": "Specification or invariant",
+    "verdict": "met",
+    "finding": "For the revised CXL.cache model, super_fix completed the Isabelle/HOL proof across 68 theory files in 2 repair passes.",
+    "detail": "The change broadened the behavior allowed by the formal protocol model by relaxing one transition guard.",
+    "quote": "A second re-\nfinement with super_fix completed the proof.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": "Specification or invariant",
     "verdict": "partial",
-    "finding": "For s2n, three manual proof updates were needed over one year of code changes.",
-    "detail": "The paper does not report the percentage of proof lines changed, classify the system under PROVERS, or establish that journeyman developers maintained the proofs.",
-    "quote": "In one year of code changes only three manual\nupdates to the proof were required.",
+    "finding": "In the CXL.cache proof workflow, the 68-file Isabelle/HOL proof completed after 2 super_fix passes.",
+    "detail": "The authors describe a single fully automated pipeline as future work.",
+    "quote": "A second re-\nfinement with super_fix completed the proof.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
-    "ref": 1,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
-    "case": null,
+    "case": "Specification or invariant",
     "verdict": "met",
-    "finding": "In one Isabelle/HOL case study, super_fix completed the proof across 68 files after 2 repair iterations.",
-    "detail": "The CXL proof was updated as the transition system and invariant evolved. The workflow combined automation with user-supplied heuristics and earlier manual effort.",
-    "quote": "Then, after our fix iteration with super_fix, only 9\nfiles remained with errors, 1 per each. A second re-\nfinement with super_fix completed the proof.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": false,
-    "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "met",
-    "finding": "Lean 4 agents completed 43 of 48 proof-repair tasks after human changes broke existing proofs.",
-    "detail": "The study describes repairs to proofs affected by changed definitions and uses Lean compiler feedback. The 43 successes include tasks with human intervention; the source does not give a separate count for definition changes.",
+    "finding": "System Capless agents completed 43 of 48 broken-proof repair tasks in Lean 4.",
+    "detail": "The 43 of 48 count covers the full Repair category and cannot be read as a rate specific to specification or invariant changes. For step_masked, a human directed a change to the read and write rules, and the text gives no final check result.",
     "quote": "Among proof-related tasks, the agent performs the best for Repair tasks:\n90% success rate (43/48), only 8% intervention, and fewer iterations (4.9 checks vs. 8.3 for Proof).",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
-    "case": null,
-    "verdict": "met",
-    "finding": "AWS-LC: around 16 of 616 pull requests needed proof fixes in 2023.",
-    "detail": "AWS-LC requires formal verification to pass in CI before changes are submitted. The source does not report how many pull requests changed verified code.",
-    "quote": "•Year 2023, around 16/616(PRs) fixes",
+    "case": "Specification or invariant",
+    "verdict": "partial",
+    "finding": "In one System Capless mutable-reference update, the agent fixed ten proof issues in Semantics/Props.lean.",
+    "detail": "The agent left sorry placeholders where the original read and write rules allowed access to cells outside the capability set. A human directed the rule correction.",
+    "quote": "It fixed ten distinct issues,\nprimarily adding cases for the new operations\nand updating proofs to match changed definitions.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": "Implementation logic",
+    "verdict": "partial",
+    "finding": "AWS-LC reported about 16 proof-maintenance fixes across 616 pull requests in 2023.",
+    "detail": "The aggregate count does not identify which pull requests changed implementation logic or how the proofs were repaired.",
+    "quote": "Year 2023, around 16/616(PRs) fixes",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": "Data type",
+    "verdict": "partial",
+    "finding": "For one MoveLight vector extension, Claude Code propagated proof changes across 30+ files.",
+    "detail": "The reported workflow used interactive prompts and human guidance. The paper gives no submission record or before-and-after proof-check trace for the vector change.",
+    "quote": "The vector extension (Sec. 4.1) took\nonly one day despite changing 30+ files because the modifications were uniform: adding a new\npath element vecElem and a new case to the value/type compatibility relation, then threading\nthem through existing lemmas, so the AI could apply the same pattern repeatedly without errors.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": "Specification or invariant",
+    "verdict": "met",
+    "finding": "CertiGC (n=1 update): 1 Codex-assisted invariant repair passed Rocq checks and merged upstream.",
+    "detail": "Rocq checked the repaired proof. The workflow result itself is documented in a single preprint by the author.",
+    "quote": "The strongest validation is machine checking. The relevant proof files compile,\nand the branch was merged upstream.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": "Implementation logic",
+    "verdict": "partial",
+    "finding": "In one xv6 kernel project, Claude Code agents updated proofs after source changes. The number of repairs was unreported.",
+    "detail": "The reported repairs concern binary changes such as shifted offsets or instruction alignment. The excerpt lists a re-proving evaluation in its contents but ends before presenting its results.",
+    "quote": "we find that agents are able to perform these tedious proof updates\nwithout substantial developer input.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": "Data type",
+    "verdict": "partial",
+    "finding": "Devoid lifted Coq traversal proofs across data-type changes in 2 tree scenarios, with 0 additional proof obligations for lifting.",
+    "detail": "The multi-step case simulated incremental updates and required intermediate types and unpacking. The reported proof line counts measure generated term size. The source gives no count of manually changed proof lines.",
+    "quote": "These components were enough forDevoid to lift functions and proofs with\nno additional proof burden and no additional axioms.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": "Implementation logic",
+    "verdict": "met",
+    "finding": "Lean accepted mechanical repairs in 109 of 139 eligible proof failures after structural implementation refactoring.",
+    "detail": "Eligibility was limited to three one-identifier templates for unfold, simp, or dsimp. Lean checked the individual proofs. The aggregate repair count is reported by the preprint authors.",
+    "quote": "The predefined edit repairs 109/139 eligible failures, including 51/54\nreference-proof failures and 58/85 prover failures, with a median edit of two tokens on one line.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    }
   ],
   "judged": [
    {
     "url": "https://sel4.systems/Verification/proofs.html",
     "milestone": "m1",
-    "hash": "720e5521c521",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c59271dc66e6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sel4.systems/Verification/proofs.html",
     "milestone": "m2",
-    "hash": "0b0e9f348a5b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "77f518b0de26",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sel4.systems/Verification/proofs.html",
     "milestone": "m3",
-    "hash": "0b4d75a655bc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7399c78060b4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sel4.systems/Verification/proofs.html",
     "milestone": "m4",
-    "hash": "b5172622b10a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d0770d8a550f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sel4.systems/Verification/proofs.html",
     "milestone": "completion",
-    "hash": "226e27cf080e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "03b3e698c32d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proofcraft.systems/news-2025",
     "milestone": "m1",
-    "hash": "720e5521c521",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c59271dc66e6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proofcraft.systems/news-2025",
     "milestone": "m2",
-    "hash": "0b0e9f348a5b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "77f518b0de26",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proofcraft.systems/news-2025",
     "milestone": "m3",
-    "hash": "0b4d75a655bc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7399c78060b4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proofcraft.systems/news-2025",
     "milestone": "m4",
-    "hash": "b5172622b10a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d0770d8a550f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proofcraft.systems/news-2025",
     "milestone": "completion",
-    "hash": "226e27cf080e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "03b3e698c32d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.darpa.mil/research/programs/pipelined-reasoning-of-verifiers-enabling-robust-systems",
     "milestone": "m1",
-    "hash": "720e5521c521",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c59271dc66e6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.darpa.mil/research/programs/pipelined-reasoning-of-verifiers-enabling-robust-systems",
     "milestone": "m2",
-    "hash": "0b0e9f348a5b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "77f518b0de26",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.darpa.mil/research/programs/pipelined-reasoning-of-verifiers-enabling-robust-systems",
     "milestone": "m3",
-    "hash": "0b4d75a655bc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7399c78060b4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.darpa.mil/research/programs/pipelined-reasoning-of-verifiers-enabling-robust-systems",
     "milestone": "m4",
-    "hash": "b5172622b10a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d0770d8a550f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.darpa.mil/research/programs/pipelined-reasoning-of-verifiers-enabling-robust-systems",
     "milestone": "completion",
-    "hash": "226e27cf080e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "03b3e698c32d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.darpa.mil/research/programs/proof-engineering-adaptation-repair-and-learning-for-software",
     "milestone": "m1",
-    "hash": "720e5521c521",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c59271dc66e6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.darpa.mil/research/programs/proof-engineering-adaptation-repair-and-learning-for-software",
     "milestone": "m2",
-    "hash": "0b0e9f348a5b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "77f518b0de26",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.darpa.mil/research/programs/proof-engineering-adaptation-repair-and-learning-for-software",
     "milestone": "m3",
-    "hash": "0b4d75a655bc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7399c78060b4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.darpa.mil/research/programs/proof-engineering-adaptation-repair-and-learning-for-software",
     "milestone": "m4",
-    "hash": "b5172622b10a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d0770d8a550f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.darpa.mil/research/programs/proof-engineering-adaptation-repair-and-learning-for-software",
     "milestone": "completion",
-    "hash": "226e27cf080e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "03b3e698c32d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2607.28928",
     "milestone": "m1",
-    "hash": "720e5521c521",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://dependenttyp.es/pdf/quotients.pdf",
-    "milestone": "m1",
-    "hash": "720e5521c521",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://ilyasergey.net/assets/pdf/papers/sisyphus-pldi23.pdf",
-    "milestone": "m1",
-    "hash": "720e5521c521",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://dependenttyp.es/pdf/repair.pdf",
-    "milestone": "m1",
-    "hash": "720e5521c521",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://discovery.ucl.ac.uk/id/eprint/10075271/1/Chudnov2018_Chapter_ContinuousFormalVerificationOf.pdf",
-    "milestone": "m2",
-    "hash": "0b0e9f348a5b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c59271dc66e6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2607.28928",
     "milestone": "m2",
-    "hash": "0b0e9f348a5b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "77f518b0de26",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2607.28928",
     "milestone": "m3",
-    "hash": "0b4d75a655bc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7399c78060b4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2607.28928",
     "milestone": "m4",
-    "hash": "b5172622b10a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d0770d8a550f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2607.28928",
     "milestone": "completion",
-    "hash": "226e27cf080e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "03b3e698c32d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://dependenttyp.es/pdf/quotients.pdf",
-    "milestone": "m2",
-    "hash": "0b0e9f348a5b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://dependenttyp.es/pdf/quotients.pdf",
-    "milestone": "m3",
-    "hash": "0b4d75a655bc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://dependenttyp.es/pdf/quotients.pdf",
-    "milestone": "m4",
-    "hash": "b5172622b10a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://dependenttyp.es/pdf/quotients.pdf",
-    "milestone": "completion",
-    "hash": "226e27cf080e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://ilyasergey.net/assets/pdf/papers/sisyphus-pldi23.pdf",
-    "milestone": "m2",
-    "hash": "0b0e9f348a5b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://ilyasergey.net/assets/pdf/papers/sisyphus-pldi23.pdf",
-    "milestone": "m3",
-    "hash": "0b4d75a655bc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://ilyasergey.net/assets/pdf/papers/sisyphus-pldi23.pdf",
-    "milestone": "m4",
-    "hash": "b5172622b10a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://ilyasergey.net/assets/pdf/papers/sisyphus-pldi23.pdf",
-    "milestone": "completion",
-    "hash": "226e27cf080e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://dependenttyp.es/pdf/repair.pdf",
-    "milestone": "m2",
-    "hash": "0b0e9f348a5b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://dependenttyp.es/pdf/repair.pdf",
-    "milestone": "m3",
-    "hash": "0b4d75a655bc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://dependenttyp.es/pdf/repair.pdf",
-    "milestone": "m4",
-    "hash": "b5172622b10a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://dependenttyp.es/pdf/repair.pdf",
-    "milestone": "completion",
-    "hash": "226e27cf080e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://d1.awsstatic.com/Security/pdfs/Continuous_Formal_Verification_Of_Amazon_s2n.pdf",
     "milestone": "m1",
-    "hash": "720e5521c521",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c59271dc66e6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
-    "url": "https://d1.awsstatic.com/Security/pdfs/Continuous_Formal_Verification_Of_Amazon_s2n.pdf",
+    "url": "https://dependenttyp.es/pdf/quotients.pdf",
     "milestone": "m2",
-    "hash": "0b0e9f348a5b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "77f518b0de26",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
-    "url": "https://d1.awsstatic.com/Security/pdfs/Continuous_Formal_Verification_Of_Amazon_s2n.pdf",
+    "url": "https://dependenttyp.es/pdf/quotients.pdf",
     "milestone": "m3",
-    "hash": "0b4d75a655bc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7399c78060b4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
-    "url": "https://d1.awsstatic.com/Security/pdfs/Continuous_Formal_Verification_Of_Amazon_s2n.pdf",
+    "url": "https://dependenttyp.es/pdf/quotients.pdf",
     "milestone": "m4",
-    "hash": "b5172622b10a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d0770d8a550f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
-    "url": "https://d1.awsstatic.com/Security/pdfs/Continuous_Formal_Verification_Of_Amazon_s2n.pdf",
+    "url": "https://dependenttyp.es/pdf/quotients.pdf",
     "milestone": "completion",
-    "hash": "226e27cf080e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "03b3e698c32d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ilyasergey.net/assets/pdf/papers/sisyphus-pldi23.pdf",
+    "milestone": "m1",
+    "hash": "c59271dc66e6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ilyasergey.net/assets/pdf/papers/sisyphus-pldi23.pdf",
+    "milestone": "m2",
+    "hash": "77f518b0de26",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ilyasergey.net/assets/pdf/papers/sisyphus-pldi23.pdf",
+    "milestone": "m3",
+    "hash": "7399c78060b4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ilyasergey.net/assets/pdf/papers/sisyphus-pldi23.pdf",
+    "milestone": "m4",
+    "hash": "d0770d8a550f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ilyasergey.net/assets/pdf/papers/sisyphus-pldi23.pdf",
+    "milestone": "completion",
+    "hash": "03b3e698c32d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://dependenttyp.es/pdf/repair.pdf",
+    "milestone": "m1",
+    "hash": "c59271dc66e6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://dependenttyp.es/pdf/repair.pdf",
+    "milestone": "m2",
+    "hash": "77f518b0de26",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://dependenttyp.es/pdf/repair.pdf",
+    "milestone": "m3",
+    "hash": "7399c78060b4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://dependenttyp.es/pdf/repair.pdf",
+    "milestone": "m4",
+    "hash": "d0770d8a550f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://dependenttyp.es/pdf/repair.pdf",
+    "milestone": "completion",
+    "hash": "03b3e698c32d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://discovery.ucl.ac.uk/id/eprint/10075271/1/Chudnov2018_Chapter_ContinuousFormalVerificationOf.pdf",
     "milestone": "m1",
-    "hash": "720e5521c521",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c59271dc66e6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://discovery.ucl.ac.uk/id/eprint/10075271/1/Chudnov2018_Chapter_ContinuousFormalVerificationOf.pdf",
+    "milestone": "m2",
+    "hash": "77f518b0de26",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://discovery.ucl.ac.uk/id/eprint/10075271/1/Chudnov2018_Chapter_ContinuousFormalVerificationOf.pdf",
     "milestone": "m3",
-    "hash": "0b4d75a655bc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7399c78060b4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://discovery.ucl.ac.uk/id/eprint/10075271/1/Chudnov2018_Chapter_ContinuousFormalVerificationOf.pdf",
     "milestone": "m4",
-    "hash": "b5172622b10a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d0770d8a550f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://discovery.ucl.ac.uk/id/eprint/10075271/1/Chudnov2018_Chapter_ContinuousFormalVerificationOf.pdf",
     "milestone": "completion",
-    "hash": "226e27cf080e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "03b3e698c32d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://d1.awsstatic.com/Security/pdfs/Continuous_Formal_Verification_Of_Amazon_s2n.pdf",
+    "milestone": "m1",
+    "hash": "c59271dc66e6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://d1.awsstatic.com/Security/pdfs/Continuous_Formal_Verification_Of_Amazon_s2n.pdf",
+    "milestone": "m2",
+    "hash": "77f518b0de26",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://d1.awsstatic.com/Security/pdfs/Continuous_Formal_Verification_Of_Amazon_s2n.pdf",
+    "milestone": "m3",
+    "hash": "7399c78060b4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://d1.awsstatic.com/Security/pdfs/Continuous_Formal_Verification_Of_Amazon_s2n.pdf",
+    "milestone": "m4",
+    "hash": "d0770d8a550f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://d1.awsstatic.com/Security/pdfs/Continuous_Formal_Verification_Of_Amazon_s2n.pdf",
+    "milestone": "completion",
+    "hash": "03b3e698c32d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.doc.ic.ac.uk/~afd/papers/2025/FormaliSE.pdf",
     "milestone": "m1",
-    "hash": "720e5521c521",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c59271dc66e6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.doc.ic.ac.uk/~afd/papers/2025/FormaliSE.pdf",
+    "milestone": "m2",
+    "hash": "77f518b0de26",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.doc.ic.ac.uk/~afd/papers/2025/FormaliSE.pdf",
+    "milestone": "m3",
+    "hash": "7399c78060b4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.doc.ic.ac.uk/~afd/papers/2025/FormaliSE.pdf",
+    "milestone": "m4",
+    "hash": "d0770d8a550f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.doc.ic.ac.uk/~afd/papers/2025/FormaliSE.pdf",
+    "milestone": "completion",
+    "hash": "03b3e698c32d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2601.03768",
     "milestone": "m1",
-    "hash": "720e5521c521",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c59271dc66e6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2601.03768",
+    "milestone": "m2",
+    "hash": "77f518b0de26",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2601.03768",
+    "milestone": "m3",
+    "hash": "7399c78060b4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2601.03768",
+    "milestone": "m4",
+    "hash": "d0770d8a550f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2601.03768",
+    "milestone": "completion",
+    "hash": "03b3e698c32d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sos-vo.org/system/files/2024-05/Formal%20Verification%20of%20AWS-LibCrypto_1.pdf",
+    "milestone": "m1",
+    "hash": "c59271dc66e6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sos-vo.org/system/files/2024-05/Formal%20Verification%20of%20AWS-LibCrypto_1.pdf",
     "milestone": "m2",
-    "hash": "0b0e9f348a5b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "77f518b0de26",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sos-vo.org/system/files/2024-05/Formal%20Verification%20of%20AWS-LibCrypto_1.pdf",
+    "milestone": "m3",
+    "hash": "7399c78060b4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sos-vo.org/system/files/2024-05/Formal%20Verification%20of%20AWS-LibCrypto_1.pdf",
+    "milestone": "m4",
+    "hash": "d0770d8a550f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sos-vo.org/system/files/2024-05/Formal%20Verification%20of%20AWS-LibCrypto_1.pdf",
+    "milestone": "completion",
+    "hash": "03b3e698c32d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://verse-lab.org/papers/regex-borrows-oopsla26.pdf",
+    "milestone": "m2",
+    "hash": "77f518b0de26",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2606.21167",
+    "milestone": "m2",
+    "hash": "77f518b0de26",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2609.04043",
+    "milestone": "m2",
+    "hash": "77f518b0de26",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol141-itp2019/LIPIcs.ITP.2019.26/LIPIcs.ITP.2019.26.pdf",
+    "milestone": "m3",
+    "hash": "7399c78060b4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.36328",
+    "milestone": "m1",
+    "hash": "c59271dc66e6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1259,8 +1751,158 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 10 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "case_label = \"Change type\". Reason: The published classification makes it possible to re-judge results by the kind of change each demonstration actually tested."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"When a change to a program or its specification breaks a proof, a tool adapts the argument and a proof assistant checks that it establishes the required property for the revised program under its stated assumptions. Developers without formal-methods expertise could use this process during routine maintenance.\". Reason: The current definition folds a tentative programme target into the meaning of proof repair and leaves the checker’s role implicit."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Adding interrupts, ARM page tables and address spaces to the seL4 operating-system kernel took several person-months to design and implement and 1.5\\u20132 person-years to re-verify. Teams can rerun proof scripts with each update, but a broken argument still needs repair. Automating that work would help developers keep guarantees about specified behaviour current as they release changes, with specialist help reserved for difficult cases. Each guarantee depends on the assumptions of its proof.\". Reason: The seL4 study measures the cost of verifying a change directly, whereas the existing figures measure the cost of initial verification."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by DARPA, PEARLS Artificial Intelligence Exploration opportunity, 2021: \"to support, and if possible automate, the generation and maintenance of proofs used in the formal verification of software.\". Reason: The November 2021 call identifies automated maintenance of formal proofs as an explicit PEARLS objective."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by DARPA, fiscal year 2026 budget justification for PROVERS, 2025: \"at a cost that is proportionate to code change\". Reason: The fiscal year 2026 justification states how DARPA wants repair cost to scale with a code change."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit completion: criterion = \"Developers without formal-methods expertise carry out the Phase 3 demonstration on a high-complexity system. Following software update and maintenance, the target is 1% of proof lines requiring manual change.\"; set_by = \"DARPA, PROVERS solicitation HR001123S0020, Table 1, Phase 3 column and proof-maintenance row. FAQ A59 specifies who carries out the demonstration.\"; threshold_quote = \"20% 10% 1%\"; threshold_ref = 3; basis = \"DARPA labels the table\\u2019s targets tentative. Its quantitative evaluation team assesses cost and efficiency separately. The percentage measures manual proof-line edits and supplies no bound on labour or on how changes propagate through the software.\"; refs = [3, 5, 16]. Reason: The table supplies the missing numerical quotation, and the FAQ assigns the demonstration itself to developers without formal-methods expertise."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: title = \"A proof assistant accepts an automatically repaired proof after a program or its specification changes.\"; criterion = \"A change invalidates an existing proof. Automation adapts the proof, and the proof assistant accepts it for the required claim about the revised version under the stated assumptions.\"; refs = [6, 17]. Reason: The existing criterion mixes the checker’s acceptance test with a 2021 result and describes only one kind of change that can break a proof."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: title = \"A development workflow automatically adapts a broken proof and checks it on the software update.\"; criterion = \"Submit an update that invalidates an existing proof. As part of the development workflow, a repair tool adapts the proof and the proof check passes for the updated software and applicable specification. Developers may resolve obligations left by the tool.\"; set_by = \"DARPA, PROVERS solicitation HR001123S0020, TA1.2 Workflow Integration.\"; set_by_kind = \"government_programme\"; threshold_quote = \"automatically adapt those proofs in response to changes.\"; threshold_ref = 3; refs = [3, 1, 9]. Reason: The existing workflow test can pass through replay alone, while the PROVERS workflow objective explicitly calls for adapting proofs after changes."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Demonstrate proof maintenance after a software update on an open, unclassified system of low complexity. Formal-methods experts may participate fully. The Phase 1 target is 20% of proof lines requiring manual change.\"; set_by = \"DARPA, PROVERS solicitation HR001123S0020, Table 1, Phase 1 column and proof-maintenance row. FAQ A59 describes expert participation.\"; threshold_quote = \"20%\"; threshold_ref = 3; refs = [3, 5]. Reason: The Phase 1 criterion omits the open-system condition and the source quotation for its 20% target."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"Demonstrate proof maintenance on a system of moderate complexity with a team that includes programmers without substantial formal-methods backgrounds. Phase 2 includes four specification-change cycles. Its target is 10% of proof lines requiring manual change following software update and maintenance.\"; set_by = \"DARPA, PROVERS solicitation HR001123S0020, Table 1, Phase 2 column and proof-maintenance row. Section I.B describes the team and change cycles.\"; threshold_quote = \"10%\"; threshold_ref = 3; refs = [3]. Reason: The Phase 2 criterion omits the four specification-change cycles and the mixed experience of the team that carries them out."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add case \"Data type\". Reason: Repair across changes in data representation has its own published demonstrations, including transport between equivalent types."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add case \"Specification or invariant\". Reason: Changing a specification or invariant changes a claim that the revised proof must establish."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add case \"Implementation logic\". Reason: Experiments such as Sisyphus exercise changes to implementation logic while holding the specification fixed."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 5. Reason: The university-hosted copy of Software Aging in reference 18 provides the readable paper text."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 4. Reason: The full fiscal year 2026 budget justification is accessible and contains the PROVERS objective in reference 14."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 3. Reason: The dated PEARLS opportunity resolves the year in which DARPA announced the goal."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No academy, professional society or programme statement disputing the value or feasibility of automated proof repair was found.\". Reason: The search for institutional disagreement yielded no position specific to the automated proof-repair goal."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "remove statement 2. Reason: Proofcraft’s announcement describes a performer’s work under PROVERS, whose programme goal is already recorded in DARPA’s own words."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "remove statement 0. Reason: The undated PEARLS summary can be replaced with the dated opportunity that announced the goal."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Applied 19 of 19 proposed operations from SWE-05-revise-20261121T160524693467Z; now version 2."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: completion, m1, m2, m3, m4."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 0 from arXiv, 4 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 1 found, 0 not found, 5 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Structural problems after applying: references never cited: [4, 7, 8, 10, 11, 12]"
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 13 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 5 candidates returned, 0 dropped as sources already used, 5 to judge."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 5 of 5 new candidates, without search. Skipped: 1 no readable saved copy. Dropped rows: none. Replaced 6 earlier rows. Added 37 results: 32 from sources already used, 5 from newly found sources."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 3 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 36 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Removed 1 references no longer cited; renumbered."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-21"
  }
 }
