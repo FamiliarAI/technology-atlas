@@ -363,10 +363,12 @@
   "title": "Proof-producing synthesis of systems software",
   "definition": "A synthesizer constructs a systems program from an expert-reviewed formal behavioral specification and produces a proof that its modeled behavior satisfies that specification. The specification leaves implementation choices open; a checker separate from the synthesizer checks the proof.",
   "goal": {
-   "need": "Verus's systems case studies contain 6.1K implementation lines and 31K proof lines: approximately 5.1 proof lines per implementation line. These are artifact sizes, not measurements of labor. Proof-producing synthesis targets production of both artifacts from specifications, as DARPA's HACMS programme explicitly proposed.",
+   "need": "A 2018 study found 10 previously unknown recovery bugs in widely used Linux file systems. Some could cost users files already written to disk. Crash tests exercise a bounded set of workloads. A proof can cover every crash the specification describes, but the expert labor is substantial: the correctness proof specific to the seL4 kernel took 11 person-years. Generating code and proof together could put such guarantees within reach of more systems teams. The guarantee depends on the specification capturing how the hardware behaves.",
    "need_refs": [
-    1,
-    2
+    16,
+    17,
+    3,
+    18
    ],
    "figures": {
     "caption": "Implementation and proof artifacts in the Verus systems case studies",
@@ -397,11 +399,11 @@
      "checked": true
     },
     {
-     "body": "Microsoft Research and the Verus development team",
-     "year": "2024",
-     "quote": "we aim to enable faster, cheaper verification of rich properties for realistic systems.",
-     "context": null,
-     "ref": 1,
+     "body": "Yuriy Brun, Saikat Chakraborty, Claire Le Goues, Corina Păsăreanu and Adish Singla, Automatically Engineering Trusted Software: A Research Roadmap",
+     "year": "2026",
+     "quote": "automatically synthesizing formal proofs to verify the correctness of the produced software",
+     "context": "The roadmap pairs this goal with generating source code from formal specifications that express users’ intent.",
+     "ref": 3,
      "checked": true
     }
    ]
@@ -429,8 +431,8 @@
   "milestones": [
    {
     "id": "m1",
-    "title": "An imperative routine is synthesized with functional correctness and loop termination.",
-    "criterion": "From supplied atomic operations and templates constraining loops, stack space and resource use, synthesize an imperative routine satisfying its input-output specification, termination conditions and syntactic constraints. The 2010 paper demonstrates this formulation for arithmetic, sorting and dynamic programming, including Strassen matrix multiplication.",
+    "title": "An imperative routine and a proof of its input-output behavior and loop termination are synthesized.",
+    "criterion": "Given an input-output specification, permitted atomic operations, a loop template, stack limits and bounds on specified operations, synthesize an imperative routine within those constraints. Synthesize loop invariants establishing partial correctness and ranking functions establishing termination. The generated guards and statements must be well formed.",
     "set_by": "Srivastava, Gulwani and Foster, published proof-theoretic synthesis formulation in From Program Verification to Program Synthesis.",
     "set_by_kind": "protocol",
     "threshold_quote": "partial correctness, loop termination, and well-formedness conditions on program guards.",
@@ -445,7 +447,7 @@
    {
     "id": "m2",
     "title": "A synthesized data structure has a refinement proof accepted by the Coq kernel.",
-    "criterion": "Refine a declarative specification of an abstract data type, which packages operations with private state, into an implementation while producing a refinement proof checked by Coq's kernel. Fiat reports this for SQL-like query and insertion structures in 2015. Its automated synthesis requires programmer-supplied index choices; the kernel-checked derivation does not itself certify subsequent OCaml compilation.",
+    "criterion": "Refine a declarative specification of an abstract data type, a set of operations on private state, into a functional implementation. Produce a proof that the implementation’s operations satisfy the specification and that Coq’s kernel accepts. The implementation checked at this stage is the functional program represented in Coq.",
     "set_by": "Fiat developers, using the established proof-assistant convention of kernel acceptance for refinement proofs; the published demonstration concerns query structures.",
     "set_by_kind": "community_convention",
     "threshold_quote": "Each refinement process leaves a proof trail, checkable by the normal Coq kernel, justifying its soundness.",
@@ -460,10 +462,10 @@
    {
     "id": "m3",
     "title": "Synthesized, linked assembly satisfies its original high-level specification.",
-    "criterion": "Produce a fully linked assembly program together with a Coq-checked proof that it meets its original high-level specification. The 2020 pipeline demonstrates this for SQL-style specifications, including manual memory management and calls to separately verified foreign data structures. The correctness theorem covers the linked assembly rather than stopping at extracted functional code.",
+    "criterion": "Produce a fully linked assembly program represented as a term in Coq. Coq must check a proof that this linked program satisfies the original high-level specification, including calls to any separately verified routines linked into it.",
     "set_by": "Pit-Claudel and colleagues, foundational refinement and linking criterion in Extensible Extraction of Efficient Imperative Programs with Foreign Functions, Manually Managed Memory, and Proofs.",
     "set_by_kind": "community_convention",
-    "threshold_quote": "The pipeline runs entirely within the Coq proof assistant, leading to final, linked assembly code with overall full-functional-correctness proofs in separation logic.",
+    "threshold_quote": "a fully linked assembly program represented as a Coq term with a proof that it meets the original high-level specification.",
     "threshold_ref": 8,
     "refs": [
      8
@@ -475,7 +477,7 @@
    {
     "id": "m4",
     "title": "A synthesized distributed store passes proof, audit and execution checks in at least 2 of 3 runs.",
-    "criterion": "At least 2 of 3 independent runs for a fixed distributed-store specification must close the Rocq proof without unproved placeholders, pass the non-vacuity and interface audit, and execute the extracted OCaml implementation on the harness; budget exhaustion fails. Table 1 of the preprint dated 22 May 2026 records 20 successful runs out of 21 across seven specifications, passing all seven. Runtime evaluation used five Google Cloud virtual machines. The specifications omit production reconfiguration and fault recovery.",
+    "criterion": "For one fixed distributed key-value-store specification, at least two of three independent synthesis runs must succeed. Each successful run must close the refinement proof in Rocq without unproved placeholders, pass the benchmark audit for a non-vacuous implementation of the specified interface, and execute the extracted OCaml implementation on the distributed test harness. A run that exhausts its time or cost budget fails.",
     "set_by": "IDS benchmark authors, Section 5.1 and Table 1; the published cutoff and execution tests concern distributed key-value-store specifications.",
     "set_by_kind": "protocol",
     "threshold_quote": "Rocq Qed accepted, audit step passed, extracted OCaml runs on the harness",
@@ -486,11 +488,27 @@
     "status": "active",
     "replaced_by": [],
     "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "Every scored interface in a Vero instance is implemented and every specification is proved in Lean 4.",
+    "criterion": "Starting from one curated Vero project in code-and-proof mode, supply a function body for every scored interface and a Lean 4 proof of every scored specification against those implementations. The grader must accept the submission after inserting the permitted edits into a fresh benchmark copy and checking proof dependencies against its allowed axioms.",
+    "set_by": "Vero benchmark authors, code-and-proof mode and grading rules in section 3.2.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "implement every API and prove every specification against its own implementations.",
+    "threshold_ref": 6,
+    "refs": [
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
    }
   ],
   "measures": [],
   "not_found": [
-   "No external completion test was located that jointly bounds specification compactness, human review effort, systems scope and runtime performance."
+   "No external completion test was located that jointly bounds specification compactness, human review effort, systems scope and runtime performance.",
+   "No programme or academy assessment was found that judges proof-producing synthesis for a specified systems program unachievable or unworthy of pursuit."
   ],
   "references": [
    {
@@ -702,558 +720,958 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 16,
+    "kind": "report",
+    "url": "https://www.usenix.org/conference/osdi18/presentation/mohan",
+    "doi": null,
+    "title": "Finding Crash-Consistency Bugs with Bounded Black-Box Crash Testing",
+    "authors": "Jayashree Mohan, Ashlie Martinez, Soujanya Ponnapalli, Pandian Raju, and Vijay Chidambaram",
+    "container": "13th USENIX Symposium on Operating Systems Design and Implementation (OSDI 18)",
+    "year": "2018",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 17,
+    "kind": "journal",
+    "url": "https://sel4.systems/Research/pdfs/comprehensive-formal-verification-os-microkernel.pdf",
+    "doi": "10.1145/2560537",
+    "title": "Comprehensive Formal Verification of an OS Microkernel",
+    "authors": "Klein G, Andronick J, Elphinstone K, Murray T, Sewell T, Kolanski R, et al.",
+    "container": "ACM Trans. Comput. Syst.",
+    "year": "2014",
+    "volume": "32",
+    "issue": "1",
+    "pages": "1-70",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 18,
+    "kind": "report",
+    "url": "https://www.nationalacademies.org/read/29129/chapter/5",
+    "doi": "10.17226/29129",
+    "title": "Defense Software for a Contested Future: Agility, Assurance, and Incentives",
+    "authors": "Committee on Enhancing the Assurance and Nimbleness of Large-Scale Integrated Software-Based Systems, Computer Science and Telecommunications Board, Division on Engineering and Physical Sciences, National Academies of Sciences, Engineering, and Medicine",
+    "container": "The National Academies Press",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 19,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2610.20527",
+    "doi": null,
+    "title": "https://arxiv.org/html/2610.20527",
+    "authors": "Balasingam A, Ngom A, Yu GX, Kraska T",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 20,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2608.13522",
+    "doi": null,
+    "title": "Vero: Can AI Agents Build Formally Verified Software Repositories?",
+    "authors": "Ye Z, Lou H, Sun Y, Song P, Yan Z, Kasriel T, et al.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 21,
+    "kind": "journal",
+    "url": "https://adam.chlipala.net/papers/GarageDoorPLDI24/GarageDoorPLDI24.pdf",
+    "doi": "10.1145/3656446",
+    "title": "Foundational Integration Verification of a Cryptographic Server",
+    "authors": "Erbsen A, Philipoom J, Jamner D, Lin A, Gruetter S, Pit-Claudel C, et al.",
+    "container": "Proc. ACM Program. Lang.",
+    "year": "2024",
+    "volume": "8",
+    "issue": "PLDI",
+    "pages": "1704-1729",
+    "citation_source": "crossref"
    }
   ],
   "milestone_order": [
    "m1",
    "m2",
    "m3",
-   "m4"
+   "m4",
+   "m5"
   ],
   "results": [
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "One synthesized Python interpreter matched CPython in 99.95% of over 1.7 million generated-program tests.",
-    "detail": "Claude developed the Rust interpreter and proved adherence to published CPython semantics using Verus. The source does not report a Coq-checked proof for linked assembly.",
-    "quote": "In another experiment, we asked Claude to develop an interpreter for a large subset of Python in Rust, and to prove (using Verus, a verification tool for Rust) that it adheres to the CPython semantics outlined in an academic paper.",
+    "finding": "Claude proved no crashes for 239 OSS-Fuzz entry points across 123 libraries.",
+    "detail": "When Claude patched code, the specification was regenerated from the patched executable. The reported proofs therefore establish the no-crash property for the resulting binaries under the modeled conditions.",
+    "quote": "Claude successfully patched the bugs it found and then proved that there are no crashes on any input (up to 64 MB) for 239 entry points across 123 different OSS-Fuzz libraries.",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Proof-theoretic synthesis produced programs across 3 domains, including Strassen matrix multiplication; median synthesis time was 14 seconds.",
-    "detail": "The input specifies functional behavior, operations, loop structure, stack space and operation bounds. Synthesized invariants and ranking functions establish partial correctness and termination.",
-    "quote": "For these\nprograms, the median time for synthesis is 14 seconds, and the ra-\ntio of synthesis to veriﬁcation time ranges between 1× to 92× (with\nan median of 7×), illustrating the potential of the approach.",
-    "checked": true,
-    "confirmed": false,
+    "finding": "VS3 synthesized integer square root with a loop invariant and ranking function in a median of 9.96 seconds across three runs.",
+    "detail": "Source type is coded as report because the available kinds omit conference proceedings. The source is a peer-reviewed POPL conference paper.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "Fiat synthesized 3 query-structure examples, each using at most 2 tables, with Coq-checked refinement proofs.",
-    "detail": "The examples comprise a bookstore and two further databases. Automated synthesis requires programmer-supplied index structures. The proof trail does not certify subsequent OCaml compilation.",
-    "quote": "Each reﬁnement process\nleaves a proof trail, checkable by the normal Coq kernel, justifying\nits soundness.",
+    "finding": "Fiat synthesized functional implementations with Coq-checked refinement proofs for 3 query ADTs.",
+    "detail": "The supplied text identifies itself as a submission and gives no publication venue. Confirmation rests on the Coq-checked refinement proof.",
+    "quote": "In contrast, derivations of ADTs with\nFiat are completely veriﬁed by Coq, and these derivations may be\nintegrated within larger, more general proof developments.",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "Fiat-derived query structures: 6 example programs evaluated using proof-generating ADT refinement in Coq.",
-    "detail": "The system derives complete ADT implementations from SQL-like specifications. Extensions require supplied indexing hints and verified data structures; the text does not establish that OCaml extraction or compilation is certified.",
-    "quote": "Each transformation is accompanied by a proof, certiﬁed by Coq, that the resulting ADT is a reﬁnement of the initial speciﬁcation, written adt1≽≈ adt2, under an abstraction relation [6]≈ between the internal states of the two ADTs.",
+    "finding": "Fiat applied Coq-certified functional ADT synthesis to 6 example programs.",
+    "detail": "The proof covers the Gallina implementation. The paper separately reports OCaml extraction and benchmarking for Messages and Classiﬁer. The supplied manuscript refers to an anonymous supplement and gives no publication venue.",
+    "quote": "To demonstrate the applicability of our new extensible\nquery-planning tactic, we have applied the tactic to the\nsix example programs listed in Figure 17.",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One titles-by-author query was synthesized as an imperative Facade routine with a checked partial-correctness proof.",
+    "detail": "The fold compilation rule supplies the loop structure. The stated postcondition applies only if the routine terminates.",
+    "quote": "Once these obligations have been resolved, we arrive at the desired Facade program.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "Both evaluated ADTs yielded functional implementations with Coq-checked refinement proofs.",
+    "detail": "The functional programs retain nondeterministic calls to abstract data structures, which are resolved by linking verified implementations later in the pipeline.",
+    "quote": "From Fiat specifications we derive a collection of nondeterministic Fiat programs (one per ADT method, as demonstrated in Fig.\n5\nb), then extract each method to Facade Fig.\n5\nc) and compile to Bedrock.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "met",
-    "finding": "One SQL-style case study produced linked assembly with a Coq-checked full-functional-correctness proof.",
-    "detail": "The pipeline links against separately verified data structures and handles manual memory management. Its trusted base includes the Bedrock semantics, translator, assembler, and wrappers.",
+    "finding": "The full pipeline produced Coq-checked linked Bedrock assembly for both evaluated ADTs.",
+    "detail": "The checked assembly artifact is Bedrock. The translator to x86, assembler, and wrappers are part of the trusted base.",
     "quote": "The pipeline runs entirely within the Coq proof assistant, leading to final, linked assembly code with overall full-functional-correctness proofs in separation logic.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "IDS passed 62/62 CloverBench tasks by synthesizing Dafny code and verification annotations.",
+    "detail": "The aggregate CloverBench result does not identify which synthesized routines required loop invariants and ranking functions. DafnyBench supplied the routine bodies.",
+    "quote": "and all three LLM methods saturate at\n62\n/\n62\n62/62\non CloverBench.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "For one synthesized counter, Rocq accepted proofs of 2 behavioral laws.",
+    "detail": null,
+    "quote": "The spec states two properties, or “axioms,” about\ninit\n,\ninc\n, and\nread\n: reading the initial state returns zero, and reading after an increment returns one more than reading before.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "met",
-    "finding": "IDS synthesized distributed stores successfully in 20 of 21 runs across seven specifications.",
-    "detail": "Each specification passed in at least 2 of 3 independent runs. Success required a closed Rocq proof, audit and execution of extracted OCaml; budget exhaustion counted as failure. Runtime used five Google Cloud VMs. The specifications omit reconfiguration and fault recovery.",
+    "finding": "IDS passed the proof, audit, and execution checks in 3/3 independent runs for Chapar causal consistency.",
+    "detail": "The pass count comes from Table 1. Rocq checks the refinement proof, while the audit, execution, and repeat-run outcomes are empirical results reported by the authors.",
     "quote": null,
     "checked": null,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 5,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
-    "milestone": "m3",
+    "milestone": "m5",
     "case": null,
     "verdict": "partial",
-    "finding": "One synthesized bookstore database was extracted to OCaml and benchmarked.",
-    "detail": "Fiat produces Coq-checkable refinement proofs for SQL-style specifications, but the reported result stops at extracted OCaml; it does not establish correctness of fully linked assembly.",
-    "quote": "We performed such an extraction for the bookstore example and benchmarked it; the observed performance is reasonable, and the operations scale in a way that is consistent with the indexing scheme used, as demonstrated by Figure 15.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Two synthesized, verified OCaml implementations were extracted and benchmarked.",
-    "detail": "The SQL-like specifications are refined to functional implementations, but the source does not report a correctness theorem for fully linked assembly.",
-    "quote": "We have extracted veriﬁed OCaml implementations of\nMessages and Classiﬁer and benchmarked them using both the\nmaster plan tactic with just A VL trees and lists and with a\nversion extended with new data structures.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "met",
-    "finding": "One process-scheduler ADT was refined from a declarative specification to a closed, verified assembly module.",
-    "detail": "The pipeline uses Fiat refinement and Coq’s checker, then links against a hand-verified indexing implementation. The source does not state a count of query-structure examples.",
-    "quote": "This benchmark starts from high-level Fiat specifications (as shown in Fig.\n5\na) and outputs a closed Bedrock module, linked against a hand-verified nested-binary-tree implementation.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": false,
-    "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "partial",
-    "finding": "IDS synthesized Rocq-checked implementations for 7 distributed key-value-store specifications.",
-    "detail": "The specifications are high-level reference implementations with state and operations. The text does not establish that they are declarative abstract data type specifications with private state.",
-    "quote": "IDS returns verified implementations for all seven specifications, a\n3.5\n×\n3.5\\times\npass rate over the\n2\n2\nout of\n7\n7\nthat each of Codex and Claude Code reach under the same prompt and budget.",
+    "finding": "IDS passed 176/189 VERINA tasks requiring both a function body and a Lean 4 proof.",
+    "detail": null,
+    "quote": "IDS reaches\n𝟏𝟕𝟔\n/\n𝟏𝟖𝟗\n\\mathbf{176/189}\non VERINA",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 5,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "IDS extracted synthesized implementations to OCaml and benchmarked them on a 5-VM cluster.",
-    "detail": "The reported proof checks the Rocq implementation; the text does not report a proof covering fully linked assembly.",
-    "quote": "We extract synthesized implementations from Gallina to OCaml and benchmark them on a 5-VM Google Cloud cluster under a distributed runtime against hand-written expert references.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 5,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "Two case studies synthesized verified LLVM implementations: dynamic-array push and O(n log n) introsort.",
-    "detail": "The tool synthesizes imperative code from an abstract algorithm through refinement, with proofs of correctness and complexity. The excerpt does not establish synthesis from loop, stack-space and resource templates satisfying the specified syntactic constraints.",
-    "quote": "As case studies, we verify the amortized constant time\npush operation on dynamic arrays and the O(n log n) introsort algorithm, and refine them down to efficient\nLLVM implementations.",
+    "finding": "Sepref generated imperative LLVM code with correctness and complexity proofs in 2 case studies.",
+    "detail": "Sepref translates the abstract algorithm’s existing control flow and uses user hints where needed to discharge proof obligations.",
+    "quote": "• We extend the Sepref tool (Section 4) to synthesize executable imperative code in LLVM,\ntogether with a proof of correctness and complexity.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The dynamic-array case study verifies 1 operation, push, through a functional refinement with amortized constant cost.",
+    "detail": "The case study verifies push and discusses how the method could extend to lookup, update, initialization, and destruction.",
+    "quote": "We verify the amortized-constant-time push operation of\ndynamic arrays in the abstract NREST formalism and then synthesize LLVM code from it using\nthe automatic method from the previous section.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Introsort refinement reaches generated LLVM for 2 element types, unsigned integers and strings.",
+    "detail": "The string instantiation bounds comparison cost using the maximum string length. Compilation to machine code is outside the checked refinement.",
+    "quote": "Finally, instantiating the element type and comparison operation yields a complete LLVM\nprogram, that our code generator can translate to actual LLVM text and a corresponding header\nfile for interfacing our sorting algorithm from C or C++.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "Rupicola generated 1 imperative uppercasing routine with a proof of total correctness.",
-    "detail": "The routine is compiled from a manually constructed functional model using compilation lemmas and annotations. The text does not establish synthesis from supplied atomic operations and templates constraining loops, stack space and resource use.",
+    "finding": "Rupicola generated 1 in-place ASCII uppercasing routine with a Coq proof of total correctness.",
+    "detail": "The user supplied the functional model, the calling interface, and compilation hints. Bedrock2 tracks stack usage, but the example does not give a stack budget or bounds on specified operations as synthesis inputs.",
     "quote": "The result is a Bedrock2 program upstr_br2fn and its\nproof of (total) correctness upstr_br2fn_ok (the Derive\ncommand is syntactic sugar for defining a dependent pair).",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The paper names 1 IP-checksum example with an end-to-end proof and describes a verified route from the generated Bedrock2 code to RISC-V.",
+    "detail": "The performance experiments used C pretty-printing and conventional C compilers. Verified linking is described as a toolchain capability.",
+    "quote": "Still, expressivity is a\nconcern, so for multiple of our example programs we wrote\nend-to-end proofs connecting abstract specifications to Rupi-\ncola’s inputs.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "AxDafny verified synthesized programs for 56.4% of 250 LCB-Pro-Dafny tasks.",
-    "detail": "The system generates implementations and proof annotations checked by Dafny, including termination checks. The source does not establish synthesis from supplied atomic operations and templates constraining loops, stack space and resource use; specifications generally omit complexity and memory constraints.",
+    "finding": "AxDafny verified 56.4% of synthesized solutions across 250 LCB-Pro-Dafny tasks.",
+    "detail": "The verifier checked individual solutions. The aggregate success rate is an author-reported benchmark result.",
     "quote": "On the newly introduced LCB-Pro-Dafny benchmark, AxDafny verifies 56.4% of tasks, improving over the 11.6%\nsuccess rate of direct GPT-5.5 generation.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "JetStream generated accelerators with Verus-checked answer correctness for all 22 TPC-H queries.",
+    "detail": "The checked limits on when an operation may decline do not establish loop termination.",
+    "quote": "The accelerator’s data structures, query execution, and maintenance logic are all verified.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "JetStream’s generated auxiliary data structures have contracts checked in Verus for 3 operations per accelerator.",
+    "detail": "The operation proofs assume the host supplies scans, deltas, and rescans that satisfy the declared input contracts.",
+    "quote": "The accelerator’s data structures, query execution, and maintenance logic are all verified.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "met",
+    "finding": "GPT-5.5 (xhigh) fully solved 27 of 43 Vero projects in code-and-proof mode.",
+    "detail": "On deposit_sc, one of the accepted projects, Lean checked all 79 scored specifications across four modules against the submitted implementations.",
+    "quote": "Our evaluation shows that Vero is frontier-resistant, as the strongest configuration fully solves only 27 of 43 instances in code-and-proof mode and 10 instances resist every configuration in both modes.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "met",
+    "finding": "One statically linked RISC-V cryptographic server satisfies its high-level I/O specification under one end-to-end Coq theorem.",
+    "detail": "The theorem assumes the verified code is loaded at the specified entry address, the initial I/O trace is empty, and the required memory is available.",
+    "quote": "the complete software image compiled with Bedrock2,\ncertified with one Coq theorem about a machine-code sequence.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    }
   ],
   "judged": [
    {
     "url": "https://www.anthropic.com/research/formal-verification",
     "milestone": "m1",
-    "hash": "a233cf68015b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "90d3e6ecc0e8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.anthropic.com/research/formal-verification",
     "milestone": "m2",
-    "hash": "c7c9ce8b49cf",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f6997d9b535e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.anthropic.com/research/formal-verification",
     "milestone": "m3",
-    "hash": "1460708ea37f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2e3389a42b9e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.anthropic.com/research/formal-verification",
     "milestone": "m4",
-    "hash": "57d51a3ce006",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3b821412a167",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.anthropic.com/research/formal-verification",
+    "milestone": "m5",
+    "hash": "dbe60214c2b5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.anthropic.com/research/formal-verification",
     "milestone": "completion",
     "hash": "87752d53d7fb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.microsoft.com/en-us/research/publication/verus-a-practical-foundation-for-systems-verification/",
     "milestone": "m1",
-    "hash": "a233cf68015b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "90d3e6ecc0e8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.microsoft.com/en-us/research/publication/verus-a-practical-foundation-for-systems-verification/",
     "milestone": "m2",
-    "hash": "c7c9ce8b49cf",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f6997d9b535e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.microsoft.com/en-us/research/publication/verus-a-practical-foundation-for-systems-verification/",
     "milestone": "m3",
-    "hash": "1460708ea37f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2e3389a42b9e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.microsoft.com/en-us/research/publication/verus-a-practical-foundation-for-systems-verification/",
     "milestone": "m4",
-    "hash": "57d51a3ce006",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3b821412a167",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.microsoft.com/en-us/research/publication/verus-a-practical-foundation-for-systems-verification/",
+    "milestone": "m5",
+    "hash": "dbe60214c2b5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.microsoft.com/en-us/research/publication/verus-a-practical-foundation-for-systems-verification/",
     "milestone": "completion",
     "hash": "87752d53d7fb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://github.com/papers-we-love/papers-we-love/blob/main/distributed_systems/ironFleet-proving-practical-distributed-systems-correct.pdf",
     "milestone": "m1",
-    "hash": "a233cf68015b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "90d3e6ecc0e8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://github.com/papers-we-love/papers-we-love/blob/main/distributed_systems/ironFleet-proving-practical-distributed-systems-correct.pdf",
     "milestone": "m2",
-    "hash": "c7c9ce8b49cf",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f6997d9b535e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://github.com/papers-we-love/papers-we-love/blob/main/distributed_systems/ironFleet-proving-practical-distributed-systems-correct.pdf",
     "milestone": "m3",
-    "hash": "1460708ea37f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2e3389a42b9e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://github.com/papers-we-love/papers-we-love/blob/main/distributed_systems/ironFleet-proving-practical-distributed-systems-correct.pdf",
     "milestone": "m4",
-    "hash": "57d51a3ce006",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3b821412a167",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/papers-we-love/papers-we-love/blob/main/distributed_systems/ironFleet-proving-practical-distributed-systems-correct.pdf",
+    "milestone": "m5",
+    "hash": "dbe60214c2b5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://github.com/papers-we-love/papers-we-love/blob/main/distributed_systems/ironFleet-proving-practical-distributed-systems-correct.pdf",
     "milestone": "completion",
     "hash": "87752d53d7fb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://explore.openaire.eu/search/publication?pid=10.1561%2F2500000010",
     "milestone": "m1",
-    "hash": "a233cf68015b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "90d3e6ecc0e8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://explore.openaire.eu/search/publication?pid=10.1561%2F2500000010",
     "milestone": "m2",
-    "hash": "c7c9ce8b49cf",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f6997d9b535e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://explore.openaire.eu/search/publication?pid=10.1561%2F2500000010",
     "milestone": "m3",
-    "hash": "1460708ea37f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2e3389a42b9e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://explore.openaire.eu/search/publication?pid=10.1561%2F2500000010",
     "milestone": "m4",
-    "hash": "57d51a3ce006",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3b821412a167",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://explore.openaire.eu/search/publication?pid=10.1561%2F2500000010",
+    "milestone": "m5",
+    "hash": "dbe60214c2b5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://explore.openaire.eu/search/publication?pid=10.1561%2F2500000010",
     "milestone": "completion",
     "hash": "87752d53d7fb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.tufts.edu/~jfoster/papers/popl10.pdf",
     "milestone": "m1",
-    "hash": "a233cf68015b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://jasongross.github.io/papers/2015-adt-synthesis.pdf",
-    "milestone": "m2",
-    "hash": "c7c9ce8b49cf",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://people.csail.mit.edu/bendy/Fiat-Ext-Indexes/fiat-ext-indexes.pdf",
-    "milestone": "m2",
-    "hash": "c7c9ce8b49cf",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7324049/",
-    "milestone": "m3",
-    "hash": "1460708ea37f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2605.23109v1",
-    "milestone": "m4",
-    "hash": "57d51a3ce006",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "90d3e6ecc0e8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.tufts.edu/~jfoster/papers/popl10.pdf",
     "milestone": "m2",
-    "hash": "c7c9ce8b49cf",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f6997d9b535e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.tufts.edu/~jfoster/papers/popl10.pdf",
     "milestone": "m3",
-    "hash": "1460708ea37f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2e3389a42b9e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.tufts.edu/~jfoster/papers/popl10.pdf",
     "milestone": "m4",
-    "hash": "57d51a3ce006",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3b821412a167",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.tufts.edu/~jfoster/papers/popl10.pdf",
+    "milestone": "m5",
+    "hash": "dbe60214c2b5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.tufts.edu/~jfoster/papers/popl10.pdf",
     "milestone": "completion",
     "hash": "87752d53d7fb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://jasongross.github.io/papers/2015-adt-synthesis.pdf",
     "milestone": "m1",
-    "hash": "a233cf68015b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "90d3e6ecc0e8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://jasongross.github.io/papers/2015-adt-synthesis.pdf",
+    "milestone": "m2",
+    "hash": "f6997d9b535e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://jasongross.github.io/papers/2015-adt-synthesis.pdf",
     "milestone": "m3",
-    "hash": "1460708ea37f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2e3389a42b9e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://jasongross.github.io/papers/2015-adt-synthesis.pdf",
     "milestone": "m4",
-    "hash": "57d51a3ce006",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3b821412a167",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://jasongross.github.io/papers/2015-adt-synthesis.pdf",
+    "milestone": "m5",
+    "hash": "dbe60214c2b5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://jasongross.github.io/papers/2015-adt-synthesis.pdf",
     "milestone": "completion",
     "hash": "87752d53d7fb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.csail.mit.edu/bendy/Fiat-Ext-Indexes/fiat-ext-indexes.pdf",
     "milestone": "m1",
-    "hash": "a233cf68015b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "90d3e6ecc0e8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.csail.mit.edu/bendy/Fiat-Ext-Indexes/fiat-ext-indexes.pdf",
+    "milestone": "m2",
+    "hash": "f6997d9b535e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.csail.mit.edu/bendy/Fiat-Ext-Indexes/fiat-ext-indexes.pdf",
     "milestone": "m3",
-    "hash": "1460708ea37f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2e3389a42b9e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.csail.mit.edu/bendy/Fiat-Ext-Indexes/fiat-ext-indexes.pdf",
     "milestone": "m4",
-    "hash": "57d51a3ce006",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3b821412a167",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.csail.mit.edu/bendy/Fiat-Ext-Indexes/fiat-ext-indexes.pdf",
+    "milestone": "m5",
+    "hash": "dbe60214c2b5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.csail.mit.edu/bendy/Fiat-Ext-Indexes/fiat-ext-indexes.pdf",
     "milestone": "completion",
     "hash": "87752d53d7fb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7324049/",
     "milestone": "m1",
-    "hash": "a233cf68015b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "90d3e6ecc0e8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7324049/",
     "milestone": "m2",
-    "hash": "c7c9ce8b49cf",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f6997d9b535e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7324049/",
+    "milestone": "m3",
+    "hash": "2e3389a42b9e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7324049/",
     "milestone": "m4",
-    "hash": "57d51a3ce006",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3b821412a167",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7324049/",
+    "milestone": "m5",
+    "hash": "dbe60214c2b5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7324049/",
     "milestone": "completion",
     "hash": "87752d53d7fb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2605.23109v1",
     "milestone": "m1",
-    "hash": "a233cf68015b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "90d3e6ecc0e8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2605.23109v1",
     "milestone": "m2",
-    "hash": "c7c9ce8b49cf",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f6997d9b535e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2605.23109v1",
     "milestone": "m3",
-    "hash": "1460708ea37f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2e3389a42b9e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2605.23109v1",
+    "milestone": "m4",
+    "hash": "3b821412a167",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2605.23109v1",
+    "milestone": "m5",
+    "hash": "dbe60214c2b5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2605.23109v1",
     "milestone": "completion",
     "hash": "87752d53d7fb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www21.in.tum.de/~haslbema/documents/Haslbeck_Lammich-TOPLAS.pdf",
     "milestone": "m1",
-    "hash": "a233cf68015b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "90d3e6ecc0e8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www21.in.tum.de/~haslbema/documents/Haslbeck_Lammich-TOPLAS.pdf",
+    "milestone": "m2",
+    "hash": "f6997d9b535e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www21.in.tum.de/~haslbema/documents/Haslbeck_Lammich-TOPLAS.pdf",
+    "milestone": "m3",
+    "hash": "2e3389a42b9e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www21.in.tum.de/~haslbema/documents/Haslbeck_Lammich-TOPLAS.pdf",
+    "milestone": "m4",
+    "hash": "3b821412a167",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www21.in.tum.de/~haslbema/documents/Haslbeck_Lammich-TOPLAS.pdf",
+    "milestone": "m5",
+    "hash": "dbe60214c2b5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www21.in.tum.de/~haslbema/documents/Haslbeck_Lammich-TOPLAS.pdf",
+    "milestone": "completion",
+    "hash": "87752d53d7fb",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://jamner.net/papers/rupicola-PLDI22.pdf",
     "milestone": "m1",
-    "hash": "a233cf68015b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "90d3e6ecc0e8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://jamner.net/papers/rupicola-PLDI22.pdf",
+    "milestone": "m2",
+    "hash": "f6997d9b535e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://jamner.net/papers/rupicola-PLDI22.pdf",
+    "milestone": "m3",
+    "hash": "2e3389a42b9e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://jamner.net/papers/rupicola-PLDI22.pdf",
+    "milestone": "m4",
+    "hash": "3b821412a167",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://jamner.net/papers/rupicola-PLDI22.pdf",
+    "milestone": "m5",
+    "hash": "dbe60214c2b5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://jamner.net/papers/rupicola-PLDI22.pdf",
+    "milestone": "completion",
+    "hash": "87752d53d7fb",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2606.32007",
     "milestone": "m1",
-    "hash": "a233cf68015b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "90d3e6ecc0e8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2606.32007",
+    "milestone": "m2",
+    "hash": "f6997d9b535e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2606.32007",
+    "milestone": "m3",
+    "hash": "2e3389a42b9e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2606.32007",
+    "milestone": "m4",
+    "hash": "3b821412a167",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2606.32007",
+    "milestone": "m5",
+    "hash": "dbe60214c2b5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2606.32007",
+    "milestone": "completion",
+    "hash": "87752d53d7fb",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.20527",
+    "milestone": "m1",
+    "hash": "90d3e6ecc0e8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.20527",
+    "milestone": "m2",
+    "hash": "f6997d9b535e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.20527",
+    "milestone": "m3",
+    "hash": "2e3389a42b9e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.20527",
+    "milestone": "m4",
+    "hash": "3b821412a167",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.20527",
+    "milestone": "m5",
+    "hash": "dbe60214c2b5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.20527",
     "milestone": "completion",
     "hash": "87752d53d7fb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2608.13522",
+    "milestone": "m5",
+    "hash": "dbe60214c2b5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://adam.chlipala.net/papers/GarageDoorPLDI24/GarageDoorPLDI24.pdf",
+    "milestone": "m3",
+    "hash": "2e3389a42b9e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1320,8 +1738,98 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 8 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"A 2018 study found 10 previously unknown recovery bugs in widely used Linux file systems. Some could cost users files already written to disk. Crash tests exercise a bounded set of workloads. A proof can cover every crash the specification describes, but the expert labor is substantial: the correctness proof specific to the seL4 kernel took 11 person-years. Generating code and proof together could put such guarantees within reach of more systems teams. The guarantee depends on the specification capturing how the hardware behaves.\". Reason: The proof-line count measures artifact size, while the kernel study measures labor and the storage study identifies a consequence for users."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Yuriy Brun, Saikat Chakraborty, Claire Le Goues, Corina Păsăreanu and Adish Singla, Automatically Engineering Trusted Software: A Research Roadmap, 2026: \"automatically synthesizing formal proofs to verify the correctness of the produced software\". Reason: The trusted-software roadmap explicitly names both code synthesis and proof synthesis as goals."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No programme or academy assessment was found that judges proof-producing synthesis for a specified systems program unachievable or unworthy of pursuit.\". Reason: The programme and academy assessments discuss practical limits without taking a position against the goal."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: title = \"An imperative routine and a proof of its input-output behavior and loop termination are synthesized.\"; criterion = \"Given an input-output specification, permitted atomic operations, a loop template, stack limits and bounds on specified operations, synthesize an imperative routine within those constraints. Synthesize loop invariants establishing partial correctness and ranking functions establishing termination. The generated guards and statements must be well formed.\"; threshold_quote = \"partial correctness, loop termination, and well-formedness conditions on program guards.\"; threshold_ref = 7. Reason: The criterion needs to require the synthesized proof and distinguish its obligations from the paper’s example programs."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"Refine a declarative specification of an abstract data type, a set of operations on private state, into a functional implementation. Produce a proof that the implementation\\u2019s operations satisfy the specification and that Coq\\u2019s kernel accepts. The implementation checked at this stage is the functional program represented in Coq.\". Reason: The Fiat criterion mixes the kernel’s acceptance test with a case-study result and subsequent OCaml compilation."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Produce a fully linked assembly program represented as a term in Coq. Coq must check a proof that this linked program satisfies the original high-level specification, including calls to any separately verified routines linked into it.\"; threshold_quote = \"a fully linked assembly program represented as a Coq term with a proof that it meets the original high-level specification.\"; threshold_ref = 8. Reason: The linked-assembly theorem identifies the precise artifact checked by Coq, which the existing criterion obscures with case-study details."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"For one fixed distributed key-value-store specification, at least two of three independent synthesis runs must succeed. Each successful run must close the refinement proof in Rocq without unproved placeholders, pass the benchmark audit for a non-vacuous implementation of the specified interface, and execute the extracted OCaml implementation on the distributed test harness. A run that exhausts its time or cost budget fails.\". Reason: The distributed-store criterion mixes the per-specification pass rule with the observed success count and runtime measurements."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m4: \"Every scored interface in a Vero instance is implemented and every specification is proved in Lean 4.\". Reason: Vero supplies a missing test of whether one generated implementation satisfies every obligation across a repository benchmark instance."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "remove statement 1. Reason: The Verus statement names faster verification of systems code as its goal and makes no claim about synthesizing the implementation."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Applied 9 of 9 proposed operations from SWE-02-revise-20261121T155249791441Z; now version 2."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m3, m4, m5."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 0 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 4 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 13 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 2 candidates returned, 0 dropped as sources already used, 2 to judge."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 2 of 2 new candidates, without search. Skipped: 3 no readable saved copy. Dropped rows: none. Replaced 14 earlier rows. Added 21 results: 19 from sources already used, 2 from newly found sources."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 2 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 19 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-21"
  }
 }
