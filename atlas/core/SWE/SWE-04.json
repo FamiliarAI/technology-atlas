@@ -333,11 +333,15 @@
  "page": {
   "id": "SWE-04",
   "title": "Compositional verification of concurrent crash-recovering services",
-  "definition": "Machine-checked rules derive a service's safety and progress guarantees from component contracts: formal statements of assumptions and guarantees. The rules cover shared-memory threads, messages and independent crashes with recovery, and engineers without formal-methods expertise can preserve the proof through a compatible component replacement.",
+  "definition": "Each component has a contract stating what it assumes and what it guarantees. Machine-checked rules combine those contracts to prove that client operations return only permitted results and, under stated scheduling, communication and failure assumptions, eventually finish. The proof covers threads sharing memory within a server, messages between servers, and servers that crash and recover independently. A developer without formal-methods expertise can replace a component with another verified against the same contract and recheck the service without changing the proofs of its callers.",
   "goal": {
-   "need": "Grove's 2023 extended manuscript reports the source and verification artifacts tabulated below for one distributed-systems library. Its client proofs use component specifications, allowing implementation changes without reconstructing every client argument. These counts illustrate the amount of verification material whose reuse matters; line counts do not establish labour costs.",
+   "need": "At one code-hosting service, a 43-second network interruption triggered 24 hours and 11 minutes of degraded service. Users saw inconsistent data. Reviews and fault-injection tests can miss rare orderings of writes, crashes and retries. A storage team could change how data is replicated and retain its assurance that users see consistent reads and eventually receive replies, without redoing proofs for callers. This requires the replacement to meet the same contract and enough replicas to keep running and communicating within the assumed bounds.",
    "need_refs": [
-    1
+    14,
+    15,
+    1,
+    6,
+    13
    ],
    "figures": {
     "caption": "Verification artifacts for Grove's component library, 2023",
@@ -408,13 +412,14 @@
    {
     "id": "m1",
     "title": "Concurrent components refine their contracts under every permitted client and thread interleaving.",
-    "criterion": "Machine-check contextual refinement: a component implementation composed with any permitted client has only behaviours allowed by its specification, under the stated environment assumptions. This permits composition through specification interfaces. CertiKOS reported the result for its mC2 kernel, comprising 6,500 lines of C and x86 assembly, in 2016; its ticket-lock and MCS-lock implementations share an interchangeable interface.",
+    "criterion": "Machine-check contextual refinement. For every client that meets the component’s assumptions and every permitted interleaving of threads, each observable behaviour of the implementation linked with that client must be allowed by the component’s specification.",
     "set_by": "Contextual-refinement convention, instantiated by the CertiKOS developers in OSDI 2016, abstract and §2.",
     "set_by_kind": "community_convention",
     "threshold_quote": "the implementation of each such function will behave like its specification under any kernel/user context with any valid interleaving.",
     "threshold_ref": 5,
     "refs": [
-     5
+     5,
+     16
     ],
     "status": "active",
     "replaced_by": [],
@@ -423,7 +428,7 @@
    {
     "id": "m2",
     "title": "A concurrent storage implementation refines its specification across crashes and recovery.",
-    "criterion": "Machine-check concurrent recovery refinement: every code execution corresponds to specification transitions with identical external I/O. A crash followed by recovery, including further crashes during recovery, simulates one atomic specification crash. Perennial demonstrated this for Mailboat's mailbox library in 2019. The SMTP/POP3 implementation was unverified; the prototype proved safety and did not support composing abstraction layers.",
+    "criterion": "Machine-check concurrent recovery refinement. Every execution of the implementation must match an interleaving of specification steps with the same external calls and return values. A crash followed by recovery, including any further crashes during recovery, must simulate one atomic crash step in the specification.",
     "set_by": "Refinement convention, extended to concurrent recovery refinement by the Perennial developers, SOSP 2019, §3.1 and theorem 2.",
     "set_by_kind": "community_convention",
     "threshold_quote": "every sequence of code transitions must correspond to some interleaving of spec transitions with the same external I/O",
@@ -438,7 +443,7 @@
    {
     "id": "m3",
     "title": "A distributed key-value store remains linearizable through concurrent operations and node recovery.",
-    "criterion": "Prove replica crash-idempotence, safe reconfiguration with valid replicas, correct client initialization and linearizable Put/Get/CondPut operations by composing component specifications. Linearizable operations appear atomic and respect real-time ordering. Grove's 2023 vKV development meets these four obligations with threads, unreliable messages and independent node crashes; it does not prove liveness.",
+    "criterion": "Compose component proofs to establish four properties. The replica server’s main function is crash-idempotent, including the request handlers it starts. Reconfiguration is safe when all proposed servers are valid replicas. Client initialization succeeds given the addresses of the configuration service. Put, Get and CondPut are linearizable: each operation appears to act on one key-value map at a single instant between call and return, respecting the real-time order of calls that do not overlap.",
     "set_by": "Linearizability and crash-safety conventions, instantiated by Grove's published top-level specifications, §5.1.",
     "set_by_kind": "community_convention",
     "threshold_quote": "A clerk’s Put(k,v), Get(k), and CondPut(k,e,v) functions behave as though accessing a local in-memory key-value map with linearizable operations.",
@@ -453,7 +458,7 @@
    {
     "id": "m4",
     "title": "Compatible controller contracts compose to prove eventual stable reconciliation of a cluster.",
-    "criterion": "Under Welder's weak-fairness, eventual fault-cessation and Pod-naming assumptions, prove CORE: compatible controllers eventually reach and maintain their desired states when those desired states stabilize, while respecting non-interference guarantees. Discharge their liveness dependencies and verify Rust implementation conformance to the models. Welder reported this for four composed controllers in 2026: ReplicaSet, Deployment, StatefulSet and RabbitMQ. The model uses API-server-mediated state; direct shared-memory threads lie outside its scope.",
+    "criterion": "Verify that the controller implementations conform to their models. Show that each controller set meets its non-interference guarantees, that the sets satisfy one another’s assumptions, and that the composition discharges their liveness dependencies. If desired states stabilize, the cluster must eventually match them and continue to do so. Continuously enabled actions must eventually occur, message drops, controller crashes and disruptive Pod changes must eventually cease, and other actors must respect any Pod names reserved by the StatefulSet controller.",
     "set_by": "Machine-checked specification-satisfaction convention; Welder developers' controller-specific CORE criterion and composition rules, SOSP 2026, §§3–5.",
     "set_by_kind": "community_convention",
     "threshold_quote": "CORE states that a set of controllers 𝑆 collectively reconcile the cluster state to eventually match the desired state stably.",
@@ -484,12 +489,26 @@
     "status": "active",
     "replaced_by": [],
     "threshold_checked": null
+   },
+   {
+    "id": "m6",
+    "title": "A replicated service eventually answers a client that keeps sending its request to all replicas.",
+    "criterion": "Machine-check that a client repeatedly sending a request to all replicas eventually receives a reply. Assume a quorum Q and bounds F, Δ, B and E. Eventually each scheduler in Q runs at frequency at least F, messages among Q and the client arrive within Δ, and each replica in Q receives at most B packets per 10B/F + 1 time units. Replicas in Q must have clock error at most E whenever they read the clock, must have enough memory, and must never stop because they reach an overflow-prevention limit.",
+    "set_by": "Distributed liveness under eventual synchrony, as specified for IronRSL in IronFleet, SOSP 2015, §5.1.4.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "if a client repeatedly sends a request to all replicas, it eventually receives a reply.",
+    "threshold_ref": 13,
+    "refs": [
+     13
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
    }
   ],
   "measures": [],
   "not_found": [
-   "No published demonstration was found of non-experts maintaining a service proof that covers the complete technical scope.",
-   "The supplied deep-specification article's PMC full text and attempted publisher and repository copies could not be retrieved."
+   "No published demonstration was found of non-experts maintaining a service proof that covers the complete technical scope."
   ],
   "references": [
    {
@@ -592,20 +611,6 @@
    },
    {
     "id": 8,
-    "kind": "journal",
-    "url": "https://research.tudelft.nl/en/publications/iris-from-the-ground-up-a-modular-foundation-for-higher-order-con/",
-    "doi": "10.1017/S0956796818000151",
-    "title": "Iris from the ground up",
-    "authors": "JUNG R, KREBBERS R, JOURDAN JH, BIZJAK A, BIRKEDAL L, DREYER D",
-    "container": "J. Funct. Prog.",
-    "year": "2018",
-    "volume": "28",
-    "issue": null,
-    "pages": null,
-    "citation_source": "crossref"
-   },
-   {
-    "id": 9,
     "kind": "report",
     "url": "https://www.cs.columbia.edu/~rgu/publications/pldi18-gu.pdf",
     "doi": "10.1145/3192366.3192381",
@@ -619,7 +624,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 10,
+    "id": 9,
     "kind": "preprint",
     "url": "https://cs.nyu.edu/~jt4767/papers/perennial/daisynfs.pdf",
     "doi": null,
@@ -633,7 +638,7 @@
     "citation_source": "model"
    },
    {
-    "id": 11,
+    "id": 10,
     "kind": "preprint",
     "url": "https://pdos.csail.mit.edu/6.824/papers/grove.pdf",
     "doi": null,
@@ -647,7 +652,7 @@
     "citation_source": "model"
    },
    {
-    "id": 12,
+    "id": 11,
     "kind": "report",
     "url": "https://www.usenix.org/system/files/osdi21-chajed.pdf",
     "doi": null,
@@ -661,11 +666,109 @@
     "citation_source": "model"
    },
    {
-    "id": 13,
+    "id": 12,
     "kind": "report",
     "url": "https://www.usenix.org/system/files/osdi25-leblanc.pdf",
     "doi": null,
     "title": "PoWER Never Corrupts: Tool-Agnostic Verification of Crash Consistency and Corruption Detection",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 13,
+    "kind": "report",
+    "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2015/10/ironfleet.pdf",
+    "doi": "10.1145/2815400.2815428",
+    "title": "IronFleet: Proving Practical Distributed Systems Correct",
+    "authors": "Hawblitzel C, Howell J, Kapritsos M, Lorch JR, Parno B, Roberts ML, et al.",
+    "container": "Proceedings of the 25th Symposium on Operating Systems Principles",
+    "year": "2015",
+    "volume": null,
+    "issue": null,
+    "pages": "1-17",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 14,
+    "kind": "web",
+    "url": "https://github.blog/news-insights/company-news/oct21-post-incident-analysis/",
+    "doi": null,
+    "title": "October 21 post-incident analysis",
+    "authors": "Jason Warner",
+    "container": "The GitHub Blog",
+    "year": "2018",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 15,
+    "kind": "report",
+    "url": "https://lamport.azurewebsites.net/tla/formal-methods-amazon.pdf",
+    "doi": null,
+    "title": "Use of Formal Methods at Amazon Web Services",
+    "authors": "Chris Newcombe, Tim Rath, Fan Zhang, Bogdan Munteanu, Marc Brooker, Michael Deardeuff",
+    "container": "Amazon.com",
+    "year": "2014",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 16,
+    "kind": "journal",
+    "url": "https://www.jot.fm/issues/issue_2004_06/article4/",
+    "doi": "10.5381/jot.2004.3.6.a4",
+    "title": "Checking Concise Specifications For Multithreaded Software",
+    "authors": "Freund S, Qadeer S",
+    "container": "JOT",
+    "year": "2004",
+    "volume": "3",
+    "issue": "6",
+    "pages": "81",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 17,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5597730/",
+    "doi": "10.1098/rsta.2016.0331",
+    "title": "Position paper: the science of deep specification",
+    "authors": "Appel AW, Beringer L, Chlipala A, Pierce BC, Shao Z, Weirich S, et al.",
+    "container": "Phil. Trans. R. Soc. A.",
+    "year": "2017",
+    "volume": "375",
+    "issue": "2104",
+    "pages": "20160331",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 18,
+    "kind": "report",
+    "url": "https://people.csail.mit.edu/nickolai/papers/chang-psm.pdf",
+    "doi": "10.1145/3830418.3843873",
+    "title": "Verifying a high-performance distributed transaction system using permissioned state machines",
+    "authors": "Chang YS, Tassarotti J, Kaashoek F, Zeldovich N",
+    "container": "Proceedings of the ACM SIGOPS 32nd Symposium on Operating Systems Principles",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": "676-697",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 19,
+    "kind": "book",
+    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol372-ecoop2026/html/LIPIcs.ECOOP.2026.21/LIPIcs.ECOOP.2026.21.html",
+    "doi": "10.4230/LIPIcs.ECOOP.2026.21",
+    "title": "Foundational and Compositional Verification of Layered Concurrent Objects",
     "authors": "",
     "container": null,
     "year": "",
@@ -680,6 +783,7 @@
    "m2",
    "m3",
    "m4",
+   "m6",
    "m5"
   ],
   "results": [
@@ -687,748 +791,1021 @@
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "Iris 3.1 provides a Coq-implemented framework for concurrent separation logic; no component sample size is stated.",
-    "detail": "The reported framework bears on machine-checked reasoning about concurrency, but the supplied text does not report contextual refinement of a component under arbitrary permitted clients.",
-    "quote": "Iris is a framework for higher-order concurrent separation logic, which has been implemented in the Coq proof assistant and deployed very effectively in a wide variety of verification projects.",
+    "finding": "One concurrent kernel, CertiKOS, uses contextual refinement for certified linking and end-to-end functional correctness.",
+    "detail": null,
+    "quote": "as a unifying mechanism to support certified linking and prove end-to-end functional correctness properties.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
-    "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "CertiKOS machine-checked contextual refinement for the mC2 concurrent kernel, comprising 6,500 lines of C and x86 assembly.",
-    "detail": "The proof applies to permitted clients in the modeled x86 subset and assumes sequential consistency for atomic instructions. The machine does not model TLBs, and the assembler, bootloader, pre-initialization module and ELF loader were not verified.",
-    "quote": "All our proofs (including every step in Fig. 5 and Fig. 2)\nare implemented, composed, and machine-checked in\nCoq.",
+    "finding": "CertiKOS checked contextual refinement in Coq for one multicore kernel with 6,500 lines of C and x86 assembly.",
+    "detail": "The model assumes sequential consistency for atomic instructions and covers a subset of x86. The source is an OSDI conference proceedings paper, classified as report because the schema has no conference category.",
+    "quote": "We\nhave successfully developed a practical concurrent OS\nkernel and veriﬁed its (contextual) functional correctness\nin Coq.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 5,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One verified multicore kernel provides 2 interchangeable spinlock implementations within its compositional verification framework.",
+    "detail": "The authors compare both locks in benchmarks. For ticket-lock progress, the checked proof assumes bounded scheduling gaps and requires holders to release the lock within a bounded number of steps.",
+    "quote": "The\nmC2 kernel provides two kinds of spinlocks: ticket\nlock and MCS lock. They have the same interface and\nthus are interchangeable.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "CCAL machine-checks contextual refinement for 6 verified concurrent components, including ticket and MCS locks.",
-    "detail": "The model assumes strong sequential consistency for shared primitives; its multithreaded model does not allow preemption. The supplied text identifies a conference paper but does not state its peer-review status.",
-    "quote": "To evaluate the framework itself, we have\nimplemented, specified, and verified various concurrent pro-\ngrams in the framework.",
+    "finding": "CCAL verifies 6 concurrent components in Coq under a contextual refinement theorem covering all permitted interleavings.",
+    "detail": "The model assumes strong sequential consistency for shared primitives. The ticket-lock example also requires fair scheduling and eventual release of held locks.",
+    "quote": "saying that, for any client program P, we have that for any\nlog l in the behavior[[P⊕ M]]L′[D], there must exist a log l′\nin the behavior[[P]]L[D] such that l and l′ satisfy R.",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
-    "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "CCAL verifies 2 interchangeable lock implementations against the same atomic contract, preserving higher-level proofs.",
+    "detail": null,
+    "quote": "Thus the lock implementations\ncan be freely interchanged without affecting any proof in\nthe higher-level modules using locks.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Mailboat’s 1 concurrent storage library has a Coq-checked refinement proof under its caller restrictions.",
+    "detail": "The SOSP ’19 proceedings paper is classified as a report because the schema has no conference-paper category.",
+    "quote": "we verified and\nmodeled Mailboat at a low level, including modeling that\nDeliver might run concurrently with arbitrary Go code.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 6,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "Mailboat: 1 concurrent mailbox library verified for crash recovery using Perennial in 2019.",
-    "detail": "The proof covers safety under Goose’s process-crash model. The SMTP/POP3 protocol implementation was unverified, and Perennial did not support composing abstraction layers. The source identifies conference proceedings but does not state whether the paper was peer reviewed.",
-    "quote": "The proof is machine-checked and, if correct, implies that\nall possible code executions are allowed by the specification.",
+    "finding": "Perennial verifies a replicated storage implementation in which 2 physical disks refine one logical disk across crashes and recovery.",
+    "detail": "The replicated-disk example uses modeled disk primitives. Mailboat’s separate Goose proof models process crashes with file data retained.",
+    "quote": "We implemented and verified a version of the replicated-\ndisk example described throughout this paper.",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Mailboat provides 1 executable mail service with Coq-checked safety and recovery for its concurrent storage library.",
+    "detail": "The proof assumes the Goose model accurately represents Go and the file system, and trusts the Goose translator and Go compiler.",
+    "quote": "Both Perennial and\nIris use the Coq proof assistant, and the mail server and the\nframework’s proofs are machine checked.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 6,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "For 1 transaction implementation, GoTxn, Coq checks contextual refinement for every safe modeled client and permitted thread interleaving.",
+    "detail": "Clients must satisfy the transaction safety predicate, including its restrictions on shared-state access. The physical and abstract disks start all-zero and have the same size.",
+    "quote": "Theorem 4. The GoTxn implementation txn is a transaction\nrefinement, meaning for all p : Go⟨Txn⟩ where safe(p) holds,\nlink(p, txn) ⊑ p.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
-    "finding": "DaisyNFS: 1 concurrent file-system implementation has a stated crash-safe refinement theorem.",
-    "detail": "The theorem covers matching network I/O traces across crashes and restarts. The supplied text does not explicitly establish that crashes during recovery simulate one atomic specification crash. The proof also relies on trusted assumptions connecting Dafny and Coq, and the network dispatch loop is unverified.",
+    "finding": "For 1 concurrent file system, DaisyNFS, the refinement matches request and response traces across crashes and restarts.",
+    "detail": "The combined theorem trusts the Dafny-to-Coq correspondence and the wire-protocol glue. The execution model assumes recovery runs after each boot and the disk preserves written data without corruption.",
     "quote": "Execution might involve crashing and restarting a program\n(potentially multiple times), wiping out any in-memory state\nafter each crash.",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For 1 executable service, DaisyNFS, transaction and file-system proofs compose to establish concurrent safety and crash refinement.",
+    "detail": "The reported incremental changes extend the file system and its proofs. The paper also benchmarks a global-lock variant, with no reported same-contract verification or proof recheck for that replacement.",
+    "quote": "From here we can apply Theorem 2 to Lemma 3 and ob-\ntain Theorem 1, which says link(sdfy, txn) ⊑ sNFS (note that\nsdfy = link(sNFS,atomically ◦ i)).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Grove composes checked safety contracts for 3 vRSM functions across all their interleavings.",
+    "detail": null,
+    "quote": "Although\nthe proofs are independent, they nonetheless cover all of the\npossible interactions in the resulting system.",
+    "checked": true,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Grove verifies 1 concurrent state logger and ties the replica's durable log to its accepted operations across crashes.",
+    "detail": null,
+    "quote": "The crash obligation says that at all times, replica server j\nmust own the log file and that the contents of the file match\nthe list operations in the accepted ghost state.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": null,
-    "verdict": "partial",
-    "finding": "Grove verifies one distributed key-value store, vKV, using composable component proofs.",
-    "detail": "The text describes linearizability, reconfiguration, unreliable messages and independent crashes, including during recovery. It does not explicitly establish replica crash-idempotence or prove correct client initialization. Grove does not verify liveness.",
-    "quote": "Nevertheless,\nthese proofs still compose into a complete proof of the entire\ndistributed system.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Welder verified CORE for a composition of 4 Kubernetes controllers.",
-    "detail": "The paper reports composition and resolved liveness dependencies, but the provided text does not explicitly establish Rust implementation conformance to the models. It also assumes Retry-on-Conflict loop termination to address version-conflict starvation.",
-    "quote": "We verified that the composition of the four controllers\nimplements CORE.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m5",
-    "case": null,
-    "verdict": "partial",
-    "finding": "One concurrent mC2 kernel, with 6500 lines of C and assembly, was verified for contextual functional correctness.",
-    "detail": "The paper composes shared-memory proofs and reports eventual system-call termination, but does not establish network messaging, independent crashes and recovery, or a compatible component replacement.",
-    "quote": "We have successfully developed a practical concurrent OS\nkernel and veriﬁed its (contextual) functional correctness\nin Coq. Our certiﬁed kernel is written in 6500 lines of\nC and x86 assembly and runs on stock x86 multicore\nmachines.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 5,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m5",
-    "case": null,
-    "verdict": "partial",
-    "finding": "CCAL verified 6 concurrent components using compositional shared-memory layers.",
-    "detail": "The toolkit composes safety and progress proofs under assumptions such as fair scheduling. The paper focuses on shared memory and does not establish the required network messaging, independent crashes, recovery, or compatible replacement in one service.",
-    "quote": "To evaluate the framework itself, we have\nimplemented, specified, and verified various concurrent pro-\ngrams in the framework.",
+    "verdict": "met",
+    "finding": "vKV's Coq proof establishes all 4 required top-level properties for the distributed key-value store.",
+    "detail": "The initialization theorem establishes correct initialization with the supplied addresses. It carries no eventual-return guarantee.",
+    "quote": "The\nspecification for vKV, consisting of the four parts described in\n§5.1, is 49 lines.",
     "checked": true,
     "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "After 1 verified configuration-service replacement in vKV, the replica proof needed 22 added or modified lines.",
+    "detail": "Most replica proof edits accommodated the new list of configuration-service addresses. Grove verifies safety and does not verify liveness.",
+    "quote": "For instance, the new proof of replica differs from\nthe old proof by 18 lines added and 4 lines changed, which\n17\n\n[Page 18]\nwere largely needed because replica servers now take as\ninput a list of multiple network addresses used to contact the\nconfigservice instead of a single address.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "Perennial machine-checks concurrent refinement for 1 mail-server library.",
-    "detail": "Mailboat's proof covers concurrent executions under its caller assumptions, but the paper says Perennial does not support composing layers of abstraction. It does not establish contextual refinement for every permitted client.",
-    "quote": "The proof is written inside Coq, reasoning about possible\nexecutions of the Go code using Perennial’s model of Go.\nThe proof is machine-checked and, if correct, implies that\nall possible code executions are allowed by the specification.",
+    "finding": "One Retry-on-Conflict loop refines an atomic check-then-update API under a termination assumption.",
+    "detail": "The paper gives a trace-mapping argument in §4.2 and does not identify that argument as machine-checked.",
+    "quote": "We prove that every behavior of𝑠 can be\nmapped to a behavior of𝑡 in terms of the cluster state under\nour fairness assumption.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
-    "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "met",
+    "finding": "Welder machine-checked stable reconciliation for a composition of four Kubernetes controllers.",
+    "detail": "The guarantee covers the desired-state predicates specified for the verified implementations and relies on the parametric environment model and trusted runtime components.",
+    "quote": "We proved that the composition of the\nfour controllers implements the CORE specification.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m5",
     "case": null,
     "verdict": "partial",
-    "finding": "Mailboat has a machine-checked safety and crash-recovery proof for 1 concurrent mail server.",
-    "detail": "The proof covers process crashes and recovery, but not liveness. Network protocol code is unverified, and the paper does not establish independent node crashes or proof-preserving component replacement.",
-    "quote": "The proof shows that after recovery all delivered\nmessages are durably stored and that concurrent readers only\nobserve complete messages.",
+    "finding": "Welder composed safety and reconciliation progress proofs for four deployable controllers under a controller-crash model.",
+    "detail": "The RabbitMQ port reused the controller code and required a new reconciliation proof in Welder's environment model. It did not demonstrate a same-contract implementation swap.",
+    "quote": "We proved that the composition of the\nfour controllers implements the CORE specification.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
-    "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One GoJournal implementation has Coq-checked atomic crash specifications across 4 internal layers.",
+    "detail": null,
+    "quote": "CIRCULAR , WAL, OBJ, and JRNL all provide atomic\ncrash specifications, which are used by the layer above.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "GoJournal has checked concurrent crash specifications, and 1 toy client is proved safe across arbitrarily many SimpleNFS crashes and recoveries.",
+    "detail": "The GoJournal proof assumes atomic 4 KB disk writes, execution according to the Goose-generated Perennial model, and caller-supplied concurrency control.",
+    "quote": "we prove an idempotent specification\nfor a toy example client on top of SimpleNFS, establishing\nthat it can successfully execute even if SimpleNFS crashes\nand recovers an arbitrary number of times.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One verified SimpleNFS implementation uses GoJournal contracts, with explicit crash reasoning required for 44 lines of server code.",
+    "detail": "The service can be mounted over NFS, but the reported theorem concerns RPC state transitions. The toy-client recovery proof does not establish service-wide liveness.",
+    "quote": "For example, in the verified SimpleNFS server, only 44 lines\nof code, out of 462, required crash reasoning.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Verus checks 2 concurrent CAPYBARAKV variants against a shared linearizable API.",
+    "detail": "The source is an OSDI conference proceedings paper. The journal kind is the closest available category. The peer_reviewed field follows the journal-specific definition.",
+    "quote": "The API shared by the two vari-\nants is a linearizable specification that is formalized using\nlogical atomicity [32, 60] and encoded using proof callbacks\nin Verus.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Two concurrent CAPYBARAKV variants use checked crash-state contracts and share recovery code.",
+    "detail": "The persistent-memory model covers partial asynchronous writes. Synchronization or sharding prevents reads or writes from running concurrently with a write to the same storage region.",
+    "quote": "At startup time, each wrapper provides a blanket permis-\nsion allowing any number of writes that do not change the ab-\nstract post-recovery state. TheUntrustedKvStoreImpl saves\nthis for repeated use throughout its lifetime, for recovery and\nfor all operations except commit.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Tulip’s Rocq-checked safety and recovery proof uses local reasoning for 13 of its 25 protocol actions.",
+    "detail": "The crash-and-recovery benchmark shows continued execution in a specific run. The checked result covers strict serializability and recovery correctness, while eventual completion and replacement remain unverified.",
+    "quote": "Of the 25 actions in total, 13 depend on a single module,\nwhich achieves ideal modularity: proving these actions re-\nquires purely local reasoning within their own module.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "GoTxn, a 1,600-line transaction system, refines its specification for all safe client programs.",
-    "detail": "The refinement covers concurrent execution and crashes. Safe transactions must access shared state through the transaction system.",
-    "quote": "Theorem 4. The GoTxn implementation txn is a transaction\nrefinement, meaning for all p : Go⟨Txn⟩ where safe(p) holds,\nlink(p, txn) ⊑ p.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m5",
-    "case": null,
-    "verdict": "partial",
-    "finding": "One executable NFS service composes concurrent, crash-safe transaction and file-system proofs.",
-    "detail": "The transaction system has no liveness proof or proof of deadlock avoidance. The network dispatch loop is unverified, and the result does not establish independent node crashes or compatible component replacement.",
-    "quote": "The verified artifact from this work is DaisyNFS, which\nimplements a Network File System (NFS) server in Go on top\nof a bare disk and comes with a proof that clients observe that\neach operation follows the NFS specification as laid out in\nRFC 1813 [4].",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "partial",
-    "finding": "One bank application’s proof composes specifications of the vKV and lock services.",
-    "detail": "Grove verifies concurrent components modularly, but the supplied text does not establish contextual refinement for every permitted client.",
-    "quote": "The proof of the bank\nconsiders only the specifications of the underlying vKV and\nlock service, and does not look at their implementation.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Grove verifies crash recovery for one durable storage library used by replica servers.",
-    "detail": "The text does not establish identical external I/O against specification transitions or simulation of repeated recovery crashes by one atomic specification crash.",
-    "quote": "the proof of crash recovery in a\ndurable storage library uses ownership of durable files;",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m5",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Grove composes proofs for one distributed key-value service, vKV, across concurrent threads, networks and crash recovery.",
-    "detail": "Grove verifies safety but cannot prove liveness or eventual operation completion. The text does not demonstrate a compatible component replacement preserving a client derivation.",
-    "quote": "This paper uses Grove to verify several distributed system\ncomponents written in Go, including vKV, a realistic dis-\ntributed multi-threaded key-value store.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m5",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Welder verifies the composition of 4 Kubernetes controllers against safety and progress specifications.",
-    "detail": "CORE composes safety and liveness under rely-guarantee assumptions. The text does not establish the required integrated coverage of shared-memory threads, independent node crashes and recovery, or preservation through a compatible replacement.",
-    "quote": "We used the Welder framework\nto build and verify a composition of four practical Kubernetes\ncontrollers, including both core and custom controllers.",
+    "finding": "Rocq verified contextual trace refinement in 2 case studies, a layered timer and a lock-free bounded queue.",
+    "detail": "The proofs cover abstract transition-system implementations under sequential consistency. The paper leaves refinement to executable code for future work. The source is a conference proceedings paper.",
+    "quote": "▶ Lemma 31. Given L,L′ :ϕ→A and M :A→B, if scL⊑ scL′, thenL∥M⊑L′∥M.\n▶Lemma 32.GivenL,L′ :ϕ→A andM :A→B, ifL∥M⊑L′∥M, thenL◁M ⊑L′ ◁M .",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
-    "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "partial",
-    "finding": "GoJournal: 1 concurrent journaling implementation, with 1,345 lines of Go code, machine-checked for correctness and crash safety.",
-    "detail": "The proof uses preconditions, postconditions and crash conditions. A toy client is proved to tolerate arbitrary crashes and recoveries, but the text does not establish identical external I/O for every execution or that repeated crashes during recovery simulate one atomic specification crash.",
-    "quote": "The contributions of this paper are (1) GoJournal, a con-\ncurrent journaling system with a machine-checked proof of\ncorrectness and crash-safety;",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "partial",
-    "finding": "CAPYBARAKV: 2 concurrent variants use verified crash-consistent storage.",
-    "detail": "The variants use a linearizable API and share recovery code protected by PoWER. The text does not establish full execution-to-specification refinement with identical external I/O, including repeated crashes during recovery.",
-    "quote": "In addition to the single-threaded CAPYBARAKV, we build\ntwo concurrent variants, one that uses a reader-writer lock to\nenable concurrent reads and one that uses sharding to also\nenable concurrent writes, representing the two forms of con-\ncurrency described in §3.4.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    }
   ],
   "judged": [
    {
     "url": "https://www.nsf.gov/funding/opportunities/shf-software-hardware-foundations",
     "milestone": "m1",
-    "hash": "e5c086c42d84",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fe878523ef2a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nsf.gov/funding/opportunities/shf-software-hardware-foundations",
     "milestone": "m2",
-    "hash": "a13ebbeb2ab7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f9705df98a66",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nsf.gov/funding/opportunities/shf-software-hardware-foundations",
     "milestone": "m3",
-    "hash": "22ac8263e153",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1e907c75da86",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nsf.gov/funding/opportunities/shf-software-hardware-foundations",
     "milestone": "m4",
-    "hash": "e50366546fac",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4d4dbbc399dc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nsf.gov/funding/opportunities/shf-software-hardware-foundations",
+    "milestone": "m6",
+    "hash": "b5f0909ee469",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nsf.gov/funding/opportunities/shf-software-hardware-foundations",
     "milestone": "m5",
     "hash": "11dced225ab9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nsf.gov/funding/opportunities/shf-software-hardware-foundations",
     "milestone": "completion",
     "hash": "ddd7e56762ab",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
     "milestone": "m1",
-    "hash": "e5c086c42d84",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fe878523ef2a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
     "milestone": "m2",
-    "hash": "a13ebbeb2ab7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f9705df98a66",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
     "milestone": "m3",
-    "hash": "22ac8263e153",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1e907c75da86",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
     "milestone": "m4",
-    "hash": "e50366546fac",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4d4dbbc399dc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
+    "milestone": "m6",
+    "hash": "b5f0909ee469",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
     "milestone": "m5",
     "hash": "11dced225ab9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
     "milestone": "completion",
     "hash": "ddd7e56762ab",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://deepspec.org/page/Research/",
     "milestone": "m1",
-    "hash": "e5c086c42d84",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fe878523ef2a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://deepspec.org/page/Research/",
     "milestone": "m2",
-    "hash": "a13ebbeb2ab7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f9705df98a66",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://deepspec.org/page/Research/",
     "milestone": "m3",
-    "hash": "22ac8263e153",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1e907c75da86",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://deepspec.org/page/Research/",
     "milestone": "m4",
-    "hash": "e50366546fac",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4d4dbbc399dc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://deepspec.org/page/Research/",
+    "milestone": "m6",
+    "hash": "b5f0909ee469",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://deepspec.org/page/Research/",
     "milestone": "m5",
     "hash": "11dced225ab9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://deepspec.org/page/Research/",
     "milestone": "completion",
     "hash": "ddd7e56762ab",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5597730/",
     "milestone": "m1",
-    "hash": "e5c086c42d84",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fe878523ef2a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5597730/",
     "milestone": "m2",
-    "hash": "a13ebbeb2ab7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f9705df98a66",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5597730/",
     "milestone": "m3",
-    "hash": "22ac8263e153",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1e907c75da86",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5597730/",
     "milestone": "m4",
-    "hash": "e50366546fac",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4d4dbbc399dc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5597730/",
+    "milestone": "m6",
+    "hash": "b5f0909ee469",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5597730/",
     "milestone": "m5",
     "hash": "11dced225ab9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5597730/",
     "milestone": "completion",
     "hash": "ddd7e56762ab",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://research.tudelft.nl/en/publications/iris-from-the-ground-up-a-modular-foundation-for-higher-order-con/",
     "milestone": "m1",
-    "hash": "e5c086c42d84",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fe878523ef2a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://research.tudelft.nl/en/publications/iris-from-the-ground-up-a-modular-foundation-for-higher-order-con/",
     "milestone": "m2",
-    "hash": "a13ebbeb2ab7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f9705df98a66",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://research.tudelft.nl/en/publications/iris-from-the-ground-up-a-modular-foundation-for-higher-order-con/",
     "milestone": "m3",
-    "hash": "22ac8263e153",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1e907c75da86",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://research.tudelft.nl/en/publications/iris-from-the-ground-up-a-modular-foundation-for-higher-order-con/",
     "milestone": "m4",
-    "hash": "e50366546fac",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4d4dbbc399dc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://research.tudelft.nl/en/publications/iris-from-the-ground-up-a-modular-foundation-for-higher-order-con/",
+    "milestone": "m6",
+    "hash": "b5f0909ee469",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://research.tudelft.nl/en/publications/iris-from-the-ground-up-a-modular-foundation-for-higher-order-con/",
     "milestone": "m5",
     "hash": "11dced225ab9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://research.tudelft.nl/en/publications/iris-from-the-ground-up-a-modular-foundation-for-higher-order-con/",
     "milestone": "completion",
     "hash": "ddd7e56762ab",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.columbia.edu/~rgu/publications/osdi16-gu.pdf",
     "milestone": "m1",
-    "hash": "e5c086c42d84",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.cs.columbia.edu/~rgu/publications/pldi18-gu.pdf",
-    "milestone": "m1",
-    "hash": "e5c086c42d84",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://people.csail.mit.edu/nickolai/papers/chajed-perennial.pdf",
-    "milestone": "m2",
-    "hash": "a13ebbeb2ab7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://cs.nyu.edu/~jt4767/papers/perennial/daisynfs.pdf",
-    "milestone": "m2",
-    "hash": "a13ebbeb2ab7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pdos.csail.mit.edu/6.824/papers/grove.pdf",
-    "milestone": "m3",
-    "hash": "22ac8263e153",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.wisdom.weizmann.ac.il/~padon/welder-sosp2026.pdf",
-    "milestone": "m4",
-    "hash": "e50366546fac",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fe878523ef2a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.columbia.edu/~rgu/publications/osdi16-gu.pdf",
     "milestone": "m2",
-    "hash": "a13ebbeb2ab7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f9705df98a66",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.columbia.edu/~rgu/publications/osdi16-gu.pdf",
     "milestone": "m3",
-    "hash": "22ac8263e153",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1e907c75da86",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.columbia.edu/~rgu/publications/osdi16-gu.pdf",
     "milestone": "m4",
-    "hash": "e50366546fac",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4d4dbbc399dc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.columbia.edu/~rgu/publications/osdi16-gu.pdf",
+    "milestone": "m6",
+    "hash": "b5f0909ee469",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.columbia.edu/~rgu/publications/osdi16-gu.pdf",
     "milestone": "m5",
     "hash": "11dced225ab9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.columbia.edu/~rgu/publications/osdi16-gu.pdf",
     "milestone": "completion",
     "hash": "ddd7e56762ab",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.columbia.edu/~rgu/publications/pldi18-gu.pdf",
+    "milestone": "m1",
+    "hash": "fe878523ef2a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.columbia.edu/~rgu/publications/pldi18-gu.pdf",
     "milestone": "m2",
-    "hash": "a13ebbeb2ab7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f9705df98a66",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.columbia.edu/~rgu/publications/pldi18-gu.pdf",
     "milestone": "m3",
-    "hash": "22ac8263e153",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1e907c75da86",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.columbia.edu/~rgu/publications/pldi18-gu.pdf",
     "milestone": "m4",
-    "hash": "e50366546fac",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4d4dbbc399dc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.columbia.edu/~rgu/publications/pldi18-gu.pdf",
+    "milestone": "m6",
+    "hash": "b5f0909ee469",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.columbia.edu/~rgu/publications/pldi18-gu.pdf",
     "milestone": "m5",
     "hash": "11dced225ab9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.columbia.edu/~rgu/publications/pldi18-gu.pdf",
     "milestone": "completion",
     "hash": "ddd7e56762ab",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.csail.mit.edu/nickolai/papers/chajed-perennial.pdf",
     "milestone": "m1",
-    "hash": "e5c086c42d84",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fe878523ef2a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.csail.mit.edu/nickolai/papers/chajed-perennial.pdf",
+    "milestone": "m2",
+    "hash": "f9705df98a66",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.csail.mit.edu/nickolai/papers/chajed-perennial.pdf",
     "milestone": "m3",
-    "hash": "22ac8263e153",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1e907c75da86",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.csail.mit.edu/nickolai/papers/chajed-perennial.pdf",
     "milestone": "m4",
-    "hash": "e50366546fac",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4d4dbbc399dc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.csail.mit.edu/nickolai/papers/chajed-perennial.pdf",
+    "milestone": "m6",
+    "hash": "b5f0909ee469",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.csail.mit.edu/nickolai/papers/chajed-perennial.pdf",
     "milestone": "m5",
     "hash": "11dced225ab9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.csail.mit.edu/nickolai/papers/chajed-perennial.pdf",
     "milestone": "completion",
     "hash": "ddd7e56762ab",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://cs.nyu.edu/~jt4767/papers/perennial/daisynfs.pdf",
     "milestone": "m1",
-    "hash": "e5c086c42d84",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fe878523ef2a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cs.nyu.edu/~jt4767/papers/perennial/daisynfs.pdf",
+    "milestone": "m2",
+    "hash": "f9705df98a66",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://cs.nyu.edu/~jt4767/papers/perennial/daisynfs.pdf",
     "milestone": "m3",
-    "hash": "22ac8263e153",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1e907c75da86",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://cs.nyu.edu/~jt4767/papers/perennial/daisynfs.pdf",
     "milestone": "m4",
-    "hash": "e50366546fac",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4d4dbbc399dc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cs.nyu.edu/~jt4767/papers/perennial/daisynfs.pdf",
+    "milestone": "m6",
+    "hash": "b5f0909ee469",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://cs.nyu.edu/~jt4767/papers/perennial/daisynfs.pdf",
     "milestone": "m5",
     "hash": "11dced225ab9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://cs.nyu.edu/~jt4767/papers/perennial/daisynfs.pdf",
     "milestone": "completion",
     "hash": "ddd7e56762ab",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pdos.csail.mit.edu/6.824/papers/grove.pdf",
     "milestone": "m1",
-    "hash": "e5c086c42d84",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fe878523ef2a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pdos.csail.mit.edu/6.824/papers/grove.pdf",
     "milestone": "m2",
-    "hash": "a13ebbeb2ab7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f9705df98a66",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pdos.csail.mit.edu/6.824/papers/grove.pdf",
+    "milestone": "m3",
+    "hash": "1e907c75da86",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pdos.csail.mit.edu/6.824/papers/grove.pdf",
     "milestone": "m4",
-    "hash": "e50366546fac",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4d4dbbc399dc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pdos.csail.mit.edu/6.824/papers/grove.pdf",
+    "milestone": "m6",
+    "hash": "b5f0909ee469",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pdos.csail.mit.edu/6.824/papers/grove.pdf",
     "milestone": "m5",
     "hash": "11dced225ab9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pdos.csail.mit.edu/6.824/papers/grove.pdf",
     "milestone": "completion",
     "hash": "ddd7e56762ab",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.wisdom.weizmann.ac.il/~padon/welder-sosp2026.pdf",
     "milestone": "m1",
-    "hash": "e5c086c42d84",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fe878523ef2a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.wisdom.weizmann.ac.il/~padon/welder-sosp2026.pdf",
     "milestone": "m2",
-    "hash": "a13ebbeb2ab7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f9705df98a66",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.wisdom.weizmann.ac.il/~padon/welder-sosp2026.pdf",
     "milestone": "m3",
-    "hash": "22ac8263e153",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1e907c75da86",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.wisdom.weizmann.ac.il/~padon/welder-sosp2026.pdf",
+    "milestone": "m4",
+    "hash": "4d4dbbc399dc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.wisdom.weizmann.ac.il/~padon/welder-sosp2026.pdf",
+    "milestone": "m6",
+    "hash": "b5f0909ee469",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.wisdom.weizmann.ac.il/~padon/welder-sosp2026.pdf",
     "milestone": "m5",
     "hash": "11dced225ab9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.wisdom.weizmann.ac.il/~padon/welder-sosp2026.pdf",
     "milestone": "completion",
     "hash": "ddd7e56762ab",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/system/files/osdi21-chajed.pdf",
+    "milestone": "m1",
+    "hash": "fe878523ef2a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.usenix.org/system/files/osdi21-chajed.pdf",
     "milestone": "m2",
-    "hash": "a13ebbeb2ab7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f9705df98a66",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/system/files/osdi21-chajed.pdf",
+    "milestone": "m3",
+    "hash": "1e907c75da86",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/system/files/osdi21-chajed.pdf",
+    "milestone": "m4",
+    "hash": "4d4dbbc399dc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/system/files/osdi21-chajed.pdf",
+    "milestone": "m6",
+    "hash": "b5f0909ee469",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/system/files/osdi21-chajed.pdf",
+    "milestone": "m5",
+    "hash": "11dced225ab9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/system/files/osdi21-chajed.pdf",
+    "milestone": "completion",
+    "hash": "ddd7e56762ab",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/system/files/osdi25-leblanc.pdf",
+    "milestone": "m1",
+    "hash": "fe878523ef2a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.usenix.org/system/files/osdi25-leblanc.pdf",
     "milestone": "m2",
-    "hash": "a13ebbeb2ab7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f9705df98a66",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/system/files/osdi25-leblanc.pdf",
+    "milestone": "m3",
+    "hash": "1e907c75da86",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/system/files/osdi25-leblanc.pdf",
+    "milestone": "m4",
+    "hash": "4d4dbbc399dc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/system/files/osdi25-leblanc.pdf",
+    "milestone": "m6",
+    "hash": "b5f0909ee469",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/system/files/osdi25-leblanc.pdf",
+    "milestone": "m5",
+    "hash": "11dced225ab9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/system/files/osdi25-leblanc.pdf",
+    "milestone": "completion",
+    "hash": "ddd7e56762ab",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2015/10/ironfleet.pdf",
+    "milestone": "m6",
+    "hash": "b5f0909ee469",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.csail.mit.edu/nickolai/papers/chang-psm.pdf",
+    "milestone": "m5",
+    "hash": "11dced225ab9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://coladog.github.io/assets/lion-sosp26.pdf",
+    "milestone": "completion",
+    "hash": "ddd7e56762ab",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol372-ecoop2026/html/LIPIcs.ECOOP.2026.21/LIPIcs.ECOOP.2026.21.html",
+    "milestone": "m1",
+    "hash": "fe878523ef2a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1495,8 +1872,103 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 12 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"Each component has a contract stating what it assumes and what it guarantees. Machine-checked rules combine those contracts to prove that client operations return only permitted results and, under stated scheduling, communication and failure assumptions, eventually finish. The proof covers threads sharing memory within a server, messages between servers, and servers that crash and recover independently. A developer without formal-methods expertise can replace a component with another verified against the same contract and recheck the service without changing the proofs of its callers.\". Reason: The definition leaves safety and progress abstract and does not say which proof survives a replacement."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"At one code-hosting service, a 43-second network interruption triggered 24 hours and 11 minutes of degraded service. Users saw inconsistent data. Reviews and fault-injection tests can miss rare orderings of writes, crashes and retries. A storage team could change how data is replicated and retain its assurance that users see consistent reads and eventually receive replies, without redoing proofs for callers. This requires the replacement to meet the same contract and enough replicas to keep running and communicating within the assumed bounds.\". Reason: The existing rationale refers to a missing table and gives no measure of the consequences for service users."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Machine-check contextual refinement. For every client that meets the component\\u2019s assumptions and every permitted interleaving of threads, each observable behaviour of the implementation linked with that client must be allowed by the component\\u2019s specification.\"; refs = [5, 18]. Reason: The criterion mixes the refinement test with a kernel result, and its references omit an early demonstration on a single concurrent method."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"Machine-check concurrent recovery refinement. Every execution of the implementation must match an interleaving of specification steps with the same external calls and return values. A crash followed by recovery, including any further crashes during recovery, must simulate one atomic crash step in the specification.\". Reason: The Mailboat result and prototype limitations obscure the two obligations in concurrent recovery refinement."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Compose component proofs to establish four properties. The replica server\\u2019s main function is crash-idempotent, including the request handlers it starts. Reconfiguration is safe when all proposed servers are valid replicas. Client initialization succeeds given the addresses of the configuration service. Put, Get and CondPut are linearizable: each operation appears to act on one key-value map at a single instant between call and return, respecting the real-time order of calls that do not overlap.\". Reason: The criterion includes a verdict on vKV and omits the configuration-service address precondition on client initialization."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"Verify that the controller implementations conform to their models. Show that each controller set meets its non-interference guarantees, that the sets satisfy one another\\u2019s assumptions, and that the composition discharges their liveness dependencies. If desired states stabilize, the cluster must eventually match them and continue to do so. Continuously enabled actions must eventually occur, message drops, controller crashes and disruptive Pod changes must eventually cease, and other actors must respect any Pod names reserved by the StatefulSet controller.\". Reason: The criterion mixes the four-controller result into the test and leaves the fairness and Pod-naming conditions unexplained."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m4: \"A replicated service eventually answers a client that keeps sending its request to all replicas.\". Reason: Eventual cluster reconciliation does not establish that a particular client receives a reply, for which IronRSL supplies an implementation-level test."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 1. Reason: The Royal Society’s full text of the DeepSpec position paper is accessible through reference 14."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Applied 8 of 8 proposed operations from SWE-04-revise-20261121T160455404555Z; now version 2."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m3, m4, m6."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 3 from Crossref, 0 from PubMed, 0 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 1 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "definition is 591 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 13 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 4 candidates returned, 0 dropped as sources already used, 4 to judge."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 4 of 4 new candidates, without search. Skipped: none. Dropped rows: 2 not relevant. Replaced 19 earlier rows. Added 25 results: 23 from sources already used, 2 from newly found sources."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 0 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 25 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Removed 1 references no longer cited; renumbered."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-21"
  }
 }
