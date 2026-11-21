@@ -337,12 +337,13 @@
  "page": {
   "id": "CPE-02",
   "title": "Room-temperature general-purpose adiabatic reversible computer",
-  "definition": "A room-temperature general-purpose computer preserves information in its logic and recovers electrical switching energy through gradual, adiabatic state changes. Its complete system consumes less energy for completed programs than a corresponding irreversible computer at the same useful throughput.",
+  "definition": "A room-temperature general-purpose computer uses logic in which the complete state after each step uniquely identifies the permitted state before it. A power clock times the logic and gradually charges and discharges its circuits, recovering electrical energy for reuse. The complete computer uses less energy per completed program than a corresponding irreversible computer at the same throughput. Existing adiabatic processors such as the 8-bit nRERL recover switching energy while allowing some operations to discard information.",
   "goal": {
-   "need": "Data centres combine computing loads with power conversion and cooling. Their estimated electricity demand below motivates reducing energy per completed computation. The IEEE roadmap identifies power-clock energy recovery as necessary for room-temperature adiabatic logic to produce system-level savings.",
+   "need": "Data centres used an estimated 485 TWh of electricity worldwide in 2025. Conventional processors dissipate switching energy as heat. Smaller switches can reduce that loss, but erasing information still carries a heat cost. Preserving information and reusing switching energy could let operators run more parallel work within the same power budget. The saving depends on how much energy the clock recovers and how much extra work and storage the program needs.",
    "need_refs": [
-    1,
-    2
+    12,
+    2,
+    4
    ],
    "figures": {
     "caption": "IEA estimates for worldwide data-centre electricity consumption in 2024.",
@@ -379,6 +380,14 @@
      "context": null,
      "ref": 3,
      "checked": true
+    },
+    {
+     "body": "Second IEEE Rebooting Computing Summit, Working Group on Adiabatic and Reversible Computing",
+     "year": "2014",
+     "quote": "a 64-bit adder and/or\n2. a 1 GFLOPS processor",
+     "context": "Appendix F sets a power target of 1% of an equivalent circuit built with then-current CMOS for either demonstration.",
+     "ref": 13,
+     "checked": null
     }
    ]
   },
@@ -399,19 +408,20 @@
   },
   "case_label": null,
   "cases": [],
-  "milestone_structure": "sequence",
+  "milestone_structure": "parallel",
   "milestones": [
    {
     "id": "m1",
     "title": "A fabricated circuit maps distinct allowed input states to distinct complete output states.",
-    "criterion": "A physical circuit implements an injective mapping on its permitted logical states: the complete output, including retained auxiliary information, identifies the input uniquely. Vieri's thesis, submitted on 14 May 1999, reports an 8-bit exchange RAM, XRAM, performing addressable exchange operations correctly. The tested chip count and operating temperature are not specified.",
+    "criterion": "A fabricated circuit maps each permitted input state to a distinct complete output state. The output, including any retained auxiliary information, uniquely identifies the input.",
     "set_by": "Reversible-computing community; the logical reversibility criterion formalised by Frank and Shukla, 2021, sections 2.1.3–2.1.4.",
     "set_by_kind": "community_convention",
     "threshold_quote": "Reversible computational operations include only one-to-one transitions such as (a).",
     "threshold_ref": 5,
     "refs": [
      5,
-     6
+     6,
+     14
     ],
     "status": "active",
     "replaced_by": [],
@@ -420,7 +430,7 @@
    {
     "id": "m2",
     "title": "A reversible logic circuit and its power clock achieve an energy-recovery factor greater than 1.",
-    "criterion": "A fabricated reversible logic circuit and its energy-recovering clock achieve Rf > 1, where Vaire defines Rf as logic energy divided by energy dissipated per cycle. Its CTO identified >1 as Ice River's proof-of-concept cutoff. In an interview published on 3 September 2025, Vaire reported comparison factors of 1.77 for a capacitor array and 1.41 for a shift register in 22 nm CMOS, with a 500 MHz data frequency. These company results are not peer reviewed and do not establish a whole-system advantage or independently verify logical reversibility.",
+    "criterion": "A fabricated reversible logic circuit operated with its energy-recovering power clock achieves an energy-recovery factor Rf greater than 1. Rf is the logic energy divided by the energy dissipated per cycle, including losses in the power clock.",
     "set_by": "Vaire's Ice River proof-of-concept test, described by its CTO on 3 September 2025; its technology whitepaper defines the zero-recovery boundary at Rf = 1.",
     "set_by_kind": "protocol",
     "threshold_quote": "For a traditional system with an R-factor of 1, efficiency is 0: no energy is recovered.",
@@ -436,7 +446,7 @@
    {
     "id": "m3",
     "title": "A room-temperature processor runs reversible programs with reversible circuits and an energy-recovering clock.",
-    "criterion": "An integrated room-temperature processor executes stored reversible programs, including arithmetic, memory access and branching, using reversible circuitry and an energy-recovering supply. Pendulum's 1999 thesis reports a 10-instruction sequential program, an instruction-encoder fault and no measurement of supply energy recovery. MANA's April 2021 paper reports two four-instruction programs at 100 kHz and 4.2 K on five of six chips across two wafers. That cryogenic adiabatic result does not establish room-temperature, logically reversible integration.",
+    "criterion": "At room temperature, an integrated processor executes stored reversible programs that exercise arithmetic, memory access and branching. Reversible circuits implement the instruction set, and the power clock recovers switching energy during execution.",
     "set_by": "MIT Reversible Computing Project; Vieri's 1999 thesis, section 2.1, states the required integration of supply, circuits, architecture and programs. Applied here within the room-temperature scope.",
     "set_by_kind": "community_convention",
     "threshold_quote": "Reversible electronic computers must have a reversible power supply, which power reversible circuits, which implement a reversible architecture, which runs reversible programs.",
@@ -448,13 +458,43 @@
     "status": "active",
     "replaced_by": [],
     "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "A 64-bit adiabatic adder uses at most 1% of the power of an equivalent CMOS adder.",
+    "criterion": "A 64-bit adder built from adiabatic circuits operates at no more than 1% of the power of an equivalent adder built with CMOS technology current at the time of the demonstration.",
+    "set_by": "Second IEEE Rebooting Computing Summit, Working Group on Adiabatic and Reversible Computing, Appendix F",
+    "set_by_kind": "professional_society",
+    "threshold_quote": "1% of the equivalent circuit constructed using\nthen-current CMOS.",
+    "threshold_ref": 13,
+    "refs": [
+     13
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m5",
+    "title": "An adiabatic processor delivers 1 GFLOPS at no more than 1% of equivalent CMOS processor power.",
+    "criterion": "An adiabatic processor delivers one billion floating-point operations per second while using no more than 1% of the power of an equivalent circuit built with CMOS technology current at the time of the demonstration.",
+    "set_by": "Second IEEE Rebooting Computing Summit, Working Group on Adiabatic and Reversible Computing, Appendix F",
+    "set_by_kind": "professional_society",
+    "threshold_quote": "1% of the equivalent circuit constructed using\nthen-current CMOS.",
+    "threshold_ref": 13,
+    "refs": [
+     13
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
    }
   ],
   "measures": [],
   "not_found": [
-   "Frank and Edwards' 2025 APL Electronic Devices perspective and the 2014 IEEE Second Rebooting Computing Summit report could not be opened in readable form.",
    "No peer-reviewed Ice River measurement paper, public measurement dataset or independent replication was found.",
-   "Searches through 14 November 2026 did not locate a room-temperature general-purpose processor demonstrating the stated whole-system comparison."
+   "Searches through 14 November 2026 did not locate a room-temperature general-purpose processor demonstrating the stated whole-system comparison.",
+   "A readable full-text copy of Frank and Edwards’ 2025 APL Electronic Devices perspective was not located."
   ],
   "references": [
    {
@@ -610,12 +650,70 @@
     "issue": null,
     "pages": null,
     "citation_source": "model"
+   },
+   {
+    "id": 12,
+    "kind": "report",
+    "url": "https://www.iea.org/reports/key-questions-on-energy-and-ai/executive-summary",
+    "doi": null,
+    "title": "Executive summary",
+    "authors": "International Energy Agency",
+    "container": "Key Questions on Energy and AI",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 13,
+    "kind": "report",
+    "url": "https://rebootingcomputing.ieee.org/images/files/pdf/RCS2ReportFinal.pdf",
+    "doi": null,
+    "title": "2nd Rebooting Computing Summit Summary Report",
+    "authors": "Alan M. Kadin and the IEEE Rebooting Computing Committee",
+    "container": "IEEE Rebooting Computing",
+    "year": "2014",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 14,
+    "kind": "report",
+    "url": "https://www.bitsavers.org/pdf/mit/ai/aim/AITR-1500.pdf",
+    "doi": null,
+    "title": "Asymptotically Zero Energy Computing Using Split-Level Charge Recovery Logic",
+    "authors": "Saed G. Younis",
+    "container": "Massachusetts Institute of Technology, A.I. Technical Report No. 1500",
+    "year": "1994",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 15,
+    "kind": "web",
+    "url": "https://www.scribd.com/document/111126935/00766827",
+    "doi": null,
+    "title": "A 16-bit Carry-Lookahead Adder Using Reversible Energy Recovery Logic for Ultra-Low-Energy Systems",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
    }
   ],
   "milestone_order": [
    "m1",
    "m2",
-   "m3"
+   "m4",
+   "m3",
+   "m5"
   ],
   "results": [
    {
@@ -633,107 +731,289 @@
     "judged_on": "2026-11-14"
    },
    {
-    "milestone": "m1",
+    "milestone": "m2",
     "case": null,
-    "verdict": "met",
-    "finding": "A fabricated 4-bit adder–subtractor identity circuit produced no errors for the chosen input vectors; chip count unspecified.",
-    "detail": "The identity mapping preserves the input in the complete output. The tested chip count and operating temperature are not specified.",
-    "quote": "When properly measured alone, the cascaded identity\nblocks chip gives very good results, introducing no error\nwhatever are the chosen input vectors.",
-    "checked": true,
+    "verdict": "partial",
+    "finding": "MANA’s resistive power-clock divider was calculated to dissipate 243 μW for one divider network.",
+    "detail": "The 1.4 zJ per junction switching energy comes from prior experiments and does not include power-clock losses.",
+    "quote": "The resulting dissipated power from the divider is\nP = (135 mV/\n√\n2)2/37.5  〈\n",
+    "checked": false,
     "confirmed": true,
     "peer_reviewed": true,
-    "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "One fabricated 8-bit nRERL microprocessor consumed 26.22 pJ at 440 kHz.",
-    "detail": "The processor uses adiabatic components and a clocked power generator, but its design deliberately breaks logical reversibility. The text does not specify the operating temperature or report execution of a stored program.",
+    "finding": "The 4-bit MANA processor ran both test programs on five of six chips.",
+    "detail": "The instruction buffer held four words. The experiment emulated a larger instruction memory.",
+    "quote": "Furtherm ore, we were able to replicate\nthese results on a total of ﬁve out of six chips across two\nwafers that we have tested, as shown in Table III, with one\nchip failing to produce any output, possibly due to a poor\nconnection between the immersion probe and chip.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "One fabricated Cuccaro adder–subtractor chip reproduced its inputs with zero observed errors. The number of test vectors was unspecified.",
+    "detail": "The error-free result was for the standalone chip. In the separate 100 Hz, 1.5 V worst-case adiabatic test, probe loading limited the measured cascade to two chips.",
+    "quote": "When properly measured alone, the cascaded identity\nblocks chip gives very good results, introducing no error\nwhatever are the chosen input vectors.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One fabricated nRERL processor consumed 26.22 pJ including its power clock.",
+    "detail": "The comparison with static CMOS uses simulated energy per cycle. Its ratio does not give Rf.",
     "quote": "The total energy consumption of the nRERL\nmicroprocessor was 26.22 pJ at Vdd = 2.5 V and f = 440 kHz, which is almost\nthe same as the simulation result.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One fabricated 8-bit nRERL processor implemented 19 instructions.",
+    "detail": "The register file and RAM clear existing data before writes using self-energy-recovery circuits. This recovers electrical energy while losing the previous stored value.",
+    "quote": "Total 19 instructions are\nimplemented: add, sub, and, or, xor, slt, addi, lw, sw, jr, jalr, sp, beqz, bnez, j,\njal, nop/ref (refresh), lwp and swp.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One Pendulum processor correctly ran a stored 10-instruction sequential program.",
+    "detail": "The instruction encoder’s fast- and slow-rail timing mismatch created a momentary short and uncontrolled dissipation. Reversible memory exchange was verified in a separate XRAM test.",
+    "quote": "a small (10 instruction) program of sequential instructions\nwas run correctly.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 6,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "A 16-bit RERL carry-lookahead adder reportedly used less energy than a static CMOS adder. Sample size and savings were unreported.",
+    "detail": "The excerpt reports an energy-consumption comparison and gives no operating conditions for evaluating relative power.",
+    "quote": "Experimental results showed that the RERL adder had substantial advantages in energy consumption over the static CMOS one.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    }
   ],
   "judged": [
    {
     "url": "https://arxiv.org/abs/2208.11196",
     "milestone": "m1",
-    "hash": "f9fcef1db4f6",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "c1b991efad13",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2208.11196",
     "milestone": "m2",
-    "hash": "b9fe6369cf84",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "c53348759864",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2208.11196",
+    "milestone": "m4",
+    "hash": "691e87181113",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2208.11196",
     "milestone": "m3",
-    "hash": "6a0f1f372bfb",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "76033f189e31",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2208.11196",
+    "milestone": "m5",
+    "hash": "e1272a46eb3b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2208.11196",
     "milestone": "completion",
     "hash": "885b0340ed6c",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.1109/JSSC.2020.3041338",
     "milestone": "m1",
-    "hash": "f9fcef1db4f6",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "c1b991efad13",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.1109/JSSC.2020.3041338",
     "milestone": "m2",
-    "hash": "b9fe6369cf84",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "c53348759864",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doi.org/10.1109/JSSC.2020.3041338",
+    "milestone": "m4",
+    "hash": "691e87181113",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.1109/JSSC.2020.3041338",
     "milestone": "m3",
-    "hash": "6a0f1f372bfb",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "76033f189e31",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doi.org/10.1109/JSSC.2020.3041338",
+    "milestone": "m5",
+    "hash": "e1272a46eb3b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.1109/JSSC.2020.3041338",
     "milestone": "completion",
     "hash": "885b0340ed6c",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://backoffice.biblio.ugent.be/download/5761545/5761575",
     "milestone": "m1",
-    "hash": "f9fcef1db4f6",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "c1b991efad13",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://backoffice.biblio.ugent.be/download/5761545/5761575",
+    "milestone": "m2",
+    "hash": "c53348759864",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://backoffice.biblio.ugent.be/download/5761545/5761575",
+    "milestone": "m4",
+    "hash": "691e87181113",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://backoffice.biblio.ugent.be/download/5761545/5761575",
+    "milestone": "m3",
+    "hash": "76033f189e31",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://backoffice.biblio.ugent.be/download/5761545/5761575",
+    "milestone": "m5",
+    "hash": "e1272a46eb3b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://backoffice.biblio.ugent.be/download/5761545/5761575",
+    "milestone": "completion",
+    "hash": "885b0340ed6c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cecs.uci.edu/~papers/compendium94-03/papers/2001/aspdac01/pdffiles/1a_14.pdf",
+    "milestone": "m1",
+    "hash": "c1b991efad13",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cecs.uci.edu/~papers/compendium94-03/papers/2001/aspdac01/pdffiles/1a_14.pdf",
+    "milestone": "m2",
+    "hash": "c53348759864",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cecs.uci.edu/~papers/compendium94-03/papers/2001/aspdac01/pdffiles/1a_14.pdf",
+    "milestone": "m4",
+    "hash": "691e87181113",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://cecs.uci.edu/~papers/compendium94-03/papers/2001/aspdac01/pdffiles/1a_14.pdf",
     "milestone": "m3",
-    "hash": "6a0f1f372bfb",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "76033f189e31",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cecs.uci.edu/~papers/compendium94-03/papers/2001/aspdac01/pdffiles/1a_14.pdf",
+    "milestone": "m5",
+    "hash": "e1272a46eb3b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cecs.uci.edu/~papers/compendium94-03/papers/2001/aspdac01/pdffiles/1a_14.pdf",
+    "milestone": "completion",
+    "hash": "885b0340ed6c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aggregate.org/EE480/pendulum.pdf",
+    "milestone": "m3",
+    "hash": "76033f189e31",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.scribd.com/document/111126935/00766827",
+    "milestone": "m4",
+    "hash": "691e87181113",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -795,8 +1075,113 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 0 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"A room-temperature general-purpose computer uses logic in which the complete state after each step uniquely identifies the permitted state before it. A power clock times the logic and gradually charges and discharges its circuits, recovering electrical energy for reuse. The complete computer uses less energy per completed program than a corresponding irreversible computer at the same throughput. Existing adiabatic processors such as the 8-bit nRERL recover switching energy while allowing some operations to discard information.\". Reason: The definition needs to explain which information survives a logical step and how the power clock recovers switching energy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Data centres used an estimated 485 TWh of electricity worldwide in 2025. Conventional processors dissipate switching energy as heat. Smaller switches can reduce that loss, but erasing information still carries a heat cost. Preserving information and reusing switching energy could let operators run more parallel work within the same power budget. The saving depends on how much energy the clock recovers and how much extra work and storage the program needs.\". Reason: The current paragraph points to an absent electricity estimate and leaves the benefit to operators unexplained."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Second IEEE Rebooting Computing Summit, Working Group on Adiabatic and Reversible Computing, 2014: \"a 64-bit adder and/or\n2. a 1 GFLOPS processor\". Reason: The 2014 IEEE working group named two concrete hardware goals that the existing statements omit."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"A fabricated circuit maps each permitted input state to a distinct complete output state. The output, including any retained auxiliary information, uniquely identifies the input.\"; refs = [5, 6, 14]. Reason: The XRAM observations belong with the evidence for m1, while the criterion needs only the one-to-one mapping test."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"A fabricated reversible logic circuit operated with its energy-recovering power clock achieves an energy-recovery factor Rf greater than 1. Rf is the logic energy divided by the energy dissipated per cycle, including losses in the power clock.\". Reason: The Ice River measurements and their verification status obscure the two quantities that determine whether m2 passes."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"At room temperature, an integrated processor executes stored reversible programs that exercise arithmetic, memory access and branching. Reversible circuits implement the instruction set, and the power clock recovers switching energy during execution.\". Reason: The Pendulum and MANA test histories obscure the integration requirement that m3 measures."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m2: \"A 64-bit adiabatic adder uses at most 1% of the power of an equivalent CMOS adder.\". Reason: The IEEE summit’s adder target supplies a missing test of power use in a complete arithmetic circuit."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m3: \"An adiabatic processor delivers 1 GFLOPS at no more than 1% of equivalent CMOS processor power.\". Reason: The summit’s floating-point target tests processor power at a specified throughput that m3 does not measure."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "structure = parallel. Reason: The summit allows either power demonstration, and the reversible-program test in m3 can be assessed independently of both."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 0. Reason: Appendix F of the 2014 summit report is available in full and states both demonstration targets."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"A readable full-text copy of Frank and Edwards’ 2025 APL Electronic Devices perspective was not located.\". Reason: Removing the combined access note would otherwise discard the unresolved search for the 2025 perspective."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Applied 11 of 11 proposed operations from CPE-02-revise-20261121T164125151208Z; now version 2."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m3, m4, m5."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 3 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 0 found, 0 not found, 3 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "definition is 532 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 4 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 6 candidates returned, 0 dropped as sources already used, 6 to judge."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 2 of 6 new candidates, without search. Skipped: 7 no readable saved copy. Dropped rows: none. Replaced 2 earlier rows. Added 7 results: 5 from sources already used, 2 from newly found sources."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 6 found, 1 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-14"
+  "results_run": "2026-11-21"
  }
 }
