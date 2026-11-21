@@ -355,11 +355,14 @@
  "page": {
   "id": "SWE-07",
   "title": "Confinement of untrusted programs",
-  "definition": "An execution environment prevents untrusted programs from releasing information contrary to a specified policy. Its guarantee covers storage and covert timing channels—communication through execution timing or shared hardware—under an explicit hardware/software model.",
+  "definition": "A caller can give confidential data to an untrusted program and receive its result. The execution environment prevents the program from disclosing information to anyone the policy does not authorise. Under its stated hardware and software assumptions, the guarantee covers both storage channels, where another program can read a change in shared state, and timing channels, where another program can observe a change in how long an operation takes.",
   "goal": {
-   "need": "A 2019 seL4 experiment found an estimated 395 bits/s shared-kernel channel despite application-memory partitioning. Kernel cloning pushed measured leakage below the tool's resolution. Confinement must address kernel and hardware effects alongside application memory; undetected leakage is not proved absence.",
+   "need": "A browser needs to know which sites its user visits. Of 424 Android browsers studied, 37 shared browsing history for which investigators could identify no feature requiring disclosure. Confinement would let people give third-party software the data it needs and still control who may learn it. Memory permissions alone cannot provide that control. Even programs with separate memory can communicate through changes in execution time, so the guarantee depends on hardware that lets the operating system isolate those timing effects.",
    "need_refs": [
-    1
+    20,
+    2,
+    3,
+    16
    ],
    "figures": {
     "caption": "Measured shared-kernel timing channel on x86 in the 2019 seL4 experiment.",
@@ -409,18 +412,18 @@
      "checked": true
     },
     {
-     "body": "National Institute of Standards and Technology",
-     "year": "2020",
-     "quote": "Reduce the maximum bandwidth for identified covert [Selection (one or more): storage; timing] channels to [Assignment: organization-defined values].",
-     "context": "Control SC-31(2) specifies organisation-selected leakage limits rather than a universal acceptable bandwidth.",
-     "ref": 5,
-     "checked": false
+     "body": "German Cyberagentur, ÖvIT programme, PISTIs-V project description",
+     "year": "n.d.",
+     "quote": "Dadurch werden keine geschützten Informationen preisgegeben, auch nicht durch mikroarchitektonische Timing-Kanäle.",
+     "context": "The programme calls for proof that LionsOS confines untrusted components even when processor timing is observable. It gives the project term as September 2024 to September 2027.",
+     "ref": 6,
+     "checked": true
     }
    ]
   },
   "completion": {
    "title": "A reference system proves confinement of untrusted programs, including microarchitectural timing channels.",
-   "criterion": "An implemented reference system proves that untrusted programs cannot disclose protected information contrary to its security policy, including through microarchitectural timing channels. The confinement argument spans the OS, critical drivers, relevant device hardware and processor mechanisms, with explicit hardware/software assumptions. The system supplies the embedded-system OS services specified by PISTIs-V. The guarantee applies to supported programs on the specified platform; policy-authorised releases remain allowed.",
+   "criterion": "On the embedded LionsOS reference system, prove that untrusted programs cannot disclose information contrary to the system's policy, including through microarchitectural timing channels. Establish the claim for the implemented OS and its embedded-system services under explicit hardware and software assumptions. Verify critical drivers against the verified hardware of the devices they control, and verify the fence.t processor mechanism used for time protection on CVA6 RISC-V. The policy defines which releases are allowed.",
    "set_by": "German Cyberagentur, ÖvIT programme, PISTIs-V project description; detailed project goals published by UNSW Trustworthy Systems. The published target concerns a LionsOS/RISC-V embedded reference system.",
    "set_by_kind": "government_programme",
    "threshold_quote": "Die verifizierten Eigenschaften von LionsOS beinhalten den Beweis, dass nicht vertrauenswürdige Komponenten eingeschränkt werden. Dadurch werden keine geschützten Informationen preisgegeben, auch nicht durch mikroarchitektonische Timing-Kanäle.",
@@ -428,6 +431,7 @@
    "basis": "PISTIs-V joins confinement, timing-channel prevention and verified hardware/software integration in an operating-system reference system. This supplies an external test for the core capability. Its scope is embedded systems; it defines no general-program workload suite, acceptable slowdown or nonzero leakage allowance. Lampson supplies the general confinement formulation; NIST leaves permitted channel bandwidths to each organisation.",
    "refs": [
     6,
+    21,
     4,
     2,
     5
@@ -440,8 +444,8 @@
   "milestones": [
    {
     "id": "m1",
-    "title": "A kernel's C implementation proves nonleakage for its storage channels.",
-    "criterion": "Prove Murray and colleagues' nonleakage theorem: partition observations depend only on authorised sources and the scheduler, given initial kernel invariants, a consistent well-formed policy, safe cross-partition capabilities and only timer interrupts. In 2013 this was machine-checked for 8,830 lines of seL4 C code, assuming correct compiler, assembly, hardware and boot code. The theorem covers storage channels and logical time; fine-grained hardware timing is outside its model.",
+    "title": "A machine-checked proof establishes nonleakage for a kernel's C implementation.",
+    "criterion": "Prove that each partition's observations depend only on authorised sources and the scheduler. Start from a configured kernel state satisfying the invariants, a consistent and well-formed access policy, the safety condition on cross-partition capabilities, and the timer-only interrupt restriction. The theorem covers storage channels and logical time and assumes correct compilation, assembly, hardware and boot code.",
     "set_by": "Information-flow verification convention: a machine-checked noninterference theorem. The specific test is Murray and colleagues' 2013 seL4 Theorem 2, published for the stated seL4 configuration.",
     "set_by_kind": "community_convention",
     "threshold_quote": "Theorem 2: seL4’s C implementation enforces information flow security.",
@@ -456,11 +460,11 @@
    },
    {
     "id": "m2",
-    "title": "A tested timing channel passes the published 95% zero-leakage test or falls below 1 millibit.",
-    "criterion": "For a tested channel, estimate mutual information M in bits per input. Below 0.001 bit, Ge and colleagues' tool cannot resolve leakage. Otherwise compare M with M0, the 95% zero-leakage limit obtained from 100 shuffled datasets; M ≤ M0 gives no evidence of leakage. Their 2019 experiment passes for individual channels but retains a detectable Haswell L2 channel. This is a per-channel experimental result, not an aggregate leakage bound.",
+    "title": "One channel measures below 1 millibit per input or within the 95% zero-leakage bound.",
+    "criterion": "For one specified channel and configuration, estimate mutual information M in bits per input. Record M < 0.001 bit as below the tool's resolution. Otherwise shuffle the association between inputs and outputs 100 times and use the shuffled estimates to calculate M₀, the upper 95% bound under zero leakage. Record M ≤ M₀ as consistent with zero leakage. Both conclusions apply only to the tested channel and dataset.",
     "set_by": "Ge and colleagues, published experimental protocol in Time Protection: The Missing OS Abstraction, Sections 5.1 and 5.3. The detection criterion belongs to this experiment.",
     "set_by_kind": "protocol",
-    "threshold_quote": "Otherwise we conclude that the dataset does not contain evidence of an information leak.",
+    "threshold_quote": "others are consistent with no channel or below the 1 mb tool resolution.",
     "threshold_ref": 1,
     "refs": [
      1
@@ -471,8 +475,8 @@
    },
    {
     "id": "m3",
-    "title": "An OS model proves time protection while allowing specified communication.",
-    "criterion": "Prove observer-relative confidentiality for every user domain over a model including observable time, flushable and partitioned microarchitectural state, interrupts and permitted communication. Sison and colleagues' FM 2023 Theorem 1 establishes this in Isabelle/HOL for a generic OS model, including an instantiation with two system calls for one-way messaging. It establishes the model-level property under its hardware and OS assumptions.",
+    "title": "An OS model enforces confidentiality for every observing domain, including its observations of time.",
+    "criterion": "Machine-check observer-relative confidentiality for every user domain in a generic OS model. Include observable time, partitioned and resettable processor state, interrupts and the communication that the policy permits. Under the model's hardware and OS assumptions, each domain's observations may depend on another domain's data only through the specified policy channels.",
     "set_by": "Formal-verification convention: a machine-checked security theorem. The specific property is Sison and colleagues' observer-relative confidentiality definition and Theorem 1, peer reviewed at FM 2023.",
     "set_by_kind": "community_convention",
     "threshold_quote": "Theorem 1 (OS model enforces confidentiality with time protection).",
@@ -497,8 +501,11 @@
      4,
      11
     ],
-    "status": "active",
-    "replaced_by": [],
+    "status": "retired",
+    "replaced_by": [
+     "m10",
+     "m11"
+    ],
     "threshold_checked": true
    },
    {
@@ -515,14 +522,17 @@
      13,
      14
     ],
-    "status": "active",
-    "replaced_by": [],
+    "status": "retired",
+    "replaced_by": [
+     "m12",
+     "m13"
+    ],
     "threshold_checked": true
    },
    {
     "id": "m6",
     "title": "Composing OS-service proofs establishes a system-wide information-flow property.",
-    "criterion": "Derive an assembled OS's global information-flow property from local proofs of its services and communication protocols, with kernel and hardware contracts explicit. This instantiates the developer's compositional-verification objective and roadmap task 1E for confidentiality. It precedes completion because the reference system must also establish the relevant kernel, device and timing-protection contracts for its implementation. The project describes its proof approach as work in progress.",
+    "criterion": "State an information-flow policy for the assembled OS. From local proofs for its services and the protocols through which they communicate, derive that the services running together enforce the policy. State the kernel and hardware guarantees on which the derivation depends.",
     "set_by": "UNSW Trustworthy Systems, Compositional Proof Methods project Aim and verification roadmap task 1E; a PISTIs-V activity published for component-based OSes including LionsOS.",
     "set_by_kind": "government_programme",
     "threshold_quote": "Scalable verification of global safety and security guarantees for component-based OSes by composing local per-component proof efforts.",
@@ -531,6 +541,118 @@
      15,
      10,
      4
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m7",
+    "title": "A confined procedure can return a result but cannot write through its inherited object references.",
+    "criterion": "Invoke a procedure with a caller-supplied input and an authorised output. Remove modification rights from every object reference inherited from the procedure and preserve that restriction on calls made through inherited procedure references. References passed explicitly by the caller retain their granted rights. The test covers writes through object references.",
+    "set_by": "Cohen and Jefferson, Hydra confined-call semantics, section 3.5 of Protection in the Hydra Operating System.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "only the inherited capabilities and not those passed as arguments have MDFYRTS removed.",
+    "threshold_ref": 22,
+    "refs": [
+     22
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m8",
+    "title": "seL4's abstract specification bounds the addresses touched on behalf of each security domain.",
+    "criterion": "In seL4's abstract kernel specification, prove that the addresses touched on behalf of a domain form a subset of the addresses its security policy allows. Establish the kernel invariants, access-control properties and information-flow properties needed for that argument.",
+    "set_by": "UNSW Trustworthy Systems, seL4 time-protection verification roadmap, task 2A.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "TA ⊆ domain’s addresses (according to security policy)",
+    "threshold_ref": 10,
+    "refs": [
+     10,
+     19
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m9",
+    "title": "A proof establishes that CVA6's fence.t instruction enforces its timing-isolation contract.",
+    "criterion": "Formally verify the CVA6 hardware implementation of fence.t against the contract used by the OS. Establish that it clears the on-core microarchitectural state covered by the contract and that the time to switch domains is independent of the preceding domain's execution history.",
+    "set_by": "German Cyberagentur, ÖvIT programme, PISTIs-V processor-verification objective.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "verify other critical hardware components, including the fence.t instruction",
+    "threshold_ref": 21,
+    "refs": [
+     21,
+     3,
+     16
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m10",
+    "title": "A refinement proof establishes time protection for seL4's C implementation.",
+    "criterion": "Carry the time-protection property of seL4's abstract specification through its executable specification to its C implementation. Account for the addresses touched at each level and prove that the implementation preserves the required isolation under the stated hardware contract.",
+    "set_by": "UNSW Trustworthy Systems, seL4 time-protection verification roadmap, tasks 2B and 2C.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "2C Verify for C implementation",
+    "threshold_ref": 10,
+    "refs": [
+     10,
+     19
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m11",
+    "title": "Verified seL4 communication mechanisms preserve time protection across security domains.",
+    "criterion": "Implement permitted communication between domains and prove that it preserves time protection. For a one-way communication mechanism, establish that only the specified information can flow forwards and that timing reveals no additional information in either direction.",
+    "set_by": "UNSW Trustworthy Systems, seL4 time-protection verification roadmap, task 2D.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "2D Implement and verify for cross-domain communications",
+    "threshold_ref": 10,
+    "refs": [
+     10,
+     11
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m12",
+    "title": "A device implementation provably refines its formal interface specification.",
+    "criterion": "Give a formal specification of the device behaviour visible to software and prove that every such behaviour of the hardware implementation is allowed by the specification.",
+    "set_by": "UNSW Trustworthy Systems, Formalisation of Device Interfaces project within PISTIs-V.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "the implementation refines the specification.",
+    "threshold_ref": 12,
+    "refs": [
+     12,
+     13
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m13",
+    "title": "A device driver is proved correct against its specified hardware and OS interfaces.",
+    "criterion": "State the behaviour assumed of the device and the obligations imposed by the OS interface. Prove that the driver implementation operates correctly under those assumptions and meets those obligations for all behaviours admitted by the interfaces.",
+    "set_by": "PISTIs-V, project goal 2 on correct operation of device drivers.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "verifying device drivers for correct operation and interfacing to the hardware",
+    "threshold_ref": 4,
+    "refs": [
+     4,
+     14
     ],
     "status": "active",
     "replaced_by": [],
@@ -809,31 +931,176 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 20,
+    "kind": "journal",
+    "url": "https://jgamba.eu/files/papers/2023-pets-mobile-browsers.pdf",
+    "doi": "10.56553/popets-2023-0003",
+    "title": "Not Your Average App: A Large-scale Privacy Analysis of Android Browsers",
+    "authors": "Pradeep A, Feal Á, Gamba J, Rao A, Lindorfer M, Vallina-Rodriguez N, et al.",
+    "container": "PoPETs",
+    "year": "2023",
+    "volume": "2023",
+    "issue": "1",
+    "pages": "29-46",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 21,
+    "kind": "web",
+    "url": "https://www.cyberagentur.de/en/programs/evit/",
+    "doi": null,
+    "title": "Ecosystem Formally Verifiable IT – Provable Cybersecurity (EVIT)",
+    "authors": "Cyberagentur",
+    "container": null,
+    "year": "n.d.",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 22,
+    "kind": "journal",
+    "url": "https://www4.cs.fau.de/Lehre/WS10/V_SYSSEC/hydra_p141-cohen.pdf",
+    "doi": "10.1145/1067629.806532",
+    "title": "Protection in the Hydra Operating System",
+    "authors": "Cohen E, Jefferson D",
+    "container": "SIGOPS Oper. Syst. Rev.",
+    "year": "1975",
+    "volume": "9",
+    "issue": "5",
+    "pages": "141-160",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 23,
+    "kind": "report",
+    "url": "https://www.cs.ucf.edu/courses/cop6614/fall2005/cohen-Protectio-Hydra.pdf",
+    "doi": null,
+    "title": "PROTECTION IN THE HYDRA OPERATING SYSTEM",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 24,
+    "kind": "report",
+    "url": "https://6826.csail.mit.edu/2020/papers/certikos-sec.pdf",
+    "doi": "10.1145/2908080.2908100",
+    "title": "End-to-End Verification of Information-Flow Security for C and Assembly Programs",
+    "authors": "Costanzo D, Shao Z, Gu R",
+    "container": "Proceedings of the 37th ACM SIGPLAN Conference on Programming Language Design and Implementation",
+    "year": "2016",
+    "volume": null,
+    "issue": null,
+    "pages": "648-664",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 25,
+    "kind": "report",
+    "url": "https://trustworthy.systems/publications/theses_public/25/Nair%3Absc.pdf",
+    "doi": null,
+    "title": "Updating L4v Invariants to Aid Time Protection Proofs",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 26,
+    "kind": "report",
+    "url": "https://trustworthy.systems/publications/theses_public/25/Liang%3Absc.pdf",
+    "doi": null,
+    "title": "Refining seL4’s Accounting of Touched Addresses for Time Protection",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 27,
+    "kind": "report",
+    "url": "https://trustworthy.systems/publications/theses_public/25/Sethu%3Abe.pdf",
+    "doi": null,
+    "title": "A Usable System Model for Time Protection",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 28,
+    "kind": "report",
+    "url": "https://people.csail.mit.edu/nickolai/papers/athalye-parfait.pdf",
+    "doi": "10.1145/3694715.3695956",
+    "title": "Modular Verification of Secure and Leakage-Free Systems: From Application Specification to Circuit-Level Implementation",
+    "authors": "Athalye A, Corrigan-Gibbs H, Kaashoek F, Tassarotti J, Zeldovich N",
+    "container": "Proceedings of the ACM SIGOPS 30th Symposium on Operating Systems Principles",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": "655-672",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 29,
+    "kind": "report",
+    "url": "https://cseweb.ucsd.edu/~dstefan/cse227-spring20/papers/chen%3Atoward.pdf",
+    "doi": "10.1145/2908080.2908101",
+    "title": "Toward Compositional Verification of Interruptible OS Kernels and Device Drivers",
+    "authors": "Chen H, Wu X(, Shao Z, Lockerman J, Gu R",
+    "container": "Proceedings of the 37th ACM SIGPLAN Conference on Programming Language Design and Implementation",
+    "year": "2016",
+    "volume": null,
+    "issue": null,
+    "pages": "431-447",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 30,
+    "kind": "report",
+    "url": "https://www.cs.cmu.edu/~15811/papers/ironclad-apps.pdf",
+    "doi": null,
+    "title": "Ironclad Apps: End-to-End Security via Automated Full-System Verification",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
    }
   ],
   "milestone_order": [
+   "m7",
    "m1",
    "m2",
    "m3",
-   "m4",
-   "m5",
+   "m8",
+   "m10",
+   "m11",
+   "m12",
+   "m13",
+   "m9",
    "m6"
   ],
   "results": [
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "partial",
-    "finding": "One seL4 kernel confidentiality proof covers all in-kernel storage channels.",
-    "detail": "The page says proofs reach C code, but does not establish the specific nonleakage theorem or all its required conditions.",
-    "quote": "As mentioned above, in practice the proof covers all\n    in-kernel storage channels but does not cover timing channels",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
    {
     "milestone": "m1",
     "case": null,
@@ -845,34 +1112,6 @@
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "met",
-    "finding": "CVA6 branch-history-table channel with MICRORESET: 1 million attacks; mutual information 0.0 millibit per input.",
-    "detail": "The result is for an individual tested channel. The authors used 1,000 randomized datasets to estimate the zero-leakage limit; it is not an aggregate leakage bound.",
-    "quote": null,
-    "checked": null,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "partial",
-    "finding": "OpenC910 L1 instruction-cache timing channel: sample size not stated; mutual information was 3.2 millibits per input.",
-    "detail": "With fence.t.s, M was below the reported zero-leakage bound of 3.5 millibits. The text does not establish that the bound was the specified 95% limit obtained from 100 shuffled datasets, and M exceeded 1 millibit.",
-    "quote": null,
-    "checked": null,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 17,
     "judged_by": "gpt-6.1-terra",
     "judged_on": "2026-11-15"
    },
@@ -905,20 +1144,6 @@
     "judged_on": "2026-11-15"
    },
    {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "met",
-    "finding": "Haswell interrupt channel: 11,029 samples, with measured leakage of 0.5 millibit per input.",
-    "detail": "The measured leakage is below the tool’s 1 millibit resolution. This is a per-channel result; a separate protected Haswell L2 channel remained detectable.",
-    "quote": "IRQ partitioning results in an\nuninterrupted time slice for the spy, and a closed channel\n(M = 0.5 mb,M0 = 0.7 mb, n = 11, 029).",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": false,
-    "ref": 1,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
     "milestone": "m4",
     "case": null,
     "verdict": "partial",
@@ -929,20 +1154,6 @@
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "met",
-    "finding": "Theorem 1 proves time protection for every user domain in a generic OS model, with an instantiation using 2 system calls.",
-    "detail": "The Isabelle/HOL proof is model-level and depends on stated hardware and OS assumptions, including partitioning, flushing and bounded execution times.",
-    "quote": "Formally, we then prove that Deﬁnition 1 holds\nat all times as seen by every possible user domain:\nTheorem 1 (OS model enforces conﬁdentiality with time protection).\n∀u. obs-conﬁdentiality u",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": false,
-    "ref": 9,
     "judged_by": "gpt-6.1-terra",
     "judged_on": "2026-11-15"
    },
@@ -1006,55 +1217,384 @@
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "seL4 implementation on AArch64: confidentiality proved; code size not stated.",
-    "detail": "The source reports a confidentiality proof for implementation code, but does not state the precise nonleakage theorem, its assumptions, or the channels and timing covered.",
-    "quote": "Proofcraft has now established the proof that seL4 enforces\nconfidentiality\non\nAArch64, providing a formal mathematical proof that the kernel prevents an\napplication running on top of seL4 from learning information without\nauthorisation.",
+    "finding": "For the seL4 kernel's C implementation, an Isabelle/HOL-checked confidentiality proof covers all in-kernel storage channels.",
+    "detail": "For supported architectures and compiler settings, the page also reports verification of compiler and linker output. This leaves the milestone's logical-time requirement unverified by this source.",
+    "quote": "in practice the proof covers all\n    in-kernel storage channels but does not cover timing channels",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
-    "ref": 18,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "Kernel-text timing channel: 100,000 samples; estimated leakage was 0.1 millibit per input.",
-    "detail": "On the FPGA-based CVA-6 with separate kernel images, the estimate equaled the 95% zero-leakage limit of 0.1 millibit.",
+    "finding": "CVA6 branch history table with write-through L1 and MICRORESET, 1 million trials, 0.0 millibit per input.",
+    "detail": "The paper's separate zero-leakage analysis uses 1,000 random pairings. The direct threshold is sufficient for this result.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m9",
+    "case": null,
+    "verdict": "partial",
+    "finding": "CVA6 fence.t with padding, 1 million trials, 1.4 millibits per input in the write-back L1 context-switch channel.",
+    "detail": "The write-back experiment used a 22,000-cycle pad from the timer interrupt. The measurement supports consistency with zero leakage for that dataset.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "OpenC910 L1I with fence.t.s measured 3.2 millibits, within its reported zero-leakage bound. Sample size unspecified.",
+    "detail": "The comparison applies to the tested channels and datasets. The supplied manuscript gives no publication venue or review status.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m13",
+    "case": null,
+    "verdict": "met",
+    "finding": "For one LionsOS Ethernet driver, Viper verifies four correctness properties against the specified hardware and OS interfaces.",
+    "detail": "The proof trusts the Pancake-to-Viper transpiler and the manually encoded weak-memory model. The hardware contract comes from the device manual. The source is an ACM workshop proceedings paper.",
+    "quote": "The combination of these four properties establish the\ndriver’s safety and correctness",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "Haswell seL4 timer-interrupt channel with IRQ partitioning (n = 11,029) measured 0.5 millibit per input.",
+    "detail": "The text identifies the definitive publication as a EuroSys 2019 conference paper. The schema has no conference category, so the author version is classified as a report.",
+    "quote": "IRQ partitioning results in an\nuninterrupted time slice for the spy, and a closed channel\n(M = 0.5 mb,M0 = 0.7 mb, n = 11, 029).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 1,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "met",
+    "finding": "Isabelle/HOL proves observer-relative confidentiality for every user domain in 1 generic OS model.",
+    "detail": "The model assumes partitioned memory and interrupts, resettable processor state, deterministic scheduling, bounded operation latencies and padding to a predetermined switch completion time.",
+    "quote": "Formally, we then prove that Deﬁnition 1 holds\nat all times as seen by every possible user domain:\nTheorem 1 (OS model enforces conﬁdentiality with time protection).\n∀u. obs-conﬁdentiality u",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m11",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Isabelle/HOL verifies the generic OS model's time-protection obligations for 2 one-way messaging system calls.",
+    "detail": "The example models capability-based authorisation and permits disclosure to the recipient only when the call is authorised. Its proof applies at the generic OS model level.",
+    "quote": "We provide an example instantiation of the parameters that we prove meets\nthese obligations: a simple model of capability-based access control over a broad-\ncast/subscribe pair of system calls for one-way messaging between domains.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Proofcraft reports a completed seL4 implementation confidentiality proof for one architecture, AArch64.",
+    "detail": "The announcement refers readers elsewhere for the assumptions and mentions Isabelle/HOL for seL4 verification generally. The supplied text does not identify the machine-checked statement for this result.",
+    "quote": "Thanks to continued support from\nNCSC\n, this milestone completes the formal\nproof that the seL4 implementation code on AArch64 enforces security isolation\nof the applications running on top (under the assumptions listed\nhere\n).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "The seL4 kernel-text timing channel with per-domain kernel images measured 0.1 millibit per input over 100,000 samples.",
+    "detail": "With a shared kernel image, the same channel measured 9.6 millibits per input, above the reported 0.1-millibit zero-leakage bound.",
     "quote": "With separate kernel images, we get\nM\n=\nℳ\n0\n=\n0.1\nM=\\mathcal{M}_{0}=0.1\nmb,\nindicating the channel is closed.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 19,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Isabelle/HOL Theorem 4.2 proves conditional confidentiality for a generic time-protection extension that includes observable wall-clock time.",
+    "detail": "The model assumes hardware-enforced partitioning, correct resets and worst-case padding on a single core without hardware multithreading.",
+    "quote": "For all kernel models that meet these requirements, the above claims are formally verified in Isabelle/HOL.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m8",
+    "case": null,
+    "verdict": "partial",
+    "finding": "seL4's abstract specification tracks touched addresses for user-controlled objects, with the required subset bound stated in Proposition 4.1.",
+    "detail": "Abstract tracking covers user-controlled kernel objects. Kernel globals receive concrete addresses at lower refinement levels, and the no-fail proofs needed to establish coverage of actual accesses remain unfinished.",
+    "quote": "We therefore add it as a\nghost state\nfield\nin the seL4 abstract specification – that is, state that is intended to assist\nproofs but that should not impact the functional semantics of the actual system.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "Isabelle/HOL proves nonleakage for one seL4 kernel implementation spanning 8,830 lines of C.",
+    "detail": "Logical time is represented by the interrupt oracle. Fine-grained timing effects such as cache leakage and timeslice overruns are outside the theorem.",
+    "quote": "Theorem 2: seL4’s C implementation enforces infor-\nmation ﬂow security.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Isabelle/HOL proves partition-relative confidentiality in one 4,970-line seL4 abstract kernel model.",
+    "detail": "Only timer interrupts are enabled. The proof treats the global schedule and logical time as observable and excludes fine-grained processor timing.",
+    "quote": "Theorem 1: seL4’s abstract speciﬁcation enforces in-\nformation ﬂow security.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m11",
+    "case": null,
+    "verdict": "partial",
+    "finding": "seL4’s nonleakage proof excludes storage back-channels for two mechanisms used for one-way communication.",
+    "detail": "Inert copies of cross-partition capabilities keep channel destruction from signalling in both directions. Shared-cache timing and timeslice overruns remain outside the guarantee.",
+    "quote": "The information\nﬂow security theorem implies that these primitives are free of\nstorage back-channels, and that the dynamic intra-partition\nservices do not violate information ﬂow security either.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "Haswell seL4 timer-interrupt channel with IRQ partitioning, 11,029 samples, 0.5 millibits per input.",
+    "detail": "The supplied text is the author’s version of a peer-reviewed EuroSys proceedings paper. The available kind labels lack a conference option, so report is used. The journal-specific peer_reviewed flag is false.",
+    "quote": "IRQ partitioning results in an\nuninterrupted time slice for the spy, and a closed channel\n(M = 0.5 mb,M0 = 0.7 mb, n = 11, 029).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 1,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "met",
+    "finding": "One generic OS model has an Isabelle/HOL confidentiality theorem covering every user domain, including its observations of time.",
+    "detail": "The model assumes deterministic scheduling, partitioned memory and devices, interrupt masking, and bounded interrupt handling and flushes. Domain switches reset flushable state, flush shared cache state, and pad to a predetermined time. System-call handlers must satisfy the stated policy obligations.",
+    "quote": "Theorem 1 (OS model enforces conﬁdentiality with time protection).\n∀u. obs-conﬁdentiality u",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m11",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Two modelled system calls, broadcast and subscribe, satisfy machine-checked policy obligations for one-way messaging between domains.",
+    "detail": "The proof covers an instance of the generic OS model with capability-based authorisation and tightly specified policy channels.",
+    "quote": "This includes an instantiation of our generic model, for a pair of system calls\nwith tightly speciﬁed policy channels, to ensure it is nontrivial.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m12",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Cheshire I2C has a formal interface specification and behavioural equivalence to the original Verilog for 1 submodule, i2c_reg_top.",
+    "detail": "The HOL4 theorem covers valid memory-mapped I/O requests. The paper appeared in the ACM PLOS workshop proceedings, classified here as a proceedings volume.",
+    "quote": "For the i2c_reg_top submodule, we have completed all the\nthree steps of Section 3.1, resulting in a proof of behavioural\nequivalence between the spec and the original Verilog design.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "met",
+    "finding": "Hydra illustrates 1 confined Tax procedure call that can write its result to the caller’s object while blocking writes through inherited references.",
+    "detail": "The implementation uses UCNFRTS to trigger confinement. The guarantee evaluated here covers writes through object references.",
+    "quote": "Just as MDFYRTS masks MDFYRTS on loads, it\nmasks MDFYRTS in all capabilities in the incarnated LNS\ninherited from the procedure (but not those passed as\narguments).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 23,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For one kernel, mCertiKOS-secure, Coq verifies modeled process noninterference across approximately 3,000 lines of C and the linked assembly.",
+    "detail": "The process-local semantics collapses other processes’ execution into a single yield step. The low-level theorem compares output-buffer observations without measuring elapsed steps or modeling the x86 timestamp counter.",
+    "quote": "We successfully developed a fully-formalized Coq\nproof that guarantees security of the low-level model of the\nkernel’s assembly execution.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 24,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m8",
+    "case": null,
+    "verdict": "partial",
+    "finding": "In seL4’s abstract specification, Isabelle/HOL proofs established preservation of the kernel-object invariant for 2 of the 3 routines called directly by call_kernel.",
+    "detail": "The proof assumes a well-formed post-initialisation state and an axiomatized cache-colour allocation. Thread activation also requires a valid pointer in the current domain and a thread control block at that address. The event handler remains open.",
+    "quote": "proofs completed for them, completing two of the three functions called bycall kernel.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 25,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m10",
+    "case": null,
+    "verdict": "partial",
+    "finding": "RISC-V seL4 touched-address refinement was demonstrated on 2 procedures, lookupCap and updateCap, with limited proof coverage.",
+    "detail": "The lookupCap proof assumes both correspondence and a specification lemma for resolveAddressBitsInDomPart. The updateCap correspondence for cap_untyped_cap_set_capFreeIndex remains incomplete.",
+    "quote": "I proved correspondence between\nupdateCapInDomPart and the operation*slot = cap.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 26,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m11",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The seL4 notification implementation coalesces signals to wake at most one thread. The Cheshire benchmark protocol specifies 20,000 samples per test.",
+    "detail": "The security argument assumes state-independent signalling, a valid worst-case bound for padding, and a timer interval long enough for notification delivery.",
+    "quote": "A signal will only ever unblock a single thread,\n40\n\n[Page 51]\nVarun Sethu A Usable System Model for Time Protection\nwith multiple repeated signals within the same domain time-slice only accumulating badge\nvalues and never unblocking more than one thread.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 27,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m12",
+    "case": null,
+    "verdict": "met",
+    "finding": "Parfait proved circuit-to-interface refinement for all 4 hardware security module implementations.",
+    "detail": "The end-to-end proof connects mechanized subproofs with an on-paper argument. Its scope is cycle-level digital I/O, including timing, under the stated driver and toolchain assumptions.",
+    "quote": "Parfait proves IPR between the application specification and\nthe SoC running the app and system software",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 28,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m13",
+    "case": null,
+    "verdict": "met",
+    "finding": "Coq proofs cover mCertiKOS drivers and interrupt handlers for all 3 modeled devices: UART, IOAPIC, and LAPIC.",
+    "detail": "The UART proof assumes that a transmission acknowledgment arrives within 12,800 calls to delay(). The verified runtime model assumes a single processor and nonpreemptive user processes. The paper appeared in the peer-reviewed PLDI conference proceedings.",
+    "quote": "Using our general device interface, we\nhave modeled a serial device and two interrupt controller\ndevices. On top of these device models, we have veriﬁed the\nrelated drivers and interrupt handlers.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 29,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Ironclad proves app-specific information-flow guarantees for 4 standalone full-stack images.",
+    "detail": "Verified kernel invariants and IOMMU configuration support the proof. It assumes correct CPU, memory, and chipset behavior, plus secure late launch and TPM support. Timing, cache effects, and liveness are outside the proof.",
+    "quote": "The proof for each\napp, in turn, builds on lemmas about lower-level libraries,\ndrivers, and OS, which we discuss in§6.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 30,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    }
   ],
   "judged": [
    {
     "url": "https://sel4.systems/About/FAQ.html",
-    "milestone": "m1",
-    "hash": "a0cac82efb48",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://sel4.systems/About/FAQ.html",
-    "milestone": "m2",
-    "hash": "41656ef2d788",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://sel4.systems/About/FAQ.html",
-    "milestone": "m3",
-    "hash": "d48758eb9983",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://sel4.systems/About/FAQ.html",
     "milestone": "m4",
     "hash": "c8b35001b4ac",
     "date": "2026-11-15",
@@ -1068,574 +1608,1393 @@
     "by": "gpt-6.1-terra"
    },
    {
+    "url": "https://sel4.systems/Verification/assumptions.html",
+    "milestone": "m4",
+    "hash": "c8b35001b4ac",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://sel4.systems/Verification/assumptions.html",
+    "milestone": "m5",
+    "hash": "dcf19035e2e9",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
+    "milestone": "m4",
+    "hash": "c8b35001b4ac",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
+    "milestone": "m5",
+    "hash": "dcf19035e2e9",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Murphy_RRGTPTH_25.pdf",
+    "milestone": "m5",
+    "hash": "dcf19035e2e9",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Tyler_LZSWTH_26.pdf",
+    "milestone": "m5",
+    "hash": "dcf19035e2e9",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.sel4.systems/Research/pdfs/time-protection-missing-os-abstraction.pdf",
+    "milestone": "m4",
+    "hash": "c8b35001b4ac",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.sel4.systems/Research/pdfs/time-protection-missing-os-abstraction.pdf",
+    "milestone": "m5",
+    "hash": "dcf19035e2e9",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Wistoff_SGHB_23.pdf",
+    "milestone": "m4",
+    "hash": "c8b35001b4ac",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Wistoff_SGHB_23.pdf",
+    "milestone": "m5",
+    "hash": "dcf19035e2e9",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Wistoff_HB_24.pdf",
+    "milestone": "m4",
+    "hash": "c8b35001b4ac",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Wistoff_HB_24.pdf",
+    "milestone": "m5",
+    "hash": "dcf19035e2e9",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Sison_BMKH_23.pdf",
+    "milestone": "m4",
+    "hash": "c8b35001b4ac",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Sison_BMKH_23.pdf",
+    "milestone": "m5",
+    "hash": "dcf19035e2e9",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Tyler_LZSWTH_26.pdf",
+    "milestone": "m4",
+    "hash": "c8b35001b4ac",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.ieee-security.org/TC/SP2013/papers/4977a415.pdf",
+    "milestone": "m4",
+    "hash": "c8b35001b4ac",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.ieee-security.org/TC/SP2013/papers/4977a415.pdf",
+    "milestone": "m5",
+    "hash": "dcf19035e2e9",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/full_text/Ge_YCH_19.pdf",
+    "milestone": "m4",
+    "hash": "c8b35001b4ac",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/full_text/Ge_YCH_19.pdf",
+    "milestone": "m5",
+    "hash": "dcf19035e2e9",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.robs-cse.com/publications/FM23_accepted.pdf",
+    "milestone": "m4",
+    "hash": "c8b35001b4ac",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.robs-cse.com/publications/FM23_accepted.pdf",
+    "milestone": "m5",
+    "hash": "dcf19035e2e9",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Murphy_RRGTPTH_25.pdf",
+    "milestone": "m4",
+    "hash": "c8b35001b4ac",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://sel4.systems/About/FAQ.html",
+    "milestone": "m7",
+    "hash": "24c5e27bdb7f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sel4.systems/About/FAQ.html",
+    "milestone": "m1",
+    "hash": "1eb166b382fc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sel4.systems/About/FAQ.html",
+    "milestone": "m2",
+    "hash": "5237c5a7c922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sel4.systems/About/FAQ.html",
+    "milestone": "m3",
+    "hash": "cb963e3093c7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sel4.systems/About/FAQ.html",
+    "milestone": "m8",
+    "hash": "cb20e89f9ac8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sel4.systems/About/FAQ.html",
+    "milestone": "m10",
+    "hash": "c0ecd50b1e4f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sel4.systems/About/FAQ.html",
+    "milestone": "m11",
+    "hash": "efd7fbb34866",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sel4.systems/About/FAQ.html",
+    "milestone": "m12",
+    "hash": "84b808df181b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sel4.systems/About/FAQ.html",
+    "milestone": "m13",
+    "hash": "253e808f7ad8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sel4.systems/About/FAQ.html",
+    "milestone": "m9",
+    "hash": "9f86b500ecfa",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
     "url": "https://sel4.systems/About/FAQ.html",
     "milestone": "m6",
-    "hash": "282754120fc3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4fdf47dd3cd0",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sel4.systems/About/FAQ.html",
     "milestone": "completion",
-    "hash": "a6ca6236cf9c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "aed8eab7b47f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sel4.systems/Verification/assumptions.html",
+    "milestone": "m7",
+    "hash": "24c5e27bdb7f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sel4.systems/Verification/assumptions.html",
     "milestone": "m1",
-    "hash": "a0cac82efb48",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1eb166b382fc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sel4.systems/Verification/assumptions.html",
     "milestone": "m2",
-    "hash": "41656ef2d788",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5237c5a7c922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sel4.systems/Verification/assumptions.html",
     "milestone": "m3",
-    "hash": "d48758eb9983",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "cb963e3093c7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sel4.systems/Verification/assumptions.html",
-    "milestone": "m4",
-    "hash": "c8b35001b4ac",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m8",
+    "hash": "cb20e89f9ac8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sel4.systems/Verification/assumptions.html",
-    "milestone": "m5",
-    "hash": "dcf19035e2e9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m10",
+    "hash": "c0ecd50b1e4f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sel4.systems/Verification/assumptions.html",
+    "milestone": "m11",
+    "hash": "efd7fbb34866",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sel4.systems/Verification/assumptions.html",
+    "milestone": "m12",
+    "hash": "84b808df181b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sel4.systems/Verification/assumptions.html",
+    "milestone": "m13",
+    "hash": "253e808f7ad8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sel4.systems/Verification/assumptions.html",
+    "milestone": "m9",
+    "hash": "9f86b500ecfa",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sel4.systems/Verification/assumptions.html",
     "milestone": "m6",
-    "hash": "282754120fc3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4fdf47dd3cd0",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sel4.systems/Verification/assumptions.html",
     "milestone": "completion",
-    "hash": "a6ca6236cf9c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "aed8eab7b47f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
+    "milestone": "m7",
+    "hash": "24c5e27bdb7f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
     "milestone": "m1",
-    "hash": "a0cac82efb48",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1eb166b382fc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
     "milestone": "m2",
-    "hash": "41656ef2d788",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5237c5a7c922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
     "milestone": "m3",
-    "hash": "d48758eb9983",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "cb963e3093c7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
-    "milestone": "m4",
-    "hash": "c8b35001b4ac",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m8",
+    "hash": "cb20e89f9ac8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
-    "milestone": "m5",
-    "hash": "dcf19035e2e9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m10",
+    "hash": "c0ecd50b1e4f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
+    "milestone": "m11",
+    "hash": "efd7fbb34866",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
+    "milestone": "m12",
+    "hash": "84b808df181b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
+    "milestone": "m13",
+    "hash": "253e808f7ad8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
+    "milestone": "m9",
+    "hash": "9f86b500ecfa",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
     "milestone": "m6",
-    "hash": "282754120fc3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4fdf47dd3cd0",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/acrobat-24.pdf",
     "milestone": "completion",
-    "hash": "a6ca6236cf9c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.ieee-security.org/TC/SP2013/papers/4977a415.pdf",
-    "milestone": "m1",
-    "hash": "a0cac82efb48",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://trustworthy.systems/publications/full_text/Ge_YCH_19.pdf",
-    "milestone": "m2",
-    "hash": "41656ef2d788",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "aed8eab7b47f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/publications/papers/Wistoff_SGHB_23.pdf",
-    "milestone": "m2",
-    "hash": "41656ef2d788",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://trustworthy.systems/publications/papers/Wistoff_HB_24.pdf",
-    "milestone": "m2",
-    "hash": "41656ef2d788",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.robs-cse.com/publications/FM23_accepted.pdf",
-    "milestone": "m3",
-    "hash": "d48758eb9983",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://trustworthy.systems/publications/papers/Murphy_RRGTPTH_25.pdf",
-    "milestone": "m5",
-    "hash": "dcf19035e2e9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://trustworthy.systems/publications/papers/Tyler_LZSWTH_26.pdf",
-    "milestone": "m5",
-    "hash": "dcf19035e2e9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.sel4.systems/Research/pdfs/time-protection-missing-os-abstraction.pdf",
-    "milestone": "m1",
-    "hash": "a0cac82efb48",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.sel4.systems/Research/pdfs/time-protection-missing-os-abstraction.pdf",
-    "milestone": "m2",
-    "hash": "41656ef2d788",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.sel4.systems/Research/pdfs/time-protection-missing-os-abstraction.pdf",
-    "milestone": "m3",
-    "hash": "d48758eb9983",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.sel4.systems/Research/pdfs/time-protection-missing-os-abstraction.pdf",
-    "milestone": "m4",
-    "hash": "c8b35001b4ac",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.sel4.systems/Research/pdfs/time-protection-missing-os-abstraction.pdf",
-    "milestone": "m5",
-    "hash": "dcf19035e2e9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.sel4.systems/Research/pdfs/time-protection-missing-os-abstraction.pdf",
-    "milestone": "m6",
-    "hash": "282754120fc3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.sel4.systems/Research/pdfs/time-protection-missing-os-abstraction.pdf",
-    "milestone": "completion",
-    "hash": "a6ca6236cf9c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m7",
+    "hash": "24c5e27bdb7f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/publications/papers/Wistoff_SGHB_23.pdf",
     "milestone": "m1",
-    "hash": "a0cac82efb48",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1eb166b382fc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Wistoff_SGHB_23.pdf",
+    "milestone": "m2",
+    "hash": "5237c5a7c922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/publications/papers/Wistoff_SGHB_23.pdf",
     "milestone": "m3",
-    "hash": "d48758eb9983",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "cb963e3093c7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/publications/papers/Wistoff_SGHB_23.pdf",
-    "milestone": "m4",
-    "hash": "c8b35001b4ac",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m8",
+    "hash": "cb20e89f9ac8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/publications/papers/Wistoff_SGHB_23.pdf",
-    "milestone": "m5",
-    "hash": "dcf19035e2e9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m10",
+    "hash": "c0ecd50b1e4f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Wistoff_SGHB_23.pdf",
+    "milestone": "m11",
+    "hash": "efd7fbb34866",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Wistoff_SGHB_23.pdf",
+    "milestone": "m12",
+    "hash": "84b808df181b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Wistoff_SGHB_23.pdf",
+    "milestone": "m13",
+    "hash": "253e808f7ad8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Wistoff_SGHB_23.pdf",
+    "milestone": "m9",
+    "hash": "9f86b500ecfa",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/publications/papers/Wistoff_SGHB_23.pdf",
     "milestone": "m6",
-    "hash": "282754120fc3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4fdf47dd3cd0",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/publications/papers/Wistoff_SGHB_23.pdf",
     "milestone": "completion",
-    "hash": "a6ca6236cf9c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "aed8eab7b47f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Wistoff_HB_24.pdf",
+    "milestone": "m7",
+    "hash": "24c5e27bdb7f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/publications/papers/Wistoff_HB_24.pdf",
     "milestone": "m1",
-    "hash": "a0cac82efb48",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1eb166b382fc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Wistoff_HB_24.pdf",
+    "milestone": "m2",
+    "hash": "5237c5a7c922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/publications/papers/Wistoff_HB_24.pdf",
     "milestone": "m3",
-    "hash": "d48758eb9983",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "cb963e3093c7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/publications/papers/Wistoff_HB_24.pdf",
-    "milestone": "m4",
-    "hash": "c8b35001b4ac",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m8",
+    "hash": "cb20e89f9ac8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/publications/papers/Wistoff_HB_24.pdf",
-    "milestone": "m5",
-    "hash": "dcf19035e2e9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m10",
+    "hash": "c0ecd50b1e4f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Wistoff_HB_24.pdf",
+    "milestone": "m11",
+    "hash": "efd7fbb34866",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Wistoff_HB_24.pdf",
+    "milestone": "m12",
+    "hash": "84b808df181b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Wistoff_HB_24.pdf",
+    "milestone": "m13",
+    "hash": "253e808f7ad8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Wistoff_HB_24.pdf",
+    "milestone": "m9",
+    "hash": "9f86b500ecfa",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/publications/papers/Wistoff_HB_24.pdf",
     "milestone": "m6",
-    "hash": "282754120fc3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4fdf47dd3cd0",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/publications/papers/Wistoff_HB_24.pdf",
     "milestone": "completion",
-    "hash": "a6ca6236cf9c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "aed8eab7b47f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Tyler_LZSWTH_26.pdf",
+    "milestone": "m7",
+    "hash": "24c5e27bdb7f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Tyler_LZSWTH_26.pdf",
+    "milestone": "m1",
+    "hash": "1eb166b382fc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Tyler_LZSWTH_26.pdf",
+    "milestone": "m2",
+    "hash": "5237c5a7c922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Tyler_LZSWTH_26.pdf",
+    "milestone": "m3",
+    "hash": "cb963e3093c7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Tyler_LZSWTH_26.pdf",
+    "milestone": "m8",
+    "hash": "cb20e89f9ac8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Tyler_LZSWTH_26.pdf",
+    "milestone": "m10",
+    "hash": "c0ecd50b1e4f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Tyler_LZSWTH_26.pdf",
+    "milestone": "m11",
+    "hash": "efd7fbb34866",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Tyler_LZSWTH_26.pdf",
+    "milestone": "m12",
+    "hash": "84b808df181b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Tyler_LZSWTH_26.pdf",
+    "milestone": "m13",
+    "hash": "253e808f7ad8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Tyler_LZSWTH_26.pdf",
+    "milestone": "m9",
+    "hash": "9f86b500ecfa",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Tyler_LZSWTH_26.pdf",
+    "milestone": "m6",
+    "hash": "4fdf47dd3cd0",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Tyler_LZSWTH_26.pdf",
+    "milestone": "completion",
+    "hash": "aed8eab7b47f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.sel4.systems/Research/pdfs/time-protection-missing-os-abstraction.pdf",
+    "milestone": "m7",
+    "hash": "24c5e27bdb7f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.sel4.systems/Research/pdfs/time-protection-missing-os-abstraction.pdf",
+    "milestone": "m1",
+    "hash": "1eb166b382fc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.sel4.systems/Research/pdfs/time-protection-missing-os-abstraction.pdf",
+    "milestone": "m2",
+    "hash": "5237c5a7c922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.sel4.systems/Research/pdfs/time-protection-missing-os-abstraction.pdf",
+    "milestone": "m3",
+    "hash": "cb963e3093c7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.sel4.systems/Research/pdfs/time-protection-missing-os-abstraction.pdf",
+    "milestone": "m8",
+    "hash": "cb20e89f9ac8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.sel4.systems/Research/pdfs/time-protection-missing-os-abstraction.pdf",
+    "milestone": "m10",
+    "hash": "c0ecd50b1e4f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.sel4.systems/Research/pdfs/time-protection-missing-os-abstraction.pdf",
+    "milestone": "m11",
+    "hash": "efd7fbb34866",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.sel4.systems/Research/pdfs/time-protection-missing-os-abstraction.pdf",
+    "milestone": "m12",
+    "hash": "84b808df181b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.sel4.systems/Research/pdfs/time-protection-missing-os-abstraction.pdf",
+    "milestone": "m13",
+    "hash": "253e808f7ad8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.sel4.systems/Research/pdfs/time-protection-missing-os-abstraction.pdf",
+    "milestone": "m9",
+    "hash": "9f86b500ecfa",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.sel4.systems/Research/pdfs/time-protection-missing-os-abstraction.pdf",
+    "milestone": "m6",
+    "hash": "4fdf47dd3cd0",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.sel4.systems/Research/pdfs/time-protection-missing-os-abstraction.pdf",
+    "milestone": "completion",
+    "hash": "aed8eab7b47f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Sison_BMKH_23.pdf",
+    "milestone": "m7",
+    "hash": "24c5e27bdb7f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/publications/papers/Sison_BMKH_23.pdf",
     "milestone": "m1",
-    "hash": "a0cac82efb48",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1eb166b382fc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/publications/papers/Sison_BMKH_23.pdf",
     "milestone": "m2",
-    "hash": "41656ef2d788",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5237c5a7c922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/publications/papers/Sison_BMKH_23.pdf",
     "milestone": "m3",
-    "hash": "d48758eb9983",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "cb963e3093c7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/publications/papers/Sison_BMKH_23.pdf",
-    "milestone": "m4",
-    "hash": "c8b35001b4ac",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m8",
+    "hash": "cb20e89f9ac8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/publications/papers/Sison_BMKH_23.pdf",
-    "milestone": "m5",
-    "hash": "dcf19035e2e9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m10",
+    "hash": "c0ecd50b1e4f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Sison_BMKH_23.pdf",
+    "milestone": "m11",
+    "hash": "efd7fbb34866",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Sison_BMKH_23.pdf",
+    "milestone": "m12",
+    "hash": "84b808df181b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Sison_BMKH_23.pdf",
+    "milestone": "m13",
+    "hash": "253e808f7ad8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Sison_BMKH_23.pdf",
+    "milestone": "m9",
+    "hash": "9f86b500ecfa",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/publications/papers/Sison_BMKH_23.pdf",
     "milestone": "m6",
-    "hash": "282754120fc3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4fdf47dd3cd0",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/publications/papers/Sison_BMKH_23.pdf",
     "milestone": "completion",
-    "hash": "a6ca6236cf9c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "aed8eab7b47f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
-    "url": "https://trustworthy.systems/publications/papers/Tyler_LZSWTH_26.pdf",
-    "milestone": "m1",
-    "hash": "a0cac82efb48",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://trustworthy.systems/publications/papers/Tyler_LZSWTH_26.pdf",
-    "milestone": "m2",
-    "hash": "41656ef2d788",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://trustworthy.systems/publications/papers/Tyler_LZSWTH_26.pdf",
-    "milestone": "m3",
-    "hash": "d48758eb9983",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://trustworthy.systems/publications/papers/Tyler_LZSWTH_26.pdf",
-    "milestone": "m4",
-    "hash": "c8b35001b4ac",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://trustworthy.systems/publications/papers/Tyler_LZSWTH_26.pdf",
-    "milestone": "m6",
-    "hash": "282754120fc3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://trustworthy.systems/publications/papers/Tyler_LZSWTH_26.pdf",
-    "milestone": "completion",
-    "hash": "a6ca6236cf9c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.ieee-security.org/TC/SP2013/papers/4977a415.pdf",
-    "milestone": "m2",
-    "hash": "41656ef2d788",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.ieee-security.org/TC/SP2013/papers/4977a415.pdf",
-    "milestone": "m3",
-    "hash": "d48758eb9983",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.ieee-security.org/TC/SP2013/papers/4977a415.pdf",
-    "milestone": "m4",
-    "hash": "c8b35001b4ac",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.ieee-security.org/TC/SP2013/papers/4977a415.pdf",
-    "milestone": "m5",
-    "hash": "dcf19035e2e9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.ieee-security.org/TC/SP2013/papers/4977a415.pdf",
-    "milestone": "m6",
-    "hash": "282754120fc3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.ieee-security.org/TC/SP2013/papers/4977a415.pdf",
-    "milestone": "completion",
-    "hash": "a6ca6236cf9c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://trustworthy.systems/publications/full_text/Ge_YCH_19.pdf",
-    "milestone": "m1",
-    "hash": "a0cac82efb48",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://trustworthy.systems/publications/full_text/Ge_YCH_19.pdf",
-    "milestone": "m3",
-    "hash": "d48758eb9983",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://trustworthy.systems/publications/full_text/Ge_YCH_19.pdf",
-    "milestone": "m4",
-    "hash": "c8b35001b4ac",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://trustworthy.systems/publications/full_text/Ge_YCH_19.pdf",
-    "milestone": "m5",
-    "hash": "dcf19035e2e9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://trustworthy.systems/publications/full_text/Ge_YCH_19.pdf",
-    "milestone": "m6",
-    "hash": "282754120fc3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://trustworthy.systems/publications/full_text/Ge_YCH_19.pdf",
-    "milestone": "completion",
-    "hash": "a6ca6236cf9c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.robs-cse.com/publications/FM23_accepted.pdf",
-    "milestone": "m1",
-    "hash": "a0cac82efb48",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.robs-cse.com/publications/FM23_accepted.pdf",
-    "milestone": "m2",
-    "hash": "41656ef2d788",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.robs-cse.com/publications/FM23_accepted.pdf",
-    "milestone": "m4",
-    "hash": "c8b35001b4ac",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.robs-cse.com/publications/FM23_accepted.pdf",
-    "milestone": "m5",
-    "hash": "dcf19035e2e9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.robs-cse.com/publications/FM23_accepted.pdf",
-    "milestone": "m6",
-    "hash": "282754120fc3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.robs-cse.com/publications/FM23_accepted.pdf",
-    "milestone": "completion",
-    "hash": "a6ca6236cf9c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://trustworthy.systems/publications/papers/Murphy_RRGTPTH_25.pdf",
-    "milestone": "m1",
-    "hash": "a0cac82efb48",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://trustworthy.systems/publications/papers/Murphy_RRGTPTH_25.pdf",
-    "milestone": "m2",
-    "hash": "41656ef2d788",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://trustworthy.systems/publications/papers/Murphy_RRGTPTH_25.pdf",
-    "milestone": "m3",
-    "hash": "d48758eb9983",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://trustworthy.systems/publications/papers/Murphy_RRGTPTH_25.pdf",
-    "milestone": "m4",
-    "hash": "c8b35001b4ac",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://trustworthy.systems/publications/papers/Murphy_RRGTPTH_25.pdf",
-    "milestone": "m6",
-    "hash": "282754120fc3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://trustworthy.systems/publications/papers/Murphy_RRGTPTH_25.pdf",
-    "milestone": "completion",
-    "hash": "a6ca6236cf9c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "url": "https://proofcraft.systems/news-2026/",
+    "milestone": "m7",
+    "hash": "24c5e27bdb7f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proofcraft.systems/news-2026/",
     "milestone": "m1",
-    "hash": "a0cac82efb48",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1eb166b382fc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proofcraft.systems/news-2026/",
+    "milestone": "m2",
+    "hash": "5237c5a7c922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proofcraft.systems/news-2026/",
+    "milestone": "m3",
+    "hash": "cb963e3093c7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proofcraft.systems/news-2026/",
+    "milestone": "m8",
+    "hash": "cb20e89f9ac8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proofcraft.systems/news-2026/",
+    "milestone": "m10",
+    "hash": "c0ecd50b1e4f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proofcraft.systems/news-2026/",
+    "milestone": "m11",
+    "hash": "efd7fbb34866",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proofcraft.systems/news-2026/",
+    "milestone": "m12",
+    "hash": "84b808df181b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proofcraft.systems/news-2026/",
+    "milestone": "m13",
+    "hash": "253e808f7ad8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proofcraft.systems/news-2026/",
+    "milestone": "m9",
+    "hash": "9f86b500ecfa",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proofcraft.systems/news-2026/",
+    "milestone": "m6",
+    "hash": "4fdf47dd3cd0",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proofcraft.systems/news-2026/",
+    "milestone": "completion",
+    "hash": "aed8eab7b47f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2310.17046v1",
+    "milestone": "m7",
+    "hash": "24c5e27bdb7f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2310.17046v1",
+    "milestone": "m1",
+    "hash": "1eb166b382fc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2310.17046v1",
     "milestone": "m2",
-    "hash": "41656ef2d788",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5237c5a7c922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2310.17046v1",
+    "milestone": "m3",
+    "hash": "cb963e3093c7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2310.17046v1",
+    "milestone": "m8",
+    "hash": "cb20e89f9ac8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2310.17046v1",
+    "milestone": "m10",
+    "hash": "c0ecd50b1e4f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2310.17046v1",
+    "milestone": "m11",
+    "hash": "efd7fbb34866",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2310.17046v1",
+    "milestone": "m12",
+    "hash": "84b808df181b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2310.17046v1",
+    "milestone": "m13",
+    "hash": "253e808f7ad8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2310.17046v1",
+    "milestone": "m9",
+    "hash": "9f86b500ecfa",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2310.17046v1",
+    "milestone": "m6",
+    "hash": "4fdf47dd3cd0",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2310.17046v1",
+    "milestone": "completion",
+    "hash": "aed8eab7b47f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.ieee-security.org/TC/SP2013/papers/4977a415.pdf",
+    "milestone": "m7",
+    "hash": "24c5e27bdb7f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.ieee-security.org/TC/SP2013/papers/4977a415.pdf",
+    "milestone": "m1",
+    "hash": "1eb166b382fc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.ieee-security.org/TC/SP2013/papers/4977a415.pdf",
+    "milestone": "m2",
+    "hash": "5237c5a7c922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.ieee-security.org/TC/SP2013/papers/4977a415.pdf",
+    "milestone": "m3",
+    "hash": "cb963e3093c7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.ieee-security.org/TC/SP2013/papers/4977a415.pdf",
+    "milestone": "m8",
+    "hash": "cb20e89f9ac8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.ieee-security.org/TC/SP2013/papers/4977a415.pdf",
+    "milestone": "m10",
+    "hash": "c0ecd50b1e4f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.ieee-security.org/TC/SP2013/papers/4977a415.pdf",
+    "milestone": "m11",
+    "hash": "efd7fbb34866",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.ieee-security.org/TC/SP2013/papers/4977a415.pdf",
+    "milestone": "m12",
+    "hash": "84b808df181b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.ieee-security.org/TC/SP2013/papers/4977a415.pdf",
+    "milestone": "m13",
+    "hash": "253e808f7ad8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.ieee-security.org/TC/SP2013/papers/4977a415.pdf",
+    "milestone": "m9",
+    "hash": "9f86b500ecfa",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.ieee-security.org/TC/SP2013/papers/4977a415.pdf",
+    "milestone": "m6",
+    "hash": "4fdf47dd3cd0",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.ieee-security.org/TC/SP2013/papers/4977a415.pdf",
+    "milestone": "completion",
+    "hash": "aed8eab7b47f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/full_text/Ge_YCH_19.pdf",
+    "milestone": "m7",
+    "hash": "24c5e27bdb7f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/full_text/Ge_YCH_19.pdf",
+    "milestone": "m1",
+    "hash": "1eb166b382fc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/full_text/Ge_YCH_19.pdf",
+    "milestone": "m2",
+    "hash": "5237c5a7c922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/full_text/Ge_YCH_19.pdf",
+    "milestone": "m3",
+    "hash": "cb963e3093c7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/full_text/Ge_YCH_19.pdf",
+    "milestone": "m8",
+    "hash": "cb20e89f9ac8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/full_text/Ge_YCH_19.pdf",
+    "milestone": "m10",
+    "hash": "c0ecd50b1e4f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/full_text/Ge_YCH_19.pdf",
+    "milestone": "m11",
+    "hash": "efd7fbb34866",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/full_text/Ge_YCH_19.pdf",
+    "milestone": "m12",
+    "hash": "84b808df181b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/full_text/Ge_YCH_19.pdf",
+    "milestone": "m13",
+    "hash": "253e808f7ad8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/full_text/Ge_YCH_19.pdf",
+    "milestone": "m9",
+    "hash": "9f86b500ecfa",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/full_text/Ge_YCH_19.pdf",
+    "milestone": "m6",
+    "hash": "4fdf47dd3cd0",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/full_text/Ge_YCH_19.pdf",
+    "milestone": "completion",
+    "hash": "aed8eab7b47f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.robs-cse.com/publications/FM23_accepted.pdf",
+    "milestone": "m7",
+    "hash": "24c5e27bdb7f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.robs-cse.com/publications/FM23_accepted.pdf",
+    "milestone": "m1",
+    "hash": "1eb166b382fc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.robs-cse.com/publications/FM23_accepted.pdf",
+    "milestone": "m2",
+    "hash": "5237c5a7c922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.robs-cse.com/publications/FM23_accepted.pdf",
+    "milestone": "m3",
+    "hash": "cb963e3093c7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.robs-cse.com/publications/FM23_accepted.pdf",
+    "milestone": "m8",
+    "hash": "cb20e89f9ac8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.robs-cse.com/publications/FM23_accepted.pdf",
+    "milestone": "m10",
+    "hash": "c0ecd50b1e4f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.robs-cse.com/publications/FM23_accepted.pdf",
+    "milestone": "m11",
+    "hash": "efd7fbb34866",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.robs-cse.com/publications/FM23_accepted.pdf",
+    "milestone": "m12",
+    "hash": "84b808df181b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.robs-cse.com/publications/FM23_accepted.pdf",
+    "milestone": "m13",
+    "hash": "253e808f7ad8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.robs-cse.com/publications/FM23_accepted.pdf",
+    "milestone": "m9",
+    "hash": "9f86b500ecfa",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.robs-cse.com/publications/FM23_accepted.pdf",
+    "milestone": "m6",
+    "hash": "4fdf47dd3cd0",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.robs-cse.com/publications/FM23_accepted.pdf",
+    "milestone": "completion",
+    "hash": "aed8eab7b47f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Murphy_RRGTPTH_25.pdf",
+    "milestone": "m7",
+    "hash": "24c5e27bdb7f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Murphy_RRGTPTH_25.pdf",
+    "milestone": "m1",
+    "hash": "1eb166b382fc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Murphy_RRGTPTH_25.pdf",
+    "milestone": "m2",
+    "hash": "5237c5a7c922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Murphy_RRGTPTH_25.pdf",
+    "milestone": "m3",
+    "hash": "cb963e3093c7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Murphy_RRGTPTH_25.pdf",
+    "milestone": "m8",
+    "hash": "cb20e89f9ac8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Murphy_RRGTPTH_25.pdf",
+    "milestone": "m10",
+    "hash": "c0ecd50b1e4f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Murphy_RRGTPTH_25.pdf",
+    "milestone": "m11",
+    "hash": "efd7fbb34866",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Murphy_RRGTPTH_25.pdf",
+    "milestone": "m12",
+    "hash": "84b808df181b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Murphy_RRGTPTH_25.pdf",
+    "milestone": "m13",
+    "hash": "253e808f7ad8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Murphy_RRGTPTH_25.pdf",
+    "milestone": "m9",
+    "hash": "9f86b500ecfa",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Murphy_RRGTPTH_25.pdf",
+    "milestone": "m6",
+    "hash": "4fdf47dd3cd0",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Murphy_RRGTPTH_25.pdf",
+    "milestone": "completion",
+    "hash": "aed8eab7b47f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.ucf.edu/courses/cop6614/fall2005/cohen-Protectio-Hydra.pdf",
+    "milestone": "m7",
+    "hash": "24c5e27bdb7f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://6826.csail.mit.edu/2020/papers/certikos-sec.pdf",
+    "milestone": "m1",
+    "hash": "1eb166b382fc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/theses_public/25/Nair%3Absc.pdf",
+    "milestone": "m8",
+    "hash": "cb20e89f9ac8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/theses_public/25/Liang%3Absc.pdf",
+    "milestone": "m10",
+    "hash": "c0ecd50b1e4f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/theses_public/25/Sethu%3Abe.pdf",
+    "milestone": "m11",
+    "hash": "efd7fbb34866",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.csail.mit.edu/nickolai/papers/athalye-parfait.pdf",
+    "milestone": "m12",
+    "hash": "84b808df181b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cseweb.ucsd.edu/~dstefan/cse227-spring20/papers/chen%3Atoward.pdf",
+    "milestone": "m13",
+    "hash": "253e808f7ad8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.cmu.edu/~15811/papers/ironclad-apps.pdf",
+    "milestone": "m6",
+    "hash": "4fdf47dd3cd0",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-15",
   "log": [
    {
@@ -1702,8 +3061,128 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 9 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"A caller can give confidential data to an untrusted program and receive its result. The execution environment prevents the program from disclosing information to anyone the policy does not authorise. Under its stated hardware and software assumptions, the guarantee covers both storage channels, where another program can read a change in shared state, and timing channels, where another program can observe a change in how long an operation takes.\". Reason: The definition leaves storage channels unexplained and treats shared hardware as a channel without identifying what another program observes."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"A browser needs to know which sites its user visits. Of 424 Android browsers studied, 37 shared browsing history for which investigators could identify no feature requiring disclosure. Confinement would let people give third-party software the data it needs and still control who may learn it. Memory permissions alone cannot provide that control. Even programs with separate memory can communicate through changes in execution time, so the guarantee depends on hardware that lets the operating system isolate those timing effects.\". Reason: The existing paragraph reports a kernel experiment without explaining whose information is at risk or why restricting access to it is insufficient."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by German Cyberagentur, ÖvIT programme, PISTIs-V project description, n.d.: \"Dadurch werden keine geschützten Informationen preisgegeben, auch nicht durch mikroarchitektonische Timing-Kanäle.\". Reason: The funding programme explicitly names the confinement property that the existing PISTIs-V statement describes only as a general security goal."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit completion: criterion = \"On the embedded LionsOS reference system, prove that untrusted programs cannot disclose information contrary to the system's policy, including through microarchitectural timing channels. Establish the claim for the implemented OS and its embedded-system services under explicit hardware and software assumptions. Verify critical drivers against the verified hardware of the devices they control, and verify the fence.t processor mechanism used for time protection on CVA6 RISC-V. The policy defines which releases are allowed.\"; threshold_quote = \"Die verifizierten Eigenschaften von LionsOS beinhalten den Beweis, dass nicht vertrauensw\\u00fcrdige Komponenten eingeschr\\u00e4nkt werden. Dadurch werden keine gesch\\u00fctzten Informationen preisgegeben, auch nicht durch mikroarchitektonische Timing-Kan\\u00e4le.\"; threshold_ref = 6; refs = [6, 21, 4, 2, 5]. Reason: The programme identifies the processor mechanism and requires the driver proof to use the verified implementation of the corresponding device, two conditions left implicit in the criterion."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after None: \"A confined procedure can return a result but cannot write through its inherited object references.\". Reason: Hydra supplies an early implemented test of confinement through explicit object references before the later kernel proofs and timing experiments."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: title = \"A machine-checked proof establishes nonleakage for a kernel's C implementation.\"; criterion = \"Prove that each partition's observations depend only on authorised sources and the scheduler. Start from a configured kernel state satisfying the invariants, a consistent and well-formed access policy, the safety condition on cross-partition capabilities, and the timer-only interrupt restriction. The theorem covers storage channels and logical time and assumes correct compilation, assembly, hardware and boot code.\"; threshold_quote = \"Theorem 2: seL4\\u2019s C implementation enforces information flow security.\"; threshold_ref = 7. Reason: The criterion mixes the theorem's hypotheses with the date and size of the implementation for which it was proved."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: title = \"One channel measures below 1 millibit per input or within the 95% zero-leakage bound.\"; criterion = \"For one specified channel and configuration, estimate mutual information M in bits per input. Record M < 0.001 bit as below the tool's resolution. Otherwise shuffle the association between inputs and outputs 100 times and use the shuffled estimates to calculate M\\u2080, the upper 95% bound under zero leakage. Record M \\u2264 M\\u2080 as consistent with zero leakage. Both conclusions apply only to the tested channel and dataset.\"; threshold_quote = \"others are consistent with no channel or below the 1 mb tool resolution.\"; threshold_ref = 1. Reason: The revised criterion distinguishes a measurement below tool resolution from one consistent with zero and removes the result for a particular processor."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: title = \"An OS model enforces confidentiality for every observing domain, including its observations of time.\"; criterion = \"Machine-check observer-relative confidentiality for every user domain in a generic OS model. Include observable time, partitioned and resettable processor state, interrupts and the communication that the policy permits. Under the model's hardware and OS assumptions, each domain's observations may depend on another domain's data only through the specified policy channels.\"; threshold_quote = \"Theorem 1 (OS model enforces confidentiality with time protection).\"; threshold_ref = 9. Reason: The theorem defines the test for every observing domain, while the existing criterion also recounts the authors' particular two-system-call result."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m3: \"seL4's abstract specification bounds the addresses touched on behalf of each security domain.\". Reason: Roadmap task 2A supplies the missing step between the generic OS theorem and refinement of seL4's own specification to C."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m5: \"A proof establishes that CVA6's fence.t instruction enforces its timing-isolation contract.\". Reason: The existing milestones leave the kernel's processor contract as an assumption even though the programme calls for verification of the hardware that implements it."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "split m4 into \"A refinement proof establishes time protection for seL4's C implementation.\" | \"Verified seL4 communication mechanisms preserve time protection across security domains.\". Reason: The roadmap treats carrying time protection to the kernel implementation and preserving it across cross-domain communication as separately verifiable results."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "split m5 into \"A device implementation provably refines its formal interface specification.\" | \"A device driver is proved correct against its specified hardware and OS interfaces.\". Reason: Proving that hardware implements an interface and proving that a driver uses an interface correctly are distinct obligations that can be met for different devices."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m6: criterion = \"State an information-flow policy for the assembled OS. From local proofs for its services and the protocols through which they communicate, derive that the services running together enforce the policy. State the kernel and hardware guarantees on which the derivation depends.\"; threshold_quote = \"Scalable verification of global safety and security guarantees for component-based OSes by composing local per-component proof efforts.\"; threshold_ref = 15. Reason: The existing criterion mixes the compositional proof obligation with a progress report and an explanation of its place in the project."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "remove statement 3. Reason: NIST SC-31(2) sets an organisation-defined bandwidth limit for identified channels, so listing it as a call for complete confinement misstates the control."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Applied 14 of 14 proposed operations from SWE-07-revise-20261121T161527614310Z; now version 2."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: completion, m7, m1, m2, m3, m8, m9, m10, m11, m12, m13, m6."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 0 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 12 found, 0 not found, 1 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "definition is 448 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 14 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 8 candidates returned, 0 dropped as sources already used, 8 to judge."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 8 of 8 new candidates, without search. Skipped: 3 no readable saved copy. Dropped rows: none. Replaced 7 earlier rows. Added 27 results: 19 from sources already used, 8 from newly found sources."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 3 from Crossref, 0 from PubMed, 0 from arXiv, 5 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 24 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-21"
  }
 }
