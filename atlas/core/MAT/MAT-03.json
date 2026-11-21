@@ -297,15 +297,30 @@
   ],
   "prompt": "5e97d4b8dfc3"
  },
+ "review": {
+  "state": "published",
+  "note": null,
+  "into": null,
+  "at": "2026-11-15",
+  "log": [
+   {
+    "date": "2026-11-15",
+    "state": "published"
+   }
+  ]
+ },
  "page": {
   "id": "MAT-03",
   "title": "First-principles theory of turbulent transport",
   "definition": "A statistical theory derives drag, momentum transfer and velocity fluctuations of incompressible turbulent fluids from their governing equations at high Reynolds number, where inertia dominates viscosity. It supplies derived closure relations—the extra relationships needed after averaging—with bounded prediction errors.",
   "goal": {
-   "need": "Skin friction accounts for about 50% of civil-aircraft drag in cruise. For NASA’s hump benchmark at chord Reynolds number 936,000, typical Reynolds-averaged models overpredict separation-bubble length by about 35% and underpredict peak turbulent shear-stress magnitude by about 45%. These quantities connect turbulent momentum transport to design calculations.",
+   "need": "Skin friction accounts for about half the drag on a civil aircraft in cruise. In a wind-tunnel test of flow over a hump at chord Reynolds number 936,000, typical Reynolds-averaged models overpredict the length of the separated region by about 35% and underestimate peak turbulent shear-stress magnitude at 80% chord by about 45%. Improvements from tuning are often specific to one flow. Within a validated range, engineers could compare drag on new shapes before choosing which ones to test in a wind tunnel.",
    "need_refs": [
     1,
-    2
+    2,
+    9,
+    3,
+    15
    ],
    "figures": {
     "caption": "NASA hump benchmark: documented errors in typical Reynolds-averaged predictions",
@@ -336,10 +351,18 @@
      "checked": false
     },
     {
-     "body": "U.S. National Science Foundation",
+     "body": "Simons Foundation collaboration on the statistical mechanics of turbulence",
+     "year": "2019",
+     "quote": "Our goal is to construct a nonequilibrium statistical theory",
+     "context": "The theory would describe both how turbulent fluctuations generate a mean flow and how a mean flow drives turbulence.",
+     "ref": 16,
+     "checked": true
+    },
+    {
+     "body": "U.S. National Science Foundation, TEMPEST Science and Technology Center",
      "year": "2026",
-     "quote": "scientists still cannot reliably predict how complex turbulent systems behave across vastly different scales.",
-     "context": "The announcement of 26 August 2026 establishes TEMPEST to develop physics-grounded turbulence models, covering fluids and plasmas.",
+     "quote": "to develop more accurate and reliable physics-grounded models",
+     "context": "The center’s remit includes turbulence in fluids and plasmas.",
      "ref": 4,
      "checked": true
     }
@@ -352,12 +375,13 @@
    "set_by_kind": "atlas",
    "threshold_quote": null,
    "threshold_ref": null,
-   "basis": "Searched NASA’s CFD roadmap and prediction-error challenge, NSF’s TEMPEST objectives, AIAA-linked benchmark materials, Spalart’s modeling requirements and Sreenivasan–Schumacher’s solution criteria. None defines this completion test. The latter states: “There is no single problem that can be regarded universally as constituting the turbulence problem.” The test combines statistical derivation with independent transport prediction within a finite domain.",
+   "basis": "ASME V&V 20 quantifies simulation accuracy for a specified variable at a specified validation point. It leaves extrapolation beyond validation points to engineering judgment. The Atlas criterion adds a first-principles derivation, bounds on statistical prediction errors and an independent test in a new geometry. Achievement applies to the stated domain of the theory.",
    "refs": [
     5,
     6,
     3,
-    4
+    4,
+    15
    ],
    "threshold_checked": null
   },
@@ -368,15 +392,17 @@
    {
     "id": "m1",
     "title": "A turbulence theory recovers the four-fifths law under its stated assumptions.",
-    "criterion": "For three-dimensional homogeneous, isotropic turbulence in the inertial range, recover ⟨(δu_L)³⟩ = −(4/5)εr, where δu_L is the longitudinal velocity difference across separation r and ε is mean energy dissipation per unit mass. State the stationarity and inviscid-limit assumptions, including the dissipation assumption. This conditional result dates to 1941. Moisy and colleagues reported on 17 May 1999 that the forced Kolmogorov equation agreed with helium-gas measurements within ±3% over microscale Reynolds numbers 120–1,200; that finite-Reynolds-number test does not prove the limiting assumptions.",
+    "criterion": "For statistically stationary, homogeneous, isotropic turbulence in three dimensions, derive ⟨(δu_L)³⟩ = −(4/5)εr in the inertial range as viscosity tends to zero. Here δu_L is the velocity at the second point minus the velocity at the first, projected along their separation r, and ε is the mean energy dissipation rate per unit mass. State the assumptions on scale separation and on dissipation in the limit.",
     "set_by": "Community convention: Kolmogorov’s four-fifths law; its use as an acceptance condition is documented by Cerbus and Chakraborty, quoting Frisch.",
     "set_by_kind": "community_convention",
     "threshold_quote": "must either satisfy the four-fifths law, or explicitly violate the assumptions made in deriving it.",
     "threshold_ref": 7,
     "refs": [
      7,
+     10,
+     11,
      8,
-     5
+     19
     ],
     "status": "active",
     "replaced_by": [],
@@ -384,16 +410,15 @@
    },
    {
     "id": "m2",
-    "title": "A Reynolds-averaged model reduces NASA hump prediction error by 40%.",
-    "criterion": "Apply NASA’s 40% prediction-error reduction target to its published hump separation-bubble metric at Mach 0.1 and chord Reynolds number 936,000. The metric is the relative error in bubble length, whose experimental value is 0.435 times hump chord; the documented typical error is about 35%. A 40% reduction corresponds to about 21% error. NASA permits judgment in metric selection; this is one benchmark target. Its 2016 report also shows wall-modeled large-eddy simulation matching experimental reattachment at x/c = 1.1, without establishing a first-principles closure.",
+    "title": "A Reynolds-averaged model cuts separation-bubble length error on the NASA hump by at least 40%.",
+    "criterion": "Use the baseline two-dimensional hump without flow control at Mach 0.1 and chord Reynolds number 936,000. Compute the distance from flow separation to reattachment in units of the hump chord and compare it with the experimental length of 0.435. Reduce the absolute relative error in length by at least 40% from the documented typical error of about 35%, giving a target error of about 21% or less. This applies the program target to one of its published metrics.",
     "set_by": "NASA Revolutionary Computational Aerosciences and Transformational Tools and Technologies programmes; 40% Challenge and Standard Test Cases, applied here to the published hump bubble-length metric.",
     "set_by_kind": "government_programme",
     "threshold_quote": "40% reduction in predictive error against standard test cases for turbulent separated flows",
     "threshold_ref": 9,
     "refs": [
      9,
-     2,
-     10
+     2
     ],
     "status": "active",
     "replaced_by": [],
@@ -402,7 +427,7 @@
    {
     "id": "m3",
     "title": "A derived closure predicts laboratory transport with error bounds that resolve measured changes.",
-    "criterion": "Derive a closure or equivalent statistical solution from incompressible Navier–Stokes dynamics with specified physical inputs. In its initial laboratory validation flows, predict drag and velocity-fluctuation statistics without empirical closure fitting; bound prediction errors over the stated Reynolds-number and averaging ranges, with intervals narrower than measured variation across conditions. Independent transfer remains the completion test. Warnecke’s preprint of 12 March 2026 reports a three-point statistical interpolation compared with preliminary simulations; it does not report this transport-error demonstration.",
+    "criterion": "Derive a closure or equivalent statistical solution from the incompressible Navier–Stokes equations for specified forcing and boundary conditions. In the initial laboratory flows, predict drag and velocity-fluctuation statistics without fitting empirical closure parameters. Derive prediction-error bounds for the stated Reynolds numbers and averaging ranges. Compare predictions with measurements, accounting for measurement uncertainty, and show that the prediction intervals are narrower than the measured variation across conditions.",
     "set_by": "Atlas fallback: the reviewed statistical-theory literature, NASA roadmap and Spalart requirements contain no acceptance threshold for this controlled-error derivation and laboratory demonstration.",
     "set_by_kind": "atlas",
     "threshold_quote": null,
@@ -410,8 +435,23 @@
     "refs": [
      5,
      6,
-     3,
-     11
+     3
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m4",
+    "title": "Measured viscous and turbulent shear sum to the linear total-stress profile in a plane channel.",
+    "criterion": "In statistically steady, fully developed incompressible flow between parallel walls, measure the mean streamwise velocity U and the covariance ⟨u′v′⟩ of streamwise and wall-normal velocity fluctuations. Test μ dU/dy − ρ⟨u′v′⟩ = (h − y)(−dp/dx) across the half-channel using an independently measured streamwise pressure gradient. Here y is distance from the wall, h is the channel half-height, μ is dynamic viscosity and ρ is density. Report the difference between the two sides with the measurement uncertainty.",
+    "set_by": "Community convention for fully developed plane-channel flow, using the integrated mean momentum equation as an experimental consistency check.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "the total shear stress (sum of the viscous and Reynolds stresses) must vary linearly across the channel",
+    "threshold_ref": 18,
+    "refs": [
+     17,
+     18
     ],
     "status": "active",
     "replaced_by": [],
@@ -423,7 +463,8 @@
    "No outside completion criterion was found for an empirically unfitted turbulent-transport theory combining derived error bounds with independent validation across geometries.",
    "No outside acceptance threshold was found for the controlled-error laboratory derivation milestone.",
    "No opened result demonstrated the complete combination required by the completion test.",
-   "The full Moisy experimental paper could not be opened; its abstract gives Reynolds-number coverage and agreement but no measurement-record count."
+   "Moisy and colleagues do not give the total number of velocity records retained after screening.",
+   "No academy, professional society or research program statement was found disputing the feasibility or value of a transport theory for a stated range of flows."
   ],
   "references": [
    {
@@ -554,34 +595,6 @@
    },
    {
     "id": 10,
-    "kind": "report",
-    "url": "https://ntrs.nasa.gov/api/citations/20160007667/downloads/20160007667.pdf",
-    "doi": null,
-    "title": "Revolutionary Computational Aerosciences (RCA)",
-    "authors": "Malik MR.",
-    "container": "NASA",
-    "year": "2016",
-    "volume": null,
-    "issue": null,
-    "pages": null,
-    "citation_source": "model"
-   },
-   {
-    "id": 11,
-    "kind": "preprint",
-    "url": "https://arxiv.org/abs/2603.11595",
-    "doi": "10.48550/arXiv.2603.11595",
-    "title": "Multipoint Statistical Turbulent Dynamics from Hopf Equation Closures",
-    "authors": "Warnecke M",
-    "container": "arXiv",
-    "year": "2026",
-    "volume": null,
-    "issue": null,
-    "pages": null,
-    "citation_source": "arxiv"
-   },
-   {
-    "id": 12,
     "kind": "journal",
     "url": "https://rainbow.ldeo.columbia.edu/~alexeyk/Papers/Kolmogorov1941b.pdf",
     "doi": null,
@@ -595,7 +608,7 @@
     "citation_source": "model"
    },
    {
-    "id": 13,
+    "id": 11,
     "kind": "preprint",
     "url": "https://arxiv.org/html/1803.09695",
     "doi": null,
@@ -609,7 +622,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 14,
+    "id": 12,
     "kind": "report",
     "url": "https://ntrs.nasa.gov/api/citations/20180003199/downloads/20180003199.pdf",
     "doi": null,
@@ -623,7 +636,7 @@
     "citation_source": "model"
    },
    {
-    "id": 15,
+    "id": 13,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2305.05717",
     "doi": null,
@@ -637,7 +650,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 16,
+    "id": 14,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2310.01375v1",
     "doi": null,
@@ -649,9 +662,122 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 15,
+    "kind": "report",
+    "url": "https://www.asme.org/codes-standards/find-codes-standards/standard-for-verification-and-validation-in-computational-fluid-dynamics-and-heat-transfer",
+    "doi": null,
+    "title": "Standard for Verification and Validation in Computational Fluid Dynamics and Heat Transfer",
+    "authors": "The American Society of Mechanical Engineers",
+    "container": "ASME V&V 20-2009",
+    "year": "2009 (R2021)",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 16,
+    "kind": "press_release",
+    "url": "https://www.ens-lyon.fr/en/article/research/simons-foundation-supports-international-collaboration-revisit-fundamental-problems-fluid-turbulence",
+    "doi": null,
+    "title": "Simons Foundation supports international collaboration to revisit the fundamental problems of fluid turbulence",
+    "authors": "ENS de Lyon",
+    "container": null,
+    "year": "2019",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 17,
+    "kind": "report",
+    "url": "https://ntrs.nasa.gov/api/citations/19930082911/downloads/19930082911.pdf",
+    "doi": null,
+    "title": "Investigation of Turbulent Flow in a Two-Dimensional Channel",
+    "authors": "John Laufer",
+    "container": "National Advisory Committee for Aeronautics, Technical Note 2123",
+    "year": "1950",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 18,
+    "kind": "journal",
+    "url": "https://link.aps.org/accepted/10.1103/PhysRevFluids.8.084305",
+    "doi": "10.1103/PhysRevFluids.8.084305",
+    "title": "Mechanisms of drag reduction by semidilute inertial particles in turbulent channel flow",
+    "authors": "Dave H, Kasbaoui MH",
+    "container": "Phys. Rev. Fluids",
+    "year": "2023",
+    "volume": "8",
+    "issue": "8",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 19,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/chao-dyn/9812002",
+    "doi": "10.48550/arXiv.chao-dyn/9812002",
+    "title": "Kolmogorov equation in fully developed turbulence",
+    "authors": "Moisy F, Tabeling P, Willaime H",
+    "container": "arXiv",
+    "year": "1998",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 20,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2410.14431v2",
+    "doi": null,
+    "title": "https://arxiv.org/html/2410.14431v2",
+    "authors": "Oulghelou M, Cherroud S, Merle X, Cinnella P",
+    "container": "arXiv",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 21,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/chao-dyn/9912033",
+    "doi": null,
+    "title": "Longitudinal Structure Functions in Decaying and Forced Turbulence",
+    "authors": "Fukayama D, Oyamada T, Nakano T, Gotoh T, Yamamoto K",
+    "container": "arXiv",
+    "year": "1999",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 22,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/nlin/0208004",
+    "doi": null,
+    "title": "Local 4/5-Law and Energy Dissipation Anomaly in Turbulence",
+    "authors": "Eyink GL",
+    "container": "arXiv",
+    "year": "2002",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
    }
   ],
   "milestone_order": [
+   "m4",
    "m1",
    "m2",
    "m3"
@@ -661,363 +787,538 @@
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "Kolmogorov’s theory, with no sample, relates the third longitudinal velocity moment to dissipation and separation; the coefficient is illegible.",
-    "detail": "The supplied text says the viscous term may be neglected at large separation, but does not state the stationarity or inviscid-limit dissipation assumptions. Its transcription also obscures the coefficient in equation (7).",
+    "finding": "Kolmogorov derives the −4/5 longitudinal third-moment coefficient for locally isotropic turbulence. No sample size applies.",
+    "detail": "The supplied transcription drops the fraction in equation (7). The numerator and denominator are recoverable from the adjacent small-separation balance and the coefficient relation in equation (10).",
     "quote": "For large r, on the contrary, the first term may be \nneglected in comparison with the second, i.e. we may assume that \nBddd --Er. (7)",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "For stationary 3D Navier–Stokes solutions (sample size not applicable), the paper derives a 4/5-law limit under weak anomalous dissipation.",
-    "detail": "The result assumes homogeneity, approximate inertial-range isotropy and weak anomalous dissipation as viscosity tends to zero. Its ε is mean energy input; the paper assumes only an energy inequality, so it does not establish that ε equals mean energy dissipation. Existence of solutions satisfying its weak dissipation assumption remains open.",
+    "finding": "For stationary, homogeneous, approximately isotropic 3D Navier–Stokes solutions, the longitudinal third-moment slope is −4/5 times the energy input (theorem, no sample).",
+    "detail": "Weak anomalous dissipation requires ν E‖u‖² → 0. Under an additional energy-balance assumption, the input in the theorem equals the mean viscous dissipation.",
     "quote": "If the force is statistically homogeneous, then any homogeneous martingale solution satisfies the spherically averaged 4/5 law pointwise in space.\nAn additional hypothesis of approximate isotropy in the inertial range gives the traditional version of the Kolmogorov law.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
-    "finding": "NASA hump, one test case: k-kL-ARSM predicted separation-bubble length with 3.4% error.",
-    "detail": "The error is below the approximately 21% target, and the report states Mach 0.1. However, the supplied text does not state the chord Reynolds number, so the specified condition cannot be verified. The model was calibrated using this hump case.",
+    "finding": "On one NASA hump benchmark, k-kL-ARSM predicted separation-bubble length with 3.4% absolute relative error.",
+    "detail": "The report used the hump to calibrate k-kL-ARSM. The criterion permits calibration.",
     "quote": "Out of all two-equation turbulence models,\nk-kL-ARSM produces bubble size that is close to the experimental data with 3.4% error (ﬁg-\nure 23(a)).",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Velocity-correlation ratio in grid turbulence: 1.28; sample size not stated.",
-    "detail": "The paper compares an isotropic-turbulence relation with experimental data, but does not demonstrate drag prediction or bounded prediction errors over stated conditions. It also uses experimental data to determine a constant.",
-    "quote": "If we take into account the wire-length correction for the ratio (21), in Dryden et \nal. (1937, p. 29) is obtained the value 1.28, which is also sufficiently close to the \ntheoretical value 4, if we consider the limited accuracy of the experiment.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
     "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "For stationary Navier–Stokes solutions, the authors derive an averaged 4/5 law; no laboratory sample is studied.",
-    "detail": "The result concerns an idealized periodic flow and assumes weak anomalous dissipation, whose existence remains open. It does not demonstrate drag predictions or bounded transport errors against laboratory measurements.",
-    "quote": "The main result of this paper is to show that only (\nWAD\n) is required to deduce the 4/5 law in its averaged form.",
+    "finding": "On one NASA hump benchmark, k-kL-ARSM produced Reynolds shear-stress levels comparable to measurements at four stations.",
+    "detail": "The four comparison stations are shown in Figure 25. The skin-friction comparison concerns a local coefficient.",
+    "quote": "However, the present k-kL-ARSM\nshows the capability of producing similar levels of shear stress to the experimental data at\nx/c of 0.8 to 1.3.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "In one wall-mounted hump test, the k-kL-ARSM model predicted separation-bubble size with 3.4% error.",
-    "detail": "The model was calibrated on the hump flow. The report does not derive an unfitted closure from incompressible Navier–Stokes dynamics or provide the required bounded errors for drag and velocity-fluctuation statistics.",
-    "quote": "Out of all two-equation turbulence models,\nk-kL-ARSM produces bubble size that is close to the experimental data with 3.4% error (ﬁg-\nure 23(a)).",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "For a theoretical sequence of 3D flows (sample size not applicable), the longitudinal third-order flux law has coefficient −4/5.",
-    "detail": "The result concerns statistically stationary, stochastically forced incompressible flows. In the inviscid limit, the coefficient is the small-scale dissipation including possible singularities; under the stated sufficient condition for an isolated direct cascade, it equals the mean energy input ε. The theorem uses spatial and directional averages.",
-    "quote": "Necessary and sufficient conditions for the third order Kolmogorov universal scaling flux laws are derived for the stochastically forced incompressible Navier-Stokes equations on the torus in 2d and 3d.",
+    "finding": "Stationary 3D Navier–Stokes solutions on a torus recover the longitudinal coefficient −4/5 for an isolated direct cascade. Sample size is inapplicable.",
+    "detail": "The lower cutoff ℓν tends to zero with viscosity. The law holds uniformly up to ℓI in the nested limit, with ν→0 first and then ℓI→0 below the forcing scale. In the defect-free case, ν E‖uν(t)‖²→0 suffices for the full mean dissipation rate to enter the law.",
+    "quote": "\\displaystyle\\lim_{\\ell_{I}\\to 0}\\limsup_{\\nu\\to 0}\\sup_{\\ell\\in[\\ell_{\\nu},\\ell_{I}]}\\Big|\\frac{S_{vel}^{\\parallel}(\\ell)}{\\ell}+\\frac{4}{5}\\varepsilon^{*}\\Big|=0",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "Deterministic weak fluid solutions, sample size not applicable: a local version of the 4/5 law is derived.",
-    "detail": "The result uses spherical averages and distributional limits; the text does not establish the stated stationary, homogeneous and isotropic law with its inviscid-limit dissipation assumptions.",
-    "quote": "As a consequence, we show that certain weak solutions of the Euler and Navier-Stokes equations satisfy deterministic versions of Kolmogorov’s\n4\n/\n5\n\\nicefrac{{4}}{{5}}\n,\n4\n/\n3\n\\nicefrac{{4}}{{3}}\n,\n4\n/\n15\n\\nicefrac{{4}}{{15}}\nlaws.",
+    "finding": "A theorem for forced 3D Navier–Stokes solution families (no empirical sample) derives the deterministic longitudinal scaling coefficient −4/5.",
+    "detail": "The corollary assumes uniform Besov regularity and forcing bounds. It takes viscosity to zero before shrinking the upper scale cutoff. For the example with positive limiting cumulative dissipation, the lower cutoff can approach the Kolmogorov ν^(3/4) scale from above.",
+    "quote": "The proof of the\n4\n/\n5\n\\nicefrac{{4}}{{5}}\nlaw follows identically using (\n2.16\n)",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Blended RANS on one NASA hump case gives 19.5% absolute relative bubble-length error against the Atlas reference.",
+    "detail": "The Atlas error is calculated from the prediction in Table 11. The paper’s own experimental comparison gives about 1.9% error.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Stationary homogeneous isotropic turbulence: the theoretical derivation (no sample) recovers the longitudinal third-moment coefficient −4/5.",
+    "detail": "The steady energy balance ε = εin is stated, but the source does not explicitly specify the behavior of ε as ν → 0.",
+    "quote": "In the inertial region of stationary-turbulence with in-\nﬁnite Reynolds number, one can neglect the second, third\nand fourth terms on the RHS of the above equation, so\n\n[Page 5]\nStructure Functions in Decaying and Forced Turbulence 5\nthat one gets Kolmogorov’s well-known 4/5 law: 15)\nDLLL(r) = − 45 εr. (4.4)",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For weak 3D incompressible Euler flows, the local longitudinal third-order law has coefficient −4/5 (theorem, no empirical sample).",
+    "detail": "Corollary 1 assumes the distributional increment limits exist. Equation (3.2) uses smooth spacetime averaging, takes viscosity to zero before separation tends to zero, and uses the limiting local viscous dissipation.",
+    "quote": "S_{L}({\\bf u})=-{{4}\\over{5}}D({\\bf u}),\\,\\,\\,\\,S_{T}({\\bf u})=-{{8}\\over{15}}D({\\bf u}).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 22,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    }
   ],
   "judged": [
    {
     "url": "https://doi.org/10.48550/arXiv.2308.00837",
+    "milestone": "m4",
+    "hash": "91de6930b617",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doi.org/10.48550/arXiv.2308.00837",
     "milestone": "m1",
-    "hash": "4989b2a93177",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7ddc3e233315",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.48550/arXiv.2308.00837",
     "milestone": "m2",
-    "hash": "793ad20800d2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "488cea745241",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.48550/arXiv.2308.00837",
     "milestone": "m3",
-    "hash": "ab64bef96a87",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ec824115c476",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.48550/arXiv.2308.00837",
     "milestone": "completion",
     "hash": "a7e3a96e03f1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.claymath.org/wp-content/uploads/2022/06/navierstokes.pdf",
+    "milestone": "m4",
+    "hash": "91de6930b617",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.claymath.org/wp-content/uploads/2022/06/navierstokes.pdf",
     "milestone": "m1",
-    "hash": "4989b2a93177",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7ddc3e233315",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.claymath.org/wp-content/uploads/2022/06/navierstokes.pdf",
     "milestone": "m2",
-    "hash": "793ad20800d2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "488cea745241",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.claymath.org/wp-content/uploads/2022/06/navierstokes.pdf",
     "milestone": "m3",
-    "hash": "ab64bef96a87",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ec824115c476",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.claymath.org/wp-content/uploads/2022/06/navierstokes.pdf",
     "milestone": "completion",
     "hash": "a7e3a96e03f1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://openai.com/index/navier-stokes-solution/",
+    "milestone": "m4",
+    "hash": "91de6930b617",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://openai.com/index/navier-stokes-solution/",
     "milestone": "m1",
-    "hash": "4989b2a93177",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7ddc3e233315",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://openai.com/index/navier-stokes-solution/",
     "milestone": "m2",
-    "hash": "793ad20800d2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "488cea745241",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://openai.com/index/navier-stokes-solution/",
     "milestone": "m3",
-    "hash": "ab64bef96a87",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ec824115c476",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://openai.com/index/navier-stokes-solution/",
     "milestone": "completion",
     "hash": "a7e3a96e03f1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.claymath.org/news/navier-stokes-announcement/",
+    "milestone": "m4",
+    "hash": "91de6930b617",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.claymath.org/news/navier-stokes-announcement/",
     "milestone": "m1",
-    "hash": "4989b2a93177",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7ddc3e233315",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.claymath.org/news/navier-stokes-announcement/",
     "milestone": "m2",
-    "hash": "793ad20800d2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "488cea745241",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.claymath.org/news/navier-stokes-announcement/",
     "milestone": "m3",
-    "hash": "ab64bef96a87",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ec824115c476",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.claymath.org/news/navier-stokes-announcement/",
     "milestone": "completion",
     "hash": "a7e3a96e03f1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doi.org/10.48550/arXiv.2503.01800",
+    "milestone": "m4",
+    "hash": "91de6930b617",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.48550/arXiv.2503.01800",
     "milestone": "m1",
-    "hash": "4989b2a93177",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7ddc3e233315",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.48550/arXiv.2503.01800",
     "milestone": "m2",
-    "hash": "793ad20800d2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "488cea745241",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.48550/arXiv.2503.01800",
     "milestone": "m3",
-    "hash": "ab64bef96a87",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ec824115c476",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.48550/arXiv.2503.01800",
     "milestone": "completion",
     "hash": "a7e3a96e03f1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://rainbow.ldeo.columbia.edu/~alexeyk/Papers/Kolmogorov1941b.pdf",
+    "milestone": "m4",
+    "hash": "91de6930b617",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://rainbow.ldeo.columbia.edu/~alexeyk/Papers/Kolmogorov1941b.pdf",
     "milestone": "m1",
-    "hash": "4989b2a93177",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/1803.09695",
-    "milestone": "m1",
-    "hash": "4989b2a93177",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://ntrs.nasa.gov/api/citations/20180003199/downloads/20180003199.pdf",
-    "milestone": "m2",
-    "hash": "793ad20800d2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7ddc3e233315",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://rainbow.ldeo.columbia.edu/~alexeyk/Papers/Kolmogorov1941b.pdf",
     "milestone": "m2",
-    "hash": "793ad20800d2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "488cea745241",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://rainbow.ldeo.columbia.edu/~alexeyk/Papers/Kolmogorov1941b.pdf",
     "milestone": "m3",
-    "hash": "ab64bef96a87",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ec824115c476",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://rainbow.ldeo.columbia.edu/~alexeyk/Papers/Kolmogorov1941b.pdf",
     "milestone": "completion",
     "hash": "a7e3a96e03f1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/1803.09695",
+    "milestone": "m4",
+    "hash": "91de6930b617",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/1803.09695",
+    "milestone": "m1",
+    "hash": "7ddc3e233315",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/1803.09695",
     "milestone": "m2",
-    "hash": "793ad20800d2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "488cea745241",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/1803.09695",
     "milestone": "m3",
-    "hash": "ab64bef96a87",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ec824115c476",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/1803.09695",
     "milestone": "completion",
     "hash": "a7e3a96e03f1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ntrs.nasa.gov/api/citations/20180003199/downloads/20180003199.pdf",
+    "milestone": "m4",
+    "hash": "91de6930b617",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://ntrs.nasa.gov/api/citations/20180003199/downloads/20180003199.pdf",
     "milestone": "m1",
-    "hash": "4989b2a93177",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7ddc3e233315",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ntrs.nasa.gov/api/citations/20180003199/downloads/20180003199.pdf",
+    "milestone": "m2",
+    "hash": "488cea745241",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://ntrs.nasa.gov/api/citations/20180003199/downloads/20180003199.pdf",
     "milestone": "m3",
-    "hash": "ab64bef96a87",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ec824115c476",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://ntrs.nasa.gov/api/citations/20180003199/downloads/20180003199.pdf",
     "milestone": "completion",
     "hash": "a7e3a96e03f1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2305.05717",
+    "milestone": "m4",
+    "hash": "91de6930b617",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2305.05717",
     "milestone": "m1",
-    "hash": "4989b2a93177",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7ddc3e233315",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2305.05717",
+    "milestone": "m2",
+    "hash": "488cea745241",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2305.05717",
+    "milestone": "m3",
+    "hash": "ec824115c476",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2305.05717",
+    "milestone": "completion",
+    "hash": "a7e3a96e03f1",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2310.01375v1",
+    "milestone": "m4",
+    "hash": "91de6930b617",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2310.01375v1",
     "milestone": "m1",
-    "hash": "4989b2a93177",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7ddc3e233315",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2310.01375v1",
+    "milestone": "m2",
+    "hash": "488cea745241",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2310.01375v1",
+    "milestone": "m3",
+    "hash": "ec824115c476",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2310.01375v1",
+    "milestone": "completion",
+    "hash": "a7e3a96e03f1",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2410.14431v2",
+    "milestone": "m4",
+    "hash": "91de6930b617",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2410.14431v2",
+    "milestone": "m1",
+    "hash": "7ddc3e233315",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2410.14431v2",
     "milestone": "m2",
-    "hash": "793ad20800d2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "488cea745241",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2410.14431v2",
+    "milestone": "m3",
+    "hash": "ec824115c476",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2410.14431v2",
+    "milestone": "completion",
+    "hash": "a7e3a96e03f1",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/chao-dyn/9912033",
+    "milestone": "m1",
+    "hash": "7ddc3e233315",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/nlin/0208004",
+    "milestone": "m1",
+    "hash": "7ddc3e233315",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://repository.tudelft.nl/file/File_25502c9e-c0c5-4a3b-bbe4-82824b049618",
+    "milestone": "m2",
+    "hash": "488cea745241",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1084,20 +1385,123 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 5 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Skin friction accounts for about half the drag on a civil aircraft in cruise. In a wind-tunnel test of flow over a hump at chord Reynolds number 936,000, typical Reynolds-averaged models overpredict the length of the separated region by about 35% and underestimate peak turbulent shear-stress magnitude at 80% chord by about 45%. Improvements from tuning are often specific to one flow. Within a validated range, engineers could compare drag on new shapes before choosing which ones to test in a wind tunnel.\". Reason: The current paragraph quantifies model errors but leaves out the design decision they affect and the limits on transferring a tuned model to another shape."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Simons Foundation collaboration on the statistical mechanics of turbulence, 2019: \"Our goal is to construct a nonequilibrium statistical theory\". Reason: The collaboration’s 2019 announcement identifies the specific interaction its statistical theory is intended to explain."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by U.S. National Science Foundation, TEMPEST Science and Technology Center, 2026: \"to develop more accurate and reliable physics-grounded models\". Reason: NSF’s stated objective identifies the program and makes clear the broader scope of the models it seeks."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit completion: basis = \"ASME V&V 20 quantifies simulation accuracy for a specified variable at a specified validation point. It leaves extrapolation beyond validation points to engineering judgment. The Atlas criterion adds a first-principles derivation, bounds on statistical prediction errors and an independent test in a new geometry. Achievement applies to the stated domain of the theory.\"; refs = [5, 6, 3, 4, 17]. Reason: ASME V&V 20 supplies the missing distinction between assessing error at a validation point and establishing accuracy in a new geometry."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after None: \"Measured viscous and turbulent shear sum to the linear total-stress profile in a plane channel.\". Reason: The channel experiment adds an early laboratory test that directly connects measured velocity fluctuations to momentum transport and wall friction."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"For statistically stationary, homogeneous, isotropic turbulence in three dimensions, derive \\u27e8(\\u03b4u_L)\\u00b3\\u27e9 = \\u2212(4/5)\\u03b5r in the inertial range as viscosity tends to zero. Here \\u03b4u_L is the velocity at the second point minus the velocity at the first, projected along their separation r, and \\u03b5 is the mean energy dissipation rate per unit mass. State the assumptions on scale separation and on dissipation in the limit.\"; threshold_quote = \"must either satisfy the four-fifths law, or explicitly violate the assumptions made in deriving it.\"; threshold_ref = 7; refs = [7, 12, 13, 8, 21]. Reason: The helium experiment fitted dissipation and a forcing length in a finite-Reynolds-number equation, whereas this milestone tests recovery of the limiting four-fifths law."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: title = \"A Reynolds-averaged model cuts separation-bubble length error on the NASA hump by at least 40%.\"; criterion = \"Use the baseline two-dimensional hump without flow control at Mach 0.1 and chord Reynolds number 936,000. Compute the distance from flow separation to reattachment in units of the hump chord and compare it with the experimental length of 0.435. Reduce the absolute relative error in length by at least 40% from the documented typical error of about 35%, giving a target error of about 21% or less. This applies the program target to one of its published metrics.\"; threshold_quote = \"40% reduction in predictive error against standard test cases for turbulent separated flows\"; threshold_ref = 9; refs = [9, 2]. Reason: The published hump metric uses both separation and reattachment positions, so matching the reattachment position alone cannot establish the required reduction in length error."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Derive a closure or equivalent statistical solution from the incompressible Navier\\u2013Stokes equations for specified forcing and boundary conditions. In the initial laboratory flows, predict drag and velocity-fluctuation statistics without fitting empirical closure parameters. Derive prediction-error bounds for the stated Reynolds numbers and averaging ranges. Compare predictions with measurements, accounting for measurement uncertainty, and show that the prediction intervals are narrower than the measured variation across conditions.\"; refs = [5, 6, 3]. Reason: The existing criterion includes a preprint result and leaves implicit the comparison between laboratory measurements and the theory’s error bounds."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 3. Reason: The authors’ full manuscript reports more than 30 million data points per file and describes its file-selection procedure."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"Moisy and colleagues do not give the total number of velocity records retained after screening.\". Reason: The manuscript gives the sample count per file and the approximate fraction rejected, leaving a narrower gap about the number of independent records."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No academy, professional society or research program statement was found disputing the feasibility or value of a transport theory for a stated range of flows.\". Reason: Reservations about a universal theory have a wider scope than objections to a theory with an explicitly limited domain."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "remove statement 1. Reason: The NSF quotation describes a prediction difficulty, while the same announcement states the center’s modeling objective explicitly."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Applied 12 of 12 proposed operations from MAT-03-revise-20261121T130749104757Z; now version 2."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m4, m1, m2, m3."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 1 from arXiv, 3 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 3 found, 0 not found, 2 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Structural problems after applying: references never cited: [10, 11]"
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 11 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 4 candidates returned, 0 dropped as sources already used, 4 to judge."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 3 of 4 new candidates, without search. Skipped: 2 no readable saved copy. Dropped rows: 1 not relevant. Replaced 8 earlier rows. Added 9 results: 7 from sources already used, 2 from newly found sources."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 3 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 8 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Removed 2 references no longer cited; renumbered."
    }
   ],
-  "results_run": "2026-11-15"
- },
- "review": {
-  "state": "published",
-  "note": null,
-  "into": null,
-  "at": "2026-11-15",
-  "log": [
-   {
-    "date": "2026-11-15",
-    "state": "published"
-   }
-  ]
+  "results_run": "2026-11-21"
  }
 }
