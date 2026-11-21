@@ -283,11 +283,15 @@
  "page": {
   "id": "MAT-07",
   "title": "Prescriptive mathematical theory of deep learning",
-  "definition": "A mathematical theory takes stated assumptions about a class of data distributions and prescribes, before any training, a deep neural network and its training procedure, with a proved bound on error on unseen data that experiments then confirm. It covers feature learning, in which training changes the network's internal representations.",
+  "definition": "From stated assumptions about how the data are generated, a mathematical theory prescribes a deep neural network and its training procedure before training begins. It accounts for feature learning, in which training changes the network’s internal representations, and proves an upper bound on population risk, the expected loss on a new example from the same distribution. Experiments test the theory’s predictions by measuring loss on held-out examples.",
   "goal": {
-   "need": "In Zhang et al.’s CIFAR-10 experiments, the same 1,649,402-parameter Inception architecture attained 100% training accuracy with genuine or randomized labels. Without augmentation or weight decay, test accuracy was 85.75% with genuine labels and 9.78% with randomized labels, on 10,000 held-out images after training on 50,000 images. Architecture size therefore did not explain this difference; a design theory must account for the data and training-selected solution.",
+   "need": "For one 350-million-parameter language model, choosing training settings on a smaller network cost as much as pretraining the large model once. A perfect training fit gives little guidance about new examples. On CIFAR-10, the same network fit genuine and randomized labels perfectly, yet test accuracy fell from 85.75% to 9.78% when the labels were randomized. Where the data satisfy the theory’s assumptions, teams could choose a network and training settings for a target error and spend less of their computing budget on trial runs.",
    "need_refs": [
-    1
+    29,
+    1,
+    18,
+    3,
+    5
    ],
    "figures": {
     "caption": "Inception on CIFAR-10 without data augmentation or weight decay.",
@@ -327,6 +331,14 @@
      "context": "The collaboration seeks to use rigorous analysis of neural networks to guide algorithm design and transfer between domains.",
      "ref": 3,
      "checked": true
+    },
+    {
+     "body": "Office of Naval Research, FY2020 Multidisciplinary University Research Initiative, Topic 3, Mathematical Methods for Deep Learning",
+     "year": "2019",
+     "quote": "designing Deep Learning architectures, training them, analyzing their performance, and predicting their behavior under different conditions with provable guarantees",
+     "context": "The solicitation identifies the choice of architectures suited to a given learning task as a research objective.",
+     "ref": 28,
+     "checked": true
     }
    ]
   },
@@ -336,13 +348,13 @@
    "set_by": "Technology Atlas. The two-class, in-advance design test is the Atlas's reading of the design goals stated by NSF and the NSF–Simons collaborations; no outside body has published an acceptance test.",
    "set_by_kind": "atlas",
    "threshold_quote": "At present, no framework can robustly predict the observed exponents a priori from dataset and architectural properties across realistic settings",
-   "threshold_ref": 19,
+   "threshold_ref": 18,
    "basis": "No outside body defines when a design theory of deep learning is complete. Proved feature-learning guarantees exist for single restricted data models, mostly for networks of 2 or 3 layers, and none was registered before the experiments it explains. The test asks for what prescriptive means: a design fixed in advance from the theory, a bound that is informative at the sizes tested, and confirmation by others, on 2 data classes of different kinds so that one tailored model does not suffice. Coverage of natural images or text is not required.",
    "refs": [
     2,
     3,
     4,
-    19
+    18
    ],
    "threshold_checked": true
   },
@@ -367,9 +379,9 @@
    },
    {
     "id": "m2",
-    "title": "A theorem proves gradient descent drives a finite-width neural network to zero training loss.",
-    "criterion": "A theorem, peer-reviewed or checked in a proof assistant, states a finite width, an initialization and a step size for which gradient descent on a neural network brings training loss below any ε>0 on n training points within a stated number of steps, with stated probability. The first such results are for two-layer ReLU networks with squared loss and width polynomial in n, whose weights stay close to initialization. Test error is not addressed at this step. A result that needs infinite width, or a rate without a finite width, is partial.",
-    "set_by": "Community convention of a peer-reviewed convergence proof; first stated for two-layer rectified-linear-unit networks by Du and colleagues, ICLR 2019, Theorem 4.1.",
+    "title": "A theorem proves gradient descent reaches any positive training-loss tolerance at finite width.",
+    "criterion": "For n training examples satisfying stated assumptions, a peer-reviewed or machine-checked theorem specifies a finite network width, initialization and gradient-descent step size. For every ε > 0, it gives a finite iteration bound by which empirical loss is below ε, with stated probability over any random initialization.",
+    "set_by": "The finite-width gradient-descent convergence test exemplified by Du and colleagues, ICLR 2019, Theorem 4.1.",
     "set_by_kind": "community_convention",
     "threshold_quote": "randomly initialized gradient descent converges to a globally optimal solution at a linear convergence rate for the quadratic loss function.",
     "threshold_ref": 9,
@@ -383,10 +395,10 @@
    {
     "id": "m3",
     "title": "A proved bound certifies below-chance test error for a trained network with more weights than data.",
-    "criterion": "A generalization bound, evaluated numerically for a trained neural network with more parameters than training examples, certifies with stated confidence a population classification error below that of chance prediction: 0.5 for two balanced classes. The bound may depend on the data and may apply to a distribution over weights (a PAC-Bayes bound); the first such certificate was at most 0.23 on two-class MNIST with 55,000 training images. A bound at or above chance, or an estimate from held-out data alone, does not count.",
-    "set_by": "Community convention of a nonvacuous probability bound; first computed by Dziugaite and Roy, UAI 2017, for two-class MNIST.",
+    "criterion": "For a trained classifier with more parameters than training examples, evaluate a proved generalization bound numerically at a stated confidence level. Its upper bound on population classification error must be strictly below the error of uniform random guessing, 0.5 for binary classification. A data-dependent bound may use the training sample. For a stochastic network, the certificate applies to error averaged over the stated distribution of weights.",
+    "set_by": "Dziugaite and Roy, UAI 2017, distinguish certificates that beat the guessing baseline from bounds that merely fall below one.",
     "set_by_kind": "community_convention",
-    "threshold_quote": "all true label experiments have classification error bounded by 0.23.",
+    "threshold_quote": "the bound is nonvacuous, but trivial in the sense that the error rate of guessing is 50%.",
     "threshold_ref": 10,
     "refs": [
      10
@@ -398,17 +410,17 @@
    {
     "id": "m4",
     "title": "A theorem bounds test error for a finite network that learns features under gradient training.",
-    "criterion": "A theorem, peer-reviewed or checked in a proof assistant, gives for one stated data model and loss a finite architecture, initialization and gradient-based training rule, with finite sufficient sample size, width and number of steps, and bounds the population risk. The proof must use a change in the network's internal representation during training; an analysis in which weights stay near initialization (the kernel regime) is partial. Networks of two layers count. No prediction made before experiments is required.",
+    "criterion": "For one stated data model and loss, a peer-reviewed or machine-checked theorem specifies a finite architecture, initialization and gradient-based training rule. It bounds population risk at a stated finite sample size, width and number of training steps. The risk proof must use task-relevant features acquired during training. A two-layer network qualifies. A bound proved solely for features fixed at initialization establishes only partial progress.",
     "set_by": "Community convention of a peer-reviewed theorem; the object of study stated by Damian, Lee and Soltanolkotabi, COLT 2022.",
     "set_by_kind": "community_convention",
-    "threshold_quote": "can be easily learned with gradient descent on a two layer neural network outside the kernel regime by learning representations that are relevant to the target task",
+    "threshold_quote": "outside the kernel regime by learning representations that are relevant to the target task",
     "threshold_ref": 5,
     "refs": [
      5,
      6,
      7,
      8,
-     18
+     32
     ],
     "status": "active",
     "replaced_by": [],
@@ -421,10 +433,10 @@
     "set_by": "Ren, Dandi, Krzakala and Lee, 2026, who pose the question for Random Hierarchy Models; community convention of a peer-reviewed theorem.",
     "set_by_kind": "community_convention",
     "threshold_quote": "can we prove that deep networks, trained with gradient-based methods and standard input-label pairs, can efficiently exploit hierarchical structure?",
-    "threshold_ref": 20,
+    "threshold_ref": 19,
     "refs": [
-     20,
-     21
+     19,
+     20
     ],
     "status": "active",
     "replaced_by": [],
@@ -437,9 +449,26 @@
     "set_by": "Technology Atlas; the completion test reduced to one data class, without proved bounds or replication. Simon and colleagues name prediction from first principles as the decisive test of a theory of scaling laws.",
     "set_by_kind": "atlas",
     "threshold_quote": "a decisive test of any such theory is its ability to predict these exponents quantitatively from first principles",
-    "threshold_ref": 19,
+    "threshold_ref": 18,
     "refs": [
-     19
+     18
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m7",
+    "title": "A theory correctly predicts how excess test loss scales with training-set size in one setting.",
+    "criterion": "For a stated data distribution and network training procedure, derive the exponent α for which excess loss scales as n^(−α) in a specified regime, where n is the training-set size and excess loss is measured above a stated limiting loss. Obtain α independently of the measured learning curve. Train finite networks across sample sizes in that regime and show quantitative agreement between the derived exponent and the exponent estimated from held-out losses.",
+    "set_by": "Simon and colleagues, Open Direction 7 on predicting scaling exponents from first principles, with experimental tests by Müller and colleagues and by Cagnetta and colleagues.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "a decisive test of any such theory is its ability to predict these exponents quantitatively from first principles",
+    "threshold_ref": 18,
+    "refs": [
+     18,
+     30,
+     31
     ],
     "status": "active",
     "replaced_by": [],
@@ -449,7 +478,7 @@
   "measures": [],
   "not_found": [
    "No external coverage requirement was found that distinguishes a completed general design theory from the restricted theorems cited here.",
-   "The ONR MURI Foundations of Deep Learning project’s About page could not be opened."
+   "No programme, academy or professional society statement was found disputing the value or feasibility of a prescriptive theory for specified data classes."
   ],
   "references": [
    {
@@ -692,20 +721,6 @@
    },
    {
     "id": 18,
-    "kind": "journal",
-    "url": "https://proceedings.mlr.press/v75/",
-    "doi": null,
-    "title": "Proceedings of the 31st Conference On Learning Theory — PMLR Volume 75",
-    "authors": "",
-    "container": null,
-    "year": "",
-    "volume": null,
-    "issue": null,
-    "pages": null,
-    "citation_source": "model"
-   },
-   {
-    "id": 19,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2604.21691",
     "doi": null,
@@ -719,7 +734,7 @@
     "citation_source": "model"
    },
    {
-    "id": 20,
+    "id": 19,
     "kind": "preprint",
     "url": "https://arxiv.org/abs/2601.19756",
     "doi": null,
@@ -733,7 +748,7 @@
     "citation_source": "model"
    },
    {
-    "id": 21,
+    "id": 20,
     "kind": "preprint",
     "url": "https://arxiv.org/abs/2001.04413",
     "doi": null,
@@ -747,7 +762,7 @@
     "citation_source": "model"
    },
    {
-    "id": 22,
+    "id": 21,
     "kind": "journal",
     "url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/e6d37cc5723e810b793c834bcb6647cf-Paper-Conference.pdf",
     "doi": null,
@@ -761,7 +776,7 @@
     "citation_source": "model"
    },
    {
-    "id": 23,
+    "id": 22,
     "kind": "journal",
     "url": "https://proceedings.neurips.cc/paper_files/paper/2022/file/323746f0ae2fbd8b6f500dc2d5c5f898-Paper-Conference.pdf",
     "doi": null,
@@ -775,7 +790,7 @@
     "citation_source": "model"
    },
    {
-    "id": 24,
+    "id": 23,
     "kind": "journal",
     "url": "https://jmlr.org/papers/volume22/20-879/20-879.pdf",
     "doi": null,
@@ -789,7 +804,7 @@
     "citation_source": "model"
    },
    {
-    "id": 25,
+    "id": 24,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2610.23729v1",
     "doi": null,
@@ -803,7 +818,7 @@
     "citation_source": "model"
    },
    {
-    "id": 26,
+    "id": 25,
     "kind": "journal",
     "url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/af536fa4312b5b2e5c541156cd31e93b-Paper-Conference.pdf",
     "doi": null,
@@ -817,7 +832,7 @@
     "citation_source": "model"
    },
    {
-    "id": 27,
+    "id": 26,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2601.19756v2",
     "doi": null,
@@ -831,7 +846,7 @@
     "citation_source": "model"
    },
    {
-    "id": 28,
+    "id": 27,
     "kind": "preprint",
     "url": "https://arxiv.org/pdf/2001.04413",
     "doi": null,
@@ -843,9 +858,164 @@
     "issue": null,
     "pages": null,
     "citation_source": "model"
+   },
+   {
+    "id": 28,
+    "kind": "report",
+    "url": "https://apply07.grants.gov/grantsws/rest/opportunity/att/download/284145",
+    "doi": null,
+    "title": "Fiscal Year (FY) 2020 Department of Defense Multidisciplinary Research Program of the University Research Initiative",
+    "authors": "Office of Naval Research, Army Research Office, Air Force Office of Scientific Research",
+    "container": "Department of Defense",
+    "year": "2019",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 29,
+    "kind": "journal",
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2021/hash/8df7c2e3c3c3be098ef7b382bd2c37ba-Abstract.html",
+    "doi": null,
+    "title": "Tuning Large Neural Networks via Zero-Shot Hyperparameter Transfer",
+    "authors": "Ge Yang, Edward Hu, Igor Babuschkin, Szymon Sidor, Xiaodong Liu, David Farhi, Nick Ryder, Jakub Pachocki, Weizhu Chen, Jianfeng Gao",
+    "container": "Advances in Neural Information Processing Systems 34 (NeurIPS 2021)",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 30,
+    "kind": "journal",
+    "url": "https://www.ks.uiuc.edu/Publications/Papers/PDF/MULL95A/MULL95A.pdf",
+    "doi": "10.1162/neco.1996.8.5.1085",
+    "title": "A Numerical Study on Learning Curves in Stochastic Multilayer Feedforward Networks",
+    "authors": "Müller KR, Finke M, Murata N, Schulten K, Amari S",
+    "container": "Neural Computation",
+    "year": "1996",
+    "volume": "8",
+    "issue": "5",
+    "pages": "1085-1106",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 31,
+    "kind": "journal",
+    "url": "https://proceedings.mlr.press/v306/cagnetta26a.html",
+    "doi": null,
+    "title": "Deriving Neural Scaling Laws from the Statistics of Natural Language",
+    "authors": "Francesco Cagnetta, Allan Raventos, Surya Ganguli, Matthieu Wyart",
+    "container": "Proceedings of the 43rd International Conference on Machine Learning",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 32,
+    "kind": "journal",
+    "url": "https://proceedings.mlr.press/v75/li18a.html",
+    "doi": null,
+    "title": "Algorithmic Regularization in Over-parameterized Matrix Sensing and Neural Networks with Quadratic Activations",
+    "authors": "Yuanzhi Li, Tengyu Ma, Hongyang Zhang",
+    "container": "Proceedings of the 31st Conference On Learning Theory",
+    "year": "2018",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 33,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11228526/",
+    "doi": "10.1073/pnas.2311878121",
+    "title": "Explaining neural scaling laws",
+    "authors": "Bahri Y, Dyer E, Kaplan J, Lee J, Sharma U",
+    "container": "Proc. Natl. Acad. Sci. U.S.A.",
+    "year": "2024",
+    "volume": "121",
+    "issue": "27",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 34,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/2602.07488",
+    "doi": null,
+    "title": "Deriving neural scaling laws from the statistics of natural language",
+    "authors": "Cagnetta F, Raventós A, Ganguli S, Wyart M",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 35,
+    "kind": "journal",
+    "url": "https://www.jmlr.org/papers/volume27/22-1457/22-1457.pdf",
+    "doi": null,
+    "title": "Convergence of Gradient Descent for Deep Neural Networks",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 36,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2503.07325",
+    "doi": null,
+    "title": "Non-vacuous Generalization Bounds for Deep Neural Networks without any modification to the trained models",
+    "authors": "Than K, Phan D",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 37,
+    "kind": "report",
+    "url": "https://proceedings.iclr.cc/paper_files/paper/2026/file/73950f0eb4ac0925dc71ba2406893320-Paper-Conference.pdf",
+    "doi": null,
+    "title": "Neural Networks Learn Generic Multi-Index Models Near Information-Theoretic Limit",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 38,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2601.00455",
+    "doi": null,
+    "title": "Deep Networks Learn Deep Hierarchical Models",
+    "authors": "Daniely A",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
    }
   ],
   "milestone_order": [
+   "m7",
    "m2",
    "m3",
    "m4",
@@ -882,284 +1052,718 @@
     "judged_on": "2026-11-15"
    },
    {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For quadratic-feature regression with n examples per training split, Theorem 3 gives a population-loss upper bound containing n⁻¹ᐟ².",
+    "detail": "Figure 2 compares widths 256 and 2048 at input dimension 32. Its finite-network curves compare sample efficiency across depths.",
+    "quote": "To focus on the sample complexity and avoid width-related bottlenecks, we directly simulate the\ninfinite width limit (m2 → ∞) of Algorithm 1 by computing the kernel K in closed form.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
-    "finding": "CIFAR10 networks trained on 50,000 examples empirically reach zero training loss under stochastic gradient training.",
-    "detail": "This is an experimental optimization result. The finite-network theorem proves expressivity only; it does not prove gradient-descent convergence with a specified initialization, step size, iteration bound and success probability.",
-    "quote": "On the CIFAR10 dataset, Alexnet and MLPs all converge to zero loss on the training set.",
+    "finding": "For n second-stage examples, outer-layer gradient descent reaches the comparator-scale empirical loss in Õ(1/(λm₁)) steps.",
+    "detail": "The convergence proof uses a strongly convex ridge objective with the learned hidden representation held fixed during the outer-layer updates.",
+    "quote": "steps we reach an iterate ˆa = a(T ), ˆθ = (ˆa, W(1), b(0), V(0))) satisfying\nL2(ˆθ) ≲ L2(θ∗) and ∥ˆa∥2 ≲ ∥a∗∥2.",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
-    "ref": 1,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "met",
-    "finding": "Three-layer networks learn quadratic features with n = ÕΩ(d⁴) samples per split and achieve o_d(1) population squared loss.",
-    "detail": "Theorems 1 and 3 specify finite widths, initialization and polynomial training time. Layerwise gradient descent learns the quadratic representation under spherical inputs and smoothness, nondegeneracy and incoherence assumptions. The innermost layer remains fixed.",
+    "finding": "For spherical quadratic-feature regression with n examples per split, a finite gradient-trained network has a proved population-loss term d⁴/min(n, m₁, m₂).",
+    "detail": "The innermost weights stay fixed. The trained middle layer builds a label-dependent nonlinear feature from that initial embedding.",
     "quote": "We thus require sample size n = ˜Ω(d4) and widths m1, m2 = ˜Ω(d4) to obtain od(1) test loss.",
     "checked": true,
     "confirmed": true,
-    "peer_reviewed": true,
+    "peer_reviewed": false,
     "ref": 11,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m5",
     "case": null,
     "verdict": "partial",
-    "finding": "Hierarchical quadratic targets are learned with n = ÕΩ(d⁴) samples per split by a fixed three-layer network.",
-    "detail": "The result proves population-risk guarantees and an optimization-based depth separation, but depth does not grow with hierarchy levels L. Only the middle and output layers are trained; the innermost layer is fixed.",
-    "quote": "In this work we showed that three-layer networks can both learn nonlinear features and leverage these\nfeatures to obtain a provable sample complexity improvement over two-layer networks.",
+    "finding": "For a centered ReLU of a quadratic feature with n examples per split, fixed-depth gradient training gives a risk bound with a d⁻¹ᐟ⁶ error-floor term.",
+    "detail": null,
+    "quote": "The above separation hinges on the ability of three-layer networks to learn the nonlinear featurexT Ax\nand leverage this feature learning to obtain an improved sample complexity.",
     "checked": true,
     "confirmed": true,
-    "peer_reviewed": true,
+    "peer_reviewed": false,
     "ref": 11,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
-    "milestone": "m4",
+    "milestone": "m6",
     "case": null,
-    "verdict": "met",
-    "finding": "Two-layer networks learn Gaussian single-index polynomials with population squared loss ≤ ε using n ≍ C(q)(dε⁻² ∨ ε⁻⁸)polylog(d) samples.",
-    "detail": "The NeurIPS 2024 paper specifies finite width N ≍ C(q)ε⁻¹polylog(d), randomized initialization and layer-wise gradient training with batch reuse. The proof uses strong recovery of the latent direction by first-layer weights, followed by regularized second-layer training; constants depend on polynomial degree q.",
-    "quote": "Combining the above theorems, we conclude that in order for two-layer\nNN (3.1) trained by Algorithm 1 to achieve ε population squared loss, it is sufficient to set\nn = T1 + T2 ≍ C(q) · (dε−2 ∨ ε−8)polylog(d), N ≍ C(q) · ε−1polylog(d),",
+    "verdict": "partial",
+    "finding": "Single-index and quadratic-feature experiments vary training size n and evaluate the theory-guided procedure on 32,768 held-out examples.",
+    "detail": "The experiments report test-loss curves and agreement between learned and target features. The risk bounds supply theoretical sample-size dependence.",
+    "quote": "As above, we optimize the hyperparameters η1, λusing grid search over a\nholdout validation set of size 215 and report the final error over a test set of size 215.",
     "checked": true,
     "confirmed": true,
-    "peer_reviewed": true,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Two-layer networks for Gaussian single-index polynomials attain O(ε²) population squared error with T₂ = C(q)N⁴ polylog(d)/ε⁴ second-stage examples.",
+    "detail": "The polynomial result combines Theorems 1–2 with Proposition 5 and Lemma 20. The source is a NeurIPS conference proceedings paper, represented as a report because the format has no proceedings category.",
+    "quote": "Proposition 5. After Phase I terminates, for suitable λ >0, the output of Phase II satisfies\nEx[(f ˆΘ(x) − f∗(x))2] ≲ ε2.\nwith probability 1 as d → ∞, if we set T2 = C(q)N 4polylog(d)ε−4, N = C(q)polylog(d)ε−1 for\nsome constant C(q) depending on the target degree q.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
     "ref": 12,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Same-batch gradient descent on a cubic Hermite target reaches low test error at roughly n ≃ d training examples.",
+    "detail": "The near-linear relation is between sample size n and input dimension d. The paper’s experiments illustrate that relation with a test-error heatmap.",
+    "quote": "We see that SGD with reused data (Figure 1(b)) reaches\nlow test error using roughly n ≃ d samples, whereas online SGD fails to achieve even weak recov-\nery with much larger sample size n = Ω(d2).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Two-layer networks learning a noisy quartic show a sharp excess-risk drop across training sizes near the predicted n ≍ d² transition.",
+    "detail": "The exponent 2 describes how the sample requirement grows with input dimension. The milestone asks for an exponent describing how excess loss decays with sample size.",
+    "quote": "Our analysis\nin Section 5.1 shows that this is exactly the way that Algorithm 1 learns f⋆u and this is reﬂected by\nthe steep and sudden drop from trivial risk (L2 = 1) to vanishing excess risk without plateauing at\nL2 = 0.5 in Figure 1.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For n ≳̃ d²κ²r examples, two-layer ReLU training bounds empirical squared loss relative to the noise baseline ς².",
+    "detail": "The guarantee includes finite-sample and finite-width remainder terms. More output-layer steps approximate the regularized optimizer.",
+    "quote": "Note that we can approximate a(∞) bya(T ) to within arbitrary accuracy within T = ˜Θ(η−1λ−1)\nsteps.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "met",
-    "finding": "Two-layer ReLU feature learning with n ≥ Õ(d²κ²r) samples bounds excess population L1 risk by Õ(√(dr^pκ^(2p)/n) + √(r^pκ^(2p)/m) + n^(-1/4)), with probability 0.99.",
-    "detail": "Gaussian inputs; degree-p polynomial targets depend on r directions and have rank-r expected Hessian. Symmetric random initialization, one hidden-layer gradient step, then output-layer gradient descent with weight decay; T = Õ(η⁻¹λ⁻¹). The proof uses learned features aligned with the relevant subspace.",
+    "finding": "For n ≳̃ d²κ²r Gaussian training examples, a two-layer ReLU network has a learned-feature population L1 bound with probability at least 0.99.",
+    "detail": "The source is a COLT conference proceedings paper. The journal value is the closest available kind, and peer_reviewed is false under the journal-specific field definition.",
     "quote": "Our primary result is that gradient descent learns a representation of the data which depends only\non the directions relevant to f ⋆.",
     "checked": true,
     "confirmed": true,
-    "peer_reviewed": true,
+    "peer_reviewed": false,
     "ref": 5,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
-    "milestone": "m4",
+    "milestone": "m6",
     "case": null,
-    "verdict": "met",
-    "finding": "Two-layer ReLU networks learn noisy XOR features from n≥C log(m/δ) samples, with population classification error ≤η+C√(log(1/δ)/n).",
-    "detail": "Theorem 1 covers four log-concave clusters under assumptions A1–A7, with probability ≥1−4δ. Width m≥C log(1/δ), Gaussian initialization variance ≤1/(C⁴md), and logistic-loss gradient descent with 1/(2√C)≤α≤1/√C for T=1+1/(4α) steps suffice. Only the first layer is trained. The proof uses amplification and alignment of learned features beyond the kernel regime.",
-    "quote": "Theorem 1 shows that at time T , gradient descent learns a network that accurately\nclassiﬁes every clean sample, and incorrectly classiﬁes every noisy sample, and achieves\npopulation risk close to the noise rate η.",
+    "verdict": "partial",
+    "finding": "For a noisy Gaussian quartic, the prescribed two-layer algorithm approaches zero held-out excess L2 risk around the predicted n ≍ d² sample scale.",
+    "detail": "The reported experimental agreement concerns the location and shape of a risk drop. The paper provides no tolerance for a point-by-point comparison.",
+    "quote": "Our analysis\nin Section 5.1 shows that this is exactly the way that Algorithm 1 learns f⋆u and this is reﬂected by\nthe steep and sudden drop from trivial risk (L2 = 1) to vanishing excess risk without plateauing at\nL2 = 0.5 in Figure 1.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For the noisy XOR ReLU classifier trained on n examples, the proved error bound above the label-noise rate decays as n^−1/2.",
+    "detail": "Figure 2 varies training steps and changes input dimension from 5,000 to 300 between the two sample sizes.",
+    "quote": "By\ncontrast, Theorem 1 provides a dimension-independent rate of O(\n√\n1/n).",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 13,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
-    "milestone": "m2",
+    "milestone": "m3",
     "case": null,
-    "verdict": "met",
-    "finding": "For n training points, gradient descent on a finite-width two-layer ReLU network reaches squared training loss ≤ε in O(log(1/ε)) iterations.",
-    "detail": "ICLR 2019 conference paper, Theorem 4.1: width m=Ω(n⁶/(λ₀⁴δ³)), Gaussian first-layer initialization, fixed uniform ±1 output weights, step size η=O(λ₀/n²), and success probability ≥1−δ. Requires unit-norm inputs, bounded labels and positive Gram eigenvalue λ₀, ensured by nonparallel inputs. Weights remain near initialization; no population-risk result.",
-    "quote": "gradient descent achieves zero training loss at a linear con-\nvergence rate, i.e., it ﬁnds a solution W(K) withL(W(K))≤ϵ inK =O(log (1/ϵ)) iterations.4",
+    "verdict": "partial",
+    "finding": "The overparameterized XOR ReLU classifier trained on n = 300 examples had 15% validation error after interpolation.",
+    "detail": "The theorem applies at a prescribed early stopping time. The experiment reports validation accuracy through interpolation.",
+    "quote": "in the high-dimensional setting the test accuracy remains at the\noptimal 85% level even after reaching the point of interpolation.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
-    "ref": 9,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "met",
+    "finding": "For a two-layer ReLU network trained on n noisy XOR examples, population classification error is bounded by η + C√(log(1/δ)/n).",
+    "detail": "One gradient step raises the normalized alignment of many hidden neurons with task-relevant cluster centers from order d^−1/2 to constant order. The proof uses that alignment and near-orthogonality to the other class.",
+    "quote": "Further, the test error satisﬁes\nP(x,y)∼P\n(\ny⁄= sgn(f(x;W (T ))))≤η +C\n√\nlog(1/δ)\nn .",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
-    "finding": "For n training points, coupled-initialized two-layer ReLU networks achieve arbitrarily small squared training loss with width O(λ⁻²n²), suppressing logarithmic factors.",
-    "detail": "Theorem 3.6 gives T = O(λ⁻²n² log(1/ϵ)) iterations under a positive NTK minimum eigenvalue assumption. However, the supplied excerpt does not state a sufficient step size and overall success probability for this convergence theorem; its referenced formal Theorem H.4 is absent.",
-    "quote": "Starting\nfrom a coupled initialization (Def. 2.1) and for any accuracy\nϵ∈ (0, 1), the squared training loss is smaller thanϵ after\nT =O(λ−2n2 log(1/ϵ)) iterations of gradient descent.",
+    "finding": "A two-layer ReLU network can exactly interpolate arbitrary targets on n distinct d-dimensional examples with 2n+d weights.",
+    "detail": "The construction chooses a projection and biases from the sample, then solves a linear system for the output weights. The SGD experiment reports training accuracy, which does not establish arbitrary training-loss tolerances.",
+    "quote": "Theorem 1. There exists a two-layer neural network with ReLU activations and2n +d weights that\ncan represent any function on a sample of sizen ind dimensions.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 1,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Small Inception trained on 50,000 CIFAR10 images achieved 14.25% held-out error with random cropping and weight decay disabled.",
+    "detail": "The error is calculated from the test accuracy in Table 1.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 1,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Finite CNNs trained on 3,125–50,000 CIFAR-10 examples with true or randomized labels reached 100% training accuracy.",
+    "detail": "The training objective was cross-entropy, so perfect classification accuracy alone leaves the attained loss undetermined.",
+    "quote": "True-label training is consistently fastest while random labels are learned more slowly, but all five fractions are memorized by the 4\n×\n\\times\nmodel under both policies.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "For n training examples, gradient descent on a finite-width two-layer ReLU network reaches any empirical squared-loss tolerance ε in O(log(1/ε)) iterations.",
+    "detail": "With initial loss L₀ > 0, any nonnegative integer k > (2/(ηλ₀)) log(L₀/ε) suffices. The supplied arXiv copy reports ICLR 2019 conference publication, which establishes conference peer review for confirmed. The peer_reviewed field is reserved for journal publication.",
+    "quote": "it ﬁnds a solution W(K) withL(W(K))≤ϵ inK =O(log (1/ϵ)) iterations.",
     "checked": true,
     "confirmed": true,
-    "peer_reviewed": true,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "For a two-layer ReLU network on n examples, gradient descent reaches squared training loss below ε in O(λ⁻²n² log(n/ε)) steps for 0 < ε < 1.",
+    "detail": "The squared-loss result alone meets the criterion. The paper appears in peer-reviewed ICML proceedings, a PMLR volume, so the journal-specific peer_reviewed flag is false.",
+    "quote": "the squared training loss is smaller thanϵ after\nT =O(λ−2n2 log(1/ϵ)) iterations of gradient descent.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
     "ref": 15,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "partial",
-    "finding": "For NTK-separable distributions, two-layer ReLU networks attain population classification error ≤ ϵ with n = Õ(γ⁻⁴ϵ⁻²) samples.",
-    "detail": "Corollary 3.2 specifies finite width and iterations, coupled initialization, and constant success probability. The generalization analysis uses the NTK regime, rather than requiring learned internal representations, so it does not meet the feature-learning criterion.",
-    "quote": "Corollary 3.2. Under Assumption 3.2, given ϵ > 0, and\na uniform random sample of size n = ~Ω(γ−4ϵ−2) and\nm = Ω(γ−2logn) it holds with constant probability that\nPr(x,y)∼D [yf (Wk,x,a )≤ 0] ≤ ϵ",
+    "finding": "A two-layer ReLU classifier trained on n = Õ(γ⁻⁴ε⁻²) examples has population misclassification error at most ε with constant probability.",
+    "detail": "The proof uses a separator in the neural tangent features at initialization. The source is a peer-reviewed ICML proceedings paper.",
+    "quote": "a uniform random sample of size n = ~Ω(γ−4ϵ−2) and\nm = Ω(γ−2logn) it holds with constant probability that\nPr(x,y)∼D [yf (Wk,x,a )≤ 0] ≤ ϵ",
     "checked": true,
     "confirmed": true,
-    "peer_reviewed": true,
+    "peer_reviewed": false,
     "ref": 15,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "met",
-    "finding": "Stochastic neural networks trained on 55,000 binary MNIST images certify population classification error at most 0.23.",
-    "detail": "Networks have 326,000–2,384,000 parameters, exceeding the training sample count. Data-dependent PAC-Bayes certificates hold with probability 0.965 and lie below chance error of 0.5. The supplied text does not establish peer review.",
-    "quote": "Remarkably, the PAC-Bayes bounds do not grow much de-\nspite the networks becoming several times larger, and all\ntrue label experiments have classiﬁcation error bounded\nby 0.23.",
+    "finding": "A stochastic binary MNIST classifier trained on 55,000 examples achieved a PAC-Bayes population error bound of 16.1%.",
+    "detail": "The tightest bound was for the 471,000-parameter network. The certificate uses the training sample and a Gaussian weight distribution optimized from the SGD solution.",
+    "quote": "and all\ntrue label experiments have classiﬁcation error bounded\nby 0.23.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 10,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "PBB on multiclass MNIST with 50,000 training examples reports a population-risk upper bound of 0.023 for a network with more parameters than examples.",
-    "detail": "The three 600-unit hidden layers establish overparameterization, and the reported bound is below chance. However, the text gives no confidence level for the numerical certificate or correction for selecting the prior scale by a data-dependent grid search. The theorem states confidence only symbolically as 1−δ.",
-    "quote": "At the\nsame time, as noted above, our optimal upper bound value (0.023) is much tighter than theirs (0.21).",
+    "finding": "Stochastic MNIST classifier trained on 50,000 examples has a PAC-Bayes population classification-error upper bound of 2.3%.",
+    "detail": "The numerical certificate satisfies the below-chance threshold. The missing value of δ prevents verification of the confidence level used for the reported bound.",
+    "quote": "the minimal value of the upper bound that we achieve (∼ 0.023 on MNIST)",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 16,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "A finite ReLU network trained by SGD on 50,000 MNIST examples has a population classification-error upper bound of 2.3%.",
+    "detail": "The certificate uses empirical loss and the divergence between the learned weight distribution and its prior. The proof does not establish which features SGD learns or how they contribute to the bound.",
+    "quote": "the minimal value of the upper bound that we achieve (∼ 0.023 on MNIST)",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The XOR ReLU network trained on 2,000 examples had median held-out accuracy near 90%.",
+    "detail": "The larger-sample run also used more training steps. The comparison does not establish a learning-curve exponent.",
+    "quote": "Even running over 10× number of steps, the median\ntest accuracy remains near 90%, while in Figure 1 the median test accuracy is 100%.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
-    "finding": "A finite two-layer ReLU network trained on n noisy XOR samples achieves 100% training accuracy after one GD step.",
-    "detail": "Theorem 3.1 specifies width, initialization, step size and success probability, but proves zero classification error, not logistic training loss below every ε>0. Its guarantee covers only 1 ≤ t ≤ √n.",
+    "finding": "The XOR ReLU classifier achieves 100% training accuracy on n noisy examples after one gradient-descent step.",
+    "detail": "Correct classification requires positive signed margins. Arbitrarily small logistic loss requires control of their magnitudes beyond what the theorem guarantees.",
     "quote": "Theorem 3.1 shows that at time t = 1, the network achieves 100% training accuracy despite the\nconstant fraction of flipped labels in the training data.",
     "checked": true,
     "confirmed": true,
-    "peer_reviewed": true,
+    "peer_reviewed": false,
     "ref": 17,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The overparameterized XOR ReLU classifier has a proved clean-error bound of exp(−Ω(n^2.01)) for sufficiently large n.",
+    "detail": "The empirical accuracies do not instantiate the symbolic confidence and risk bounds for the 200-example runs.",
+    "quote": "test error exp(−Ω(n2.01)),\nwhich guarantees a near-zero test error for large n.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "met",
-    "finding": "For sufficiently large n noisy XOR samples, a finite two-layer ReLU network learns features with clean population error ≤ exp(−Ω(n^2.01)).",
-    "detail": "Under A1–A6, width m ≥ Cn^0.02, Gaussian initialization and logistic-loss GD give the bound for Cn^0.01 ≤ t ≤ √n with probability ≥ 1−n^−Ω(1)−O(1/√m). Only first-layer weights train; their alignment with cluster means is essential. The risk bound concerns clean labels.",
-    "quote": "the network\ncontinues to overfit to the training data while simultaneously achieving test error exp(−Ω(n2.01)),\nwhich guarantees a near-zero test error for large n.",
+    "finding": "A finite-width, feature-learning XOR ReLU network trained on n noisy examples has clean population error at most exp(−Ω(n^2.01)).",
+    "detail": "The risk bound is on clean labels. The venue is peer-reviewed conference proceedings, so confirmed is true and the journal-specific peer_reviewed field is false. The schema has no conference-paper kind.",
+    "quote": "Upon further training, the neurons gradually align with the core features\n±µ1 and ±µ2, which is sufficient for generalization.",
     "checked": true,
     "confirmed": true,
-    "peer_reviewed": true,
+    "peer_reviewed": false,
     "ref": 17,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "met",
-    "finding": "Two-layer ReLU networks learn Boolean XOR with d polylog(d) samples and population logistic loss ≤ (log d)^−Θ(1).",
-    "detail": "Theorem 3.1 specifies finite width, spherical initialization, step size and minibatch SGD on both layers; t ≤ C log(d)/η with probability 1−d^−ω(1). The proof tracks learned signal directions and their amplification beyond the kernel regime. Published at ICLR 2024.",
-    "quote": "We prove that with data drawn from the d-dimensional\nBoolean hypercube labeled by the quadratic “XOR” function y = −xixj, it is\npossible to train to a population error o(1) with dpolylog(d) samples.",
+    "finding": "A two-layer ReLU network trained on Boolean XOR with O(d polylog(d)) fresh examples attains population logistic loss at most (log d)^(−Θ(1)).",
+    "detail": "The schema has no conference-proceedings kind. The source is a peer-reviewed ICLR 2024 conference paper, so confirmed is true and the journal-specific peer_reviewed field is false.",
+    "quote": "Then for some t ≤ C log(d)/η, with probability 1 − d−ω(1), we have\nEx∼Pd [ℓρt (x)] ≤ (log(d))−Θ(1).",
     "checked": true,
     "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 22,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
+    "peer_reviewed": false,
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "For N training samples, Theorem 4.2 proves finite-width deep-network GD contracts squared loss by (1−cηγn_{L−2}n_{L−1}) per step.",
-    "detail": "Requires smooth activations, Lipschitz-concentrated data, loose pyramidal widths, N log⁸N=o(n_{L−2}n_{L−1}), and n_{L−1}≥Ω(Nᵃ), a>0. Uses duplicated Gaussian initialization, γ=d³N² and η≤C/(γNdn_{L−1}). Success probability ≥1−CN exp(−c log²n_{L−1})−C exp(−c log²N). The geometric bound gives any ε>0 in finitely many steps. Published at NeurIPS 2022.",
+    "finding": "For N training examples, gradient descent on a finite-width deep network has empirical least-squares loss converging geometrically to 0.",
+    "detail": "The width conditions apply for sufficiently large dimensions and sample sizes. The paper appears in peer-reviewed NeurIPS conference proceedings, classified here as a book volume. The peer_reviewed field is journal-specific.",
     "quote": "In words, (20) guarantees that gradient descent linearly\nconverges to a point with zero loss.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 22,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "met",
+    "finding": "A stochastic fully connected MNIST network trained on 60,000 examples had a 2.79% population classification-error certificate.",
+    "detail": "The authors selected hyperparameters by certificate value and discuss a union-bound correction for the grid search. The reported 2.79% is the certificate before that correction.",
+    "quote": "our risk\ncertiﬁcate (0.0279) is much tighter than theirs (0.210)",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 23,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
-    "milestone": "m3",
+    "milestone": "m4",
     "case": null,
     "verdict": "partial",
-    "finding": "PAC-Bayes neural networks trained on 60,000 MNIST examples reportedly yield non-vacuous risk certificates; no numerical classification-error bound is supplied.",
-    "detail": "The described fully connected network has more weights than training examples. Certificates use PAC-Bayes-kl with stated confidence of 96.5% before model-selection correction. However, the supplied excerpt contains no numerical certificate establishing below-chance population classification error.",
-    "quote": "Our\nexperiments on MNIST and CIFAR-10 show that our training methods produce competitive\ntest set errors and non-vacuous risk bounds with much tighter values than previous results in\nthe literature, showing promise not only to guide the learning algorithm through bounding\nthe risk but also for model selection.",
-    "checked": true,
+    "finding": "A four-layer stochastic MNIST CNN trained on 60,000 examples had a 1.55% population classification-error certificate.",
+    "detail": "SGD updates the convolutional kernels. The certificate uses empirical error and the KL divergence between the posterior and prior, without analyzing the representations learned by those kernels.",
+    "quote": null,
+    "checked": null,
     "confirmed": true,
     "peer_reviewed": true,
-    "ref": 24,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
+    "ref": 23,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "met",
-    "finding": "ResNet-50 trained on 50,000 CIFAR-10 images achieves a certified population classification error bound of 12.4%.",
-    "detail": "The network has 25.6 million parameters. Theorem 2.6 gives 95% confidence using cross-fit decoder error, decoder–network agreement and stability measured on independent unlabeled test inputs. The bound is below the 90% chance error for ten classes.",
-    "quote": "on CIFAR-10, ResNet-50 certifies at\n12.4\n%\n12.4\\%\n;",
+    "finding": "ResNet-18 trained on 60,000 MNIST examples has a 2.6% upper bound on population classification error.",
+    "detail": "The stability term uses independent test inputs without their labels.",
+    "quote": "On MNIST all architectures certify tightly (best:\nResNet-18 at\n2.6\n%\n2.6\\%\n)",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
+    "ref": 24,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The learned-feature certificate bounds population classification error at 2.6% for SGD-trained ResNet-18 on 60,000 MNIST examples.",
+    "detail": "The theorem assumes i.i.d. labeled data and independent unlabeled inputs. It evaluates the learned representation and training stability after training.",
+    "quote": "What makes the bound tight is not the proof technique but the learned representation, which creates a local class\ngeometry so clean that a trivial classifier nearly matches the network.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 24,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For CIFAR-10 ResNet-18 trained on 1,000–50,000 examples, the certificate ends 8.0 percentage points above test error.",
+    "detail": "The reported gap is between the certificate and observed test error. Excess loss would require a stated limiting loss as its baseline.",
+    "quote": "ResNet-18 on CIFAR-10: the bound converges to within\n8.0\n8.0\npp of test error at\nn\n=\n50,000\nn{=}50{,}000",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 24,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For n second-stage examples, gradient descent reaches regularized-objective tolerance ε in O(m log(m/ε)) steps.",
+    "detail": "Lemma 15 gives a corresponding first-stage result, with a residual term for the part of the target outside the degree-k polynomial space.",
+    "quote": "it is sufficient to have T2 ≳ m log(m/ϵ2).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
     "ref": 25,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "met",
-    "finding": "Three-layer networks learn hierarchical polynomials with 2n samples, n ≥ d^(k+3α), and population squared error Õ(d^−α).",
-    "detail": "ICLR 2024 theorem assumes Gaussian inputs and restricted polynomial features. It specifies initialization, widths m1 ≥ d^(k+α), m2 = d^α, and polynomially many layerwise gradient steps. The proof uses a learned bottleneck representation approximating p; the overall procedure is not a fixed kernel method.",
-    "quote": "Our main result shows that for a\nlarge subclass of degree k polynomials p, a three-layer neural network trained via\nlayerwise gradient descent on the square loss learns the target h up to vanishing\ntest error in eO(dk) samples and polynomial time.",
-    "checked": true,
+    "finding": "A three-layer Gaussian polynomial regressor trained on n ≥ d^(k+3α) examples per stage has population square loss Õ(d⁻ᵅ).",
+    "detail": "Stage one trains the bottleneck readout to recover the hidden polynomial p up to scale. Stage two trains the output readout on that learned representation.",
+    "quote": "the second stage of training uses this feature to learn the link function g.",
+    "checked": false,
     "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 26,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
+    "peer_reviewed": false,
+    "ref": 25,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m5",
     "case": null,
     "verdict": "partial",
-    "finding": "An L-layer CNN trained by layerwise gradient descent learns an L-level RHM with zero classification error using d^{o(1)}m^L samples in the stated polynomial-time regime.",
-    "detail": "Theorem 4.1 gives label recovery with probability at least 1−δ under non-ambiguity, uniformity, non-degeneracy and signal-separation assumptions. Sample size and training time are polynomial in d in the stated parameter regime. However, the source is an arXiv preprint; no peer review or proof-assistant verification is reported.",
+    "finding": "A fixed three-layer network learns Gaussian hierarchical polynomials with n ≥ d^(k+3α) examples per stage.",
+    "detail": "The paper's L counts orthogonal terms in the hidden polynomial. It does not count levels of composition.",
+    "quote": "Our main result, Theorem 1, is that for a large class of degree k polynomials p, a three-layer neural\nnetwork trained via layer-wise gradient descent can efficiently learn the hierarchical polynomial\nh = g ◦ p in eO(dk) samples.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 25,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Jointly trained three-layer networks reached near-zero test square loss at roughly n ≈ d³ for Gaussian cubic-composition targets.",
+    "detail": "The comparison tests the qualitative sample-complexity prediction for learning the hidden feature.",
+    "quote": "As a consequence, the network can\nlearn h in d3 samples (left panel of each figure).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 25,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Finite three-layer networks learning Gaussian cubic compositions reached near-zero test square loss around n ≈ d³.",
+    "detail": "The theorem gives a dimension-dependent upper bound for layer-wise gradient descent. The experimental learning curves use joint Adam.",
+    "quote": "As a consequence, the network can\nlearn h in d3 samples (left panel of each figure).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 25,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For one layer fitted on N examples, gradient descent approaches the empirical ridge minimizer with weight error at most P exp(−T/P).",
+    "detail": "P is the number of supported patches at the layer. The bound is conditional on the patch embedding assumptions.",
+    "quote": "\\left\\|{\\bm{W}}_{N,T}-{\\bm{W}}_{N,*}\\right\\|_{2}\\leq\\left\\|{\\bm{W}}_{N,T}-{\\bm{W}}_{N,*}\\right\\|_{F}\\leq e^{-T/|\\mathcal{P}_{l}|}\\left\\|{\\bm{W}}_{N,*}\\right\\|_{F}\\leq e^{-T/|\\mathcal{P}_{l}|}|\\mathcal{P}_{l}|.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 26,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "A finite CNN for an L-level random hierarchy achieves 0 population classification error in the stated regime with m^L samples up to the stated factors.",
+    "detail": "The learned embeddings approximate label probabilities conditioned on each patch. The proof uses those embeddings to group patches that share a latent parent and passes the resulting representations to the next layer.",
+    "quote": "we show that the intermediate features\nwill be automatically learned when the model is trained to fit the label.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 26,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "An L-layer CNN learns an L-level random hierarchy with 0 population classification error using m^L samples up to the stated factors.",
+    "detail": "The polynomial regime has m, V, and s on the order of log d and L on the order of log d/log log d. The network uses the known branching factor and learns from observed sequences and root labels.",
     "quote": "A polynomially wide\nL\nL\n-layer convolutional network, trained layerwise with gradient descent,\ncan efficiently learn this RHM using\nO\n⁡\n(\nm\n(\n1\n+\no\n⁡\n(\n1\n)\n)\n​\nL\n)\nO(m^{(1+o(1))L})\nsamples and polynomially many gradient steps.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
+    "ref": 26,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "A quadratic DenseNet trained by noisy SGD on N = poly(d/ε) labeled examples reaches a truncated empirical objective of at most ε².",
+    "detail": "The source reports acceptance at COLT 2023. The supplied document is the arXiv version.",
+    "quote": "SGD converges to a point with\ngObj(Z; W, K) ≤ ε2 gObj(D; W, K) ≤ ε2 Obj(D; W, K) ≤ ε2",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
     "ref": 27,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "met",
+    "finding": "A quadratic DenseNet trained on N = poly(d/ε) teacher-labeled examples achieves population squared loss at most ε².",
+    "detail": "Theorem 2 bounds the discrepancy between learned and corresponding teacher features up to a unitary transformation.",
+    "quote": "E\nx∼D\n\n\u0000\nG⋆(x) − F (x)\n\u00012 ≤ ε2 and E\nx∼D\n\u0000\nG⋆(x) − eF (x)\n\u00012 ≤ ε2 .",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 27,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m5",
     "case": null,
     "verdict": "met",
-    "finding": "An SGD variant learns L-level quadratic hierarchies with N = poly(d/ε) samples and poly(d/ε) training time, achieving population squared error ≤ ε².",
-    "detail": "Depth grows with hierarchy levels for L = o(log log d), with L−1 trainable layers. Requires well-conditioned quadratic targets, information gaps, restricted skip connections and suitable input distributions. Uses regularization and staged SGD with SVD warm starts. This arXiv version reports acceptance at COLT 2023.",
-    "quote": "Within poly(d/ε) time/sample complexity, by a variant of SGD starting from random initializa-\ntion, the L-layer quadratic DenseNet can learn this concept class with any generalization error\nε, using forward feature learning + backward feature correction .",
+    "finding": "A quadratic DenseNet with L−1 trained layers learns an L-level teacher from N = poly(d/ε) examples with population squared loss at most ε².",
+    "detail": "The teacher has well-conditioned weights, skip connections, and diminishing signal contributions at deeper levels. Earlier trainable layers continue updating as new layers enter training.",
+    "quote": "m = poly(d/ε) and learning rate η = 1poly(d/ε) over the training objective (2.3), with probability at\nleast 0.99, we can find a learner network F in time poly(d/ε) such that:",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
-    "ref": 28,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
+    "ref": 27,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Finite fully connected and convolutional networks reportedly match the predicted excess test-loss exponent α = 1 for D ≫ P. Numerical training-set sizes are unspecified.",
+    "detail": "Section 3.2 identifies SGD, ReLU or Erf activations, and MSE or cross-entropy losses across the testbed. The supplied text gives no run-specific fitted exponent or uncertainty.",
+    "quote": "In both cases, we find striking agreement with the theoretically predicted values\nα\nD\n,\nα\nW\n=\n1\nacross a variety of dataset, neural network architecture, batch size in stochastic gradient descent, and loss type.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 33,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "TinyStories GPT-2–style transformers trained on roughly 10⁵–10⁸ tokens yielded held-out loss slopes consistent with the predicted exponent α = 0.185.",
+    "detail": "The empirical fit uses the lower envelope across context lengths. The text supplies neither a numerical H∞ nor a fit with H∞ subtracted or included as an offset.",
+    "quote": "Using the measured TinyStories values\nγ= 0.325andβ= 0.88gives the prediction\nαD ≈ 0.3252×0.88 ≈0.185,\nAs indicated by the dashed black line in Fig. 1 (bottom),\nour prediction matches empirical learning curves.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 34,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "For n linearly independent training inputs, full-batch gradient descent at width 1 reaches any positive squared-loss tolerance in finitely many steps.",
+    "detail": "Initialize first-layer weights and all biases to zero, intermediate weights positive, and output weights above the stated threshold. For 0 < κ < 1 and S(w₀) ≥ ε, take k = 1 + floor(log(S(w₀)/ε)/[−log(1−κ)]). If κ = 1, one step suffices. If S(w₀) < ε, zero steps suffice.",
+    "quote": "Our results show that,\nforanyfixed depth L and fixed hidden-layer dimensionsd1,...,d L−1, gradient descent can\nbe initialized so as to find such an interpolating solution, and does so with a linear rate.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 35,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "ViT L/16 V1 with 1,281,167 ImageNet training examples has a reported population-error upper bound of 29.957%.",
+    "detail": "Conditioning on a model that memorizes its training examples can change their conditional distribution. The i.i.d. sampling assumption alone therefore does not justify equation (22), which is used to derive the certificate.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 36,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "met",
+    "finding": "A two-layer network learns Gaussian polynomial multi-index targets with o_d(1) population loss using two independent batches of n = d^(1+o(1)) examples each.",
+    "detail": "The loss derivative at zero must have mean zero and yield a full-rank positive signal on the hidden subspace. Theorem 2 gives a finite second-stage step threshold. The source is an ICLR conference proceedings paper, represented here as report.",
+    "quote": "can agnostically learn the target with od(1) test error using eO(d) samples and\neO(d2) time.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 37,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For an r-level label hierarchy, a layerwise-trained ResNet on m i.i.d. pairs has expected population error at most Õ(D²(M+1)⁴(wn)^(2K+1)/(γ^(4+2K)m)).",
+    "detail": "The preprint assumes full supervision at every hierarchy level. Each training example supplies the entire label vector, including intermediate labels.",
+    "quote": "will learn a classifier with expected error at most\nO\n~\n​\n(\nD\n2\n​\n(\nM\n+\n1\n)\n4\n​\n(\nw\n​\nn\n)\n2\n​\nK\n+\n1\nγ\n4\n+\n2\n​\nK\n​\nm\n)\n\\tilde{O}\\left(\\frac{D^{2}(M+1)^{4}(wn)^{2K+1}}{\\gamma^{4+2K}m}\\right)\n.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 38,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    }
   ],
   "judged": [
@@ -1207,552 +1811,979 @@
    },
    {
     "url": "https://doi.org/10.48550/arXiv.1611.03530",
+    "milestone": "m7",
+    "hash": "5a5eeb6f6203",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doi.org/10.48550/arXiv.1611.03530",
     "milestone": "m2",
-    "hash": "2c244280811c",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "479d15448c27",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.48550/arXiv.1611.03530",
     "milestone": "m3",
-    "hash": "fb3f4ced762c",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "7c84d1b52a4d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.48550/arXiv.1611.03530",
     "milestone": "m4",
-    "hash": "833f8a4d1a45",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "a4cf65066cf7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.48550/arXiv.1611.03530",
     "milestone": "m5",
     "hash": "bd7b925ab5f5",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.48550/arXiv.1611.03530",
     "milestone": "m6",
     "hash": "b1d2404e1483",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.48550/arXiv.1611.03530",
     "milestone": "completion",
     "hash": "bc5484ec8631",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://papers.neurips.cc/paper_files/paper/2023/hash/236b6a814a1d2c0ff504ca7bf380f7ff-Abstract-Conference.html",
+    "milestone": "m7",
+    "hash": "5a5eeb6f6203",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://papers.neurips.cc/paper_files/paper/2023/hash/236b6a814a1d2c0ff504ca7bf380f7ff-Abstract-Conference.html",
     "milestone": "m2",
-    "hash": "2c244280811c",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "479d15448c27",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://papers.neurips.cc/paper_files/paper/2023/hash/236b6a814a1d2c0ff504ca7bf380f7ff-Abstract-Conference.html",
     "milestone": "m3",
-    "hash": "fb3f4ced762c",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "7c84d1b52a4d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://papers.neurips.cc/paper_files/paper/2023/hash/236b6a814a1d2c0ff504ca7bf380f7ff-Abstract-Conference.html",
     "milestone": "m4",
-    "hash": "833f8a4d1a45",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "a4cf65066cf7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://papers.neurips.cc/paper_files/paper/2023/hash/236b6a814a1d2c0ff504ca7bf380f7ff-Abstract-Conference.html",
     "milestone": "m5",
     "hash": "bd7b925ab5f5",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://papers.neurips.cc/paper_files/paper/2023/hash/236b6a814a1d2c0ff504ca7bf380f7ff-Abstract-Conference.html",
     "milestone": "m6",
     "hash": "b1d2404e1483",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://papers.neurips.cc/paper_files/paper/2023/hash/236b6a814a1d2c0ff504ca7bf380f7ff-Abstract-Conference.html",
     "milestone": "completion",
     "hash": "bc5484ec8631",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://papers.neurips.cc/paper_files/paper/2024/file/6bd5fca2074dcd9ede9de50f71f7ec28-Paper-Conference.pdf",
+    "milestone": "m7",
+    "hash": "5a5eeb6f6203",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://papers.neurips.cc/paper_files/paper/2024/file/6bd5fca2074dcd9ede9de50f71f7ec28-Paper-Conference.pdf",
     "milestone": "m2",
-    "hash": "2c244280811c",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "479d15448c27",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://papers.neurips.cc/paper_files/paper/2024/file/6bd5fca2074dcd9ede9de50f71f7ec28-Paper-Conference.pdf",
     "milestone": "m3",
-    "hash": "fb3f4ced762c",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "7c84d1b52a4d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://papers.neurips.cc/paper_files/paper/2024/file/6bd5fca2074dcd9ede9de50f71f7ec28-Paper-Conference.pdf",
     "milestone": "m4",
-    "hash": "833f8a4d1a45",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "a4cf65066cf7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://papers.neurips.cc/paper_files/paper/2024/file/6bd5fca2074dcd9ede9de50f71f7ec28-Paper-Conference.pdf",
     "milestone": "m5",
     "hash": "bd7b925ab5f5",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://papers.neurips.cc/paper_files/paper/2024/file/6bd5fca2074dcd9ede9de50f71f7ec28-Paper-Conference.pdf",
     "milestone": "m6",
     "hash": "b1d2404e1483",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://papers.neurips.cc/paper_files/paper/2024/file/6bd5fca2074dcd9ede9de50f71f7ec28-Paper-Conference.pdf",
     "milestone": "completion",
     "hash": "bc5484ec8631",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.mlr.press/v178/damian22a.html",
+    "milestone": "m7",
+    "hash": "5a5eeb6f6203",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v178/damian22a.html",
     "milestone": "m2",
-    "hash": "2c244280811c",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "479d15448c27",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v178/damian22a.html",
     "milestone": "m3",
-    "hash": "fb3f4ced762c",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "7c84d1b52a4d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v178/damian22a.html",
     "milestone": "m4",
-    "hash": "833f8a4d1a45",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "a4cf65066cf7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v178/damian22a.html",
     "milestone": "m5",
     "hash": "bd7b925ab5f5",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v178/damian22a.html",
     "milestone": "m6",
     "hash": "b1d2404e1483",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v178/damian22a.html",
     "milestone": "completion",
     "hash": "bc5484ec8631",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.jmlr.org/beta/papers/v24/22-1132.html",
+    "milestone": "m7",
+    "hash": "5a5eeb6f6203",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.jmlr.org/beta/papers/v24/22-1132.html",
     "milestone": "m2",
-    "hash": "2c244280811c",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "479d15448c27",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.jmlr.org/beta/papers/v24/22-1132.html",
     "milestone": "m3",
-    "hash": "fb3f4ced762c",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "7c84d1b52a4d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.jmlr.org/beta/papers/v24/22-1132.html",
     "milestone": "m4",
-    "hash": "833f8a4d1a45",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "a4cf65066cf7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.jmlr.org/beta/papers/v24/22-1132.html",
     "milestone": "m5",
     "hash": "bd7b925ab5f5",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.jmlr.org/beta/papers/v24/22-1132.html",
     "milestone": "m6",
     "hash": "b1d2404e1483",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.jmlr.org/beta/papers/v24/22-1132.html",
     "milestone": "completion",
     "hash": "bc5484ec8631",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1611.03530",
+    "milestone": "m7",
+    "hash": "5a5eeb6f6203",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1611.03530",
+    "milestone": "m2",
+    "hash": "479d15448c27",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1611.03530",
+    "milestone": "m3",
+    "hash": "7c84d1b52a4d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1611.03530",
+    "milestone": "m4",
+    "hash": "a4cf65066cf7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1611.03530",
+    "milestone": "m5",
+    "hash": "bd7b925ab5f5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1611.03530",
+    "milestone": "m6",
+    "hash": "b1d2404e1483",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1611.03530",
+    "milestone": "completion",
+    "hash": "bc5484ec8631",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.16090v1",
+    "milestone": "m7",
+    "hash": "5a5eeb6f6203",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.16090v1",
     "milestone": "m2",
-    "hash": "2c244280811c",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "479d15448c27",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.16090v1",
     "milestone": "m3",
-    "hash": "fb3f4ced762c",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "7c84d1b52a4d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.16090v1",
     "milestone": "m4",
-    "hash": "833f8a4d1a45",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "a4cf65066cf7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.16090v1",
     "milestone": "m5",
     "hash": "bd7b925ab5f5",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.16090v1",
     "milestone": "m6",
     "hash": "b1d2404e1483",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.16090v1",
     "milestone": "completion",
     "hash": "bc5484ec8631",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1810.02054",
+    "milestone": "m7",
+    "hash": "5a5eeb6f6203",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1810.02054",
     "milestone": "m2",
-    "hash": "2c244280811c",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "479d15448c27",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1810.02054",
     "milestone": "m3",
-    "hash": "fb3f4ced762c",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "7c84d1b52a4d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1810.02054",
     "milestone": "m4",
-    "hash": "833f8a4d1a45",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "a4cf65066cf7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1810.02054",
     "milestone": "m5",
     "hash": "bd7b925ab5f5",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1810.02054",
     "milestone": "m6",
     "hash": "b1d2404e1483",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1810.02054",
     "milestone": "completion",
     "hash": "bc5484ec8631",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.mlr.press/v162/munteanu22a/munteanu22a.pdf",
+    "milestone": "m7",
+    "hash": "5a5eeb6f6203",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v162/munteanu22a/munteanu22a.pdf",
     "milestone": "m2",
-    "hash": "2c244280811c",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "479d15448c27",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v162/munteanu22a/munteanu22a.pdf",
     "milestone": "m3",
-    "hash": "fb3f4ced762c",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "7c84d1b52a4d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v162/munteanu22a/munteanu22a.pdf",
     "milestone": "m4",
-    "hash": "833f8a4d1a45",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "a4cf65066cf7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v162/munteanu22a/munteanu22a.pdf",
     "milestone": "m5",
     "hash": "bd7b925ab5f5",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v162/munteanu22a/munteanu22a.pdf",
     "milestone": "m6",
     "hash": "b1d2404e1483",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v162/munteanu22a/munteanu22a.pdf",
     "milestone": "completion",
     "hash": "bc5484ec8631",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1703.11008",
+    "milestone": "m7",
+    "hash": "5a5eeb6f6203",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1703.11008",
     "milestone": "m2",
-    "hash": "2c244280811c",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "479d15448c27",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1703.11008",
     "milestone": "m3",
-    "hash": "fb3f4ced762c",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "7c84d1b52a4d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1703.11008",
     "milestone": "m4",
-    "hash": "833f8a4d1a45",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "a4cf65066cf7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1703.11008",
     "milestone": "m5",
     "hash": "bd7b925ab5f5",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1703.11008",
     "milestone": "m6",
     "hash": "b1d2404e1483",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1703.11008",
     "milestone": "completion",
     "hash": "bc5484ec8631",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1908.07380",
+    "milestone": "m7",
+    "hash": "5a5eeb6f6203",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1908.07380",
     "milestone": "m2",
-    "hash": "2c244280811c",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "479d15448c27",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1908.07380",
     "milestone": "m3",
-    "hash": "fb3f4ced762c",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "7c84d1b52a4d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1908.07380",
     "milestone": "m4",
-    "hash": "833f8a4d1a45",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "a4cf65066cf7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1908.07380",
     "milestone": "m5",
     "hash": "bd7b925ab5f5",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1908.07380",
     "milestone": "m6",
     "hash": "b1d2404e1483",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1908.07380",
     "milestone": "completion",
     "hash": "bc5484ec8631",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/bd6673d95a2a994a5647dca1df91a000-Paper-Conference.pdf",
+    "milestone": "m7",
+    "hash": "5a5eeb6f6203",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/bd6673d95a2a994a5647dca1df91a000-Paper-Conference.pdf",
     "milestone": "m2",
-    "hash": "2c244280811c",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "479d15448c27",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/bd6673d95a2a994a5647dca1df91a000-Paper-Conference.pdf",
     "milestone": "m3",
-    "hash": "fb3f4ced762c",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "7c84d1b52a4d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/bd6673d95a2a994a5647dca1df91a000-Paper-Conference.pdf",
     "milestone": "m4",
-    "hash": "833f8a4d1a45",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "a4cf65066cf7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/bd6673d95a2a994a5647dca1df91a000-Paper-Conference.pdf",
     "milestone": "m5",
     "hash": "bd7b925ab5f5",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/bd6673d95a2a994a5647dca1df91a000-Paper-Conference.pdf",
     "milestone": "m6",
     "hash": "b1d2404e1483",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/bd6673d95a2a994a5647dca1df91a000-Paper-Conference.pdf",
     "milestone": "completion",
     "hash": "bc5484ec8631",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/e6d37cc5723e810b793c834bcb6647cf-Paper-Conference.pdf",
+    "milestone": "m7",
+    "hash": "5a5eeb6f6203",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/e6d37cc5723e810b793c834bcb6647cf-Paper-Conference.pdf",
     "milestone": "m2",
-    "hash": "2c244280811c",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "479d15448c27",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/e6d37cc5723e810b793c834bcb6647cf-Paper-Conference.pdf",
     "milestone": "m3",
-    "hash": "fb3f4ced762c",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "7c84d1b52a4d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/e6d37cc5723e810b793c834bcb6647cf-Paper-Conference.pdf",
     "milestone": "m4",
-    "hash": "833f8a4d1a45",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "a4cf65066cf7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/e6d37cc5723e810b793c834bcb6647cf-Paper-Conference.pdf",
     "milestone": "m5",
     "hash": "bd7b925ab5f5",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/e6d37cc5723e810b793c834bcb6647cf-Paper-Conference.pdf",
     "milestone": "m6",
     "hash": "b1d2404e1483",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/e6d37cc5723e810b793c834bcb6647cf-Paper-Conference.pdf",
     "milestone": "completion",
     "hash": "bc5484ec8631",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2022/file/323746f0ae2fbd8b6f500dc2d5c5f898-Paper-Conference.pdf",
+    "milestone": "m7",
+    "hash": "5a5eeb6f6203",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.neurips.cc/paper_files/paper/2022/file/323746f0ae2fbd8b6f500dc2d5c5f898-Paper-Conference.pdf",
     "milestone": "m2",
-    "hash": "2c244280811c",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "479d15448c27",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2022/file/323746f0ae2fbd8b6f500dc2d5c5f898-Paper-Conference.pdf",
+    "milestone": "m3",
+    "hash": "7c84d1b52a4d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2022/file/323746f0ae2fbd8b6f500dc2d5c5f898-Paper-Conference.pdf",
+    "milestone": "m4",
+    "hash": "a4cf65066cf7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2022/file/323746f0ae2fbd8b6f500dc2d5c5f898-Paper-Conference.pdf",
+    "milestone": "m5",
+    "hash": "bd7b925ab5f5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2022/file/323746f0ae2fbd8b6f500dc2d5c5f898-Paper-Conference.pdf",
+    "milestone": "m6",
+    "hash": "b1d2404e1483",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2022/file/323746f0ae2fbd8b6f500dc2d5c5f898-Paper-Conference.pdf",
+    "milestone": "completion",
+    "hash": "bc5484ec8631",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://jmlr.org/papers/volume22/20-879/20-879.pdf",
+    "milestone": "m7",
+    "hash": "5a5eeb6f6203",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://jmlr.org/papers/volume22/20-879/20-879.pdf",
+    "milestone": "m2",
+    "hash": "479d15448c27",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://jmlr.org/papers/volume22/20-879/20-879.pdf",
     "milestone": "m3",
-    "hash": "fb3f4ced762c",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "7c84d1b52a4d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://jmlr.org/papers/volume22/20-879/20-879.pdf",
+    "milestone": "m4",
+    "hash": "a4cf65066cf7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://jmlr.org/papers/volume22/20-879/20-879.pdf",
+    "milestone": "m5",
+    "hash": "bd7b925ab5f5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://jmlr.org/papers/volume22/20-879/20-879.pdf",
+    "milestone": "m6",
+    "hash": "b1d2404e1483",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://jmlr.org/papers/volume22/20-879/20-879.pdf",
+    "milestone": "completion",
+    "hash": "bc5484ec8631",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.23729v1",
+    "milestone": "m7",
+    "hash": "5a5eeb6f6203",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.23729v1",
+    "milestone": "m2",
+    "hash": "479d15448c27",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.23729v1",
     "milestone": "m3",
-    "hash": "fb3f4ced762c",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "7c84d1b52a4d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.23729v1",
+    "milestone": "m4",
+    "hash": "a4cf65066cf7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.23729v1",
+    "milestone": "m5",
+    "hash": "bd7b925ab5f5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.23729v1",
+    "milestone": "m6",
+    "hash": "b1d2404e1483",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.23729v1",
+    "milestone": "completion",
+    "hash": "bc5484ec8631",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/af536fa4312b5b2e5c541156cd31e93b-Paper-Conference.pdf",
+    "milestone": "m7",
+    "hash": "5a5eeb6f6203",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/af536fa4312b5b2e5c541156cd31e93b-Paper-Conference.pdf",
+    "milestone": "m2",
+    "hash": "479d15448c27",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/af536fa4312b5b2e5c541156cd31e93b-Paper-Conference.pdf",
+    "milestone": "m3",
+    "hash": "7c84d1b52a4d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/af536fa4312b5b2e5c541156cd31e93b-Paper-Conference.pdf",
     "milestone": "m4",
-    "hash": "833f8a4d1a45",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "a4cf65066cf7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/af536fa4312b5b2e5c541156cd31e93b-Paper-Conference.pdf",
+    "milestone": "m5",
+    "hash": "bd7b925ab5f5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/af536fa4312b5b2e5c541156cd31e93b-Paper-Conference.pdf",
+    "milestone": "m6",
+    "hash": "b1d2404e1483",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/af536fa4312b5b2e5c541156cd31e93b-Paper-Conference.pdf",
+    "milestone": "completion",
+    "hash": "bc5484ec8631",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2601.19756v2",
+    "milestone": "m7",
+    "hash": "5a5eeb6f6203",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2601.19756v2",
+    "milestone": "m2",
+    "hash": "479d15448c27",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2601.19756v2",
+    "milestone": "m3",
+    "hash": "7c84d1b52a4d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2601.19756v2",
+    "milestone": "m4",
+    "hash": "a4cf65066cf7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2601.19756v2",
     "milestone": "m5",
     "hash": "bd7b925ab5f5",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2601.19756v2",
+    "milestone": "m6",
+    "hash": "b1d2404e1483",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2601.19756v2",
+    "milestone": "completion",
+    "hash": "bc5484ec8631",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2001.04413",
+    "milestone": "m7",
+    "hash": "5a5eeb6f6203",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2001.04413",
+    "milestone": "m2",
+    "hash": "479d15448c27",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2001.04413",
+    "milestone": "m3",
+    "hash": "7c84d1b52a4d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2001.04413",
+    "milestone": "m4",
+    "hash": "a4cf65066cf7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2001.04413",
     "milestone": "m5",
     "hash": "bd7b925ab5f5",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2001.04413",
+    "milestone": "m6",
+    "hash": "b1d2404e1483",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2001.04413",
+    "milestone": "completion",
+    "hash": "bc5484ec8631",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11228526/",
+    "milestone": "m7",
+    "hash": "5a5eeb6f6203",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2602.07488",
+    "milestone": "m7",
+    "hash": "5a5eeb6f6203",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.jmlr.org/papers/volume27/22-1457/22-1457.pdf",
+    "milestone": "m2",
+    "hash": "479d15448c27",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2503.07325",
+    "milestone": "m3",
+    "hash": "7c84d1b52a4d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.iclr.cc/paper_files/paper/2026/file/73950f0eb4ac0925dc71ba2406893320-Paper-Conference.pdf",
+    "milestone": "m4",
+    "hash": "a4cf65066cf7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2601.00455",
+    "milestone": "m5",
+    "hash": "bd7b925ab5f5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 2,
+  "version": 3,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1899,8 +2930,113 @@
     "date": "2026-11-16",
     "actor": "claude-fable-5-2",
     "action": "Removed the completion date (2018-07-03): after the rewrite and the re-judge by gpt-6-astra no result meets the completion test."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"From stated assumptions about how the data are generated, a mathematical theory prescribes a deep neural network and its training procedure before training begins. It accounts for feature learning, in which training changes the network\\u2019s internal representations, and proves an upper bound on population risk, the expected loss on a new example from the same distribution. Experiments test the theory\\u2019s predictions by measuring loss on held-out examples.\". Reason: The definition should distinguish the population quantity a theorem bounds from the finite-sample measurement used to test its predictions."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"For one 350-million-parameter language model, choosing training settings on a smaller network cost as much as pretraining the large model once. A perfect training fit gives little guidance about new examples. On CIFAR-10, the same network fit genuine and randomized labels perfectly, yet test accuracy fell from 85.75% to 9.78% when the labels were randomized. Where the data satisfy the theory\\u2019s assumptions, teams could choose a network and training settings for a target error and spend less of their computing budget on trial runs.\". Reason: The CIFAR-10 example shows why training accuracy is insufficient, but the entry omits the cost of choosing training settings and the decision a theory would help teams make."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Office of Naval Research, FY2020 Multidisciplinary University Research Initiative, Topic 3, Mathematical Methods for Deep Learning, 2019: \"designing Deep Learning architectures, training them, analyzing their performance, and predicting their behavior under different conditions with provable guarantees\". Reason: The ONR solicitation explicitly joins architecture design, training and provable prediction in one programme objective."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 1. Reason: The official solicitation supplies the ONR programme objective directly, resolving the source gap recorded for the project’s About page."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No programme, academy or professional society statement was found disputing the value or feasibility of a prescriptive theory for specified data classes.\". Reason: The question about institutional disagreement needs a record of the scope of the search."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after None: \"A theory correctly predicts how excess test loss scales with training-set size in one setting.\". Reason: Predicting the slope of a learning curve has a published experimental test and marks progress before a theory can prescribe a network or predict its absolute error."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: title = \"A theorem proves gradient descent reaches any positive training-loss tolerance at finite width.\"; criterion = \"For n training examples satisfying stated assumptions, a peer-reviewed or machine-checked theorem specifies a finite network width, initialization and gradient-descent step size. For every \\u03b5 > 0, it gives a finite iteration bound by which empirical loss is below \\u03b5, with stated probability over any random initialization.\"; set_by = \"The finite-width gradient-descent convergence test exemplified by Du and colleagues, ICLR 2019, Theorem 4.1.\"; set_by_kind = \"community_convention\"; threshold_quote = \"randomly initialized gradient descent converges to a globally optimal solution at a linear convergence rate for the quadratic loss function.\"; threshold_ref = 9; refs = [9]. Reason: Du and colleagues bound the iterations needed to reach any positive tolerance, while the title suggests exact zero in finite time and the criterion includes a historical result."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"For a trained classifier with more parameters than training examples, evaluate a proved generalization bound numerically at a stated confidence level. Its upper bound on population classification error must be strictly below the error of uniform random guessing, 0.5 for binary classification. A data-dependent bound may use the training sample. For a stochastic network, the certificate applies to error averaged over the stated distribution of weights.\"; set_by = \"Dziugaite and Roy, UAI 2017, distinguish certificates that beat the guessing baseline from bounds that merely fall below one.\"; set_by_kind = \"community_convention\"; threshold_quote = \"the bound is nonvacuous, but trivial in the sense that the error rate of guessing is 50%.\"; threshold_ref = 10; refs = [10]. Reason: Dziugaite and Roy distinguish a nonvacuous bound from one that beats guessing, and their measured certificate belongs with the results."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"For one stated data model and loss, a peer-reviewed or machine-checked theorem specifies a finite architecture, initialization and gradient-based training rule. It bounds population risk at a stated finite sample size, width and number of training steps. The risk proof must use task-relevant features acquired during training. A two-layer network qualifies. A bound proved solely for features fixed at initialization establishes only partial progress.\"; threshold_quote = \"outside the kernel regime by learning representations that are relevant to the target task\"; threshold_ref = 5; refs = [5, 6, 7, 8, 33]. Reason: The feature-learning test turns on whether the risk proof uses a learned representation, and the COLT 2018 citation can identify the relevant paper directly."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Applied 9 of 9 proposed operations from MAT-07-revise-20261121T132701197414Z; now version 3."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m7, m2, m3, m4."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 0 from arXiv, 4 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 5 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Structural problems after applying: references never cited: [18]"
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "definition is 454 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 19 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 6 candidates returned, 0 dropped as sources already used, 6 to judge."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 6 of 6 new candidates, without search. Skipped: none. Dropped rows: none. Replaced 22 earlier rows. Added 53 results: 47 from sources already used, 6 from newly found sources."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 3 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 47 found, 1 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Removed 1 references no longer cited; renumbered."
    }
   ],
-  "results_run": "2026-11-16"
+  "results_run": "2026-11-21"
  }
 }
