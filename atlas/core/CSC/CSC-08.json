@@ -256,14 +256,29 @@
   ],
   "prompt": "5e97d4b8dfc3"
  },
+ "review": {
+  "state": "published",
+  "note": null,
+  "into": null,
+  "at": "2026-11-15",
+  "log": [
+   {
+    "date": "2026-11-15",
+    "state": "published"
+   }
+  ]
+ },
  "page": {
   "id": "CSC-08",
   "title": "Open-world mobile manipulation",
   "definition": "A robot navigates and manipulates objects to carry out multistep language instructions in previously unseen, unmodified homes or small workplaces. It generalizes across objects, layouts and instructions without demonstrations of the evaluation tasks, site-specific training or remote control during execution.",
   "goal": {
-   "need": "In the United States in 2025, people aged 15 and over averaged 1.99 hours per day on household activities, including 0.56 hours of housework and 0.71 hours of food preparation and cleanup. These population means include people who did none of the activity that day. The survey interviewed approximately 6,100 people. These quantities describe work to which domestic mobile manipulation is relevant; they do not estimate how much a robot could replace.",
+   "need": "In 2025, U.S. residents aged 15 and over averaged 1.99 hours a day on household activities, including 0.56 hours of housework and 0.71 hours of food preparation and cleanup. A dishwasher handles one chore. A resident could ask a robot to tidy a bedroom without first demonstrating the job. Someone with limited mobility could have a dropped phone brought within reach without waiting for help. The benefit depends on which objects the robot can reach and grasp. The survey measures time spent on chores and gives no estimate of time saved.",
    "need_refs": [
-    1
+    1,
+    13,
+    3,
+    14
    ],
    "figures": {
     "caption": "Time spent on household activities in the United States, 2025",
@@ -304,6 +319,14 @@
      "context": null,
      "ref": 3,
      "checked": true
+    },
+    {
+     "body": "U.S. Robotics Roadmap, service robotics working group",
+     "year": "2013",
+     "quote": "high-speed, collision-free, mobile manipulation in completely novel, unstructured, dynamic environments.",
+     "context": "The 2013 edition of A Roadmap for U.S. Robotics gives this as a 15-year goal for service robots.",
+     "ref": 15,
+     "checked": null
     }
    ]
   },
@@ -333,7 +356,7 @@
    {
     "id": "m1",
     "title": "A laboratory robot grasps and lifts an object with its gripper.",
-    "criterion": "Complete the grasp-and-lift endpoint of the Colosseum V2 Pick category on physical hardware. The paper's hardware study used one Action Chunking Transformer policy, five tasks and seven conditions, with 20 trials per task-condition pair after 60 training demonstrations per task. This study evaluates trained manipulation skills under bounded changes. Its inspected version was revised on 29 September 2026.",
+    "criterion": "In a physical trial of a Colosseum V2 Pick task, use the gripper to grasp the target object and lift it clear of its support. RaiseCube is one such task.",
     "set_by": "Colosseum V2 authors, section III-A.1, Pick category, and section IV-C, hardware evaluation protocol.",
     "set_by_kind": "protocol",
     "threshold_quote": "This category involves grasping and lifting objects using the gripper.",
@@ -347,11 +370,11 @@
    },
    {
     "id": "m2",
-    "title": "A simulated household robot completes a task goal within twice the human demonstration time.",
-    "criterion": "Satisfy every condition in a valid goal clause of a BEHAVIOR household task before the 2025 timeout: twice the mean human demonstration completion time for that task. Standard-track evaluation excludes privileged object states and global robot pose; evaluation instances cannot supply training data. Full completion is an episode endpoint, without a benchmark-wide passing rate. The provisional leaderboard records 12.4% full-task success for Robot Learning Collective on 14 November 2025 across 50 tasks with 10 held-out instances each: 500 episodes.",
+    "title": "A simulated robot completes a household task within twice the mean human demonstration time.",
+    "criterion": "In a held-out episode of the 2025 BEHAVIOR standard track, satisfy every condition in at least one valid goal clause by the default timeout of twice the mean human demonstration time for that task. The policy may use the permitted camera and proprioceptive observations. Object states and the robot’s global pose are unavailable at evaluation, and evaluation instances may not be used to collect training data.",
     "set_by": "2025 BEHAVIOR Challenge organisers, Evaluation and Rules and the leaderboard's full-task success convention.",
     "set_by_kind": "protocol",
-    "threshold_quote": "Calculation: Partial successes = (Number of goal BDDL predicates satisfied at episode end) / (Total number of goal predicates).",
+    "threshold_quote": "the default timeout, which is 2 * average human task completion time within the demo dataset",
     "threshold_ref": 5,
     "refs": [
      5,
@@ -364,13 +387,14 @@
    {
     "id": "m3",
     "title": "A service robot executes three operator commands within seven minutes.",
-    "criterion": "Complete all three commands and return to the instruction point under the RoboCup@Home General Purpose Service Robot Challenge. The maximum test time is seven minutes, excluding referee pauses for arena resets. Commands are generated and withheld from teams; rephrasings are allowed. The rules permit partial credit and penalized assistance, so a competition score alone does not establish this full-command endpoint. This is a published target in the draft revised on 14 October 2026; no completed run under that draft is established here.",
-    "set_by": "RoboCup@Home Technical Committee, section 5.3 of the 2027 draft Rules & Regulations, revised on 14 October 2026.",
+    "criterion": "Execute all three operator commands and return to the instruction point within seven minutes of running time. If commands are issued one at a time, return to the operator after each task. The referee pauses the timer at the instruction point for arena resets. The rules allow up to three rephrasings of a command, award partial credit and deduct points for human assistance.",
+    "set_by": "RoboCup@Home Technical Committee, 2026 Rules & Regulations, release 2026.2, section 5.3.",
     "set_by_kind": "professional_society",
     "threshold_quote": "Main Goal: Execute three commands issued by the operator.",
     "threshold_ref": 4,
     "refs": [
-     4
+     4,
+     18
     ],
     "status": "active",
     "replaced_by": [],
@@ -379,7 +403,7 @@
    {
     "id": "m4",
     "title": "A humanoid completes three learned household chore types in homes excluded from training.",
-    "criterion": "Meet Figure's whole-task endpoints: put all 13–15 toys in the basket; fold and basket all towels; or place both pillows and both comforter corners in the bed's top third. Toy handling has a one-minute limit per toy; towels have three minutes each; each pillow and comforter side has one minute. Safety intervention fails the rollout. On 17 September 2026, Figure reported completions across a study of three chore types in 30 unseen homes, using existing furniture and one fixed checkpoint per task. Tasks were trained elsewhere. This company result is not peer reviewed.",
+    "criterion": "Evaluate each chore across 30 homes excluded from training, using existing furniture, held-out objects and one fixed policy per chore. Score whole trials. For tidying, put all 13–15 toys in the basket within one minute per toy. For folding, pick up, fold and basket every towel within three minutes per towel. For bed making, place both pillows and both comforter corners in the top third of the bed and pull the comforter smooth, allowing one minute per pillow and per comforter side. A human safety intervention fails the trial.",
     "set_by": "Figure, Helix 2.5 evaluation protocol and Detailed Eval Criteria, published on 17 September 2026.",
     "set_by_kind": "protocol",
     "threshold_quote": "Success required completing the entire task: every item tidied, every towel folded, or the whole bed made.",
@@ -390,14 +414,44 @@
     "status": "active",
     "replaced_by": [],
     "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "A mobile robot moves a named object from its starting surface to a requested destination surface.",
+    "criterion": "In the physical HomeRobot benchmark, give the robot the names of a household object, its starting surface and its destination surface. The robot must find a matching object on the specified starting surface, pick it up, find a valid destination surface and place the object on it. If several objects or surfaces match the instruction, any matching choice is valid.",
+    "set_by": "HomeRobot Open-Vocabulary Mobile Manipulation benchmark, section 3.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "Overall success is true if all four stages were accomplished.",
+    "threshold_ref": 16,
+    "refs": [
+     16
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m6",
+    "title": "A mobile manipulator executes an instruction whose skill–object combination was held out of training.",
+    "criterion": "In an RT-1 unseen-task trial, give the physical robot an instruction whose skill and target objects each appeared in training, but whose particular combination was withheld. Use the same environment and randomization procedure as for seen tasks. The robot must carry out the requested action on the specified object or objects.",
+    "set_by": "RT-1 unseen-task evaluation protocol.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "specific combinations of skills and objects are not seen during training",
+    "threshold_ref": 17,
+    "refs": [
+     17
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
    }
   ],
   "measures": [],
   "not_found": [
    "No external completion protocol was found that jointly requires previously undemonstrated tasks, unseen unmodified sites and execution without assistance.",
-   "The final 2026 RoboCup@Home rulebook download could not be opened; the cited rulebook is the draft revised on 14 October 2026.",
    "Figure's graph images could not be inspected, so its trial denominators were not verified.",
-   "The supplied deformable-object survey could not be opened because ScienceDirect returned HTTP 403."
+   "The supplied deformable-object survey could not be opened because ScienceDirect returned HTTP 403.",
+   "No robotics roadmap or capability assessment located disputes the value or feasibility of the domestic mobile manipulation goal."
   ],
   "references": [
    {
@@ -567,110 +621,413 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 13,
+    "kind": "preprint",
+    "url": "https://arxiv.org/abs/2311.16098",
+    "doi": "10.48550/arXiv.2311.16098",
+    "title": "On Bringing Robots Home",
+    "authors": "Shafiullah NMM, Rai A, Etukuru H, Liu Y, Misra I, Chintala S, et al.",
+    "container": "arXiv",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 14,
+    "kind": "report",
+    "url": "https://cdn.aaai.org/Symposia/Spring/2009/SS-09-03/SS09-03-003.pdf",
+    "doi": null,
+    "title": "Human-Robot Interaction Studies for Autonomous Mobile Manipulation for the Motor Impaired",
+    "authors": "Young Sang Choi, Cressel Anderson, Travis Deyle, Charles C. Kemp",
+    "container": "AAAI Spring Symposium, Technical Report SS-09-03",
+    "year": "2009",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 15,
+    "kind": "report",
+    "url": "https://archive2.cra.org/ccc/files/docs/2013-Robotics-Roadmap",
+    "doi": null,
+    "title": "A Roadmap for U.S. Robotics: From Internet to Robotics",
+    "authors": "Georgia Institute of Technology, Carnegie Mellon University, Robotics Technology Consortium, University of Pennsylvania, University of Southern California, Stanford University, University of California–Berkeley, University of Washington, Massachusetts Institute of Technology (organizers)",
+    "container": "2013 Edition",
+    "year": "2013",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 16,
+    "kind": "report",
+    "url": "https://proceedings.mlr.press/v229/yenamandra23a/yenamandra23a.pdf",
+    "doi": null,
+    "title": "HomeRobot: Open-Vocabulary Mobile Manipulation",
+    "authors": "Sriram Yenamandra, Arun Ramachandran, Karmesh Yadav, Austin S. Wang, Mukul Khanna, Theophile Gervet, Tsung-Yen Yang, Vidhi Jain, Alexander Clegg, John M. Turner, Zsolt Kira, Manolis Savva, Angel X. Chang, Devendra Singh Chaplot, Dhruv Batra, Roozbeh Mottaghi, Yonatan Bisk, Chris Paxton",
+    "container": "Proceedings of The 7th Conference on Robot Learning",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 17,
+    "kind": "report",
+    "url": "https://www.roboticsproceedings.org/rss19/p025.pdf",
+    "doi": "10.15607/RSS.2023.XIX.025",
+    "title": "RT-1: Robotics Transformer for Real-World Control at Scale",
+    "authors": "Brohan A, Brown N, Carbajal J, Chebotar Y, Dabis J, Finn C, et al.",
+    "container": "Robotics: Science and Systems XIX",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 18,
+    "kind": "web",
+    "url": "https://github.com/RoboCupAtHome/RuleBook/releases/tag/2026.2",
+    "doi": null,
+    "title": "2026.2",
+    "authors": "RoboCupAtHome",
+    "container": "RoboCupAtHome/RuleBook",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 19,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2407.06939",
+    "doi": null,
+    "title": "Towards Open-World Mobile Manipulation in Homes: Lessons from the Neurips 2023 HomeRobot Open Vocabulary Mobile Manipulation Challenge",
+    "authors": "Yenamandra S, Ramachandran A, Khanna M, Yadav K, Vakil J, Melnik A, et al.",
+    "container": "arXiv",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 20,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2306.11565",
+    "doi": null,
+    "title": "HomeRobot: Open-Vocabulary Mobile Manipulation",
+    "authors": "Yenamandra S, Ramachandran A, Yadav K, Wang A, Khanna M, Gervet T, et al.",
+    "container": "arXiv",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
    }
   ],
   "milestone_order": [
    "m1",
    "m2",
+   "m5",
    "m3",
+   "m6",
    "m4"
   ],
   "results": [
    {
     "milestone": "m1",
     "case": null,
-    "verdict": "partial",
-    "finding": "The ACT hardware study compared success rates across 35 task-condition pairs; simulation-to-hardware R² was 0.49.",
-    "detail": "The five tasks included three Pick-category tasks, with 20 trials per condition after 60 demonstrations per task. The supplied text does not state an individual Pick task's hardware success rate or explicitly establish a successful grasp and lift.",
-    "quote": "Figure 7, where the coefficient of determination across all 35\ntask–perturbation pairs is R2 = 0.49.",
-    "checked": true,
+    "verdict": "met",
+    "finding": "Single-arm ACT succeeded on at least one physical RaiseCube trial, inferred from the baseline used to normalize results. The baseline had 20 trials.",
+    "detail": "The exact success count is unavailable in the supplied text. The document is an arXiv preprint version and records journal acceptance after reviewer evaluation.",
+    "quote": null,
+    "checked": null,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "Robot Learning Collective achieved 12.4% full-task success across 500 held-out evaluation episodes.",
-    "detail": "The evaluation used 50 tasks with 10 held-out instances each and a time limit of twice the mean human demonstration time. The policy used task embeddings and task-specific checkpoints; the evaluation did not test unseen tasks or language understanding.",
+    "finding": "Robot Learning Collective achieved 12.4% full task success across 500 private held-out BEHAVIOR episodes.",
+    "detail": "The 26% q-score includes partial credit. The finding uses the private binary-success rate in Table 1.",
     "quote": null,
     "checked": null,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "met",
-    "finding": "Helix 2.5 achieved 56% whole-task success across trials in 30 unseen homes.",
-    "detail": "Three task-specific checkpoints were evaluated in unseen homes with unseen objects; task training occurred elsewhere. The source does not state the number of trials.",
-    "quote": "The Index-pretrained policy succeeded on 56% - over 6x higher (Figure 1). Success required completing the entire task: every item tidied, every towel folded, or the whole bed made.",
+    "finding": "Index-pretrained Helix 2.5 achieved 56% whole-trial success across three chores in 30 unseen homes.",
+    "detail": "The 56% is pooled across chores. The task-specific fine-tuning data were collected outside the evaluation homes.",
+    "quote": "The Index-pretrained policy succeeded on 56% - over 6x higher (Figure 1). Success required completing the entire task: every item tidied, every towel folded, or the whole bed made. We give no partial credit.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "Robot Learning Collective achieved 12.40% full task success on the 2025 BEHAVIOR Standard held-out test set (episode count unreported).",
+    "detail": null,
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "met",
+    "finding": "UniTeam’s Stretch RE2 achieved 33.3% full-task success across three physical HomeRobot trials.",
+    "detail": "The three queries were cup from couch to chair, toy animal from chair to table, and lemon from chair to table. The paper reports UniTeam’s result in aggregate.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "met",
+    "finding": "The Stretch reinforcement-learning baseline achieved 20% end-to-end success across 20 physical HomeRobot episodes.",
+    "detail": "Trials used unseen object instances from categories both present and absent in simulation training. Each episode allowed up to 300 timesteps.",
+    "quote": "RL performed slightly better than the Heuristic baseline, successfully completing 1 extra episode and achieving a success rate of 20%.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "met",
+    "finding": "The RT-1 mobile manipulator achieved 76% success on held-out skill–object combinations (53 tasks in Appendix I, 21 instructions in Section IV-A).",
+    "detail": "The paper gives conflicting counts for the unseen-task evaluation, so the exact denominator behind the 76% success rate is unclear.",
+    "quote": "On unseen tasks, RT-1 shows it is\ncapable of generalizing to novel instructions, performing 76%\nof the never-before-seen instructions, 24% more than the next\nbest baseline.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    }
   ],
   "judged": [
    {
     "url": "https://arxiv.org/abs/2605.27759",
     "milestone": "m1",
-    "hash": "4a30b69a6bf8",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ffcfed03a0f2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2605.27759",
     "milestone": "m2",
-    "hash": "f17b4d9aa20d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "245cdf342244",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2605.27759",
+    "milestone": "m5",
+    "hash": "a439fe17fc6d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2605.27759",
     "milestone": "m3",
-    "hash": "22ac83e51097",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "0b7944503e42",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2605.27759",
+    "milestone": "m6",
+    "hash": "9346350fc727",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2605.27759",
     "milestone": "m4",
-    "hash": "f3850d8dbc6b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "b126a72bd1b2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2605.27759",
     "milestone": "completion",
     "hash": "3fafae6defc6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.06951",
+    "milestone": "m1",
+    "hash": "ffcfed03a0f2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2512.06951",
     "milestone": "m2",
-    "hash": "f17b4d9aa20d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "245cdf342244",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.06951",
+    "milestone": "m5",
+    "hash": "a439fe17fc6d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.06951",
+    "milestone": "m3",
+    "hash": "0b7944503e42",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.06951",
+    "milestone": "m6",
+    "hash": "9346350fc727",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.06951",
+    "milestone": "m4",
+    "hash": "b126a72bd1b2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.06951",
+    "milestone": "completion",
+    "hash": "3fafae6defc6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.figure.ai/news/helix-2-5-zero-shot-30-home-generalization",
+    "milestone": "m1",
+    "hash": "ffcfed03a0f2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.figure.ai/news/helix-2-5-zero-shot-30-home-generalization",
+    "milestone": "m2",
+    "hash": "245cdf342244",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.figure.ai/news/helix-2-5-zero-shot-30-home-generalization",
+    "milestone": "m5",
+    "hash": "a439fe17fc6d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.figure.ai/news/helix-2-5-zero-shot-30-home-generalization",
+    "milestone": "m3",
+    "hash": "0b7944503e42",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.figure.ai/news/helix-2-5-zero-shot-30-home-generalization",
+    "milestone": "m6",
+    "hash": "9346350fc727",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.figure.ai/news/helix-2-5-zero-shot-30-home-generalization",
     "milestone": "m4",
-    "hash": "f3850d8dbc6b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "b126a72bd1b2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.figure.ai/news/helix-2-5-zero-shot-30-home-generalization",
+    "milestone": "completion",
+    "hash": "3fafae6defc6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://behavior.stanford.edu/challenge/archive/2025/leaderboard.html",
+    "milestone": "m2",
+    "hash": "245cdf342244",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2407.06939",
+    "milestone": "m5",
+    "hash": "a439fe17fc6d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2306.11565",
+    "milestone": "m5",
+    "hash": "a439fe17fc6d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.roboticsproceedings.org/rss19/p025.pdf",
+    "milestone": "m6",
+    "hash": "9346350fc727",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2412.05313",
+    "milestone": "completion",
+    "hash": "3fafae6defc6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -712,20 +1069,103 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 2 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"In 2025, U.S. residents aged 15 and over averaged 1.99 hours a day on household activities, including 0.56 hours of housework and 0.71 hours of food preparation and cleanup. A dishwasher handles one chore. A resident could ask a robot to tidy a bedroom without first demonstrating the job. Someone with limited mobility could have a dropped phone brought within reach without waiting for help. The benefit depends on which objects the robot can reach and grasp. The survey measures time spent on chores and gives no estimate of time saved.\". Reason: The time-use figures establish the scale of household work, but the current text omits what a resident could delegate and why learning each chore on site is a limitation."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by U.S. Robotics Roadmap, service robotics working group, 2013: \"high-speed, collision-free, mobile manipulation in completely novel, unstructured, dynamic environments.\". Reason: The U.S. robotics roadmap explicitly names mobile manipulation in novel environments, a more specific goal than the existing statements about domestic service and real-world use."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No robotics roadmap or capability assessment located disputes the value or feasibility of the domestic mobile manipulation goal.\". Reason: The question about institutional dissent has no identified source."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"In a physical trial of a Colosseum V2 Pick task, use the gripper to grasp the target object and lift it clear of its support. RaiseCube is one such task.\"; threshold_quote = \"This category involves grasping and lifting objects using the gripper.\"; threshold_ref = 9; refs = [9]. Reason: The original criterion mixes a single grasp-and-lift test with the design and revision date of a five-task study."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: title = \"A simulated robot completes a household task within twice the mean human demonstration time.\"; criterion = \"In a held-out episode of the 2025 BEHAVIOR standard track, satisfy every condition in at least one valid goal clause by the default timeout of twice the mean human demonstration time for that task. The policy may use the permitted camera and proprioceptive observations. Object states and the robot\\u2019s global pose are unavailable at evaluation, and evaluation instances may not be used to collect training data.\"; threshold_quote = \"the default timeout, which is 2 * average human task completion time within the demo dataset\"; threshold_ref = 5; refs = [5, 10]. Reason: The existing quotation defines partial credit, and the criterion embeds a leaderboard result in the test for a single episode."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m2: \"A mobile robot moves a named object from its starting surface to a requested destination surface.\". Reason: The existing milestones omit a physical test that joins language, navigation, grasping and placement in one episode."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Execute all three operator commands and return to the instruction point within seven minutes of running time. If commands are issued one at a time, return to the operator after each task. The referee pauses the timer at the instruction point for arena resets. The rules allow up to three rephrasings of a command, award partial credit and deduct points for human assistance.\"; set_by = \"RoboCup@Home Technical Committee, 2026 Rules & Regulations, release 2026.2, section 5.3.\"; threshold_quote = \"Main Goal: Execute three commands issued by the operator.\"; threshold_ref = 4; refs = [4, 19]. Reason: The final 2026 rules specify the three-command endpoint, return point and timer pauses that the entry attributes only to a 2027 draft."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 1. Reason: Section 5.3 of the final rulebook revised on 11 May 2026 is available, resolving the recorded gap."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m3: \"A mobile manipulator executes an instruction whose skill–object combination was held out of training.\". Reason: The existing tests cover new commands and new homes without isolating whether a robot can apply a familiar skill to an object it never handled that way in training."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"Evaluate each chore across 30 homes excluded from training, using existing furniture, held-out objects and one fixed policy per chore. Score whole trials. For tidying, put all 13\\u201315 toys in the basket within one minute per toy. For folding, pick up, fold and basket every towel within three minutes per towel. For bed making, place both pillows and both comforter corners in the top third of the bed and pull the comforter smooth, allowing one minute per pillow and per comforter side. A human safety intervention fails the trial.\"; threshold_quote = \"Success required completing the entire task: every item tidied, every towel folded, or the whole bed made.\"; threshold_ref = 8; refs = [8]. Reason: The criterion mixes Figure’s reported outcome with its grading rules and leaves unclear that each chore uses its own fixed policy across homes."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Applied 10 of 10 proposed operations from CSC-08-revise-20261121T153708611013Z; now version 2."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m5, m3, m6, m4."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 1 from arXiv, 5 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 6 found, 0 not found, 1 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 3 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 6 candidates returned, 0 dropped as sources already used, 6 to judge."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 5 of 6 new candidates, without search. Skipped: 2 no readable saved copy. Dropped rows: 1 partial on completion. Replaced 3 earlier rows. Added 7 results: 3 from sources already used, 4 from newly found sources."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 2 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 3 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-15"
- },
- "review": {
-  "state": "published",
-  "note": null,
-  "into": null,
-  "at": "2026-11-15",
-  "log": [
-   {
-    "date": "2026-11-15",
-    "state": "published"
-   }
-  ]
+  "results_run": "2026-11-21"
  }
 }
