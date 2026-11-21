@@ -611,6 +611,14 @@ class PageTests(unittest.TestCase):
         self.assertTrue(path.is_file())
         self.assertEqual(pages.latest_proposal('BME-99'), path)
 
+    def test_the_latest_proposal_is_the_newest_by_stamp_not_by_folder_name(self):
+        older = pages.CALLS / 'BME-99-revise-fable-20261116T054742636421Z' / 'proposal.json'
+        newer = pages.CALLS / 'BME-99-revise-20261121T105847075214Z' / 'proposal.json'
+        for path in (older, newer):
+            path.parent.mkdir(parents=True)
+            path.write_text('{}')
+        self.assertEqual(pages.latest_proposal('BME-99'), newer)
+
     def test_revise_shows_the_answers_behind_a_change_and_checks_their_quotes(self):
         self.define()
         empty = {'answer': None, 'ref': None, 'quote': None}

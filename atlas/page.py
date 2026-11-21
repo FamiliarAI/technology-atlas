@@ -2498,7 +2498,11 @@ def show_proposal(stored):
 
 
 def latest_proposal(identifier):
-    found = sorted(CALLS.glob(f'{identifier}-revise-*/proposal.json'))
+    # Newest by the stamp in the folder name; a model tag such as '-fable-' must not sort later.
+    found = sorted(
+        CALLS.glob(f'{identifier}-revise-*/proposal.json'),
+        key=lambda path: re.search(r'(\d{8}T\d+)Z?$', path.parent.name).group(1).ljust(21, '0'),
+    )
     if not found:
         raise ValueError(f'{identifier}: no stored proposal; run revise first')
     return found[-1]
