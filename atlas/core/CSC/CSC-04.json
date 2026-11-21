@@ -338,9 +338,13 @@
   "title": "Proof-carrying code at development and maintenance cost parity",
   "definition": "Production machine code would carry independently checkable proofs of its stated behaviour, memory safety (valid memory accesses) and information flow (permitted transfers between security domains). Total development and maintenance cost, including proofs, would not exceed that of equivalent software developed and tested without proofs.",
   "goal": {
-   "need": "The seL4 team found 144 of 160 C defects during verification of its first kernel in 2009. Its design-through-verification effort included research, tools and libraries, so it does not isolate proof overhead. Reducing the effort needed to obtain and maintain such evidence is the economic goal.",
+   "need": "Of 912 high- or critical-severity bugs examined in stable Chrome releases, about 70% involved memory safety. Tests give little evidence about inputs they never exercise. An operator updating a network service could check, before running it, that every execution covered by the proof respects its memory and information-flow rules. At cost parity, suppliers could maintain that assurance within their ordinary development and maintenance budgets. Its value depends on the rules capturing users’ needs and on the execution assumptions holding.",
    "need_refs": [
-    1
+    18,
+    19,
+    14,
+    12,
+    10
    ],
    "figures": {
     "caption": "The first seL4 functional-correctness proof, completed in 2009",
@@ -389,6 +393,14 @@
      "context": null,
      "ref": 4,
      "checked": null
+    },
+    {
+     "body": "Verified Software Initiative, The Verified Software Initiative: A Manifesto",
+     "year": "2009",
+     "quote": "replace unverified programs in current service and continue to evolve in a verified state.",
+     "context": "The goal concerns verified replacements for software already in service and the preservation of verification through later changes.",
+     "ref": 20,
+     "checked": null
     }
    ]
   },
@@ -414,13 +426,14 @@
    {
     "id": "m1",
     "title": "A code consumer validates a supplied binary’s safety proof before executing the binary.",
-    "criterion": "The consumer checks an accompanying proof against its safety policy. In Necula and Lee’s 1996 packet-filter experiment, reads were confined to packet and scratch memory, writes to scratch memory, branches were forward, and protected registers were preserved, conditional on valid input addresses. Four DEC Alpha assembly packet filters were certified against that policy.",
+    "criterion": "Before executing a supplied native-code binary, the consumer checks its accompanying proof against the binary and the consumer’s published safety policy. Validation must establish that the code obeys the policy whenever the stated entry conditions hold.",
     "set_by": "Proof-carrying-code research convention; Necula and Lee’s OSDI 1996 protocol, instantiated for packet filters.",
     "set_by_kind": "community_convention",
     "threshold_quote": "Kernel safety is ensured by validating the safety proof.",
     "threshold_ref": 5,
     "refs": [
-     5
+     5,
+     14
     ],
     "status": "active",
     "replaced_by": [],
@@ -429,7 +442,7 @@
    {
     "id": "m2",
     "title": "A software implementation has a machine-checked proof that it refines its functional specification.",
-    "criterion": "A machine-checked refinement proof establishes that implementation behaviour conforms to the abstract functional specification under stated assumptions. The 2009 seL4 result met this test for one ARMv6 kernel at C-source level. Compiler correctness, assembly, boot code, cache management and hardware remained assumptions.",
+    "criterion": "A proof assistant checks that every observable behaviour of the implementation under the stated execution assumptions is permitted by its abstract functional specification. Identify the implementation level to which the theorem applies.",
     "set_by": "Functional-verification community’s refinement criterion, instantiated by the seL4 team in SOSP 2009.",
     "set_by_kind": "community_convention",
     "threshold_quote": "Functional correctness means here that the implementation always strictly follows our high-level abstract specification of kernel behaviour.",
@@ -444,7 +457,7 @@
    {
     "id": "m3",
     "title": "A compiler has a machine-checked semantic-preservation proof from its source language to assembly.",
-    "criterion": "Successful compilation is connected by a machine-checked semantic-preservation theorem to the source and assembly semantics; guarantees respect the theorem’s treatment of undefined source behaviour. CompCert 3.18, dated 31 August 2026, supplies such proofs for CompCert C, a large C subset, targeting ARM, PowerPC, RISC-V and x86 assembly. This result stops at assembly rather than establishing the entire deployed executable.",
+    "criterion": "Machine-check a theorem covering every successful compilation in the supported source language. When the source program has defined behaviour, every observable behaviour of the generated assembly must be permitted by the source semantics.",
     "set_by": "Compiler-verification community’s semantic-preservation criterion, formalised in CompCert’s documentation and Compiler module.",
     "set_by_kind": "community_convention",
     "threshold_quote": "the fact that the generated assembly code is semantically equivalent to its source program",
@@ -460,7 +473,7 @@
    {
     "id": "m4",
     "title": "A system’s executable inherits functional-correctness and information-flow guarantees from its source.",
-    "criterion": "Binary refinement connects the executable to the verified source semantics, carrying the applicable functional and security theorems through compilation. seL4 reports this proof stack in supporting configurations. Its 2013 translation-validation result covered all previously verified functions of one kernel compiled by GCC 4.5.1 at optimisation level 1 for ARM; assembly routines and volatile hardware accesses were excluded. The validator, SMT solvers and machine model remained part of the trust assumptions.",
+    "criterion": "Prove that the executable refines the source semantics used in the functional-correctness proof. For that same executable and configuration, establish that the functional specification and the information-flow policy both hold. State the execution assumptions and the observations covered by the information-flow theorem.",
     "set_by": "Binary-refinement and information-flow verification conventions; Sewell, Myreen and Klein’s PLDI 2013 result and the seL4 proof statements.",
     "set_by_kind": "community_convention",
     "threshold_quote": "Formally, we prove that the binary is a refinement of the stated C source semantics.",
@@ -475,16 +488,46 @@
    },
    {
     "id": "m5",
-    "title": "A software system meets PROVERS targets for >10 property classes and 1% manual proof edits.",
-    "criterion": "On a Phase 3 system, traditional developers demonstrate proofs for >10 classes of system properties; <5% of serious red-team findings remain; the target for proof lines requiring manual change after updates and maintenance is 1%. These are DARPA’s tentative programme targets. As a precursor, the 2018 s2n paper reports 956 proof replays after deployment in November 2016 and three manual proof updates over one year. Some replays involved no change to verified code; this does not measure the fraction of proof lines edited.",
-    "set_by": "DARPA, PROVERS BAA HR001123S0020, Table 1, dated 29 March 2023; thresholds are tabulated. The opened text is mirrored by GovTribe. The FAQ specifies non-expert participation.",
+    "title": "Developers prove >10 property classes, with <5% of serious findings left and 1% of proof lines edited by hand.",
+    "criterion": "Apply the tentative PROVERS Phase 3 targets to a high-complexity system. Developers without formal-methods expertise demonstrate the tools. More than 10 classes of system properties are proved, and less than 5% of serious findings by the red team remain. After software updates and maintenance, measure the percentage of proof lines requiring manual change against the 1% target.",
+    "set_by": "DARPA, PROVERS broad agency announcement HR001123S0020, Table 1, Phase 3 Maturation column, and programme FAQ on developer participation.",
     "set_by_kind": "government_programme",
-    "threshold_quote": null,
-    "threshold_ref": null,
+    "threshold_quote": "lines of proof requiring manual change following software update and maintenance\n\n20% 10% 1%",
+    "threshold_ref": 4,
     "refs": [
      4,
-     11,
-     12
+     11
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m6",
+    "title": "A production project rechecks its proofs on every code change submitted for integration.",
+    "criterion": "Integrate proof checking into the project’s build workflow so that each pushed change or pull request triggers a check of the stated properties against the updated implementation. A successful run must establish those properties for the revision under test.",
+    "set_by": "Continuous formal verification practice in the Amazon s2n deployment, identified in DARPA’s PROVERS FAQ as the precedent for proof maintenance.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "runs every time a code change is\npushed or a pull request is issued.",
+    "threshold_ref": 12,
+    "refs": [
+     12,
+     11
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m7",
+    "title": "Evaluators compare proof-tool costs and development efficiency against a baseline workflow.",
+    "criterion": "Document the platform team’s baseline workflow. Compare the continuous proof workflow with traditional formal verification, evaluating the costs of scaling, using, adopting and maintaining the tools and their effect on development efficiency. Report the comparison without imposing a numerical cost ratio.",
+    "set_by": "DARPA, PROVERS broad agency announcement HR001123S0020, quantitative evaluation and evidence curation requirements.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "cost (of scaling, use, adoption, and maintenance).",
+    "threshold_ref": 4,
+    "refs": [
+     4
     ],
     "status": "active",
     "replaced_by": [],
@@ -736,6 +779,160 @@
     "issue": null,
     "pages": null,
     "citation_source": "crossref"
+   },
+   {
+    "id": 18,
+    "kind": "web",
+    "url": "https://www.chromium.org/Home/chromium-security/memory-safety/",
+    "doi": null,
+    "title": "Memory safety",
+    "authors": "The Chromium Projects",
+    "container": "The Chromium Projects",
+    "year": "undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 19,
+    "kind": "report",
+    "url": "https://www.nationalacademies.org/read/11923/chapter/4",
+    "doi": "10.17226/11923",
+    "title": "Software for Dependable Systems: Sufficient Evidence?",
+    "authors": "National Research Council",
+    "container": "The National Academies Press",
+    "year": "2007",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 20,
+    "kind": "journal",
+    "url": "https://users.csc.calpoly.edu/~gfisher/classes/509/handouts/a22-hoare.pdf",
+    "doi": "10.1145/1592434.1592439",
+    "title": "The Verified Software Initiative: A Manifesto",
+    "authors": "Hoare CAR, Misra J, Leavens GT, Shankar N",
+    "container": "ACM Comput. Surv.",
+    "year": "2009",
+    "volume": "41",
+    "issue": "4",
+    "pages": "1-8",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 21,
+    "kind": "report",
+    "url": "https://www.cs.tufts.edu/comp/150CMP/papers/colby00certifying.pdf",
+    "doi": null,
+    "title": "https://www.cs.tufts.edu/comp/150CMP/papers/colby00certifying.pdf",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 22,
+    "kind": "preprint",
+    "url": "https://google-deepmind.github.io/code-verification/",
+    "doi": null,
+    "title": "https://google-deepmind.github.io/code-verification/",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 23,
+    "kind": "report",
+    "url": "https://www.cs.princeton.edu/techreports/2005/733.pdf",
+    "doi": null,
+    "title": "Interfacing Compilers, Proof Checkers, and Proofs for Foundational Proof-Carrying Code",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 24,
+    "kind": "web",
+    "url": "https://docs.sel4.systems/releases/sel4/16.0.0.html",
+    "doi": null,
+    "title": "seL4 Version 16.0.0 Release",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 25,
+    "kind": "web",
+    "url": "https://proofcraft.systems/news-2026/",
+    "doi": null,
+    "title": "Proofcraft News - 2026",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 26,
+    "kind": "web",
+    "url": "https://github.com/aws/aws-lc/blob/main/README.md",
+    "doi": null,
+    "title": "AWS libcrypto (AWS-LC)",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 27,
+    "kind": "book",
+    "url": "https://link.springer.com/chapter/10.1007/978-3-032-41269-0_5",
+    "doi": "10.1007/978-3-032-41269-0_5",
+    "title": "From Manual to LLM-Assisted Formal Verification of a PKCS#1 Signature Parser",
+    "authors": "Hána M, Kosmatov N, Prevosto V, Signoles J",
+    "container": "Lecture Notes in Computer Science",
+    "year": "2027",
+    "volume": null,
+    "issue": null,
+    "pages": "61-82",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 28,
+    "kind": "journal",
+    "url": "https://verse-lab.org/sisyphus/pdfs/sisyphus-pldi23.pdf",
+    "doi": "10.1145/3591221",
+    "title": "Mostly Automated Proof Repair for Verified Libraries",
+    "authors": "Gopinathan K, Keoliya M, Sergey I",
+    "container": "Proc. ACM Program. Lang.",
+    "year": "2023",
+    "volume": "7",
+    "issue": "PLDI",
+    "pages": "25-49",
+    "citation_source": "crossref"
    }
   ],
   "milestone_order": [
@@ -743,398 +940,1275 @@
    "m2",
    "m3",
    "m4",
-   "m5"
+   "m6",
+   "m5",
+   "m7"
   ],
   "results": [
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "One seL4 kernel has machine-checked functional correctness proofs for verified configurations.",
-    "detail": "The C code of verified configurations conforms to the seL4 specification. The page states that proof assumptions remain.",
-    "quote": "Functional correctness:\nthe C code of all verified\n      configurations of seL4 behaves precisely as specified in the seL4\n      specification and nothing more.",
+    "finding": "The seL4 kernel’s 10,000 verified lines of C refine its functional specification in every verified configuration.",
+    "detail": "The page identifies machine interfaces such as caching as assumptions and refers readers elsewhere for the full list.",
+    "quote": "the C code of all verified\n      configurations of seL4 behaves precisely as specified in the seL4\n      specification and nothing more.",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m4",
     "case": null,
-    "verdict": "met",
-    "finding": "One seL4 kernel has binary correctness and security proofs in supporting configurations.",
-    "detail": "The binary implements the behavior of the verified C code; the security guarantees depend on configuration and system setup assumptions.",
-    "quote": "Binary correctness:\nin the configurations that support this property, the binary machine\n      code running on the processor correctly implements the behaviour of the C code assumed\n      in the functional correctness proof.",
+    "verdict": "partial",
+    "finding": "For 1 kernel, seL4 reports machine-checked binary refinement and confidentiality proofs for supported configurations.",
+    "detail": "Integrity requires withholding cross-component write access. The stated confidentiality scope is domain-scheduler security domains. The page refers readers to separate configuration and assumptions pages.",
+    "quote": "the binary machine\n      code running on the processor correctly implements the behaviour of the C code assumed\n      in the functional correctness proof.",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
-    "finding": "For one seL4 kernel, the correctness proof comprises 200,000 lines of machine-checked Isabelle proof script.",
-    "detail": "The page reports verified C code, but does not establish that the proof is a refinement proof against an abstract functional specification. Assembly and boot code were not verified.",
-    "quote": "All together 200,000 lines of Isabelle proof script. Manually written,\nmachine checked.",
+    "finding": "The Isabelle-checked seL4 correctness proof covered 7,500 lines of C in one kernel.",
+    "detail": null,
+    "quote": "7,500 lines of C code. We currently do not verify the assembly code\nand the boot code (1,200 lines).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 1,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Design, documentation, implementation and verification of one seL4 kernel took about 25 person-years.",
+    "detail": "The repeat-effort and certification figures are estimates. The certification comparison uses dollars, while the project reports labour in person-years.",
+    "quote": "In total, design, documentation, implementation and verification\nof the seL4 kernel come to about 25 person years.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 1,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "met",
-    "finding": "CompCert 3.18 has a Coq-checked semantic-preservation proof for compilation to assembly across 4 architecture families.",
-    "detail": "The result covers CompCert C and stops at assembly; it does not establish correctness of an entire deployed executable.",
-    "quote": "The particularity of this compiler is that it is written mostly within\nthe specification language of the Coq proof assistant, and its\ncorrectness --- the fact that the generated assembly code is\nsemantically equivalent to its source program --- was entirely proved\nwithin the Coq proof assistant.",
+    "finding": "CompCert 3.18 is one compiler with Coq-checked semantic preservation from CompCert C to assembly across five target architectures.",
+    "detail": "The supplied page summarizes the theorem without reproducing its formal statement. It displays PowerPC modules and points to the source distribution for the other four architectures.",
+    "quote": "its\ncorrectness --- the fact that the generated assembly code is\nsemantically equivalent to its source program --- was entirely proved\nwithin the Coq proof assistant.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "Kernel proof validation for several DEC Alpha packet-filter binaries took 1 to 3 milliseconds per binary.",
+    "detail": "The abstract gives the sample size as ‘several’ and supplies no exact count.",
+    "quote": "The\nbinaries can be executed with no run-time overhead, beyond a one-time cost\nof 1 to 3 milliseconds for validating the enclosed proofs.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "Coq checked contextual refinement for one concurrent kernel, mC2, comprising 6500 lines of C and x86 assembly.",
+    "detail": "The theorem covers the modeled x86 instruction subset and assumes strong sequential consistency for atomic instructions. The model omits the TLB, and the assembler, bootloader, PreInit module and ELF loader are unverified.",
+    "quote": "We\nhave successfully developed a practical concurrent OS\nkernel and veriﬁed its (contextual) functional correctness\nin Coq.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Functional correctness reaches modeled x86 assembly for one concurrent kernel, mC2.",
+    "detail": "The prior information-flow result appears in related work. The mC2 model omits TLB behavior and leaves the bootloader, PreInit module and ELF loader unverified.",
+    "quote": "All global\nproperties proved at the system-call speciﬁcation level\ncan be transferred down to the lowest assembly machine.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Verification of new concurrency support in one kernel project, mC2, took about 2 person-years.",
+    "detail": "The labor figure covers the new concurrency framework and features. The runtime comparisons with other kernels do not measure development workflow efficiency.",
+    "quote": "Our team completed\nthe veriﬁcation of the new concurrency framework and\nfeatures in about 2 person years.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "Dafny proved functional equivalence for one AuthV2 source implementation comprising 2,751 lines.",
+    "detail": "Java library calls are modeled by axiomatic preconditions and postconditions. The source proof assumes those contracts.",
+    "quote": "The Dafny imple-\nmentation has essentially one imperative method for every\nfunction in the specification, each with a post-condition that it\nreturns the same value as the function on all inputs.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For one DafnyLite-to-Java compiler, the authors checked four classes of properties on generated Java.",
+    "detail": "The checks cover null dereferences, unintended side effects, signed computations and reference equality. The text gives no fuzzing sample size.",
+    "quote": "we use it to confirm the 1) absence of null-\npointer exceptions, 2) absence of unintended side effects [40],\n3) correct usage of signed computations [51], and 4) correct\nusage of reference equality [25].",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The final of eight AuthV2 shadow iterations had zero observed authorization decision differences from AuthV1.",
+    "detail": "The functional assurance for generated Java depends on correct compilation and accurate models of the Java libraries.",
+    "quote": "The final iteration of AuthV2java\nagreed with AuthV1 on 1015 inputs with no observed differ-\nences.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One production project, AuthV2, reduced wall-clock proof checking to under 10 minutes.",
+    "detail": "A brittleness report measures solver stability. The milestone also requires a successful run to establish the functional properties for the submitted revision.",
+    "quote": "we could keep the wall-clock\nverification time from 30 to below 10 minutes",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One AuthV2 replacement project took four years to develop.",
+    "detail": "The discussion of other verification approaches does not provide comparative cost or development-efficiency measurements.",
+    "quote": "Over a period of four years we developed a new, for-\nmally verified authorization engine, called AuthV2, that is\nbehaviorally equivalent to the original engine, called AuthV1.2",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "One CakeML compiler source implementation has a HOL4 proof of its specified I/O behavior.",
+    "detail": "The theorem assumes well-formed command-line arguments and a standard initial file-system state. The functional specification describes printing the compiler interface's return values.",
+    "quote": "Thus, we now have a CakeML program that is veriﬁed\nto have the desired I/O behaviour of the CakeML compiler.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One CakeML compiler has a HOL4 preservation theorem for five architectures that permits early resource-limit termination.",
+    "detail": "The theorem assumes compatible compiler and machine configurations, correct installation, matching FFI behavior and environmental interference outside the CakeML process state.",
+    "quote": "behave the same as the source up to some point at which it terminates with an\nout-of-memory error.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One bootstrapped CakeML compiler has a HOL4 functional-correctness theorem for its machine code.",
+    "detail": "Native execution assumes correct installation, matching FFI behavior and restricted environmental interference. The wrapper assembly used to establish the initial state is unverified.",
+    "quote": "This bootstrapping method produces a\nmachine code implementation of the compiler and also proves a theorem stating functional\ncorrectness of that machine code.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "The s2n TLS handshake refinement proof covers 2 LLVM-level state-machine functions.",
+    "detail": "The HMAC checks also establish functional agreement within their checked scope. They assume correct hash implementations, and the link to the monolithic specification uses sampled key and message sizes.",
+    "quote": "Formally, we proved that the implementation reﬁnes\na speciﬁcation (conversely, the speciﬁcation simulates the implementation).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "met",
+    "finding": "Amazon s2n recorded 956 CI proof replays on the upstream repository.",
+    "detail": "Some replays were triggered by changes outside the verified code. The HMAC specification-level Coq proofs are rerun when the monolithic specification changes.",
+    "quote": "Since deployment of the proof to the CI system in November of 2016 our\nproofs have been re-played 956 times.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Across 3 s2n verification efforts, the TLS handshake took 8 months of engineering effort.",
+    "detail": "Reported effort includes understanding the C code, specifying behavior, proving code against specifications, integrating CI and merging artifacts. The handshake effort also includes tool extensions for protocol reasoning.",
+    "quote": "The\nTLS handshake veriﬁcation took longer at 8 months, though some of that time\ninvolved developing tool extensions to support reasoning about protocols.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "Special J demonstrates host-side safety proof checking for native x86 code, with one worked method covering a four-byte array read.",
+    "detail": "The worked proof covers the optimized loop in Poly.eval. The prototype checks type and memory safety under its entry and trusted-runtime assumptions. The supplied text identifies the publication as PLDI 2000 conference proceedings.",
+    "quote": "/CR/CP/D2 /CQ /CT /D6/CP/D4/CX/CS/D0/DD /CR /CW/CT/CR /CZ /CT/CS /CQ /DD /CP /D7/D1/CP/D0/D0 /D4/D6/D3 /D3/CU/B9/CR /CW/CT/CR /CZ /CT/D6/BA",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "The s2n TLS handshake refinement proof covers 2 functions that drive the state machine, analyzed as LLVM IR.",
+    "detail": "The high-level specification models the subset of TLS 1.2 implemented by s2n. The verdict rests on the handshake refinement result. The HMAC checks separately sampled message sizes.",
+    "quote": "Formally, we proved that the implementation reﬁnes\na speciﬁcation (conversely, the speciﬁcation simulates the implementation).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "met",
+    "finding": "Amazon s2n recorded 956 proof replays in its main repository after integrating proof checks into CI.",
+    "detail": "The replay count excludes forks and includes runs where the checked code was unchanged. The separate Coq proofs tied to the monolithic HMAC specification were rerun when that specification changed.",
+    "quote": "Since deployment of the proof to the CI system in November of 2016 our\nproofs have been re-played 956 times.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Across 3 s2n component verification projects, the TLS handshake took 8 months of engineering effort.",
+    "detail": "The reported effort includes understanding the C code, writing specifications and proofs, integrating CI, and merging the proof artifacts. The handshake estimate also includes some tool development.",
+    "quote": "The\nTLS handshake veriﬁcation took longer at 8 months, though some of that time\ninvolved developing tool extensions to support reasoning about protocols.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "Several DEC Alpha packet filters had enclosed safety proofs validated in 1 to 3 milliseconds.",
-    "detail": "The excerpt does not state that four filters were certified or give the specific memory, branch, register and input-address conditions in the criterion.",
-    "quote": "The binaries can be executed with no run-time overhead, beyond a one-time cost\nof 1 to 3 milliseconds for validating the enclosed proofs.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "met",
-    "finding": "One mC2 concurrent OS kernel, comprising 6,500 lines of C and x86 assembly, has a Coq-checked contextual refinement proof.",
-    "detail": "The proof uses a sequentially consistent machine model. The assembler, bootloader, CPU and device initialization, and ELF loader are unverified; TLB behavior is not modeled.",
-    "quote": "We have successfully developed a practical concurrent OS\nkernel and veriﬁed its (contextual) functional correctness\nin Coq.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "met",
-    "finding": "One AuthV2 authorization engine implementation was proved equivalent to its functional specification in Dafny.",
-    "detail": "The proof applies to the Dafny implementation and assumes the modeled behavior of external Java libraries. Correctness of the compiler generating production Java was supported by testing, not established by this proof.",
-    "quote": "We developed in Dafny an efficient, imperative, verification-\naware implementation of the program, and we proved it\nequivalent to the functional specification.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "met",
-    "finding": "CakeML: 1 compiler has a machine-checked semantic-preservation proof targeting machine code for 5 architectures.",
-    "detail": "The theorem permits termination with an out-of-memory error after matching the source behaviour up to that point. It assumes well-formed configurations, a correctly initialized machine state, and compatible foreign-function behaviour.",
-    "quote": "Any binary produced by a successful evaluation of the compiler function will either\n• behave exactly according to the observable behaviour of the source semantics or\n• behave the same as the source up to some point at which it terminates with an\nout-of-memory error.",
+    "finding": "Lean checked a conditional fault-freedom proof against the bytes of one AArch64 libsignal-cli executable.",
+    "detail": "The gatekeeper accepts proofs after Lean kernel replay and comparison with the approved specification. The paper gives no execution gate controlled by a code consumer.",
+    "quote": "The theorem also establishes progress: every reachable valid call exits or aborts, and never faults or diverges.",
     "checked": true,
     "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 17,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "peer_reviewed": false,
+    "ref": 22,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "For one AArch64 libsignal-cli executable, Lean proved functional refinement for all runs of three covered operations under stated assumptions.",
+    "detail": "Assumptions include bounded inputs, a fresh single-threaded process with only standard streams open, an empty environment, a fixed clock, randomness from a file, 1 GiB of memory beyond loaded segments, an 8 MiB stack and conforming hooks.",
+    "quote": "These theorems state that the executable implements the Lean models of\nlibsignal\non which the security proofs are built.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 22,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One AArch64 libsignal-cli build satisfies ten symbolic security theorems on collision-free traces and has a functional-refinement proof.",
+    "detail": "The symbolic result assumes two provisioned parties with pinned identities, fresh coins, bounded inputs, modeled AArch64 Linux execution and conforming hooks. Attacker knowledge comes from public setup values, bundles, wire messages and allowed leaks or inversions. Side channels are outside scope. At a collision, the guarantee covers the preceding prefix.",
+    "quote": "We prove that the machine code computes exactly what the model computes, and that the game run on the model is secure. A coupling argument then shows that the game run on the machine code is secure as well",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 22,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m5",
     "case": null,
     "verdict": "partial",
-    "finding": "s2n (1 system): three manual proof updates over one year.",
-    "detail": "The 956 proof replays included runs without changes to verified code and do not measure the fraction of proof lines edited. The paper does not establish the Phase 3 property-class or red-team targets.",
-    "quote": "In one year of code changes only three manual\nupdates to the proof were required.",
+    "finding": "In one libsignal campaign, authors wrote 0 proof lines. The post-maintenance manual edit rate was unmeasured.",
+    "detail": "The reported absence of human proof authorship applies to this campaign. The paper reports that early source changes or recompilation required large proof repairs and gives no manual-edit percentage for those repairs.",
+    "quote": "The proofs were produced entirely by agent teams powered by Gemini 4 Carbon (\n§2.3\n), and none of the authors wrote any proof code.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 22,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For one libsignal verification campaign, the five-person team reported four weeks of work.",
+    "detail": "The historical comparisons involve other systems. The paper provides no baseline workflow or cost accounting for the same verification scope.",
+    "quote": "The proof work was done by a team of five over four weeks, working in parallel on symbolic and computational proofs.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 22,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Flit completed safety checks on 2 native SPARC benchmark binaries using their accompanying LTAL witnesses.",
+    "detail": "The LTAL witness guides Flit in checking that a typing derivation exists. The dissertation reports that the machine-checked soundness proof connecting that derivation to the safety policy was still nearing completion.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 23,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "seL4 16.0.0 reports a completed functional correctness proof for 1 kernel configuration, MCS on 64-bit RISC-V.",
+    "detail": "The implementation level cannot be determined from the release notes.",
+    "quote": "The MCS configuration for 64-bit RISC-V now has a functional correctness proof, and the functional correctness proof for\nMCS on AArch64 is ongoing.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 24,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "On one system, seL4 on AArch64, Proofcraft reports completed proofs for three named security property classes.",
+    "detail": "Three is the count of security property classes named in the announcement. The source gives no system-wide count for a Phase 3 evaluation.",
+    "quote": "Ryan Barry presented his\nrecent completion of the\nseL4 security proofs on AArch64\n: integrity,\nconfidentiality and authority confinement.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 25,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "AWS-LC (1 production library) reports running formal verification checks in CI on every change.",
+    "detail": "The README refers readers to a separate repository for the verified API functions, caveats, and verification technology.",
+    "quote": "the checks are run in AWS-LC’s CI on every change.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 26,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For one PKCS#1 v1.5 parser tested in four assisted runs, the authors estimated 2.5 person-months of human effort for LLM-assisted verification.",
+    "detail": "Prior research and methodology development counted toward the manual estimate and helped accelerate the assisted work. The assisted estimate included time spent learning to work with the LLM. All four runs required human intervention.",
+    "quote": "We estimate the total human effort for this work to be approximately 2.5 person-months, compared to 6 person-months required for the manual proof.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 27,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Across 14 evolved OCaml programs, completing Sisyphus-assisted Coq proof repairs took under 20 minutes of manual work per program.",
+    "detail": "One author timed manual specification and proof of the original versions. Another timed completion of residual obligations after Sisyphus ran. The study did not time manual verification of the same updated versions.",
+    "quote": "As can be seen from the table, all obligations took fewer than 20 minutes to dispatch, while\nspecifying and proving the original programs took considerably longer, demonstrating the util-\nity of Sisyphus for maintaining veriﬁed code-bases.",
     "checked": true,
     "confirmed": true,
-    "peer_reviewed": false,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "peer_reviewed": true,
+    "ref": 28,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    }
   ],
   "judged": [
    {
     "url": "http://www.cs.cmu.edu/~15811/papers/grand-challenge.pdf",
     "milestone": "m1",
-    "hash": "ea260cb87f49",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a987f40c809d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "http://www.cs.cmu.edu/~15811/papers/grand-challenge.pdf",
     "milestone": "m2",
-    "hash": "d01c943b8438",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "cc5c45d8c127",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "http://www.cs.cmu.edu/~15811/papers/grand-challenge.pdf",
     "milestone": "m3",
-    "hash": "0b44d0b089a5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7ea5bd42b79a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "http://www.cs.cmu.edu/~15811/papers/grand-challenge.pdf",
     "milestone": "m4",
-    "hash": "a64ae83f4ca6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ca44efea9249",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "http://www.cs.cmu.edu/~15811/papers/grand-challenge.pdf",
+    "milestone": "m6",
+    "hash": "fcfe8523754c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "http://www.cs.cmu.edu/~15811/papers/grand-challenge.pdf",
     "milestone": "m5",
-    "hash": "2b8fa380a85a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1f04d095328a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "http://www.cs.cmu.edu/~15811/papers/grand-challenge.pdf",
+    "milestone": "m7",
+    "hash": "0fe1b159ca3a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "http://www.cs.cmu.edu/~15811/papers/grand-challenge.pdf",
     "milestone": "completion",
     "hash": "9bd2e3a04473",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sel4.systems/Verification/proofs.html",
     "milestone": "m1",
-    "hash": "ea260cb87f49",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a987f40c809d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sel4.systems/Verification/proofs.html",
     "milestone": "m2",
-    "hash": "d01c943b8438",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "cc5c45d8c127",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sel4.systems/Verification/proofs.html",
     "milestone": "m3",
-    "hash": "0b44d0b089a5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7ea5bd42b79a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sel4.systems/Verification/proofs.html",
     "milestone": "m4",
-    "hash": "a64ae83f4ca6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ca44efea9249",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sel4.systems/Verification/proofs.html",
+    "milestone": "m6",
+    "hash": "fcfe8523754c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sel4.systems/Verification/proofs.html",
     "milestone": "m5",
-    "hash": "2b8fa380a85a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1f04d095328a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sel4.systems/Verification/proofs.html",
+    "milestone": "m7",
+    "hash": "0fe1b159ca3a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sel4.systems/Verification/proofs.html",
     "milestone": "completion",
     "hash": "9bd2e3a04473",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/projects/OLD/l4.verified/numbers",
     "milestone": "m1",
-    "hash": "ea260cb87f49",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a987f40c809d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/projects/OLD/l4.verified/numbers",
     "milestone": "m2",
-    "hash": "d01c943b8438",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "cc5c45d8c127",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/projects/OLD/l4.verified/numbers",
     "milestone": "m3",
-    "hash": "0b44d0b089a5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7ea5bd42b79a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/projects/OLD/l4.verified/numbers",
     "milestone": "m4",
-    "hash": "a64ae83f4ca6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ca44efea9249",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/projects/OLD/l4.verified/numbers",
+    "milestone": "m6",
+    "hash": "fcfe8523754c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/projects/OLD/l4.verified/numbers",
     "milestone": "m5",
-    "hash": "2b8fa380a85a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1f04d095328a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/projects/OLD/l4.verified/numbers",
+    "milestone": "m7",
+    "hash": "0fe1b159ca3a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/projects/OLD/l4.verified/numbers",
     "milestone": "completion",
     "hash": "9bd2e3a04473",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/publications/papers/Sillitoe_BGH_26.slides.pdf",
     "milestone": "m1",
-    "hash": "ea260cb87f49",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a987f40c809d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/publications/papers/Sillitoe_BGH_26.slides.pdf",
     "milestone": "m2",
-    "hash": "d01c943b8438",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "cc5c45d8c127",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/publications/papers/Sillitoe_BGH_26.slides.pdf",
     "milestone": "m3",
-    "hash": "0b44d0b089a5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7ea5bd42b79a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/publications/papers/Sillitoe_BGH_26.slides.pdf",
     "milestone": "m4",
-    "hash": "a64ae83f4ca6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ca44efea9249",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Sillitoe_BGH_26.slides.pdf",
+    "milestone": "m6",
+    "hash": "fcfe8523754c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/publications/papers/Sillitoe_BGH_26.slides.pdf",
     "milestone": "m5",
-    "hash": "2b8fa380a85a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1f04d095328a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://trustworthy.systems/publications/papers/Sillitoe_BGH_26.slides.pdf",
+    "milestone": "m7",
+    "hash": "0fe1b159ca3a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://trustworthy.systems/publications/papers/Sillitoe_BGH_26.slides.pdf",
     "milestone": "completion",
     "hash": "9bd2e3a04473",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://compcert.inria.fr/doc/index.html",
     "milestone": "m1",
-    "hash": "ea260cb87f49",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a987f40c809d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://compcert.inria.fr/doc/index.html",
     "milestone": "m2",
-    "hash": "d01c943b8438",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "cc5c45d8c127",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://compcert.inria.fr/doc/index.html",
     "milestone": "m3",
-    "hash": "0b44d0b089a5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7ea5bd42b79a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://compcert.inria.fr/doc/index.html",
     "milestone": "m4",
-    "hash": "a64ae83f4ca6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ca44efea9249",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://compcert.inria.fr/doc/index.html",
+    "milestone": "m6",
+    "hash": "fcfe8523754c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://compcert.inria.fr/doc/index.html",
     "milestone": "m5",
-    "hash": "2b8fa380a85a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1f04d095328a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://compcert.inria.fr/doc/index.html",
+    "milestone": "m7",
+    "hash": "0fe1b159ca3a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://compcert.inria.fr/doc/index.html",
     "milestone": "completion",
     "hash": "9bd2e3a04473",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.usenix.org/legacy/publications/library/proceedings/osdi96/full_papers/necula/html/index.html",
     "milestone": "m1",
-    "hash": "ea260cb87f49",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a987f40c809d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
-    "url": "https://www.cs.tufts.edu/comp/150CMP/papers/colby00certifying.pdf",
+    "url": "https://www.usenix.org/legacy/publications/library/proceedings/osdi96/full_papers/necula/html/index.html",
+    "milestone": "m2",
+    "hash": "cc5c45d8c127",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/legacy/publications/library/proceedings/osdi96/full_papers/necula/html/index.html",
+    "milestone": "m3",
+    "hash": "7ea5bd42b79a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/legacy/publications/library/proceedings/osdi96/full_papers/necula/html/index.html",
+    "milestone": "m4",
+    "hash": "ca44efea9249",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/legacy/publications/library/proceedings/osdi96/full_papers/necula/html/index.html",
+    "milestone": "m6",
+    "hash": "fcfe8523754c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/legacy/publications/library/proceedings/osdi96/full_papers/necula/html/index.html",
+    "milestone": "m5",
+    "hash": "1f04d095328a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/legacy/publications/library/proceedings/osdi96/full_papers/necula/html/index.html",
+    "milestone": "m7",
+    "hash": "0fe1b159ca3a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/legacy/publications/library/proceedings/osdi96/full_papers/necula/html/index.html",
+    "milestone": "completion",
+    "hash": "9bd2e3a04473",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.columbia.edu/~rgu/publications/osdi16-gu.pdf",
     "milestone": "m1",
-    "hash": "ea260cb87f49",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a987f40c809d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.columbia.edu/~rgu/publications/osdi16-gu.pdf",
     "milestone": "m2",
-    "hash": "d01c943b8438",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "cc5c45d8c127",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.columbia.edu/~rgu/publications/osdi16-gu.pdf",
+    "milestone": "m3",
+    "hash": "7ea5bd42b79a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.columbia.edu/~rgu/publications/osdi16-gu.pdf",
+    "milestone": "m4",
+    "hash": "ca44efea9249",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.columbia.edu/~rgu/publications/osdi16-gu.pdf",
+    "milestone": "m6",
+    "hash": "fcfe8523754c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.columbia.edu/~rgu/publications/osdi16-gu.pdf",
+    "milestone": "m5",
+    "hash": "1f04d095328a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.columbia.edu/~rgu/publications/osdi16-gu.pdf",
+    "milestone": "m7",
+    "hash": "0fe1b159ca3a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.columbia.edu/~rgu/publications/osdi16-gu.pdf",
+    "milestone": "completion",
+    "hash": "9bd2e3a04473",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cdn.amazon.science/bb/40/22ac44f84f6d8eb625ac9666a00f/formally-verified-cloud-scale-authorization.pdf",
+    "milestone": "m1",
+    "hash": "a987f40c809d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://cdn.amazon.science/bb/40/22ac44f84f6d8eb625ac9666a00f/formally-verified-cloud-scale-authorization.pdf",
     "milestone": "m2",
-    "hash": "d01c943b8438",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "cc5c45d8c127",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cdn.amazon.science/bb/40/22ac44f84f6d8eb625ac9666a00f/formally-verified-cloud-scale-authorization.pdf",
+    "milestone": "m3",
+    "hash": "7ea5bd42b79a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cdn.amazon.science/bb/40/22ac44f84f6d8eb625ac9666a00f/formally-verified-cloud-scale-authorization.pdf",
+    "milestone": "m4",
+    "hash": "ca44efea9249",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cdn.amazon.science/bb/40/22ac44f84f6d8eb625ac9666a00f/formally-verified-cloud-scale-authorization.pdf",
+    "milestone": "m6",
+    "hash": "fcfe8523754c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cdn.amazon.science/bb/40/22ac44f84f6d8eb625ac9666a00f/formally-verified-cloud-scale-authorization.pdf",
+    "milestone": "m5",
+    "hash": "1f04d095328a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cdn.amazon.science/bb/40/22ac44f84f6d8eb625ac9666a00f/formally-verified-cloud-scale-authorization.pdf",
+    "milestone": "m7",
+    "hash": "0fe1b159ca3a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cdn.amazon.science/bb/40/22ac44f84f6d8eb625ac9666a00f/formally-verified-cloud-scale-authorization.pdf",
+    "milestone": "completion",
+    "hash": "9bd2e3a04473",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E43ED3EA740D2DF970067F4E2BB9EF7D/S0956796818000229a.pdf/the-verified-cakeml-compiler-backend.pdf",
+    "milestone": "m1",
+    "hash": "a987f40c809d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E43ED3EA740D2DF970067F4E2BB9EF7D/S0956796818000229a.pdf/the-verified-cakeml-compiler-backend.pdf",
+    "milestone": "m2",
+    "hash": "cc5c45d8c127",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E43ED3EA740D2DF970067F4E2BB9EF7D/S0956796818000229a.pdf/the-verified-cakeml-compiler-backend.pdf",
     "milestone": "m3",
-    "hash": "0b44d0b089a5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7ea5bd42b79a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E43ED3EA740D2DF970067F4E2BB9EF7D/S0956796818000229a.pdf/the-verified-cakeml-compiler-backend.pdf",
+    "milestone": "m4",
+    "hash": "ca44efea9249",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E43ED3EA740D2DF970067F4E2BB9EF7D/S0956796818000229a.pdf/the-verified-cakeml-compiler-backend.pdf",
+    "milestone": "m6",
+    "hash": "fcfe8523754c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E43ED3EA740D2DF970067F4E2BB9EF7D/S0956796818000229a.pdf/the-verified-cakeml-compiler-backend.pdf",
+    "milestone": "m5",
+    "hash": "1f04d095328a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E43ED3EA740D2DF970067F4E2BB9EF7D/S0956796818000229a.pdf/the-verified-cakeml-compiler-backend.pdf",
+    "milestone": "m7",
+    "hash": "0fe1b159ca3a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E43ED3EA740D2DF970067F4E2BB9EF7D/S0956796818000229a.pdf/the-verified-cakeml-compiler-backend.pdf",
+    "milestone": "completion",
+    "hash": "9bd2e3a04473",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://d1.awsstatic.com/Security/pdfs/Continuous_Formal_Verification_Of_Amazon_s2n.pdf",
+    "milestone": "m1",
+    "hash": "a987f40c809d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://d1.awsstatic.com/Security/pdfs/Continuous_Formal_Verification_Of_Amazon_s2n.pdf",
+    "milestone": "m2",
+    "hash": "cc5c45d8c127",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://d1.awsstatic.com/Security/pdfs/Continuous_Formal_Verification_Of_Amazon_s2n.pdf",
+    "milestone": "m3",
+    "hash": "7ea5bd42b79a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://d1.awsstatic.com/Security/pdfs/Continuous_Formal_Verification_Of_Amazon_s2n.pdf",
+    "milestone": "m4",
+    "hash": "ca44efea9249",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://d1.awsstatic.com/Security/pdfs/Continuous_Formal_Verification_Of_Amazon_s2n.pdf",
+    "milestone": "m6",
+    "hash": "fcfe8523754c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://d1.awsstatic.com/Security/pdfs/Continuous_Formal_Verification_Of_Amazon_s2n.pdf",
+    "milestone": "m5",
+    "hash": "1f04d095328a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://d1.awsstatic.com/Security/pdfs/Continuous_Formal_Verification_Of_Amazon_s2n.pdf",
+    "milestone": "m7",
+    "hash": "0fe1b159ca3a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://d1.awsstatic.com/Security/pdfs/Continuous_Formal_Verification_Of_Amazon_s2n.pdf",
+    "milestone": "completion",
+    "hash": "9bd2e3a04473",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.tufts.edu/comp/150CMP/papers/colby00certifying.pdf",
+    "milestone": "m1",
+    "hash": "a987f40c809d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.tufts.edu/comp/150CMP/papers/colby00certifying.pdf",
+    "milestone": "m2",
+    "hash": "cc5c45d8c127",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.tufts.edu/comp/150CMP/papers/colby00certifying.pdf",
+    "milestone": "m3",
+    "hash": "7ea5bd42b79a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.tufts.edu/comp/150CMP/papers/colby00certifying.pdf",
+    "milestone": "m4",
+    "hash": "ca44efea9249",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.tufts.edu/comp/150CMP/papers/colby00certifying.pdf",
+    "milestone": "m6",
+    "hash": "fcfe8523754c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.tufts.edu/comp/150CMP/papers/colby00certifying.pdf",
+    "milestone": "m5",
+    "hash": "1f04d095328a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.tufts.edu/comp/150CMP/papers/colby00certifying.pdf",
+    "milestone": "m7",
+    "hash": "0fe1b159ca3a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.tufts.edu/comp/150CMP/papers/colby00certifying.pdf",
+    "milestone": "completion",
+    "hash": "9bd2e3a04473",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://discovery.ucl.ac.uk/id/eprint/10075271/1/Chudnov2018_Chapter_ContinuousFormalVerificationOf.pdf",
+    "milestone": "m1",
+    "hash": "a987f40c809d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://discovery.ucl.ac.uk/id/eprint/10075271/1/Chudnov2018_Chapter_ContinuousFormalVerificationOf.pdf",
+    "milestone": "m2",
+    "hash": "cc5c45d8c127",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://discovery.ucl.ac.uk/id/eprint/10075271/1/Chudnov2018_Chapter_ContinuousFormalVerificationOf.pdf",
+    "milestone": "m3",
+    "hash": "7ea5bd42b79a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://discovery.ucl.ac.uk/id/eprint/10075271/1/Chudnov2018_Chapter_ContinuousFormalVerificationOf.pdf",
+    "milestone": "m4",
+    "hash": "ca44efea9249",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://discovery.ucl.ac.uk/id/eprint/10075271/1/Chudnov2018_Chapter_ContinuousFormalVerificationOf.pdf",
+    "milestone": "m6",
+    "hash": "fcfe8523754c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://discovery.ucl.ac.uk/id/eprint/10075271/1/Chudnov2018_Chapter_ContinuousFormalVerificationOf.pdf",
     "milestone": "m5",
-    "hash": "2b8fa380a85a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1f04d095328a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://discovery.ucl.ac.uk/id/eprint/10075271/1/Chudnov2018_Chapter_ContinuousFormalVerificationOf.pdf",
+    "milestone": "m7",
+    "hash": "0fe1b159ca3a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://discovery.ucl.ac.uk/id/eprint/10075271/1/Chudnov2018_Chapter_ContinuousFormalVerificationOf.pdf",
+    "milestone": "completion",
+    "hash": "9bd2e3a04473",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://google-deepmind.github.io/code-verification/",
+    "milestone": "m1",
+    "hash": "a987f40c809d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://google-deepmind.github.io/code-verification/",
+    "milestone": "m2",
+    "hash": "cc5c45d8c127",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://google-deepmind.github.io/code-verification/",
+    "milestone": "m3",
+    "hash": "7ea5bd42b79a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://google-deepmind.github.io/code-verification/",
+    "milestone": "m4",
+    "hash": "ca44efea9249",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://google-deepmind.github.io/code-verification/",
+    "milestone": "m6",
+    "hash": "fcfe8523754c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://google-deepmind.github.io/code-verification/",
+    "milestone": "m5",
+    "hash": "1f04d095328a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://google-deepmind.github.io/code-verification/",
+    "milestone": "m7",
+    "hash": "0fe1b159ca3a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://google-deepmind.github.io/code-verification/",
     "milestone": "completion",
     "hash": "9bd2e3a04473",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.princeton.edu/techreports/2005/733.pdf",
+    "milestone": "m1",
+    "hash": "a987f40c809d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://docs.sel4.systems/releases/sel4/16.0.0.html",
+    "milestone": "m2",
+    "hash": "cc5c45d8c127",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proofcraft.systems/news-2026/",
+    "milestone": "m5",
+    "hash": "1f04d095328a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/aws/aws-lc/blob/main/README.md",
+    "milestone": "m6",
+    "hash": "fcfe8523754c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://link.springer.com/chapter/10.1007/978-3-032-41269-0_5",
+    "milestone": "m7",
+    "hash": "0fe1b159ca3a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://verse-lab.org/sisyphus/pdfs/sisyphus-pldi23.pdf",
+    "milestone": "m7",
+    "hash": "0fe1b159ca3a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1196,8 +2270,98 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 0 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Of 912 high- or critical-severity bugs examined in stable Chrome releases, about 70% involved memory safety. Tests give little evidence about inputs they never exercise. An operator updating a network service could check, before running it, that every execution covered by the proof respects its memory and information-flow rules. At cost parity, suppliers could maintain that assurance within their ordinary development and maintenance budgets. Its value depends on the rules capturing users\\u2019 needs and on the execution assumptions holding.\". Reason: The kernel defect count describes one verification project, while the browser data quantify a risk to users and the revised text explains what an operator gains when software changes."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Verified Software Initiative, The Verified Software Initiative: A Manifesto, 2009: \"replace unverified programs in current service and continue to evolve in a verified state.\". Reason: The manifesto explicitly names continued verification as deployed software changes, a maintenance goal missing from the existing statements."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Before executing a supplied native-code binary, the consumer checks its accompanying proof against the binary and the consumer\\u2019s published safety policy. Validation must establish that the code obeys the policy whenever the stated entry conditions hold.\"; refs = [5, 14]. Reason: The four packet filters and their particular access rules are evidence from one experiment; the reusable test is validation of the supplied proof against the consumer’s policy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"A proof assistant checks that every observable behaviour of the implementation under the stated execution assumptions is permitted by its abstract functional specification. Identify the implementation level to which the theorem applies.\". Reason: The revised criterion states what refinement requires across implementations and leaves the ARM kernel’s coverage and exclusions with its result."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Machine-check a theorem covering every successful compilation in the supported source language. When the source program has defined behaviour, every observable behaviour of the generated assembly must be permitted by the source semantics.\". Reason: The compiler version and supported architectures belong with the result, while the test concerns what the compiler theorem guarantees for successful compilations."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"Prove that the executable refines the source semantics used in the functional-correctness proof. For that same executable and configuration, establish that the functional specification and the information-flow policy both hold. State the execution assumptions and the observations covered by the information-flow theorem.\". Reason: The existing criterion describes one compiler run and leaves implicit that both guarantees must apply to the same executable configuration."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m4: \"A production project rechecks its proofs on every code change submitted for integration.\". Reason: Checking proofs on every code change is a demonstrated maintenance stage that can be assessed before measuring what fraction of proof lines need repair."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m5: title = \"Developers prove >10 property classes, with <5% of serious findings left and 1% of proof lines edited by hand.\"; criterion = \"Apply the tentative PROVERS Phase 3 targets to a high-complexity system. Developers without formal-methods expertise demonstrate the tools. More than 10 classes of system properties are proved, and less than 5% of serious findings by the red team remain. After software updates and maintenance, measure the percentage of proof lines requiring manual change against the 1% target.\"; set_by = \"DARPA, PROVERS broad agency announcement HR001123S0020, Table 1, Phase 3 Maturation column, and programme FAQ on developer participation.\"; set_by_kind = \"government_programme\"; threshold_quote = \"lines of proof requiring manual change following software update and maintenance\\n\\n20% 10% 1%\"; threshold_ref = 4; refs = [4, 11]. Reason: Table 1 supplies the missing proof-line threshold and the high-complexity condition, while the s2n replay count uses a different denominator."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m5: \"Evaluators compare proof-tool costs and development efficiency against a baseline workflow.\". Reason: DARPA specifies a separate evaluation of tool costs that fills the gap between counting manual edits and comparing whole-lifecycle costs."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Applied 9 of 9 proposed operations from CSC-04-revise-20261121T151721638709Z; now version 2."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m3, m4, m6, m5, m7."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 0 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 1 found, 0 not found, 3 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 13 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 8 candidates returned, 0 dropped as sources already used, 8 to judge."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 6 of 8 new candidates, without search. Skipped: 3 no readable saved copy. Dropped rows: none. Replaced 9 earlier rows. Added 35 results: 29 from sources already used, 6 from newly found sources."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 0 from arXiv, 6 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 34 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-21"
  }
 }
