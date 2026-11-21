@@ -303,12 +303,15 @@
  "page": {
   "id": "SWE-06",
   "title": "Specification inference for verified legacy modernization",
-  "definition": "Recover modular contracts—formal statements of component behavior and assumptions—from existing source code, with machine-checked evidence that the legacy implementation satisfies them and that replacements preserve stated interface behavior.",
+  "definition": "Recover modular contracts from legacy source code. Each contract states what callers must supply and what behavior the component guarantees in return. Machine-checked proofs establish that the original component satisfies the contract and that a replacement preserves the specified behavior on which callers rely.",
   "goal": {
-   "need": "A 2024 comparison tested five annotation generators on three Java examples against hand-written specifications sufficient for OpenJML verification. Each generator recovered less than one quarter of that baseline. DARPA identifies missing legacy specifications as an obstacle to verified component replacement.",
+   "need": "A U.S. tax system that issues notices and reports refund status had 75,000 reported users in 2025. Its business rules are embedded in aging code that fewer specialists can maintain. Even a replacement built exactly to its documentation can break callers if the documentation misses behavior they rely on. Recovering those dependencies would let maintainers upgrade one component for security or speed while preserving the services that use it. They still need to distinguish required behavior from defects in the old code.",
    "need_refs": [
-    1,
-    2
+    18,
+    3,
+    2,
+    19,
+    9
    ],
    "figures": {
     "caption": "Coverage of verification annotations in the 2024 comparison",
@@ -376,7 +379,7 @@
    {
     "id": "m1",
     "title": "Recovered candidate invariants survive every observed run of a program’s test suite.",
-    "criterion": "Infer candidate preconditions, postconditions and loop invariants from executions. Retain candidates without falsifying observations and with sufficient samples for the detector’s plausibility test. In 2001, Daikon rediscovered the specified invariants of one array-sum example using 100 randomly generated input arrays. These are candidates supported by executions, rather than proofs over all executions.",
+    "criterion": "Infer candidate preconditions, postconditions and loop invariants from execution traces. Report a candidate only if no observation falsifies it and enough observations support it under the detector’s plausibility test.",
     "set_by": "Dynamic invariant-detection convention described by Ernst and colleagues, Sections 2 and 3.",
     "set_by_kind": "community_convention",
     "threshold_quote": "those invariants that are tested to a sufficient degree without falsification are reported to the programmer.",
@@ -391,7 +394,7 @@
    {
     "id": "m2",
     "title": "A static verifier establishes inferred contracts under its stated assumptions.",
-    "criterion": "Feed inferred contracts to a static verifier and retain those it establishes under its assumptions. In 2001, ESC/Java accepted 70 invariants for StackAr (40 non-comment source lines, seven methods) and 80 for DisjSets (30 lines, four methods); heuristically added ownership annotations were potentially unsafe. A preprint revised on 13 May 2026 reports successful verification of inferred specifications for one Move vector-search function; it is not peer reviewed.",
+    "criterion": "Submit inferred contracts and the implementation to a static verifier. Count a contract as established only if the verifier discharges the obligations for that contract under its stated assumptions.",
     "set_by": "Static-verification convention described by Nimmer and Ernst, Section 1, and applied in the Move Prover inference workflow.",
     "set_by_kind": "community_convention",
     "threshold_quote": "A static verifier can indicate which proposed invariants are guaranteed to be true.",
@@ -407,44 +410,90 @@
    {
     "id": "m3",
     "title": "Legacy-code understanding reaches at least 60% accuracy and over 70% code coverage.",
-    "criterion": "At V-SPELLS Phase 1 scale, 10Ks source lines, instrument all domain-data accesses and operations; achieve at least 60% accuracy and over 70% code coverage.",
-    "set_by": "DARPA, V-SPELLS solicitation, Table 1, Phase 1; thresholds appear only in the table.",
+    "criterion": "At a scale of tens of thousands of source lines, instrument all accesses to domain data types and all operations on them. Achieve at least 60% program-understanding accuracy and more than 70% code coverage.",
+    "set_by": "DARPA, V-SPELLS solicitation, Table 1, Phase 1 indicative target.",
     "set_by_kind": "government_programme",
-    "threshold_quote": null,
-    "threshold_ref": null,
+    "threshold_quote": "at least 60% accuracy with over 70% code coverage",
+    "threshold_ref": 3,
     "refs": [
      3
     ],
     "status": "active",
     "replaced_by": [],
-    "threshold_checked": null
+    "threshold_checked": false
    },
    {
     "id": "m4",
     "title": "Legacy-code composition reaches 80% program-understanding accuracy and 90% coverage.",
-    "criterion": "At V-SPELLS Phase 2 scale, 100Ks source lines, make all domain operations programmable in a domain-specific language, with native-code compatibility; achieve 80% accuracy and 90% coverage. Galois describes C-to-model lifting and memory-safety checking, without reporting these metrics; its developer account is undated and not peer reviewed.",
-    "set_by": "DARPA, V-SPELLS solicitation, Table 1, Phase 2; thresholds appear only in the table.",
+    "criterion": "At a scale of hundreds of thousands of source lines, make all domain operations programmable in a domain-specific language while maintaining compatibility with native code. Achieve 80% program-understanding accuracy and 90% coverage.",
+    "set_by": "DARPA, V-SPELLS solicitation, Table 1, Phase 2 indicative target.",
     "set_by_kind": "government_programme",
-    "threshold_quote": null,
-    "threshold_ref": null,
+    "threshold_quote": "80% accuracy/90% coverage",
+    "threshold_ref": 3,
     "refs": [
-     3,
-     7
+     3
     ],
     "status": "active",
     "replaced_by": [],
-    "threshold_checked": null
+    "threshold_checked": false
    },
    {
     "id": "m5",
-    "title": "Legacy-code recovery reaches 95% accuracy and 99.9% coverage at V-SPELLS’s final code scale.",
-    "criterion": "At V-SPELLS Phase 3 scale, 1000Ks source lines, translate all code to a domain-specific language or virtual machine, except a few effectively analyzed enclaves; achieve 95% accuracy and 99.9% coverage.",
-    "set_by": "DARPA, V-SPELLS solicitation, Table 1, Phase 3; thresholds appear only in the table.",
+    "title": "At million-line scale, program understanding reaches 95% accuracy and 99.9% coverage.",
+    "criterion": "At a scale of millions of source lines, translate all code to a domain-specific language or virtual machine except for a few enclaves that can be analyzed effectively. Achieve 95% program-understanding accuracy and 99.9% coverage.",
+    "set_by": "DARPA, V-SPELLS solicitation, Table 1, Phase 3 indicative target.",
     "set_by_kind": "government_programme",
-    "threshold_quote": null,
-    "threshold_ref": null,
+    "threshold_quote": "95% accuracy/99.9% coverage",
+    "threshold_ref": 3,
     "refs": [
      3
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": false
+   },
+   {
+    "id": "m6",
+    "title": "An inferred component contract suffices to verify a caller’s stated property.",
+    "criterion": "Verify the caller using the inferred contract in place of the called implementation. At the call, prove the component’s preconditions. Use its guaranteed postconditions to discharge the caller’s proof obligation.",
+    "set_by": "Modular verification convention documented in the OpenJML method-call tutorial.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "we replace the call of `callee()` in the caller’s body with the callee’s pre- and post-conditions.",
+    "threshold_ref": 17,
+    "refs": [
+     17,
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": false
+   },
+   {
+    "id": "m7",
+    "title": "A compatible driver replaces a problematic driver in a large monolithic system.",
+    "criterion": "In the V-SPELLS Phase 1 example, replace a known problematic driver with a correct, compatible version written in a domain-specific language. Use a subsystem that lacks instrumentation like that provided by the Berkeley Packet Filter and add that instrumentation to the subsystem.",
+    "set_by": "DARPA, V-SPELLS solicitation, Exemplary Evaluation, Phase 1.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "with a correct and compatible DSL version",
+    "threshold_ref": 3,
+    "refs": [
+     3
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m8",
+    "title": "A component is replaced in a large distributed legacy system.",
+    "criterion": "Use the modernization tools to replace a component within a large distributed legacy system. Demonstrate the replacement in the context of the surrounding system.",
+    "set_by": "DARPA, V-SPELLS Phase 2 exemplary evaluation and FY 2023 programme plan.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "Demonstrate utility by replacing a component in a large legacy distributed system.",
+    "threshold_ref": 20,
+    "refs": [
+     3,
+     20
     ],
     "status": "active",
     "replaced_by": [],
@@ -455,7 +504,8 @@
   "not_found": [
    "No published acceptance test was found for the integrated completion criterion.",
    "No operational definitions of V-SPELLS’s accuracy and coverage percentages were found in its public solicitation.",
-   "Searches for V-SPELLS evaluations and final reports found no public result establishing attainment of its Phase 1, 2 or 3 recovery targets."
+   "Searches for V-SPELLS evaluations and final reports found no public result establishing attainment of its Phase 1, 2 or 3 recovery targets.",
+   "No programme, standards-body or professional-society statement disputing the feasibility or value of verified legacy component replacement was found."
   ],
   "references": [
    {
@@ -544,20 +594,6 @@
    },
    {
     "id": 7,
-    "kind": "web",
-    "url": "https://www.galois.com/project/v-spells",
-    "doi": null,
-    "title": "V-SPELLS",
-    "authors": "Galois",
-    "container": "Galois",
-    "year": "undated",
-    "volume": null,
-    "issue": null,
-    "pages": null,
-    "citation_source": "model"
-   },
-   {
-    "id": 8,
     "kind": "journal",
     "url": "https://people.csail.mit.edu/mernst/pubs/invariants-tse2001-abstract.html",
     "doi": null,
@@ -571,7 +607,7 @@
     "citation_source": "model"
    },
    {
-    "id": 9,
+    "id": 8,
     "kind": "report",
     "url": "https://people.csail.mit.edu/polikarn/publications/issta09.pdf",
     "doi": null,
@@ -585,7 +621,7 @@
     "citation_source": "model"
    },
    {
-    "id": 10,
+    "id": 9,
     "kind": "report",
     "url": "https://homes.cs.washington.edu/~mernst/pubs/generate-specs-issta2002.pdf",
     "doi": null,
@@ -599,7 +635,7 @@
     "citation_source": "model"
    },
    {
-    "id": 11,
+    "id": 10,
     "kind": "preprint",
     "url": "https://arxiv.org/pdf/1407.5286",
     "doi": null,
@@ -613,7 +649,7 @@
     "citation_source": "model"
    },
    {
-    "id": 12,
+    "id": 11,
     "kind": "preprint",
     "url": "https://arxiv.org/pdf/2404.00762",
     "doi": null,
@@ -627,7 +663,7 @@
     "citation_source": "model"
    },
    {
-    "id": 13,
+    "id": 12,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2609.33438v1",
     "doi": null,
@@ -641,7 +677,7 @@
     "citation_source": "model"
    },
    {
-    "id": 14,
+    "id": 13,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2604.10761v1",
     "doi": null,
@@ -655,7 +691,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 15,
+    "id": 14,
     "kind": "report",
     "url": "https://liyiweb.com/files/Liu2025AIG.pdf",
     "doi": null,
@@ -669,7 +705,7 @@
     "citation_source": "model"
    },
    {
-    "id": 16,
+    "id": 15,
     "kind": "report",
     "url": "https://ilyasergey.net/CS6217/_static/papers/popl09.pdf",
     "doi": null,
@@ -683,7 +719,7 @@
     "citation_source": "model"
    },
    {
-    "id": 17,
+    "id": 16,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2610.05132v2",
     "doi": null,
@@ -695,13 +731,100 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 17,
+    "kind": "web",
+    "url": "https://www.openjml.org/tutorial/MethodCalls",
+    "doi": null,
+    "title": "JML Tutorial - Method Calls",
+    "authors": "OpenJML",
+    "container": "OpenJML.org",
+    "year": "n.d.",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 18,
+    "kind": "report",
+    "url": "https://files.gao.gov/reports/GAO-25-107795/index.html",
+    "doi": null,
+    "title": "Information Technology: Agencies Need to Plan for Modernizing Critical Decades-Old Legacy Systems",
+    "authors": "United States Government Accountability Office",
+    "container": "GAO-25-107795",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 19,
+    "kind": "press_release",
+    "url": "https://www.darpa.mil/news/2020/legacy-code",
+    "doi": null,
+    "title": "Enhancing Understanding of Legacy Code to Simplify Software Re-engineering Process",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "DARPA",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 20,
+    "kind": "report",
+    "url": "https://comptroller.defense.gov/Portals/45/Documents/defbudget/fy2024/budget_justification/pdfs/03_RDT_and_E/RDTE_Vol1_DARPA_MasterJustificationBook_PB_2024.pdf",
+    "doi": null,
+    "title": "Fiscal Year (FY) 2024 Budget Estimates: Defense Advanced Research Projects Agency",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "Defense-Wide Justification Book Volume 1 of 5, Research, Development, Test & Evaluation, Defense-Wide",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 21,
+    "kind": "preprint",
+    "url": "https://cs.nyu.edu/~wies/publ/intra-module_inference.pdf",
+    "doi": null,
+    "title": "Intra-Module Inference",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 22,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2604.15533",
+    "doi": null,
+    "title": "Verification Modulo Tested Library Contracts",
+    "authors": "Uppar A, Muhammad O, Prabhu S, D'Souza D, P M, Murali A",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
    }
   ],
   "milestone_order": [
    "m1",
    "m2",
+   "m6",
    "m3",
+   "m7",
    "m4",
+   "m8",
    "m5"
   ],
   "results": [
@@ -709,594 +832,1084 @@
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "Daikon detected 88 candidate invariants for StackAr; test-suite sample size was not reported.",
-    "detail": "The reported candidates include preconditions and postconditions, but the experiment does not report inferred loop invariants.",
-    "quote": "Figure 2 shows that the Daikon invariant detector ﬁnds 88 invariants: 6\nobject invariants, 5 requires clauses (method preconditions), 3 modiﬁes clauses\n(modiﬁcation targets), and 74 ensures clauses (method postconditions).",
+    "finding": "Daikon reported 144 candidate invariants from the test suite of one Java class, DisjSets.",
+    "detail": "The source gives no test-run count. Two DisjSets candidates passed the trace-based filters but were later identified as test-suite artifacts.",
+    "quote": "Figure 4 shows that Daikon found 144 invariants over the class;",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 5,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "ESC/Java proved 80 inferred invariants for DisjSets, a four-method program.",
-    "detail": "ESC also proved 70 invariants for StackAr. Heuristically added ownership annotations were potentially unsafe; two DisjSets test-suite artifacts could not be proved.",
+    "finding": "ESC/Java verified 80 of 82 expressible inferred invariants for DisjSets.",
+    "detail": "Two DisjSets candidates produced warnings and 62 could not be expressed in ESCJML. The ownership annotations were added heuristically without source analysis.",
     "quote": "ESC proved 80 of the 82 expressible invariants, and it warned\nabout two (unprovable) test suite artifacts.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 5,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "Daikon rediscovered predefined invariants in programs from Gries’s work; sample size not stated.",
-    "detail": "The abstract describes dynamic inference but does not state the sample count, plausibility test, or whether preconditions, postconditions and loop invariants were all recovered.",
-    "quote": "In programs from Gries's work on program derivation, the system rediscovered predefined\ninvariants.",
+    "finding": "Daikon inferred likely invariants in 2 sets of target programs.",
+    "detail": "The abstract gives no program count for the Gries examples, no observation counts, and no description of the plausibility test.",
+    "quote": "Second, it reports on the\napplication of Daikon to two sets of target programs.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
-    "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
     "finding": "Daikon inferred more than 19,500 assertion clauses across 25 Eiffel classes.",
-    "detail": "The study inferred preconditions, postconditions and loop invariants from test executions. Daikon discarded falsified candidates and applied statistical confidence checks; retained clauses were candidates, not proofs.",
-    "quote": "Working on 25\nclasses taken from different sources such as widely-used standard\nlibraries and code written by students, we applied Daikon to in-\nfer contracts and compared the results (totaling more than 19500\ninferred assertion clauses) with the already present contracts.",
+    "detail": "The authors wrote both test suites. The larger suite used category partitioning and achieved branch coverage. This is a peer-reviewed conference proceedings paper.",
+    "quote": "we applied Daikon to in-\nfer contracts and compared the results (totaling more than 19500\ninferred assertion clauses) with the already present contracts.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Daikon reported 554 nonredundant candidate invariants across 11 Java programs.",
+    "detail": "The count excludes invariants inexpressible in ESC/Java and those judged redundant. The source is an ISSTA conference paper, represented as report because the schema has no conference category.",
+    "quote": "those invariants that are tested to a sufﬁcient degree without\nfalsiﬁcation are reported to the programmer.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "Across 11 Java programs, ESC/Java verified 530 Daikon-inferred invariants.",
-    "detail": "ESC/Java is unsound: among other limitations, it does not model arithmetic overflow or track aliasing, and it permits unchecked assumptions. The authors edited annotations where necessary and excluded redundant invariants.",
+    "finding": "ESC/Java verified 530 of 554 evaluated Daikon clauses across 11 Java programs.",
+    "detail": "ESC/Java omits arithmetic overflow and alias tracking, models zero or one loop iterations, and allows unchecked assumptions.",
     "quote": null,
     "checked": null,
     "confirmed": true,
     "peer_reviewed": false,
-    "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
-    "milestone": "m2",
+    "milestone": "m6",
     "case": null,
     "verdict": "partial",
-    "finding": "For binarySearch0, ESC/Java2 established 31 of 62 inferred loop-invariant candidates.",
-    "detail": "The inferred assertions describe an internal loop; the method’s precondition and postcondition were supplied by the authors. ESC/Java2 was run with -loopSafe on code screened for unsupported features.",
-    "quote": "In the\nbinarySearch0 example, D AIKON produces 62 loop\ninvariant candidates in the ﬁrst iteration. Running\nESC/Java2 determines that half of them are valid loop\ninvariants, among which c2, c5, c7, and c9 in Table 1.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "met",
-    "finding": "AutoSpec verified inferred specifications for 199 of 251 C benchmark programs.",
-    "detail": "AutoSpec used Frama-C and its WP plugin, retaining validated specifications and discarding candidates that failed verification. The evaluation assumed compilation-error-free programs and properties consistent with the code.",
-    "quote": "The result shows AutoSpec can successfully handle\n79% (= 199 / 251) programs with various structures (e.g., linear/multiple/nested\nloops, arrays, pointers), while existing approaches can only handle programs\nwith linear loops.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "met",
-    "finding": "Path2Spec with GPT-5 produced OpenJML-verified specifications for 325 of 385 Java benchmark programs (84.4%).",
-    "detail": "OpenJML verification checks specifications under their preconditions; passing does not establish complete behavioral coverage. This is an unreviewed preprint.",
-    "quote": "For instance, when paired with GPT-5,\nPath2Spec\nachieves an overall %Passed of 84.4%, which is 33.2 percentage points higher than SpecGen’s 51.2%.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "partial",
-    "finding": "For one StackAr program, Daikon reported 25 invariants, including preconditions and postconditions.",
-    "detail": "The detector retained properties supported by sufficient, unfalsified observations. The reported experiment does not establish recovery of loop invariants.",
-    "quote": "The Daikon invariant detector reported 25 invariants, including\nthe representation invariant, method preconditions, modiﬁcation\ntargets, and postconditions.",
+    "finding": "ESC/Java verified its runtime safety checks for all 8 methods of StackAr using generated specifications.",
+    "detail": "Figure 5 shows the caller body and its annotations. The text reports the class-level check without a call-by-call proof trace.",
+    "quote": "successfully\nchecks that the StackAr class avoids runtime errors",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
-    "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "Daikon produced 62 loop-invariant candidates for binarySearch0 from its initial test suite.",
-    "detail": "The method’s preconditions and postconditions were supplied, not inferred. The text does not report the test-suite size or a detector plausibility threshold; most initial candidates were invalid.",
+    "finding": "For one java.util method, binarySearch0, Daikon reported 62 candidate loop invariants from the initial test suite.",
+    "detail": "The initial tests covered only a subset of legal behavior. Some surviving candidates reflected the particular values generated by those tests.",
     "quote": "DYNAMATE executes D AIKON on binarySearch0\nusing the initial test suite, which produces 62 loop\ninvariant candidates, most of which are invalid due\nto the incompleteness of the initial test suite.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "DYNAMATE automatically proved conformance to supplied contracts for 25 of 28 OpenJDK java.util methods.",
+    "detail": "ESC/Java2 ran with -loopSafe. The authors excluded unsupported Java and JML features on which the proofs would depend and adapted some methods for verification.",
+    "quote": "DYNAMATE automatically veriﬁed 25 of the 28\nsubjects, with high repeatability.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "AutoSpec verified stated properties for 199 of 251 C benchmark programs using inferred specifications.",
+    "detail": "The benchmark count measures successful program-level proofs. It does not count all individual contracts established, since some unsuccessful programs also had validated annotations.",
+    "quote": "The result shows AutoSpec can successfully handle\n79% (= 199 / 251) programs with various structures",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
     "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "met",
+    "finding": "AutoSpec verified the caller’s property in the pointer-sum benchmark in 5 of 5 runs using the inferred add contract.",
+    "detail": "The paper reports the successful modular proof and shows the inferred callee contract. It does not print the individual call-site verification conditions.",
+    "quote": "The subsequently generated specification (line 4) states\nthe add function has no assignment behavior, making the verification succeed.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "AutoSpec verified 199 of 251 C benchmark programs using synthesized specifications.",
-    "detail": "AutoSpec generates candidate specifications and validates them with theorem provers. It does not infer them from observed test executions or report a sample-based plausibility test.",
-    "quote": "The result shows AutoSpec can successfully handle\n79% (= 199 / 251) programs with various structures (e.g., linear/multiple/nested\nloops, arrays, pointers), while existing approaches can only handle programs\nwith linear loops.",
+    "finding": "Java PathFinder-guided Path2Spec achieved a 42.3% static verification pass rate across 385 Java programs.",
+    "detail": "The reported rate measures downstream static verification. Java PathFinder produced usable paths for 81 of the 385 programs.",
+    "quote": "using path information extracted by JPF as guidance to generate formal specifications achieves an overall %Passed of 42.3%",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
-    "milestone": "m3",
+    "milestone": "m2",
     "case": null,
-    "verdict": "partial",
-    "finding": "Path2Spec generated verified specifications for 84.4% of 385 benchmark programs.",
-    "detail": "Verification pass rate is not the milestone’s program-understanding accuracy or code coverage. The benchmarks contain small Java programs, rather than a legacy codebase at the specified scale; domain-data instrumentation is not reported.",
+    "verdict": "met",
+    "finding": "GPT-5 Path2Spec achieved an 84.4% OpenJML verification pass rate across 385 Java programs.",
+    "detail": "OpenJML build 21-0-14 used a 30-minute timeout. Timeouts, detected violations, and other errors counted as failures.",
     "quote": "Path2Spec\nproduces far more correct specifications than the state-of-the-art SpecGen\nacross all base models and benchmarks, reaching a best overall success rate of 84.4%\n(325/385 verified) with GPT-5, against SpecGen’s 51.2% (197/385).",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "Across 43 Java methods, GPT-5.1-generated tests eliminated 1,877 postconditions inferred by SpecFuzzer.",
-    "detail": "The study dynamically filters candidate postconditions against test suites, but does not report inference of preconditions and loop invariants or a minimum-sample plausibility test.",
+    "finding": "Across 43 Java methods, GPT-5.1-generated tests eliminated 1,877 candidate postconditions inferred by SpecFuzzer.",
+    "detail": "SpecFuzzer grouped surviving postconditions by which mutants they killed and reported one representative per cluster.",
     "quote": "Notably, the 1,009 new counterexample test cases\ngenerated by GPT-5.1 allow us to invalidate and\neliminate a total of 1,877 invalid postcondition assertions\ninferred by SpecFuzzer.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "INVCON+ Naive generated an average of 480.89 candidate invariants per contract across 361 ERC20 contracts.",
+    "detail": "Table IV reports the aggregate candidate count without a separate count for the likely-candidate class.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
     "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "INVCON+ produced about 46 statically verified invariants per contract across 361 ERC20 contracts.",
-    "detail": "The evaluation used at most 200 historical transactions per contract. VeriSol translated annotated contracts to Boogie, whose modular verifier checked the candidates. The text does not establish the paper’s publication or peer-review status.",
+    "finding": "VeriSol verified approximately 46 inferred invariants per contract across 361 ERC20 contracts.",
+    "detail": "The evaluation covers Solidity 0.5.0–0.5.17. The supplied manuscript gives no publication venue or independent replication.",
     "quote": "INVCON+ achieves the highest recall score, reaching 0.80,\nand generates approximately 46 invariants per contract, all of\nwhich are successfully verified by VeriSol.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "ABDUCTOR found consistent specifications for all 121 procedures in a firewire device driver.",
-    "detail": "A forward shape-analysis phase re-executed candidate preconditions, filtered unsafe ones, and calculated postconditions. The authors slightly modified the driver code for the analysis.",
+    "finding": "ABDUCTOR established consistent heap contracts for all 121 procedures in the modified Windows IEEE 1394 driver.",
+    "detail": "The analysis ignored concurrency and modeled unknown library calls and calls through function pointers as nondeterministic assignments without side effects.",
     "quote": "Our analysis was able to ﬁnd consistent speciﬁcations (where\nprecondition is not inconsistent) for all 121 of the procedures.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "met",
+    "finding": "In the 121-procedure Windows IEEE 1394 driver, inferred callee contracts supported proofs of higher-level procedures’ Hoare triples.",
+    "detail": "The stated caller properties are the preconditions and postconditions in the resulting Hoare triples. The experiment used a slightly modified driver.",
+    "quote": "our analysis has found proofs of\nthe Hoare triples for higher-level procedures, which would have\nbeen impossible if the specs discovered for sub-procedures were\ntoo imprecise for the relevant call sites.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "On 50 C programs, 62% of SpecAgent synthesis trajectories passed the Frama-C/WP verification gate by six invocations.",
+    "detail": "The pass rate counts synthesis trajectories. The paper reports specification precision and recall as separate metrics.",
+    "quote": "Most notably, the fraction of trajectories passing the verification gate also increases from 36% at 2 invocations to 62% at 6 invocations",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "SpecAgent's inferred ACSL annotations supported discharge of 604 of 811 C verification targets.",
+    "detail": "The benchmark total includes loop-invariant proofs. The source gives no separate count of caller properties proved using inferred callee contracts.",
+    "quote": "SpecAgent\nsuccessfully supports the verification of 604 out of 811 targets (74.5%)",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "SpecAgent on a 50-program benchmark: 62% of specification trajectories passed the verification gate at six agent invocations.",
-    "detail": "The gate uses Frama-C/WP to check generated ACSL specifications. The workflow can output intermediate candidates when its invocation budget is exhausted, so not every final output is necessarily verified.",
-    "quote": "Most notably, the fraction of trajectories passing the verification gate also increases from 36% at 2 invocations to 62% at 6 invocations, suggesting that 2–6 is the golden interval where the majority of trajectories reach verifiable states.",
+    "finding": "Static verification checked inferred internal contracts in 8 verification runs across 4 Windows driver modules.",
+    "detail": "The verifier used supplied external specifications, public interface contracts, module invariants, and some manual internal annotations. For kbdclass and mouclass it also relied on linked-list disjointness, which the authors checked manually.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "met",
+    "finding": "Dualis verified 38 of 43 C++ client benchmarks using inferred modular library contracts.",
+    "detail": "The call-site precondition is encoded as the antecedent of a conditional postcondition. This finding concerns modular mode, where the caller establishes that antecedent to use the guarantee.",
+    "quote": "For modular contracts, out of 43 benchmarks,\nHornICE\nsolved 19 benchmarks,\nHornICE+LLM\nsolved 25, and the\nLLM\nsolution solved 38.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 17,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 22,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    }
   ],
   "judged": [
    {
     "url": "https://www.darpa.mil/research/programs/verified-security-and-performance-enhancement-of-large-legacy-software",
     "milestone": "m1",
-    "hash": "59da29e49d55",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c6581981515c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.darpa.mil/research/programs/verified-security-and-performance-enhancement-of-large-legacy-software",
     "milestone": "m2",
-    "hash": "ea1ab0f2a151",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9a6ed881097c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.darpa.mil/research/programs/verified-security-and-performance-enhancement-of-large-legacy-software",
+    "milestone": "m6",
+    "hash": "5f219102e8e3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.darpa.mil/research/programs/verified-security-and-performance-enhancement-of-large-legacy-software",
     "milestone": "m3",
-    "hash": "d82570218642",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "04fa6ef23697",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.darpa.mil/research/programs/verified-security-and-performance-enhancement-of-large-legacy-software",
+    "milestone": "m7",
+    "hash": "c89c23b6ffdf",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.darpa.mil/research/programs/verified-security-and-performance-enhancement-of-large-legacy-software",
     "milestone": "m4",
-    "hash": "e48398212dfc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4c92e25f9858",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.darpa.mil/research/programs/verified-security-and-performance-enhancement-of-large-legacy-software",
+    "milestone": "m8",
+    "hash": "e0c05d630a9f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.darpa.mil/research/programs/verified-security-and-performance-enhancement-of-large-legacy-software",
     "milestone": "m5",
-    "hash": "31ca14d8da90",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a25fde72a51d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.darpa.mil/research/programs/verified-security-and-performance-enhancement-of-large-legacy-software",
     "milestone": "completion",
     "hash": "2c5e4bb6736e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.purdue.edu/homes/xyzhang/fall07/Papers/invariants-verify-rv2001.pdf",
     "milestone": "m1",
-    "hash": "59da29e49d55",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c6581981515c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.purdue.edu/homes/xyzhang/fall07/Papers/invariants-verify-rv2001.pdf",
     "milestone": "m2",
-    "hash": "ea1ab0f2a151",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9a6ed881097c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.purdue.edu/homes/xyzhang/fall07/Papers/invariants-verify-rv2001.pdf",
+    "milestone": "m6",
+    "hash": "5f219102e8e3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.purdue.edu/homes/xyzhang/fall07/Papers/invariants-verify-rv2001.pdf",
     "milestone": "m3",
-    "hash": "d82570218642",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "04fa6ef23697",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.purdue.edu/homes/xyzhang/fall07/Papers/invariants-verify-rv2001.pdf",
+    "milestone": "m7",
+    "hash": "c89c23b6ffdf",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.purdue.edu/homes/xyzhang/fall07/Papers/invariants-verify-rv2001.pdf",
     "milestone": "m4",
-    "hash": "e48398212dfc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4c92e25f9858",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.purdue.edu/homes/xyzhang/fall07/Papers/invariants-verify-rv2001.pdf",
+    "milestone": "m8",
+    "hash": "e0c05d630a9f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.purdue.edu/homes/xyzhang/fall07/Papers/invariants-verify-rv2001.pdf",
     "milestone": "m5",
-    "hash": "31ca14d8da90",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a25fde72a51d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.purdue.edu/homes/xyzhang/fall07/Papers/invariants-verify-rv2001.pdf",
     "milestone": "completion",
     "hash": "2c5e4bb6736e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.csail.mit.edu/mernst/pubs/invariants-tse2001-abstract.html",
     "milestone": "m1",
-    "hash": "59da29e49d55",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c6581981515c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.csail.mit.edu/mernst/pubs/invariants-tse2001-abstract.html",
     "milestone": "m2",
-    "hash": "ea1ab0f2a151",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9a6ed881097c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.csail.mit.edu/mernst/pubs/invariants-tse2001-abstract.html",
+    "milestone": "m6",
+    "hash": "5f219102e8e3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.csail.mit.edu/mernst/pubs/invariants-tse2001-abstract.html",
     "milestone": "m3",
-    "hash": "d82570218642",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "04fa6ef23697",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.csail.mit.edu/mernst/pubs/invariants-tse2001-abstract.html",
+    "milestone": "m7",
+    "hash": "c89c23b6ffdf",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.csail.mit.edu/mernst/pubs/invariants-tse2001-abstract.html",
     "milestone": "m4",
-    "hash": "e48398212dfc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4c92e25f9858",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.csail.mit.edu/mernst/pubs/invariants-tse2001-abstract.html",
+    "milestone": "m8",
+    "hash": "e0c05d630a9f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.csail.mit.edu/mernst/pubs/invariants-tse2001-abstract.html",
     "milestone": "m5",
-    "hash": "31ca14d8da90",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a25fde72a51d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.csail.mit.edu/mernst/pubs/invariants-tse2001-abstract.html",
     "milestone": "completion",
     "hash": "2c5e4bb6736e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.csail.mit.edu/polikarn/publications/issta09.pdf",
     "milestone": "m1",
-    "hash": "59da29e49d55",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://homes.cs.washington.edu/~mernst/pubs/generate-specs-issta2002.pdf",
-    "milestone": "m2",
-    "hash": "ea1ab0f2a151",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/pdf/1407.5286",
-    "milestone": "m2",
-    "hash": "ea1ab0f2a151",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/pdf/2404.00762",
-    "milestone": "m2",
-    "hash": "ea1ab0f2a151",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2609.33438v1",
-    "milestone": "m2",
-    "hash": "ea1ab0f2a151",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c6581981515c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.csail.mit.edu/polikarn/publications/issta09.pdf",
     "milestone": "m2",
-    "hash": "ea1ab0f2a151",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9a6ed881097c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.csail.mit.edu/polikarn/publications/issta09.pdf",
+    "milestone": "m6",
+    "hash": "5f219102e8e3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.csail.mit.edu/polikarn/publications/issta09.pdf",
     "milestone": "m3",
-    "hash": "d82570218642",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "04fa6ef23697",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.csail.mit.edu/polikarn/publications/issta09.pdf",
+    "milestone": "m7",
+    "hash": "c89c23b6ffdf",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.csail.mit.edu/polikarn/publications/issta09.pdf",
     "milestone": "m4",
-    "hash": "e48398212dfc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4c92e25f9858",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.csail.mit.edu/polikarn/publications/issta09.pdf",
+    "milestone": "m8",
+    "hash": "e0c05d630a9f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.csail.mit.edu/polikarn/publications/issta09.pdf",
     "milestone": "m5",
-    "hash": "31ca14d8da90",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a25fde72a51d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.csail.mit.edu/polikarn/publications/issta09.pdf",
     "milestone": "completion",
     "hash": "2c5e4bb6736e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://homes.cs.washington.edu/~mernst/pubs/generate-specs-issta2002.pdf",
     "milestone": "m1",
-    "hash": "59da29e49d55",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c6581981515c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://homes.cs.washington.edu/~mernst/pubs/generate-specs-issta2002.pdf",
+    "milestone": "m2",
+    "hash": "9a6ed881097c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://homes.cs.washington.edu/~mernst/pubs/generate-specs-issta2002.pdf",
+    "milestone": "m6",
+    "hash": "5f219102e8e3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://homes.cs.washington.edu/~mernst/pubs/generate-specs-issta2002.pdf",
     "milestone": "m3",
-    "hash": "d82570218642",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "04fa6ef23697",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://homes.cs.washington.edu/~mernst/pubs/generate-specs-issta2002.pdf",
+    "milestone": "m7",
+    "hash": "c89c23b6ffdf",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://homes.cs.washington.edu/~mernst/pubs/generate-specs-issta2002.pdf",
     "milestone": "m4",
-    "hash": "e48398212dfc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4c92e25f9858",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://homes.cs.washington.edu/~mernst/pubs/generate-specs-issta2002.pdf",
+    "milestone": "m8",
+    "hash": "e0c05d630a9f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://homes.cs.washington.edu/~mernst/pubs/generate-specs-issta2002.pdf",
     "milestone": "m5",
-    "hash": "31ca14d8da90",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a25fde72a51d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://homes.cs.washington.edu/~mernst/pubs/generate-specs-issta2002.pdf",
     "milestone": "completion",
     "hash": "2c5e4bb6736e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1407.5286",
     "milestone": "m1",
-    "hash": "59da29e49d55",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c6581981515c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1407.5286",
+    "milestone": "m2",
+    "hash": "9a6ed881097c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1407.5286",
+    "milestone": "m6",
+    "hash": "5f219102e8e3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1407.5286",
     "milestone": "m3",
-    "hash": "d82570218642",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "04fa6ef23697",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1407.5286",
+    "milestone": "m7",
+    "hash": "c89c23b6ffdf",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1407.5286",
     "milestone": "m4",
-    "hash": "e48398212dfc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4c92e25f9858",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1407.5286",
+    "milestone": "m8",
+    "hash": "e0c05d630a9f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1407.5286",
     "milestone": "m5",
-    "hash": "31ca14d8da90",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a25fde72a51d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1407.5286",
     "milestone": "completion",
     "hash": "2c5e4bb6736e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2404.00762",
     "milestone": "m1",
-    "hash": "59da29e49d55",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c6581981515c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2404.00762",
+    "milestone": "m2",
+    "hash": "9a6ed881097c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2404.00762",
+    "milestone": "m6",
+    "hash": "5f219102e8e3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2404.00762",
     "milestone": "m3",
-    "hash": "d82570218642",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "04fa6ef23697",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2404.00762",
+    "milestone": "m7",
+    "hash": "c89c23b6ffdf",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2404.00762",
     "milestone": "m4",
-    "hash": "e48398212dfc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4c92e25f9858",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2404.00762",
+    "milestone": "m8",
+    "hash": "e0c05d630a9f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2404.00762",
     "milestone": "m5",
-    "hash": "31ca14d8da90",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a25fde72a51d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2404.00762",
     "milestone": "completion",
     "hash": "2c5e4bb6736e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2609.33438v1",
     "milestone": "m1",
-    "hash": "59da29e49d55",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c6581981515c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2609.33438v1",
+    "milestone": "m2",
+    "hash": "9a6ed881097c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2609.33438v1",
+    "milestone": "m6",
+    "hash": "5f219102e8e3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2609.33438v1",
     "milestone": "m3",
-    "hash": "d82570218642",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "04fa6ef23697",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2609.33438v1",
+    "milestone": "m7",
+    "hash": "c89c23b6ffdf",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2609.33438v1",
     "milestone": "m4",
-    "hash": "e48398212dfc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4c92e25f9858",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2609.33438v1",
+    "milestone": "m8",
+    "hash": "e0c05d630a9f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2609.33438v1",
     "milestone": "m5",
-    "hash": "31ca14d8da90",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a25fde72a51d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2609.33438v1",
     "milestone": "completion",
     "hash": "2c5e4bb6736e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2604.10761v1",
     "milestone": "m1",
-    "hash": "59da29e49d55",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c6581981515c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2604.10761v1",
+    "milestone": "m2",
+    "hash": "9a6ed881097c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2604.10761v1",
+    "milestone": "m6",
+    "hash": "5f219102e8e3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2604.10761v1",
+    "milestone": "m3",
+    "hash": "04fa6ef23697",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2604.10761v1",
+    "milestone": "m7",
+    "hash": "c89c23b6ffdf",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2604.10761v1",
+    "milestone": "m4",
+    "hash": "4c92e25f9858",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2604.10761v1",
+    "milestone": "m8",
+    "hash": "e0c05d630a9f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2604.10761v1",
+    "milestone": "m5",
+    "hash": "a25fde72a51d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2604.10761v1",
+    "milestone": "completion",
+    "hash": "2c5e4bb6736e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://liyiweb.com/files/Liu2025AIG.pdf",
+    "milestone": "m1",
+    "hash": "c6581981515c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://liyiweb.com/files/Liu2025AIG.pdf",
     "milestone": "m2",
-    "hash": "ea1ab0f2a151",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9a6ed881097c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://liyiweb.com/files/Liu2025AIG.pdf",
+    "milestone": "m6",
+    "hash": "5f219102e8e3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://liyiweb.com/files/Liu2025AIG.pdf",
+    "milestone": "m3",
+    "hash": "04fa6ef23697",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://liyiweb.com/files/Liu2025AIG.pdf",
+    "milestone": "m7",
+    "hash": "c89c23b6ffdf",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://liyiweb.com/files/Liu2025AIG.pdf",
+    "milestone": "m4",
+    "hash": "4c92e25f9858",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://liyiweb.com/files/Liu2025AIG.pdf",
+    "milestone": "m8",
+    "hash": "e0c05d630a9f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://liyiweb.com/files/Liu2025AIG.pdf",
+    "milestone": "m5",
+    "hash": "a25fde72a51d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://liyiweb.com/files/Liu2025AIG.pdf",
+    "milestone": "completion",
+    "hash": "2c5e4bb6736e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ilyasergey.net/CS6217/_static/papers/popl09.pdf",
+    "milestone": "m1",
+    "hash": "c6581981515c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://ilyasergey.net/CS6217/_static/papers/popl09.pdf",
     "milestone": "m2",
-    "hash": "ea1ab0f2a151",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9a6ed881097c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ilyasergey.net/CS6217/_static/papers/popl09.pdf",
+    "milestone": "m6",
+    "hash": "5f219102e8e3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ilyasergey.net/CS6217/_static/papers/popl09.pdf",
+    "milestone": "m3",
+    "hash": "04fa6ef23697",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ilyasergey.net/CS6217/_static/papers/popl09.pdf",
+    "milestone": "m7",
+    "hash": "c89c23b6ffdf",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ilyasergey.net/CS6217/_static/papers/popl09.pdf",
+    "milestone": "m4",
+    "hash": "4c92e25f9858",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ilyasergey.net/CS6217/_static/papers/popl09.pdf",
+    "milestone": "m8",
+    "hash": "e0c05d630a9f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ilyasergey.net/CS6217/_static/papers/popl09.pdf",
+    "milestone": "m5",
+    "hash": "a25fde72a51d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ilyasergey.net/CS6217/_static/papers/popl09.pdf",
+    "milestone": "completion",
+    "hash": "2c5e4bb6736e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.05132v2",
+    "milestone": "m1",
+    "hash": "c6581981515c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.05132v2",
     "milestone": "m2",
-    "hash": "ea1ab0f2a151",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9a6ed881097c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.05132v2",
+    "milestone": "m6",
+    "hash": "5f219102e8e3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.05132v2",
+    "milestone": "m3",
+    "hash": "04fa6ef23697",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.05132v2",
+    "milestone": "m7",
+    "hash": "c89c23b6ffdf",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.05132v2",
+    "milestone": "m4",
+    "hash": "4c92e25f9858",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.05132v2",
+    "milestone": "m8",
+    "hash": "e0c05d630a9f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.05132v2",
+    "milestone": "m5",
+    "hash": "a25fde72a51d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.05132v2",
+    "milestone": "completion",
+    "hash": "2c5e4bb6736e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cs.nyu.edu/~wies/publ/intra-module_inference.pdf",
+    "milestone": "m2",
+    "hash": "9a6ed881097c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2604.15533",
+    "milestone": "m6",
+    "hash": "5f219102e8e3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-15",
   "log": [
    {
@@ -1363,8 +1976,123 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 8 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"Recover modular contracts from legacy source code. Each contract states what callers must supply and what behavior the component guarantees in return. Machine-checked proofs establish that the original component satisfies the contract and that a replacement preserves the specified behavior on which callers rely.\". Reason: The definition now explains what a caller must supply and what a replacement must preserve."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"A U.S. tax system that issues notices and reports refund status had 75,000 reported users in 2025. Its business rules are embedded in aging code that fewer specialists can maintain. Even a replacement built exactly to its documentation can break callers if the documentation misses behavior they rely on. Recovering those dependencies would let maintainers upgrade one component for security or speed while preserving the services that use it. They still need to distinguish required behavior from defects in the old code.\". Reason: The Java benchmark measures annotation recovery, while the tax-system example shows who depends on legacy software and why a compatible replacement matters."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Infer candidate preconditions, postconditions and loop invariants from execution traces. Report a candidate only if no observation falsifies it and enough observations support it under the detector\\u2019s plausibility test.\". Reason: The array-sum experiment is evidence for the milestone and its sample size is specific to that experiment."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"Submit inferred contracts and the implementation to a static verifier. Count a contract as established only if the verifier discharges the obligations for that contract under its stated assumptions.\". Reason: The criterion now states what the verifier must establish without embedding experiment sizes or publication history."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m2: \"An inferred component contract suffices to verify a caller’s stated property.\". Reason: Checking a caller tests whether the recovered contract says enough to prove a property the caller needs."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"At a scale of tens of thousands of source lines, instrument all accesses to domain data types and all operations on them. Achieve at least 60% program-understanding accuracy and more than 70% code coverage.\"; set_by = \"DARPA, V-SPELLS solicitation, Table 1, Phase 1 indicative target.\"; threshold_quote = \"at least 60% accuracy with over 70% code coverage\"; threshold_ref = 3. Reason: The Phase 1 table cell supplies the missing quotation and distinguishes the inclusive accuracy target from the strict coverage target."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m3: \"A compatible driver replaces a problematic driver in a large monolithic system.\". Reason: The Phase 1 example tests replacement of a working system component, a separate result from reaching the instrumentation targets."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"At a scale of hundreds of thousands of source lines, make all domain operations programmable in a domain-specific language while maintaining compatibility with native code. Achieve 80% program-understanding accuracy and 90% coverage.\"; set_by = \"DARPA, V-SPELLS solicitation, Table 1, Phase 2 indicative target.\"; threshold_quote = \"80% accuracy/90% coverage\"; threshold_ref = 3; refs = [3]. Reason: The Phase 2 cell supplies the missing threshold quotation, and the Galois tool description is not part of the test."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m4: \"A component is replaced in a large distributed legacy system.\". Reason: The Phase 2 evaluation calls for an actual component replacement in a distributed system in addition to the composition metrics."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m5: title = \"At million-line scale, program understanding reaches 95% accuracy and 99.9% coverage.\"; criterion = \"At a scale of millions of source lines, translate all code to a domain-specific language or virtual machine except for a few enclaves that can be analyzed effectively. Achieve 95% program-understanding accuracy and 99.9% coverage.\"; set_by = \"DARPA, V-SPELLS solicitation, Table 1, Phase 3 indicative target.\"; threshold_quote = \"95% accuracy/99.9% coverage\"; threshold_ref = 3. Reason: The Phase 3 cell supplies the missing quotation and identifies the percentages as program-understanding metrics."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No programme, standards-body or professional-society statement disputing the feasibility or value of verified legacy component replacement was found.\". Reason: Concerns about inferring programmer intent address a different question from whether verified legacy replacement is worth pursuing."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Skipped proposed operation 3 (remove statement 1): the entry needs at least 2 statements. Its reason: The Aptos authors name specification inference for Move as their goal, but their statement makes no claim about replacing a legacy component compatibly."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Applied 11 of 12 proposed operations from SWE-06-revise-20261121T160540234215Z; now version 2."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m6, m3, m7, m4, m8, m5."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 4 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 1 found, 4 not found, 1 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Structural problems after applying: references never cited: [7]"
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 12 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 3 candidates returned, 0 dropped as sources already used, 3 to judge."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 2 of 3 new candidates, without search. Skipped: 2 no readable saved copy. Dropped rows: none. Replaced 16 earlier rows. Added 22 results: 20 from sources already used, 2 from newly found sources."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 1 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 19 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Removed 1 references no longer cited; renumbered."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-21"
  }
 }
