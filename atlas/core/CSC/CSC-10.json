@@ -297,16 +297,28 @@
   ],
   "prompt": "5e97d4b8dfc3"
  },
+ "review": {
+  "state": "published",
+  "note": null,
+  "into": null,
+  "at": "2026-11-15",
+  "log": [
+   {
+    "date": "2026-11-15",
+    "state": "published"
+   }
+  ]
+ },
  "page": {
   "id": "CSC-10",
   "title": "Machine-checked behavioral guarantees for frontier AI models",
-  "definition": "A deployed model whose capabilities match the most advanced general-purpose AI models has an independently checkable proof that it obeys a specified safety rule for every allowed input and execution. The proof covers the arithmetic, output generation and system assumptions used in deployment.",
+  "definition": "A deployed general-purpose AI model with capabilities matching or exceeding the most advanced models carries an independently checkable proof that it obeys a specified safety rule. The proof covers every permitted input and every output the deployed arithmetic and generation procedure can produce under the stated system assumptions. Existing language-model verifiers can bound the probability of a violation for an individual prompt.",
   "goal": {
-   "need": "SDP-CROWN reports certification experiments on classifiers with up to 2.47 million parameters. A preprint revised on 9 June 2026 computes bounds through a synthetic layer with over a billion weights. At implementation level, eight software verifiers evaluated on 912 neural-network examples returned 3% incorrect outcomes. A domain-wide behavioral proof requires both a valid argument and trustworthy checking of the computation it describes.",
+   "need": "In July 2026, more than 300 million people a week asked ChatGPT health questions. In a test of two emergency scenarios, 33 of 64 ChatGPT Health responses advised waiting 24–48 hours for evaluation. Testing more phrasings can uncover errors but cannot rule one out on an untested phrasing. Patients whose symptoms meet a verified emergency rule could rely on the service to direct them to immediate care. That protection depends on clinicians defining the rule correctly and on the patient’s account supplying the information it requires.",
    "need_refs": [
-    1,
-    2,
-    3
+    17,
+    18,
+    19
    ],
    "figures": {
     "caption": "Evaluation of software verifiers on NeuroCodeBench 2.0",
@@ -355,6 +367,14 @@
      "context": "Programme manager Sandeep Neema described the assurance goal on 3 June 2022. ANSR targets systems combining neural learning with symbolic reasoning.",
      "ref": 6,
      "checked": true
+    },
+    {
+     "body": "International Scientific Exchange on AI Safety",
+     "year": "2026",
+     "quote": "Quantitative verification of safety properties",
+     "context": "Section 2.3.2 of the 2026 Singapore Consensus identifies this research priority and describes current methods as impractical for frontier systems.",
+     "ref": 20,
+     "checked": null
     }
    ]
   },
@@ -385,7 +405,7 @@
    {
     "id": "m1",
     "title": "A neural network satisfies its output constraints for every input in a benchmark region.",
-    "criterion": "For a network and a VNN-LIB specification encoding violations, establish UNSAT: no permitted input produces a forbidden output. Each benchmark fixes its input region and output constraints. SDP-CROWN reports classifier certification experiments up to 65,000 neurons and 2.47 million parameters in 2025. The preprint revised on 9 June 2026 proves a CIFAR-100 ResNet-large benchmark property at initialization, without branch-and-bound; it is not peer reviewed.",
+    "criterion": "For a fixed network and a VNN-LIB specification encoding a violation, establish UNSAT: there is no assignment that satisfies the input-region constraints, the network equations and the forbidden-output constraints together.",
     "set_by": "VNN-COMP 2026 organizers, competition rules, Terminology: the established UNSAT convention for neural-network verification.",
     "set_by_kind": "community_convention",
     "threshold_quote": "unsat: all the constraints in the .vnnlib cannot be met at the same time",
@@ -393,7 +413,8 @@
     "refs": [
      9,
      1,
-     2
+     2,
+     21
     ],
     "status": "active",
     "replaced_by": [],
@@ -402,7 +423,7 @@
    {
     "id": "m2",
     "title": "Encoded neural-network constraints have an UNSAT certificate accepted by a formally verified checker.",
-    "criterion": "A checker with a machine-proved soundness theorem accepts a certificate establishing that the encoded polynomial constraints have no solution. The 2025 Imandra evaluation certified 276 collision-avoidance queries for a 137-ReLU network and 180 robotics queries for a 32-ReLU network, restricting evaluation to proofs smaller than 5 MB. ReLU is the activation max(0,x). Certification of translation from the original model and specification remains a separate obligation.",
+    "criterion": "A checker accepts a certificate for the encoded neural-network constraints. A machine-checked soundness theorem establishes that acceptance implies that the polynomial constraints at the root of the proof tree have no solution.",
     "set_by": "Proof-carrying neural-network verification convention; Desmartin et al., ITP 2025, Theorem 15, and Duong et al., NeurIPS 2025.",
     "set_by_kind": "community_convention",
     "threshold_quote": "if this algorithm returns UNSAT then indeed the given set of polynomial constraints at the root of the tree has no solution.",
@@ -418,7 +439,7 @@
    {
     "id": "m3",
     "title": "A floating-point neural-network program satisfies its safety assertion on every modeled execution.",
-    "criterion": "Under specified C execution semantics and mathematical-library models, no permitted execution of the neural-network program violates its safety assertion. This applies SV-COMP's TRUE semantics to neural-network code; the Floats category does not support correctness witnesses. The NeuroCodeBench 2.0 preprint revised on 10 August 2026 reports 76 correct safe ESBMC outcomes among 912 examples, with 900 seconds per example. These outcomes were compared with known answers rather than independently checked proofs.",
+    "criterion": "For a floating-point neural-network program in C, establish that no permitted execution reaches a violation of its safety assertion under the specified C semantics and mathematical-library models. SV-COMP accepts a TRUE verdict without a correctness witness in its C.unreach-call.Floats category.",
     "set_by": "SV-COMP 2026 organizers, Definition of Verification Task. The criterion covers C programs generally; NeuroCodeBench applies it to neural-network implementations.",
     "set_by_kind": "community_convention",
     "threshold_quote": "The specification is satisfied (i.e., there is no path that violates the specification)",
@@ -433,11 +454,11 @@
    },
    {
     "id": "m4",
-    "title": "A language model's output-safety probability is bounded soundly for a specified prompt.",
-    "criterion": "For a specified prompt, safety predicate and decoding distribution, compute L and U with L ≤ Pr[satisfies predicate] ≤ U, supported by a soundness proof. BEAVER's preprint revised on 7 May 2026 evaluates 12 models on 100 privacy, 204 code, 320 stereotype and 318 toxicity instances. For Llama-3.1-8B at temperature 1 and a 16-token limit, its bounds expose violation probability above 10% on 66 of 100 email-leakage prompts. The paper supplies no proof-assistant-checked deployment certificate and is not peer reviewed.",
-    "set_by": "Sound probability-enclosure convention, instantiated by BEAVER's Theorem D.3. ARIA's original Technical Area 2(c) also specifies sound probability bounds.",
+    "title": "A language model’s safety probability for one prompt has sound bounds tighter than zero to one.",
+    "criterion": "Fix the model, prompt, decoding distribution, stopping rule and a safety predicate that must hold at every output prefix. Compute bounds L and U on the probability P of generating a response satisfying the predicate. Prove that 0 ≤ L ≤ P ≤ U ≤ 1 and return an interval with L > 0 or U < 1.",
+    "set_by": "Sound probability bounds for language-model outputs, as defined in BEAVER section 3 and justified by Theorem D.3.",
     "set_by_kind": "community_convention",
-    "threshold_quote": "BEAVER’s bounds are sound at every iteration",
+    "threshold_quote": "tighten them over a finite number of model queries while preserving soundness at every iteration.",
     "threshold_ref": 14,
     "refs": [
      14,
@@ -469,6 +490,22 @@
     "status": "active",
     "replaced_by": [],
     "threshold_checked": null
+   },
+   {
+    "id": "m6",
+    "title": "A checked proof links a neural network’s verification queries to its application safety rule.",
+    "criterion": "For a neural-network safety rule expressed in application quantities, specify how inputs and outputs are converted between application and network representations. A machine-checked proof establishes that, under these conversions, ruling out violations in the generated queries implies that the network satisfies the original rule.",
+    "set_by": "Specification-compilation soundness as formalised in Vehicle, sections 2.1 and 4.2.4, and identified in the Imandra checker’s account of certified compilation.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "the tool automatically generates provably equivalent representations suitable for each of the backends.",
+    "threshold_ref": 22,
+    "refs": [
+     22,
+     11
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
    }
   ],
   "measures": [],
@@ -700,11 +737,138 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 17,
+    "kind": "web",
+    "url": "https://openai.com/index/health-in-chatgpt/",
+    "doi": null,
+    "title": "Launching Health in ChatGPT",
+    "authors": "OpenAI",
+    "container": null,
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 18,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41591-026-04297-7",
+    "doi": "10.1038/s41591-026-04297-7",
+    "title": "ChatGPT Health performance in a structured test of triage recommendations",
+    "authors": "Ramaswamy A, Tyagi A, Hugo H, Jiang J, Jayaraman P, Jangda M, et al.",
+    "container": "Nat Med",
+    "year": "2026",
+    "volume": "32",
+    "issue": "5",
+    "pages": "1671-1675",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 19,
+    "kind": "report",
+    "url": "https://www.turing.ac.uk/news/publications/frontier-ai-risks-practical-way-forward",
+    "doi": null,
+    "title": "Frontier AI Risks: A practical way forward",
+    "authors": "The Alan Turing Institute",
+    "container": null,
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 20,
+    "kind": "report",
+    "url": "https://www.aipriorities.org/files/Singapore_Consensus_2026.pdf",
+    "doi": null,
+    "title": "The 2026 Singapore Consensus on Global AI Safety Research Priorities",
+    "authors": "Stephen Casper, Sören Mindermann, Oskar Galeev (lead writers), with contributors to the International Scientific Exchange on AI Safety",
+    "container": null,
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 21,
+    "kind": "book",
+    "url": "https://www.researchgate.net/publication/221403485_An_Abstraction-Refinement_Approach_to_Verification_of_Artificial_Neural_Networks",
+    "doi": "10.1007/978-3-642-14295-6_24",
+    "title": "An Abstraction-Refinement Approach to Verification of Artificial Neural Networks",
+    "authors": "Pulina L, Tacchella A",
+    "container": "Lecture Notes in Computer Science",
+    "year": "2010",
+    "volume": null,
+    "issue": null,
+    "pages": "243-257",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 22,
+    "kind": "book",
+    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol337-fscd2025/html/LIPIcs.FSCD.2025.2/LIPIcs.FSCD.2025.2.html",
+    "doi": "10.4230/LIPIcs.FSCD.2025.2",
+    "title": "Vehicle: Bridging the Embedding Gap in the Verification of Neuro-Symbolic Programs",
+    "authors": "Matthew L. Daggitt, Wen Kokke, Robert Atkey, Ekaterina Komendantskaya, Natalia Slusarz, Luca Arnaboldi",
+    "container": "10th International Conference on Formal Structures for Computation and Deduction (FSCD 2025)",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 23,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2611.24114v1",
+    "doi": null,
+    "title": "The 7th International Verification of Neural Networks Competition (VNN-COMP 2026): Summary and Results",
+    "authors": "Ladner T, Kaulen K, Bak S, Girard-Satabin J, Johnson TT, Manino E, et al.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 24,
+    "kind": "web",
+    "url": "https://github.com/teal-sea/lean-checked-network",
+    "doi": null,
+    "title": "A trained network, checked by Lean",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 25,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2609.00838v1",
+    "doi": null,
+    "title": "Probabilistic Model Checking of Autoregressive Neural Sequence Models",
+    "authors": "Spieker H, Gross D, Gotlieb A",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
    }
   ],
   "milestone_order": [
    "m1",
    "m2",
+   "m6",
    "m3",
    "m4",
    "m5"
@@ -714,244 +878,545 @@
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "SDP-CROWN certified 63.5% of 200 CIFAR-10 images on ConvLarge.",
-    "detail": "The result covers ℓ2 perturbation regions around the images. The text does not report a VNN-LIB specification or an UNSAT result. The paper appeared in ICML conference proceedings.",
+    "finding": "SDP-CROWN achieved 63.5% verified accuracy for CIFAR-10 ConvLarge on 200 test images.",
+    "detail": "The source is a peer-reviewed ICML conference proceedings paper. The kind field uses the closest available category, and peer_reviewed follows the requested journal-only definition.",
     "quote": "In contrast, our proposed\nmethod achieves a striking 63.5% verified accuracy while\nkeeping runtime moderate (73s).",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 1,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "CIFAR-100 ResNet-large: 1 benchmark property proved UNSAT under FSDP.",
-    "detail": "α-CROWN proved the property at initialization without branch-and-bound.",
+    "finding": "CIFAR-100 ResNet-large: 1 VNN-COMP benchmark instance proved UNSAT with FSDP.",
+    "detail": "Section 4.8 and Table 6 report the same verdict in both GPU configurations. The text identifies the benchmark but leaves the exact input region and forbidden-output inequalities unstated.",
     "quote": "Theunsatresult—property\nproved by α-CROWN at initialisation, without BaB—is the first complete verification result obtained\nunder FSDP for a convolutional VNN-COMP model.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "ACAS Xu at VNN-COMP 2025: three independent verifiers each established UNSAT for 139 of 186 instances.",
+    "detail": "Tables 20 and 45 report the same counts under both counterexample tolerances. The criterion is evaluated per instance.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "CIFAR-100 ResNet benchmark: an unspecified number of samples were filtered out as verifiable by vanilla CROWN.",
-    "detail": "The source does not report how many samples were verified or establish that the filtered-out samples had VNN-LIB violation specifications shown to be UNSAT.",
-    "quote": "We filtered out the samples which can be verified by vanilla CROWN (which is used during training) to make the benchmark more challenging.",
+    "finding": "Marabou established UNSAT for all 456 benchmark queries in the checked subset.",
+    "detail": "The checked subset included certificates smaller than 5 MB for a 137-ReLU collision predictor and a 32-ReLU navigation controller.",
+    "quote": "AllUNSAT proofs were checked by the\nnative Marabou checker and by Imandra, and both checkers have certified all queries.",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
-    "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "Imandra certified UNSAT proofs for all 456 evaluated neural-network queries.",
-    "detail": "The sample comprised 276 collision-avoidance queries for a 137-ReLU network and 180 robotics queries for a 32-ReLU network; proofs were smaller than 5 MB. Certifying translation from the original model and specification remains future work.",
-    "quote": "We evaluated the results of 276 coav and 180 robotics\nqueries, which have proof size smaller than 5MB. AllUNSAT proofs were checked by the\nnative Marabou checker and by Imandra, and both checkers have certified all queries.",
+    "finding": "The formally verified Imandra checker accepted all 456 evaluated Marabou UNSAT certificates.",
+    "detail": "The checker uses exact real arithmetic. The benchmark runs disabled some ReLU bound-tightening optimizations whose proof lemmas are outside the soundness theorem.",
+    "quote": "AllUNSAT proofs were checked by the\nnative Marabou checker and by Imandra, and both checkers have certified all queries.",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
-    "milestone": "m3",
+    "milestone": "m1",
     "case": null,
-    "verdict": "met",
-    "finding": "NeuroCodeBench polynomial approximation networks: 48 of 96 safety properties held.",
-    "detail": "The authors report scanning every 32-bit floating-point input in the training interval to establish the ground truth for these properties. The result is reported in a preprint.",
+    "verdict": "partial",
+    "finding": "48 of 96 constructed SAT ReLU benchmarks have no input that reaches the forbidden output.",
+    "detail": "The separate VNN-LIB-derived benchmarks were tested after translation to floating-point C. The authors take the original real-valued safety verdicts as given.",
     "quote": null,
     "checked": null,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 3,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "ESBMC returned 76 ground-truth-matching TRUE verdicts across 912 NeuroCodeBench 2.0 C tasks.",
+    "detail": "The local evaluation used benchmark labels to score verdicts. Its aggregate count includes component tests as well as whole-network tasks. The paper reports official SV-COMP inclusion and aggregate outcomes separately.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 3,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "met",
-    "finding": "For Llama-3.1-8B, BEAVER bounded email-leakage probability above 10% on 66 of 100 prompts.",
-    "detail": "The experiments used temperature 1 and a 16-token generation limit. The preprint presents a soundness proof for its probability bounds; it does not provide a proof-assistant-checked deployment certificate.",
+    "finding": "For Llama-3.2-3B-Instruct, BEAVER certified a nontrivial email-leakage risk on 29 of 50 Enron prompt variants.",
+    "detail": "The paper reports how many prompts crossed the threshold. It does not list their individual interval endpoints. The proof is presented in the preprint without reported machine checking.",
+    "quote": "For Llama-3.2-3B-Instruct,\nBEAVER\ncertifies that 29 out of 50 sampled instances are risky.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "α,β-CROWN recorded 1,982 UNSAT results in the 3,373-instance VNN-COMP 2026 regular-track suite.",
+    "detail": "Table 14 gives the UNSAT count. The organizers checked submitted counterexamples and describe requiring UNSAT proofs as a future goal.",
     "quote": null,
     "checked": null,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 23,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Lean checked one 34-leaf alpha-beta-CROWN certificate for ACAS Xu network 1_1, property 1.",
+    "detail": null,
+    "quote": "This project proves the receipt\nchecks and the complete input-tree composition around TorchLean's semantics, for one\nalpha-beta-CROWN tree.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 24,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "met",
+    "finding": "For one neural car controller, Vehicle generated 2 violation queries and reports an Agda proof of compilation soundness.",
+    "detail": "The proof covers query compilation under real-number semantics. Marabou determines satisfiability externally. The Agda export backend’s correctness and in-Agda checking of solver certificates remain future work.",
+    "quote": "The queries\nare equisatifiable to the original specification in the sense that a neural network satisfies\nthe specification if and only if no satisfying assignment to variablesx0 and x1 can be found\nfor either query.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 22,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "met",
+    "finding": "GPT-2 manufacturing process planner, 1,176 prompts, each with a safety probability lower bound of at least 0.90.",
+    "detail": "The interval follows from Table 4's per-input threshold and the soundness theorem. PRISM checks the extracted chains, and the preprint presents the abstraction proof as a proof sketch.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 25,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    }
   ],
   "judged": [
    {
     "url": "https://proceedings.mlr.press/v267/chiu25a.html",
     "milestone": "m1",
-    "hash": "f9882cb13e29",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "45786c4ad543",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v267/chiu25a.html",
     "milestone": "m2",
-    "hash": "ab2fda2ae57e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "02f6efc85db9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.mlr.press/v267/chiu25a.html",
+    "milestone": "m6",
+    "hash": "a9afd327dbeb",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v267/chiu25a.html",
     "milestone": "m3",
-    "hash": "1aa95fd36b7e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "011135b1545a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v267/chiu25a.html",
     "milestone": "m4",
-    "hash": "09e5b97edf84",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "24f41d08456f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v267/chiu25a.html",
     "milestone": "m5",
     "hash": "99e958d4e587",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v267/chiu25a.html",
     "milestone": "completion",
     "hash": "5d4c56e8b2a0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://livrepository.liverpool.ac.uk/3184632/",
     "milestone": "m1",
-    "hash": "f9882cb13e29",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "45786c4ad543",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://livrepository.liverpool.ac.uk/3184632/",
     "milestone": "m2",
-    "hash": "ab2fda2ae57e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "02f6efc85db9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://livrepository.liverpool.ac.uk/3184632/",
+    "milestone": "m6",
+    "hash": "a9afd327dbeb",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://livrepository.liverpool.ac.uk/3184632/",
     "milestone": "m3",
-    "hash": "1aa95fd36b7e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "011135b1545a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://livrepository.liverpool.ac.uk/3184632/",
     "milestone": "m4",
-    "hash": "09e5b97edf84",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "24f41d08456f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://livrepository.liverpool.ac.uk/3184632/",
     "milestone": "m5",
     "hash": "99e958d4e587",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://livrepository.liverpool.ac.uk/3184632/",
     "milestone": "completion",
     "hash": "5d4c56e8b2a0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2606.09377",
     "milestone": "m1",
-    "hash": "f9882cb13e29",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "45786c4ad543",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2606.09377",
     "milestone": "m2",
-    "hash": "ab2fda2ae57e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "02f6efc85db9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2606.09377",
+    "milestone": "m6",
+    "hash": "a9afd327dbeb",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2606.09377",
     "milestone": "m3",
-    "hash": "1aa95fd36b7e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "011135b1545a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2606.09377",
     "milestone": "m4",
-    "hash": "09e5b97edf84",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "24f41d08456f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2606.09377",
     "milestone": "m5",
     "hash": "99e958d4e587",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2606.09377",
     "milestone": "completion",
     "hash": "5d4c56e8b2a0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2512.19007",
     "milestone": "m1",
-    "hash": "f9882cb13e29",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "45786c4ad543",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.19007",
+    "milestone": "m2",
+    "hash": "02f6efc85db9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.19007",
+    "milestone": "m6",
+    "hash": "a9afd327dbeb",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.19007",
+    "milestone": "m3",
+    "hash": "011135b1545a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.19007",
+    "milestone": "m4",
+    "hash": "24f41d08456f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.19007",
+    "milestone": "m5",
+    "hash": "99e958d4e587",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.19007",
+    "milestone": "completion",
+    "hash": "5d4c56e8b2a0",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol352-itp2025/html/LIPIcs.ITP.2025.1/LIPIcs.ITP.2025.1.html",
+    "milestone": "m1",
+    "hash": "45786c4ad543",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol352-itp2025/html/LIPIcs.ITP.2025.1/LIPIcs.ITP.2025.1.html",
     "milestone": "m2",
-    "hash": "ab2fda2ae57e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "02f6efc85db9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol352-itp2025/html/LIPIcs.ITP.2025.1/LIPIcs.ITP.2025.1.html",
+    "milestone": "m6",
+    "hash": "a9afd327dbeb",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol352-itp2025/html/LIPIcs.ITP.2025.1/LIPIcs.ITP.2025.1.html",
+    "milestone": "m3",
+    "hash": "011135b1545a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol352-itp2025/html/LIPIcs.ITP.2025.1/LIPIcs.ITP.2025.1.html",
+    "milestone": "m4",
+    "hash": "24f41d08456f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol352-itp2025/html/LIPIcs.ITP.2025.1/LIPIcs.ITP.2025.1.html",
+    "milestone": "m5",
+    "hash": "99e958d4e587",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol352-itp2025/html/LIPIcs.ITP.2025.1/LIPIcs.ITP.2025.1.html",
+    "milestone": "completion",
+    "hash": "5d4c56e8b2a0",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2510.23389v2",
+    "milestone": "m1",
+    "hash": "45786c4ad543",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2510.23389v2",
+    "milestone": "m2",
+    "hash": "02f6efc85db9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2510.23389v2",
+    "milestone": "m6",
+    "hash": "a9afd327dbeb",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2510.23389v2",
     "milestone": "m3",
-    "hash": "1aa95fd36b7e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "011135b1545a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2510.23389v2",
+    "milestone": "m4",
+    "hash": "24f41d08456f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2510.23389v2",
+    "milestone": "m5",
+    "hash": "99e958d4e587",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2510.23389v2",
+    "milestone": "completion",
+    "hash": "5d4c56e8b2a0",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.05439v2",
+    "milestone": "m1",
+    "hash": "45786c4ad543",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.05439v2",
+    "milestone": "m2",
+    "hash": "02f6efc85db9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.05439v2",
+    "milestone": "m6",
+    "hash": "a9afd327dbeb",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.05439v2",
+    "milestone": "m3",
+    "hash": "011135b1545a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2512.05439v2",
     "milestone": "m4",
-    "hash": "09e5b97edf84",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "24f41d08456f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.05439v2",
+    "milestone": "m5",
+    "hash": "99e958d4e587",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.05439v2",
+    "milestone": "completion",
+    "hash": "5d4c56e8b2a0",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2611.24114v1",
+    "milestone": "m1",
+    "hash": "45786c4ad543",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/teal-sea/lean-checked-network",
+    "milestone": "m2",
+    "hash": "02f6efc85db9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol337-fscd2025/html/LIPIcs.FSCD.2025.2/LIPIcs.FSCD.2025.2.html",
+    "milestone": "m6",
+    "hash": "a9afd327dbeb",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2609.00838v1",
+    "milestone": "m4",
+    "hash": "24f41d08456f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -993,20 +1458,98 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 4 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"A deployed general-purpose AI model with capabilities matching or exceeding the most advanced models carries an independently checkable proof that it obeys a specified safety rule. The proof covers every permitted input and every output the deployed arithmetic and generation procedure can produce under the stated system assumptions. Existing language-model verifiers can bound the probability of a violation for an individual prompt.\". Reason: The definition omits models that exceed recorded frontier capabilities and leaves the difference between a per-prompt bound and a domain-wide guarantee implicit."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"In July 2026, more than 300 million people a week asked ChatGPT health questions. In a test of two emergency scenarios, 33 of 64 ChatGPT Health responses advised waiting 24\\u201348 hours for evaluation. Testing more phrasings can uncover errors but cannot rule one out on an untested phrasing. Patients whose symptoms meet a verified emergency rule could rely on the service to direct them to immediate care. That protection depends on clinicians defining the rule correctly and on the patient\\u2019s account supplying the information it requires.\". Reason: The current rationale gives verifier benchmark sizes without explaining who faces a risk or what a guarantee could change for them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by International Scientific Exchange on AI Safety, 2026: \"Quantitative verification of safety properties\". Reason: The Singapore Consensus names quantitative safety verification as a research priority and explicitly addresses its feasibility for frontier systems."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"For a fixed network and a VNN-LIB specification encoding a violation, establish UNSAT: there is no assignment that satisfies the input-region constraints, the network equations and the forbidden-output constraints together.\"; refs = [9, 1, 2, 21]. Reason: The two reported experiments obscure the benchmark’s acceptance test and make model size and solver choice look like requirements."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"A checker accepts a certificate for the encoded neural-network constraints. A machine-checked soundness theorem establishes that acceptance implies that the polynomial constraints at the root of the proof tree have no solution.\". Reason: The experiment’s network sizes and 5 MB proof-size restriction are incidental to the checker’s soundness theorem."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m2: \"A checked proof links a neural network’s verification queries to its application safety rule.\". Reason: A valid certificate can establish the wrong property if translation changes the application rule, and the existing milestones never test that translation separately."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"For a floating-point neural-network program in C, establish that no permitted execution reaches a violation of its safety assertion under the specified C semantics and mathematical-library models. SV-COMP accepts a TRUE verdict without a correctness witness in its C.unreach-call.Floats category.\". Reason: The ESBMC outcome count and time limit belong to an evaluation, while the SV-COMP test concerns reachability of an assertion violation."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: title = \"A language model\\u2019s safety probability for one prompt has sound bounds tighter than zero to one.\"; criterion = \"Fix the model, prompt, decoding distribution, stopping rule and a safety predicate that must hold at every output prefix. Compute bounds L and U on the probability P of generating a response satisfying the predicate. Prove that 0 \\u2264 L \\u2264 P \\u2264 U \\u2264 1 and return an interval with L > 0 or U < 1.\"; set_by = \"Sound probability bounds for language-model outputs, as defined in BEAVER section 3 and justified by Theorem D.3.\"; set_by_kind = \"community_convention\"; threshold_quote = \"tighten them over a finite number of model queries while preserving soundness at every iteration.\"; threshold_ref = 14; refs = [14, 4]. Reason: The existing inequality admits the uninformative interval from zero to one, while BEAVER explicitly requires tightening the bounds and preserving soundness."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Applied 8 of 8 proposed operations from CSC-10-revise-20261121T154456311981Z; now version 2."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m6, m3, m4."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 0 from arXiv, 4 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 2 found, 0 not found, 1 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "definition is 435 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 7 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 4 candidates returned, 0 dropped as sources already used, 4 to judge."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 4 of 4 new candidates, without search. Skipped: none. Dropped rows: none. Replaced 6 earlier rows. Added 12 results: 8 from sources already used, 4 from newly found sources."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 2 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 7 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-15"
- },
- "review": {
-  "state": "published",
-  "note": null,
-  "into": null,
-  "at": "2026-11-15",
-  "log": [
-   {
-    "date": "2026-11-15",
-    "state": "published"
-   }
-  ]
+  "results_run": "2026-11-21"
  }
 }
