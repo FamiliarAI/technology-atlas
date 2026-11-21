@@ -283,13 +283,27 @@
   ],
   "prompt": "5e97d4b8dfc3"
  },
+ "review": {
+  "state": "published",
+  "note": null,
+  "into": null,
+  "at": "2026-11-15",
+  "log": [
+   {
+    "date": "2026-11-15",
+    "state": "published"
+   }
+  ]
+ },
  "page": {
   "id": "CSC-09",
-  "title": "Indistinguishability obfuscation for general circuits",
-  "definition": "A compiler preserves a program's outputs and hides which of two equivalent, same-size logic circuits it transformed: every polynomial-time adversary has distinguishing advantage smaller than every inverse polynomial in the security parameter. A complete implementation meets a published application's numerical security and resource limits.",
+  "title": "Practical indistinguishability obfuscation for general circuits",
+  "definition": "A randomized polynomial-time compiler transforms any polynomial-size Boolean circuit into one that gives the same output on every input. If two circuits have the same size and agree on every input, every polynomial-time observer's advantage in distinguishing their compiled versions eventually falls below every inverse polynomial in the security parameter. This guarantee concerns which implementation was compiled. For some functions, inspecting any implementation reveals information that is hard to learn by querying the function alone.",
   "goal": {
-   "need": "A developer assessment published on 1 July 2026 estimates more than 10^36 GPU-hours for one complete Diamond iO evaluation, with over 99% spent evaluating a pseudorandom function under an encrypted key. The Root iO position paper proposes combining obfuscation, encrypted computation and proof verification to support confidential smart contracts without a continuing committee holding secret shares.",
+   "need": "A sealed-bid token auction with 11,103 bidders across three platforms kept bid quantities private while computing the clearing price. Its encrypted-contract protocol relies on a quorum of key holders for decryption, however fast the computation becomes. With secure obfuscation, encrypted computation and proof verification, anyone could release just the result a contract authorizes. Users would still rely on the blockchain's validators and on at least one honest participant in the one-time setup.",
    "need_refs": [
+    15,
+    16,
     1,
     2
    ],
@@ -332,6 +346,14 @@
      "context": "Funding description for Phantom Zone, published on 8 May 2025.",
      "ref": 5,
      "checked": true
+    },
+    {
+     "body": "PSE, December 2025 Newsletter",
+     "year": "2025",
+     "quote": "we presented our roadmap toward practical iO.",
+     "context": "PSE presented the roadmap at Obfuscation Day in Buenos Aires as part of its work on scaling confidential smart contracts on Ethereum.",
+     "ref": 17,
+     "checked": null
     }
    ]
   },
@@ -353,12 +375,12 @@
   },
   "case_label": null,
   "cases": [],
-  "milestone_structure": "sequence",
+  "milestone_structure": "parallel",
   "milestones": [
    {
     "id": "m1",
     "title": "A construction proves indistinguishability obfuscation for all polynomial-size circuits.",
-    "criterion": "A proof establishes functionality preservation, polynomial running time and indistinguishability for all polynomial-size circuits under explicit assumptions. The Jain–Lin–Sahai preprint received on 5 October 2021 reports this conditional result from subexponential security of learning parity with noise over prime fields, polynomial-stretch Boolean pseudorandom generators in NC^0, and the decisional linear assumption in symmetric prime-order bilinear groups. NC^0 denotes constant-depth circuits with bounded fan-in.",
+    "criterion": "Under explicit assumptions, prove that a randomized polynomial-time obfuscator preserves the output of every polynomial-size Boolean circuit on every input. For every pair of equivalent circuit families with matching size, input length and output length at each security parameter, prove that their obfuscations are computationally indistinguishable.",
     "set_by": "The field's formal iO definition, reproduced in Jain–Lin–Sahai Definition 2.2; their subsequent theorem supplies a conditional construction.",
     "set_by_kind": "community_convention",
     "threshold_quote": "Then, (subexponentially secure) indistinguishability obfuscation for all polynomial-size circuits exists.",
@@ -373,8 +395,8 @@
    },
    {
     "id": "m2",
-    "title": "An obfuscation prototype correctly evaluates a circuit with one external input bit.",
-    "criterion": "Produce and execute the prototype's circuit, including its identity-function correctness check. On 28 April 2025, Machina iO reported means of three measurements on an AWS i4i.8xlarge instance with 32 vCPUs and 256 GB RAM. Its one-bit-input, public-depth-zero setting took 15.80 minutes to obfuscate and 2.542 minutes to evaluate, excluding 4.575 minutes of loading. The implementation substitutes cryptographic components and omits a pseudorandom oracle required for general functionalities; this demonstration does not establish full iO security.",
+    "title": "A Diamond iO prototype evaluates a circuit with one external input bit and passes its identity check.",
+    "criterion": "Generate and execute the prototype circuit with one external input bit and public multiplicative depth zero. For the correctness check, set the public circuit to the identity function and verify that evaluation returns the binary key sampled by the obfuscator.",
     "set_by": "Machina iO's published prototype experiment, correctness check and Benchmark 1 protocol.",
     "set_by_kind": "protocol",
     "threshold_quote": "verifying that the output of the evaluation matches the hardcoded key sampled by the obfuscator.",
@@ -388,9 +410,9 @@
    },
    {
     "id": "m3",
-    "title": "A lattice obfuscator executes complete FHE ciphertext multiplication over BGG+ encodings.",
-    "criterion": "Execute complete multiplication for fully homomorphic encryption, which permits computation on ciphertexts, inside BGG+ lattice encodings. This is a Diamond iO implementation target. On 10 May 2026, its developers reported a smaller modular-multiplication component on 8 RTXPro 6000 GPUs: about 1.5 hours of preprocessing, under 1 minute of evaluation and 731 GB of output. The full GSW encrypted-computation benchmark was extrapolated from component runs. The roadmap also identifies incomplete security proofs for new encoding optimizations.",
-    "set_by": "Machina iO's published Challenge 1 and implementation roadmap; specific to its lattice-based route.",
+    "title": "A circuit multiplies two fully homomorphic encryption ciphertexts over BGG+ encodings.",
+    "criterion": "Run the entire ciphertext-multiplication circuit for a lattice-based fully homomorphic encryption scheme on BGG+ key-homomorphic encodings. The run must compute the ciphertext product, including the operations that assemble it from the underlying modular products.",
+    "set_by": "Machina iO, FHE Multiplication over Key-Homomorphic Encodings and Challenge 1.",
     "set_by_kind": "protocol",
     "threshold_quote": "Practical implementation of FHE evaluation over BGG+ encodings",
     "threshold_ref": 1,
@@ -436,8 +458,8 @@
    {
     "id": "m6",
     "title": "An obfuscated circuit verifies authorization proofs and conditionally decrypts FHE ciphertexts.",
-    "criterion": "Execute the full verification-and-decryption circuit: given FHE ciphertexts and a SNARK proof that a specified contract authorized decryption, output plaintexts only when the proof verifies. A SNARK is a succinct non-interactive argument of knowledge. The cited sources provide a construction and implementation target, rather than a completed application run.",
-    "set_by": "Machina iO's Root iO protocol and conditional-FHE-decryption roadmap endpoint; specific to this application route.",
+    "criterion": "Execute the obfuscated verification-and-decryption circuit on ciphertexts and a proof that the specified Ethereum contract authorized their decryption. Return the corresponding plaintexts when the proof verifies and withhold them when verification fails.",
+    "set_by": "Machina iO's Root iO protocol and the conditional-decryption application listed beyond the roadmap through Q2 2027.",
     "set_by_kind": "protocol",
     "threshold_quote": "outputs their plaintexts only if the proof is valid.",
     "threshold_ref": 1,
@@ -449,13 +471,76 @@
     "status": "active",
     "replaced_by": [],
     "threshold_checked": true
+   },
+   {
+    "id": "m7",
+    "title": "A Boolean-formula obfuscator generates and evaluates 8-, 12- and 16-bit point functions.",
+    "criterion": "At security parameter 52, obfuscate and evaluate a Boolean formula at each of the three input lengths. Each formula returns 1 on exactly one designated input and 0 on every other input. Record obfuscation time, output size and evaluation time for each length.",
+    "set_by": "Apon, Huang, Katz and Malozemoff, Section 4 and Table 6 of Implementing Cryptographic Program Obfuscation.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "point functions taking 8, 12, and 16 bits of input, using security parameter 52",
+    "threshold_ref": 18,
+    "refs": [
+     18
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m8",
+    "title": "A blind pseudorandom function over an encrypted key has implementable lattice parameters.",
+    "criterion": "Implement a pseudorandom function over key-homomorphic encodings of an encrypted key, keeping both the key and the function output hidden. Implement noise refreshing to bound the accumulated error and specify the lattice parameters for evaluation. The roadmap permits an estimate of total work at this stage.",
+    "set_by": "Machina iO implementation roadmap, Milestone 2.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "Blind PRF over Key-Homomorphic Encodings with Implementable Parameters",
+    "threshold_ref": 11,
+    "refs": [
+     11
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m9",
+    "title": "A proof verifier works over key-homomorphic encodings with a matching prover.",
+    "criterion": "Implement a prover for a succinct non-interactive argument of knowledge and a circuit that checks its proofs over key-homomorphic encodings. A publicly verifiable scheme is admissible. A designated-verifier scheme must support strong reuse of its secret verification key.",
+    "set_by": "Machina iO implementation roadmap, Milestone 5.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "SNARK verification circuit and prover",
+    "threshold_ref": 19,
+    "refs": [
+     11,
+     19
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m10",
+    "title": "A witness-encryption demonstration releases an embedded message if and only if a proof verifies.",
+    "criterion": "Implement witness encryption and demonstrate it in an application. The obfuscated circuit must take the entire proof as input, verify it against the intended statement and release the embedded message if and only if verification succeeds.",
+    "set_by": "Machina iO implementation roadmap, Milestone 6.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "Obfuscation that releases a hardcoded message iff a SNARK proof verifies",
+    "threshold_ref": 19,
+    "refs": [
+     11,
+     19
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
    }
   ],
   "measures": [],
   "not_found": [
    "No application specification publishing all numerical resource limits required by the provisional completion test was identified.",
    "The SafeWare solicitation attachment and the supplied Communications of the ACM article could not be opened.",
-   "No completed full execution of the secure-parameter 110-bit ObfusBench workload or the conditional-decryption application was found."
+   "No completed full execution of the secure-parameter 110-bit ObfusBench workload or the conditional-decryption application was found.",
+   "Searches of programme, standards and cryptography workshop materials found no institutional statement rejecting practical general-circuit iO as a goal."
   ],
   "references": [
    {
@@ -653,14 +738,172 @@
     "issue": null,
     "pages": null,
     "citation_source": "model"
+   },
+   {
+    "id": 15,
+    "kind": "web",
+    "url": "https://www.zama.org/post/118m-committed-for-the-first-encrypted-ico-on-ethereum",
+    "doi": null,
+    "title": "The Zama Public Auction: $118M Committed for the First Encrypted ICO on Ethereum",
+    "authors": "The Zama Team",
+    "container": "Zama",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 16,
+    "kind": "web",
+    "url": "https://github.com/zama-ai/fhevm/blob/main/docs/protocol/architecture/kms.md",
+    "doi": null,
+    "title": "KMS",
+    "authors": "zama-ai",
+    "container": "fhevm",
+    "year": "undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 17,
+    "kind": "web",
+    "url": "https://pse.dev/blog/pse-december-2025",
+    "doi": null,
+    "title": "PSE December 2025 Newsletter",
+    "authors": "PSE Team",
+    "container": "PSE",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 18,
+    "kind": "preprint",
+    "url": "https://eprint.iacr.org/2014/779.pdf",
+    "doi": null,
+    "title": "Implementing Cryptographic Program Obfuscation",
+    "authors": "Daniel Apon, Yan Huang, Jonathan Katz, and Alex J. Malozemoff",
+    "container": "Cryptology ePrint Archive, Paper 2014/779",
+    "year": "2014",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 19,
+    "kind": "web",
+    "url": "https://pse.dev/mastermap/machina",
+    "doi": null,
+    "title": "Machina iO",
+    "authors": "PSE",
+    "container": "Master Map",
+    "year": "undated",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 20,
+    "kind": "preprint",
+    "url": "https://eprint.iacr.asia/2026/2547.pdf",
+    "doi": null,
+    "title": "iO from LWE with Structured Preimage",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 21,
+    "kind": "book",
+    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol229-icalp2022/LIPIcs.ICALP.2022.28/LIPIcs.ICALP.2022.28.pdf",
+    "doi": "10.4230/LIPIcs.ICALP.2022.28",
+    "title": "Factoring and Pairings Are Not Necessary for IO: Circular-Secure LWE Suffices",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 22,
+    "kind": "web",
+    "url": "https://www.piapark.me/pdf/what_is_io_and_its_application.pdf",
+    "doi": null,
+    "title": "What is iO and its application",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 23,
+    "kind": "web",
+    "url": "https://hackmd.io/lcTACEx_Sva9-4rlQbbi0g",
+    "doi": null,
+    "title": "Milestones of Machina iO from Q1 2026 to Q2 2027",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 24,
+    "kind": "web",
+    "url": "https://github.com/MachinaIO/mxx/blob/3bd50d9b7d4cf455a9d159ee85bff79dc10c1bcb/tests/test_gpu_diamond_io.rs",
+    "doi": null,
+    "title": "test_gpu_diamond_io.rs",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 25,
+    "kind": "web",
+    "url": "https://github.com/MachinaIO/mxx/blob/3bd50d9b7d4cf455a9d159ee85bff79dc10c1bcb/tests/test_gpu_diamond_we.rs",
+    "doi": null,
+    "title": "test_gpu_diamond_we.rs",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
    }
   ],
   "milestone_order": [
+   "m7",
    "m1",
    "m2",
    "m3",
+   "m8",
    "m4",
+   "m9",
    "m5",
+   "m10",
    "m6"
   ],
   "results": [
@@ -668,223 +911,804 @@
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Jain–Lin–Sahai prove iO for all polynomial-size circuits under 3 subexponential-security assumptions.",
-    "detail": "The assumptions are LPN over prime fields, a polynomial-stretch Boolean PRG in NC^0, and DLIN in symmetric prime-order bilinear groups.",
+    "finding": "Theorem reports iO for all polynomial-size circuits under 3 assumptions. No empirical sample applies.",
+    "detail": null,
     "quote": "Then, (subexponentially secure) indistinguishability obfuscation for all polynomial-size circuits exists.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "An indistinguishability obfuscation scheme is claimed under 3 hardness assumptions; sample size is not applicable.",
-    "detail": "The abstract claims a construction under decisional linear, large-field LPN and sparse LPN assumptions, but does not state that it covers all polynomial-size circuits or establish the required functionality, running time and indistinguishability properties.",
+    "finding": "The paper reports one indistinguishability obfuscation construction under three explicit hardness assumptions.",
+    "detail": "The ePrint record identifies this version as a minor revision of a TCC 2024 publication. The supplied text contains only the abstract and metadata.",
     "quote": "We construct an indistinguishability obfuscation (IO) scheme from the sub-exponential hardness of the decisional linear problem on bilinear groups together with two variants of the learning parity with noise (LPN) problem, namely large-field LPN and (binary-field) sparse LPN.",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "Machina iO’s one-bit prototype took a mean of 15.80 minutes to obfuscate the circuit across three measurements.",
-    "detail": "On AWS i4i.8xlarge, evaluation averaged 2.542 minutes, excluding 4.575 minutes of loading. The authors report an identity-function correctness check. Cryptographic substitutions and the missing pseudorandom oracle mean the demonstration does not establish full iO security.",
+    "finding": "Diamond iO generated and evaluated a one-bit circuit at public multiplicative depth zero in three benchmark repetitions and passed the identity check.",
+    "detail": "The three repetitions refer to the performance benchmark. The post gives no repetition count for the identity check. The final decryption inner product contributes depth outside the public circuit.",
+    "quote": "We confirmed the correctness of the implementation by setting the public circuit as the identity\n                    function and verifying that the output of the evaluation matches the hardcoded key sampled by the\n                    obfuscator.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Diamond iO generated and evaluated circuits with up to 4 external input bits, averaging three measurements per input width.",
+    "detail": null,
     "quote": null,
     "checked": null,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "BGG+ modulo-q multiplication component: 1 experiment on 8 GPUs produced 731 GB of preprocessing output.",
-    "detail": "The full GSW FHE benchmark was not completed; its results were extrapolated from measurements of individual parallelizable units. The modulus size for the component was chosen for correctness and may need to be larger for security.",
-    "quote": "With 8 GPUs (RTXPro 6000) running in parallel, preprocessing (corresponding to obfuscation in iO) took about 1.5 hours, and online evaluation (corresponding to obfuscated-circuit evaluation) finishes in under 1 minutes. The preprocessing output size, corresponding to a part of an obfuscated circuit, was 731 GB.",
+    "finding": "One GSW FHE benchmark over BGG+ encodings estimated 51 minutes of online evaluation from measurements of individual units.",
+    "detail": "The GSW benchmark used ring dimension 2^16 and a 1120-bit encoding modulus. The estimate assumes more than 10^18 GPUs.",
+    "quote": "In online evaluation (corresponding to evaluation in iO), the minimum latency is 51 mins when more than $10^{18}$ GPUs are available.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
-    "milestone": "m5",
+    "milestone": "m7",
     "case": null,
     "verdict": "partial",
-    "finding": "5Gen reports obfuscation-size estimates for a point function with an 80-bit input domain; sample size not stated.",
-    "detail": "The text reports experiments with an obfuscation toolchain and a size estimate for the 80-bit point function, but does not say that this function was produced and evaluated.",
+    "finding": "Point-function obfuscation output size was estimated for two domain sizes, the larger with 80-bit inputs.",
+    "detail": null,
     "quote": null,
     "checked": null,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One FHE ciphertext multiplication over BGG+ encodings was estimated to take more than 10^16 hours on one GPU.",
+    "detail": null,
+    "quote": "Nevertheless, it is estimated that computing a single FHE multiplication over BGG+ encodings would require more than $10^{16}$ hours on a single GPU.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 1,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m8",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One encrypted-key PRF evaluation over BGG+ encodings was estimated to take more than 10^36 hours on one GPU.",
+    "detail": null,
+    "quote": "This process accounts for more than 99% of the total evaluation time of Diamond iO, and is estimated to require more than $10^{36}$ hours on a single GPU.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 1,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m5",
     "case": null,
     "verdict": "partial",
-    "finding": "ObfusBench implemented PRF obfuscation across an unspecified number of iO constructions for 110 input bits.",
-    "detail": "Full obfuscation and evaluation were estimated from measured unit computational tasks, not executed end to end. The text does not establish that all 110 input bits were meaningfully used.",
+    "finding": "ObfusBench reports an obfuscation implementation for one 110-input-bit PRF per lattice-based construction, with extrapolated evaluation costs.",
+    "detail": null,
     "quote": "For each lattice-based iO construction, we implemented the obfuscation of a PRF with 110 input bits and reported\nestimates\nof the end-to-end performance.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 1,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "A conditional construction achieves iO for all polynomial-size Boolean circuits under two sub-exponential hardness assumptions. No empirical sample.",
+    "detail": "Theorem 5.3 proves sampler security under LWE and LSP, and Theorem 2.1 supplies the reduction from the sampler to iO. LSP is a new hardness assumption.",
+    "quote": "We\nformulate a new, arguably simple assumption calledLWE with Structured Preimagethat suffices to\nbuild iO.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Theorem 1 reports conditional iO for all circuits. The displayed shallow construction has negligible block-recovery error. No empirical sample applies.",
+    "detail": "The correctness calculation on pages 15–16 allows negligible error. The paper states the general-circuit theorem on page 3 and refers readers to the full version for further analysis.",
+    "quote": "▶ Theorem 1 (Informal). Assume the (sub-exponential) hardness of the LWE problem, and\nthe SRL security of GSW in the presence of a randomness-key cycle with a packed variant of\ndual-Regev, then there exists indistinguishability obfuscation for all circuits.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The Diamond iO prototype reports obfuscation and evaluation with 1 input bit. Run count unreported.",
+    "detail": "The timing result supports the one-bit execution requirement. The slides give no result for the identity check.",
+    "quote": "Our sufficiently secure parameters\n(target security parameter 80, 1 input bit, \naround 60 gates): \n \nLess than one hour\nfor obfuscation and evaluation \n(we are double checking this result)",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 22,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One modular multiplication over BGG+ encodings was evaluated with an approximately 24-bit prime.",
+    "detail": null,
+    "quote": "Using the new LUT evaluation technique, we succeeded in evaluating a modulo-$q$ multiplication over BGG+ encodings, where $q$ is a prime factor of the encoding modulus $Q$ and is about 24 bits.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 23,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m8",
+    "case": null,
+    "verdict": "partial",
+    "finding": "DiamondIO implements a Goldreich PRF parameter-search and GPU work-estimation harness with a default ring dimension of 65,536. No executed sample count is reported.",
+    "detail": "The default benchmark configuration requests one iteration and sets security_bits to 0. The final CRT depth, refresh width, error bounds, and work estimates are computed at runtime.",
+    "quote": "\"DiamondIO CRT-depth search selected parameters\"",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 24,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m10",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The GPU DiamondWE test asserts message recovery for one all-true witness, with a default witness length of 10 bits.",
+    "detail": "The test covers only the satisfying input. The assertion specifies the expected outcome, and the source provides no execution result.",
+    "quote": "assert_eq\n!\n(\ndecoded\n,\nmsg\n)\n;",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 25,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    }
   ],
   "judged": [
    {
     "url": "https://eccc.weizmann.ac.il/report/2001/057",
+    "milestone": "m7",
+    "hash": "8f74acb5a135",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eccc.weizmann.ac.il/report/2001/057",
     "milestone": "m1",
-    "hash": "5a1fa6db4a59",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ad25a1b183b2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eccc.weizmann.ac.il/report/2001/057",
     "milestone": "m2",
-    "hash": "f447a1b75c7a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "023405b6c4de",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eccc.weizmann.ac.il/report/2001/057",
     "milestone": "m3",
-    "hash": "04b73a28f1ac",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3161f6e70cee",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eccc.weizmann.ac.il/report/2001/057",
+    "milestone": "m8",
+    "hash": "823585928125",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eccc.weizmann.ac.il/report/2001/057",
     "milestone": "m4",
     "hash": "de7149da9362",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eccc.weizmann.ac.il/report/2001/057",
+    "milestone": "m9",
+    "hash": "4a5cd4f96070",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eccc.weizmann.ac.il/report/2001/057",
     "milestone": "m5",
     "hash": "67106331b95b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eccc.weizmann.ac.il/report/2001/057",
+    "milestone": "m10",
+    "hash": "0e66529c2453",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eccc.weizmann.ac.il/report/2001/057",
     "milestone": "m6",
-    "hash": "d610651d8b6b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "392564792d53",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eccc.weizmann.ac.il/report/2001/057",
     "milestone": "completion",
     "hash": "c4c6a7c376c6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2021/1334",
+    "milestone": "m7",
+    "hash": "8f74acb5a135",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2021/1334",
     "milestone": "m1",
-    "hash": "5a1fa6db4a59",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ad25a1b183b2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2021/1334",
     "milestone": "m2",
-    "hash": "f447a1b75c7a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "023405b6c4de",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2021/1334",
     "milestone": "m3",
-    "hash": "04b73a28f1ac",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3161f6e70cee",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2021/1334",
+    "milestone": "m8",
+    "hash": "823585928125",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2021/1334",
     "milestone": "m4",
     "hash": "de7149da9362",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2021/1334",
+    "milestone": "m9",
+    "hash": "4a5cd4f96070",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2021/1334",
     "milestone": "m5",
     "hash": "67106331b95b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2021/1334",
+    "milestone": "m10",
+    "hash": "0e66529c2453",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2021/1334",
     "milestone": "m6",
-    "hash": "d610651d8b6b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "392564792d53",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2021/1334",
     "milestone": "completion",
     "hash": "c4c6a7c376c6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2024/856",
+    "milestone": "m7",
+    "hash": "8f74acb5a135",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2024/856",
     "milestone": "m1",
-    "hash": "5a1fa6db4a59",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ad25a1b183b2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2024/856",
+    "milestone": "m2",
+    "hash": "023405b6c4de",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2024/856",
+    "milestone": "m3",
+    "hash": "3161f6e70cee",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2024/856",
+    "milestone": "m8",
+    "hash": "823585928125",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2024/856",
+    "milestone": "m4",
+    "hash": "de7149da9362",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2024/856",
+    "milestone": "m9",
+    "hash": "4a5cd4f96070",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2024/856",
+    "milestone": "m5",
+    "hash": "67106331b95b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2024/856",
+    "milestone": "m10",
+    "hash": "0e66529c2453",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2024/856",
+    "milestone": "m6",
+    "hash": "392564792d53",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2024/856",
+    "milestone": "completion",
+    "hash": "c4c6a7c376c6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/hello_world_first",
+    "milestone": "m7",
+    "hash": "8f74acb5a135",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/hello_world_first",
+    "milestone": "m1",
+    "hash": "ad25a1b183b2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://machina-io.com/posts/hello_world_first",
     "milestone": "m2",
-    "hash": "f447a1b75c7a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "023405b6c4de",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/hello_world_first",
+    "milestone": "m3",
+    "hash": "3161f6e70cee",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/hello_world_first",
+    "milestone": "m8",
+    "hash": "823585928125",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/hello_world_first",
+    "milestone": "m4",
+    "hash": "de7149da9362",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/hello_world_first",
+    "milestone": "m9",
+    "hash": "4a5cd4f96070",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/hello_world_first",
+    "milestone": "m5",
+    "hash": "67106331b95b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/hello_world_first",
+    "milestone": "m10",
+    "hash": "0e66529c2453",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/hello_world_first",
+    "milestone": "m6",
+    "hash": "392564792d53",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/hello_world_first",
+    "milestone": "completion",
+    "hash": "c4c6a7c376c6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/circuit-specific-decryption-keys-for-fhe-part-4.html",
+    "milestone": "m7",
+    "hash": "8f74acb5a135",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/circuit-specific-decryption-keys-for-fhe-part-4.html",
+    "milestone": "m1",
+    "hash": "ad25a1b183b2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/circuit-specific-decryption-keys-for-fhe-part-4.html",
+    "milestone": "m2",
+    "hash": "023405b6c4de",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://machina-io.com/posts/circuit-specific-decryption-keys-for-fhe-part-4.html",
     "milestone": "m3",
-    "hash": "04b73a28f1ac",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3161f6e70cee",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/circuit-specific-decryption-keys-for-fhe-part-4.html",
+    "milestone": "m8",
+    "hash": "823585928125",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/circuit-specific-decryption-keys-for-fhe-part-4.html",
+    "milestone": "m4",
+    "hash": "de7149da9362",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/circuit-specific-decryption-keys-for-fhe-part-4.html",
+    "milestone": "m9",
+    "hash": "4a5cd4f96070",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/circuit-specific-decryption-keys-for-fhe-part-4.html",
+    "milestone": "m5",
+    "hash": "67106331b95b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/circuit-specific-decryption-keys-for-fhe-part-4.html",
+    "milestone": "m10",
+    "hash": "0e66529c2453",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/circuit-specific-decryption-keys-for-fhe-part-4.html",
+    "milestone": "m6",
+    "hash": "392564792d53",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/circuit-specific-decryption-keys-for-fhe-part-4.html",
+    "milestone": "completion",
+    "hash": "c4c6a7c376c6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://api.drum.lib.umd.edu/server/api/core/bitstreams/c00f1022-c150-4295-b19a-65cbd814d7d7/content",
+    "milestone": "m7",
+    "hash": "8f74acb5a135",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://api.drum.lib.umd.edu/server/api/core/bitstreams/c00f1022-c150-4295-b19a-65cbd814d7d7/content",
+    "milestone": "m1",
+    "hash": "ad25a1b183b2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://api.drum.lib.umd.edu/server/api/core/bitstreams/c00f1022-c150-4295-b19a-65cbd814d7d7/content",
+    "milestone": "m2",
+    "hash": "023405b6c4de",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://api.drum.lib.umd.edu/server/api/core/bitstreams/c00f1022-c150-4295-b19a-65cbd814d7d7/content",
+    "milestone": "m3",
+    "hash": "3161f6e70cee",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://api.drum.lib.umd.edu/server/api/core/bitstreams/c00f1022-c150-4295-b19a-65cbd814d7d7/content",
+    "milestone": "m8",
+    "hash": "823585928125",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://api.drum.lib.umd.edu/server/api/core/bitstreams/c00f1022-c150-4295-b19a-65cbd814d7d7/content",
+    "milestone": "m4",
+    "hash": "de7149da9362",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://api.drum.lib.umd.edu/server/api/core/bitstreams/c00f1022-c150-4295-b19a-65cbd814d7d7/content",
+    "milestone": "m9",
+    "hash": "4a5cd4f96070",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://api.drum.lib.umd.edu/server/api/core/bitstreams/c00f1022-c150-4295-b19a-65cbd814d7d7/content",
     "milestone": "m5",
     "hash": "67106331b95b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://api.drum.lib.umd.edu/server/api/core/bitstreams/c00f1022-c150-4295-b19a-65cbd814d7d7/content",
+    "milestone": "m10",
+    "hash": "0e66529c2453",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://api.drum.lib.umd.edu/server/api/core/bitstreams/c00f1022-c150-4295-b19a-65cbd814d7d7/content",
+    "milestone": "m6",
+    "hash": "392564792d53",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://api.drum.lib.umd.edu/server/api/core/bitstreams/c00f1022-c150-4295-b19a-65cbd814d7d7/content",
+    "milestone": "completion",
+    "hash": "c4c6a7c376c6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/io-is-not-magic-starting-points.html",
+    "milestone": "m7",
+    "hash": "8f74acb5a135",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/io-is-not-magic-starting-points.html",
+    "milestone": "m1",
+    "hash": "ad25a1b183b2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/io-is-not-magic-starting-points.html",
+    "milestone": "m2",
+    "hash": "023405b6c4de",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/io-is-not-magic-starting-points.html",
+    "milestone": "m3",
+    "hash": "3161f6e70cee",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/io-is-not-magic-starting-points.html",
+    "milestone": "m8",
+    "hash": "823585928125",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/io-is-not-magic-starting-points.html",
+    "milestone": "m4",
+    "hash": "de7149da9362",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/io-is-not-magic-starting-points.html",
+    "milestone": "m9",
+    "hash": "4a5cd4f96070",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://machina-io.com/posts/io-is-not-magic-starting-points.html",
     "milestone": "m5",
     "hash": "67106331b95b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/io-is-not-magic-starting-points.html",
+    "milestone": "m10",
+    "hash": "0e66529c2453",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/io-is-not-magic-starting-points.html",
+    "milestone": "m6",
+    "hash": "392564792d53",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/io-is-not-magic-starting-points.html",
+    "milestone": "completion",
+    "hash": "c4c6a7c376c6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.asia/2026/2547.pdf",
+    "milestone": "m1",
+    "hash": "ad25a1b183b2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol229-icalp2022/LIPIcs.ICALP.2022.28/LIPIcs.ICALP.2022.28.pdf",
+    "milestone": "m1",
+    "hash": "ad25a1b183b2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.piapark.me/pdf/what_is_io_and_its_application.pdf",
+    "milestone": "m2",
+    "hash": "023405b6c4de",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://hackmd.io/lcTACEx_Sva9-4rlQbbi0g",
+    "milestone": "m3",
+    "hash": "3161f6e70cee",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/MachinaIO/mxx/blob/5eeedcfa4fda2fff978af0bd7ba937f460169840/tests/test_gpu_lwe_nested_rns_ring_gsw_mul_bench.rs",
+    "milestone": "m3",
+    "hash": "3161f6e70cee",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/MachinaIO/mxx/blob/3bd50d9b7d4cf455a9d159ee85bff79dc10c1bcb/tests/test_gpu_diamond_io.rs",
+    "milestone": "m8",
+    "hash": "823585928125",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/MachinaIO/mxx/blob/3bd50d9b7d4cf455a9d159ee85bff79dc10c1bcb/tests/test_gpu_diamond_we.rs",
+    "milestone": "m10",
+    "hash": "0e66529c2453",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -926,20 +1750,128 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 4 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "title = \"Practical indistinguishability obfuscation for general circuits\". Reason: The title currently also describes the conditional existence theorem, which already has published proofs."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"A randomized polynomial-time compiler transforms any polynomial-size Boolean circuit into one that gives the same output on every input. If two circuits have the same size and agree on every input, every polynomial-time observer's advantage in distinguishing their compiled versions eventually falls below every inverse polynomial in the security parameter. This guarantee concerns which implementation was compiled. For some functions, inspecting any implementation reveals information that is hard to learn by querying the function alone.\". Reason: The definition omits the compiler's efficiency requirement and gives application acceptance limits in place of explaining the scope of the secrecy guarantee."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"A sealed-bid token auction with 11,103 bidders across three platforms kept bid quantities private while computing the clearing price. Its encrypted-contract protocol relies on a quorum of key holders for decryption, however fast the computation becomes. With secure obfuscation, encrypted computation and proof verification, anyone could release just the result a contract authorizes. Users would still rely on the blockchain's validators and on at least one honest participant in the one-time setup.\". Reason: The current paragraph quantifies the cost of one prototype but leaves out the scale of a real use and the continuing dependence on decryption-key holders."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by PSE, December 2025 Newsletter, 2025: \"we presented our roadmap toward practical iO.\". Reason: PSE explicitly names the confidential-contract goal, whereas the existing Ethereum Foundation grant statement concerns local mixing and an AES contest."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"Searches of programme, standards and cryptography workshop materials found no institutional statement rejecting practical general-circuit iO as a goal.\". Reason: Impossibility results for virtual-black-box obfuscation concern a stronger guarantee and do not establish institutional opposition to practical iO."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after None: \"A Boolean-formula obfuscator generates and evaluates 8-, 12- and 16-bit point functions.\". Reason: The 2014 Boolean-formula benchmark supplies an executable laboratory demonstration more than a decade before the Diamond iO prototype."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Under explicit assumptions, prove that a randomized polynomial-time obfuscator preserves the output of every polynomial-size Boolean circuit on every input. For every pair of equivalent circuit families with matching size, input length and output length at each security parameter, prove that their obfuscations are computationally indistinguishable.\"; threshold_quote = \"Then, (subexponentially secure) indistinguishability obfuscation for all polynomial-size circuits exists.\"; threshold_ref = 8; refs = [6, 8]. Reason: The criterion currently incorporates the date, assumptions and conclusion of one qualifying theorem into the test for every construction."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: title = \"A Diamond iO prototype evaluates a circuit with one external input bit and passes its identity check.\"; criterion = \"Generate and execute the prototype circuit with one external input bit and public multiplicative depth zero. For the correctness check, set the public circuit to the identity function and verify that evaluation returns the binary key sampled by the obfuscator.\"; threshold_quote = \"verifying that the output of the evaluation matches the hardcoded key sampled by the obfuscator.\"; threshold_ref = 9; refs = [9]. Reason: The identity check concerns the sampled key, and the published timings and hardware describe one result rather than a passing threshold."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: title = \"A circuit multiplies two fully homomorphic encryption ciphertexts over BGG+ encodings.\"; criterion = \"Run the entire ciphertext-multiplication circuit for a lattice-based fully homomorphic encryption scheme on BGG+ key-homomorphic encodings. The run must compute the ciphertext product, including the operations that assemble it from the underlying modular products.\"; set_by = \"Machina iO, FHE Multiplication over Key-Homomorphic Encodings and Challenge 1.\"; threshold_quote = \"Practical implementation of FHE evaluation over BGG+ encodings\"; threshold_ref = 1; refs = [1, 10, 11]. Reason: The existing criterion mixes the full ciphertext-multiplication test with measurements of one modular multiplication and extrapolations from individual gates."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m3: \"A blind pseudorandom function over an encrypted key has implementable lattice parameters.\". Reason: The roadmap defines an intermediate blind-function implementation whose parameters can be assessed before a full evaluation is affordable."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m4: \"A proof verifier works over key-homomorphic encodings with a matching prover.\". Reason: The roadmap requires a working proof verifier and corresponding prover independently of the input-scaling demonstration."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m5: \"A witness-encryption demonstration releases an embedded message if and only if a proof verifies.\". Reason: Releasing a fixed message on a valid proof is a distinct application demonstration before decrypting a supplied ciphertext."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m6: criterion = \"Execute the obfuscated verification-and-decryption circuit on ciphertexts and a proof that the specified Ethereum contract authorized their decryption. Return the corresponding plaintexts when the proof verifies and withhold them when verification fails.\"; set_by = \"Machina iO's Root iO protocol and the conditional-decryption application listed beyond the roadmap through Q2 2027.\"; threshold_quote = \"outputs their plaintexts only if the proof is valid.\"; threshold_ref = 1; refs = [1, 2, 11]. Reason: The roadmap places conditional decryption beyond its six scheduled milestones, and the criterion currently includes a verdict about execution."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "structure = parallel. Reason: The roadmap joins independent input-scaling and proof-verification work at witness encryption, so a single prerequisite chain misstates their dependency."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Applied 14 of 14 proposed operations from CSC-09-revise-20261121T154419804343Z; now version 2."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m7, m1, m2, m3, m8, m9, m10, m6."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 6 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 7 found, 0 not found, 2 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "definition is 540 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 7 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 9 candidates returned, 0 dropped as sources already used, 9 to judge."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 7 of 9 new candidates, without search. Skipped: 3 no readable saved copy. Dropped rows: 1 not relevant. Replaced 6 earlier rows. Added 15 results: 9 from sources already used, 6 from newly found sources."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 6 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 13 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-15"
- },
- "review": {
-  "state": "published",
-  "note": null,
-  "into": null,
-  "at": "2026-11-15",
-  "log": [
-   {
-    "date": "2026-11-15",
-    "state": "published"
-   }
-  ]
+  "results_run": "2026-11-21"
  }
 }
