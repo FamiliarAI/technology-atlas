@@ -398,8 +398,10 @@
   "title": "Proof-producing program transformation",
   "definition": "Tools refactor or migrate existing software systems while automatically producing proofs that an independent checker accepts. The proofs establish observational equivalence—matching modeled external behavior—or a stated refinement, which permits only behavior allowed by the source semantics.",
   "goal": {
-   "need": "In a three-year study published in 2011, Csmith researchers reported more than 325 previously unknown C-compiler bugs. Every compiler tested crashed and silently generated incorrect code on some valid inputs. These findings motivate checking that transformations preserve behavior beyond compiling successfully or passing fixed tests.",
+   "need": "In 2019, a U.S. student-aid system written in about a million lines of COBOL supported more than 20 million applications a year. Its operators wanted to move away from COBOL. When maintainers replace code in stages, comparing old and new outputs can miss a change on an untested input. A preservation proof lets them establish that a replacement keeps the behavior its callers rely on for every input covered by the proof. That assurance depends on the model capturing interactions such as file access and record locking.",
    "need_refs": [
+    18,
+    8,
     1
    ],
    "figures": null,
@@ -409,7 +411,7 @@
      "year": "2020",
      "quote": "V-SPELLS tools will enable developers to deliver assured incremental modernization of legacy systems",
      "context": null,
-     "ref": 2,
+     "ref": 1,
      "checked": true
     },
     {
@@ -417,7 +419,7 @@
      "year": "2024",
      "quote": "We need formal modeling tools that allow us to reason about “equivalence” of the translated code.",
      "context": "This passage concerns translating concurrent C programs into Rust.",
-     "ref": 3,
+     "ref": 2,
      "checked": null
     }
    ]
@@ -431,9 +433,9 @@
    "threshold_ref": null,
    "basis": "Searches of DARPA V-SPELLS and TRACTOR goals and metrics, verified-compilation definitions, and certified-refactoring literature found no joint completion test for this capability. This test is bounded by declared semantics. The sources provide no agreed numerical cutoff for transformation breadth, recurring proof cost, or adoption effort.",
    "refs": [
+    1,
     2,
-    3,
-    4
+    3
    ],
    "threshold_checked": null
   },
@@ -444,13 +446,13 @@
    {
     "id": "m1",
     "title": "An executable refactoring is derived from a machine-checked preservation theorem.",
-    "criterion": "For every program satisfying a refactoring rule’s preconditions, its output is behaviorally equivalent to its input; the executable refactoring is generated from a machine-checked correctness theory. Sultana and Thompson’s 2008 prototype generated Haskell code for one refactoring over PCF, a typed functional calculus extended here with sum and unit types.",
+    "criterion": "An executable refactoring is generated from a machine-checked theory proving that, for every program satisfying the rule’s preconditions, the transformed program is behaviorally equivalent to the original.",
     "set_by": "Certified-programming convention, instantiated by Sultana and Thompson in A Certified Refactoring Engine, Sections 11.1–11.4; the demonstrated language is restricted.",
     "set_by_kind": "community_convention",
     "threshold_quote": "Software produced in this manner – that is, generated from a machine-checked theory proving its correctness – is said to be certified",
-    "threshold_ref": 5,
+    "threshold_ref": 4,
     "refs": [
-     5
+     4
     ],
     "status": "active",
     "replaced_by": [],
@@ -459,14 +461,14 @@
    {
     "id": "m2",
     "title": "An optimizing compiler has a machine-checked preservation theorem for its composed passes.",
-    "criterion": "The compiler’s composed passes have a machine-checked preservation theorem under explicit source and target semantics. CompCert version 3.18, dated 31 August 2026, supplies this for its C subset through assembly generation. Its relation permits reducing source nondeterminism and replacing undefined behavior; it does not require equality of all source and target behavior sets.",
+    "criterion": "A machine-checked theorem establishes that whenever the composed compiler passes produce a target program, its observable behavior satisfies the declared preservation relation to the source program under the formal semantics of both languages.",
     "set_by": "Verified-compilation convention, instantiated by Inria and AbsInt’s CompCert development and explained in AbsInt’s The structure of CompCert.",
     "set_by_kind": "community_convention",
     "threshold_quote": "The property that is formally verified is semantic preservation between the input code and output code of every pass.",
-    "threshold_ref": 7,
+    "threshold_ref": 6,
     "refs": [
-     6,
-     7
+     5,
+     6
     ],
     "status": "active",
     "replaced_by": [],
@@ -475,14 +477,14 @@
    {
     "id": "m3",
     "title": "A formally verified validator accepts the result of an untrusted program transformation.",
-    "criterion": "A validator has a machine-checked theorem that accepting a source/target pair implies the declared preservation relation; an accepted transformation instantiates that theorem. Tristan and Leroy’s 2009 Coq-verified validator establishes this for lazy code motion, an optimization that can move computations across loops.",
+    "criterion": "A validator accepts a source program and the output of an untrusted transformation. A machine-checked soundness theorem establishes that every pair it accepts satisfies the declared preservation relation.",
     "set_by": "Verified translation-validation convention, formalized by Leroy in Formal verification of a realistic compiler, Section 2.2, equation 7.",
     "set_by_kind": "community_convention",
     "threshold_quote": "∀S, C, Validate(S, C) = true =⇒ S ≈ C",
-    "threshold_ref": 4,
+    "threshold_ref": 3,
     "refs": [
-     4,
-     8
+     3,
+     7
     ],
     "status": "active",
     "replaced_by": [],
@@ -491,13 +493,13 @@
    {
     "id": "m4",
     "title": "A migrated legacy program’s preservation and companion correctness proofs pass an independent kernel.",
-    "criterion": "A migrated program’s preservation theorem and companion safety/termination theorem pass the proof assistant’s kernel under explicit assumptions. A November 2026 preprint reports 16 certified translations of 8 CardDemo COBOL batch programs, totaling 2,878 source lines, into Rust and Java. The front ends, semantics, statement generator and Aeneas extraction remain trusted; file opens are assumed to succeed. Proof construction required program-specific work. The report is not peer reviewed.",
+    "criterion": "For a migrated legacy program, a proof assistant’s kernel accepts a theorem relating the source and target behaviors on the stated input domain. It also accepts a companion theorem establishing source safety, target termination and the specified relation between outcomes under the stated assumptions.",
     "set_by": "Mechanized-verification convention of kernel-checked proofs; Tomar’s Sections 2–5 instantiate the certification test for COBOL batch-program migrations.",
     "set_by_kind": "community_convention",
     "threshold_quote": "We call a translation certified when its migration theorem and its composite theorem are proved",
-    "threshold_ref": 9,
+    "threshold_ref": 8,
     "refs": [
-     9
+     8
     ],
     "status": "active",
     "replaced_by": [],
@@ -506,19 +508,35 @@
    {
     "id": "m5",
     "title": "A deployed system’s complete modernization has an independently checked preservation proof.",
-    "criterion": "A proof accepted by an independent checker relates a deployed system’s complete refactored or migrated implementation to its original, including modeled external interfaces. Per-system proof engineering is allowed. The cited examples are narrower: the COBOL report certifies selected batch-program migrations; Scylla’s 2026 C-to-Rust paper reports case studies but explicitly lacks formal guarantees of translation correctness.",
+    "criterion": "An independent checker accepts a preservation proof relating a deployed system’s complete refactored or migrated implementation to the original, including its modeled external interfaces. The proof may be constructed specifically for that system.",
     "set_by": "Atlas; no external whole-system modernization stage with this proof requirement was found. This is the precursor to completion, allowing bespoke proof construction.",
     "set_by_kind": "atlas",
     "threshold_quote": null,
     "threshold_ref": null,
     "refs": [
-     2,
-     9,
-     10
+     1,
+     8,
+     9
     ],
     "status": "active",
     "replaced_by": [],
     "threshold_checked": null
+   },
+   {
+    "id": "m6",
+    "title": "An optimization pass emits a preservation proof for its output that a separate checker accepts.",
+    "criterion": "For an individual run, the optimization pass produces the transformed program and a proof relating it to the input. A separate checker accepts the proof for that input and output under the declared program semantics.",
+    "set_by": "The credible-compilation convention defined by Martin Rinard and implemented for LLVM optimizations in Crellvm.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "the compiler generates a proof that the transformed program correctly implements the input program.",
+    "threshold_ref": 19,
+    "refs": [
+     19,
+     15
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
    }
   ],
   "measures": [],
@@ -531,20 +549,6 @@
   "references": [
    {
     "id": 1,
-    "kind": "journal",
-    "url": "https://www.flux.utah.edu/paper/yang-pldi11",
-    "doi": "10.1145/1993498.1993532",
-    "title": "Finding and Understanding Bugs in C Compilers",
-    "authors": "Yang X, Chen Y, Eide E, Regehr J",
-    "container": "Proceedings of the 32nd ACM SIGPLAN Conference on Programming Language Design and Implementation",
-    "year": "2011",
-    "volume": null,
-    "issue": null,
-    "pages": "283-294",
-    "citation_source": "crossref"
-   },
-   {
-    "id": 2,
     "kind": "report",
     "url": "https://imlive.s3.amazonaws.com/Federal%20Government/ID295011957732437144315448100587755673337/HR001120S0058-Amendment-02.pdf",
     "doi": null,
@@ -558,7 +562,7 @@
     "citation_source": "model"
    },
    {
-    "id": 3,
+    "id": 2,
     "kind": "report",
     "url": "https://govtribe.com/file/government-file/darpa-ps-24-20-dot-pdf",
     "doi": null,
@@ -572,7 +576,7 @@
     "citation_source": "model"
    },
    {
-    "id": 4,
+    "id": 3,
     "kind": "journal",
     "url": "https://xavierleroy.org/publi/compcert-CACM.pdf",
     "doi": "10.1145/1538788.1538814",
@@ -586,7 +590,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 5,
+    "id": 4,
     "kind": "report",
     "url": "https://www.cs.kent.ac.uk/pubs/2008/2778/content.pdf",
     "doi": null,
@@ -600,7 +604,7 @@
     "citation_source": "model"
    },
    {
-    "id": 6,
+    "id": 5,
     "kind": "web",
     "url": "https://compcert.org/doc/index.html",
     "doi": null,
@@ -614,7 +618,7 @@
     "citation_source": "model"
    },
    {
-    "id": 7,
+    "id": 6,
     "kind": "web",
     "url": "https://www.absint.com/compcert/structure.htm",
     "doi": null,
@@ -628,7 +632,7 @@
     "citation_source": "model"
    },
    {
-    "id": 8,
+    "id": 7,
     "kind": "journal",
     "url": "https://xavierleroy.org/publi/validation-LCM.pdf",
     "doi": "10.1145/1542476.1542512",
@@ -642,7 +646,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 9,
+    "id": 8,
     "kind": "preprint",
     "url": "https://www.mefyi.com/papers/proof-carrying-modernization/proof-carrying-modernization.pdf",
     "doi": "10.5281/zenodo.23996134",
@@ -656,7 +660,7 @@
     "citation_source": "model"
    },
    {
-    "id": 10,
+    "id": 9,
     "kind": "journal",
     "url": "https://arxiv.org/html/2412.15042v2",
     "doi": "10.1145/3798229",
@@ -670,7 +674,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 11,
+    "id": 10,
     "kind": "web",
     "url": "https://compcert.inria.fr/doc/index.html",
     "doi": null,
@@ -684,7 +688,7 @@
     "citation_source": "model"
    },
    {
-    "id": 12,
+    "id": 11,
     "kind": "journal",
     "url": "https://weizmann.elsevierpure.com/en/publications/translation-validation-2/",
     "doi": null,
@@ -698,7 +702,7 @@
     "citation_source": "model"
    },
    {
-    "id": 13,
+    "id": 12,
     "kind": "preprint",
     "url": "https://arxiv.org/abs/2505.04852",
     "doi": null,
@@ -712,7 +716,7 @@
     "citation_source": "model"
    },
    {
-    "id": 14,
+    "id": 13,
     "kind": "journal",
     "url": "https://www.conference-publishing.com/toc/OOPSLAA26/abs",
     "doi": null,
@@ -726,7 +730,7 @@
     "citation_source": "model"
    },
    {
-    "id": 15,
+    "id": 14,
     "kind": "journal",
     "url": "https://kar.kent.ac.uk/71304/1/paper.pdf",
     "doi": "10.1017/S0956796818000229",
@@ -740,7 +744,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 16,
+    "id": 15,
     "kind": "book",
     "url": "https://sf.snu.ac.kr/publications/crellvm.pdf",
     "doi": "10.1145/3192366.3192377",
@@ -754,7 +758,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 17,
+    "id": 16,
     "kind": "journal",
     "url": "https://arxiv.org/pdf/1607.02226",
     "doi": "10.4204/EPTCS.216.3",
@@ -768,7 +772,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 18,
+    "id": 17,
     "kind": "book",
     "url": "https://www.iog.io/api/research/pdf/E5NH4Z64",
     "doi": "10.1145/3759163.3760427",
@@ -780,100 +784,87 @@
     "issue": null,
     "pages": "1-20",
     "citation_source": "crossref"
+   },
+   {
+    "id": 18,
+    "kind": "report",
+    "url": "https://www.gao.gov/assets/gao-19-471.pdf",
+    "doi": null,
+    "title": "Information Technology: Agencies Need to Develop Modernization Plans for Critical Legacy Systems",
+    "authors": "United States Government Accountability Office",
+    "container": "GAO-19-471",
+    "year": "2019",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 19,
+    "kind": "report",
+    "url": "https://dspace.mit.edu/entities/publication/d040e1b8-130f-4c6c-9be7-78103b122e3a",
+    "doi": null,
+    "title": "Credible Compilation",
+    "authors": "Martin C. Rinard",
+    "container": "Computer Science (CS)",
+    "year": "2003",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 20,
+    "kind": "report",
+    "url": "https://ssrg.ece.vt.edu/papers/ccs24.pdf",
+    "doi": "10.1145/3658644.3690244",
+    "title": "Verifiably Correct Lifting of Position-Independent x86-64 Binaries to Symbolized Assembly",
+    "authors": "Verbeek F, Naus N, Ravindran B",
+    "container": "Proceedings of the 2024 on ACM SIGSAC Conference on Computer and Communications Security",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": "2786-2798",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 21,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2611.18055v1",
+    "doi": null,
+    "title": "DeCompCert: A Verified Decompiler for CompCert-Generated AArch64",
+    "authors": "Priya S, Shivakumar BA, Gilray T, Micinski K",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 22,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2610.30188v1",
+    "doi": null,
+    "title": "Agentic Verified Optimization of Real-World Software",
+    "authors": "Ye Z, Ghai U, Qin Z, Song D, Kong S",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
    }
   ],
   "milestone_order": [
    "m1",
    "m2",
    "m3",
+   "m6",
    "m4",
    "m5"
   ],
   "results": [
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "met",
-    "finding": "CompCert 3.18 proves semantic preservation for its composed compiler passes from a C subset to assembly.",
-    "detail": "The project page lists explicit source and target semantics, individual pass proofs, and whole-compiler semantic preservation theorems.",
-    "quote": "Compiler\n: composing the passes together;\nwhole-compiler semantic preservation theorems.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": false,
-    "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "met",
-    "finding": "CompCert's 20-pass pipeline includes frontend and backend passes with a composed semantic-preservation proof.",
-    "detail": "Coq checks the proof under explicit C-to-assembly semantics. The relation permits reduced source nondeterminism and replacement of undefined behavior; the verified compilation passes end at assembly.",
-    "quote": "The CompCert frontend and backend compilation passes are all formally proved \nto be free of miscompilation errors; as a consequence, so is their composition.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Valex validates 2 stages of the CompCert toolchain: assembling and linking.",
-    "detail": "The page describes checks against abstract assembly but does not report a machine-checked soundness theorem for Valex or a particular accepted transformation.",
-    "quote": "In order to bridge this gap AbsInt has developed a tool for automatic translation validation, \ncalled Valex. It validates the assembling and linking stages à posteriori.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Translation validation is illustrated for SIGNAL-to-C compilation; the number of programs is not stated.",
-    "detail": "The source describes an automatic refinement-checking method but does not state that the validator has a machine-checked correctness theorem or that a particular transformation was accepted.",
-    "quote": "These, and other ingredients are elaborated in this paper, in which we illustrate the. new approach in a most challenging case. We consider a translation (compilation) from the synchronous multi-clock data-flow language SIGNAL to asynchronous (sequential) C-code.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m5",
-    "case": null,
-    "verdict": "partial",
-    "finding": "PR2 rewrote raw pointers in translations of 28 real-world C projects.",
-    "detail": "The work targets individual functions and retains some raw pointers. It reports test-based and manual checks, but no formal preservation guarantee or independently checked proof; deployment is not established.",
-    "quote": "We implement PR 2 and evaluate it using\ngpt-4o-mini on 28 real-world C projects.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "partial",
-    "finding": "One CBPV transformation to commuting conversion normal form has a preservation result mechanized in Lean 4.",
-    "detail": "The source does not say that an executable refactoring was generated from the correctness theory. It states preservation of evaluation results for well-typed translated programs.",
-    "quote": "In this work, we identify the commuting conversions of CBPV, define a\ncommuting conversion normal form\n(CCNF) for CBPV, present a single-pass transformation into CCNF based on A-normalization, and prove that well-typed, translated programs evaluate to the same result.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
    {
     "milestone": "m5",
     "case": null,
@@ -884,7 +875,7 @@
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
-    "ref": 10,
+    "ref": 9,
     "judged_by": "gpt-6.1-terra",
     "judged_on": "2026-11-15"
    },
@@ -898,637 +889,1106 @@
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
-    "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "met",
-    "finding": "One PCF refactoring was proved behavior-preserving and generated as executable Haskell code.",
-    "detail": "The theorem covers well-typed inputs; the refactoring returns the input unchanged when its checks fail. The paper reports a book chapter reviewed by anonymous referees.",
-    "quote": "This algorithm was veriﬁed using the theorem proved in earli er work, and\nHaskell code for the refactoring – and the other deﬁnitions i t relies on – was\ngenerated using Isabelle’s new code generation framework.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": false,
-    "ref": 5,
+    "ref": 9,
     "judged_by": "gpt-6.1-terra",
     "judged_on": "2026-11-15"
    },
    {
     "milestone": "m2",
     "case": null,
+    "verdict": "met",
+    "finding": "CompCert 3.18 reports Coq-proved whole-compiler semantic preservation for one optimizing compiler with five documented target architectures.",
+    "detail": "The page displays the PowerPC versions of architecture-specific modules and identifies AArch64, ARM, x86, and RISC-V versions in the source distribution.",
+    "quote": "The particularity of this compiler is that it is written mostly within\nthe specification language of the Coq proof assistant, and its\ncorrectness --- the fact that the generated assembly code is\nsemantically equivalent to its source program --- was entirely proved\nwithin the Coq proof assistant.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
     "verdict": "partial",
-    "finding": "CakeML version 2: one optimizing compiler with a machine-checked correctness theorem for five target architectures.",
-    "detail": "The composed theorem permits an out-of-memory termination after a prefix of the source behavior. That can add behavior beyond those allowed by the source semantics, so it does not establish the stated equivalence or refinement.",
-    "quote": "Our overall correctness theorem (stated in Section 10) inherits the weaker conclusion\ninvolving extend with resource limit.",
+    "finding": "CompCert lists a posteriori validation and a Coq correctness proof for one RTL-to-LTL register allocation pass.",
+    "detail": null,
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "CompCert’s Coq-checked C-to-assembly preservation theorem covers one optimizing compiler with 12 backend passes.",
+    "detail": "The verified composition ends at generated assembly. Assembling and linking are outside the theorem’s scope.",
+    "quote": "Then, the diagrams are composed together, \nestablishing semantic preservation for the whole compiler.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 6,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Valex checks abstract assembly against linked PowerPC executables from 2 toolchains. No evaluated sample size is reported.",
+    "detail": "The two supported configurations use the Diab assembler and linker or GCC 4.8 with GNU binutils 2.24.",
+    "quote": "Currently Valex can check linked PowerPC executables that have been produced \nfrom C source code by the CompCert C compiler using the Diab assembler and\nlinker from Wind River Systems, or the GCC tool chain (version 4.8, together with GNU binutils 2.24).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 6,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Automatic translation validation is illustrated for 1 translation setting, SIGNAL to sequential C. The program-pair count is unreported.",
+    "detail": "The record identifies the publication as a peer-reviewed conference article. The journal-only peer_reviewed flag is therefore false.",
+    "quote": "We consider a translation (compilation) from the synchronous multi-clock data-flow language SIGNAL to asynchronous (sequential) C-code.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Additional tests found 2 incorrect PR 2 pointer rewrites among 59 examined outside existing test coverage.",
+    "detail": "The checks compare behavior only on inputs exercised by the tests. The baseline for pointer rewriting is C2Rust-generated Rust.",
+    "quote": "in 59 total cases we found only 2 in-\ncorrect pointer rewrites, corresponding to a 96.61%\ncorrectness rate among inspected cases",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "DeCo proves equal results for incrementalized execution and full reevaluation in Lean and demonstrates an executable across five application areas.",
+    "detail": "The five application areas are linear algebra, relational algebra, dictionaries, trees, and conflict-free replicated data types. The abstract gives no program count.",
+    "quote": "We mechanized our work in Lean and proved it sound, meaning incrementalized execution computes the same result as full reevaluation.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
-    "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The call-by-push-value normalization theorem covers one pass and proves equal evaluation results for well-typed programs.",
+    "detail": "The result is a theorem about the pass. The abstract gives no empirical program count.",
+    "quote": "present a single-pass transformation into CCNF based on A-normalization, and prove that well-typed, translated programs evaluate to the same result.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "HACL★ case study (one library): 14,018 lines of C from verified Low★ sources were translated to safe Rust.",
+    "detail": "The authors repaired proofs at the Low★ level. They evaluated the Rust output with functional tests and left a mechanical proof of translation correctness to future work.",
+    "quote": "We now report on our porting effort for the following algorithms: Chacha20Poly1305, Curve25519,\nP256, SHA2, Poly1305, and supporting bignum libraries. These represent different flavors of code,\ntotalling 14,018 lines of C, and cover almost all usage patterns present in HACL★.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "In one HACL★ case study, Scylla translated 14,018 lines of generated C to safe Rust after Low★ source and proof updates.",
+    "detail": "The proof updates apply to the Low★ source. The paper evaluates the Rust translation by compilation and functional testing and leaves a formal proof of translation correctness to future work.",
+    "quote": "We now report on our porting effort for the following algorithms: Chacha20Poly1305, Curve25519,\nP256, SHA2, Poly1305, and supporting bignum libraries. These represent different flavors of code,\ntotalling 14,018 lines of C, and cover almost all usage patterns present in HACL★.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "One verified PCF+1 refactoring, “enlarge deﬁnition type,” generated four compilable Haskell modules.",
+    "detail": "The authors wrote executable versions of the logical side-condition checks and proved them equivalent before generating Haskell from the verified definition.",
+    "quote": "Once the algorithm was proved to be correct, the code generat ion framework by\nHaftmann and Nipkow [10] – described in§11.2.1 – was used to generate Haskell\ncode from the algorithm’s deﬁnition in Isabelle/HOL.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 4,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "CakeML’s composed compiler has a HOL4 preservation theorem covering 5 target architectures.",
+    "detail": "The theorem assumes correctly installed code and data, compatible compiler and machine configurations, and matching foreign-function behavior.",
+    "quote": "behave exactly according to the observable behaviour of the source\nsemantics, or\n• behave the same as the source up to some point at which it terminates with\nan out-of-memory error.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "CakeML verifies 1 register-colouring checker for all accepted candidate colourings.",
+    "detail": "The coloured program is constructed by applying the checked mapping. No sample of independently supplied transformed programs is reported.",
+    "quote": "The veriﬁcation of this checker shows that any\ncolouring function that passes this checker also satisﬁes colouring ok.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "met",
-    "finding": "Crellvm validated two LLVM optimizations across benchmarks and five open-source projects using a Coq-verified proof checker.",
-    "detail": "The verified preservation relation is behavior refinement. The guarantee applies when the checker uses verified inference rules; the LLVM IR comparison tool remains unverified.",
-    "quote": "Then we performed validation of the\ntwo optimizations for standard benchmarks, five large\nopen-source projects and test files randomly generated\nby CSmith.",
+    "finding": "Crellvm’s ERHL checker has a Coq-checked refinement guarantee for accepted LLVM IR pairs using verified rules, including 9 verified non-arithmetic rules.",
+    "detail": "Acceptance using unverified arithmetic rules falls outside the theorem’s guarantee. The separate llvm-diff comparison against stock LLVM output was also unverified. The source appeared in peer-reviewed PLDI conference proceedings.",
+    "quote": "we\nformally verified the soundness of the proof checker in Coq",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
-    "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "met",
+    "finding": "Crellvm’s separate checker accepted generated proofs for 74.0% of approximately 2,205,000 LLVM optimization steps in the benchmark experiment.",
+    "detail": "The aggregate includes instcombine checks using unverified arithmetic inference rules. Register promotion provides successful runs in the verified configuration. The evaluation checked intermediate IR translations.",
+    "quote": "Out of 2,205K validations in total, 1632K (74.0%) are suc-\ncessfully validated.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Lean kernel replay passed for all 16 AWS CardDemo batch translations.",
+    "detail": "The migration theorems rely on trusted front ends and a trusted statement generator.",
+    "quote": "All 16 theorems are proved, use only Lean’s standard axioms and pass the kernel replay\nand the mutation test (Section 5).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "met",
-    "finding": "All 16 translations of 8 CardDemo COBOL programs, totaling 2,878 source lines, have certified preservation and companion proofs.",
-    "detail": "Proofs are checked by Lean’s kernel under explicit input assumptions. Front ends, semantics, statement generation and Aeneas extraction remain trusted; file opens are assumed successful. Proofs required program-specific work.",
+    "finding": "All 16 AWS CardDemo batch translations have kernel-checked preservation and companion correctness proofs.",
+    "detail": "The proofs assume bounded, well-formed records and successful file opens. Java termination is proved on a later version of JimpleLean. Rust proofs use trusted Aeneas extraction.",
     "quote": "We call a translation\ncertifiedwhen its migration theorem and its composite theorem are proved; all 16 translations\nare certified.",
     "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "partial",
-    "finding": "One verified CakeML compiler performs optimizations across 12 intermediate languages.",
-    "detail": "The compiler is bootstrapped within HOL4, and most transitions have behavioral preservation theorems. The paper does not state that an executable refactoring is generated from a correctness theory; the overall theorem also permits out-of-memory termination.",
-    "quote": "We bootstrap the compiler within the logic so that it can be used both inside and\noutside of the logic.",
-    "checked": true,
     "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Crellvm generated and checked proofs for 2 major LLVM optimizations.",
-    "detail": "The Coq-verified checker establishes refinement for accepted translations, but the paper does not report a preservation theorem for composed compiler passes through assembly generation.",
-    "quote": "As case studies, we applied our\napproach to two major optimizations of LLVM: register pro-\nmotion (mem2reg) and global value numbering (gvn), having\nfound four new miscompilation bugs (two in each).",
-    "checked": true,
-    "confirmed": false,
     "peer_reviewed": false,
-    "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m5",
     "case": null,
     "verdict": "partial",
-    "finding": "Lean checked preservation proofs for all 16 translations of 8 standalone COBOL batch programs.",
-    "detail": "The proofs cover selected programs from the CardDemo application, not a complete modernization of a deployed system. They rely on modeled interfaces, bounded inputs, and other stated assumptions.",
-    "quote": "For the eight standalone batch programs of AWS CardDemo covered by that front end, all 16 translations are proved, as equivalences for Rust and as refinements with partial correctness for Java.",
+    "finding": "Lean checked preservation for all 16 translations in the AWS CardDemo standalone batch study.",
+    "detail": "CardDemo’s online CICS programs are outside the study. File I/O is modeled as in-memory records, with real dataset opens, record locking and job control outside the theorems.",
+    "quote": "For the eight standalone batch programs\nof AWS CardDemo covered by that front end, all 16 translations are proved, as equivalences for\nRust and as refinements with partial correctness for Java.",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
-    "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "One C global-variable renaming refactoring was proved to preserve program behaviors under stated conditions.",
-    "detail": "The Coq proof covers successful AST transformations, with behaviors equal up to renaming in traces and assumptions about external code and inline assembly. The text does not state that the executable refactoring was generated from the correctness theory; parsing and pretty-printing are outside the proof.",
+    "finding": "One CompCert C refactoring rule, global-variable renaming, has Coq-checked behavior preservation for all qualifying successful runs.",
+    "detail": "The proof covers the syntax-tree transformation. Lexing, parsing, and pretty-printing are outside that proof. The supplied arXiv copy carries the VPT 2016 proceedings DOI.",
     "quote": "Under the conditions already discussed (hypothesesEXT1, EXT2 and RG in Fig. 2), and when the renam-\ning operations succeeds, the transformed program has the same set of possible behaviors as the original\nprogram, up to renaming in the traces.",
     "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 17,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "partial",
-    "finding": "CakeML version 2: one optimizing compiler has an HOL4-checked end-to-end correctness theorem for 5 target architectures.",
-    "detail": "The theorem allows compiled programs to terminate with an out-of-memory error after a prefix of the source behavior. This extends the source behavior set, so it does not establish the required equivalence or refinement under the stated source semantics.",
-    "quote": "Our overall correctness theorem (stated in Section 10 ) inherits the weaker conclusion\ninvolving extend_with_resource_limit.",
-    "checked": true,
     "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "peer_reviewed": false,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "met",
-    "finding": "Plinth certifier: 1 auction contract; certificate checked with verification claims for 2 passes.",
-    "detail": "The Rocq development proves the dead-code elimination decision procedure equivalent to its translation relation and proves validator equivalence for that relation. The certificate does not establish end-to-end preservation across all compiler passes.",
+    "finding": "Plinth’s verified dead code elimination validator found 1 mismatch across 16 golden tests.",
+    "detail": "The rejected test exercised partial elimination of a datatype binding, a compiler extension outside the formal specification.",
+    "quote": "Interestingly, we discovered a mismatch between the im-\nplementation and the specification, as one of the tests failed.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For 1 Plinth auction compilation, Rocq accepted semantic preservation claims for 2 passes.",
+    "detail": "The certificate combines pass-level claims. The checked semantic claims cover dead code elimination and non-recursive let compilation.",
     "quote": "We built and type-checked the certificate with verifica-\ntion claims on two passes (dead code elimination and non-\nrecursive let compilation), which took about 14 minutes.",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
-    "ref": 18,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "One CakeML optimizing compiler has a HOL4 preservation theorem for its composed passes across five target architectures.",
+    "detail": "The theorem assumes well-formed matching configurations, correct installation, and agreement between the abstract and machine foreign-function interfaces. The assembly wrapper is outside the theorem.",
+    "quote": "Using the backend correctness theorem, we prove a top-level correctness theorem relating\nthe source semantics, the CakeML compiler, and the target semantics.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One CakeML register-colouring checker has a HOL4 soundness theorem covering every accepted colouring.",
+    "detail": "The checked artifact is the mapping from temporaries to registers. The preservation theorem concerns the program obtained by applying that mapping.",
+    "quote": "The veriﬁcation of this checker shows that\nany colouring function that passes this checker also satisﬁes colouring_ok.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One CakeML compiler self-compilation produces machine code and a HOL4 functional correctness theorem for the resulting binary.",
+    "detail": "The reported proof is for the whole bootstrap compilation. The paper establishes general correctness theorems for the constituent optimization passes.",
+    "quote": "This bootstrapping method produces a\nmachine code implementation of the compiler and also proves a theorem stating functional\ncorrectness of that machine code.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Isabelle/HOL checked equivalence modulo address relocation for the recovered basic blocks of one 36,181-instruction ferret benchmark binary and its rebuild.",
+    "detail": "The proof depends on Ghidra recovering reachable code. Runtime linking can change behavior even when the equivalence check succeeds.",
+    "quote": "The proofs\nare formalized in Isabelle/HOL [28] and fully automated.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "met",
+    "finding": "DeCompCert’s Rocq-verified checker accepted 100% of 3,173 eligible AArch64-to-C contexts with exact signatures supplied.",
+    "detail": "The guarantee begins at typed, unexpanded Asm. Parsing assembly text and establishing that inferred signatures faithfully represent the external assembly are trusted front-end obligations.",
+    "quote": "All 3,173 eligible contexts complete the connected\nAsm\n-to-\nCsyntax\nchain and recompile with CompCert, covering\napproximately 2.16 million physical lines of C.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "met",
+    "finding": "For 156 of 189 Verina functions, the optimizer emitted a faster rewrite with a Lean kernel-accepted equivalence proof.",
+    "detail": "The checker replayed each proof in a fresh environment and rejected unapproved axioms and executable substitutions. The proofs cover Lean-defined behavior, with the compiler and runtime trusted to preserve it.",
+    "quote": "On the 189 reference implementations in Verina, agents produce faster proved rewrites for 156, including algorithmic changes such as replacing exponential recursion with dynamic programming.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 22,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    }
   ],
   "judged": [
    {
     "url": "https://compcert.inria.fr/doc/index.html",
     "milestone": "m1",
-    "hash": "aa27da46672e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "62cb0ea16505",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://compcert.inria.fr/doc/index.html",
     "milestone": "m2",
-    "hash": "b59c960a7a32",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bc0b0f5db1d2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://compcert.inria.fr/doc/index.html",
     "milestone": "m3",
-    "hash": "6c720f1feb6f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "26ba0698b95f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://compcert.inria.fr/doc/index.html",
+    "milestone": "m6",
+    "hash": "cc244e17666d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://compcert.inria.fr/doc/index.html",
     "milestone": "m4",
-    "hash": "f897b5e920c4",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f61d6c78ef25",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://compcert.inria.fr/doc/index.html",
     "milestone": "m5",
-    "hash": "739ce112f9ae",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "61be69417e6a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://compcert.inria.fr/doc/index.html",
     "milestone": "completion",
     "hash": "9204f3855853",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.absint.com/compcert/structure.htm",
     "milestone": "m1",
-    "hash": "aa27da46672e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "62cb0ea16505",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.absint.com/compcert/structure.htm",
     "milestone": "m2",
-    "hash": "b59c960a7a32",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bc0b0f5db1d2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.absint.com/compcert/structure.htm",
     "milestone": "m3",
-    "hash": "6c720f1feb6f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "26ba0698b95f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.absint.com/compcert/structure.htm",
+    "milestone": "m6",
+    "hash": "cc244e17666d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.absint.com/compcert/structure.htm",
     "milestone": "m4",
-    "hash": "f897b5e920c4",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f61d6c78ef25",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.absint.com/compcert/structure.htm",
     "milestone": "m5",
-    "hash": "739ce112f9ae",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "61be69417e6a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.absint.com/compcert/structure.htm",
     "milestone": "completion",
     "hash": "9204f3855853",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://weizmann.elsevierpure.com/en/publications/translation-validation-2/",
     "milestone": "m1",
-    "hash": "aa27da46672e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "62cb0ea16505",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://weizmann.elsevierpure.com/en/publications/translation-validation-2/",
     "milestone": "m2",
-    "hash": "b59c960a7a32",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bc0b0f5db1d2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://weizmann.elsevierpure.com/en/publications/translation-validation-2/",
     "milestone": "m3",
-    "hash": "6c720f1feb6f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "26ba0698b95f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://weizmann.elsevierpure.com/en/publications/translation-validation-2/",
+    "milestone": "m6",
+    "hash": "cc244e17666d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://weizmann.elsevierpure.com/en/publications/translation-validation-2/",
     "milestone": "m4",
-    "hash": "f897b5e920c4",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f61d6c78ef25",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://weizmann.elsevierpure.com/en/publications/translation-validation-2/",
     "milestone": "m5",
-    "hash": "739ce112f9ae",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "61be69417e6a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://weizmann.elsevierpure.com/en/publications/translation-validation-2/",
     "milestone": "completion",
     "hash": "9204f3855853",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2505.04852",
     "milestone": "m1",
-    "hash": "aa27da46672e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "62cb0ea16505",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2505.04852",
     "milestone": "m2",
-    "hash": "b59c960a7a32",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bc0b0f5db1d2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2505.04852",
     "milestone": "m3",
-    "hash": "6c720f1feb6f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "26ba0698b95f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2505.04852",
+    "milestone": "m6",
+    "hash": "cc244e17666d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2505.04852",
     "milestone": "m4",
-    "hash": "f897b5e920c4",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f61d6c78ef25",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2505.04852",
     "milestone": "m5",
-    "hash": "739ce112f9ae",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "61be69417e6a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2505.04852",
     "milestone": "completion",
     "hash": "9204f3855853",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.conference-publishing.com/toc/OOPSLAA26/abs",
     "milestone": "m1",
-    "hash": "aa27da46672e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "62cb0ea16505",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.conference-publishing.com/toc/OOPSLAA26/abs",
     "milestone": "m2",
-    "hash": "b59c960a7a32",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bc0b0f5db1d2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.conference-publishing.com/toc/OOPSLAA26/abs",
     "milestone": "m3",
-    "hash": "6c720f1feb6f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "26ba0698b95f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.conference-publishing.com/toc/OOPSLAA26/abs",
+    "milestone": "m6",
+    "hash": "cc244e17666d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.conference-publishing.com/toc/OOPSLAA26/abs",
     "milestone": "m4",
-    "hash": "f897b5e920c4",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f61d6c78ef25",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.conference-publishing.com/toc/OOPSLAA26/abs",
     "milestone": "m5",
-    "hash": "739ce112f9ae",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "61be69417e6a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.conference-publishing.com/toc/OOPSLAA26/abs",
     "milestone": "completion",
     "hash": "9204f3855853",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2412.15042",
     "milestone": "m1",
-    "hash": "aa27da46672e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "62cb0ea16505",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2412.15042",
     "milestone": "m2",
-    "hash": "b59c960a7a32",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bc0b0f5db1d2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2412.15042",
     "milestone": "m3",
-    "hash": "6c720f1feb6f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "26ba0698b95f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2412.15042",
+    "milestone": "m6",
+    "hash": "cc244e17666d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2412.15042",
     "milestone": "m4",
-    "hash": "f897b5e920c4",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f61d6c78ef25",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2412.15042",
     "milestone": "m5",
-    "hash": "739ce112f9ae",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "61be69417e6a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2412.15042",
     "milestone": "completion",
     "hash": "9204f3855853",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2412.15042",
     "milestone": "m1",
-    "hash": "aa27da46672e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "62cb0ea16505",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2412.15042",
     "milestone": "m2",
-    "hash": "b59c960a7a32",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bc0b0f5db1d2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2412.15042",
     "milestone": "m3",
-    "hash": "6c720f1feb6f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "26ba0698b95f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2412.15042",
+    "milestone": "m6",
+    "hash": "cc244e17666d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2412.15042",
     "milestone": "m4",
-    "hash": "f897b5e920c4",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f61d6c78ef25",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2412.15042",
     "milestone": "m5",
-    "hash": "739ce112f9ae",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "61be69417e6a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2412.15042",
     "milestone": "completion",
     "hash": "9204f3855853",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.kent.ac.uk/pubs/2008/2778/content.pdf",
     "milestone": "m1",
-    "hash": "aa27da46672e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://kar.kent.ac.uk/71304/1/paper.pdf",
-    "milestone": "m2",
-    "hash": "b59c960a7a32",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://sf.snu.ac.kr/publications/crellvm.pdf",
-    "milestone": "m3",
-    "hash": "6c720f1feb6f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.mefyi.com/papers/proof-carrying-modernization/proof-carrying-modernization.pdf",
-    "milestone": "m4",
-    "hash": "f897b5e920c4",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "62cb0ea16505",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.kent.ac.uk/pubs/2008/2778/content.pdf",
     "milestone": "m2",
-    "hash": "b59c960a7a32",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bc0b0f5db1d2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.kent.ac.uk/pubs/2008/2778/content.pdf",
     "milestone": "m3",
-    "hash": "6c720f1feb6f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "26ba0698b95f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.kent.ac.uk/pubs/2008/2778/content.pdf",
+    "milestone": "m6",
+    "hash": "cc244e17666d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.kent.ac.uk/pubs/2008/2778/content.pdf",
     "milestone": "m4",
-    "hash": "f897b5e920c4",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f61d6c78ef25",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.kent.ac.uk/pubs/2008/2778/content.pdf",
     "milestone": "m5",
-    "hash": "739ce112f9ae",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "61be69417e6a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.kent.ac.uk/pubs/2008/2778/content.pdf",
     "milestone": "completion",
     "hash": "9204f3855853",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://kar.kent.ac.uk/71304/1/paper.pdf",
     "milestone": "m1",
-    "hash": "aa27da46672e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "62cb0ea16505",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://kar.kent.ac.uk/71304/1/paper.pdf",
+    "milestone": "m2",
+    "hash": "bc0b0f5db1d2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://kar.kent.ac.uk/71304/1/paper.pdf",
     "milestone": "m3",
-    "hash": "6c720f1feb6f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "26ba0698b95f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://kar.kent.ac.uk/71304/1/paper.pdf",
+    "milestone": "m6",
+    "hash": "cc244e17666d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://kar.kent.ac.uk/71304/1/paper.pdf",
     "milestone": "m4",
-    "hash": "f897b5e920c4",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f61d6c78ef25",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://kar.kent.ac.uk/71304/1/paper.pdf",
     "milestone": "m5",
-    "hash": "739ce112f9ae",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "61be69417e6a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://kar.kent.ac.uk/71304/1/paper.pdf",
     "milestone": "completion",
     "hash": "9204f3855853",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sf.snu.ac.kr/publications/crellvm.pdf",
     "milestone": "m1",
-    "hash": "aa27da46672e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "62cb0ea16505",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sf.snu.ac.kr/publications/crellvm.pdf",
     "milestone": "m2",
-    "hash": "b59c960a7a32",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bc0b0f5db1d2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sf.snu.ac.kr/publications/crellvm.pdf",
+    "milestone": "m3",
+    "hash": "26ba0698b95f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sf.snu.ac.kr/publications/crellvm.pdf",
+    "milestone": "m6",
+    "hash": "cc244e17666d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sf.snu.ac.kr/publications/crellvm.pdf",
     "milestone": "m4",
-    "hash": "f897b5e920c4",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f61d6c78ef25",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sf.snu.ac.kr/publications/crellvm.pdf",
     "milestone": "m5",
-    "hash": "739ce112f9ae",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "61be69417e6a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sf.snu.ac.kr/publications/crellvm.pdf",
     "milestone": "completion",
     "hash": "9204f3855853",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.mefyi.com/papers/proof-carrying-modernization/proof-carrying-modernization.pdf",
     "milestone": "m1",
-    "hash": "aa27da46672e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "62cb0ea16505",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.mefyi.com/papers/proof-carrying-modernization/proof-carrying-modernization.pdf",
     "milestone": "m2",
-    "hash": "b59c960a7a32",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bc0b0f5db1d2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.mefyi.com/papers/proof-carrying-modernization/proof-carrying-modernization.pdf",
     "milestone": "m3",
-    "hash": "6c720f1feb6f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "26ba0698b95f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.mefyi.com/papers/proof-carrying-modernization/proof-carrying-modernization.pdf",
+    "milestone": "m6",
+    "hash": "cc244e17666d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.mefyi.com/papers/proof-carrying-modernization/proof-carrying-modernization.pdf",
+    "milestone": "m4",
+    "hash": "f61d6c78ef25",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.mefyi.com/papers/proof-carrying-modernization/proof-carrying-modernization.pdf",
     "milestone": "m5",
-    "hash": "739ce112f9ae",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "61be69417e6a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.mefyi.com/papers/proof-carrying-modernization/proof-carrying-modernization.pdf",
     "milestone": "completion",
     "hash": "9204f3855853",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1607.02226",
     "milestone": "m1",
-    "hash": "aa27da46672e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "62cb0ea16505",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
-    "url": "https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E43ED3EA740D2DF970067F4E2BB9EF7D/S0956796818000229a.pdf/div-class-title-the-verified-cakeml-compiler-backend-div.pdf",
+    "url": "https://arxiv.org/pdf/1607.02226",
     "milestone": "m2",
-    "hash": "b59c960a7a32",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bc0b0f5db1d2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1607.02226",
+    "milestone": "m3",
+    "hash": "26ba0698b95f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1607.02226",
+    "milestone": "m6",
+    "hash": "cc244e17666d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1607.02226",
+    "milestone": "m4",
+    "hash": "f61d6c78ef25",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1607.02226",
+    "milestone": "m5",
+    "hash": "61be69417e6a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1607.02226",
+    "milestone": "completion",
+    "hash": "9204f3855853",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.iog.io/api/research/pdf/E5NH4Z64",
+    "milestone": "m1",
+    "hash": "62cb0ea16505",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.iog.io/api/research/pdf/E5NH4Z64",
+    "milestone": "m2",
+    "hash": "bc0b0f5db1d2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.iog.io/api/research/pdf/E5NH4Z64",
     "milestone": "m3",
-    "hash": "6c720f1feb6f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "26ba0698b95f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.iog.io/api/research/pdf/E5NH4Z64",
+    "milestone": "m6",
+    "hash": "cc244e17666d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.iog.io/api/research/pdf/E5NH4Z64",
+    "milestone": "m4",
+    "hash": "f61d6c78ef25",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.iog.io/api/research/pdf/E5NH4Z64",
+    "milestone": "m5",
+    "hash": "61be69417e6a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.iog.io/api/research/pdf/E5NH4Z64",
+    "milestone": "completion",
+    "hash": "9204f3855853",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E43ED3EA740D2DF970067F4E2BB9EF7D/S0956796818000229a.pdf/div-class-title-the-verified-cakeml-compiler-backend-div.pdf",
+    "milestone": "m1",
+    "hash": "62cb0ea16505",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E43ED3EA740D2DF970067F4E2BB9EF7D/S0956796818000229a.pdf/div-class-title-the-verified-cakeml-compiler-backend-div.pdf",
+    "milestone": "m2",
+    "hash": "bc0b0f5db1d2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E43ED3EA740D2DF970067F4E2BB9EF7D/S0956796818000229a.pdf/div-class-title-the-verified-cakeml-compiler-backend-div.pdf",
+    "milestone": "m3",
+    "hash": "26ba0698b95f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E43ED3EA740D2DF970067F4E2BB9EF7D/S0956796818000229a.pdf/div-class-title-the-verified-cakeml-compiler-backend-div.pdf",
+    "milestone": "m6",
+    "hash": "cc244e17666d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E43ED3EA740D2DF970067F4E2BB9EF7D/S0956796818000229a.pdf/div-class-title-the-verified-cakeml-compiler-backend-div.pdf",
+    "milestone": "m4",
+    "hash": "f61d6c78ef25",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E43ED3EA740D2DF970067F4E2BB9EF7D/S0956796818000229a.pdf/div-class-title-the-verified-cakeml-compiler-backend-div.pdf",
+    "milestone": "m5",
+    "hash": "61be69417e6a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E43ED3EA740D2DF970067F4E2BB9EF7D/S0956796818000229a.pdf/div-class-title-the-verified-cakeml-compiler-backend-div.pdf",
+    "milestone": "completion",
+    "hash": "9204f3855853",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ssrg.ece.vt.edu/papers/ccs24.pdf",
+    "milestone": "m5",
+    "hash": "61be69417e6a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2611.18036v1",
+    "milestone": "completion",
+    "hash": "9204f3855853",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2611.18055v1",
+    "milestone": "m3",
+    "hash": "26ba0698b95f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.30188v1",
+    "milestone": "m6",
+    "hash": "cc244e17666d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-15",
   "log": [
    {
@@ -1595,8 +2055,98 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 6 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"In 2019, a U.S. student-aid system written in about a million lines of COBOL supported more than 20 million applications a year. Its operators wanted to move away from COBOL. When maintainers replace code in stages, comparing old and new outputs can miss a change on an untested input. A preservation proof lets them establish that a replacement keeps the behavior its callers rely on for every input covered by the proof. That assurance depends on the model capturing interactions such as file access and record locking.\". Reason: The compiler bug count gives no measure of who depends on legacy software or what a preservation proof would establish for them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"An executable refactoring is generated from a machine-checked theory proving that, for every program satisfying the rule\\u2019s preconditions, the transformed program is behaviorally equivalent to the original.\". Reason: The Haskell prototype and its language belong in the evidence for the refactoring test."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"A machine-checked theorem establishes that whenever the composed compiler passes produce a target program, its observable behavior satisfies the declared preservation relation to the source program under the formal semantics of both languages.\". Reason: The CompCert release date and its particular treatment of C behavior obscure the general test for composing verified passes."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"A validator accepts a source program and the output of an untrusted transformation. A machine-checked soundness theorem establishes that every pair it accepts satisfies the declared preservation relation.\". Reason: Lazy code motion is an instance of the validator test and need not appear in its criterion."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m3: \"An optimization pass emits a preservation proof for its output that a separate checker accepts.\". Reason: The validator milestone can be met without emitting a proof for an individual transformation, leaving proof production itself untested before migration."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"For a migrated legacy program, a proof assistant\\u2019s kernel accepts a theorem relating the source and target behaviors on the stated input domain. It also accepts a companion theorem establishing source safety, target termination and the specified relation between outcomes under the stated assumptions.\". Reason: The CardDemo program count, trusted components and publication status describe one result, while the criterion needs to identify the two proof obligations."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m5: criterion = \"An independent checker accepts a preservation proof relating a deployed system\\u2019s complete refactored or migrated implementation to the original, including its modeled external interfaces. The proof may be constructed specifically for that system.\". Reason: The COBOL and Scylla case studies describe candidate results and distract from the distinction between a system-specific proof and reusable proof automation."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Applied 7 of 7 proposed operations from SWE-11-revise-20261121T164058012999Z; now version 2."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m3, m6, m4, m5."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 1 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Structural problems after applying: references never cited: [1]"
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 14 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 5 candidates returned, 0 dropped as sources already used, 5 to judge."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 4 of 5 new candidates, without search. Skipped: 6 no readable saved copy. Dropped rows: 1 partial on completion. Replaced 16 earlier rows. Added 27 results: 24 from sources already used, 3 from newly found sources."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 2 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 26 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Removed 1 references no longer cited; renumbered."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-21"
  }
 }
