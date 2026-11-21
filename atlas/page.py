@@ -2354,7 +2354,8 @@ others to null or an empty list.
 - add_statement: statement (body, year, quote, context, ref). remove_statement: index, from 0.
 - edit_text: field ("title", "definition" or "goal.need") and value; for goal.need also refs,
   the references the new text rests on.
-- add_case: value, a case name of at most 4 words. rename_case: rename_from and rename_to.
+- add_case: value, a case name of at most 4 words; only on an entry that already lists cases
+  (an entry with none cannot start them in a revision). rename_case: rename_from and rename_to.
 - add_not_found: value, one short sentence. remove_not_found: index, from 0.
 Milestone ids are permanent: never reuse one, and refer to milestones only by id.
 
