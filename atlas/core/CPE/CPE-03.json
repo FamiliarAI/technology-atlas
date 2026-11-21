@@ -280,14 +280,29 @@
   ],
   "prompt": "5e97d4b8dfc3"
  },
+ "review": {
+  "state": "published",
+  "note": null,
+  "into": null,
+  "at": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "state": "published"
+   }
+  ]
+ },
  "page": {
   "id": "CPE-03",
   "title": "Processing-in-memory with minority data-movement energy",
   "definition": "A programmable computer computes within or near stored data and runs complete database, graph-analytics, scientific-computing and neural-network applications. Data movement consumes less than 50% of whole-system execution energy for each application.",
   "goal": {
-   "need": "A 2018 study examined four Google consumer workload classes, covering Chrome, TensorFlow Mobile, VP9 playback and VP9 capture. Its characterization used an Intel Celeron N3060 Chromebook with 2 GB of DRAM, hardware performance counters and energy modeling. The attributed data-movement energy shares quantify the energy budget that memory-centric computing targets.",
+   "need": "Moving data between memory and processors accounted for an estimated 62.7% of system energy on average across web browsing, mobile neural networks, video playback and video capture. Caches help when data is reused. Faster arithmetic still leaves the cost of fetching data. For those four workloads, moving selected operations to programmable cores near memory cut modeled energy use by 49.1% on average, enough to do more of the same work per charge. The gain depends on how much data must still travel between memory banks or back to the host.",
    "need_refs": [
-    1
+    1,
+    17,
+    2,
+    8
    ],
    "figures": {
     "caption": "Data-movement energy shares in the 2018 Google consumer-workload study.",
@@ -318,12 +333,20 @@
      "checked": true
     },
     {
-     "body": "IEEE International Roadmap for Devices and Systems, Beyond CMOS committee",
+     "body": "IEEE International Roadmap for Devices and Systems, Beyond CMOS and Emerging Research Materials",
      "year": "2024",
-     "quote": "harnessing the benefits of AM for data intensive applications requires cross-layer efforts spanning from devices and circuits to architectures and applications.",
-     "context": "AM means associative memory, which searches stored values in parallel. The passage concerns in-memory search hardware.",
+     "quote": "Emerging accelerators for neural network inference are a more near-term goal",
+     "context": "The roadmap compares inference with training. During inference the weights stay fixed, so an array can multiply inputs by stored weights without repeatedly reprogramming the memory devices.",
      "ref": 3,
      "checked": true
+    },
+    {
+     "body": "Defense Advanced Research Projects Agency, Optimum Processing Technology Inside Memory Arrays",
+     "year": "2023",
+     "quote": "a fast, compact, power-efficient, and scalable compute-in-memory accelerator",
+     "context": "The programme targets arrays of memory elements that perform multiplication and circuits that sum their outputs.",
+     "ref": 18,
+     "checked": null
     }
    ]
   },
@@ -348,37 +371,34 @@
    "Processing-near-memory",
    "Computing-in-memory"
   ],
-  "milestone_structure": "sequence",
+  "milestone_structure": "parallel",
   "milestones": [
    {
     "id": "m1",
     "title": "A processing-in-memory building-block prototype functions in execution tests.",
-    "criterion": "A physical building-block prototype functions and completes its execution tests. FRANC specifies independent government testing using procedures agreed with each performer. Related near-memory evidence includes commercial programmable UPMEM processors described in the preprint revised on 7 March 2024. Related in-memory evidence includes experimentally demonstrated arithmetic and precision-correction primitives reviewed on 7 January 2026.",
-    "set_by": "DARPA FRANC, HR001117S0056 Amendment 01, section I.C.5, TA-2 final-gate table on PDF page 26. This is a programme-specific component gate. Its threshold appears in a table.",
+    "criterion": "A physical processing-in-memory component functions in execution tests. For the FRANC building-block gate, the performer and the independent U.S. government test and validation contractor agree on the procedures, the contractor runs the tests, and the final deliverable includes the results.",
+    "set_by": "DARPA FRANC, HR001117S0056 Amendment 01, section I.C.5, TA-2 Building Blocks final gate.",
     "set_by_kind": "government_programme",
-    "threshold_quote": null,
-    "threshold_ref": null,
+    "threshold_quote": "Functioning prototype. Results of execution tests.",
+    "threshold_ref": 4,
     "refs": [
      4,
-     6,
-     7
+     19
     ],
     "status": "active",
     "replaced_by": [],
-    "threshold_checked": null
+    "threshold_checked": true
    },
    {
     "id": "m2",
     "title": "A memory-centric prototype executes benchmarks with at least a tenfold gain on its chosen metric.",
-    "criterion": "FRANC TA-1 requires a functioning integrated processing-and-memory prototype using new materials or integration processes, diverging from conventional von Neumann architecture and executing agreed benchmarks. Its performer-specified metric improves by at least 10× over the state of the art. Energy–delay product is permitted. Related near-memory results in the PrIM preprint include 23.2× mean speedup over an Intel Xeon CPU across 16 benchmarks using 2,556 processing units. Related in-memory hardware includes a 64-core phase-change-memory chip with 256 × 256 arrays per core. These publications provide evidence of prototypes and benchmarking. Their FRANC acceptance remains unverified.",
+    "criterion": "A functioning prototype integrates processing and memory using new materials or integration processes and departs from conventional von Neumann architecture. It executes the agreed benchmarks and improves on the state of the art by at least a factor of ten on the performer’s specified metric, which may be energy–delay product. For an accelerator integrated into an otherwise conventional system, the comparison includes the overhead of integration with the rest of the platform.",
     "set_by": "DARPA FRANC, HR001117S0056 Amendment 01, sections I.C.3 and I.C.5, TA-1. The target applies to programme prototypes using new materials or integration technologies.",
     "set_by_kind": "government_programme",
     "threshold_quote": "the completed system must advance over the current state of the art by at least a factor of ten",
     "threshold_ref": 4,
     "refs": [
-     4,
-     8,
-     9
+     4
     ],
     "status": "active",
     "replaced_by": [],
@@ -387,7 +407,7 @@
    {
     "id": "m3",
     "title": "A programmable PIM system reduces whole-system energy in each of four application classes.",
-    "criterion": "One programmable PIM system completes at least one application in each of databases, graph analytics, scientific computing and neural networks, with lower total execution energy than a conventional task- and accuracy-matched baseline. The boundary includes host, memory, communication, control and precision-recovery overheads. Near-memory evidence includes PrIM's PIM-chip energy measurements and the 2024 ACM study's two communication-intensive workloads. The in-memory review documents precision-recovery overheads. Whole-application qualification remains open in these sources.",
+    "criterion": "One programmable processing-in-memory system runs at least one complete application in each of four classes: databases, graph analytics, scientific computing and neural networks. For each application, hardware measurements show lower total execution energy than a conventional processor–memory system using the same input and meeting the same correctness or accuracy target. Both totals include host execution, memory, communication, control, conversion and any required precision recovery.",
     "set_by": "Atlas working milestone. Searches of DARPA FRANC, IEEE IRDS and PIM benchmarks found no published cross-domain whole-application energy gate.",
     "set_by_kind": "atlas",
     "threshold_quote": null,
@@ -395,9 +415,25 @@
     "refs": [
      3,
      4,
+     6,
      7,
-     8,
-     10
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m4",
+    "title": "An in-memory multiply–accumulate array reaches 100 TOPS/W with at least 256 × 256 compute elements.",
+    "criterion": "Demonstrate a physical array of at least 256 × 256 multiply elements with peak efficiency of at least 100 trillion operations per second per watt and compute density of at least 20 trillion operations per second per square millimetre. Use the performer’s proposed data set and algorithm, with 8-bit integer multiply–accumulate operations at full 8-bit arithmetic accuracy. Include all required peripheral, control and analog-to-digital conversion circuits in the power calculation.",
+    "set_by": "DARPA OPTIMA, HR001123S0026, phase 2 multiply–accumulate macro target, sections I.D–E and Table 1.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "at least 256x256 MCEs with 100 TOPS/W energy efficiency and 20 TOPS/mm2 area efficiency.",
+    "threshold_ref": 18,
+    "refs": [
+     18,
+     20
     ],
     "status": "active",
     "replaced_by": [],
@@ -484,20 +520,6 @@
    },
    {
     "id": 6,
-    "kind": "preprint",
-    "url": "https://arxiv.org/html/2308.00846v3",
-    "doi": "10.48550/arXiv.2308.00846",
-    "title": "Pathfinding Future PIM Architectures by Demystifying a Commercial PIM Technology",
-    "authors": "Hyun B, Kim T, Lee D, Rhu M",
-    "container": "arXiv",
-    "year": "2023",
-    "volume": null,
-    "issue": null,
-    "pages": null,
-    "citation_source": "arxiv"
-   },
-   {
-    "id": 7,
     "kind": "journal",
     "url": "https://www.nature.com/articles/s44335-025-00044-2",
     "doi": "10.1038/s44335-025-00044-2",
@@ -511,7 +533,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 8,
+    "id": 7,
     "kind": "preprint",
     "url": "https://arxiv.org/pdf/2105.03814",
     "doi": "10.48550/arXiv.2105.03814",
@@ -525,21 +547,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 9,
-    "kind": "preprint",
-    "url": "https://arxiv.org/abs/2212.02872",
-    "doi": "10.48550/arXiv.2212.02872",
-    "title": "A 64-core mixed-signal in-memory compute chip based on phase-change memory for deep neural network inference",
-    "authors": "Gallo ML, Khaddam-Aljameh R, Stanisavljevic M, Vasilopoulos A, Kersting B, Dazzi M, et al.",
-    "container": "arXiv",
-    "year": "2022",
-    "volume": null,
-    "issue": null,
-    "pages": null,
-    "citation_source": "arxiv"
-   },
-   {
-    "id": 10,
+    "id": 8,
     "kind": "journal",
     "url": "https://bu-icsg.github.io/publications/2024/pim_sigmetrics_2024.pdf",
     "doi": "10.1145/3639046",
@@ -553,7 +561,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 11,
+    "id": 9,
     "kind": "preprint",
     "url": "https://arxiv.org/abs/2308.00846",
     "doi": null,
@@ -567,7 +575,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 12,
+    "id": 10,
     "kind": "report",
     "url": "https://hc33.hotchips.org/assets/program/conference/day1/20210813_HC33_Aquabolt-XL_PIM_Jin_Kim_slide.pdf",
     "doi": null,
@@ -581,7 +589,7 @@
     "citation_source": "model"
    },
    {
-    "id": 13,
+    "id": 11,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2105.03814v7",
     "doi": null,
@@ -595,7 +603,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 14,
+    "id": 12,
     "kind": "journal",
     "url": "https://experts.illinois.edu/en/publications/compute-sndr-boosted-22-nm-mram-based-in-memory-computing-macro-u/",
     "doi": "10.1109/JSSC.2024.3442013",
@@ -609,7 +617,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 15,
+    "id": 13,
     "kind": "journal",
     "url": "https://www.nature.com/articles/s41928-025-01549-1?error=cookies_not_supported",
     "doi": "10.1038/s41928-025-01549-1",
@@ -623,7 +631,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 16,
+    "id": 14,
     "kind": "journal",
     "url": "https://www.nature.com/articles/s41928-025-01477-0?error=cookies_not_supported",
     "doi": null,
@@ -637,7 +645,7 @@
     "citation_source": "model"
    },
    {
-    "id": 17,
+    "id": 15,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2212.02872v1",
     "doi": null,
@@ -651,7 +659,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 18,
+    "id": 16,
     "kind": "journal",
     "url": "https://www.nature.com/articles/s41586-023-06337-5?error=cookies_not_supported",
     "doi": null,
@@ -663,10 +671,137 @@
     "issue": null,
     "pages": null,
     "citation_source": "model"
+   },
+   {
+    "id": 17,
+    "kind": "journal",
+    "url": "https://link.springer.com/article/10.1007/s00778-025-00937-5",
+    "doi": "10.1007/s00778-025-00937-5",
+    "title": "PIM-tree: A Skew-resistant Index for Processing-in-Memory",
+    "authors": "Kang H, Zhao Y, Blelloch GE, Dhulipala L, Gu Y, McGuffey C, et al.",
+    "container": "The VLDB Journal",
+    "year": "2025",
+    "volume": "34",
+    "issue": "6",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 18,
+    "kind": "report",
+    "url": "https://govtribe.com/file/government-file/hr001123s0026-dot-pdf",
+    "doi": null,
+    "title": "Broad Agency Announcement: Optimum Processing Technology Inside Memory Arrays (OPTIMA)",
+    "authors": "Defense Advanced Research Projects Agency, Microsystems Technology Office",
+    "container": "HR001123S0026",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 19,
+    "kind": "journal",
+    "url": "https://www.eecg.utoronto.ca/~stumm/Elliott-CICC92.html",
+    "doi": "10.1109/CICC.1992.591879",
+    "title": "Computational RAM: A Memory-SIMD hybrid and its application to DSP",
+    "authors": "Elliott DG, Snelgrove WM, Stumm M",
+    "container": "1992 Proceedings of the IEEE Custom Integrated Circuits Conference",
+    "year": "1992",
+    "volume": null,
+    "issue": null,
+    "pages": "30.6.1-30.6.4",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 20,
+    "kind": "report",
+    "url": "https://govtribe.com/file/government-file/hr001123s0026-optima-proposers-day-package-dot-pdf",
+    "doi": null,
+    "title": "Optimum Processing Technology Inside Memory Arrays (OPTIMA)",
+    "authors": "Jason Woo",
+    "container": "OPTIMA Proposers Day",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 21,
+    "kind": "journal",
+    "url": "https://www.sciengine.com/parse/pdf/1674-733X/3E2A83D8E3714F5180C9BD71CC21B355.pdf?attname=3E2A83D8E3714F5180C9BD71CC21B355.pdf",
+    "doi": "10.1007/s11432-023-3965-1",
+    "title": "Software-defined process-near-memory architecture using 3D hybrid bonding integration",
+    "authors": "Xu A, Deng C, Zhu J, Wang Y, Wei S, Liu L",
+    "container": "Sci. China Inf. Sci.",
+    "year": "2025",
+    "volume": "68",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 22,
+    "kind": "report",
+    "url": "https://chiportal.co.il/wp-content/uploads/2022/03/radyhsaie44-1.pdf",
+    "doi": null,
+    "title": "184QPS/W 64Mb/mm² 3D Logic-to-DRAM Hybrid Bonding with Process-Near-Memory Engine for Recommendation System",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 23,
+    "kind": "report",
+    "url": "https://ieee-iedm.org/wp-content/uploads/2026/05/2022-IEDM-Archive.pdf",
+    "doi": null,
+    "title": "A Hybrid Computing-In-Memory Architecture by Monolithic 3D Integration of BEOL CNT/IGZO-based CFET Logic and Analog RRAM",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 24,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2604.14445v1",
+    "doi": null,
+    "title": "Parallel R-tree–based Spatial Query Processing on a Commercial Processing-in-Memory System",
+    "authors": "Jannat T, Gowanlock M, Puri S",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 25,
+    "kind": "journal",
+    "url": "https://csqs.xjtu.edu.cn/1.pdf",
+    "doi": "10.1038/s41928-025-01479-y",
+    "title": "A lossless and fully parallel spintronic compute-in-memory macro for artificial intelligence chips",
+    "authors": "Li H, Chai Z, Dong W, He J, Peng R, Li S, et al.",
+    "container": "Nat Electron",
+    "year": "2025",
+    "volume": "8",
+    "issue": "11",
+    "pages": "1046-1058",
+    "citation_source": "crossref"
    }
   ],
   "milestone_order": [
    "m1",
+   "m4",
    "m2",
    "m3"
   ],
@@ -675,237 +810,825 @@
     "milestone": "m1",
     "case": "Processing-near-memory",
     "verdict": "partial",
-    "finding": "A physical UPMEM-PIM system ran 16 PrIM benchmarks for simulator validation.",
-    "detail": "The hardware execution bears on a functioning building block, but the source does not establish FRANC's independent government testing or acceptance.",
-    "quote": "We verify uPIMulator’s functional correctness as well as its performance correlation to real UPMEM-PIM hardware by running each individual PrIM benchmark with 1/2/4/8/16/24 threads under various input data sizes, cross-validating both\nuPIMulator and real UPMEM-PIM’s final output data as\nwell as its execution time.",
-    "checked": true,
+    "finding": "A physical UPMEM DPU ran PrIM benchmarks, with 98.4% simulator-to-hardware timing correlation across 710 single-DPU test points.",
+    "detail": "Each DPU stages operands from its dedicated DRAM bank into a local scratchpad before executing instructions.",
+    "quote": "For the single DPU validation, we used 710\ndata points whose execution times are within the range of 500\nms, showing 98.4% correlation against UPMEM-PIM with a\nmean absolute error (MAE) of 12.0%.",
+    "checked": false,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": "Processing-near-memory",
     "verdict": "partial",
-    "finding": "A physical UPMEM-PIM system ran 16 benchmarks for simulator validation.",
-    "detail": "The hardware benchmark runs support prototype execution, but the source does not establish a 10× improvement over the state of the art or FRANC acceptance.",
-    "quote": "We validate our uPIMulator using PrIM [71], an open-source\nUPMEM-PIM benchmark suite (Table II). PrIM consists of\n16 data-intensive workloads from various application domains\nsuch as linear algebra, graph processing, neural networks, etc.",
+    "finding": "Simulated UPMEM pipeline enhancements reached up to 6.2× speedup in an ablation study spanning 16 PrIM workloads.",
+    "detail": "The physical hardware supplied execution data for simulator validation. The enhanced designs were evaluated in simulation.",
+    "quote": "improve the performance of PrIM’s compute-bound workloads\n(avg 2.7×, max 6.2× speedup)",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": "Computing-in-memory",
+    "verdict": "partial",
+    "finding": "Aquabolt-XL on the U280 ran one GEMV benchmark 2.82× as fast as the HBM baseline.",
+    "detail": "The GEMV test multiplied a 1,280-element vector by a 1,280 × 640 matrix.",
+    "quote": "• Performance Gain: GEMV 2.82x, Add 2.85x, LSTM* 2.54x",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": "Processing-near-memory",
-    "verdict": "met",
-    "finding": "AXDIMM FPGA prototype ran SLS; sample size not stated; execution was 1.8× faster.",
-    "detail": "The x86 platform used Xilinx Zynq UltraScale+ FPGA hardware with RecNMP logic. Independent government testing is not reported.",
-    "quote": "• Enabled RecNMP* logic  \n－Achieved 1.8x SLS execution speed-up from HW",
+    "verdict": "partial",
+    "finding": "Two-rank AXDIMM sped up one sparse lengths sum benchmark by 1.8×.",
+    "detail": "The execution-time plot spans six read sizes from 4K to 128K bytes per batch.",
+    "quote": "－Achieved 1.8x SLS execution speed-up from HW",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": "Computing-in-memory",
+    "verdict": "partial",
+    "finding": "Aquabolt-XL achieved an 11.2× speedup on one GEMV microkernel.",
+    "detail": "The baseline used normal HBM. The end-to-end speech recognition result remained below the tenfold threshold.",
+    "quote": "• Performance Gain: 11.2× (Microkernel GEMV) and 3.5× (Speech Recognition Application)",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": "Processing-near-memory",
     "verdict": "partial",
-    "finding": "UPMEM system with 2,556 DPUs averaged 93.0× speedup over a CPU across 13 PrIM benchmarks.",
-    "detail": "The functioning integrated system used mature 2D DRAM fabrication. The text does not establish use of new materials or integration processes, FRANC-agreed benchmarks, or FRANC acceptance.",
+    "finding": "Eight-rank AXDIMM achieved 6.9× host-only throughput on one DLRM application.",
+    "detail": "The source reports throughput as queries per second for three rank configurations.",
+    "quote": "－Achieved 1.8x/3.5x/6.9x QPS",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": "Computing-in-memory",
+    "verdict": "partial",
+    "finding": "Aquabolt-XL on the U280 used 62% less energy on one RNN-T inference workload.",
+    "detail": "Samsung reports that it disabled system ECC for Aquabolt-XL, so the measurements do not establish the energy cost of that protection.",
+    "quote": "• PIM-enabled system reduces inference latency by 2.49X and the energy reduction by 62%",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": "Processing-near-memory",
+    "verdict": "partial",
+    "finding": "One UPMEM DPU sustained 58.56 MOPS in a streaming integer addition and subtraction test.",
+    "detail": "The streaming loop included scratchpad loads and stores and loop control. The authors measured transfers between DRAM and scratchpad separately.",
+    "quote": "Hence, the expected throughput at 350 MHz is 58.33 MOPS (obtained with Equation\n1\n), which is close to what we measure (58.56 MOPS).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": "Processing-near-memory",
+    "verdict": "partial",
+    "finding": "The larger UPMEM system averaged a 93.0× speedup over the Xeon across 13 PrIM benchmarks.",
+    "detail": "The reported average covers a subset of the suite. The text identifies host-mediated synchronization and floating-point operations as limitations in the other workloads.",
     "quote": "First, both UPMEM-based PIM systems outperform a modern CPU (by\n93.0\n×\n\\times\nand 27.9\n×\n\\times\n, on average, respectively) for 13 of the PrIM benchmarks, which do\nnot\nrequire intensive inter-DPU synchronization or floating point operations.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": "Processing-near-memory",
+    "verdict": "partial",
+    "finding": "The 16-benchmark UPMEM study reports energy savings for some workloads without quantifying those savings in the excerpt.",
+    "detail": "The database workloads are standalone operators and the linear algebra workloads are routines. The excerpt does not specify the energy measurement boundary.",
+    "quote": "Third, energy consumption comparison of the PIM, CPU, and GPU systems follows the same trends as the performance comparison: the PIM system yields large energy savings over the CPU and the CPU, for workloads where it largely outperforms the CPU and the GPU.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": "Computing-in-memory",
     "verdict": "partial",
-    "finding": "22-nm MRAM in-memory computing macro, sample size not stated: 2.7–6 dB compute SNDR boost.",
-    "detail": "The reported operating-point results bear on a computing-in-memory building block, but the supplied text does not establish that a physical prototype completed execution tests or underwent independent government testing.",
+    "finding": "One MRAM in-memory computing macro achieved a 2.7–6 dB compute SNDR gain with statistical error compensation.",
+    "detail": null,
     "quote": "An SEC-enabled SNDR boost of 2.7-6 dB is obtained over different operating points.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
-    "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": "Computing-in-memory",
+    "verdict": "partial",
+    "finding": "One MRAM in-memory computing macro achieved a 5× reduction in energy per 1-bit operation.",
+    "detail": null,
+    "quote": "This boost can be balanced to achieve a substantial 5× reduction in energy per 1-b operation while incurring a modest SEC energy overhead of 0.8% and area overhead of 12.2%.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": "Computing-in-memory",
+    "verdict": "partial",
+    "finding": "One MRAM in-memory computing macro showed a 5× reduction in energy per 1-bit operation with statistical error compensation.",
+    "detail": "The CIFAR-10 result covers last-layer mapping. The reported 0.8% energy overhead covers the compensation block.",
+    "quote": "This boost can be balanced to achieve a substantial 5× reduction in energy per 1-b operation while incurring a modest SEC energy overhead of 0.8% and area overhead of 12.2%.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": "Computing-in-memory",
-    "verdict": "met",
-    "finding": "SRAM in-memory computing prototype, sample size unspecified, experimentally solved differential equations; chip has two 64 × 64 memory arrays.",
-    "detail": "The source does not report independent government testing or the number of chips used in the execution experiments.",
+    "verdict": "partial",
+    "finding": "One SRAM accelerator design with two 64 × 64 arrays solved systems of differential equations in execution tests.",
+    "detail": null,
     "quote": "We experimentally show that the chip can be used to find solutions to systems of differential equations by recursive block inversion.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": "Computing-in-memory",
+    "verdict": "partial",
+    "finding": "One SRAM accelerator design implements analogue matrix–vector multiplication with two 64 × 64 arrays.",
+    "detail": null,
+    "quote": "It features two 64 × 64 memory arrays, enclosed in an analogue feedback loop by on-chip operational amplifiers, digital-to-analogue and analogue-to-digital converters.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": "Computing-in-memory",
+    "verdict": "partial",
+    "finding": "One integrated SRAM accelerator design was benchmarked on three workloads, with no measured tenfold gain stated in the supplied text.",
+    "detail": null,
+    "quote": "The accuracy of the results closely matches fully digital systems working at the equivalent integrated circuit precision, providing advantages in terms of latency, energy and area consumption.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": "Computing-in-memory",
+    "verdict": "partial",
+    "finding": "One SRAM accelerator design reports an energy comparison with a commercial GPU for recursive block inversion.",
+    "detail": "The text gives no numerical energy saving for this comparison. The energy breakdown described is for the test chip.",
+    "quote": "The accuracy of the results closely matches fully digital systems working at the equivalent integrated circuit precision, providing advantages in terms of latency, energy and area consumption.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": "Computing-in-memory",
+    "verdict": "partial",
+    "finding": "The RRAM solver inverted one 16 × 16 real-valued matrix at 24-bit fixed-point precision.",
+    "detail": "The experiment used 16 hardware solves, one for each column of the identity matrix.",
+    "quote": "A 16 × 16 matrix inversion problem was solved with the BlockAMC algorithm with 24-bit fixed-point precision.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": "Computing-in-memory",
+    "verdict": "partial",
+    "finding": "The RRAM chip produced 1,152 correct outputs across 288 low-precision matrix–vector multiplications.",
+    "detail": "The test used an unsigned 12-bit matrix and signed 12-bit input, decomposed into 3-bit weight slices and single-bit input slices.",
+    "quote": "For the unsigned 12-bit matrix\nA\nand signed 12-bit input\nb\n, a total of 3 × (12/3) × (12/1) × 2 × 4 = 288 LP-MVM operations were performed, yielding 1,152 elements, each precisely correct.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": "Computing-in-memory",
+    "verdict": "partial",
+    "finding": "The RRAM solver model estimated about 10× higher equivalent throughput at matrix dimension 128 against three digital baselines.",
+    "detail": "The comparison used two GPU cores and one ASIC at matched precision. The model included inversion, multiplication, DACs and ADCs. Hardware inversion was demonstrated up to a 16 × 16 problem using block partitioning.",
+    "quote": "In the BlockAMC regime, performance growth slows but remains about ×10 higher than that of the digital processors at\nN\n= 128.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": "Computing-in-memory",
+    "verdict": "partial",
+    "finding": "One IBM HERMES chip executed matrix–vector multiplication tests with 2,048 input vectors per core.",
+    "detail": null,
+    "quote": "and 2,048 randomly distributed input vectors",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
     "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": "Computing-in-memory",
+    "verdict": "partial",
+    "finding": "One IBM HERMES chip with all 64 PCM arrays active peaked at 9.76 TOPS/W.",
+    "detail": "The peak measurement covers MVM only. Neural-network digital processing is excluded, and all reported inference accuracy tests used four-phase mode.",
+    "quote": "A peak MVM throughput of 63.1 TOPS is achieved at an energy efficiency of 9.76 TOPS/W",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": "Computing-in-memory",
+    "verdict": "partial",
+    "finding": "One 64-core IBM HERMES prototype exceeded comparable resistive-memory chips by over 15× in MVM throughput per area.",
+    "detail": "The greater-than-tenfold result is for a core-level MVM metric. Inference used off-chip activation transfers and some software operations.",
+    "quote": "higher than comparable multi-core resistive memory AIMC chips, while achieving the highest accuracy on the CIFAR-10 benchmark.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": "Computing-in-memory",
+    "verdict": "partial",
+    "finding": "On one IBM HERMES chip, processing one input to a ResNet-9 layer consumed 1.51 µJ.",
+    "detail": "The layer measurement includes on-chip data aggregation and digital operations. It covers a single layer input.",
+    "quote": "and consumes 1.51\nμ\n\\mu\nJ",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": "Computing-in-memory",
     "verdict": "met",
-    "finding": "RRAM analogue matrix solver: 100 random input vectors generally reached 24-bit precision.",
-    "detail": "The prototype used separate experimental setups controlled by a personal computer. The source does not report independent government testing.",
-    "quote": "Across 100 random input vectors, solutions generally reached 24-bit precision within ten cycles.",
+    "finding": "A four-tile phase-change memory prototype achieved 86.14% accuracy on keyword spotting.",
+    "detail": "The keyword-spotting network ran on-chip after digital audio feature extraction.",
+    "quote": "The measured KWS accuracy is 86.14% (Fig.\n3g\n), well within the MLPerf SW\neq\n‘iso-accuracy’ limit of 85.88% (defined as 99% of the accuracy of the original SW model).",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
-    "milestone": "m2",
+    "milestone": "m4",
     "case": "Computing-in-memory",
     "verdict": "partial",
-    "finding": "One 64-core PCM chip achieved over 15× higher MVM throughput per area than comparable multi-core resistive-memory chips.",
-    "detail": "The chip demonstrated neural-network benchmarks, but the reported gain concerns MVM throughput density rather than end-to-end benchmark performance. The text does not establish that the benchmarks or metric were agreed under FRANC or that the prototype was accepted.",
-    "quote": "The measured MVM throughput per area of the chip is\n>\n15\n×\n>15\\times\nhigher than comparable multi-core resistive memory AIMC chips, while achieving the highest accuracy on the CIFAR-10 benchmark.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 17,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
-   },
-   {
-    "milestone": "m2",
-    "case": "Computing-in-memory",
-    "verdict": "partial",
-    "finding": "A four-tile in-memory chip ran one keyword-spotting benchmark with 7× lower latency than the best reported MLPerf result.",
-    "detail": "The measured gain is below 10×. The reported 14-fold energy-efficiency improvement for the five-chip speech-transcription system is a projection that includes estimated digital processing, rather than a measured full-system result. FRANC benchmark agreement and acceptance are unverified.",
-    "quote": "Each audio frame requires 2.4 μs in total, in the form of 8 time steps of 300 ns each (Fig.\n3e\n); this is 7 times faster than the best-case latency currently reported by MLPerf",
+    "finding": "A 512 × 512 phase-change memory MAC tile peaked at 20.0 TOPS/W for analog integration.",
+    "detail": "The 20.0 TOPS/W figure covers the analog integration power domain only. Eight-bit input and output encoding surrounds approximate analog arithmetic.",
+    "quote": "The relatively small number of digital operations in the network implies that considerable benefits may yet be obtained by improving the raw analog MAC energy efficiency (currently 20 TOPS/W).",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
-    "ref": 18,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": "Computing-in-memory",
+    "verdict": "partial",
+    "finding": "For 2,513 RNNT queries, a five-chip phase-change memory design was projected to deliver 14-fold higher samples per second per watt.",
+    "detail": "The projection includes modeled digital processing. System buses and voltage regulators are outside the comparison.",
+    "quote": "Under these conditions, an analog-AI system using the chips reported in this paper could achieve 546.6 samples per second per watt (6.704 TOPS/W) at 3.57 W, a 14-fold improvement over the best energy-efficiency results submitted to MLPerf.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": "Computing-in-memory",
+    "verdict": "partial",
+    "finding": "The five-chip phase-change memory RNNT run on 2,513 queries had an estimated execution energy of 4.44 J with standard weights.",
+    "detail": "The experiment saved intermediate outputs on an x86 host and swapped chips between stages. The keyword-spotting accuracy result has no matched whole-system energy comparison.",
+    "quote": "the total system energy and corresponding aggregate TOPS/W values for our system are calculated to be 4.44 J and 6.94 TOPS/W, respectively",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": "Processing-near-memory",
+    "verdict": "partial",
+    "finding": "A hybrid-bonded processing-near-memory prototype ran six workloads at 33.1× the FPGA’s average energy efficiency.",
+    "detail": "The paper describes one prototype design and gives no tested-chip count. The six workloads were NCO, CIC, FIR, FFT, GEMM, and YOLO V3.",
+    "quote": "The\nadvantages of SDPNM are in energy eﬃciency, and the average rat io between the proposed architecture\nand the state-of-the-art FPGA is 33.1 ×, ranging from 8.2 × to 104.1 ×.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": "Processing-near-memory",
+    "verdict": "partial",
+    "finding": "The 3D hybrid-bonded processing-near-memory prototype achieved 317.43× the CPU–DRAM energy efficiency on one industrial recommendation workload.",
+    "detail": "The test uploaded query embeddings over QSPI and used preloaded features. The reported throughput accounts for initialization and memory-subsystem overhead, while the energy-efficiency comparison leaves external platform power unspecified.",
+    "quote": "In terms of energy \nefﬁciency, which is signiﬁcant in memory-bound applications, our work achieves \n184.11QPS/W, which outperforms the CPU-DRAM system by 317.43×.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 22,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": "Computing-in-memory",
+    "verdict": "partial",
+    "finding": "M3D-CCP used 149× less energy than a GPU at equivalent performance on one image super-resolution task.",
+    "detail": "The abstract describes one task on a fabricated chip. It gives neither the GPU model nor the energy measurement boundaries.",
+    "quote": "implemented using the fabricated M3D-CCP chip, achieving GPU-equivalent performance with 149× lower \nenergy consumption.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 23,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": "Processing-near-memory",
+    "verdict": "partial",
+    "finding": "UPMEM R-tree queries on 8.4 million Lakes rectangles used about 3.4× less DPU kernel energy than CPU search across four query-set sizes.",
+    "detail": "Section V-G calculates phase energy from active server power and phase runtime. The cross-platform comparison with the conventional Mill CPU system reports runtime only.",
+    "quote": "In the Lakes dataset, strong scaling reduces kernel time by up to 3.66× and achieves a 2.70× end-to-end speedup, while consuming approximately 3.4× less energy than CPU execution in the PIM server.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 24,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": "Computing-in-memory",
+    "verdict": "partial",
+    "finding": "Spintronic compute-in-memory macro on one workload, ResNet-20 image classification, reached 9.1 TOPS/W for matrix–vector multiplication.",
+    "detail": "The conventional software baseline establishes accuracy parity. The reported energy-efficiency gain from toggle-rate-aware training compares two model variants on the same macro.",
+    "quote": "When processing the ResNet-20 model at 8-bit \nprecision, a peak MVM energy efficiency of 9.1 TOPS W−1 (boosted to \n18.9 TOPS W−1 with our toggle-rate-aware training scheme) at 0.85 V is \ndemonstrated, with a software-equivalent accuracy of 92.51%.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 25,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    }
   ],
   "judged": [
    {
     "url": "https://www.nature.com/articles/s44335-025-00044-2",
     "milestone": "m1",
-    "hash": "ed57dcba6611",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "ad84555d212c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s44335-025-00044-2",
+    "milestone": "m4",
+    "hash": "da7865adf6e5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s44335-025-00044-2",
     "milestone": "m2",
-    "hash": "6c596de83941",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "ca06097f6800",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s44335-025-00044-2",
     "milestone": "m3",
-    "hash": "5501212c59f3",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "f70e0cf7c10a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s44335-025-00044-2",
     "milestone": "completion",
     "hash": "2b5aedbcf459",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2308.00846",
     "milestone": "m1",
-    "hash": "ed57dcba6611",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "ad84555d212c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2308.00846",
+    "milestone": "m4",
+    "hash": "da7865adf6e5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2308.00846",
     "milestone": "m2",
-    "hash": "6c596de83941",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "ca06097f6800",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2308.00846",
     "milestone": "m3",
-    "hash": "5501212c59f3",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "f70e0cf7c10a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2308.00846",
     "milestone": "completion",
     "hash": "2b5aedbcf459",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://hc33.hotchips.org/assets/program/conference/day1/20210813_HC33_Aquabolt-XL_PIM_Jin_Kim_slide.pdf",
     "milestone": "m1",
-    "hash": "ed57dcba6611",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "ad84555d212c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://hc33.hotchips.org/assets/program/conference/day1/20210813_HC33_Aquabolt-XL_PIM_Jin_Kim_slide.pdf",
+    "milestone": "m4",
+    "hash": "da7865adf6e5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://hc33.hotchips.org/assets/program/conference/day1/20210813_HC33_Aquabolt-XL_PIM_Jin_Kim_slide.pdf",
+    "milestone": "m2",
+    "hash": "ca06097f6800",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://hc33.hotchips.org/assets/program/conference/day1/20210813_HC33_Aquabolt-XL_PIM_Jin_Kim_slide.pdf",
+    "milestone": "m3",
+    "hash": "f70e0cf7c10a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://hc33.hotchips.org/assets/program/conference/day1/20210813_HC33_Aquabolt-XL_PIM_Jin_Kim_slide.pdf",
+    "milestone": "completion",
+    "hash": "2b5aedbcf459",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2105.03814v7",
+    "milestone": "m1",
+    "hash": "ad84555d212c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2105.03814v7",
+    "milestone": "m4",
+    "hash": "da7865adf6e5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2105.03814v7",
     "milestone": "m2",
-    "hash": "6c596de83941",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "ca06097f6800",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2105.03814v7",
+    "milestone": "m3",
+    "hash": "f70e0cf7c10a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2105.03814v7",
+    "milestone": "completion",
+    "hash": "2b5aedbcf459",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://experts.illinois.edu/en/publications/compute-sndr-boosted-22-nm-mram-based-in-memory-computing-macro-u/",
     "milestone": "m1",
-    "hash": "ed57dcba6611",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "ad84555d212c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://experts.illinois.edu/en/publications/compute-sndr-boosted-22-nm-mram-based-in-memory-computing-macro-u/",
+    "milestone": "m4",
+    "hash": "da7865adf6e5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://experts.illinois.edu/en/publications/compute-sndr-boosted-22-nm-mram-based-in-memory-computing-macro-u/",
+    "milestone": "m2",
+    "hash": "ca06097f6800",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://experts.illinois.edu/en/publications/compute-sndr-boosted-22-nm-mram-based-in-memory-computing-macro-u/",
+    "milestone": "m3",
+    "hash": "f70e0cf7c10a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://experts.illinois.edu/en/publications/compute-sndr-boosted-22-nm-mram-based-in-memory-computing-macro-u/",
+    "milestone": "completion",
+    "hash": "2b5aedbcf459",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41928-025-01549-1?error=cookies_not_supported",
     "milestone": "m1",
-    "hash": "ed57dcba6611",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "ad84555d212c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41928-025-01549-1?error=cookies_not_supported",
+    "milestone": "m4",
+    "hash": "da7865adf6e5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41928-025-01549-1?error=cookies_not_supported",
+    "milestone": "m2",
+    "hash": "ca06097f6800",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41928-025-01549-1?error=cookies_not_supported",
+    "milestone": "m3",
+    "hash": "f70e0cf7c10a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41928-025-01549-1?error=cookies_not_supported",
+    "milestone": "completion",
+    "hash": "2b5aedbcf459",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41928-025-01477-0?error=cookies_not_supported",
     "milestone": "m1",
-    "hash": "ed57dcba6611",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "ad84555d212c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41928-025-01477-0?error=cookies_not_supported",
+    "milestone": "m4",
+    "hash": "da7865adf6e5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41928-025-01477-0?error=cookies_not_supported",
+    "milestone": "m2",
+    "hash": "ca06097f6800",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41928-025-01477-0?error=cookies_not_supported",
+    "milestone": "m3",
+    "hash": "f70e0cf7c10a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41928-025-01477-0?error=cookies_not_supported",
+    "milestone": "completion",
+    "hash": "2b5aedbcf459",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2212.02872v1",
+    "milestone": "m1",
+    "hash": "ad84555d212c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2212.02872v1",
+    "milestone": "m4",
+    "hash": "da7865adf6e5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2212.02872v1",
     "milestone": "m2",
-    "hash": "6c596de83941",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "ca06097f6800",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2212.02872v1",
+    "milestone": "m3",
+    "hash": "f70e0cf7c10a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2212.02872v1",
+    "milestone": "completion",
+    "hash": "2b5aedbcf459",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-023-06337-5?error=cookies_not_supported",
+    "milestone": "m1",
+    "hash": "ad84555d212c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-023-06337-5?error=cookies_not_supported",
+    "milestone": "m4",
+    "hash": "da7865adf6e5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-023-06337-5?error=cookies_not_supported",
     "milestone": "m2",
-    "hash": "6c596de83941",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "ca06097f6800",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-023-06337-5?error=cookies_not_supported",
+    "milestone": "m3",
+    "hash": "f70e0cf7c10a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-023-06337-5?error=cookies_not_supported",
+    "milestone": "completion",
+    "hash": "2b5aedbcf459",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.sciengine.com/parse/pdf/1674-733X/3E2A83D8E3714F5180C9BD71CC21B355.pdf?attname=3E2A83D8E3714F5180C9BD71CC21B355.pdf",
+    "milestone": "m1",
+    "hash": "ad84555d212c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://chiportal.co.il/wp-content/uploads/2022/03/radyhsaie44-1.pdf",
+    "milestone": "m2",
+    "hash": "ca06097f6800",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ieee-iedm.org/wp-content/uploads/2026/05/2022-IEDM-Archive.pdf",
+    "milestone": "m2",
+    "hash": "ca06097f6800",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2604.14445v1",
+    "milestone": "m3",
+    "hash": "f70e0cf7c10a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://csqs.xjtu.edu.cn/1.pdf",
+    "milestone": "m3",
+    "hash": "f70e0cf7c10a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.csl.cornell.edu/~zhiruz/pdfs/apu-micro2025.pdf",
+    "milestone": "completion",
+    "hash": "2b5aedbcf459",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -947,20 +1670,108 @@
     "date": "2026-11-14",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 9 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Moving data between memory and processors accounted for an estimated 62.7% of system energy on average across web browsing, mobile neural networks, video playback and video capture. Caches help when data is reused. Faster arithmetic still leaves the cost of fetching data. For those four workloads, moving selected operations to programmable cores near memory cut modeled energy use by 49.1% on average, enough to do more of the same work per charge. The gain depends on how much data must still travel between memory banks or back to the host.\". Reason: The current paragraph describes the study method but omits the energy share, the benefit to device users and the condition that limits it."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by IEEE International Roadmap for Devices and Systems, Beyond CMOS and Emerging Research Materials, 2024: \"Emerging accelerators for neural network inference are a more near-term goal\". Reason: The roadmap explicitly identifies an application goal and explains why inference is nearer to implementation than training."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Defense Advanced Research Projects Agency, Optimum Processing Technology Inside Memory Arrays, 2023: \"a fast, compact, power-efficient, and scalable compute-in-memory accelerator\". Reason: OPTIMA names a scalable compute-in-memory accelerator as a programme goal and specifies the hardware to be demonstrated."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"A physical processing-in-memory component functions in execution tests. For the FRANC building-block gate, the performer and the independent U.S. government test and validation contractor agree on the procedures, the contractor runs the tests, and the final deliverable includes the results.\"; set_by = \"DARPA FRANC, HR001117S0056 Amendment 01, section I.C.5, TA-2 Building Blocks final gate.\"; threshold_quote = \"Functioning prototype. Results of execution tests.\"; threshold_ref = 4; refs = [4, 21]. Reason: The final-gate table supplies the missing threshold quotation, and the revised criterion removes publication summaries from the test."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"A functioning prototype integrates processing and memory using new materials or integration processes and departs from conventional von Neumann architecture. It executes the agreed benchmarks and improves on the state of the art by at least a factor of ten on the performer\\u2019s specified metric, which may be energy\\u2013delay product. For an accelerator integrated into an otherwise conventional system, the comparison includes the overhead of integration with the rest of the platform.\"; refs = [4]. Reason: The revised criterion keeps FRANC’s tenfold benchmark test, includes its accelerator integration condition and removes unrelated chip specifications and speedup results."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m1: \"An in-memory multiply–accumulate array reaches 100 TOPS/W with at least 256 × 256 compute elements.\". Reason: OPTIMA supplies a measured energy-efficiency test for the in-array approach between a functioning component and a complete application."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"One programmable processing-in-memory system runs at least one complete application in each of four classes: databases, graph analytics, scientific computing and neural networks. For each application, hardware measurements show lower total execution energy than a conventional processor\\u2013memory system using the same input and meeting the same correctness or accuracy target. Both totals include host execution, memory, communication, control, conversion and any required precision recovery.\". Reason: The existing criterion mixes the whole-application energy comparison with chip-only measurements and publication verdicts."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "structure = parallel. Reason: FRANC runs its component and integrated-prototype tracks concurrently, and OPTIMA’s array-efficiency test applies to a specific computing-in-memory approach."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "remove statement 1. Reason: The quoted passage concerns associative memory used for matching and lookup, and its unexplained abbreviation obscures that scope."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Applied 9 of 9 proposed operations from CPE-03-revise-20261121T164132096002Z; now version 2."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m4, m3."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 0 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 2 found, 0 not found, 2 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Structural problems after applying: references never cited: [6, 9]"
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 9 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 10 candidates returned, 0 dropped as sources already used, 10 to judge."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 6 of 10 new candidates, without search. Skipped: 5 no readable saved copy. Dropped rows: 1 partial on completion. Replaced 9 earlier rows. Added 33 results: 28 from sources already used, 5 from newly found sources."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 1 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 32 found, 1 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Removed 2 references no longer cited; renumbered."
    }
   ],
-  "results_run": "2026-11-14"
- },
- "review": {
-  "state": "published",
-  "note": null,
-  "into": null,
-  "at": "2026-11-14",
-  "log": [
-   {
-    "date": "2026-11-14",
-    "state": "published"
-   }
-  ]
+  "results_run": "2026-11-21"
  }
 }
