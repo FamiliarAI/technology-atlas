@@ -379,10 +379,14 @@
   "title": "Compositional proof-carrying code",
   "definition": "Executable components from independent suppliers carry machine-checkable proofs of behavioral contracts: what each component assumes and guarantees. A consumer checks proofs tied to the installed bytes and combines compatible contracts into a proof of an application property under stated execution assumptions.",
   "goal": {
-   "need": "On 22 October 2026, Anthropic and Theorem reported checked proofs for 239 fuzzing entry points across 123 libraries. Their appendix says each proof repeats verification of startup, allocation and other support code; checking one proof takes 30 minutes to several CPU hours. These developer-reported results are not peer reviewed. Reusing component proofs addresses this repeated verification.",
+   "need": "In a 2024 audit of commercial software, applications averaged 911 open-source components. Function declarations tell maintainers which types a library accepts, but leave its behavior unspecified. When components lack behavioral contracts, replacing one can require analyzing most of the application again. Maintainers could reuse proofs for unchanged libraries and check whether a replacement preserves a required behavior, provided the contracts cover that behavior and each caller meets the conditions its libraries assume.",
    "need_refs": [
-    1,
-    2
+    19,
+    3,
+    6,
+    20,
+    4,
+    1
    ],
    "figures": {
     "caption": "Two examples of verification overhead reported on 22 October 2026.",
@@ -451,17 +455,18 @@
   },
   "case_label": null,
   "cases": [],
-  "milestone_structure": "sequence",
+  "milestone_structure": "parallel",
   "milestones": [
    {
     "id": "m1",
     "title": "A receiver checks a producer-supplied proof that native code satisfies its safety policy.",
-    "criterion": "The receiver derives a verification condition from the received machine code and accepts a supplied proof only for that condition, using its safety policy's axioms and inference rules. Necula's POPL 1997 paper demonstrates PCC for assembly-language extensions of ML; his project documentation also records native packet filters and Java-to-x86 certification. Acceptance establishes the specified policy relative to the code semantics and checker.",
-    "set_by": "Necula's PCC acceptance protocol; POPL 1997 and the project description revised on 22 July 2002, Overview and Implementation.",
+    "criterion": "The receiver derives a verification condition from the received native code under its published safety policy. Before execution, it checks that the producer’s proof establishes that condition using the policy’s axioms and inference rules.",
+    "set_by": "Necula and Lee’s proof-carrying-code protocol, OSDI 1996, and Necula’s PCC project description.",
     "set_by_kind": "protocol",
-    "threshold_quote": "a formal safety proof that proves, for the untrusted code, adherence to the safety rules.",
+    "threshold_quote": "This predicate must then be proved by the code producer using axioms and inference rules supplied by the code consumer",
     "threshold_ref": 7,
     "refs": [
+     15,
      7,
      8
     ],
@@ -471,11 +476,11 @@
    },
    {
     "id": "m2",
-    "title": "A low-level component has a checked proof of its behavioral precondition and postcondition.",
-    "criterion": "Bedrock's foundational theorem establishes that execution starting at a code label in a state satisfying its specification satisfies a destination label's specification whenever it reaches that label. The ICFP 2013 paper demonstrates this approach with destructive linked-list append, whose postcondition is the concatenation of the two input lists. These guarantees concern Bedrock's intermediate assembly language; its AMD64 translation was unverified.",
+    "title": "A Bedrock component has a checked proof that it meets its postcondition whenever it returns.",
+    "criterion": "Check a proof under the operational semantics of Bedrock’s intermediate assembly language. From any state satisfying a block’s entry specification, execution must proceed safely to the end of the block and satisfy the next block’s specification on transfer. For a procedure, the specification at its return label must imply the stated postcondition.",
     "set_by": "Chlipala's Bedrock verification framework, ICFP 2013, section 2 and Figure 2; a framework-specific criterion.",
     "set_by_kind": "protocol",
-    "threshold_quote": "we verify absence of assertion failures, giving us functional correctness.",
+    "threshold_quote": "and exits the block by jumping to some other block, the spec of the new block is satisfied.",
     "threshold_ref": 9,
     "refs": [
      9
@@ -487,7 +492,7 @@
    {
     "id": "m3",
     "title": "Two separately verified modules link while preserving their behavioral specifications.",
-    "criterion": "Apply Bedrock's linking rule to two modules proved correct under their respective assumption maps: their defined code labels must be disjoint, and specifications must agree wherever the assumption maps overlap. Their union then satisfies the union of the assumptions. Wang, Cuellar and Chlipala demonstrate functional-correctness reasoning across Cito-compiled and independently verified Bedrock modules in OOPSLA 2014. The theorem concerns Bedrock's intermediate assembly language.",
+    "criterion": "Check a correctness proof for each of two Bedrock intermediate-language modules under its own map of code labels to assumed preconditions. The modules must define disjoint sets of labels, and the two maps must assign identical preconditions to every label they share. Apply the linking rule to establish correctness of the combined module under the union of the maps.",
     "set_by": "Wang, Cuellar and Chlipala's Bedrock linking rule, OOPSLA 2014, section 3.2; a framework-specific criterion.",
     "set_by_kind": "protocol",
     "threshold_quote": "we have proved the concatenation of the modules correct, under the union of their assumptions.",
@@ -501,14 +506,30 @@
    },
    {
     "id": "m4",
-    "title": "Composed component proofs establish an executable application's machine-code input-output contract.",
-    "criterion": "Prove garagedoor_correct: from initial_conditions, every reachable RISC-V state eventually reaches a state whose I/O trace satisfies io_spec. The initial program counter is 0x20400000; the I/O log starts empty; memory must contain the verified code and required storage. Erbsen and colleagues establish this theorem for one bare-metal cryptographic server in PLDI 2024 by integrating component and compiler proofs. The guarantee covers functional behavior and liveness under the model, without proving cryptographic protocol security.",
+    "title": "Composed proofs show that the RISC-V server repeatedly satisfies its input-output specification.",
+    "criterion": "Check garagedoor_correct for every RISC-V machine state satisfying initial_conditions. The program counter starts at 0x20400000, the I/O log is empty, and memory contains the specified code and required working space. From every reachable state, execution must reach a state whose accumulated I/O log satisfies io_spec, which covers peripheral initialization and the server’s network protocol.",
     "set_by": "Erbsen and colleagues, PLDI 2024, Figure 2 and section 2; a criterion published for one bare-metal cryptographic server.",
     "set_by_kind": "protocol",
-    "threshold_quote": "our specification guarantees liveness and crash-freedom: io_spec will be repeatedly reestablished",
+    "threshold_quote": "always run1 (eventually run1 (fun mach' => io_spec mach'.(getLog))) mach.",
     "threshold_ref": 6,
     "refs": [
      6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "A checked placement matches a verified library’s relocated code and data to a linked executable.",
+    "criterion": "For a library with a proof valid across permitted placements, check that at least one such placement exists in the supplied static AArch64 ELF executable. Parse the executable bytes and check the library’s relocated instructions and initial data byte for byte at their placed addresses. Code must be mapped read-execute, read-only data must be readable, and writable data must be mapped read-write. Each exported function must have exactly one symbol-table entry at its placed address.",
+    "set_by": "AlphaProof Code’s PlacedLib.LinkedIn predicate and its LinkedAt and InElf definitions for static AArch64 executables.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "∃ pl, lib.LinkedAt elfBytes pl",
+    "threshold_ref": 22,
+    "refs": [
+     21,
+     22
     ],
     "status": "active",
     "replaced_by": [],
@@ -773,12 +794,125 @@
     "issue": "PLDI",
     "pages": "651-674",
     "citation_source": "crossref"
+   },
+   {
+    "id": 19,
+    "kind": "report",
+    "url": "https://www.blackduck.com/content/dam/black-duck/en-us/reports/rep-ossra-2024.pdf",
+    "doi": null,
+    "title": "2025 Open Source Security and Risk Analysis Report",
+    "authors": "Black Duck",
+    "container": null,
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 20,
+    "kind": "journal",
+    "url": "https://flint.cs.yale.edu/flint/publications/ocap.pdf",
+    "doi": "10.1145/1190315.1190325",
+    "title": "An Open Framework for Foundational Proof-Carrying Code",
+    "authors": "Feng X, Ni Z, Shao Z, Guo Y",
+    "container": "Proceedings of the 2007 ACM SIGPLAN international workshop on Types in languages design and implementation",
+    "year": "2007",
+    "volume": null,
+    "issue": null,
+    "pages": "67-78",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 21,
+    "kind": "report",
+    "url": "https://deepmind.google/documents/36/Formal_Verification_of_Signal_4.pdf",
+    "doi": null,
+    "title": "AlphaProof Code: Verifying Signal’s Security at the Machine-Code Level",
+    "authors": "Swarat Chaudhuri, Andrew Ferraiuolo, Anton Kovsharov, Tej Chajed, Sam Schlesinger, Karn Seth, Jonathan Katz, Charles Sutton, Pushmeet Kohli",
+    "container": "Google DeepMind",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 22,
+    "kind": "web",
+    "url": "https://raw.githubusercontent.com/google-deepmind/code-verification/808b4b7ffef198e6a91f71ed776d641a1c236882/arm64-semantics/Arm64/Trusted/Process/Placed.lean",
+    "doi": null,
+    "title": "Placed Libraries in Linked ELF Executables (`Arm64.Obj.PlacedLib.InElf`)",
+    "authors": "Google LLC",
+    "container": "google-deepmind/code-verification",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 23,
+    "kind": "preprint",
+    "url": "https://google-deepmind.github.io/code-verification/",
+    "doi": null,
+    "title": "https://google-deepmind.github.io/code-verification/",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 24,
+    "kind": "report",
+    "url": "https://people.eecs.berkeley.edu/~necula/Papers/oracle_popl01.pdf",
+    "doi": null,
+    "title": "Oracle-Based Checking of Untrusted Software",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 25,
+    "kind": "report",
+    "url": "https://adam.chlipala.net/papers/BedrockPOPL15/BedrockPOPL15.pdf",
+    "doi": "10.1145/2676726.2677003",
+    "title": "From Network Interface to Multithreaded Web Applications: A Case Study in Modular Program Verification",
+    "authors": "Chlipala A",
+    "container": "Proceedings of the 42nd Annual ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages",
+    "year": "2015",
+    "volume": null,
+    "issue": null,
+    "pages": "609-622",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 26,
+    "kind": "book",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7324049/",
+    "doi": "10.1007/978-3-030-51054-1_7",
+    "title": "Extensible Extraction of Efficient Imperative Programs with Foreign Functions, Manually Managed Memory, and Proofs",
+    "authors": "Pit-Claudel C, Wang P, Delaware B, Gross J, Chlipala A",
+    "container": "Lecture Notes in Computer Science",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": "119-137",
+    "citation_source": "crossref"
    }
   ],
   "milestone_order": [
    "m1",
    "m2",
    "m3",
+   "m5",
    "m4"
   ],
   "results": [
@@ -786,755 +920,1084 @@
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "Rocq checked no-crash proofs for 239 fuzz-test entry points across 123 libraries.",
-    "detail": "The executable and safety property mechanically yield the specification, but the text does not demonstrate a receiver accepting a producer-supplied proof for an independently chosen safety policy.",
-    "quote": "The open-source library and its existing fuzz test are compiled to a RISC-V executable. This executable, along with Theorem’s RISC-V and OS formal semantics and the desired no-crash property, mechanically yield a specification the proof must satisfy. Claude writes the proof; the Rocq kernel checks it against the specification.",
+    "finding": "Rocq checked native RISC-V no-crash proofs for 239 fuzz-test entry points across 123 OSS-Fuzz libraries.",
+    "detail": "Confirmed applies to the Rocq-checked no-crash result under the modeled semantics.",
+    "quote": "Claude successfully patched the bugs it found and then proved that there are no crashes on any input (up to 64 MB) for 239 entry points across 123 different OSS-Fuzz libraries.",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 1,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "partial",
-    "finding": "One x86-compiled Linux kernel zlib implementation was proved to satisfy a formal format specification.",
-    "detail": "The result concerns binary-level functional correctness, but the text does not state an explicit component precondition and postcondition or establish Bedrock's theorem.",
-    "quote": "Then, we had Claude prove that the zlib implementation in the Linux kernel correctly implements that spec.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 1,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "One certifying compiler reconstructs a type-safety proof for generated machine code.",
-    "detail": "The compiler preserves typing invariants and reconstructs a proof using a verification-condition generator and theorem prover. The retrospective does not establish that a receiver checks a producer-supplied proof against a condition derived from the received code.",
-    "quote": "We could then we reconstruct the proof using a standard veriﬁcation condition generator (VCGen) and a simple theorem prover.",
+    "finding": "One certifying C compiler prototype reconstructed type-safety proofs for native output. The number of test programs is unspecified.",
+    "detail": "The retrospective describes the authors’ prototype. It provides no evidence of independent replication, peer review of this retrospective, or a proof-assistant check of the reported result.",
+    "quote": "We could then we reconstruct the proof\nusing a standard veriﬁcation condition generator (VCGen)\nand a simple theorem prover.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Special J certifying compiler: sample size not stated; produced proof-carrying x86 code checked by a host.",
-    "detail": "The host derives a verification condition from the received native code and checks the supplied proof using logical proof rules. The reported policy is type safety, subject to the code semantics and checker. The supplied text is character-encoded.",
-    "quote": "/C7/D2/CR/CT /CP /CE /BV /CX/D7 /D3/CQ/D8/CP/CX/D2/CT/CS/B8 /D8/CW/CT /D4/D6/D3 /D3/CU /CR/CP/D2 /D8/CW/CT/D2 /CQ /CT /CR /CW/CT/CR /CZ /CT/CS\n/D8/D3 /D7/CT/CT /CX/CU /CX/D8 /CX/D7 /CX/D2 /CU/CP/CR/D8 /CP /DA /CP/D0/CX/CS /D4/D6/D3 /D3/CU /D3/CU /D8/CW/CT /CE /BV/BA",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "met",
-    "finding": "Bedrock demonstrates 1 destructive linked-list append component with a precondition and concatenation postcondition.",
-    "detail": "The foundational guarantee concerns Bedrock IL execution between specified labels; the AMD64 compiler was unverified. The appendix example's specification appears in Figure 2.",
-    "quote": "A ﬁnal foundational theorem will be of the form “if execution\nbegins at code address𝓁1 in a state satisfying the spec of𝓁1, then if\nexecution ever reaches code address𝓁2, the spec of𝓁2 will be satis-\nﬁed.”",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "partial",
-    "finding": "s2n-bignum assembly: equivalence checked for 15 pairs of arithmetic routines.",
-    "detail": "The HOL Light framework was also used to verify functional correctness of optimized routines. The source does not report the specified Bedrock theorem or linked-list append demonstration.",
-    "quote": "Overall, we checked the equivalence for 15 pairs of arithmetic routines, amounting to a total of 19k lines of proofs.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "met",
-    "finding": "Bedrock linking preserves correctness for 2 separately verified modules under compatible assumption maps.",
-    "detail": "Defined code labels must be disjoint, and assumptions must agree where their maps overlap. The result concerns Bedrock IL and partial correctness.",
-    "quote": "Informally, when we have proved two modules correct under\nsome assumptions, we have proved the concatenation of the\nmodules correct, under the union of their assumptions.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": null,
-    "verdict": "met",
-    "finding": "One bare-metal cryptographic server: garagedoor_correct proves the RISC-V machine-code I/O contract.",
-    "detail": "The theorem assumes the specified initial state and establishes repeated eventual satisfaction of io_spec, including liveness under the model. It does not establish cryptographic protocol security.",
-    "quote": "Figure 2 shows the statement of the end-to-end theorem that we proved about our demonstra-\ntion system.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "partial",
-    "finding": "The certifying compiler produces a checkable type-safety proof for native code, illustrated with 1 polynomial-evaluation method.",
-    "detail": "The result concerns type safety of annotated x86 code. It does not establish the method's functional precondition and postcondition or Bedrock's foundational theorem.",
-    "quote": "/CR/CP/D2 /CQ /CT /D6/CP/D4/CX/CS/D0/DD /CR /CW/CT/CR /CZ /CT/CS /CU/D3/D6 /D8 /DD/D4 /CT\n/D7/CP/CU/CT/D8 /DD /CQ /DD /CP /D7/D1/CP/D0/D0 /D4/D6/D3 /D3/CU/B9/CR /CW/CT/CR /CZ /CT/D6/BA",
+    "finding": "Special J certifies one native x86 loop, with four proof obligations on its back edge.",
+    "detail": "The source is a PLDI 2000 conference paper. The worked certification covers the optimized loop in eval. The supplied text encodes the prose as glyph tokens, so the quote preserves the supplied encoding.",
+    "quote": "/D6/CT/D7/D9/D0/D8/CX/D2/CV /CU/D3/D9/D6 /D4/D6/D3 /D3/CU /D3/CQ/D0/CX/CV/CP/D8/CX/D3/D2/D7 /CP/D6/CT /D7/CW /D3 /DB/D2 /CQ /CT/D0/D3 /DB/D8/CW /CT /CY/D0\n/CX/D2/D7/D8/D6/D9/CR/D8/CX/D3/D2/BA",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Bedrock proves certified statements form valid XCAP modules whose correctness theorems can be linked; no two-module demonstration is specified.",
-    "detail": "The text describes modular linking but does not state the required disjoint-label and overlapping-assumption conditions or demonstrate the specified Cito and Bedrock module linkage. The theorem concerns Bedrock IL; its AMD64 compiler is unverified.",
-    "quote": "This notion of module validity follows XCAP’s modular\nverification approach, so that it is possible to link such theorems to-\ngether to produce theorems about larger composite modules, with-\nout revisiting module internals.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "For 1 optimized Montgomery reduction routine, equivalence proofs for basic blocks were composed to establish whole-loop equivalence.",
-    "detail": "The result composes equivalence proofs for blocks; it does not apply Bedrock’s linking rule to two separately verified modules with compatible assumption maps.",
-    "quote": "For each optimization, we applied sequential composition of equivalences between each basic block pair and induced the equivalence of the whole loop.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": null,
-    "verdict": "partial",
-    "finding": "For 1 optimized Montgomery reduction routine, composed equivalence proofs and an original correctness proof established functional correctness.",
-    "detail": "The result concerns a cryptographic routine, not an executable application’s machine-code I/O contract or the specified garagedoor_correct theorem.",
-    "quote": "We verified the functional correctness of the optimized Montgomery reduction by transitively composing equivalence proofs with the original correctness proof after each optimization stage.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "One low-level finite-set module has a checked behavioral specification used in the CountUnique program.",
-    "detail": "The verified Bedrock module is linked against explicit preconditions and postconditions for finite-set operations. The guarantee concerns Bedrock IL, not verified native-code translation.",
-    "quote": "The code is split\nin two parts, which can be veriﬁed separately.",
+    "finding": "Coq checked one Bedrock IL server procedure whose return contract covers 3 query types.",
+    "detail": "The source is an ICFP conference paper, represented as report because the schema has no conference-paper category.",
+    "quote": "Finally, the program is proved to meet its spec with a short\nsequences of Coq tactics.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
-    "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
-    "milestone": "m4",
+    "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "One CountUnique program combines separately verified high- and low-level modules into a whole-program proof.",
-    "detail": "The result concerns a Bedrock IL abstract machine and partial correctness. It does not model external I/O or establish termination, and it is not the specified RISC-V cryptographic-server theorem.",
-    "quote": "We are able to establish the compilation correct-\nness of each piece of high- or low-level code modularly and\nthen compose them into a full-program correctness theorem.",
+    "finding": "The Bedrock benchmark links 2 separately verified modules, the query server and the allocator.",
+    "detail": "Confirmation covers the component verification and reported benchmark link. The Coq theorem shown is for the server module with its allocator import.",
+    "quote": "The Bedrock implementation from Figure 7 (50 lines, compiled\nto 561 lines of assembly with the Bedrock malloc library\nlinked in), which is the only one of the implementations that\nwe veriﬁed as correct.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
-    "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "HOL Light verified constant-time behavior for 2 s2n-bignum assembly routines.",
+    "detail": "The event model covers memory accesses and branches. The case studies leave variable-time operations such as division outside the modeled event trace.",
+    "quote": "We apply the constant-time verification to the s2n-bignum library, notably on the copy program of large integers, cf.\nbignum_copy\n, and the inversion modulo a prime",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
-    "finding": "One Montgomery-ladder implementation has a checked behavioral correctness proof in Bedrock2.",
-    "detail": "The proof relates derived Bedrock2 code to a low-level functional specification. Bedrock2 is a C-like language, rather than the intermediate assembly language specified in the criterion.",
+    "finding": "HOL Light checked functional correctness for the 16-instruction bignum_copy routine.",
+    "detail": null,
+    "quote": "routine is relatively small, comprising 16 instructions that copy the content of buffer\nk\nto the buffer\nz\n, padding\nz\nwith zeros if it is bigger than\nk\n.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "HOL Light composed basic-block equivalence proofs to verify 1 optimized Montgomery reduction routine.",
+    "detail": null,
+    "quote": "composition of equivalences between each basic block pair and induced the equivalence of the whole loop.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "Coq checked the return contract for 1 Bedrock IL procedure, CountUnique's count.",
+    "detail": "The contract applies to arrays whose supplied length matches their actual length and assumes the specified array and finite-set operations.",
+    "quote": "The proof of theorem main_ok, establishing correctness\nof the main program function, is where we apply the pro-\ngram logic to deduce that the Cito implementation of count\nfrom Figure 13 implements the speciﬁcation count_spec\nfrom the same ﬁgure.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "met",
+    "finding": "Coq checked 1 linked CountUnique program from separate Bedrock IL module proofs.",
+    "detail": "The excerpt names count_compil, main, and list_set and elides the remaining modules, so it does not state the total module count. The source is an OOPSLA conference proceedings paper.",
+    "quote": "Figure 14 shows more standard Bedrock code deﬁning\na wrapper to call count on a particular input array and\nthen linking together all program modules into a closed pro-\ngram with a partial-correctness theorem.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Coq checks the postcondition of 1 Bedrock2 Montgomery-ladder implementation.",
+    "detail": null,
     "quote": "InFigure 5, we show the theorem and proof script that derives the imperative code excerpted in\nFigure 6and simultaneously proves its correctness with respect to the low-level functional code.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "One server integrates proofs from three independently developed projects into a whole-system theorem.",
-    "detail": "The paper reports integration through common Coq foundations and interface proofs, but does not report applying the specified Bedrock linking rule to two modules.",
+    "finding": "One checked server proof integrates components from 3 established projects.",
+    "detail": null,
     "quote": "We integrate three independently successful projects that were not developed within a single\nprescriptive framework, and yet we find that their most primitive specifications (once all domain-\nspecific machinery has been encapsulated) are enough to connect them with manageable glue\ncode and integration proofs.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "met",
+    "finding": "One RISC-V server is proved to repeatedly satisfy io_spec from initial states with PC 0x20400000.",
+    "detail": null,
+    "quote": "Theorem garagedoor_correct : forall mach : RiscvMachine, initial_conditions mach ->\nalways run1 (eventually run1 (fun mach' => io_spec mach'.(getLog))) mach.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 6,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
-    "finding": "One lightbulb-controller case study proves a machine-code request-handling bound of about 10 million instructions, plus peripheral retries.",
-    "detail": "Source-level behavioral and timing specifications are composed with a verified compiler to yield a machine-code system theorem. The paper does not report Bedrock’s specified label-to-label theorem or its linked-list append demonstration.",
+    "finding": "One Bedrock2 procedure, ipow, has a checked source-level postcondition specifying exponentiation modulo 2^64.",
+    "detail": "The schema has no conference-paper category. The source is a published CPP ’26 proceedings paper, represented here as report.",
+    "quote": "This program is\nsimple enough that we prove the tightest possible bounds\nthat can be proved in the framework.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One RV32IM lightbulb controller has a checked successive-request theorem with a bound of about 10 million instructions per command before peripheral polling costs.",
+    "detail": "The theorem allows unbounded bring-up time. Its request specification also has cases for no packet, invalid or oversized packets, and SPI timeout.",
     "quote": "We equipped the Bedrock2 lightbulb-controller [13] software\nstack with concrete bounds on the computation required to\nhandle a command: about 10 million instructions, plus retry-\ning accesses to peripheral devices when they are busy.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Four DEC Alpha packet filters carried safety proofs; loading and proof validation took 1–3 milliseconds.",
-    "detail": "The consumer derives a safety predicate from the native code and checks the supplied proof against it. The packet-filter policy assumes valid packet and scratch-memory addresses. The supplied text identifies the paper as forthcoming at OSDI.",
-    "quote": "The one/-time cost of loading and\nc hec king the v alidit y of the safet y pro ofs is b et w een\n/1 and /3 milliseconds/.",
+    "finding": "The receiver checked safety proofs for four native DEC Alpha packet filters, with a maximum validation time of 2.35 ms.",
+    "detail": "The proofs establish memory safety and termination under the kernel's calling precondition, which supplies valid packet and scratch-memory addresses.",
+    "quote": "W eh a v e implemen ted four t ypical pac k et /#0Clters\nin assem bly language and certi/#0Ced their safet y with\nresp ect to the pac k et /#0Clter safet y p olicy /.",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "One DEC Alpha shopping agent was certified for memory safety and an access-control policy.",
-    "detail": "The consumer generates a safety predicate from the code and checks that the supplied proof establishes that predicate using the policy’s axioms and inference rules. The text describes a submitted paper; peer review is not established.",
-    "quote": "Previous sections describ e Pro of/-Carrying Co de and an example of its use for\ncertifying the memory safet y and the conformance with a simple access protec/-\ntion sc heme for a simple shopping agen t/.",
-    "checked": true,
-    "confirmed": false,
+    "finding": "Producer-supplied safety proofs were checked for two native DEC Alpha agents. The extended agent's proof took 12.3 ms to check.",
+    "detail": "Table 5 reports proof-checking time separately from verification-condition generation and proof generation.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "One integer-manipulating component was certified at assembly level against a non-negativity policy; its proof certificate was 7.7 KB.",
-    "detail": "The report describes deriving a verification condition from the binary and checking its certificate, but the experimental result does not explicitly report a receiver performing that check.",
-    "quote": "Our tool was able to successfully prove, and certify at the assembly code level, that the implementation of the component does indeed satisfy the desired claim.",
+    "finding": "Native-code safety certification across three reported examples, with a 7.7 KB certificate for the nonnegative-integer component.",
+    "detail": "The prototype used publicly available tools for proof checking and SAT formula generation. Packaging the proof with executable code was deferred.",
+    "quote": "Our tool was able to successfully prove, and certify at the\nassembly code level, that the implementation of the component does indeed satisfy the desired claim.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 17,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One CompCert assembly procedure, encrypt.s, is proved in Coq to simulate a specification that writes the input XOR 42.",
+    "detail": "Lemma 6.2 establishes a threaded forward simulation under the CompCert calling and memory conventions.",
+    "quote": "Lemma 6.2. 𝐿E⩽C[[encrypt.s]].",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "CompCertOC links 3 modules and derives a simulation for the complete program.",
-    "detail": "The result concerns compositional compiler correctness using threaded forward simulations, rather than Bedrock’s linking rule and its assumption-map conditions.",
-    "quote": "Finally,\nwe perform module linking to link the three modules into a complete program, and thread linking\nto give closed semantics to pthread_create, pthread_join and yield and to derive the closed\nforward simulation⩽closed.",
+    "finding": "CompCertOC composes separate refinements for three modules into a Coq-checked forward simulation for their linked assembly.",
+    "detail": "The client and server refinements follow from compiler correctness. The assembly routine is verified directly against its C-level specification.",
+    "quote": "Lemma 6.4 (Threaded Forward Simulation for Composed Modules).\n[[client.c]]⊕[[ server.c]]⊕ 𝐿E⩽C[[client.s+ server.s+ encrypt.s]]",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 18,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Lean checked matching placements for libsignal code and musl’s allocator in one static AArch64 ELF.",
+    "detail": "The source describes a permission-aware loader and notes that symbol names extracted from object files are trusted. It does not document the specific placement permission and symbol-table checks required by the criterion.",
+    "quote": "They hold for every placement of the code and of musl’s allocator in memory that matches the bytes of the executable, and Lean checks that such placements exist.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 23,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "Intel x86 Java type-safety checks covered nearly 300 packages, with proof oracles averaging 12% of machine-code size across nine reported examples.",
+    "detail": "The oracle encodes proof choices as bits. The receiver validates those choices under the policy rules without constructing an explicit proof term. The source is a peer-reviewed POPL proceedings paper.",
+    "quote": "We observe that oracles are on average nearly 30 times\nsmaller than LF i proofs, and about 12% of the size of the\nmachine code.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 24,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "For 1 concrete Bedrock procedure, ThreadQueue’s yield(q), Coq verifies that every return satisfies the stated postcondition.",
+    "detail": "The proof assumes the imported module contracts and the stated rules for shared-state evolution. The reported result is at the Bedrock IL level.",
+    "quote": "As an example of one of the proved speciﬁcations for Thread-\nQueue’s methods, here is the speciﬁcation for yield().",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 25,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The process-scheduler benchmark links 2 separately verified Bedrock components in Coq into a correct executable module.",
+    "detail": null,
+    "quote": "This benchmark starts from high-level Fiat specifications (as shown in Fig.\n5\na) and outputs a closed Bedrock module, linked against a hand-verified nested-binary-tree implementation.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 26,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    }
   ],
   "judged": [
    {
     "url": "https://www.anthropic.com/research/formal-verification",
     "milestone": "m1",
-    "hash": "afadcfc7dd8b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "999682c9c487",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.anthropic.com/research/formal-verification",
     "milestone": "m2",
-    "hash": "141bed21034f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c96108e89922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.anthropic.com/research/formal-verification",
     "milestone": "m3",
-    "hash": "c9f3a4e57dc6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "861051816e1e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.anthropic.com/research/formal-verification",
+    "milestone": "m5",
+    "hash": "d51f73095144",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.anthropic.com/research/formal-verification",
     "milestone": "m4",
-    "hash": "50d885d4c703",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "b87b0886e1fe",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.anthropic.com/research/formal-verification",
     "milestone": "completion",
     "hash": "29251d27b5c2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://deepspec.org/page/Research/",
     "milestone": "m1",
-    "hash": "afadcfc7dd8b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "999682c9c487",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://deepspec.org/page/Research/",
     "milestone": "m2",
-    "hash": "141bed21034f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c96108e89922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://deepspec.org/page/Research/",
     "milestone": "m3",
-    "hash": "c9f3a4e57dc6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "861051816e1e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://deepspec.org/page/Research/",
+    "milestone": "m5",
+    "hash": "d51f73095144",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://deepspec.org/page/Research/",
     "milestone": "m4",
-    "hash": "50d885d4c703",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "b87b0886e1fe",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://deepspec.org/page/Research/",
     "milestone": "completion",
     "hash": "29251d27b5c2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.darpa.mil/research/programs/verified-security-and-performance-enhancement-of-large-legacy-software",
     "milestone": "m1",
-    "hash": "afadcfc7dd8b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "999682c9c487",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.darpa.mil/research/programs/verified-security-and-performance-enhancement-of-large-legacy-software",
     "milestone": "m2",
-    "hash": "141bed21034f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c96108e89922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.darpa.mil/research/programs/verified-security-and-performance-enhancement-of-large-legacy-software",
     "milestone": "m3",
-    "hash": "c9f3a4e57dc6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "861051816e1e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.darpa.mil/research/programs/verified-security-and-performance-enhancement-of-large-legacy-software",
+    "milestone": "m5",
+    "hash": "d51f73095144",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.darpa.mil/research/programs/verified-security-and-performance-enhancement-of-large-legacy-software",
     "milestone": "m4",
-    "hash": "50d885d4c703",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "b87b0886e1fe",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.darpa.mil/research/programs/verified-security-and-performance-enhancement-of-large-legacy-software",
     "milestone": "completion",
     "hash": "29251d27b5c2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.eecs.berkeley.edu/~necula/Papers/certcomp_retrospective.pdf",
     "milestone": "m1",
-    "hash": "afadcfc7dd8b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "999682c9c487",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.eecs.berkeley.edu/~necula/Papers/certcomp_retrospective.pdf",
     "milestone": "m2",
-    "hash": "141bed21034f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c96108e89922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.eecs.berkeley.edu/~necula/Papers/certcomp_retrospective.pdf",
     "milestone": "m3",
-    "hash": "c9f3a4e57dc6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "861051816e1e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.eecs.berkeley.edu/~necula/Papers/certcomp_retrospective.pdf",
+    "milestone": "m5",
+    "hash": "d51f73095144",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.eecs.berkeley.edu/~necula/Papers/certcomp_retrospective.pdf",
     "milestone": "m4",
-    "hash": "50d885d4c703",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "b87b0886e1fe",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.eecs.berkeley.edu/~necula/Papers/certcomp_retrospective.pdf",
     "milestone": "completion",
     "hash": "29251d27b5c2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://tests.reproducible-builds.org/debian/index_dashboard.html",
     "milestone": "m1",
-    "hash": "afadcfc7dd8b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "999682c9c487",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://tests.reproducible-builds.org/debian/index_dashboard.html",
     "milestone": "m2",
-    "hash": "141bed21034f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c96108e89922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://tests.reproducible-builds.org/debian/index_dashboard.html",
     "milestone": "m3",
-    "hash": "c9f3a4e57dc6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "861051816e1e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://tests.reproducible-builds.org/debian/index_dashboard.html",
+    "milestone": "m5",
+    "hash": "d51f73095144",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://tests.reproducible-builds.org/debian/index_dashboard.html",
     "milestone": "m4",
-    "hash": "50d885d4c703",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "b87b0886e1fe",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://tests.reproducible-builds.org/debian/index_dashboard.html",
     "milestone": "completion",
     "hash": "29251d27b5c2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2501.15919",
     "milestone": "m1",
-    "hash": "afadcfc7dd8b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "999682c9c487",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2501.15919",
     "milestone": "m2",
-    "hash": "141bed21034f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c96108e89922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2501.15919",
     "milestone": "m3",
-    "hash": "c9f3a4e57dc6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "861051816e1e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2501.15919",
+    "milestone": "m5",
+    "hash": "d51f73095144",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2501.15919",
     "milestone": "m4",
-    "hash": "50d885d4c703",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "b87b0886e1fe",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2501.15919",
     "milestone": "completion",
     "hash": "29251d27b5c2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.tufts.edu/comp/150CMP/papers/colby00certifying.pdf",
     "milestone": "m1",
-    "hash": "afadcfc7dd8b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://adam.chlipala.net/papers/BedrockICFP13/BedrockICFP13.pdf",
-    "milestone": "m2",
-    "hash": "141bed21034f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://link.springer.com/chapter/10.1007/978-3-031-98668-0_19",
-    "milestone": "m2",
-    "hash": "141bed21034f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://people.csail.mit.edu/wangpeng/oopsla031-wang.pdf",
-    "milestone": "m3",
-    "hash": "c9f3a4e57dc6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://adam.chlipala.net/papers/GarageDoorPLDI24/GarageDoorPLDI24.pdf",
-    "milestone": "m4",
-    "hash": "50d885d4c703",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.research-collection.ethz.ch/server/api/core/bitstreams/d9af9dbe-290b-4b73-8645-7f5e37706c57/content",
-    "milestone": "m4",
-    "hash": "50d885d4c703",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "999682c9c487",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.tufts.edu/comp/150CMP/papers/colby00certifying.pdf",
     "milestone": "m2",
-    "hash": "141bed21034f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c96108e89922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.tufts.edu/comp/150CMP/papers/colby00certifying.pdf",
     "milestone": "m3",
-    "hash": "c9f3a4e57dc6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "861051816e1e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.tufts.edu/comp/150CMP/papers/colby00certifying.pdf",
+    "milestone": "m5",
+    "hash": "d51f73095144",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.tufts.edu/comp/150CMP/papers/colby00certifying.pdf",
     "milestone": "m4",
-    "hash": "50d885d4c703",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "b87b0886e1fe",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.tufts.edu/comp/150CMP/papers/colby00certifying.pdf",
     "milestone": "completion",
     "hash": "29251d27b5c2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://adam.chlipala.net/papers/BedrockICFP13/BedrockICFP13.pdf",
     "milestone": "m1",
-    "hash": "afadcfc7dd8b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "999682c9c487",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://adam.chlipala.net/papers/BedrockICFP13/BedrockICFP13.pdf",
+    "milestone": "m2",
+    "hash": "c96108e89922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://adam.chlipala.net/papers/BedrockICFP13/BedrockICFP13.pdf",
     "milestone": "m3",
-    "hash": "c9f3a4e57dc6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "861051816e1e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://adam.chlipala.net/papers/BedrockICFP13/BedrockICFP13.pdf",
+    "milestone": "m5",
+    "hash": "d51f73095144",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://adam.chlipala.net/papers/BedrockICFP13/BedrockICFP13.pdf",
     "milestone": "m4",
-    "hash": "50d885d4c703",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "b87b0886e1fe",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://adam.chlipala.net/papers/BedrockICFP13/BedrockICFP13.pdf",
     "milestone": "completion",
     "hash": "29251d27b5c2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/chapter/10.1007/978-3-031-98668-0_19",
     "milestone": "m1",
-    "hash": "afadcfc7dd8b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "999682c9c487",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://link.springer.com/chapter/10.1007/978-3-031-98668-0_19",
+    "milestone": "m2",
+    "hash": "c96108e89922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/chapter/10.1007/978-3-031-98668-0_19",
     "milestone": "m3",
-    "hash": "c9f3a4e57dc6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "861051816e1e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://link.springer.com/chapter/10.1007/978-3-031-98668-0_19",
+    "milestone": "m5",
+    "hash": "d51f73095144",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/chapter/10.1007/978-3-031-98668-0_19",
     "milestone": "m4",
-    "hash": "50d885d4c703",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "b87b0886e1fe",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/chapter/10.1007/978-3-031-98668-0_19",
     "milestone": "completion",
     "hash": "29251d27b5c2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.csail.mit.edu/wangpeng/oopsla031-wang.pdf",
     "milestone": "m1",
-    "hash": "afadcfc7dd8b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "999682c9c487",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.csail.mit.edu/wangpeng/oopsla031-wang.pdf",
     "milestone": "m2",
-    "hash": "141bed21034f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c96108e89922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.csail.mit.edu/wangpeng/oopsla031-wang.pdf",
+    "milestone": "m3",
+    "hash": "861051816e1e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.csail.mit.edu/wangpeng/oopsla031-wang.pdf",
+    "milestone": "m5",
+    "hash": "d51f73095144",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.csail.mit.edu/wangpeng/oopsla031-wang.pdf",
     "milestone": "m4",
-    "hash": "50d885d4c703",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "b87b0886e1fe",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.csail.mit.edu/wangpeng/oopsla031-wang.pdf",
     "milestone": "completion",
     "hash": "29251d27b5c2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://adam.chlipala.net/papers/GarageDoorPLDI24/GarageDoorPLDI24.pdf",
     "milestone": "m1",
-    "hash": "afadcfc7dd8b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "999682c9c487",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://adam.chlipala.net/papers/GarageDoorPLDI24/GarageDoorPLDI24.pdf",
     "milestone": "m2",
-    "hash": "141bed21034f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c96108e89922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://adam.chlipala.net/papers/GarageDoorPLDI24/GarageDoorPLDI24.pdf",
     "milestone": "m3",
-    "hash": "c9f3a4e57dc6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "861051816e1e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://adam.chlipala.net/papers/GarageDoorPLDI24/GarageDoorPLDI24.pdf",
+    "milestone": "m5",
+    "hash": "d51f73095144",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://adam.chlipala.net/papers/GarageDoorPLDI24/GarageDoorPLDI24.pdf",
+    "milestone": "m4",
+    "hash": "b87b0886e1fe",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://adam.chlipala.net/papers/GarageDoorPLDI24/GarageDoorPLDI24.pdf",
     "milestone": "completion",
     "hash": "29251d27b5c2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.research-collection.ethz.ch/server/api/core/bitstreams/d9af9dbe-290b-4b73-8645-7f5e37706c57/content",
     "milestone": "m1",
-    "hash": "afadcfc7dd8b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "999682c9c487",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.research-collection.ethz.ch/server/api/core/bitstreams/d9af9dbe-290b-4b73-8645-7f5e37706c57/content",
     "milestone": "m2",
-    "hash": "141bed21034f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c96108e89922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.research-collection.ethz.ch/server/api/core/bitstreams/d9af9dbe-290b-4b73-8645-7f5e37706c57/content",
     "milestone": "m3",
-    "hash": "c9f3a4e57dc6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "861051816e1e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.research-collection.ethz.ch/server/api/core/bitstreams/d9af9dbe-290b-4b73-8645-7f5e37706c57/content",
+    "milestone": "m5",
+    "hash": "d51f73095144",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.research-collection.ethz.ch/server/api/core/bitstreams/d9af9dbe-290b-4b73-8645-7f5e37706c57/content",
+    "milestone": "m4",
+    "hash": "b87b0886e1fe",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.research-collection.ethz.ch/server/api/core/bitstreams/d9af9dbe-290b-4b73-8645-7f5e37706c57/content",
     "milestone": "completion",
     "hash": "29251d27b5c2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.columbia.edu/~nieh/teaching/e6118_s00/papers/necula_pcc-osdi96.pdf",
     "milestone": "m1",
-    "hash": "afadcfc7dd8b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "999682c9c487",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.columbia.edu/~nieh/teaching/e6118_s00/papers/necula_pcc-osdi96.pdf",
+    "milestone": "m2",
+    "hash": "c96108e89922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.columbia.edu/~nieh/teaching/e6118_s00/papers/necula_pcc-osdi96.pdf",
+    "milestone": "m3",
+    "hash": "861051816e1e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.columbia.edu/~nieh/teaching/e6118_s00/papers/necula_pcc-osdi96.pdf",
+    "milestone": "m5",
+    "hash": "d51f73095144",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.columbia.edu/~nieh/teaching/e6118_s00/papers/necula_pcc-osdi96.pdf",
+    "milestone": "m4",
+    "hash": "b87b0886e1fe",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.columbia.edu/~nieh/teaching/e6118_s00/papers/necula_pcc-osdi96.pdf",
+    "milestone": "completion",
+    "hash": "29251d27b5c2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.cs.vt.edu/~kafura/cs6204/Readings/Enforcement/ProofCarryingCode2.pdf",
     "milestone": "m1",
-    "hash": "afadcfc7dd8b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "999682c9c487",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.cs.vt.edu/~kafura/cs6204/Readings/Enforcement/ProofCarryingCode2.pdf",
+    "milestone": "m2",
+    "hash": "c96108e89922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.cs.vt.edu/~kafura/cs6204/Readings/Enforcement/ProofCarryingCode2.pdf",
+    "milestone": "m3",
+    "hash": "861051816e1e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.cs.vt.edu/~kafura/cs6204/Readings/Enforcement/ProofCarryingCode2.pdf",
+    "milestone": "m5",
+    "hash": "d51f73095144",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.cs.vt.edu/~kafura/cs6204/Readings/Enforcement/ProofCarryingCode2.pdf",
+    "milestone": "m4",
+    "hash": "b87b0886e1fe",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.cs.vt.edu/~kafura/cs6204/Readings/Enforcement/ProofCarryingCode2.pdf",
+    "milestone": "completion",
+    "hash": "29251d27b5c2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://insights.sei.cmu.edu/documents/777/2007_005_001_14855.pdf",
     "milestone": "m1",
-    "hash": "afadcfc7dd8b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "999682c9c487",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://insights.sei.cmu.edu/documents/777/2007_005_001_14855.pdf",
+    "milestone": "m2",
+    "hash": "c96108e89922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://insights.sei.cmu.edu/documents/777/2007_005_001_14855.pdf",
+    "milestone": "m3",
+    "hash": "861051816e1e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://insights.sei.cmu.edu/documents/777/2007_005_001_14855.pdf",
+    "milestone": "m5",
+    "hash": "d51f73095144",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://insights.sei.cmu.edu/documents/777/2007_005_001_14855.pdf",
+    "milestone": "m4",
+    "hash": "b87b0886e1fe",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://insights.sei.cmu.edu/documents/777/2007_005_001_14855.pdf",
+    "milestone": "completion",
+    "hash": "29251d27b5c2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://jhc.sjtu.edu.cn/~yutingwang/files/papers/pldi25.pdf",
+    "milestone": "m1",
+    "hash": "999682c9c487",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://jhc.sjtu.edu.cn/~yutingwang/files/papers/pldi25.pdf",
+    "milestone": "m2",
+    "hash": "c96108e89922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://jhc.sjtu.edu.cn/~yutingwang/files/papers/pldi25.pdf",
     "milestone": "m3",
-    "hash": "c9f3a4e57dc6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "861051816e1e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://jhc.sjtu.edu.cn/~yutingwang/files/papers/pldi25.pdf",
+    "milestone": "m5",
+    "hash": "d51f73095144",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://jhc.sjtu.edu.cn/~yutingwang/files/papers/pldi25.pdf",
+    "milestone": "m4",
+    "hash": "b87b0886e1fe",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://jhc.sjtu.edu.cn/~yutingwang/files/papers/pldi25.pdf",
+    "milestone": "completion",
+    "hash": "29251d27b5c2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://google-deepmind.github.io/code-verification/",
+    "milestone": "m1",
+    "hash": "999682c9c487",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://google-deepmind.github.io/code-verification/",
+    "milestone": "m2",
+    "hash": "c96108e89922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://google-deepmind.github.io/code-verification/",
+    "milestone": "m3",
+    "hash": "861051816e1e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://google-deepmind.github.io/code-verification/",
+    "milestone": "m5",
+    "hash": "d51f73095144",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://google-deepmind.github.io/code-verification/",
     "milestone": "m4",
-    "hash": "50d885d4c703",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "b87b0886e1fe",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://google-deepmind.github.io/code-verification/",
+    "milestone": "completion",
+    "hash": "29251d27b5c2",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://google-deepmind.github.io/code-verification/Tier-1___-statements/Theorem-files/Symbolic.Theorems.Security/",
+    "milestone": "m5",
+    "hash": "d51f73095144",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.eecs.berkeley.edu/~necula/Papers/oracle_popl01.pdf",
+    "milestone": "m1",
+    "hash": "999682c9c487",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://adam.chlipala.net/papers/BedrockPOPL15/BedrockPOPL15.pdf",
+    "milestone": "m2",
+    "hash": "c96108e89922",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7324049/",
+    "milestone": "m3",
+    "hash": "861051816e1e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-15",
   "log": [
    {
@@ -1606,8 +2069,88 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 13 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"In a 2024 audit of commercial software, applications averaged 911 open-source components. Function declarations tell maintainers which types a library accepts, but leave its behavior unspecified. When components lack behavioral contracts, replacing one can require analyzing most of the application again. Maintainers could reuse proofs for unchanged libraries and check whether a replacement preserves a required behavior, provided the contracts cover that behavior and each caller meets the conditions its libraries assume.\". Reason: The current paragraph reports one experiment’s proof-checking cost but leaves out the integrator’s problem and the conditions under which a library proof can be reused."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"The receiver derives a verification condition from the received native code under its published safety policy. Before execution, it checks that the producer\\u2019s proof establishes that condition using the policy\\u2019s axioms and inference rules.\"; set_by = \"Necula and Lee\\u2019s proof-carrying-code protocol, OSDI 1996, and Necula\\u2019s PCC project description.\"; set_by_kind = \"protocol\"; threshold_quote = \"This predicate must then be proved by the code producer using axioms and inference rules supplied by the code consumer\"; threshold_ref = 7; refs = [15, 7, 8]. Reason: The criterion mixes the receiver’s acceptance test with later examples and omits the 1996 packet-filter paper that first demonstrated the test."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: title = \"A Bedrock component has a checked proof that it meets its postcondition whenever it returns.\"; criterion = \"Check a proof under the operational semantics of Bedrock\\u2019s intermediate assembly language. From any state satisfying a block\\u2019s entry specification, execution must proceed safely to the end of the block and satisfy the next block\\u2019s specification on transfer. For a procedure, the specification at its return label must imply the stated postcondition.\"; threshold_quote = \"and exits the block by jumping to some other block, the spec of the new block is satisfied.\"; threshold_ref = 9; refs = [9]. Reason: The linked-list example obscures the general test and the distinction between satisfying a postcondition on return and proving termination."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Check a correctness proof for each of two Bedrock intermediate-language modules under its own map of code labels to assumed preconditions. The modules must define disjoint sets of labels, and the two maps must assign identical preconditions to every label they share. Apply the linking rule to establish correctness of the combined module under the union of the maps.\"; threshold_quote = \"we have proved the concatenation of the modules correct, under the union of their assumptions.\"; threshold_ref = 10; refs = [10]. Reason: The criterion includes a Cito case study where only the premises and conclusion of Bedrock’s linking rule determine acceptance."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m3: \"A checked placement matches a verified library’s relocated code and data to a linked executable.\". Reason: Agreement between abstract module specifications leaves open whether the linked executable contains the verified instructions and data after relocation."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: title = \"Composed proofs show that the RISC-V server repeatedly satisfies its input-output specification.\"; criterion = \"Check garagedoor_correct for every RISC-V machine state satisfying initial_conditions. The program counter starts at 0x20400000, the I/O log is empty, and memory contains the specified code and required working space. From every reachable state, execution must reach a state whose accumulated I/O log satisfies io_spec, which covers peripheral initialization and the server\\u2019s network protocol.\"; threshold_quote = \"always run1 (eventually run1 (fun mach' => io_spec mach'.(getLog))) mach.\"; threshold_ref = 6; refs = [6]. Reason: The title suggests a generic application test while the criterion uses a specific RISC-V server theorem and includes the authors’ result."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "structure = parallel. Reason: Checking the bytes placed by a linker and proving compatibility between module contracts are separate obligations that can be discharged in either order."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Applied 7 of 7 proposed operations from SWE-10-revise-20261121T162647189073Z; now version 2."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m3, m5, m4."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 0 from arXiv, 3 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 5 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 17 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 4 candidates returned, 0 dropped as sources already used, 4 to judge."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 4 of 4 new candidates, without search. Skipped: 1 no readable saved copy. Dropped rows: 1 not relevant. Replaced 21 earlier rows. Added 24 results: 21 from sources already used, 3 from newly found sources."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 0 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 23 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-21"
  }
 }
