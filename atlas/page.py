@@ -875,7 +875,11 @@ def check_answers(answers, references):
         if not item['quote'] or reference is None:
             item['checked'] = None
             continue
-        item['checked'] = check(item['quote'], read(reference['url'], reference['title']))
+        try:
+            text = read(reference['url'], reference['title'])
+        except Exception:  # noqa: BLE001 - a failed download leaves the quote unchecked
+            text = None
+        item['checked'] = check(item['quote'], text)
     return answers
 
 
