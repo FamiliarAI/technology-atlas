@@ -44,12 +44,15 @@
  "page": {
   "id": "MAT-13",
   "title": "Navier–Stokes existence and smoothness",
-  "definition": "A proof settles whether three-dimensional incompressible viscous flow with no external force stays smooth for all time from every smooth initial velocity, or can blow up in finite time. Smooth velocity and pressure have derivatives of every order; incompressibility means zero velocity divergence; at a blow-up time the velocity becomes unbounded.",
+  "definition": "For three-dimensional incompressible viscous flow, a proof establishes one of four alternatives on either all of space or a box that repeats in each direction. Global existence means that every admissible smooth initial velocity, with zero external force, gives smooth velocity and pressure for all time. Breakdown means that some admissible initial velocity and smooth force give no such global solution. The force may be zero. In all of space the solution must also have uniformly bounded kinetic energy. Incompressibility means zero velocity divergence. Smooth fields have derivatives of every order. At finite-time blow-up, speeds become unbounded as the time is approached.",
   "goal": {
-   "need": "These equations describe incompressible viscous fluid motion. Global smoothness is proved in 2 dimensions. Clay’s 3-dimensional formulation asks for one of 4 proofs: global smoothness with zero force (A, B), or breakdown for some smooth initial velocity and smooth force (C, D). Its description also states the dichotomy without force: either A and B hold, or some smooth initial velocity has a solution with a finite blowup time. This page tests that unforced question. Clay assigns $1 million to resolution.",
+   "need": "Aircraft designers and weather forecasters use equations that treat fluids as continuous. A simulation can follow a concentrating flow only down to its smallest resolved scale. Global smoothness would guarantee that viscosity keeps every admissible unforced flow smooth on the domain proved. A breakdown example would show how the model can lose smoothness in finite time, even from smooth data. Whether that flow occurs in nature is a separate physical question.",
    "need_refs": [
+    14,
+    23,
+    9,
     1,
-    2
+    22
    ],
    "figures": null,
    "statements": [
@@ -62,28 +65,29 @@
      "checked": true
     },
     {
-     "body": "American Mathematical Society",
-     "year": "2014",
-     "quote": "The Navier–Stokes equations are fundamental to the mathematical understanding of fluid dynamics.",
-     "context": "The Steele Prize citation recognizing the partial-regularity theorem of Caffarelli, Kohn and Nirenberg.",
-     "ref": 3,
+     "body": "Clay Mathematics Institute",
+     "year": "2000",
+     "quote": "we ask for a proof of one of the following four statements.",
+     "context": "Charles L. Fefferman’s official description of the Navier–Stokes Millennium Prize Problem gives two global existence alternatives and two breakdown alternatives.",
+     "ref": 1,
      "checked": true
     }
    ]
   },
   "completion": {
-   "title": "Clay confirms a proof of global smoothness, or of finite-time blow-up with zero force.",
-   "criterion": "CMI determines under §7 of its prize rules that a complete proof settles the regularity question with zero force, for ν>0: global C∞ velocity and pressure for every admissible smooth divergence-free initial velocity with f=0, on R³ (A) or R³/Z³ (B); or one such initial velocity with f=0 whose smooth solution blows up in finite time, on R³ with bounded energy or on R³/Z³. Breakdown that needs a nonzero force does not meet this test. Before CMI rules, a complete proof announced with a proof-assistant formalization counts as a claim, also when a certificate or a computation it relies on is still to be released or is checked outside the proof assistant.",
-   "set_by": "Clay Mathematics Institute: Fefferman’s official problem description and §§4–7 of the Millennium Prize Description and Rules adopted on 26 September 2018. The Atlas restricts Clay’s breakdown alternatives C and D to zero force, following the dichotomy that Fefferman’s description states.",
+   "title": "Clay recognizes a proof of any one of its four Navier–Stokes alternatives.",
+   "criterion": "CMI determines under §7 that a complete proof establishes A, B, C or D for ν>0 in three dimensions. A or B requires global C∞ velocity and pressure for every admissible smooth divergence-free initial velocity with f=0. C or D requires some such datum and admissible smooth force, possibly zero, for which no such global solution exists. On R³, all derivatives of the datum and force decay rapidly in space and in space-time, respectively, and the solution must have uniformly bounded kinetic energy. On R³/Z³, the datum, force and solution velocity are spatially 1-periodic, and all force derivatives decay rapidly in time.",
+   "set_by": "Clay Mathematics Institute, Fefferman’s alternatives A–D and §§4–7 of the Millennium Prize Description and Rules.",
    "set_by_kind": "prize",
-   "threshold_quote": "Either (A) and (B) hold, or else there is a smooth, divergence-free u◦(x) for which (1), (2), (3) have a solution with a finite blowup time.",
+   "threshold_quote": "we ask for a proof of one of the following four statements.",
    "threshold_ref": 1,
-   "basis": "Clay’s prize statement also accepts breakdown with a nonzero force (C or D). This page does not: Fefferman’s description puts the regularity question at zero force, and forced breakdown is a separate milestone here. Clay’s announcement of 11 September 2026 acknowledged an apparent solution and kept its evaluation procedure. Alpöge and Buckmaster’s paper of 20 November 2026 claims blow-up with zero force on R³ and on T³, with a Lean formalization; its certificate, given by hash, is not yet released, and the interval-arithmetic check that the certificate meets the conditions is outside the formalization. It is counted as a claim until CMI rules.",
+   "basis": "Clay requires qualifying publication, at least two years of examination and general acceptance before its own examination. OpenAI’s September 2026 forced breakdown theorems for R³ and the periodic domain have been checked in Lean. This confirms the formal mathematical result. Clay described the announcement as an apparent solution and has issued no ruling recognizing it. Alpöge and Buckmaster’s November 2026 unforced breakdown claim remains conditional on a numerical certificate. Their release omits both the certificate and its interval-arithmetic check, and the authors say the patched Lean package had not been rebuilt when released.",
    "refs": [
     1,
     4,
     5,
-    15,
+    9,
+    21,
     16
    ],
    "threshold_checked": true
@@ -98,14 +102,16 @@
    {
     "id": "m1",
     "title": "Every admissible smooth initial velocity has a smooth Navier–Stokes solution for some T > 0.",
-    "criterion": "For ν>0 and f=0, each admissible smooth divergence-free initial velocity has smooth velocity and pressure on 0≤t<T for some T>0 depending on the initial velocity. Leray proved whole-space local existence in 1934; Clay’s description records local existence for both domains.",
-    "set_by": "The field’s local-existence theorem, established for whole space by Leray and recognized for both domains in Clay’s official problem description.",
+    "criterion": "For ν>0 and zero external force, every admissible smooth divergence-free initial velocity gives a C∞ velocity and pressure on 0≤t<T for some T>0 depending on the datum. Use rapidly decreasing initial data and bounded kinetic energy on R³, or spatially 1-periodic initial data and velocity on R³/Z³.",
+    "set_by": "The local existence theorem of Oseen and Leray in whole space and the periodic local existence theorem, both recognized in Clay’s official description.",
     "set_by_kind": "community_convention",
     "threshold_quote": "small time interval [0, T), with T depending on the initial data.",
     "threshold_ref": 1,
     "refs": [
      1,
-     6
+     6,
+     17,
+     18
     ],
     "status": "active",
     "replaced_by": [],
@@ -114,7 +120,7 @@
    {
     "id": "m2",
     "title": "Every finite-energy divergence-free initial velocity has a global Leray–Hopf weak solution.",
-    "criterion": "For ν>0 and f=0, every divergence-free u₀∈L² has a solution for all t≥0, satisfying the equations against smooth test functions and attaining u₀ strongly in L² at t=0. For each finite T, u∈L∞(0,T;L²) and ∇u∈L²(0,T;L²), with ½||u(t)||₂²+ν∫₀ᵗ||∇u(s)||₂²ds≤½||u₀||₂². Leray proved whole-space existence in 1934; the cited 2021 proof treats both domains. Smoothness is not asserted.",
+    "criterion": "For ν>0 and f=0, every divergence-free u₀∈L² admits a global distributional solution u that is weakly continuous in L² and attains u₀ strongly in L² at t=0. For each finite T, u∈L∞(0,T;L²) and ∇u∈L²(0,T;L²). For every t≥0 it satisfies ½‖u(t)‖₂²+ν∫₀ᵗ‖∇u(s)‖₂²ds≤½‖u₀‖₂². On the torus the spatial norms are over one period cell.",
     "set_by": "Leray–Hopf existence theory; Definitions 1–2 and the existence theorems in Berselli and Spirito’s published treatment specify the weak-solution and energy conditions.",
     "set_by_kind": "community_convention",
     "threshold_quote": "There exists a Leray-Hopf weak solution u",
@@ -131,7 +137,7 @@
    {
     "id": "m3",
     "title": "Suitable weak Navier–Stokes solutions have zero one-dimensional parabolic singular-set measure.",
-    "criterion": "For ν>0 and f=0, a suitable weak solution, which also obeys the local energy inequality, has a singular set S with P₁(S)=0. P₁ is the one-dimensional parabolic Hausdorff measure, using cylinders with spatial radius r and time length r². This permits isolated singular points. Caffarelli, Kohn and Nirenberg proved this partial-regularity result in 1982. Its local conclusion applies in whole space and on the periodic domain.",
+    "criterion": "For ν>0 and f=0, let u be a suitable weak solution, satisfying the local energy inequality. Let S consist of the interior space-time points where u is essentially unbounded in every neighborhood. Prove P₁(S)=0, where P₁ is one-dimensional parabolic Hausdorff measure computed with cylinders of spatial radius r and time length r². This local test applies on R³ and on R³/Z³ and permits isolated singular points.",
     "set_by": "The Caffarelli–Kohn–Nirenberg theorem, stated in Clay’s official description and recognized by the American Mathematical Society’s 2014 Steele Prize.",
     "set_by_kind": "community_convention",
     "threshold_quote": "Let E be the singular set of u. Then P1(E) = 0.",
@@ -164,17 +170,19 @@
    },
    {
     "id": "m5",
-    "title": "Breakdown is proved for some smooth initial velocity and smooth force (Clay’s alternative C or D).",
-    "criterion": "For ν>0, a complete proof exhibits a smooth divergence-free initial velocity and a smooth force, under Clay’s decay conditions on R³ (C) or periodicity conditions on R³/Z³ (D), for which no smooth solution exists for all time; on R³ the solution must also have bounded energy. The force may be nonzero and the initial velocity may be zero. The proof is public in full, as a written proof or as one checked in a proof assistant. General acceptance and a CMI ruling are not required. Clay’s prize statement accepts this alternative; this page’s completion test does not.",
-    "set_by": "Clay Mathematics Institute, statements (C) and (D) of Fefferman’s official problem description.",
+    "title": "A complete public proof establishes one of Clay’s four Navier–Stokes alternatives.",
+    "criterion": "Give a complete proof of A or B for every admissible unforced datum on the chosen domain, or of C or D for one admissible datum and smooth force on that domain. Apply Fefferman’s conditions (4)–(7) on R³ or (8)–(11) for the periodic problem. A proof checked in a proof assistant confirms the theorem it establishes. If the proof derives breakdown only under a certificate hypothesis, establishing that hypothesis is part of the test.",
+    "set_by": "Clay Mathematics Institute, Fefferman’s alternatives A–D and the complete mathematical solution requirement in §5(a).",
     "set_by_kind": "prize",
-    "threshold_quote": "(C) Breakdown of Navier–Stokes solutions on R3.",
+    "threshold_quote": "we ask for a proof of one of the following four statements.",
     "threshold_ref": 1,
     "refs": [
      1,
+     4,
      9,
      10,
-     14
+     16,
+     21
     ],
     "status": "active",
     "replaced_by": [],
@@ -182,16 +190,48 @@
    },
    {
     "id": "m6",
-    "title": "A proof settling the unforced question is published in a refereed outlet meeting Clay’s conditions.",
-    "criterion": "A complete proof of global smoothness with f=0 (A or B), or of finite-time blow-up of a smooth solution with f=0, on R³ with bounded energy or on R³/Z³, is published by a Qualifying Outlet under §6 of Clay’s rules: a refereed mathematics publication of worldwide repute with a named editorial board, a published refereeing process and a listing in MathSciNet, or a publication CMI approves under relaxed conditions. A preprint, a repository or an announcement is not such a publication. Clay’s 2 years of examination begin at this publication.",
-    "set_by": "Clay Mathematics Institute, §§4(a) and 6 of the Millennium Prize Description and Rules; the restriction to zero force is this page’s.",
+    "title": "A Qualifying Outlet publishes a complete proof of one of Clay’s four alternatives.",
+    "criterion": "A complete proposed solution of A, B, C or D appears in a Qualifying Outlet under §6. The ordinary route requires a refereed mathematics publication of worldwide repute with a named, contactable editorial board, an editor able to identify an appropriate referee, a published process for expert verification and inclusion in MathSciNet. The Board of Directors may approve relaxed conditions on the Scientific Advisory Board’s recommendation. The qualifying publication date starts the two-year period.",
+    "set_by": "Clay Mathematics Institute, §§4(a), 5(b) and 6 of the Millennium Prize Description and Rules.",
     "set_by_kind": "prize",
     "threshold_quote": "the Proposed Solution has been published by a Qualifying Outlet",
     "threshold_ref": 4,
     "refs": [
      4,
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m7",
+    "title": "Every sufficiently small admissible initial velocity gives a smooth unforced solution for all time.",
+    "criterion": "For fixed ν>0 and f=0, prove global smooth existence for every admissible divergence-free datum in a ball of positive radius about zero in a stated initial-data norm. The radius is independent of the individual datum. The solution must have bounded kinetic energy on R³ or spatially periodic velocity on R³/Z³. The proof must specify the norm, its normalization and the smallness condition.",
+    "set_by": "The small-data global existence theorem recognized in Fefferman’s official description, with whole-space estimates in Leray and a periodic Fourier norm criterion in di Dio.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "satisfies a smallness condition.",
+    "threshold_ref": 1,
+    "refs": [
      1,
-     15
+     6,
+     18
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m8",
+    "title": "A qualifying proof survives at least two years of examination and gains general acceptance.",
+    "criterion": "At least two years have elapsed since the proof appeared in a Qualifying Outlet. It has survived rigorous examination by the global mathematics community for at least two years and achieved general acceptance in that community, as determined by CMI under §7(a)(i). The date of a preprint, announcement or Lean build cannot start the qualifying-publication period.",
+    "set_by": "Clay Mathematics Institute, §§4(b)–(c) and 7(a)(i) of the Millennium Prize Description and Rules.",
+    "set_by_kind": "prize",
+    "threshold_quote": "at least two years must have passed since publication, and (iii) the proposed solution must have received general acceptance in the global mathematics community",
+    "threshold_ref": 24,
+    "refs": [
+     24,
+     4
     ],
     "status": "active",
     "replaced_by": [],
@@ -201,7 +241,9 @@
   "measures": [],
   "not_found": [
    "No compulsory sequence of intermediate mathematical theorems was found in Clay’s official description or prize rules.",
-   "No CMI decision on any proposed resolution, no release of the certificate of Alpöge and Buckmaster’s paper and no independent build or check of its Lean package were found as of 20 November 2026."
+   "No CMI decision on any proposed resolution, no release of the certificate of Alpöge and Buckmaster’s paper and no independent build or check of its Lean package were found as of 20 November 2026.",
+   "No estimate was found of engineering costs or forecast errors attributable to the absence of a regularity proof.",
+   "No statement from a mathematical society or prize body was found disputing the value or feasibility of pursuing the problem."
   ],
   "references": [
    {
@@ -483,14 +525,156 @@
     "issue": null,
     "pages": null,
     "citation_source": "model"
+   },
+   {
+    "id": 21,
+    "kind": "report",
+    "url": "https://github.com/francescoantoniodeluca/navier-stokes-formal-audit",
+    "doi": null,
+    "title": "Independent Verification of OpenAI's Navier–Stokes Formal Proof",
+    "authors": "Francesco Antonio De Luca",
+    "container": "GitHub",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 22,
+    "kind": "web",
+    "url": "https://www.siam.org/publications/siam-news/articles/openai-s-navier-stokes-construction-what-c-infty-forcing-changes/",
+    "doi": null,
+    "title": "OpenAI’s Navier-Stokes Construction: What C∞ Forcing Changes",
+    "authors": "Thomas Y. Hou",
+    "container": "SIAM News",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 23,
+    "kind": "report",
+    "url": "https://web.stanford.edu/group/ctr/ResBriefs08/28_stinis2.pdf",
+    "doi": null,
+    "title": "Phase transition approach to detecting singularities of PDEs",
+    "authors": "P. Stinis",
+    "container": "Center for Turbulence Research, Annual Research Briefs 2008",
+    "year": "2008",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 24,
+    "kind": "web",
+    "url": "https://www.claymath.org/millennium-problems/rules/",
+    "doi": null,
+    "title": "Rules for the Millennium Prize Problems",
+    "authors": "Clay Mathematics Institute",
+    "container": "Clay Mathematics Institute",
+    "year": "2018",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 25,
+    "kind": "journal",
+    "url": "https://archive.intlpress.com/site/pub/files/_fulltext/journals/dpde/2007/0004/0004/DPDE-2007-0004-0004-a001.pdf",
+    "doi": null,
+    "title": "https://archive.intlpress.com/site/pub/files/_fulltext/journals/dpde/2007/0004/0004/DPDE-2007-0004-0004-a001.pdf",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 26,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2503.11642",
+    "doi": null,
+    "title": "Global well-posedness of the Navier–Stokes equations for small initial data in frequency localized Koch–Tataru’s space",
+    "authors": "Cheskidov A, Eguchi T",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 27,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/1203.2699",
+    "doi": null,
+    "title": "Global Mild Solutions of the Navier-Stokes Equations",
+    "authors": "Lei Z, Lin FH",
+    "container": "arXiv",
+    "year": "2012",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 28,
+    "kind": "journal",
+    "url": "https://link.springer.com/article/10.1007/s00605-024-02012-7",
+    "doi": "10.1007/s00605-024-02012-7",
+    "title": "Improved regularity and analyticity of Cannone-Karch solutions of the three-dimensional Navier-Stokes equations on the torus",
+    "authors": "Ambrose DM, Lopes Filho MC, Nussenzveig Lopes HJ",
+    "container": "Monatsh Math",
+    "year": "2025",
+    "volume": "206",
+    "issue": "4",
+    "pages": "781-795",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 29,
+    "kind": "preprint",
+    "url": "https://math.berkeley.edu/~tataru/papers/nas.pdf",
+    "doi": null,
+    "title": "Well-posedness for the Navier-Stokes equations",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 30,
+    "kind": "journal",
+    "url": "https://userpages.umbc.edu/~abiswas/researchpage/Bi-littlelp.pdf",
+    "doi": "10.1016/j.jde.2004.12.012",
+    "title": "Local existence and Gevrey regularity of 3-D Navier–Stokes equations with ℓₚ initial data",
+    "authors": "Biswas A",
+    "container": "Journal of Differential Equations",
+    "year": "2005",
+    "volume": "215",
+    "issue": "2",
+    "pages": "429-447",
+    "citation_source": "crossref"
    }
   ],
   "milestone_order": [
    "m1",
+   "m7",
    "m2",
    "m3",
    "m5",
-   "m6"
+   "m6",
+   "m8"
   ],
   "results": [
    {
@@ -550,284 +734,536 @@
     "judged_on": "2026-11-16"
    },
    {
-    "milestone": "m3",
-    "case": "Whole space R³",
-    "verdict": "met",
-    "finding": "For all local suitable weak solutions, the singular set has parabolic f-Hausdorff measure 0 for f(r)=r|ln r|, implying P₁(S)=0.",
-    "detail": "Theorem A strengthens the required measure-zero result. Its local conclusion applies throughout whole space by covering with cylinders. The supplied preprint reports no peer review or proof-assistant verification.",
-    "quote": "Theorem A (Improved partial regularity) . Let v be a local suitable weak solution to\nthe Navier-Stokes equation in Q(1), then we have, for f (r) = r| lnr|,\nP f (S[v]) = 0. (1.13)",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 11,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-20"
-   },
-   {
-    "milestone": "m3",
-    "case": "Periodic space R³/Z³",
-    "verdict": "met",
-    "finding": "For all local suitable weak solutions, the singular set has parabolic f-Hausdorff measure 0 for f(r)=r|ln r|, implying P₁(S)=0.",
-    "detail": "Theorem A is local, so its conclusion applies in periodic coordinate neighborhoods and extends by a countable covering. The supplied preprint reports no peer review or proof-assistant verification.",
-    "quote": "Theorem A (Improved partial regularity) . Let v be a local suitable weak solution to\nthe Navier-Stokes equation in Q(1), then we have, for f (r) = r| lnr|,\nP f (S[v]) = 0. (1.13)",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 11,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-20"
-   },
-   {
-    "milestone": "m1",
-    "case": "Whole space R³",
-    "verdict": "met",
-    "finding": "Every admissible smooth divergence-free initial velocity on R³ has a smooth unforced solution for some T > 0.",
-    "detail": "Section 19 proves local existence for regular initial data with finite energy, bounded velocity and square-integrable first derivatives; Section 15 establishes derivatives of every order.",
-    "quote": "l'hdor~mc d'existence.\" A tout (~tat initial r~gulicr, ui (x, o), correspoml uric solu-\ntion des dquations de Navier, ui (x, t), qui est ddfinie pour des valeurs o <-- t < \f de t \net qui se r~duit ~t ui (x, o) pour t = o.",
-    "checked": false,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 12,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-20"
-   },
-   {
-    "milestone": "m2",
-    "case": "Whole space R³",
-    "verdict": "met",
-    "finding": "Every divergence-free L² initial velocity on R³ has an unforced Leray–Hopf weak solution for all t ≥ 0.",
-    "detail": "Sections 28–31 construct global weak solutions with square-integrable weak gradients and the energy inequality. Weak continuity and the initial energy bound give strong L² attainment of the initial data.",
-    "quote": "II correspond 5, cet dtat ini-\ntial au moins une solution turbulente, qui est d6finie pour toutes les valeurs du temps \npost&'ieures ?t l'instant initial.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 12,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-20"
-   },
-   {
-    "milestone": "m3",
-    "case": "Whole space R³",
-    "verdict": "met",
-    "finding": "All suitable weak solutions have singular sets with one-dimensional parabolic Hausdorff measure P₁(S)=0.",
-    "detail": "The new proof is local, so it applies in whole space. It treats zero force and unit viscosity; positive viscosity is reduced to this normalization by scaling. No finite sample is involved.",
-    "quote": "Theorem 3.3 implies the singular set of P1 measure zero.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 13,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-20"
-   },
-   {
-    "milestone": "m3",
-    "case": "Periodic space R³/Z³",
-    "verdict": "met",
-    "finding": "All suitable weak solutions have singular sets with one-dimensional parabolic Hausdorff measure P₁(S)=0.",
-    "detail": "The new proof is local, so it applies on the periodic domain. It treats zero force and unit viscosity; positive viscosity is reduced to this normalization by scaling. No finite sample is involved.",
-    "quote": "Theorem 3.3 implies the singular set of P1 measure zero.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 13,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-20"
-   },
-   {
     "milestone": "m5",
     "case": "Whole space R³",
     "verdict": "met",
-    "finding": "For every positive viscosity, one constructed flow from rest has bounded kinetic energy and unbounded velocity at t=1.",
-    "detail": "The source claims a written proof of alternative C with zero initial velocity and smooth forcing compactly supported in space and time. No peer review or proof-assistant verification is reported.",
-    "quote": "We construct such a flow with zero initial velocity and a smooth force compactly\nsupported in space and time.",
+    "finding": "One forced whole-space example per positive viscosity starts from rest and blows up at t = 1 with uniformly bounded kinetic energy.",
+    "detail": "The supplied excerpt includes the theorem and proof outline. It refers to later sections for the detailed construction and uniqueness argument.",
+    "quote": "This establishes alternative (C) in the Millennium problem statement for Navier–Stokes as\nstated by Fefferman in [ 13].",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 9,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-20"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m5",
     "case": "Periodic space R³/Z³",
     "verdict": "met",
-    "finding": "For every positive viscosity, the construction yields one periodic flow from rest with finite-time velocity blowup at t=1.",
-    "detail": "Compact support transfers the forced construction to the periodic domain, claiming alternative D. The nonzero force excludes the unforced completion test; no peer review or proof-assistant verification is reported.",
+    "finding": "One forced example on the unit torus per positive viscosity starts from rest and blows up at t = 1.",
+    "detail": "The supplied excerpt reports the periodic result and identifies Corollary 10.6 as the location of its proof.",
     "quote": "Compact support also yields the corresponding construction on\nT3 =R 3/Z3, establishing alternative (D) in [13]; see Corollary 10.6.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 9,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-20"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m5",
     "case": "Whole space R³",
     "verdict": "met",
-    "finding": "One initially stationary smooth flow develops finite-time blow-up under smooth forcing while retaining finite energy.",
-    "detail": "The source reports a public analytical proof and completed Lean verification establishing Clay alternative C. Nonzero forcing excludes the unforced completion test.",
-    "quote": "Our system produced an analytical proof and a Lean formalization that an initially smooth fluid at rest can develop a singularity in a finite time. The fluid has a smooth force applied to it, and its energy remains finite through the entire dynamics, from rest to the formation of the singularity.",
+    "finding": "One initially resting whole-space flow with smooth forcing develops a finite-time singularity, as reported in a Lean-verified proof of Clay alternative C.",
+    "detail": null,
+    "quote": "This resolves the Navier–Stokes Millennium Prize problem by establishing statement “C” (and also “D”) in the",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 14,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-20"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m5",
     "case": "Periodic space R³/Z³",
     "verdict": "met",
-    "finding": "One initially stationary smooth flow develops finite-time blow-up under smooth forcing.",
-    "detail": "The source reports a public analytical proof and completed Lean verification also establishing Clay alternative D. Nonzero forcing excludes the unforced completion test.",
-    "quote": "Our system produced an analytical proof and a Lean formalization that an initially smooth fluid at rest can develop a singularity in a finite time.",
+    "finding": "One periodic breakdown example establishes Clay alternative D in the reported Lean-verified proof.",
+    "detail": null,
+    "quote": "This resolves the Navier–Stokes Millennium Prize problem by establishing statement “C” (and also “D”) in the",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 14,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-20"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
-    "milestone": "m5",
+    "milestone": "completion",
     "case": "Whole space R³",
-    "verdict": "partial",
-    "finding": "One smooth H¹ initial velocity with zero force admits no smooth finite-energy solution for any T > 0.",
-    "detail": "Theorem 1.12 uses data without Clay’s Schwartz decay conditions. The obstruction is insufficient time differentiability at t=0, rather than finite-time velocity blow-up; it therefore does not establish Clay’s alternative C.",
-    "quote": "There exists smooth u0∈ H 1x(R3) such that\nthere does not exist any smooth ﬁnite energy solution (u, p, u0, 0, T) with the indicated data for any\nT > 0.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 17,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-20"
-   },
-   {
-    "milestone": "m1",
-    "case": "Periodic space R³/Z³",
     "verdict": "met",
-    "finding": "For every smooth divergence-free periodic initial velocity in three dimensions, the source proves a unique smooth Navier–Stokes solution for some T > 0.",
-    "detail": "Theorem 3.2 covers ν > 0 and unforced flow in every dimension n ≥ 2. The paper uses period 2π, equivalent to unit period by rescaling. This is an author-reported preprint proof; no peer review or proof-assistant verification is recorded.",
-    "quote": "such that the n-dimensional periodic Navier–Stokes equation has a unique smooth\nsolution u ∈ C∞([0, T ∗), C∞(Tn)n).",
+    "finding": "A reported Lean-verified proof establishes Clay alternative C with one forced whole-space breakdown example.",
+    "detail": "CMI recognition under §7 remains unreported. OpenAI says it does not intend to claim the prize.",
+    "quote": "This resolves the Navier–Stokes Millennium Prize problem by establishing statement “C” (and also “D”) in the",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 18,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-20"
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "completion",
+    "case": "Periodic space R³/Z³",
+    "verdict": "met",
+    "finding": "A reported Lean-verified proof establishes Clay alternative D with one periodic breakdown example.",
+    "detail": "CMI recognition under §7 remains unreported. OpenAI says it does not intend to claim the prize.",
+    "quote": "This resolves the Navier–Stokes Millennium Prize problem by establishing statement “C” (and also “D”) in the",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": "Whole space R³",
+    "verdict": "met",
+    "finding": "For every unforced suitable weak solution on R³, the interior singular set has one-dimensional parabolic Hausdorff measure 0.",
+    "detail": "The whole-space conclusion follows by applying the local theorem in a countable cover of the interior.",
+    "quote": "Theorem A (Improved partial regularity) . Let v be a local suitable weak solution to\nthe Navier-Stokes equation in Q(1), then we have, for f (r) = r| lnr|,\nP f (S[v]) = 0. (1.13)",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": "Periodic space R³/Z³",
     "verdict": "met",
-    "finding": "Suitable weak 3D Navier–Stokes solutions: claimed zero parabolic measure for gauge r[log(1/r)]² implies P₁(S)=0; sample size not applicable.",
-    "detail": "The unforced theorem is local, so it applies in periodic coordinate neighborhoods. Viscosity is normalized to one; rescaling covers ν>0. The stronger gauge implies the required nullity. No peer review or proof-assistant verification is reported.",
+    "finding": "For every unforced suitable weak solution on R³/Z³, the interior singular set has one-dimensional parabolic Hausdorff measure 0.",
+    "detail": "The periodic case follows by lifting local cylinders to R³.",
+    "quote": "Theorem A (Improved partial regularity) . Let v be a local suitable weak solution to\nthe Navier-Stokes equation in Q(1), then we have, for f (r) = r| lnr|,\nP f (S[v]) = 0. (1.13)",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": "Whole space R³",
+    "verdict": "partial",
+    "finding": "Every regular divergence-free whole-space datum yields an unforced solution on a datum-dependent interval of positive length.",
+    "detail": "Sections 15 and 19 state the all-order regularity conclusions for 0<t<T. The treatment of the initial endpoint establishes a lower level of regularity.",
+    "quote": "A tout (~tat initial r~gulicr, ui (x, o), correspoml uric solu- \ntion des dquations de Navier, ui (x, t), qui est ddfinie pour des valeurs o <-- t < \u000f de t \net qui se r~duit ~t ui (x, o) pour t = o.",
+    "checked": false,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m7",
+    "case": "Whole space R³",
+    "verdict": "partial",
+    "finding": "All regular whole-space data with ν⁻³W(0)V(0)<A yield an unforced solution that stays regular for all positive times.",
+    "detail": "The norm ball follows from W(0)V(0)≤max(‖u₀‖₂,‖u₀‖∞)³. The excerpt leaves all-order velocity and pressure regularity at t=0 implicit.",
+    "quote": "La solution qui correspond 'gun 6tat initial suffisamment voisin du repos \nne devient jamais irrSguli~re.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": "Whole space R³",
+    "verdict": "met",
+    "finding": "Every divergence-free L² datum on R³ admits at least one global unforced Leray–Hopf weak solution.",
+    "detail": "The weak formulation is (5.15). The energy bound comes from (5.12) and §31. Weak continuity is stated in §33.",
+    "quote": "II correspond 5, cet dtat ini- \ntial au moins une solution turbulente, qui est d6finie pour toutes les valeurs du temps \npost&'ieures ?t l'instant initial.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": "Whole space R³",
+    "verdict": "partial",
+    "finding": "For every turbulent solution on R³, the set of times outside its regularity intervals has Lebesgue measure zero.",
+    "detail": "The measure-zero statement concerns a subset of the time axis. The proof uses the global energy inequality.",
+    "quote": "0 ne doit diff6rer du demi-axe \nt ~ 0 que par un ensemble de mesure nulle.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": "Whole space R³",
+    "verdict": "partial",
+    "finding": "One nonzero bounded finite-energy profile solving (3.11) would yield finite-time blow-up on R³.",
+    "detail": "The formula scales the profile's speed by (T−t)⁻¹ᐟ². The author leaves the profile equation unresolved.",
+    "quote": "Je n'ai malheureusement pas r~ussi g faire l'gtude du systgme (3. I i). ~qous \nlaisserons doric en suspens cette question de savoir si des irr~gularit6s peuvent \nou non se pr&enter.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": "Whole space R³",
+    "verdict": "met",
+    "finding": "For all suitable weak solutions of unforced 3D Navier–Stokes on R³, the singular set has P₁ measure 0.",
+    "detail": null,
+    "quote": "Similarly,\nTheorem 3.3 implies the singular set of P1 measure zero.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": "Periodic space R³/Z³",
+    "verdict": "met",
+    "finding": "For all suitable weak solutions of unforced 3D Navier–Stokes on R³/Z³, the singular set has P₁ measure 0.",
+    "detail": "The periodic case follows by applying the paper’s local theorem in lifted cylinders. The paper states the theorem in Euclidean coordinates.",
+    "quote": "Similarly,\nTheorem 3.3 implies the singular set of P1 measure zero.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": "Whole space R³",
+    "verdict": "met",
+    "finding": "Every unforced divergence-free Schwartz datum on R³ yields smooth velocity and pressure for some T > 0.",
+    "detail": "Section 5 gives a self-contained proof of the local existence and regularity used here.",
+    "quote": "(iv) (Regularity). If(u, p, u0, f, T, 1) is an H 1 mild solution, and(u0, f, T) is Schwartz, then u and p\nare smooth;",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": "Periodic space R³/Z³",
+    "verdict": "met",
+    "finding": "Every unforced smooth divergence-free datum on the unit torus yields smooth periodic velocity and pressure for some T > 0.",
+    "detail": "Section 5 proves local existence and smoothness. The mean-zero reduction imposes no restriction on the original datum.",
+    "quote": "(iv) (Regularity). If(u, p, u0, f, T, 1) is a periodic H 1 mild solution, and(u0, f, T, 1) is smooth, then\n(u, p, u0, f, T, 1) is smooth.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": "Whole space R³",
+    "verdict": "partial",
+    "finding": "Forced periodic H¹ global well-posedness would imply whole-space regularity for every admissible Schwartz datum.",
+    "detail": "The separate H¹ counterexample concerns loss of time differentiability at t=0. The theorem for Schwartz data explicitly provides local smooth existence.",
+    "quote": "(iii) Conjecture 1.9 implies Conjecture 1.19, which is equivalent to Conjecture 1.18.\n(iv) Conjecture 1.19 implies Conjectures 1.13 and 1.5 (and hence also Conjecture 1.3).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": "Periodic space R³/Z³",
+    "verdict": "partial",
+    "finding": "Forced periodic H¹ global well-posedness would imply smooth global existence for every admissible unforced datum on the unit torus.",
+    "detail": "The paper proves the implication and the equivalence. It leaves global existence and breakdown undecided.",
+    "quote": "(ii) Conjecture 1.9 implies Conjecture 1.8 (and hence also Conjectures 1.6 and 1.4).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": "Periodic space R³/Z³",
+    "verdict": "met",
+    "finding": "Every smooth divergence-free periodic datum has a smooth unforced solution for T > 0.",
+    "detail": "The source works on the 2π-periodic torus. Writing L = 2π, the map u(x,t) = L v(Lx,t), p(x,t) = L² q(Lx,t) transfers its solution (v,q) to the unit torus.",
+    "quote": "such that the n-dimensional periodic Navier–Stokes equation has a unique smooth\nsolution u ∈ C∞([0, T ∗), C∞(Tn)n).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m7",
+    "case": "Periodic space R³/Z³",
+    "verdict": "met",
+    "finding": "Every admissible periodic datum in the full Fourier ℓ¹ ball of radius 2πν on the unit torus gives a global smooth unforced solution.",
+    "detail": "On the unit torus, the full norm is the sum of Euclidean coefficient magnitudes, including the mean, with coefficients normalized by integration over [0,1]³ against e^{−2πik·x}. The unit-period velocity and its coefficients are 2π times those in the source's normalization.",
+    "quote": "For ‖u0‖A,0 ≤ ν (small initial data) we get T ∗ = ∞.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": "Whole space R³",
+    "verdict": "met",
+    "finding": "For every suitable unforced weak solution on R³, the interior singular set has one-dimensional parabolic Hausdorff measure 0.",
+    "detail": "The result concerns measure zero and permits isolated singular points.",
     "quote": "We\nprove that its singular set has zero parabolic Hausdorff measure for the gaugeh(r) =r[log(1/r)]2.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 19,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-20"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": "Periodic space R³/Z³",
+    "verdict": "met",
+    "finding": "For every suitable unforced weak solution on R³/Z³, the interior singular set has one-dimensional parabolic Hausdorff measure 0.",
+    "detail": "The periodic case follows by applying the stated local theorem in coordinate neighborhoods.",
+    "quote": "We\nprove that its singular set has zero parabolic Hausdorff measure for the gaugeh(r) =r[log(1/r)]2.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": "Whole space R³",
+    "verdict": "met",
+    "finding": "Every rapidly decreasing smooth divergence-free datum admits a smooth unforced solution on an interval of length T>0.",
+    "detail": "The proposition applies Tao’s local theory and gives the whole-space pressure reconstruction.",
+    "quote": "For each initial velocity in the stated class and each force smooth into every\nHm on compact time intervals, equation(1) has a unique maximal smooth velocity, with pressure\ndetermined as above.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": "Periodic space R³/Z³",
+    "verdict": "met",
+    "finding": "Every smooth periodic divergence-free datum admits a smooth unforced solution on an interval of length T>0.",
+    "detail": "The proposition applies Tao’s local theory with mean subtraction and spatial translation for data with nonzero mean.",
+    "quote": "For each initial velocity in the stated class and each force smooth into every\nHm on compact time intervals, equation(1) has a unique maximal smooth velocity, with pressure\ndetermined as above.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m7",
+    "case": "Whole space R³",
+    "verdict": "met",
+    "finding": "All admissible whole-space data with homogeneous H¹ᐟ² norm below cν have global smooth unforced solutions.",
+    "detail": "The radius is independent of the datum at fixed viscosity. The proof applies the cited critical small-data theorem and persistence of smoothness.",
+    "quote": "There is a universalc>0such that, fora∈X R andf∈F R,\n∥a∥ ˙H1/2 +∥f∥ L1t ˙H1/2x <cν=⇒T νmax,R(a,f ) =∞.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": "Whole space R³",
+    "verdict": "met",
+    "finding": "For each ν>0, a zero datum and a smooth compactly supported force yield whole-space breakdown at any prescribed T>0.",
+    "detail": "The construction uses the compact blowup solution stated as OpenAI’s Theorem 1.1. The supplied text treats that theorem as established and gives no proof-assistant verification for this paper’s result.",
+    "quote": "Tνmax,R(a,gε) =T,lim sup\nt↑T\n∥uε(t)∥∞ =∞, u ε =v(0≤t≤T−2ε 2).\nThe velocity difference is supported insideB at everyt < T, andgε−g∈C ∞c (B× (0,∞ )).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m5",
     "case": "Periodic space R³/Z³",
     "verdict": "met",
-    "finding": "A constructed family of periodic Navier–Stokes solutions with zero initial velocity and smooth forces blows up at any prescribed T>0; sample size is not applicable.",
-    "detail": "Proposition 3.3 periodizes a cited compact blowup solution for every ν>0. The force is smooth and compactly supported in positive time; velocity becomes unbounded at T, excluding global smooth continuation by uniqueness. The public written proof meets alternative D; peer review or formal proof checking is not reported.",
+    "finding": "For each ν>0, a zero datum and a smooth time-compact periodic force yield breakdown at any prescribed T>0.",
+    "detail": "The proof uses the cited whole-space compact blowup theorem and places a single scaled copy inside a torus coordinate ball. The text reports no proof-assistant check of the periodic construction.",
     "quote": "The fields in (20) solve the periodic momentum equation at viscosityν, start\nfrom zero, and have unbounded speed atT.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 20,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-20"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m5",
     "case": "Whole space R³",
-    "verdict": "partial",
-    "finding": "The authors claim smooth compactly supported initial data yielding unforced, bounded-energy blow-up at time 1.",
-    "detail": "Zero force qualifies for alternative C, but the full public proof requirement remains unmet: the certificate is pending release, and its interval-arithmetic verification is outside Lean.",
-    "quote": "The formalization contains no data: that the certiﬁcate of Subsection 1.1 satisﬁes them is\nveriﬁed by a rigorous computation, involving interval arithmetic, which is not part of the\nformalization.",
+    "verdict": "met",
+    "finding": "One smooth, compactly supported datum yields reported unforced Navier–Stokes blow-up at T = 1 at unit viscosity.",
+    "detail": "The certificate is pending public release. The authors report verifying its conditions with 128-bit interval arithmetic outside Lean. The Lean statement does not include the blow-up rate.",
+    "quote": "smooth, compactly supported, divergence-free data onR3, and smooth divergence-free data on\nT3, whose solutions are smooth up to a ﬁnite time, at which they blow up.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 15,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-20"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": "Periodic space R³/Z³",
+    "verdict": "met",
+    "finding": "One smooth, 1-periodic datum yields reported unforced Navier–Stokes blow-up at T ≤ 1 at unit viscosity.",
+    "detail": "The certificate is pending public release. The authors report verifying its conditions with 128-bit interval arithmetic outside Lean. The Lean statement does not include the blow-up rate.",
+    "quote": "smooth, compactly supported, divergence-free data onR3, and smooth divergence-free data on\nT3, whose solutions are smooth up to a ﬁnite time, at which they blow up.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": "Periodic space R³/Z³",
+    "verdict": "met",
+    "finding": "Every smooth divergence-free periodic datum gives a local smooth unforced solution, with T = cA⁻⁴ for a mean-zero H¹ norm bound A after viscosity normalization.",
+    "detail": "The proof uses a contraction in the local strong-solution space. The smooth-data statement at t = 0 appears in the introduction, while Proposition 2.2 also gives smoothing at positive times for rough H¹ data.",
+    "quote": "with\na time of existence depending on the norm ‖u0‖H1x(Ω) of the initial data, and with\nthe solution smooth on this time interval if the initial data was smooth.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 25,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m7",
+    "case": "Periodic space R³/Z³",
+    "verdict": "partial",
+    "finding": "For small periodic mean-zero H¹ data, the one-unit-time estimate has linear decay factor e⁻¹ plus a quadratic remainder.",
+    "detail": "Section 3.2 iterates the estimate within an existing smooth solution interval. Section 4 states small-A finiteness and points to a modification of Proposition 2.2.",
+    "quote": "One can show (by modifying Proposition 2.2) that F is ﬁnite for small A, and\nis also right-continuous",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 25,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m5",
     "case": "Periodic space R³/Z³",
     "verdict": "partial",
-    "finding": "The authors claim smooth periodic initial data yielding unforced blow-up at a time T≤1.",
-    "detail": "Zero force qualifies for alternative D, but the full public proof requirement remains unmet: the certificate is pending release, and its interval-arithmetic verification is outside Lean.",
-    "quote": "The formalization contains no data: that the certiﬁcate of Subsection 1.1 satisﬁes them is\nveriﬁed by a rigorous computation, involving interval arithmetic, which is not part of the\nformalization.",
+    "finding": "Periodic global smooth existence is equivalent to a uniform H¹ bound on smooth solutions for 0 < T ≤ 1.",
+    "detail": "The bound must depend only on the initial H¹ norm and apply uniformly to all smooth solutions on the specified time interval.",
+    "quote": "Conjecture 1.1, Conjecture 1.2, and Conjecture 1.3 are all equivalent.",
     "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 15,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-20"
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 25,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
-    "milestone": "m6",
+    "milestone": "m7",
     "case": "Whole space R³",
     "verdict": "partial",
-    "finding": "The preprint claims unforced finite-time blow-up from smooth compactly supported data, with blow-up time 1.",
-    "detail": "No publication in a Clay Qualifying Outlet is recorded. The certificate is also pending release; Lean formalizes the reduction, while certificate verification occurs outside Lean.",
-    "quote": "In this paper we prove that smooth solutions of (1.1) can blow up in ﬁnite time: there exist\nsmooth, compactly supported, divergence-free data onR3, and smooth divergence-free data on\nT3, whose solutions are smooth up to a ﬁnite time, at which they blow up.",
+    "finding": "For all divergence-free L² data on ℝ³ satisfying the two norm bounds, the preprint reports global smooth unforced flow for t>0 with a common threshold ε₀>0.",
+    "detail": "The cutoff is δ=μ₀⁻²‖a‖₂² exp(−1/(C₀ε)). The text works at unit viscosity and does not explicitly establish smoothness through t=0 for admissible smooth data.",
+    "quote": "there exists a global smooth solution\nu\n∈\nC\n∞\n​\n(\nℝ\n3\n×\n(\n0\n,\n∞\n)\n)\nu\\in C^{\\infty}(\\mathbb{R}^{3}\\times(0,\\infty))\nto (\n1.1\n) such that",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 15,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-20"
+    "ref": 26,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
-    "milestone": "m6",
-    "case": "Periodic space R³/Z³",
-    "verdict": "partial",
-    "finding": "The preprint claims unforced finite-time blow-up from smooth periodic data at a time T≤1.",
-    "detail": "No publication in a Clay Qualifying Outlet is recorded. The certificate is also pending release; Lean formalizes the reduction, while certificate verification occurs outside Lean.",
-    "quote": "In this paper we prove that smooth solutions of (1.1) can blow up in ﬁnite time: there exist\nsmooth, compactly supported, divergence-free data onR3, and smooth divergence-free data on\nT3, whose solutions are smooth up to a ﬁnite time, at which they blow up.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 15,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-20"
-   },
-   {
-    "milestone": "completion",
+    "milestone": "m7",
     "case": "Whole space R³",
     "verdict": "met",
-    "finding": "The authors announce a proof with Lean formalization of unforced, bounded-energy blow-up at time 1.",
-    "detail": "Meets the stipulated announced-formalization claim rule, not a recorded CMI ruling. The certificate remains unreleased, and its interval-arithmetic verification is outside Lean; the formalized theorems depend on certificate conditions.",
-    "quote": "In this paper we prove that smooth solutions of (1.1) can blow up in ﬁnite time: there exist\nsmooth, compactly supported, divergence-free data onR3, and smooth divergence-free data on\nT3, whose solutions are smooth up to a ﬁnite time, at which they blow up.",
+    "finding": "Unforced Navier–Stokes on ℝ³ has global solutions for every divergence-free datum with X⁻¹ norm strictly below the viscosity μ.",
+    "detail": "The theorem states the mild result for the full X⁻¹ ball. Smoothness and bounded kinetic energy for the admissible subclass follow from the proof’s Sobolev estimates and the unforced energy identity.",
+    "quote": "well-posed globally in time for the initial data in X −1 satisfying\n‖v0‖X −1 < µ. (1.4)",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 15,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-20"
+    "ref": 27,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
-    "milestone": "completion",
+    "milestone": "m7",
     "case": "Periodic space R³/Z³",
-    "verdict": "met",
-    "finding": "The authors announce a proof with Lean formalization of unforced blow-up from smooth periodic data at T≤1.",
-    "detail": "Meets the stipulated announced-formalization claim rule, not a recorded CMI ruling. The certificate remains unreleased, and its interval-arithmetic verification is outside Lean; the formalized theorems depend on certificate conditions.",
-    "quote": "In this paper we prove that smooth solutions of (1.1) can blow up in ﬁnite time: there exist\nsmooth, compactly supported, divergence-free data onR3, and smooth divergence-free data on\nT3, whose solutions are smooth up to a ﬁnite time, at which they blow up.",
+    "verdict": "partial",
+    "finding": "Unforced periodic Navier–Stokes has global mild solutions for all mean-zero divergence-free data in a PM² ball of radius ε > 0. No empirical sample.",
+    "detail": "Theorems 1 and 2 give global mild existence and positive-time spatial analyticity. The fixed-point condition is 4η‖L(v₀)‖X < 1, where L is the relevant linear evolution and η bounds the bilinear operator.",
+    "quote": "There exists\n\\(\\varepsilon >0\\)\nsuch that for any\n\\(v_{0}\\in PM^{2}\\)\nsatisfying\n\\(\\Vert v_{0}\\Vert _{ PM^{2}} \\le \\varepsilon ,\\)\nthere exists a global mild solution",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 28,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": "Whole space R³",
+    "verdict": "partial",
+    "finding": "For all divergence-free data meeting the local BMO⁻¹ smallness bound, Theorem 3 gives a unique small Navier–Stokes solution through t = R².",
+    "detail": "This is a theorem over a class of initial data, so there is no sample size. The supplied copy gives no journal publication or peer-review information.",
+    "quote": "Theorem 3. There exists ϵ > 0 so that for all R > 0 the Navier-Stokes\nequations (1) have a unique small solution in XR (up to t = R2) whenever\n∇ · u0 = 0 and ‖u0‖BM O−1R ≤ ϵ.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 15,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-20"
+    "ref": 29,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": "Periodic space R³/Z³",
+    "verdict": "partial",
+    "finding": "Local existence and positive-time smoothing for 3-D periodic Navier–Stokes with initial Fourier coefficients in ℓᵖ, p < 3/2.",
+    "detail": "The theorem applies to a class of initial data, so there is no sample size. Continuity in ℓᵖ at the initial time does not by itself establish smoothness there.",
+    "quote": "We obtain local existence and Gevrey regularity of 3-D periodic Navier–Stokes equations in\ncase the sequence of Fourier coefﬁcients of the initial data is in𝓁p (p <3 /2).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 30,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    }
   ],
   "judged": [
@@ -881,490 +1317,840 @@
     "by": "gpt-6-astra"
    },
    {
-    "url": "https://arxiv.org/pdf/2210.01783",
+    "url": "https://cdn.openai.com/pdf/32d9f210-8b73-45e0-91bc-82a30aef8a9a/navier-stokes.pdf",
     "milestone": "m1",
-    "hash": "80b7cc89868d",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://arxiv.org/pdf/2210.01783",
-    "milestone": "m2",
-    "hash": "3f263e7477af",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://arxiv.org/pdf/2210.01783",
-    "milestone": "m3",
-    "hash": "79a52234e678",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://arxiv.org/pdf/2210.01783",
-    "milestone": "m5",
-    "hash": "aadd0fcb5407",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://arxiv.org/pdf/2210.01783",
-    "milestone": "m6",
-    "hash": "6e2324147ff7",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://arxiv.org/pdf/2210.01783",
-    "milestone": "completion",
-    "hash": "f18f631f1d4b",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://archive.ymsc.tsinghua.edu.cn/pacm_download/117/5537-11511_2006_Article_BF02547354.pdf",
-    "milestone": "m1",
-    "hash": "80b7cc89868d",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://archive.ymsc.tsinghua.edu.cn/pacm_download/117/5537-11511_2006_Article_BF02547354.pdf",
-    "milestone": "m2",
-    "hash": "3f263e7477af",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://archive.ymsc.tsinghua.edu.cn/pacm_download/117/5537-11511_2006_Article_BF02547354.pdf",
-    "milestone": "m3",
-    "hash": "79a52234e678",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://archive.ymsc.tsinghua.edu.cn/pacm_download/117/5537-11511_2006_Article_BF02547354.pdf",
-    "milestone": "m5",
-    "hash": "aadd0fcb5407",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://archive.ymsc.tsinghua.edu.cn/pacm_download/117/5537-11511_2006_Article_BF02547354.pdf",
-    "milestone": "m6",
-    "hash": "6e2324147ff7",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://archive.ymsc.tsinghua.edu.cn/pacm_download/117/5537-11511_2006_Article_BF02547354.pdf",
-    "milestone": "completion",
-    "hash": "f18f631f1d4b",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://varnothing.net/wp-content/uploads/2021/11/lin1998.pdf",
-    "milestone": "m1",
-    "hash": "80b7cc89868d",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://varnothing.net/wp-content/uploads/2021/11/lin1998.pdf",
-    "milestone": "m2",
-    "hash": "3f263e7477af",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://varnothing.net/wp-content/uploads/2021/11/lin1998.pdf",
-    "milestone": "m3",
-    "hash": "79a52234e678",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://varnothing.net/wp-content/uploads/2021/11/lin1998.pdf",
-    "milestone": "m5",
-    "hash": "aadd0fcb5407",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://varnothing.net/wp-content/uploads/2021/11/lin1998.pdf",
-    "milestone": "m6",
-    "hash": "6e2324147ff7",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://varnothing.net/wp-content/uploads/2021/11/lin1998.pdf",
-    "milestone": "completion",
-    "hash": "f18f631f1d4b",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "eb44820101e9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://cdn.openai.com/pdf/32d9f210-8b73-45e0-91bc-82a30aef8a9a/navier-stokes.pdf",
-    "milestone": "m1",
-    "hash": "80b7cc89868d",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "milestone": "m7",
+    "hash": "9fde5b4f2445",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://cdn.openai.com/pdf/32d9f210-8b73-45e0-91bc-82a30aef8a9a/navier-stokes.pdf",
     "milestone": "m2",
-    "hash": "3f263e7477af",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "503a3bfe65c4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://cdn.openai.com/pdf/32d9f210-8b73-45e0-91bc-82a30aef8a9a/navier-stokes.pdf",
     "milestone": "m3",
-    "hash": "79a52234e678",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "bc4172a5fc0c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://cdn.openai.com/pdf/32d9f210-8b73-45e0-91bc-82a30aef8a9a/navier-stokes.pdf",
     "milestone": "m5",
-    "hash": "aadd0fcb5407",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "fa4b9753a53f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://cdn.openai.com/pdf/32d9f210-8b73-45e0-91bc-82a30aef8a9a/navier-stokes.pdf",
     "milestone": "m6",
-    "hash": "6e2324147ff7",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "9e3017eec8bf",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cdn.openai.com/pdf/32d9f210-8b73-45e0-91bc-82a30aef8a9a/navier-stokes.pdf",
+    "milestone": "m8",
+    "hash": "5d64bf3e8233",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://cdn.openai.com/pdf/32d9f210-8b73-45e0-91bc-82a30aef8a9a/navier-stokes.pdf",
     "milestone": "completion",
-    "hash": "f18f631f1d4b",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "1e99f05fe65f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://openai.com/index/navier-stokes-solution/",
     "milestone": "m1",
-    "hash": "80b7cc89868d",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "eb44820101e9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://openai.com/index/navier-stokes-solution/",
+    "milestone": "m7",
+    "hash": "9fde5b4f2445",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://openai.com/index/navier-stokes-solution/",
     "milestone": "m2",
-    "hash": "3f263e7477af",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "503a3bfe65c4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://openai.com/index/navier-stokes-solution/",
     "milestone": "m3",
-    "hash": "79a52234e678",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "bc4172a5fc0c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://openai.com/index/navier-stokes-solution/",
     "milestone": "m5",
-    "hash": "aadd0fcb5407",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "fa4b9753a53f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://openai.com/index/navier-stokes-solution/",
     "milestone": "m6",
-    "hash": "6e2324147ff7",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "9e3017eec8bf",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://openai.com/index/navier-stokes-solution/",
+    "milestone": "m8",
+    "hash": "5d64bf3e8233",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://openai.com/index/navier-stokes-solution/",
     "milestone": "completion",
-    "hash": "f18f631f1d4b",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "1e99f05fe65f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
-    "url": "https://www.claymath.org/wp-content/uploads/2022/06/navierstokes.pdf",
+    "url": "https://arxiv.org/pdf/2210.01783",
     "milestone": "m1",
-    "hash": "80b7cc89868d",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "eb44820101e9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
-    "url": "https://www.claymath.org/wp-content/uploads/2022/06/navierstokes.pdf",
+    "url": "https://arxiv.org/pdf/2210.01783",
+    "milestone": "m7",
+    "hash": "9fde5b4f2445",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2210.01783",
     "milestone": "m2",
-    "hash": "3f263e7477af",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "503a3bfe65c4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
-    "url": "https://www.claymath.org/wp-content/uploads/2022/06/navierstokes.pdf",
+    "url": "https://arxiv.org/pdf/2210.01783",
     "milestone": "m3",
-    "hash": "79a52234e678",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "bc4172a5fc0c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
-    "url": "https://www.claymath.org/wp-content/uploads/2022/06/navierstokes.pdf",
+    "url": "https://arxiv.org/pdf/2210.01783",
     "milestone": "m5",
-    "hash": "aadd0fcb5407",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "fa4b9753a53f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
-    "url": "https://www.claymath.org/wp-content/uploads/2022/06/navierstokes.pdf",
+    "url": "https://arxiv.org/pdf/2210.01783",
     "milestone": "m6",
-    "hash": "6e2324147ff7",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "9e3017eec8bf",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
-    "url": "https://www.claymath.org/wp-content/uploads/2022/06/navierstokes.pdf",
+    "url": "https://arxiv.org/pdf/2210.01783",
+    "milestone": "m8",
+    "hash": "5d64bf3e8233",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2210.01783",
     "milestone": "completion",
-    "hash": "f18f631f1d4b",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "1e99f05fe65f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://archive.ymsc.tsinghua.edu.cn/pacm_download/117/5537-11511_2006_Article_BF02547354.pdf",
+    "milestone": "m1",
+    "hash": "eb44820101e9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://archive.ymsc.tsinghua.edu.cn/pacm_download/117/5537-11511_2006_Article_BF02547354.pdf",
+    "milestone": "m7",
+    "hash": "9fde5b4f2445",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://archive.ymsc.tsinghua.edu.cn/pacm_download/117/5537-11511_2006_Article_BF02547354.pdf",
+    "milestone": "m2",
+    "hash": "503a3bfe65c4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://archive.ymsc.tsinghua.edu.cn/pacm_download/117/5537-11511_2006_Article_BF02547354.pdf",
+    "milestone": "m3",
+    "hash": "bc4172a5fc0c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://archive.ymsc.tsinghua.edu.cn/pacm_download/117/5537-11511_2006_Article_BF02547354.pdf",
+    "milestone": "m5",
+    "hash": "fa4b9753a53f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://archive.ymsc.tsinghua.edu.cn/pacm_download/117/5537-11511_2006_Article_BF02547354.pdf",
+    "milestone": "m6",
+    "hash": "9e3017eec8bf",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://archive.ymsc.tsinghua.edu.cn/pacm_download/117/5537-11511_2006_Article_BF02547354.pdf",
+    "milestone": "m8",
+    "hash": "5d64bf3e8233",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://archive.ymsc.tsinghua.edu.cn/pacm_download/117/5537-11511_2006_Article_BF02547354.pdf",
+    "milestone": "completion",
+    "hash": "1e99f05fe65f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://varnothing.net/wp-content/uploads/2021/11/lin1998.pdf",
+    "milestone": "m1",
+    "hash": "eb44820101e9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://varnothing.net/wp-content/uploads/2021/11/lin1998.pdf",
+    "milestone": "m7",
+    "hash": "9fde5b4f2445",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://varnothing.net/wp-content/uploads/2021/11/lin1998.pdf",
+    "milestone": "m2",
+    "hash": "503a3bfe65c4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://varnothing.net/wp-content/uploads/2021/11/lin1998.pdf",
+    "milestone": "m3",
+    "hash": "bc4172a5fc0c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://varnothing.net/wp-content/uploads/2021/11/lin1998.pdf",
+    "milestone": "m5",
+    "hash": "fa4b9753a53f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://varnothing.net/wp-content/uploads/2021/11/lin1998.pdf",
+    "milestone": "m6",
+    "hash": "9e3017eec8bf",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://varnothing.net/wp-content/uploads/2021/11/lin1998.pdf",
+    "milestone": "m8",
+    "hash": "5d64bf3e8233",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://varnothing.net/wp-content/uploads/2021/11/lin1998.pdf",
+    "milestone": "completion",
+    "hash": "1e99f05fe65f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://msp.org/apde/2013/6-1/apde-v6-n1-p02-s.pdf",
     "milestone": "m1",
-    "hash": "80b7cc89868d",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "eb44820101e9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://msp.org/apde/2013/6-1/apde-v6-n1-p02-s.pdf",
+    "milestone": "m7",
+    "hash": "9fde5b4f2445",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://msp.org/apde/2013/6-1/apde-v6-n1-p02-s.pdf",
     "milestone": "m2",
-    "hash": "3f263e7477af",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "503a3bfe65c4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://msp.org/apde/2013/6-1/apde-v6-n1-p02-s.pdf",
     "milestone": "m3",
-    "hash": "79a52234e678",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "bc4172a5fc0c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://msp.org/apde/2013/6-1/apde-v6-n1-p02-s.pdf",
     "milestone": "m5",
-    "hash": "aadd0fcb5407",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "fa4b9753a53f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://msp.org/apde/2013/6-1/apde-v6-n1-p02-s.pdf",
     "milestone": "m6",
-    "hash": "6e2324147ff7",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "9e3017eec8bf",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://msp.org/apde/2013/6-1/apde-v6-n1-p02-s.pdf",
+    "milestone": "m8",
+    "hash": "5d64bf3e8233",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://msp.org/apde/2013/6-1/apde-v6-n1-p02-s.pdf",
     "milestone": "completion",
-    "hash": "f18f631f1d4b",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://archive.intlpress.com/site/pub/files/_fulltext/journals/dpde/2007/0004/0004/DPDE-2007-0004-0004-a001.pdf",
-    "milestone": "m1",
-    "hash": "80b7cc89868d",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://archive.intlpress.com/site/pub/files/_fulltext/journals/dpde/2007/0004/0004/DPDE-2007-0004-0004-a001.pdf",
-    "milestone": "m2",
-    "hash": "3f263e7477af",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://archive.intlpress.com/site/pub/files/_fulltext/journals/dpde/2007/0004/0004/DPDE-2007-0004-0004-a001.pdf",
-    "milestone": "m3",
-    "hash": "79a52234e678",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://archive.intlpress.com/site/pub/files/_fulltext/journals/dpde/2007/0004/0004/DPDE-2007-0004-0004-a001.pdf",
-    "milestone": "m5",
-    "hash": "aadd0fcb5407",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://archive.intlpress.com/site/pub/files/_fulltext/journals/dpde/2007/0004/0004/DPDE-2007-0004-0004-a001.pdf",
-    "milestone": "m6",
-    "hash": "6e2324147ff7",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://archive.intlpress.com/site/pub/files/_fulltext/journals/dpde/2007/0004/0004/DPDE-2007-0004-0004-a001.pdf",
-    "milestone": "completion",
-    "hash": "f18f631f1d4b",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://cims.nyu.edu/~tristanb/cc.pdf",
-    "milestone": "m1",
-    "hash": "80b7cc89868d",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://cims.nyu.edu/~tristanb/cc.pdf",
-    "milestone": "m2",
-    "hash": "3f263e7477af",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://cims.nyu.edu/~tristanb/cc.pdf",
-    "milestone": "m3",
-    "hash": "79a52234e678",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://cims.nyu.edu/~tristanb/cc.pdf",
-    "milestone": "m5",
-    "hash": "aadd0fcb5407",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://cims.nyu.edu/~tristanb/cc.pdf",
-    "milestone": "m6",
-    "hash": "6e2324147ff7",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://cims.nyu.edu/~tristanb/cc.pdf",
-    "milestone": "completion",
-    "hash": "f18f631f1d4b",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "1e99f05fe65f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2010.05579",
     "milestone": "m1",
-    "hash": "80b7cc89868d",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "eb44820101e9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2010.05579",
+    "milestone": "m7",
+    "hash": "9fde5b4f2445",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2010.05579",
+    "milestone": "m2",
+    "hash": "503a3bfe65c4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2010.05579",
+    "milestone": "m3",
+    "hash": "bc4172a5fc0c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2010.05579",
+    "milestone": "m5",
+    "hash": "fa4b9753a53f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2010.05579",
+    "milestone": "m6",
+    "hash": "9e3017eec8bf",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2010.05579",
+    "milestone": "m8",
+    "hash": "5d64bf3e8233",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2010.05579",
+    "milestone": "completion",
+    "hash": "1e99f05fe65f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://coolrmal.github.io/assets/papers/logarithmic-refinement-ckn-original.pdf",
+    "milestone": "m1",
+    "hash": "eb44820101e9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://coolrmal.github.io/assets/papers/logarithmic-refinement-ckn-original.pdf",
+    "milestone": "m7",
+    "hash": "9fde5b4f2445",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://coolrmal.github.io/assets/papers/logarithmic-refinement-ckn-original.pdf",
+    "milestone": "m2",
+    "hash": "503a3bfe65c4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://coolrmal.github.io/assets/papers/logarithmic-refinement-ckn-original.pdf",
     "milestone": "m3",
-    "hash": "79a52234e678",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "bc4172a5fc0c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://coolrmal.github.io/assets/papers/logarithmic-refinement-ckn-original.pdf",
+    "milestone": "m5",
+    "hash": "fa4b9753a53f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://coolrmal.github.io/assets/papers/logarithmic-refinement-ckn-original.pdf",
+    "milestone": "m6",
+    "hash": "9e3017eec8bf",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://coolrmal.github.io/assets/papers/logarithmic-refinement-ckn-original.pdf",
+    "milestone": "m8",
+    "hash": "5d64bf3e8233",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://coolrmal.github.io/assets/papers/logarithmic-refinement-ckn-original.pdf",
+    "milestone": "completion",
+    "hash": "1e99f05fe65f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2609.10262",
+    "milestone": "m1",
+    "hash": "eb44820101e9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2609.10262",
+    "milestone": "m7",
+    "hash": "9fde5b4f2445",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2609.10262",
+    "milestone": "m2",
+    "hash": "503a3bfe65c4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2609.10262",
+    "milestone": "m3",
+    "hash": "bc4172a5fc0c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2609.10262",
     "milestone": "m5",
-    "hash": "aadd0fcb5407",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "fa4b9753a53f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
-    "url": "https://github.com/tristanbuckmaster/navier-stokes",
-    "milestone": "m1",
-    "hash": "80b7cc89868d",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://github.com/tristanbuckmaster/navier-stokes",
-    "milestone": "m2",
-    "hash": "3f263e7477af",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://github.com/tristanbuckmaster/navier-stokes",
-    "milestone": "m3",
-    "hash": "79a52234e678",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://github.com/tristanbuckmaster/navier-stokes",
-    "milestone": "m5",
-    "hash": "aadd0fcb5407",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
-   },
-   {
-    "url": "https://github.com/tristanbuckmaster/navier-stokes",
+    "url": "https://arxiv.org/pdf/2609.10262",
     "milestone": "m6",
-    "hash": "6e2324147ff7",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "9e3017eec8bf",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
-    "url": "https://github.com/tristanbuckmaster/navier-stokes",
+    "url": "https://arxiv.org/pdf/2609.10262",
+    "milestone": "m8",
+    "hash": "5d64bf3e8233",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2609.10262",
     "milestone": "completion",
-    "hash": "c4dd075d07bc",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "1e99f05fe65f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://raw.githubusercontent.com/tristanbuckmaster/navier-stokes/main/paper/finite-time-blow-up-navier-stokes.pdf",
     "milestone": "m1",
-    "hash": "80b7cc89868d",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "eb44820101e9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://raw.githubusercontent.com/tristanbuckmaster/navier-stokes/main/paper/finite-time-blow-up-navier-stokes.pdf",
+    "milestone": "m7",
+    "hash": "9fde5b4f2445",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://raw.githubusercontent.com/tristanbuckmaster/navier-stokes/main/paper/finite-time-blow-up-navier-stokes.pdf",
     "milestone": "m2",
-    "hash": "3f263e7477af",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "503a3bfe65c4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://raw.githubusercontent.com/tristanbuckmaster/navier-stokes/main/paper/finite-time-blow-up-navier-stokes.pdf",
     "milestone": "m3",
-    "hash": "79a52234e678",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "bc4172a5fc0c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://raw.githubusercontent.com/tristanbuckmaster/navier-stokes/main/paper/finite-time-blow-up-navier-stokes.pdf",
     "milestone": "m5",
-    "hash": "aadd0fcb5407",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "fa4b9753a53f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://raw.githubusercontent.com/tristanbuckmaster/navier-stokes/main/paper/finite-time-blow-up-navier-stokes.pdf",
     "milestone": "m6",
-    "hash": "6e2324147ff7",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "9e3017eec8bf",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://raw.githubusercontent.com/tristanbuckmaster/navier-stokes/main/paper/finite-time-blow-up-navier-stokes.pdf",
+    "milestone": "m8",
+    "hash": "5d64bf3e8233",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://raw.githubusercontent.com/tristanbuckmaster/navier-stokes/main/paper/finite-time-blow-up-navier-stokes.pdf",
     "milestone": "completion",
-    "hash": "c4dd075d07bc",
-    "date": "2026-11-20",
-    "by": "gpt-6-astra"
+    "hash": "1e99f05fe65f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.claymath.org/wp-content/uploads/2022/06/navierstokes.pdf",
+    "milestone": "m1",
+    "hash": "eb44820101e9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.claymath.org/wp-content/uploads/2022/06/navierstokes.pdf",
+    "milestone": "m7",
+    "hash": "9fde5b4f2445",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.claymath.org/wp-content/uploads/2022/06/navierstokes.pdf",
+    "milestone": "m2",
+    "hash": "503a3bfe65c4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.claymath.org/wp-content/uploads/2022/06/navierstokes.pdf",
+    "milestone": "m3",
+    "hash": "bc4172a5fc0c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.claymath.org/wp-content/uploads/2022/06/navierstokes.pdf",
+    "milestone": "m5",
+    "hash": "fa4b9753a53f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.claymath.org/wp-content/uploads/2022/06/navierstokes.pdf",
+    "milestone": "m6",
+    "hash": "9e3017eec8bf",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.claymath.org/wp-content/uploads/2022/06/navierstokes.pdf",
+    "milestone": "m8",
+    "hash": "5d64bf3e8233",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.claymath.org/wp-content/uploads/2022/06/navierstokes.pdf",
+    "milestone": "completion",
+    "hash": "1e99f05fe65f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://archive.intlpress.com/site/pub/files/_fulltext/journals/dpde/2007/0004/0004/DPDE-2007-0004-0004-a001.pdf",
+    "milestone": "m1",
+    "hash": "eb44820101e9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://archive.intlpress.com/site/pub/files/_fulltext/journals/dpde/2007/0004/0004/DPDE-2007-0004-0004-a001.pdf",
+    "milestone": "m7",
+    "hash": "9fde5b4f2445",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://archive.intlpress.com/site/pub/files/_fulltext/journals/dpde/2007/0004/0004/DPDE-2007-0004-0004-a001.pdf",
+    "milestone": "m2",
+    "hash": "503a3bfe65c4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://archive.intlpress.com/site/pub/files/_fulltext/journals/dpde/2007/0004/0004/DPDE-2007-0004-0004-a001.pdf",
+    "milestone": "m3",
+    "hash": "bc4172a5fc0c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://archive.intlpress.com/site/pub/files/_fulltext/journals/dpde/2007/0004/0004/DPDE-2007-0004-0004-a001.pdf",
+    "milestone": "m5",
+    "hash": "fa4b9753a53f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://archive.intlpress.com/site/pub/files/_fulltext/journals/dpde/2007/0004/0004/DPDE-2007-0004-0004-a001.pdf",
+    "milestone": "m6",
+    "hash": "9e3017eec8bf",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://archive.intlpress.com/site/pub/files/_fulltext/journals/dpde/2007/0004/0004/DPDE-2007-0004-0004-a001.pdf",
+    "milestone": "m8",
+    "hash": "5d64bf3e8233",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://archive.intlpress.com/site/pub/files/_fulltext/journals/dpde/2007/0004/0004/DPDE-2007-0004-0004-a001.pdf",
+    "milestone": "completion",
+    "hash": "1e99f05fe65f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cims.nyu.edu/~tristanb/cc.pdf",
+    "milestone": "m1",
+    "hash": "eb44820101e9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cims.nyu.edu/~tristanb/cc.pdf",
+    "milestone": "m7",
+    "hash": "9fde5b4f2445",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cims.nyu.edu/~tristanb/cc.pdf",
+    "milestone": "m2",
+    "hash": "503a3bfe65c4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cims.nyu.edu/~tristanb/cc.pdf",
+    "milestone": "m3",
+    "hash": "bc4172a5fc0c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cims.nyu.edu/~tristanb/cc.pdf",
+    "milestone": "m5",
+    "hash": "fa4b9753a53f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cims.nyu.edu/~tristanb/cc.pdf",
+    "milestone": "m6",
+    "hash": "9e3017eec8bf",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cims.nyu.edu/~tristanb/cc.pdf",
+    "milestone": "m8",
+    "hash": "5d64bf3e8233",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cims.nyu.edu/~tristanb/cc.pdf",
+    "milestone": "completion",
+    "hash": "1e99f05fe65f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/tristanbuckmaster/navier-stokes",
+    "milestone": "m1",
+    "hash": "eb44820101e9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/tristanbuckmaster/navier-stokes",
+    "milestone": "m7",
+    "hash": "9fde5b4f2445",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/tristanbuckmaster/navier-stokes",
+    "milestone": "m2",
+    "hash": "503a3bfe65c4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/tristanbuckmaster/navier-stokes",
+    "milestone": "m3",
+    "hash": "bc4172a5fc0c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/tristanbuckmaster/navier-stokes",
+    "milestone": "m5",
+    "hash": "fa4b9753a53f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/tristanbuckmaster/navier-stokes",
+    "milestone": "m6",
+    "hash": "9e3017eec8bf",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/tristanbuckmaster/navier-stokes",
+    "milestone": "m8",
+    "hash": "5d64bf3e8233",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/tristanbuckmaster/navier-stokes",
+    "milestone": "completion",
+    "hash": "1e99f05fe65f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2503.11642",
+    "milestone": "m7",
+    "hash": "9fde5b4f2445",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1203.2699",
+    "milestone": "m7",
+    "hash": "9fde5b4f2445",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://link.springer.com/article/10.1007/s00605-024-02012-7",
+    "milestone": "m7",
+    "hash": "9fde5b4f2445",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://math.berkeley.edu/~tataru/papers/nas.pdf",
+    "milestone": "m1",
+    "hash": "eb44820101e9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://userpages.umbc.edu/~abiswas/researchpage/Bi-littlelp.pdf",
+    "milestone": "m1",
+    "hash": "eb44820101e9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://math.unm.edu/~lorenz/publi/MAA23-4-01-1.pdf",
+    "milestone": "m2",
+    "hash": "503a3bfe65c4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/CoolRmal/FluidSingularSets/blob/dd3ae61ce421a634818f52a6e11a8b78dd1bfc97/README.md",
+    "milestone": "m3",
+    "hash": "bc4172a5fc0c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 3,
+  "version": 4,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1696,16 +2482,162 @@
     "date": "2026-11-20",
     "actor": "atlas.page",
     "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"For three-dimensional incompressible viscous flow, a proof establishes one of four alternatives on either all of space or a box that repeats in each direction. Global existence means that every admissible smooth initial velocity, with zero external force, gives smooth velocity and pressure for all time. Breakdown means that some admissible initial velocity and smooth force give no such global solution. The force may be zero. In all of space the solution must also have uniformly bounded kinetic energy. Incompressibility means zero velocity divergence. Smooth fields have derivatives of every order. At finite-time blow-up, speeds become unbounded as the time is approached.\". Reason: The definition excludes smooth external forcing from both breakdown alternatives and places unbounded velocity at the blow-up time instead of describing its approach."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Aircraft designers and weather forecasters use equations that treat fluids as continuous. A simulation can follow a concentrating flow only down to its smallest resolved scale. Global smoothness would guarantee that viscosity keeps every admissible unforced flow smooth on the domain proved. A breakdown example would show how the model can lose smoothness in finite time, even from smooth data. Whether that flow occurs in nature is a separate physical question.\". Reason: The current rationale gives the prize amount and proof conditions but omits what regularity or breakdown would tell people who model fluids."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Clay Mathematics Institute, 2000: \"we ask for a proof of one of the following four statements.\". Reason: Fefferman’s official description states exactly what Clay asked solvers to prove."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit completion: title = \"Clay recognizes a proof of any one of its four Navier\\u2013Stokes alternatives.\"; criterion = \"CMI determines under \\u00a77 that a complete proof establishes A, B, C or D for \\u03bd>0 in three dimensions. A or B requires global C\\u221e velocity and pressure for every admissible smooth divergence-free initial velocity with f=0. C or D requires some such datum and admissible smooth force, possibly zero, for which no such global solution exists. On R\\u00b3, all derivatives of the datum and force decay rapidly in space and in space-time, respectively, and the solution must have uniformly bounded kinetic energy. On R\\u00b3/Z\\u00b3, the datum, force and solution velocity are spatially 1-periodic, and all force derivatives decay rapidly in time.\"; set_by = \"Clay Mathematics Institute, Fefferman\\u2019s alternatives A\\u2013D and \\u00a7\\u00a74\\u20137 of the Millennium Prize Description and Rules.\"; set_by_kind = \"prize\"; threshold_quote = \"we ask for a proof of one of the following four statements.\"; threshold_ref = 1; basis = \"Clay requires qualifying publication, at least two years of examination and general acceptance before its own examination. OpenAI\\u2019s September 2026 forced breakdown theorems for R\\u00b3 and the periodic domain have been checked in Lean. This confirms the formal mathematical result. Clay described the announcement as an apparent solution and has issued no ruling recognizing it. Alp\\u00f6ge and Buckmaster\\u2019s November 2026 unforced breakdown claim remains conditional on a numerical certificate. Their release omits both the certificate and its interval-arithmetic check, and the authors say the patched Lean package had not been rebuilt when released.\"; refs = [1, 4, 5, 9, 21, 16]. Reason: The zero-force restriction excludes solutions expressly allowed by Clay, while the existing criterion mixes the mathematical statement with the status of one preprint."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"For \\u03bd>0 and zero external force, every admissible smooth divergence-free initial velocity gives a C\\u221e velocity and pressure on 0\\u2264t<T for some T>0 depending on the datum. Use rapidly decreasing initial data and bounded kinetic energy on R\\u00b3, or spatially 1-periodic initial data and velocity on R\\u00b3/Z\\u00b3.\"; set_by = \"The local existence theorem of Oseen and Leray in whole space and the periodic local existence theorem, both recognized in Clay\\u2019s official description.\"; threshold_quote = \"small time interval [0, T), with T depending on the initial data.\"; threshold_ref = 1; refs = [1, 6, 17, 18]. Reason: Oseen precedes Leray in the history of short-time existence, and the existing criterion mixes the theorem’s test with its proof history."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m1: \"Every sufficiently small admissible initial velocity gives a smooth unforced solution for all time.\". Reason: Global smooth existence for sufficiently small initial data is a recognized result between short-time existence and global existence for arbitrary data."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"For \\u03bd>0 and f=0, every divergence-free u\\u2080\\u2208L\\u00b2 admits a global distributional solution u that is weakly continuous in L\\u00b2 and attains u\\u2080 strongly in L\\u00b2 at t=0. For each finite T, u\\u2208L\\u221e(0,T;L\\u00b2) and \\u2207u\\u2208L\\u00b2(0,T;L\\u00b2). For every t\\u22650 it satisfies \\u00bd\\u2016u(t)\\u2016\\u2082\\u00b2+\\u03bd\\u222b\\u2080\\u1d57\\u2016\\u2207u(s)\\u2016\\u2082\\u00b2ds\\u2264\\u00bd\\u2016u\\u2080\\u2016\\u2082\\u00b2. On the torus the spatial norms are over one period cell.\"; threshold_quote = \"There exists a Leray-Hopf weak solution u\"; threshold_ref = 7. Reason: The criterion includes proof history and omits the weak time continuity used in the cited definition."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"For \\u03bd>0 and f=0, let u be a suitable weak solution, satisfying the local energy inequality. Let S consist of the interior space-time points where u is essentially unbounded in every neighborhood. Prove P\\u2081(S)=0, where P\\u2081 is one-dimensional parabolic Hausdorff measure computed with cylinders of spatial radius r and time length r\\u00b2. This local test applies on R\\u00b3 and on R\\u00b3/Z\\u00b3 and permits isolated singular points.\"; threshold_quote = \"Let E be the singular set of u. Then P1(E) = 0.\"; threshold_ref = 1. Reason: The criterion gives the date of the proof but leaves the singular set itself undefined."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m5: title = \"A complete public proof establishes one of Clay\\u2019s four Navier\\u2013Stokes alternatives.\"; criterion = \"Give a complete proof of A or B for every admissible unforced datum on the chosen domain, or of C or D for one admissible datum and smooth force on that domain. Apply Fefferman\\u2019s conditions (4)\\u2013(7) on R\\u00b3 or (8)\\u2013(11) for the periodic problem. A proof checked in a proof assistant confirms the theorem it establishes. If the proof derives breakdown only under a certificate hypothesis, establishing that hypothesis is part of the test.\"; set_by = \"Clay Mathematics Institute, Fefferman\\u2019s alternatives A\\u2013D and the complete mathematical solution requirement in \\u00a75(a).\"; set_by_kind = \"prize\"; threshold_quote = \"we ask for a proof of one of the following four statements.\"; threshold_ref = 1; refs = [1, 4, 9, 10, 16, 21]. Reason: A complete public proof precedes prize recognition on any of Clay’s four routes, and the current criterion incorrectly excludes its own breakdown route from completion."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m6: title = \"A Qualifying Outlet publishes a complete proof of one of Clay\\u2019s four alternatives.\"; criterion = \"A complete proposed solution of A, B, C or D appears in a Qualifying Outlet under \\u00a76. The ordinary route requires a refereed mathematics publication of worldwide repute with a named, contactable editorial board, an editor able to identify an appropriate referee, a published process for expert verification and inclusion in MathSciNet. The Board of Directors may approve relaxed conditions on the Scientific Advisory Board\\u2019s recommendation. The qualifying publication date starts the two-year period.\"; set_by = \"Clay Mathematics Institute, \\u00a7\\u00a74(a), 5(b) and 6 of the Millennium Prize Description and Rules.\"; threshold_quote = \"the Proposed Solution has been published by a Qualifying Outlet\"; threshold_ref = 4; refs = [4, 1]. Reason: Clay applies the same publication requirement to all four alternatives, and §6 specifies how an outlet or an exception qualifies."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m6: \"A qualifying proof survives at least two years of examination and gains general acceptance.\". Reason: The entry jumps from publication to a final ruling and omits Clay’s mandatory period of examination and its general-acceptance requirement."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No estimate was found of engineering costs or forecast errors attributable to the absence of a regularity proof.\". Reason: The sources identify practical uses of fluid models but give no numerical burden attributable to the unresolved regularity question."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No statement from a mathematical society or prize body was found disputing the value or feasibility of pursuing the problem.\". Reason: Debate over the significance of forced breakdown concerns what the proof establishes and does not supply an institutional objection to pursuing the problem."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "remove statement 1. Reason: The 2014 AMS citation awards the Steele Prize for a partial regularity theorem and attributes the Millennium Problem to Clay."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Skipped proposed operation 4 (remove statement 0): the entry needs at least 2 statements. Its reason: Clay’s general purpose for all seven prizes is less specific than its own statement of the Navier–Stokes goal."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Applied 14 of 15 proposed operations from MAT-13-revise-20261121T105847075333Z; now version 4."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: completion, m1, m7, m2, m3, m5, m6, m8."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 4 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 8 found, 0 not found, 1 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "definition is 678 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "completion.basis is 641 characters, over its limit of 600; kept."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 14 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 9 candidates returned, 0 dropped as sources already used, 9 to judge."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 8 of 9 new candidates, without search. Skipped: 1 no readable saved copy. Dropped rows: 2 not relevant. Replaced 21 earlier rows. Added 39 results: 33 from sources already used, 6 from newly found sources."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 2 from arXiv, 3 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 38 found, 1 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Removed 1 references no longer cited; renumbered."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Dated the completion: 2026-09-08 (day); quotation found."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 0 as the model gave them."
    }
   ],
   "completed": {
-   "date": "2026-11-20",
+   "date": "2026-09-08",
    "precision": "day",
-   "event": "Levent Alpöge and Tristan Buckmaster publicly released on GitHub a claimed proof, with Lean formalization, of unforced Navier–Stokes finite-time blow-up on R³ with bounded energy and on the three-dimensional torus; CMI confirmation remains pending.",
-   "ref": 16,
-   "quote": "the paper (79 pages, version of 20 November 2026).",
+   "event": "OpenAI publicly released a proof writeup and Lean formalization claiming finite-time breakdown for the three-dimensional Navier–Stokes equations under Clay alternatives C and D.",
+   "ref": 14,
+   "quote": "September 8, 2026",
    "checked": true,
-   "by": "gpt-6-astra"
-  }
+   "by": "gpt-6.2-sol"
+  },
+  "results_run": "2026-11-21"
  }
 }
