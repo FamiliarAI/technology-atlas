@@ -328,15 +328,40 @@
   ],
   "prompt": "5e97d4b8dfc3"
  },
+ "review": {
+  "state": "merge",
+  "note": "Automatic: duplicate of CSC-01 (similarity 0.307); CSC-01 has 3 confirmed results, this page 3.",
+  "into": "CSC-01",
+  "at": "2026-11-15",
+  "log": [
+   {
+    "date": "2026-11-15",
+    "state": "merge",
+    "note": "Automatic: duplicate of CSC-01 (similarity 0.307); CSC-01 has 3 confirmed results, this page 3.",
+    "into": "CSC-01"
+   },
+   {
+    "date": "2026-11-15",
+    "state": "merge",
+    "copied": 6,
+    "into": "CSC-01"
+   }
+  ],
+  "copied": "2026-11-15"
+ },
  "page": {
   "id": "MAT-01",
   "title": "Deterministic polynomial-time algorithms for NP-complete problems",
-  "definition": "An explicit deterministic algorithm decides an NP-complete problem correctly on every input in time bounded by a fixed polynomial in the encoded input length. An NP-complete problem has polynomial-length certificates checkable in polynomial time, and every problem with such certificates reduces to it in polynomial time.",
+  "definition": "An explicit deterministic algorithm correctly decides an NP-complete problem on every input in time bounded by a fixed polynomial in the encoded input length. For a problem in NP, the answer is yes exactly when some polynomial-length certificate passes a polynomial-time check. A problem is NP-complete if it is in NP and every problem in NP can be translated into it in polynomial time while preserving the yes-or-no answer. Such an algorithm for even one NP-complete problem would therefore establish P = NP.",
   "goal": {
-   "need": "Cook's official description cites a catalogue of 300 NP-complete problems, including problems underlying industrial scheduling and routing. Polynomial-time solvability transfers between them through reductions. For SAT, deciding whether Boolean variables can satisfy a formula, exhaustive search examines up to 2^n assignments for n variables.",
+   "need": "In 2017, one delivery network used heuristics to plan daily routes for 55,000 U.S. drivers. On an 85,900-stop routing benchmark, a heuristic found the shortest tour, but establishing that no shorter tour existed took over 136 CPU-years. With an exact solver, planners could determine the minimum tour cost by asking whether any route fits each of a series of budgets. The same worst-case guarantee would extend to NP-complete scheduling decisions. Its practical value would depend on the running time at the sizes planners face.",
    "need_refs": [
+    18,
+    19,
+    17,
     1,
-    2
+    2,
+    9
    ],
    "figures": null,
    "statements": [
@@ -349,10 +374,10 @@
      "checked": true
     },
     {
-     "body": "Clay Mathematics Institute, Cook's official problem description",
+     "body": "Clay Mathematics Institute, Stephen Cook’s official description of the P versus NP problem",
      "year": "2006",
-     "quote": "the efficient solutions to the many NP-hard problems important to industry.",
-     "context": "Cook identifies this consequence when discussing a practical algorithm for an NP-complete problem.",
+     "quote": "Does P = NP?",
+     "context": "Clay asks for a resolution in either direction. An explicit polynomial-time decider for an NP-complete problem would give a positive answer. Cook reports that most complexity theorists expect a negative answer.",
      "ref": 1,
      "checked": true
     }
@@ -365,10 +390,11 @@
    "set_by_kind": "prize",
    "threshold_quote": "If L is NP-complete and L ∈ P, then P=NP.",
    "threshold_ref": 1,
-   "basis": "Cook's Proposition 1(c) makes this sufficient for P = NP. Polynomial time supplies no numerical guarantee of practical running time. As of 14 November 2026, Clay lists P versus NP as unsolved.",
+   "basis": "Cook’s Proposition 1(c) makes such an algorithm sufficient to prove P = NP. The polynomial bound supplies no numerical guarantee of practical running time. For prize consideration, Clay requires publication in a qualifying outlet, at least two years since publication, and general acceptance in the global mathematics community. Clay lists P versus NP as unsolved as of 21 November 2026.",
    "refs": [
     1,
-    4
+    4,
+    20
    ],
    "threshold_checked": true
   },
@@ -378,14 +404,15 @@
   "milestones": [
    {
     "id": "m1",
-    "title": "A deterministic program decides whether every finite CNF Boolean formula is satisfiable.",
-    "criterion": "A deterministic program terminates with the correct satisfiable or unsatisfiable answer for every finite Boolean formula in conjunctive normal form (CNF): a conjunction of clauses, each a disjunction of variables or their negations. Davis, Logemann and Loveland's 1962 IBM 704 program implemented this propositional decision procedure as its Processor.",
+    "title": "A deterministic program decides satisfiability for each finite Boolean formula in conjunctive normal form.",
+    "criterion": "Given any finite Boolean formula in conjunctive normal form, the program halts and answers yes exactly when some truth assignment makes the formula true. A formula in this form is a conjunction of clauses, each a disjunction of variables or their negations.",
     "set_by": "SAT decision-procedure convention, exemplified by Davis, Logemann and Loveland's Processor and splitting rule in A Machine Program for Theorem-Proving.",
     "set_by_kind": "community_convention",
     "threshold_quote": "The second part, the Processor, tests, at regular stages in its \"growth,\" the consistency of this propositional calculus formula.",
     "threshold_ref": 5,
     "refs": [
-     5
+     5,
+     21
     ],
     "threshold_checked": true,
     "status": "active",
@@ -394,7 +421,7 @@
    {
     "id": "m2",
     "title": "A deterministic 3-SAT algorithm has a worst-case exponential base strictly below 2.",
-    "criterion": "For 3-SAT, whose clauses contain at most three variables or their negations, decide every instance deterministically in poly(L)·2^((1−ε)n) time for some fixed ε>0; n counts variables and L is encoded input length. This is the field's exponential-improvement criterion. Monien and Speckenmeyer's 1985 branching algorithm achieved O(L·1.6181^n) time.",
+    "criterion": "Decide every 3-SAT instance deterministically in worst-case time poly(L)·2^((1−ε)n) for some fixed ε>0. Here n is the number of variables, L is the encoded formula length, and each clause has at most three literals. A literal is a variable or its negation.",
     "set_by": "Exact-algorithms convention of exponential improvement, defined by Impagliazzo and Paturi at IPEC 2013; applied here to deterministic 3-SAT.",
     "set_by_kind": "community_convention",
     "threshold_quote": "An exponential improvement is one where μ ∈ 1 − Ω(1)",
@@ -410,7 +437,7 @@
    {
     "id": "m3",
     "title": "A deterministic algorithm decides every 3-SAT instance in subexponential time.",
-    "criterion": "Decide every 3-SAT instance deterministically in 2^o(n)·poly(L) time, where n counts variables and L is encoded input length: the coefficient of n in the exponent tends to zero. OpenAI claims this through exact solution counting in a 2026 preprint. Dias and Lima's analysis takes its proofs at face value and does not assess correctness.",
+    "criterion": "Give one deterministic algorithm that correctly decides every 3-SAT instance in worst-case time poly(L)·2^f(n), where L is the encoded formula length, n is the number of variables, and f(n)/n tends to zero as n tends to infinity.",
     "set_by": "Exact-algorithms convention of subexponential improvement, defined by Impagliazzo and Paturi at IPEC 2013; applied here to deterministic 3-SAT.",
     "set_by_kind": "community_convention",
     "threshold_quote": "If μ = o(1), then the algorithm is sub-exponential.",
@@ -418,7 +445,9 @@
     "refs": [
      2,
      7,
-     8
+     8,
+     14,
+     16
     ],
     "threshold_checked": true,
     "status": "active",
@@ -427,19 +456,19 @@
    {
     "id": "m4",
     "title": "A deterministic algorithm decides every SAT instance in quasipolynomial time.",
-    "criterion": "Decide every SAT instance deterministically in 2^((log₂ L)^{O(1)}) time, where L is encoded input length and the exponent hidden by O(1) is fixed independently of the input. This places NP inside QP, the quasipolynomial-time class, through polynomial-time reductions. The stated October 2026 subexponential bound does not establish this stronger bound.",
-    "set_by": "Complexity-theory convention QP, defined by Naik, Regan and Sivakumar. Koch, Strassle and Tan use SAT quasipolynomial-time solvability as a distinct benchmark; their stated hardness assumption excludes randomized algorithms and therefore also deterministic algorithms.",
+    "criterion": "Give a deterministic algorithm that correctly decides every Boolean satisfiability instance and prove a worst-case running time of at most exp(p(log L)) for some fixed polynomial p, where L is the encoded input length and the bound holds for all sufficiently large L.",
+    "set_by": "The complexity-theory convention for deterministic quasipolynomial time (QP), defined by Naik, Regan and Sivakumar and stated in terms of input bit length by Babai.",
     "set_by_kind": "community_convention",
-    "threshold_quote": "assuming SAT cannot be solved in randomized quasipolynomial time",
-    "threshold_ref": 10,
+    "threshold_quote": "A quasipolynomial function is a function of the form exp(p(log n)) for some polynomial p.",
+    "threshold_ref": 22,
     "refs": [
      9,
      10,
-     7
+     22
     ],
-    "threshold_checked": true,
     "status": "active",
-    "replaced_by": []
+    "replaced_by": [],
+    "threshold_checked": null
    }
   ],
   "measures": [
@@ -596,20 +625,6 @@
    },
    {
     "id": 11,
-    "kind": "preprint",
-    "url": "https://doi.org/10.48550/arXiv.2611.00517",
-    "doi": null,
-    "title": "Limits and Constants of OpenAI’s Claimed ETH Refutation",
-    "authors": "",
-    "container": null,
-    "year": "",
-    "volume": null,
-    "issue": null,
-    "pages": null,
-    "citation_source": "model"
-   },
-   {
-    "id": 12,
     "kind": "journal",
     "url": "https://web.stanford.edu/class/cs357/DPLL62.pdf",
     "doi": null,
@@ -623,7 +638,7 @@
     "citation_source": "model"
    },
    {
-    "id": 13,
+    "id": 12,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2611.16814",
     "doi": null,
@@ -637,7 +652,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 14,
+    "id": 13,
     "kind": "book",
     "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ICALP.2018.88",
     "doi": "10.4230/LIPIcs.ICALP.2018.88",
@@ -651,7 +666,7 @@
     "citation_source": "model"
    },
    {
-    "id": 15,
+    "id": 14,
     "kind": "preprint",
     "url": "https://hexagonmath.org/pdf/2610.00577v1",
     "doi": null,
@@ -665,7 +680,7 @@
     "citation_source": "model"
    },
    {
-    "id": 16,
+    "id": 15,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2610.41622",
     "doi": null,
@@ -677,198 +692,358 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 16,
+    "kind": "report",
+    "url": "https://www.cslib.io/complexitylib/abstracts/subexponential-sat.pdf",
+    "doi": null,
+    "title": "OpenAI: the Exponential Time Hypothesis is false",
+    "authors": "Contributors to #1226",
+    "container": "Complexitylib / Formal Abstracts",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 17,
+    "kind": "report",
+    "url": "https://hochbaum.ieor.berkeley.edu/files/266-lecturenotes-Spring2024.pdf",
+    "doi": null,
+    "title": "Lecture Notes for IEOR 266: Graph Algorithms and Network Flows",
+    "authors": "Dorit S. Hochbaum",
+    "container": null,
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 18,
+    "kind": "journal",
+    "url": "https://pubsonline.informs.org/doi/10.1287/inte.2016.0875",
+    "doi": "10.1287/inte.2016.0875",
+    "title": "UPS Optimizes Delivery Routes",
+    "authors": "Holland C, Levis J, Nuggehalli R, Santilli B, Winters J",
+    "container": "Interfaces",
+    "year": "2017",
+    "volume": "47",
+    "issue": "1",
+    "pages": "8-23",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 19,
+    "kind": "journal",
+    "url": "https://mgoycool.github.io/papers/09applegate_orl.pdf",
+    "doi": "10.1016/j.orl.2008.09.006",
+    "title": "Certification of an optimal TSP tour through 85,900 cities",
+    "authors": "Applegate DL, Bixby RE, Chvátal V, Cook W, Espinoza DG, Goycoolea M, et al.",
+    "container": "Operations Research Letters",
+    "year": "2009",
+    "volume": "37",
+    "issue": "1",
+    "pages": "11-15",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 20,
+    "kind": "web",
+    "url": "https://www.claymath.org/millennium-problems/rules/",
+    "doi": null,
+    "title": "Rules for the Millennium Prize Problems",
+    "authors": "Clay Mathematics Institute",
+    "container": null,
+    "year": "2018",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 21,
+    "kind": "journal",
+    "url": "https://gwern.net/doc/math/1960-wang.pdf",
+    "doi": "10.1147/rd.41.0002",
+    "title": "Toward Mechanical Mathematics",
+    "authors": "Wang H",
+    "container": "IBM J. Res. &amp; Dev.",
+    "year": "1960",
+    "volume": "4",
+    "issue": "1",
+    "pages": "2-22",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 22,
+    "kind": "preprint",
+    "url": "https://people.cs.uchicago.edu/~laci/papers/icm18-babai-prepub.pdf",
+    "doi": "10.1142/9789813272880_0183",
+    "title": "Groups, Graphs, Algorithms: The Graph Isomorphism Problem",
+    "authors": "BABAI L",
+    "container": "Proceedings of the International Congress of Mathematicians (ICM 2018)",
+    "year": "2019",
+    "volume": null,
+    "issue": null,
+    "pages": "3319-3336",
+    "citation_source": "crossref"
    }
   ],
   "results": [
    {
-    "milestone": "m3",
+    "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "Analysis of the claimed subexponential algorithm: its certified bound exceeds brute force for bounded-density inputs unless log₂(n+m) > 1.03×10⁹.",
-    "detail": "The authors analyze constants in the claimed algorithm’s proof, taking that proof at face value. They do not assess its correctness or independently establish the algorithm.",
+    "finding": "Variable elimination matched brute-force model counts on all 140 tested 3-CNF formulas.",
+    "detail": "The supplied implementation uses fixed-width integer tables, so the experiment also leaves arithmetic correctness for unbounded input sizes unverified.",
+    "quote": "Variable elimination along a min-fill order\nagreed with brute force on all 100 SATLIB uf20-91 instances (in our run, a mean of 0.004s against\n0.78s; timings depend on the machine) and on 40 random 3-CNF formulas withn= 20at density\n4.26, satisfiable or not.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For bounded-density CNF, the certified bound can fall below exhaustive search only above log₂(n+m) ≈ 1.03 × 10^9.",
+    "detail": "This threshold comes from a proof-bound calculation with no sampled inputs. It constrains the guarantee and does not measure the algorithm's actual runtime.",
     "quote": "For every input of bounded\ndensity, the running time that proof certifies is above2n unlesslog 2(n+m)>1.03×10 9.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 11,
-    "judged_by": "gpt-6.1-terra"
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "On random 3-CNF with clause density above 3, clause-product interpolation has a 2^Ω(√n) cost lower bound with high probability.",
+    "detail": "The lower bound is asymptotic under the stated cost model. The note takes the cited preprint's all-instance upper bound at face value and explicitly leaves its correctness unassessed.",
+    "quote": "With\nhigh probability the clause-product scheme costs2Ω∆(√n) onFin the cost model:",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "One IBM 704 program implemented a deterministic consistency procedure for finite CNF formulas.",
-    "detail": "The Processor applies reductions and a splitting rule to test propositional formulas for consistency. The reported implementation had finite storage; the milestone concerns the decision procedure.",
-    "quote": "The second part, the Processor, \ntests, at regular stages in its \"growth,\" the consistency of \nthis propositional calculus formula.",
+    "finding": "The IBM 704 Processor decides finite CNF satisfiability by splitting on the 2 truth values of a variable.",
+    "detail": "This is an algorithmic result, with no sample size. The criterion applies to the Processor's consistency test on a fixed CNF formula. The surrounding first-order theorem prover can generate additional formulas.",
+    "quote": "Then F is inconsistent if \nand only if A & R and B & R are both inconsistent.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra"
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
-    "milestone": "m2",
+    "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Deterministic 3-SAT algorithm, all instances: claimed exponential base 1.32736.",
-    "detail": "The paper describes polynomial factors in its results table and also uses notation that can suppress subexponential factors. Either bound implies a fixed exponential base below 2.",
-    "quote": "We present a deterministic algorithm for 3-SAT running in\n1.32736\nn\n1.32736^{n}\ntime.",
+    "finding": "The deterministic width-recursive solver covers all finite CNFs, with clause width 3 as its base case.",
+    "detail": "The solver takes normalized CNF. Removing repeated literals and dropping tautological clauses preserves satisfiability before invoking it.",
+    "quote": "algorithm for\n3\n3\n-SAT by reducing the clause width recursively, with\nSolve\n3\n\\textsf{Solve}_{3}\nas the base case.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra"
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "Deterministic 3-SAT algorithm; sample size not applicable; exponential base below 1.32793.",
-    "detail": "The stated bound suppresses a subexponential factor. That factor can be absorbed into a slightly larger fixed exponential base that remains below 2.",
-    "quote": "We also provide a more intelligent branching algorithm for3-SAT to establish the upper\nbound 1.32793n, improved from1.3303n.",
+    "finding": "For all 3-SAT instances on n variables, the deterministic algorithm has a reported worst-case base of 1.32736.",
+    "detail": "The source's bound suppresses subexponential overhead, so 1.32736 is the reported base before absorbing that overhead.",
+    "quote": "3\n3\n-SAT on\nn\nn\nvariables can be solved deterministically in time\n𝒪\n⁡\n(\n1.32736\nn\n)\n\\mathcal{O}(1.32736^{n})\n.",
     "checked": true,
-    "confirmed": true,
+    "confirmed": false,
     "peer_reviewed": false,
-    "ref": 14,
-    "judged_by": "gpt-6.1-terra"
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": null,
+    "verdict": "partial",
+    "finding": "The algorithm covers all 3-SAT instances on n variables with a proved exponential base of 1.32736.",
+    "detail": "The separate subexponential claim discussed in the introduction is attributed to another manuscript.",
+    "quote": "3\n3\n-SAT on\nn\nn\nvariables can be solved deterministically in time\n𝒪\n⁡\n(\n1.32736\nn\n)\n\\mathcal{O}(1.32736^{n})\n.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Deterministic satisfiability for all k-CNF inputs at each fixed width k≥3, with 2-CNF as the base case.",
+    "detail": "The reported result is a family of algorithms indexed by the clause-width bound.",
+    "quote": "if there exists a deterministic algorithm for(k− 1)-SAT that\nruns in timeO(ck−1n), then there exists a deterministic algorithm fork-SAT that runs in\ntimeO(ckn)",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
     "verdict": "met",
-    "finding": "All 3-SAT instances: claimed deterministic decision time 2^o(n)·poly(L).",
-    "detail": "The preprint claims an exact counting algorithm; testing whether the count is positive decides satisfiability. The claim has not been established by peer review or independent replication.",
-    "quote": "Indeed, testing whether the exact count is positive or zero decides\nboth satisfiability and unsatisfiability in deterministic\n$\n2\n^{o(n)}(n+m)^{O_k(1)}\n$\ntime for every fixed\n$\nk\n$",
+    "finding": "Deterministic 3-SAT on all n-variable instances has a rounded worst-case exponential base of 1.32793.",
+    "detail": null,
+    "quote": "This immediately implies the upper boundO(1.32793n) for 3-SAT in Table 1 of §1.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Deterministic 3-SAT on all n-variable instances has a worst-case upper bound with exponential base 1.32793.",
+    "detail": null,
+    "quote": "This immediately implies the upper boundO(1.32793n) for 3-SAT in Table 1 of §1.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "Deterministic 3-SAT over all instances has a worst-case exponential base bounded by √2, up to polynomial input-length factors.",
+    "detail": "The √2 bound follows from the reported subexponential bound.",
+    "quote": "Indeed, testing whether the exact count is positive or zero decides\nboth satisfiability and unsatisfiability in deterministic\n$\n2\n^{o(n)}(n+m)^{O_k(1)}\n$\ntime for every fixed\n$\nk\n$\n;",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 7,
-    "judged_by": "gpt-6.1-terra"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "met",
-    "finding": "3-SAT: claimed deterministic algorithm for all instances runs in 2^o(n) time.",
-    "detail": "The authors claim an exact counting algorithm; satisfiability follows by checking whether the count is nonzero. The result is an unreviewed preprint claim.",
+    "finding": "Deterministic 3-SAT over all instances takes poly(L) · 2^O(n log log n / √log n) worst-case time.",
+    "detail": null,
+    "quote": "Indeed, testing whether the exact count is positive or zero decides\nboth satisfiability and unsatisfiability in deterministic\n$\n2\n^{o(n)}(n+m)^{O_k(1)}\n$\ntime for every fixed\n$\nk\n$\n;",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "For every finite CNF formula, deterministic counting decides satisfiability by testing whether the count exceeds 0.",
+    "detail": "The excerpt describes a Lean formalization and refers to Appendix E for what was machine-checked. Appendix E is outside the supplied text.",
+    "quote": "So there are a deterministic algorithm and an absolute constantC\nsuch that, for all integersk≥ 1and n≥ 4, the algorithm computes the number of satisfying\nassignments of ak-CNF onnvariables in time2 Ck 2nlog logn/√logn.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "For every n-variable 3-SAT instance, the reported theorem gives a deterministic worst-case exponential base of √2 by fixing δ = 1/2.",
+    "detail": "The supplied text does not establish that Lean checked a formal statement covering this worst-case bound.",
+    "quote": "For every δ > 0there is a deterministic\nalgorithm that computes the number of satisfying assignments of a 3-CNF onn variables, with\nany number of clauses, in timeO(2δn).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "met",
+    "finding": "One deterministic algorithm decides every n-variable 3-SAT instance in 2^{O(n log log n/√log n)} time after polynomial preprocessing.",
+    "detail": "The excerpt presents the proof and reports a Lean 4 formalization. It refers to Appendix E for the scope of machine checking, which the supplied text does not establish.",
     "quote": "We refute the Exponential Time Hypothesis (ETH) by presenting a deterministic\nalgorithm for 3-SAT onn variables that runs in2o(n) time.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 15,
-    "judged_by": "gpt-6.1-terra"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Deterministic 3-SAT algorithm; all instances; claimed running time 1.32736^n.",
-    "detail": "The claimed bound is exponential in the number of variables, so it does not satisfy the subexponential-time criterion.",
-    "quote": "We present a deterministic algorithm for 3-SAT running in\n1.32736\nn\n1.32736^{n}\ntime.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Deterministic 3-SAT algorithm; all instances; running-time upper bound 1.32793^n.",
-    "detail": "The bound is exponential in the number of variables, so it does not meet the subexponential criterion. The paper appears in peer-reviewed conference proceedings, not a journal.",
-    "quote": "We also provide a more intelligent branching algorithm for3-SAT to establish the upper\nbound 1.32793n, improved from1.3303n.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": false,
     "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "met",
-    "finding": "A deterministic algorithm claims to decide every 3-SAT instance in 2^{o(n)} times polynomial input-size time.",
-    "detail": "The exact-counting algorithm applies to every fixed clause width, including 3. Testing whether the count is positive decides satisfiability; the subexponential bound implies a fixed exponential base below 2.",
-    "quote": "Indeed, testing whether the exact count is positive or zero decides\nboth satisfiability and unsatisfiability in deterministic\n$\n2\n^{o(n)}(n+m)^{O_k(1)}\n$\ntime for every fixed\n$\nk\n$",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": null,
-    "verdict": "partial",
-    "finding": "A deterministic fixed-width SAT algorithm claims a 2^{o(n)} exponential factor.",
-    "detail": "The claimed bound is subexponential in the number of variables for each fixed clause width. It does not establish a quasipolynomial bound in encoded input length for every SAT instance.",
-    "quote": "Indeed, testing whether the exact count is positive or zero decides\nboth satisfiability and unsatisfiability in deterministic\n$\n2\n^{o(n)}(n+m)^{O_k(1)}\n$\ntime for every fixed\n$\nk\n$",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Deterministic counting algorithm for every finite k-CNF formula; claimed runtime is 2^O(min{k²n log log n/√log n, km/√log m}).",
-    "detail": "A CNF formula is a k-CNF for some finite k. Its satisfying-assignment count decides satisfiability by testing whether the count is zero.",
-    "quote": "Theorem 1(Main Theorem).There is a deterministic algorithm that, given ak-CNF withm\nclauses in whichn variables occur, computes the number of satisfying assignments of thesen\nvariables in time\n(1)2 O(min{k2nlog logn/√logn,km/√logm}),\nwhere theO(·)hides an absolute constant.",
+    "finding": "Deterministic CNF spectrum computation yields a SAT decision procedure for all finite CNFs, with direct checks below the theorem’s 2-clause minimum.",
+    "detail": "This is a theorem over formula families, with no empirical sample.",
+    "quote": "counts the assignments that satisfy exactly\nj\nj\nclauses, and the largest\nj\nj\nwith\nN\nj\n≠\n0\nN_{j}\\neq 0\nis the Max-SAT value.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "For all 3-SAT instances, the deterministic counting bound implies a worst-case decision base at most √2.",
+    "detail": "The base follows from the asymptotic bound. The paper's numerical crossover estimates compare main terms and omit lower-order costs.",
+    "quote": "Since\ne\nℓ\ne_{\\ell}\nfalls by about\nρ\n=\n1\n/\n2\n\\rho=1/\\sqrt{2}\nper\nlevel, halving\ne\n0\ne_{0}\nsaves two levels",
     "checked": false,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "met",
-    "finding": "Deterministic algorithm for every 3-CNF claims 2^o(n) time, giving a worst-case exponential base below 2.",
-    "detail": "The algorithm counts satisfying assignments, so it also decides 3-SAT. The result is an unreviewed author claim.",
-    "quote": "We refute the Exponential Time Hypothesis (ETH) by presenting a deterministic\nalgorithm for 3-SAT onn variables that runs in2o(n) time.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Deterministic 3-SAT algorithm claims 2^o(n) time.",
-    "detail": "The reported subexponential bound does not establish quasipolynomial time for every SAT instance.",
-    "quote": "We refute the Exponential Time Hypothesis (ETH) by presenting a deterministic\nalgorithm for 3-SAT onn variables that runs in2o(n) time.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "met",
-    "finding": "General 3-SAT, all instances: claimed deterministic running time 2^o(n).",
-    "detail": "The preprint analyzes and modifies an existing exact-counting recursion; a positive count decides satisfiability. The result remains an unreviewed claim.",
-    "quote": "Both count the\nsatisfying assignments of a 3-CNF formula in time\n2\no\n⁡\n(\nn\n)\n2^{o(n)}",
-    "checked": true,
+    "finding": "For all 3-SAT instances, the refined deterministic counting recursion gives a worst-case decision bound of poly(L)·2^{o(n)}.",
+    "detail": "The crossover estimate concerns the leading term. The asymptotic guarantee uses the general sparsification route.",
+    "quote": "a bound in the number\nn\nn\nof variables, which covers general formulas through sparsification.",
+    "checked": false,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    }
   ],
   "accessed": "2026-11-14",
@@ -942,6 +1117,111 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 7 found, 1 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"An explicit deterministic algorithm correctly decides an NP-complete problem on every input in time bounded by a fixed polynomial in the encoded input length. For a problem in NP, the answer is yes exactly when some polynomial-length certificate passes a polynomial-time check. A problem is NP-complete if it is in NP and every problem in NP can be translated into it in polynomial time while preserving the yes-or-no answer. Such an algorithm for even one NP-complete problem would therefore establish P = NP.\". Reason: The existing definition leaves ambiguous which answers have certificates and what a reduction must preserve."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"In 2017, one delivery network used heuristics to plan daily routes for 55,000 U.S. drivers. On an 85,900-stop routing benchmark, a heuristic found the shortest tour, but establishing that no shorter tour existed took over 136 CPU-years. With an exact solver, planners could determine the minimum tour cost by asking whether any route fits each of a series of budgets. The same worst-case guarantee would extend to NP-complete scheduling decisions. Its practical value would depend on the running time at the sizes planners face.\". Reason: The catalogue count and exhaustive-search bound leave out the scale of route planning, the cost of establishing optimality and the condition for a practical benefit."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Clay Mathematics Institute, Stephen Cook’s official description of the P versus NP problem, 2006: \"Does P = NP?\". Reason: Cook’s problem statement identifies the prize question and places the constructive positive outcome in context."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit completion: basis = \"Cook\\u2019s Proposition 1(c) makes such an algorithm sufficient to prove P = NP. The polynomial bound supplies no numerical guarantee of practical running time. For prize consideration, Clay requires publication in a qualifying outlet, at least two years since publication, and general acceptance in the global mathematics community. Clay lists P versus NP as unsolved as of 21 November 2026.\"; refs = [1, 4, 21]. Reason: The basis explains mathematical sufficiency but omits Clay’s separate conditions for considering a prize award."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: title = \"A deterministic program decides satisfiability for each finite Boolean formula in conjunctive normal form.\"; criterion = \"Given any finite Boolean formula in conjunctive normal form, the program halts and answers yes exactly when some truth assignment makes the formula true. A formula in this form is a conjunction of clauses, each a disjunction of variables or their negations.\"; refs = [5, 22]. Reason: The title can read as a single question about all formulas, and the criterion mixes the per-formula test with a historical implementation."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"Decide every 3-SAT instance deterministically in worst-case time poly(L)\\u00b72^((1\\u2212\\u03b5)n) for some fixed \\u03b5>0. Here n is the number of variables, L is the encoded formula length, and each clause has at most three literals. A literal is a variable or its negation.\". Reason: The criterion includes a historical running time that could be mistaken for the required exponential base."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Give one deterministic algorithm that correctly decides every 3-SAT instance in worst-case time poly(L)\\u00b72^f(n), where L is the encoded formula length, n is the number of variables, and f(n)/n tends to zero as n tends to infinity.\"; refs = [2, 7, 8, 15, 17]. Reason: The criterion mixes a proof obligation with commentary on one preprint, and its references omit a Lean formalization of a subexponential bound."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"Give a deterministic algorithm that correctly decides every Boolean satisfiability instance and prove a worst-case running time of at most exp(p(log L)) for some fixed polynomial p, where L is the encoded input length and the bound holds for all sufficiently large L.\"; set_by = \"The complexity-theory convention for deterministic quasipolynomial time (QP), defined by Naik, Regan and Sivakumar and stated in terms of input bit length by Babai.\"; threshold_quote = \"A quasipolynomial function is a function of the form exp(p(log n)) for some polynomial p.\"; threshold_ref = 23; refs = [9, 10, 23]. Reason: The existing threshold quotes a randomized hardness assumption, and the criterion discusses a dated result instead of giving only the deterministic test."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "remove statement 1. Reason: The quotation about industry describes a consequence of a practical solver and omits the question Clay actually posed."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Applied 9 of 9 proposed operations from MAT-01-revise-20261121T130748947772Z; now version 2."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m3, m4."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 4 from Crossref, 0 from PubMed, 0 from arXiv, 3 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 1 found, 0 not found, 1 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "definition is 510 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "measures[0].value is 265 characters, over its limit of 40; kept."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 9 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 1 candidates returned, 0 dropped as sources already used, 1 to judge."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 0 of 1 new candidates, without search. Skipped: 1 no readable saved copy. Dropped rows: none. Replaced 14 earlier rows. Added 18 results: 18 from sources already used, 0 from newly found sources."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 16 found, 2 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Removed 1 references no longer cited; renumbered."
    }
   ],
   "milestone_order": [
@@ -950,317 +1230,324 @@
    "m3",
    "m4"
   ],
-  "version": 1,
+  "version": 2,
   "judged": [
    {
     "url": "https://www.claymath.org/millennium/p-vs-np/",
     "milestone": "m1",
-    "hash": "73b4b0fe728c",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "190fd7ff1739",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.claymath.org/millennium/p-vs-np/",
     "milestone": "m2",
-    "hash": "cedeec03e822",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "53c4947cf671",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.claymath.org/millennium/p-vs-np/",
     "milestone": "m3",
-    "hash": "07939133cd56",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "869538ec9ba7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.claymath.org/millennium/p-vs-np/",
     "milestone": "m4",
-    "hash": "5297011ef7fa",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "59503cc1f2e4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.claymath.org/millennium/p-vs-np/",
     "milestone": "completion",
     "hash": "4633459203b8",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.claymath.org/wp-content/uploads/2022/06/pvsnp.pdf",
     "milestone": "m1",
-    "hash": "73b4b0fe728c",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "190fd7ff1739",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.claymath.org/wp-content/uploads/2022/06/pvsnp.pdf",
     "milestone": "m2",
-    "hash": "cedeec03e822",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "53c4947cf671",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.claymath.org/wp-content/uploads/2022/06/pvsnp.pdf",
     "milestone": "m3",
-    "hash": "07939133cd56",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "869538ec9ba7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.claymath.org/wp-content/uploads/2022/06/pvsnp.pdf",
     "milestone": "m4",
-    "hash": "5297011ef7fa",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "59503cc1f2e4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.claymath.org/wp-content/uploads/2022/06/pvsnp.pdf",
     "milestone": "completion",
     "hash": "4633459203b8",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.48550/arXiv.2611.00517",
     "milestone": "m1",
-    "hash": "73b4b0fe728c",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "190fd7ff1739",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.48550/arXiv.2611.00517",
     "milestone": "m2",
-    "hash": "cedeec03e822",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "53c4947cf671",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.48550/arXiv.2611.00517",
     "milestone": "m3",
-    "hash": "07939133cd56",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "869538ec9ba7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.48550/arXiv.2611.00517",
     "milestone": "m4",
-    "hash": "5297011ef7fa",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "59503cc1f2e4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.48550/arXiv.2611.00517",
     "milestone": "completion",
     "hash": "4633459203b8",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://web.stanford.edu/class/cs357/DPLL62.pdf",
     "milestone": "m1",
-    "hash": "73b4b0fe728c",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2611.16814",
-    "milestone": "m2",
-    "hash": "cedeec03e822",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ICALP.2018.88",
-    "milestone": "m2",
-    "hash": "cedeec03e822",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://github.com/openai/math/blob/main/preprints/The-Exponential-Time-Hypothesis-is-False-October-25-2026/build/main_full_version.tex",
-    "milestone": "m3",
-    "hash": "07939133cd56",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://hexagonmath.org/pdf/2610.00577v1",
-    "milestone": "m3",
-    "hash": "07939133cd56",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "190fd7ff1739",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://web.stanford.edu/class/cs357/DPLL62.pdf",
     "milestone": "m2",
-    "hash": "cedeec03e822",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "53c4947cf671",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://web.stanford.edu/class/cs357/DPLL62.pdf",
     "milestone": "m3",
-    "hash": "07939133cd56",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "869538ec9ba7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://web.stanford.edu/class/cs357/DPLL62.pdf",
     "milestone": "m4",
-    "hash": "5297011ef7fa",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "59503cc1f2e4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://web.stanford.edu/class/cs357/DPLL62.pdf",
     "milestone": "completion",
     "hash": "4633459203b8",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2611.16814",
     "milestone": "m1",
-    "hash": "73b4b0fe728c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "190fd7ff1739",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2611.16814",
+    "milestone": "m2",
+    "hash": "53c4947cf671",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2611.16814",
     "milestone": "m3",
-    "hash": "07939133cd56",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "869538ec9ba7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2611.16814",
     "milestone": "m4",
-    "hash": "5297011ef7fa",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "59503cc1f2e4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2611.16814",
     "milestone": "completion",
     "hash": "4633459203b8",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ICALP.2018.88",
     "milestone": "m1",
-    "hash": "73b4b0fe728c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "190fd7ff1739",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ICALP.2018.88",
+    "milestone": "m2",
+    "hash": "53c4947cf671",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ICALP.2018.88",
     "milestone": "m3",
-    "hash": "07939133cd56",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "869538ec9ba7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ICALP.2018.88",
     "milestone": "m4",
-    "hash": "5297011ef7fa",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "59503cc1f2e4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ICALP.2018.88",
     "milestone": "completion",
     "hash": "4633459203b8",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://github.com/openai/math/blob/main/preprints/The-Exponential-Time-Hypothesis-is-False-October-25-2026/build/main_full_version.tex",
     "milestone": "m1",
-    "hash": "73b4b0fe728c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "190fd7ff1739",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://github.com/openai/math/blob/main/preprints/The-Exponential-Time-Hypothesis-is-False-October-25-2026/build/main_full_version.tex",
     "milestone": "m2",
-    "hash": "cedeec03e822",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "53c4947cf671",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/openai/math/blob/main/preprints/The-Exponential-Time-Hypothesis-is-False-October-25-2026/build/main_full_version.tex",
+    "milestone": "m3",
+    "hash": "869538ec9ba7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://github.com/openai/math/blob/main/preprints/The-Exponential-Time-Hypothesis-is-False-October-25-2026/build/main_full_version.tex",
     "milestone": "m4",
-    "hash": "5297011ef7fa",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "59503cc1f2e4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://github.com/openai/math/blob/main/preprints/The-Exponential-Time-Hypothesis-is-False-October-25-2026/build/main_full_version.tex",
     "milestone": "completion",
     "hash": "4633459203b8",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://hexagonmath.org/pdf/2610.00577v1",
     "milestone": "m1",
-    "hash": "73b4b0fe728c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "190fd7ff1739",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://hexagonmath.org/pdf/2610.00577v1",
     "milestone": "m2",
-    "hash": "cedeec03e822",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "53c4947cf671",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://hexagonmath.org/pdf/2610.00577v1",
+    "milestone": "m3",
+    "hash": "869538ec9ba7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://hexagonmath.org/pdf/2610.00577v1",
     "milestone": "m4",
-    "hash": "5297011ef7fa",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "59503cc1f2e4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://hexagonmath.org/pdf/2610.00577v1",
     "milestone": "completion",
     "hash": "4633459203b8",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.41622",
+    "milestone": "m1",
+    "hash": "190fd7ff1739",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.41622",
+    "milestone": "m2",
+    "hash": "53c4947cf671",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.41622",
     "milestone": "m3",
-    "hash": "07939133cd56",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   }
-  ],
-  "results_run": "2026-11-15"
- },
- "review": {
-  "state": "merge",
-  "note": "Automatic: duplicate of CSC-01 (similarity 0.307); CSC-01 has 3 confirmed results, this page 3.",
-  "into": "CSC-01",
-  "at": "2026-11-15",
-  "log": [
-   {
-    "date": "2026-11-15",
-    "state": "merge",
-    "note": "Automatic: duplicate of CSC-01 (similarity 0.307); CSC-01 has 3 confirmed results, this page 3.",
-    "into": "CSC-01"
+    "hash": "869538ec9ba7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
-    "date": "2026-11-15",
-    "state": "merge",
-    "copied": 6,
-    "into": "CSC-01"
+    "url": "https://arxiv.org/html/2610.41622",
+    "milestone": "m4",
+    "hash": "59503cc1f2e4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.41622",
+    "milestone": "completion",
+    "hash": "4633459203b8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "copied": "2026-11-15"
+  "results_run": "2026-11-21"
  }
 }
