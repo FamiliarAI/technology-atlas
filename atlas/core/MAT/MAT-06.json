@@ -316,15 +316,29 @@
   ],
   "prompt": "5e97d4b8dfc3"
  },
+ "review": {
+  "state": "published",
+  "note": null,
+  "into": null,
+  "at": "2026-11-15",
+  "log": [
+   {
+    "date": "2026-11-15",
+    "state": "published"
+   }
+  ]
+ },
  "page": {
   "id": "MAT-06",
   "title": "Classical polynomial-time factoring and prime-field discrete logs",
-  "definition": "Classical, non-quantum algorithms factor arbitrary integers into primes and recover discrete logarithms—exponents x from g and g^x modulo a prime—including in subgroups formed by powers of g. Each algorithm has a proved running time polynomial in input bit length; zero-error randomized algorithms may use polynomial expected time.",
+  "definition": "One classical algorithm factors every integer N ≥ 2 into primes with their multiplicities. The other takes a prime p, a nonzero residue g of known order q, and a residue h among the powers of g. It finds the unique integer x with 0 ≤ x < q and g^x ≡ h modulo p. Each algorithm has a proved running time polynomial in the input bit length. A randomized algorithm may meet that bound in expectation on each input if it always returns a correct answer when it terminates.",
   "goal": {
-   "need": "NIST's 2020 comparison assigns 112-bit security strength to a 2048-bit RSA modulus and to finite-field systems with a 2048-bit modulus and 224-bit subgroup order. Classical polynomial-time algorithms would undermine the corresponding computational hardness assumptions. Their execution cost at these finite sizes would still depend on the polynomial's constants and degree.",
+   "need": "Web operators rely on estimates of key strength. In a month of TLS observations in 2019, 90% of certificates used RSA signatures. The 2020 estimates put 2048-bit RSA and prime-field Diffie–Hellman with a 2048-bit modulus and 224-bit subgroup order at 112 bits of security. A general polynomial bound would overturn the hardness assumptions behind both schemes, though the cost at deployed sizes would still depend on the polynomial’s degree and constants. Polynomial-time factoring would also let number theorists compute the ring of integers of any given number field in polynomial time.",
    "need_refs": [
+    3,
     1,
-    2
+    2,
+    11
    ],
    "figures": {
     "caption": "Matched classical computations reported at CRYPTO 2020.",
@@ -374,7 +388,7 @@
    "set_by_kind": "community_convention",
    "threshold_quote": "a ‘breakthrough’ means finding a polynomial time algorithm.",
    "threshold_ref": 4,
-   "basis": "RSA Laboratories explicitly identifies polynomial time as the breakthrough criterion for the two problems. The Handbook distinguishes polynomial complexity from performance at particular input sizes. This mathematical test supplies no additional wall-clock, memory or hardware requirement.",
+   "basis": "RSA Laboratories identifies polynomial time as a breakthrough for each problem individually. Joint completion requires the two proofs, which may appear in separate peer-reviewed publications. The Handbook supplies the running-time conventions. The degree and constants of a polynomial affect performance at particular key sizes.",
    "refs": [
     4,
     2
@@ -390,8 +404,8 @@
   "milestones": [
    {
     "id": "m1",
-    "title": "Classical algorithms run in polynomial time when relevant prime factors are polynomial in input bit length.",
-    "criterion": "For input bit length b and any fixed c, trial division, primality testing and perfect-power handling factor N when its second-largest distinct prime divisor is at most b^c. For prime-field logarithms, Pohlig–Hellman with baby-step–giant-step takes polynomial time when every prime divisor of the supplied group order q is at most b^c; q can then be factored by trial division. Gaudry's §§1.2–1.3 establish these restricted families.",
+    "title": "Classical algorithms solve the bounded-prime-factor cases in polynomial time.",
+    "criterion": "Let b be the input bit length and c a fixed positive constant. For factoring, return the complete prime factorization of every N ≥ 2 with at most one distinct prime divisor greater than b^c. For logarithms, return x for every valid prime-field input whose supplied subgroup order q has no prime divisor greater than b^c. In each case prove a polynomial bit-operation bound on this family, including any work needed to factor q.",
     "set_by": "Algorithmic-number-theory convention documented by Gaudry, CIRM 2014, §§1.2–1.3. The quotation states the factoring condition; Theorem 4 and its following complexity analysis supply the logarithm condition.",
     "set_by_kind": "community_convention",
     "threshold_quote": "factoring integers N for which the second largest prime is bounded by a polynomial in log N can be done in polynomial time.",
@@ -405,15 +419,14 @@
    },
    {
     "id": "m2",
-    "title": "A classical computation solves the published 795-bit benchmark for a target problem.",
-    "criterion": "Factor the single RSA-240 challenge modulus, or solve the single DLP-240 target in Appendix A: modulus p = RSA-240 + 49204 and base 5, with p and (p−1)/2 prime. Boudot and colleagues report both results in 2020. For the factoring case, Lu's developer report records RSA-260 factors obtained on 3 September 2026 using a GPU implementation of the general number field sieve; that report is not peer reviewed.",
+    "title": "A classical computation factors RSA-240 or solves the 795-bit DLP-240 challenge.",
+    "criterion": "For factoring, return the two prime factors of the RSA-240 modulus specified in Appendix A. For DLP-240, let p = RSA-240 + 49204 and let y be the big-endian integer whose bytes are the ASCII text “The magic words are still Squeamish Ossifrage” with no trailing newline. Return an integer x satisfying 5^x ≡ y modulo p.",
     "set_by": "Computational benchmark convention: RSA Laboratories' RSA-240 challenge and Boudot and colleagues' DLP-240 challenge, specified and solved in their CRYPTO 2020 paper.",
     "set_by_kind": "community_convention",
     "threshold_quote": "the factorization of RSA-240, a 795-bit number, and a discrete logarithm computation over a 795-bit prime field.",
     "threshold_ref": 3,
     "refs": [
-     3,
-     7
+     3
     ],
     "status": "active",
     "replaced_by": [],
@@ -430,6 +443,23 @@
     "refs": [
      4,
      2
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": false
+   },
+   {
+    "id": "m4",
+    "title": "A classical algorithm solves a full problem class in proved subexponential time.",
+    "criterion": "For either problem class, give a uniform classical algorithm that returns the required answer on every valid input of that class. Prove a bound of 2^o(b) bit operations for input bit length b, including preprocessing. For a zero-error randomized algorithm, prove this bound on expected time for each input. A bound that depends on an unproved smoothness assumption does not suffice.",
+    "set_by": "Algorithmic number theory convention for subexponential complexity, defined in the Handbook of Applied Cryptography §2.3 and applied to both problems in Shoup, chapter 15.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "This chapter presents subexponential-time algorithms for computing discrete logarithms and for factoring.",
+    "threshold_ref": 10,
+    "refs": [
+     10,
+     2,
+     6
     ],
     "status": "active",
     "replaced_by": [],
@@ -568,11 +598,96 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 10,
+    "kind": "book",
+    "url": "https://www.shoup.net/ntb/ntb-v2_0.pdf",
+    "doi": null,
+    "title": "A Computational Introduction to Number Theory and Algebra (Version 2.0)",
+    "authors": "Victor Shoup",
+    "container": null,
+    "year": "2007",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 11,
+    "kind": "journal",
+    "url": "https://pub.math.leidenuniv.nl/~lenstrahw/PUBLICATIONS/buchlen/to.pdf",
+    "doi": "10.5802/jtnb.113",
+    "title": "Approximating rings of integers in number fields",
+    "authors": "Buchmann JA, Lenstra HW",
+    "container": "Journal de théorie des nombres de Bordeaux",
+    "year": "1994",
+    "volume": "6",
+    "issue": "2",
+    "pages": "221-260",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 12,
+    "kind": "journal",
+    "url": "https://specfun.inria.fr/bostan/publications/BoGaSc07.pdf",
+    "doi": "10.1137/S0097539704443793",
+    "title": "Linear Recurrences with Polynomial Coefficients and Application to Integer Factorization and Cartier–Manin Operator",
+    "authors": "Bostan A, Gaudry P, Schost É",
+    "container": "SIAM J. Comput.",
+    "year": "2007",
+    "volume": "36",
+    "issue": "6",
+    "pages": "1777-1806",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 13,
+    "kind": "journal",
+    "url": "https://ee.stanford.edu/~hellman/publications/28.pdf",
+    "doi": null,
+    "title": "An Improved Algorithm for Computing Logarithms over GF(p) and Its Cryptographic Significance",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 14,
+    "kind": "web",
+    "url": "https://caramba.loria.fr/dlp240-rsa240.txt",
+    "doi": null,
+    "title": "795-bit factoring and discrete logarithms",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 15,
+    "kind": "preprint",
+    "url": "https://hexagonmath.org/pdf/2610.00711v1",
+    "doi": null,
+    "title": "An Improved Subexponential Bound for Deterministic Integer Factorization",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
    }
   ],
   "milestone_order": [
    "m1",
    "m2",
+   "m4",
    "m3"
   ],
   "results": [
@@ -580,265 +695,461 @@
     "milestone": "m2",
     "case": "Integer factorization",
     "verdict": "met",
-    "finding": "Factored the single RSA-240 challenge modulus, a 795-bit number.",
+    "finding": "One RSA-240 challenge modulus (795 bits) was factored into its two primes.",
     "detail": null,
-    "quote": "We report on two new records: the factorization of RSA-240, a 795-bit number, and a discrete logarithm computation over a 795-bit prime field.",
+    "quote": "With respect to RSA-240, the factors are given by RSA-240 =p ×q, with",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 3,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": "Prime-field discrete logarithms",
+    "verdict": "met",
+    "finding": "One DLP-240 challenge instance was solved over the 795-bit prime field.",
+    "detail": null,
+    "quote": "the discrete logarithm of y to base g = 5 is\nlog5y = 926031359281441953630949553317328555029610991914376116167294\n204758987445623653667881005480990720934875482587528029233264\n473672441500961216292648092075981950622133668898591866811269\n28982506005127728321426751244111412371767375547225045851716",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 3,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": "Prime-field discrete logarithms",
     "verdict": "partial",
-    "finding": "Reported a discrete logarithm computation over one 795-bit prime field.",
-    "detail": "The excerpt identifies the DLP-240 modulus but does not establish that the computed logarithm used base 5 and the specified Appendix A target.",
-    "quote": "We report on two new records: the factorization of RSA-240, a 795-bit number, and a discrete logarithm computation over a 795-bit prime field.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 3,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": "Prime-field discrete logarithms",
-    "verdict": "partial",
-    "finding": "One prime-field discrete-logarithm record computation used a 180-decimal-digit modulus.",
-    "detail": "The source describes a smaller record computation, not the specified DLP-240 target. The excerpt does not establish its peer-review status.",
-    "quote": "In order to ﬁx ideas, we will give some examples (sizes, densities, running times), coming from\na record computation that we did in June 2014, for an integerp of 180 decimal digits [7] (we refer\nto this as thep180 example).",
+    "finding": "The authors report one prime-field discrete logarithm record computation with a 180-digit prime.",
+    "detail": "The lecture notes give relation counts, matrix sizes, and timings from the computation. The cited record is an announcement, and the supplied text gives no independent replication.",
+    "quote": "coming from\na record computation that we did in June 2014, for an integerp of 180 decimal digits [7]",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
-    "milestone": "m3",
+    "milestone": "m2",
     "case": "Integer factorization",
     "verdict": "partial",
-    "finding": "RSA-260: one 260-digit integer factored using a GPU implementation of GNFS.",
-    "detail": "The reported computation factors a particular integer; it does not prove polynomial-time factoring for all integers.",
+    "finding": "A classical GPU computation factored one RSA Factoring Challenge modulus, the 260-digit RSA-260.",
+    "detail": null,
     "quote": "RSA-260 was factored by a new implementation of the\ngeneral number field sieve\n(GNFS) for GPUs, prepared and run using Devin.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
-    "milestone": "m3",
+    "milestone": "m2",
     "case": "Integer factorization",
     "verdict": "partial",
-    "finding": "One RSA-896 challenge number was factored using about 30 GPU-years of computation.",
-    "detail": "This is a single-instance factorization, not a proof of polynomial-time factoring for arbitrary integers. The author reports no meaningful improvement to GNFS runtime.",
-    "quote": "The computation ran over a 10-day period and performed about 30 GPU-years of compute time at Anthropic.",
+    "finding": "Classical factorization reported for one RSA challenge modulus, the 896-bit RSA-896.",
+    "detail": "The source reports a single computation on a different challenge modulus from the one specified.",
+    "quote": "RSA-896\nis a RSA challenge number I factored with Claude on September 19, 2026.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": "Prime-field discrete logarithms",
-    "verdict": "met",
-    "finding": "Discrete logarithms in cyclic groups: theoretical result, no sample; polynomial time when each prime divisor of the order is at most b^c.",
-    "detail": "The paper’s bounds apply to cyclic prime-power subgroups, and Algorithm 2 combines their logarithms. With a supplied smooth order, trial division and the subgroup computations take polynomial time; prime-field group operations also take polynomial time.",
-    "quote": "The choice w = k−j limits the recursion depth to 1 and corresponds to the standard\nPohlig–Hellman algorithm.",
+    "verdict": "partial",
+    "finding": "For cyclic groups of order ℓ^e, Algorithm 1 proves an O(e√ℓ) group-operation cost for the base cases.",
+    "detail": "The result is an algorithmic proof for all cyclic prime-power groups. The missing preprocessing and bit-cost steps are needed to establish the full bounded-prime-factor criterion.",
+    "quote": "There is a base case in G(j, j + 1) for each 0 ≤ j < m , with|G(j, j + 1)| = prj .\nApplying either of the standard O(\n√\nN ) discrete logarithm algorithms to the base\ncases yields the second sum in the bound for TDL(G), with c≈ 2.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": "Integer factorization",
+    "verdict": "partial",
+    "finding": "Deterministic bounded prime-divisor search for all eligible inputs, with no finite sample and a √B term in the bit-operation bound.",
+    "detail": "The complete-factorization proof doubles the cutoff until it reaches √N. Its bound depends on N^(1/4) and gives no polynomial guarantee in the input bit length for the promised family.",
+    "quote": "Lemma 13. Let b and N be positive integers with 2 ≤ b<N . Then one can\ncompute a prime divisor of N bounded by b, or prove that no such divisor exists, in\nO\n(\nMint(\n√\nb log N) + logb Mint(log N) log logN\n)\nbit operations.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": "Prime-field discrete logarithms",
+    "verdict": "partial",
+    "finding": "Prime-field discrete logs for primitive bases, with no empirical sample: O((log p)²) operations when p − 1 has only small prime factors.",
+    "detail": "The criterion also covers smooth-order proper subgroups when p − 1 has a large prime factor. The paper’s stated bound starts from the factorization of p − 1.",
+    "quote": "An improved algorithm \nis derived which requires O(log2 p) complexity if p - 1 has only \nsmall prime factors.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": "Prime-field discrete logarithms",
+    "verdict": "met",
+    "finding": "The authors report solving one prime-field discrete logarithm, the 795-bit DLP-240 challenge.",
+    "detail": "The source is the authors’ announcement and says a scientific publication is forthcoming.",
+    "quote": "log(target) = 92603135928144195363094955331732855502961099191437611616729420475898744562365366788100548099072093487548258752802923326447367244150096121629264809207598195062213366889859186681126928982506005127728321426751244111412371767375547225045851716",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": "Integer factorization",
+    "verdict": "met",
+    "finding": "Complete deterministic factorization of every n-bit integer N ≥ 2 in 2^{O(n/√log n)} bit operations.",
+    "detail": "The proof combines a linear-size multiplication encoding with an exact tensor contraction bound. The source reports no peer review, independent replication, or proof-assistant verification of the factorization theorem.",
+    "quote": "Theorem 1.There is a uniform deterministic algorithm which computes the least prime factor\nand the complete prime factorization of everyn-bit integerN≥2in time\n2O(n/√logn)\nand spacen O(1).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    }
   ],
   "judged": [
    {
     "url": "https://doi.org/10.1007/978-3-030-56880-1_3",
     "milestone": "m1",
-    "hash": "c0d21a238e69",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "38f51382e618",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.1007/978-3-030-56880-1_3",
     "milestone": "m2",
-    "hash": "5807efae8a4e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d4acdaa15b58",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doi.org/10.1007/978-3-030-56880-1_3",
+    "milestone": "m4",
+    "hash": "49f0a185cdcb",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.1007/978-3-030-56880-1_3",
     "milestone": "m3",
     "hash": "c62ae6554d43",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.1007/978-3-030-56880-1_3",
     "milestone": "completion",
     "hash": "635b36a4e990",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.6028/NIST.FIPS.203",
     "milestone": "m1",
-    "hash": "c0d21a238e69",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "38f51382e618",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.6028/NIST.FIPS.203",
     "milestone": "m2",
-    "hash": "5807efae8a4e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d4acdaa15b58",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doi.org/10.6028/NIST.FIPS.203",
+    "milestone": "m4",
+    "hash": "49f0a185cdcb",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.6028/NIST.FIPS.203",
     "milestone": "m3",
     "hash": "c62ae6554d43",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.6028/NIST.FIPS.203",
     "milestone": "completion",
     "hash": "635b36a4e990",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.48550/arXiv.2505.15917",
     "milestone": "m1",
-    "hash": "c0d21a238e69",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "38f51382e618",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.48550/arXiv.2505.15917",
     "milestone": "m2",
-    "hash": "5807efae8a4e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d4acdaa15b58",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doi.org/10.48550/arXiv.2505.15917",
+    "milestone": "m4",
+    "hash": "49f0a185cdcb",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.48550/arXiv.2505.15917",
     "milestone": "m3",
     "hash": "c62ae6554d43",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.48550/arXiv.2505.15917",
     "milestone": "completion",
     "hash": "635b36a4e990",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2006.06197",
+    "milestone": "m1",
+    "hash": "38f51382e618",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2006.06197",
+    "milestone": "m2",
+    "hash": "d4acdaa15b58",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2006.06197",
+    "milestone": "m4",
+    "hash": "49f0a185cdcb",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2006.06197",
+    "milestone": "m3",
+    "hash": "c62ae6554d43",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2006.06197",
+    "milestone": "completion",
+    "hash": "635b36a4e990",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.numdam.org/item/10.5802/ccirm.21.pdf",
     "milestone": "m1",
-    "hash": "c0d21a238e69",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://cognition.com/blog/factoring-rsa-260",
-    "milestone": "m2",
-    "hash": "5807efae8a4e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://saweis.net/posts/rsa-896.html",
-    "milestone": "m2",
-    "hash": "5807efae8a4e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "38f51382e618",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.numdam.org/item/10.5802/ccirm.21.pdf",
     "milestone": "m2",
-    "hash": "5807efae8a4e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d4acdaa15b58",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.numdam.org/item/10.5802/ccirm.21.pdf",
+    "milestone": "m4",
+    "hash": "49f0a185cdcb",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.numdam.org/item/10.5802/ccirm.21.pdf",
     "milestone": "m3",
     "hash": "c62ae6554d43",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.numdam.org/item/10.5802/ccirm.21.pdf",
     "milestone": "completion",
     "hash": "635b36a4e990",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://cognition.com/blog/factoring-rsa-260",
     "milestone": "m1",
-    "hash": "c0d21a238e69",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "38f51382e618",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cognition.com/blog/factoring-rsa-260",
+    "milestone": "m2",
+    "hash": "d4acdaa15b58",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cognition.com/blog/factoring-rsa-260",
+    "milestone": "m4",
+    "hash": "49f0a185cdcb",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://cognition.com/blog/factoring-rsa-260",
     "milestone": "m3",
     "hash": "c62ae6554d43",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://cognition.com/blog/factoring-rsa-260",
     "milestone": "completion",
     "hash": "635b36a4e990",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://saweis.net/posts/rsa-896.html",
     "milestone": "m1",
-    "hash": "c0d21a238e69",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "38f51382e618",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://saweis.net/posts/rsa-896.html",
+    "milestone": "m2",
+    "hash": "d4acdaa15b58",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://saweis.net/posts/rsa-896.html",
+    "milestone": "m4",
+    "hash": "49f0a185cdcb",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://saweis.net/posts/rsa-896.html",
     "milestone": "m3",
     "hash": "c62ae6554d43",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://saweis.net/posts/rsa-896.html",
     "milestone": "completion",
     "hash": "635b36a4e990",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/0809.3413",
     "milestone": "m1",
-    "hash": "c0d21a238e69",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "38f51382e618",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/0809.3413",
+    "milestone": "m2",
+    "hash": "d4acdaa15b58",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/0809.3413",
+    "milestone": "m4",
+    "hash": "49f0a185cdcb",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/0809.3413",
+    "milestone": "m3",
+    "hash": "c62ae6554d43",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/0809.3413",
+    "milestone": "completion",
+    "hash": "635b36a4e990",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specfun.inria.fr/bostan/publications/BoGaSc07.pdf",
+    "milestone": "m1",
+    "hash": "38f51382e618",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ee.stanford.edu/~hellman/publications/28.pdf",
+    "milestone": "m1",
+    "hash": "38f51382e618",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://caramba.loria.fr/dlp240-rsa240.txt",
+    "milestone": "m2",
+    "hash": "d4acdaa15b58",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pub.math.leidenuniv.nl/~lenstrahw/PUBLICATIONS/1992c/art.pdf",
+    "milestone": "m4",
+    "hash": "49f0a185cdcb",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://hexagonmath.org/pdf/2610.00711v1",
+    "milestone": "m4",
+    "hash": "49f0a185cdcb",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -905,20 +1216,93 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 4 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"One classical algorithm factors every integer N \\u2265 2 into primes with their multiplicities. The other takes a prime p, a nonzero residue g of known order q, and a residue h among the powers of g. It finds the unique integer x with 0 \\u2264 x < q and g^x \\u2261 h modulo p. Each algorithm has a proved running time polynomial in the input bit length. A randomized algorithm may meet that bound in expectation on each input if it always returns a correct answer when it terminates.\". Reason: The definition includes zero under “arbitrary integers” and leaves unclear which exponent can be recovered when several exponents give the same residue."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Web operators rely on estimates of key strength. In a month of TLS observations in 2019, 90% of certificates used RSA signatures. The 2020 estimates put 2048-bit RSA and prime-field Diffie\\u2013Hellman with a 2048-bit modulus and 224-bit subgroup order at 112 bits of security. A general polynomial bound would overturn the hardness assumptions behind both schemes, though the cost at deployed sizes would still depend on the polynomial\\u2019s degree and constants. Polynomial-time factoring would also let number theorists compute the ring of integers of any given number field in polynomial time.\". Reason: The current rationale gives key strengths without identifying who relies on them or a constructive use for faster factoring."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit completion: basis = \"RSA Laboratories identifies polynomial time as a breakthrough for each problem individually. Joint completion requires the two proofs, which may appear in separate peer-reviewed publications. The Handbook supplies the running-time conventions. The degree and constants of a polynomial affect performance at particular key sizes.\". Reason: The basis should distinguish RSA Laboratories’ per-problem criterion from the joint scope and the requirement for peer-reviewed evidence."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: title = \"Classical algorithms solve the bounded-prime-factor cases in polynomial time.\"; criterion = \"Let b be the input bit length and c a fixed positive constant. For factoring, return the complete prime factorization of every N \\u2265 2 with at most one distinct prime divisor greater than b^c. For logarithms, return x for every valid prime-field input whose supplied subgroup order q has no prime divisor greater than b^c. In each case prove a polynomial bit-operation bound on this family, including any work needed to factor q.\"; threshold_quote = \"factoring integers N for which the second largest prime is bounded by a polynomial in log N can be done in polynomial time.\"; threshold_ref = 6. Reason: The existing wording leaves the factoring condition undefined for prime powers and mixes the test with an account of the algorithms that establish it."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: title = \"A classical computation factors RSA-240 or solves the 795-bit DLP-240 challenge.\"; criterion = \"For factoring, return the two prime factors of the RSA-240 modulus specified in Appendix A. For DLP-240, let p = RSA-240 + 49204 and let y be the big-endian integer whose bytes are the ASCII text \\u201cThe magic words are still Squeamish Ossifrage\\u201d with no trailing newline. Return an integer x satisfying 5^x \\u2261 y modulo p.\"; threshold_quote = \"the factorization of RSA-240, a 795-bit number, and a discrete logarithm computation over a 795-bit prime field.\"; threshold_ref = 3; refs = [3]. Reason: The criterion reports results for two modulus sizes but leaves the actual DLP-240 target implicit."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m2: \"A classical algorithm solves a full problem class in proved subexponential time.\". Reason: The milestones jump from restricted families and single inputs to polynomial time, omitting the proved subexponential bounds for general inputs."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Skipped proposed operation 3 (remove statement 1): the entry needs at least 2 statements. Its reason: FIPS 203 specifies a lattice-based key-encapsulation mechanism and describes a quantum threat, without naming classical polynomial-time factoring or discrete logarithms as a goal."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Applied 6 of 7 proposed operations from MAT-06-revise-20261121T132410397484Z; now version 2."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m4."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 0 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 2 found, 1 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "definition is 468 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 8 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 7 candidates returned, 0 dropped as sources already used, 7 to judge."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 6 of 7 new candidates, without search. Skipped: 1 no readable saved copy. Dropped rows: 1 not relevant. Replaced 9 earlier rows. Added 13 results: 8 from sources already used, 5 from newly found sources."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 0 from arXiv, 3 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 13 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-15"
- },
- "review": {
-  "state": "published",
-  "note": null,
-  "into": null,
-  "at": "2026-11-15",
-  "log": [
-   {
-    "date": "2026-11-15",
-    "state": "published"
-   }
-  ]
+  "results_run": "2026-11-21"
  }
 }
