@@ -278,14 +278,28 @@
   ],
   "prompt": "5e97d4b8dfc3"
  },
+ "review": {
+  "state": "published",
+  "note": null,
+  "into": null,
+  "at": "2026-11-15",
+  "log": [
+   {
+    "date": "2026-11-15",
+    "state": "published"
+   }
+  ]
+ },
  "page": {
   "id": "MAT-08",
   "title": "Polynomial-time chemical accuracy for molecular electronic structure",
-  "definition": "An algorithm calculates the lowest electronic energy of a specified, unbounded molecular family to chemical accuracy: less than 1.6 millihartree error for its finite-basis Hamiltonian. With nuclei fixed, the total computation, including state preparation, has a proved polynomial cost bound.",
+  "definition": "For every molecule in a specified family of unbounded size, one algorithm estimates the lowest electronic energy with the nuclei held fixed. Chemical accuracy here means an absolute error below 1.6 millihartree (about 1 kcal/mol) relative to the exact energy in the chosen finite set of one-electron orbitals. The entire calculation, including state preparation, has a proved cost polynomial in the input size and the inverse energy tolerance.",
   "goal": {
-   "need": "Full configuration interaction expands an N-electron state over C(M,N) determinants, where M counts spin-orbitals, or one-electron states including spin. At N=54 and M=108 this is about 2.5×10^31 determinants. The energy tolerance used here is 1.6×10−3 hartree, approximately 1 kcal/mol. The target is a proved cost bound at that tolerance without storing this full expansion.",
+   "need": "To understand how nitrogenase converts nitrogen to ammonia, chemists compare structures with protons bound at different sites. Density-functional approximations disagreed by almost 600 kJ/mol on relative energies for models of its metal center. The cost of exact diagonalization grows exponentially. Reliable reference energies for larger models within the family would help chemists distinguish competing pathways and test cheaper approximations. Predicting rates also requires a model of the enzyme environment and corrections for nuclear motion at the temperature of interest.",
    "need_refs": [
-    1
+    19,
+    20,
+    2
    ],
    "figures": {
     "caption": "Illustrative sizes of the full configuration-interaction expansion",
@@ -326,8 +340,8 @@
     {
      "body": "United States Department of Energy",
      "year": "2026",
-     "quote": "A fundamental goal of chemistry is to predict and control chemical transformations across electronic, atomic, and molecular scales.",
-     "context": "The Chemistry domain of Quantum Genesis Priority Applications identifies reaction mechanisms and reaction dynamics as quantum-computing targets.",
+     "quote": "Predict competing reaction pathways, free-energy landscapes, and selectivity for chemical and biochemical processes involving strongly correlated electronic states.",
+     "context": "Quantum Genesis Priority Applications lists this example under Application 1.A. It names the chemical application and leaves the algorithmic cost bound unspecified.",
      "ref": 3,
      "checked": true
     }
@@ -356,7 +370,7 @@
    {
     "id": "m1",
     "title": "A molecular ground-state energy is measured within 1.6 millihartree of its finite-basis exact value.",
-    "criterion": "A quantum processor estimates a molecular ground-state energy within 1.6×10−3 hartree of full configuration interaction in the same basis. Published on 10 January 2010, Lanyon et al.'s experiment used H2 with 2 electrons and 4 STO-3G spin-orbitals, encoded on 2 photonic qubits. It obtained 20-bit energies using 31 samples per bit; at 73.48 pm, agreement with the classical reference had a reported uncertainty of 0.03 kJ/mol. State preparation and evolution operators used classical precompilation.",
+    "criterion": "A quantum processor estimates a molecular ground-state energy within 1.6×10−3 hartree of the full configuration interaction ground energy for the same nuclear geometry and orbital basis.",
     "set_by": "Quantum-chemistry chemical-accuracy convention; its finite-basis energy interpretation is explicit in Weaving et al. (2023).",
     "set_by_kind": "community_convention",
     "threshold_quote": "energy errors to within 1.6 mHa of full configuration interaction.",
@@ -373,7 +387,7 @@
    {
     "id": "m2",
     "title": "A molecular energy difference reaches 1.6 millihartree accuracy without exponential precompilation.",
-    "criterion": "A quantum-hardware calculation obtains a molecular energy difference within 1.6×10−3 hartree of its finite-basis exact value without exponentially costly circuit precompilation. Published on 18 July 2016, O'Malley et al. used 2 superconducting qubits for H2 in STO-3G, with 2 electrons and 4 spin-orbitals. The variational calculation's dissociation-energy error was (8±5)×10−4 hartree. This finite demonstration does not establish polynomial convergence of the classical parameter optimization.",
+    "criterion": "A quantum processor estimates a molecular energy difference within 1.6×10−3 hartree of the exact difference for the same finite-basis Hamiltonians. The classical computation used to construct the quantum circuits must avoid precompilation whose cost grows exponentially with system size.",
     "set_by": "Quantum-chemistry hardware convention distinguishing compiled demonstrations from calculations without exponential precompilation, explicitly applied by O'Malley et al. (2016).",
     "set_by_kind": "community_convention",
     "threshold_quote": "We report the first electronic structure calculation performed on a quantum computer without exponentially costly precompilation.",
@@ -387,8 +401,8 @@
    },
    {
     "id": "m3",
-    "title": "A molecular ground-energy estimator has polynomial cost given a trial state with nonzero overlap.",
-    "criterion": "Given a trial state with ground-state overlap amplitude S>0, a finite-basis molecular energy-estimation routine has a proved gate cost polynomial in orbital count, inverse energy error and 1/S, with controlled simulation error. Trial-state preparation remains a separate cost. Published on 9 September 2005, Aspuru-Guzik et al. simulated quantum energy calculations for water and lithium hydride and adiabatic preparation for stretched H2 on a classical computer.",
+    "title": "Ground-energy estimation has polynomial gate cost in orbital count, inverse error and inverse overlap.",
+    "criterion": "Given a trial state with ground-state overlap amplitude S>0, a proof bounds the gate cost of estimating a finite-basis molecular ground energy to absolute error ε by a polynomial in orbital count, 1/ε and 1/S. The bound includes Hamiltonian simulation error and the repetitions needed to obtain the ground energy. The cost of preparing each trial state is accounted for separately.",
     "set_by": "Quantum phase-estimation complexity convention, established in molecular algorithms by Aspuru-Guzik et al. (2005) and reviewed by McArdle et al., Sections V.1.1–V.1.3.",
     "set_by_kind": "community_convention",
     "threshold_quote": "the number of gates required grows polynomially with the number of quantum bits.",
@@ -404,7 +418,7 @@
    {
     "id": "m4",
     "title": "Molecular trial states retain inverse-polynomial ground-state overlap at polynomial preparation cost.",
-    "criterion": "Prepare trial states at polynomial total cost with squared ground-state overlap p0≥1/poly(N,M,B) throughout the completion family. Bounds must follow from the family's structural conditions. A preprint submitted on 31 October 2026 supplies a conditional adiabatic-preparation bound assuming polynomial Hartree–Fock convergence, a size-independent gap along the interpolation and an extensive Hamiltonian norm. Numerical gap evidence includes alanine chains up to 64 monomers. This is a conditional result, not a proof for the completion family; it is not peer reviewed.",
+    "criterion": "For every member of the family specified in the completion test, prove that a trial state can be prepared at cost polynomial in the electron count N, spin-orbital count M and integral bit precision B, with squared ground-state overlap p₀≥1/poly(N,M,B). Both bounds must follow from the defining structural conditions of the family.",
     "set_by": "Quantum phase-estimation state-preparation convention, stated by McArdle et al., Section V.1.2; polynomial preparation cost is required for polynomial total cost.",
     "set_by_kind": "community_convention",
     "threshold_quote": "at worst a polynomially decreasing overlap with the FCI ground state, as the system size increases.",
@@ -675,6 +689,62 @@
     "issue": "4",
     "pages": null,
     "citation_source": "crossref"
+   },
+   {
+    "id": 19,
+    "kind": "journal",
+    "url": "https://www.compchem.lu.se/ulf-ryde/publication/03a671db-f730-4482-8916-2f6bfdc0a8de",
+    "doi": "10.1039/C8CP06930A",
+    "title": "Extremely large differences in DFT energies for nitrogenase models",
+    "authors": "Cao L, Ryde U",
+    "container": "Phys. Chem. Chem. Phys.",
+    "year": "2019",
+    "volume": "21",
+    "issue": "5",
+    "pages": "2480-2488",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 20,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5530650/",
+    "doi": "10.1073/pnas.1619152114",
+    "title": "Elucidating reaction mechanisms on quantum computers",
+    "authors": "Reiher M, Wiebe N, Svore KM, Wecker D, Troyer M",
+    "container": "Proc. Natl. Acad. Sci. U.S.A.",
+    "year": "2017",
+    "volume": "114",
+    "issue": "29",
+    "pages": "7555-7560",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 21,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/2508.13926",
+    "doi": null,
+    "title": "Guided sampling ansätzes for variational quantum computing",
+    "authors": "Gunlycke D, Stenger JPT, Maksymov A, Kaushik A, Roetteler M, Hellberg CS",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 22,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2607.28548",
+    "doi": null,
+    "title": "Quantum Computing Enabled ab initio Molecular Dynamics Simulations",
+    "authors": "Das S, Bhowmik S, Li Z, Bazayeva M, Kaliakin D, Shajan A, et al.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
    }
   ],
   "milestone_order": [
@@ -688,524 +758,664 @@
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "H₂ ground-state energy, 31 samples per bit: agreement with the classical reference within a reported uncertainty of 0.03 kJ/mol.",
-    "detail": "The two-photon experiment used the STO-3G basis at a 73.48 pm bond length. Eigenstate preparation and evolution operators relied on classical preprocessing.",
+    "finding": "For one H₂ molecule at equilibrium, the photonic ground-state estimate matched full configuration interaction to about 0.011 millihartree.",
+    "detail": "The experiment initialized the photonic register with a classically computed exact eigenstate and used classically precompiled evolution gates.",
     "quote": "The ground-state energy obtained at the equilibrium bond\nlength of 73.48 pm is 2535.58+0.03 kJ mol 21, which agrees\nexactly with the result obtained on a classical computer to an uncer-\ntainty in the least signiﬁcant bit.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For one H₂ molecule, the equilibrium energy relative to separated atoms agreed with the classical result to about 0.011 millihartree.",
+    "detail": "The authors describe a scalable operator-splitting implementation theoretically. The measured curve used the directly compiled circuits.",
+    "quote": "The ground-state energy obtained at the equilibrium bond\nlength of 73.48 pm is 2535.58+0.03 kJ mol 21, which agrees\nexactly with the result obtained on a classical computer to an uncer-\ntainty in the least signiﬁcant bit.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 6,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For molecular evolution, with one H₂ resource-count example, the authors report fifth-power gate scaling in basis size.",
+    "detail": "The phase-estimation repetition discussion covers bit readout. It does not provide the repetition cost of recovering the ground energy from a trial state of overlap amplitude S.",
+    "quote": "the total number of\nelementary quantum gates required to simulate the evolution of\nan arbitrary molecule, without error correction, scales as N5",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 6,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Molecular ground-state energies: 10,000 shots per run; reported agreement with FCI within chemical accuracy.",
-    "detail": "The preprint reports a hybrid workflow: the quantum processor samples configurations, followed by classical diagonalization. Its aggregate accuracy claim also includes comparisons with DMET-CASCI for embedded systems.",
-    "quote": "Across all studies, the majority of quantum-computed energies agree with reference full configuration interaction (FCI) results and with DMET-CASCI energies for embedded systems, to within chemical accuracy for the chosen basis sets.",
+    "finding": "IQM Sirius SQD(LUCJ) ground energies for five molecules, three runs each, agreed with FCI to within 1 nanohartree.",
+    "detail": "The highest-accuracy setting led to full symmetry-sector diagonalization. With symmetry-adaptive subsampling, the largest error calculated from Tables 2 and 4 was about 0.853 millihartree.",
+    "quote": "the SQD(LUCJ) workflow recovers the FCI ground-state energy to within sub-nanohartree precision for all five molecules across all three independent runs, with no run-to-run variance observed.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "IQM Sirius scanned 1,024 water geometries using CCSD circuit precomputation described as sixth-order in system size.",
+    "detail": "The scan returns pointwise ground energies. Pointwise agreement with FCI alone does not establish the required accuracy of a difference between two geometries.",
+    "quote": "The LUCJ circuit parameters were re-initialized from geometry-specific CCSD amplitudes at every grid point, following the same procedure as described for the 1D benchmark molecules in Section",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For one H₂ molecule, the VQE ground-energy error plot uses a 1.6-millihartree band referenced to the experimental atomized energy.",
+    "detail": "The reported VQE accuracy applies to the dissociation energy. The 1.4-millihartree value in Table 1 is a Trotter error, so it does not establish the total error of the measured phase-estimation energy.",
+    "quote": "Figure\n3\na\nshows the exact and experimentally determined energies of molecular hydrogen at different bond lengths.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "H₂ dissociation energy, 2 superconducting qubits: error (8±5)×10⁻⁴ hartree.",
-    "detail": "The VQE calculation used a minimal basis and no exponentially costly precompilation. It scanned one variational parameter and locally optimized the measured energy surface.",
+    "finding": "For one H₂ molecule, superconducting VQE estimated the dissociation energy with an error of 0.8 ± 0.5 millihartree.",
+    "detail": "The difference was taken between the equilibrium geometry and the dissociation asymptote. The authors used inefficient classical simulations of the VQE circuit for a separate comparison with theoretically optimal parameters.",
     "quote": "Our VQE experiment correctly predicts this quantity with an error of\n(\n8\n±\n5\n)\n×\n10\n−\n4\n(8\\pm 5)\\times 10^{-4}\nHartree, which is below the chemical accuracy threshold.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
-    "milestone": "m3",
+    "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "Simulated ground-energy estimation for 2 molecules; water differed from diagonalization by 0.002 millihartree.",
-    "detail": "The paper assumes, rather than proves, polynomial growth of the simulation factor M. It does not establish the full gate-cost bound in inverse energy error and inverse trial-state overlap.",
-    "quote": "After 20 iterations, the electronic energy obtained for H2O (-84.203663 a.u.) \nmatched the Hamiltonian diagonalization energy (-84.203665 a.u.).",
+    "finding": "Simulated ground energies for 2 molecules, H2O and LiH, had a maximum absolute error of 0.002 millihartree.",
+    "detail": "The authors attribute the discrepancies to numerical matrix exponentiation.",
+    "quote": "After 20 iterations, the electronic energy obtained for H2O (-84.203663 a.u.) \nmatched the Hamiltonian diagonalization energy (-84.203665 a.u.).  The LiH calculation \n(-9.1228936 a.u.) matched diagonalization (-9.1228934 a.u.) to the same number of \nsignificant digits.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "Ground-energy estimator for general Hamiltonians, no molecular sample: precision h with success probability 1−ϑ.",
-    "detail": "Theorem 8 gives polynomial query dependence on inverse overlap and precision without a spectral-gap assumption. It assumes an exact Hamiltonian block-encoding and exact phase factors; the text does not prove the complete gate cost in molecular orbital count or control errors in those inputs.",
-    "quote": "Then the ground energy can be estimated to precision h with probability 1−ϑ with the following costs:",
+    "finding": "For a general molecular Hamiltonian, the direct-mapping analysis uses terms involving at most 4 basis functions.",
+    "detail": "The authors give a fixed-step decomposition bound and describe the overlap dependence of success, leaving the cost of achieving a target energy error and success probability unproved.",
+    "quote": "The number of terms in the Hamiltonian grows \napproximately with the fourth power of the number of atoms, and each term involves \nmaximally four basis functions, implying action on at most five qubits in the direct \nmapping (four qubits in S plus a control qubit in R).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For 1 molecule, stretched H2 at several separations, adiabatic preparation improved on a starting squared overlap of 0.5.",
+    "detail": "The text does not quantify the final overlap. The calculation used 1000 discretization steps at each separation.",
+    "quote": "The ASP method was applied to the H2 molecule at large \nseparations in the STO-3G basis, for which the squared overlap of the HF wave function \nwith the exact ground state is one half.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Generic block-encoded Hamiltonians, no molecular sample: ground-energy estimation uses Õ(α/(γh)) Hamiltonian-oracle calls at fixed confidence.",
+    "detail": "The analysis controls polynomial filter approximation and uses majority voting to suppress decision errors. It assumes error-free QSP phase factors and leaves the cost of implementing the molecular block-encoding outside the gate bound.",
+    "quote": "Then the\nground energy can be estimated to precision h with probability 1−ϑ with the following\ncosts:",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "Ground-state energy estimator, theoretical result with no molecular sample: expected evolution time scales as Õ(ε⁻¹η⁻²).",
-    "detail": "The proof assumes a known lower bound η on ground-state overlap probability and discusses controlled simulation error. It does not establish the required gate-cost scaling in orbital count; system-size simulation overhead is left problem-specific.",
-    "quote": "This overhead and the scaling of\nη\n\\eta\nwith respect to the system size are highly problem-specific and are independent from the tasks we are considering in this paper, and hence we will not discuss them in more detail.",
+    "finding": "For an n-qubit Hamiltonian, the ground-energy estimator has expected total evolution time Õ(ε⁻¹η⁻²) at fixed confidence.",
+    "detail": "The Trotter analysis assumes a decomposition into efficiently exponentiable terms. Its cost retains a Hamiltonian-dependent prefactor and leaves the per-step gate cost in molecular orbital count unspecified.",
+    "quote": "The expected total evolution time and the maximal evolution time are\n𝒪\n⁡\n(\nϵ\n−\n1\n​\nη\n−\n2\n​\npolylog\n​\n(\nϵ\n−\n1\n​\nτ\n−\n1\n​\nη\n−\n1\n)\n)\n\\mathcal{O}(\\epsilon^{-1}\\eta^{-2}{\\mathrm{polylog}}(\\epsilon^{-1}\\tau^{-1}\\eta^{-1}))",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Conditional adiabatic trial-state preparation; alanine chains up to 64 residues show an 8.50 eV Hartree–Fock orbital gap.",
-    "detail": "The preparation bound assumes polynomial Hartree–Fock convergence, a size-independent gap along the interpolation, and an extensive Hamiltonian norm. The 64-residue result concerns the Hartree–Fock orbital gap, not the full interpolation gap. These conditions are not proved for the completion family.",
-    "quote": "As shown in Fig.\n2\n, the HOMO-LUMO gap decreases from 14.32 eV for a single alanine residue to 8.50 eV for 64 residues.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Photonic calculation of H2 energies used 20-bit phase estimation with 31 samples per bit.",
-    "detail": "The experiment reconstructed energy curves, but classically calculated exact eigenstates and directly decomposed evolution operators. The authors state that this decomposition does not scale efficiently with molecular size.",
-    "quote": "To\ndemonstrate that the necessary precision can be achieved, we\ncarried out the IPEA to 20 bits, using n ¼ 31 samples per bit.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "A proposed simulation of an arbitrary molecule uses a number of elementary gates scaling as N5.",
-    "detail": "The reported operator-splitting result concerns simulation cost. The supplied text does not establish the complete energy-estimation gate bound in inverse error and trial-state overlap.",
-    "quote": "We give\nan overview of this ‘operator-splitting’ technique in our\nSupplementary Information and ﬁnd that the total number of\nelementary quantum gates required to simulate the evolution of\nan arbitrary molecule, without error correction, scales as N5,",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Quantum-hardware PES included a 32×32 water grid; most energies across the studies were reported within chemical accuracy.",
-    "detail": "The text does not report the error of a molecular energy difference or establish that circuit precompilation avoided exponential cost.",
-    "quote": "Across all studies, the majority of quantum-computed energies agree with reference full configuration interaction (FCI) results and with DMET-CASCI energies for embedded systems, to within chemical accuracy for the chosen basis sets.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "For one H2 molecule, the VQE dissociation-energy error was (8 ± 5) × 10⁻⁴ hartree.",
-    "detail": "The reported error is for the difference between dissociated and equilibrium energies, not an absolute ground-state energy error against full configuration interaction.",
-    "quote": "Our efficient implementation predicts the correct dissociation energy to within chemical accuracy of the numerically exact result.",
+    "finding": "Simulated QPD reached a 1 mHa average ground-energy error in a benchmark of 19 high-overlap molecules.",
+    "detail": "The benchmark used Hartree–Fock determinants as inputs. Its reported error statistic averages repeated simulations.",
+    "quote": "minimal\nT\nruntime\nT_{\\text{runtime}}\nand\nT\nmax\nT_{\\text{max}}\nrequired to achieve\nε\navg\n=\n1\n​\nmHa\n\\varepsilon_{\\text{avg}}=1\\,\\text{mHa}, we can see that both\nT\nmax\n=\nO\n⁡\n(\n1\n)\nT_{\\text{max}}=O(1)\nand\nT\nruntime\n=\nO\n⁡\n(\n1\n)\nT_{\\text{runtime}}=O(1)\nare verified.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Simulated H2O ground-state energy differed from diagonalization by 0.000002 hartree.",
-    "detail": "The calculation used a classical quantum-computer simulator, not a quantum processor.",
-    "quote": "After 20 iterations, the electronic energy obtained for H2O (-84.203663 a.u.) \nmatched the Hamiltonian diagonalization energy (-84.203665 a.u.).",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": null,
-    "verdict": "partial",
-    "finding": "For stretched H2 at several separations, adiabatic preparation improved on an initial squared overlap of one half.",
-    "detail": "The demonstration concerns a finite molecule; it does not prove polynomial preparation cost or an inverse-polynomial overlap bound for an unbounded family.",
-    "quote": "The ASP method was applied to the H2 molecule at large \nseparations in the STO-3G basis, for which the squared overlap of the HF wave function \nwith the exact ground state is one half.  As evidenced by Figure 3A, the ASP algorithm \nprepares states with a high squared overlap for several internuclear distances of the H2 \nmolecule.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Generic Hamiltonians, no molecular sample: ground-state preparation reaches fidelity 1−ϵ under stated promises.",
-    "detail": "The algorithm assumes an efficiently prepared initial state with a known overlap lower bound and a spectral-gap bound. It does not prove polynomial preparation cost or overlap bounds for a molecular family.",
-    "quote": "Then the ground state |ψ0⟩ can be prepared to\nﬁdelity 1−ϵ with the following costs:",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "Quantum prolate diagonalization was benchmarked for ground-energy estimation on 28 molecules.",
-    "detail": "The estimator relies on a high-support input state and a size-independent spectral gap. The source does not establish the stated gate bound for an arbitrary trial state with nonzero overlap.",
-    "quote": "In Section\nIV\nwe benchmark quantum prolate diagonalization for eigenvalue estimation on a set of 28 molecular systems, attaining state-of-the art runtime estimates compared to alternative single-ancilla methods and textbook QPE.",
+    "finding": "For a conditional class of weakly correlated molecules, wide-band QPD uses O(1/ε²) shots per autocorrelation evaluation.",
+    "detail": "The analytic bound has no finite sample size. The sharper sub-quintic orbital scaling additionally uses empirical Hamiltonian factorization and norm scalings.",
+    "quote": "In this case, the number of shots required to resolve\nϵ\nstoch\n=\nO\n⁡\n(\nε\n)\n\\epsilon_{\\text{stoch}}=O(\\varepsilon)\nis\nO\n⁡\n(\n1\n/\nε\n2\n)\nO(1/\\varepsilon^{2}), where\nε\n\\varepsilon\nis the target accuracy of the energy estimate.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Conditional adiabatic trial-state preparation has Õ(n/Δ²) simulation time at fixed error. The proof has no finite sample size.",
+    "detail": "The alanine study reaches 64 residues for Hartree–Fock orbital gaps. Its interpolation-gap scans cover five active spaces for a single capped residue.",
+    "quote": "First, we demonstrate fast state preparation with a rigorous ground state overlap guarantee via ASP, with a simulation time\nT\nASP\n=\nO\n~\n​\n(\nn\n/\nΔ\n2\n)\nT_{\\text{ASP}}=\\tilde{O}(n/\\Delta^{2}).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "Fluoromethane dissociation, seven geometry and spin combinations, gave a 0.61 millihartree ground-energy error at the reactant geometry.",
+    "detail": "The pathway-b transition state exceeded the threshold with a 4.24 millihartree error.",
+    "quote": "Nevertheless, CVQE successfully achieves chemical accuracy, as all deviations\nfrom the FCI reference remain below 0.0016 Ha (1 kcal/mol).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "Fluoromethane, 22 qubits: the CHF + H2 reaction-energy error was 8.0 × 10−4 hartree.",
-    "detail": "The calculation used ibm_torino and an STO-3G finite-basis FCI benchmark. The authors report circuit transpilation scaling with the number of Pauli terms, which scales quartically with orbitals.",
+    "finding": "Fluoromethane dissociation, six energy differences tested, gave a 0.80 millihartree error for the pathway-b reaction energy.",
+    "detail": "The pathway-b barrier exceeded the threshold with a 3.6 millihartree error. The circuit-generation scaling applies to the reported one-step guiding circuit.",
     "quote": "Conversely, the corresponding reaction energy |ECHF+H2 − ECH3F| is within\nchemical accuracy, differing by only 8.0 × 10−4 Ha from FCI.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "Guided ground-state energy estimator; sample size not applicable; O(1/(γδ)) queries to the evolution unitary.",
-    "detail": "The result assumes access to time evolution and a state-preparation unitary. It does not establish a molecular gate-cost bound in orbital count or account for controlled Hamiltonian simulation error.",
-    "quote": "We derive a query-optimal algorithm for the guided ground state energy problem (or the guided max eigenphase problem) in terms of queries to\nU\nU\n.",
+    "finding": "Guided ground-energy estimation (theorem, no molecular sample) uses O(1/(γδ)) controlled unitary queries at phase precision δ.",
+    "detail": "The energy reduction rescales the Hamiltonian using a spectral bound. The query count leaves the gate cost and approximation error of implementing controlled Hamiltonian evolution unspecified.",
+    "quote": "The total number of controlled calls to\nU\nU\nand\nU\n†\nU^{\\dagger}\nis then\nO\n⁡\n(\n1\nγ\n​\nδ\n)\nO\\left(\\frac{1}{\\gamma\\delta}\\right)\n, as claimed.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 17,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "First-quantized molecular energy estimation: 2 algorithms analyzed, with qubitization using O(λ/ϵ) controlled operations.",
-    "detail": "The paper analyzes finite-basis phase estimation, bounds implementation error, and discusses initial states with nonzero ground-state support. The supplied text does not establish a ground-energy gate-cost bound in 1/S.",
+    "finding": "Two finite-basis molecular phase-estimation algorithms have leading gate cost proportional to 1/ϵ per eigenvalue estimate.",
+    "detail": "The qubitization error budget includes phase estimation, rounded nuclear positions, and finite-precision block encoding. The circuit’s ancilla preparation costs are distinct from the cost of preparing a molecular trial state.",
     "quote": "To estimate\nwith accuracy ϵ, we need O(λ/ϵ) uses of controlled- Q\noperations.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 18,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For hydronium, hybrid estimates were within 1.59 millihartree of full configuration interaction at 11 of 16 tested geometries.",
+    "detail": "The count of 11 follows from the reported grid of 16 uniformly spaced O–H bond lengths from 0.5 to 2.0 Å.",
+    "quote": "Figure 5 also shows that our calculations of the total\nmany-electron energy exceed chemical accuracy (i.e., the\nenergy error is below1.59 × 10−3Ha) for all bond lengths\nat or below 1.5Å.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Gas-phase ammonia on ibm_cleveland, 50 frames: the maximum absolute error in electronic energy changes relative to the initial geometry was 4.2×10⁻⁷ hartree.",
+    "detail": "Full configuration interaction supplied the benchmark. Circuit construction used restricted closed-shell CCSD parameters and a VF2PostLayout mapping computed once per molecule. The text gives no scaling bound for the complete classical construction step.",
+    "quote": "and a maximum absolute deviation of\n4.2\n×\n10\n−\n7\n4.2\\times 10^{-7}\nE\nh\nE_{h}\n.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 22,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    }
   ],
   "judged": [
    {
     "url": "https://www.kassal.group/assets/papers/kassal006.pdf",
     "milestone": "m1",
-    "hash": "fd8a774da69f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2604.01983",
-    "milestone": "m1",
-    "hash": "fd8a774da69f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/1512.06860",
-    "milestone": "m2",
-    "hash": "59f68e3d329f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/pdf/quant-ph/0604193",
-    "milestone": "m3",
-    "hash": "94f2aebeb120",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://quantum-journal.org/papers/q-2020-12-14-372/pdf/",
-    "milestone": "m3",
-    "hash": "94f2aebeb120",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2102.11340",
-    "milestone": "m3",
-    "hash": "94f2aebeb120",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2611.00751",
-    "milestone": "m4",
-    "hash": "4a8e549ff5af",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e149fc099536",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.kassal.group/assets/papers/kassal006.pdf",
     "milestone": "m2",
-    "hash": "59f68e3d329f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9d00f30f31e7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.kassal.group/assets/papers/kassal006.pdf",
     "milestone": "m3",
-    "hash": "94f2aebeb120",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "18c18ad3835a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.kassal.group/assets/papers/kassal006.pdf",
     "milestone": "m4",
-    "hash": "4a8e549ff5af",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "8e6b1e7805b4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.kassal.group/assets/papers/kassal006.pdf",
     "milestone": "completion",
     "hash": "cfe27a5567bd",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2604.01983",
+    "milestone": "m1",
+    "hash": "e149fc099536",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2604.01983",
     "milestone": "m2",
-    "hash": "59f68e3d329f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9d00f30f31e7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2604.01983",
     "milestone": "m3",
-    "hash": "94f2aebeb120",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "18c18ad3835a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2604.01983",
     "milestone": "m4",
-    "hash": "4a8e549ff5af",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "8e6b1e7805b4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2604.01983",
     "milestone": "completion",
     "hash": "cfe27a5567bd",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/1512.06860",
     "milestone": "m1",
-    "hash": "fd8a774da69f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e149fc099536",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/1512.06860",
+    "milestone": "m2",
+    "hash": "9d00f30f31e7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/1512.06860",
     "milestone": "m3",
-    "hash": "94f2aebeb120",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "18c18ad3835a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/1512.06860",
     "milestone": "m4",
-    "hash": "4a8e549ff5af",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "8e6b1e7805b4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/1512.06860",
     "milestone": "completion",
     "hash": "cfe27a5567bd",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/quant-ph/0604193",
     "milestone": "m1",
-    "hash": "fd8a774da69f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e149fc099536",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/quant-ph/0604193",
     "milestone": "m2",
-    "hash": "59f68e3d329f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9d00f30f31e7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/quant-ph/0604193",
+    "milestone": "m3",
+    "hash": "18c18ad3835a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/quant-ph/0604193",
     "milestone": "m4",
-    "hash": "4a8e549ff5af",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "8e6b1e7805b4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/quant-ph/0604193",
     "milestone": "completion",
     "hash": "cfe27a5567bd",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://quantum-journal.org/papers/q-2020-12-14-372/pdf/",
     "milestone": "m1",
-    "hash": "fd8a774da69f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e149fc099536",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://quantum-journal.org/papers/q-2020-12-14-372/pdf/",
     "milestone": "m2",
-    "hash": "59f68e3d329f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9d00f30f31e7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://quantum-journal.org/papers/q-2020-12-14-372/pdf/",
+    "milestone": "m3",
+    "hash": "18c18ad3835a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://quantum-journal.org/papers/q-2020-12-14-372/pdf/",
     "milestone": "m4",
-    "hash": "4a8e549ff5af",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "8e6b1e7805b4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://quantum-journal.org/papers/q-2020-12-14-372/pdf/",
     "milestone": "completion",
     "hash": "cfe27a5567bd",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2102.11340",
     "milestone": "m1",
-    "hash": "fd8a774da69f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e149fc099536",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2102.11340",
     "milestone": "m2",
-    "hash": "59f68e3d329f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9d00f30f31e7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2102.11340",
+    "milestone": "m3",
+    "hash": "18c18ad3835a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2102.11340",
     "milestone": "m4",
-    "hash": "4a8e549ff5af",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "8e6b1e7805b4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2102.11340",
     "milestone": "completion",
     "hash": "cfe27a5567bd",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2611.00751",
     "milestone": "m1",
-    "hash": "fd8a774da69f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e149fc099536",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2611.00751",
     "milestone": "m2",
-    "hash": "59f68e3d329f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9d00f30f31e7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2611.00751",
     "milestone": "m3",
-    "hash": "94f2aebeb120",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "18c18ad3835a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2611.00751",
+    "milestone": "m4",
+    "hash": "8e6b1e7805b4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2611.00751",
     "milestone": "completion",
     "hash": "cfe27a5567bd",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://journals.aps.org/apsos/pdf/10.1103/1ljr-8zrf",
+    "milestone": "m1",
+    "hash": "e149fc099536",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://journals.aps.org/apsos/pdf/10.1103/1ljr-8zrf",
     "milestone": "m2",
-    "hash": "59f68e3d329f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9d00f30f31e7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://journals.aps.org/apsos/pdf/10.1103/1ljr-8zrf",
+    "milestone": "m3",
+    "hash": "18c18ad3835a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://journals.aps.org/apsos/pdf/10.1103/1ljr-8zrf",
+    "milestone": "m4",
+    "hash": "8e6b1e7805b4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://journals.aps.org/apsos/pdf/10.1103/1ljr-8zrf",
+    "milestone": "completion",
+    "hash": "cfe27a5567bd",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2608.24494",
+    "milestone": "m1",
+    "hash": "e149fc099536",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2608.24494",
+    "milestone": "m2",
+    "hash": "9d00f30f31e7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2608.24494",
     "milestone": "m3",
-    "hash": "94f2aebeb120",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "18c18ad3835a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2608.24494",
+    "milestone": "m4",
+    "hash": "8e6b1e7805b4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2608.24494",
+    "milestone": "completion",
+    "hash": "cfe27a5567bd",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://storage.googleapis.com/gweb-research2023-media/pubtools/6166.pdf",
+    "milestone": "m1",
+    "hash": "e149fc099536",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://storage.googleapis.com/gweb-research2023-media/pubtools/6166.pdf",
+    "milestone": "m2",
+    "hash": "9d00f30f31e7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://storage.googleapis.com/gweb-research2023-media/pubtools/6166.pdf",
     "milestone": "m3",
-    "hash": "94f2aebeb120",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "18c18ad3835a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://storage.googleapis.com/gweb-research2023-media/pubtools/6166.pdf",
+    "milestone": "m4",
+    "hash": "8e6b1e7805b4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://storage.googleapis.com/gweb-research2023-media/pubtools/6166.pdf",
+    "milestone": "completion",
+    "hash": "cfe27a5567bd",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2508.13926",
+    "milestone": "m1",
+    "hash": "e149fc099536",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2607.28548",
+    "milestone": "m2",
+    "hash": "9d00f30f31e7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1277,20 +1487,98 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "result on m4 from reference 12: quote is 331 characters, over its limit of 320; kept."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"For every molecule in a specified family of unbounded size, one algorithm estimates the lowest electronic energy with the nuclei held fixed. Chemical accuracy here means an absolute error below 1.6 millihartree (about 1 kcal/mol) relative to the exact energy in the chosen finite set of one-electron orbitals. The entire calculation, including state preparation, has a proved cost polynomial in the input size and the inverse energy tolerance.\". Reason: The definition leaves the finite-basis reference implicit and does not identify the quantities in the polynomial cost bound."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"To understand how nitrogenase converts nitrogen to ammonia, chemists compare structures with protons bound at different sites. Density-functional approximations disagreed by almost 600 kJ/mol on relative energies for models of its metal center. The cost of exact diagonalization grows exponentially. Reliable reference energies for larger models within the family would help chemists distinguish competing pathways and test cheaper approximations. Predicting rates also requires a model of the enzyme environment and corrections for nuclear motion at the temperature of interest.\". Reason: The determinant count quantifies a computational cost but leaves out the chemical decision that uncertain energies prevent."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by United States Department of Energy, 2026: \"Predict competing reaction pathways, free-energy landscapes, and selectivity for chemical and biochemical processes involving strongly correlated electronic states.\". Reason: The example target identifies the chemical predictions that motivate more accurate electronic energies."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"A quantum processor estimates a molecular ground-state energy within 1.6\\u00d710\\u22123 hartree of the full configuration interaction ground energy for the same nuclear geometry and orbital basis.\". Reason: The current criterion includes the date, apparatus and measured result of one hydrogen experiment."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"A quantum processor estimates a molecular energy difference within 1.6\\u00d710\\u22123 hartree of the exact difference for the same finite-basis Hamiltonians. The classical computation used to construct the quantum circuits must avoid precompilation whose cost grows exponentially with system size.\". Reason: The current criterion mixes the energy-difference test with one processor’s dissociation-energy result and a qualification about its optimizer."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: title = \"Ground-energy estimation has polynomial gate cost in orbital count, inverse error and inverse overlap.\"; criterion = \"Given a trial state with ground-state overlap amplitude S>0, a proof bounds the gate cost of estimating a finite-basis molecular ground energy to absolute error \\u03b5 by a polynomial in orbital count, 1/\\u03b5 and 1/S. The bound includes Hamiltonian simulation error and the repetitions needed to obtain the ground energy. The cost of preparing each trial state is accounted for separately.\". Reason: The title omits the inverse-overlap dependence that can make a nonzero overlap costly, and the criterion includes a historical simulation."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"For every member of the family specified in the completion test, prove that a trial state can be prepared at cost polynomial in the electron count N, spin-orbital count M and integral bit precision B, with squared ground-state overlap p\\u2080\\u22651/poly(N,M,B). Both bounds must follow from the defining structural conditions of the family.\". Reason: The criterion should specify which preparation and overlap bounds need proof without including a preprint’s assumptions, numerical evidence or publication status."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "remove statement 1. Reason: The DOE quotation states an aim of chemistry as a whole, while the same document gives a specific target for strongly correlated electronic structure."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Applied 8 of 8 proposed operations from MAT-08-revise-20261121T132800154731Z; now version 2."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m3, m4."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 0 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 1 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "definition is 443 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 10 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 4 candidates returned, 0 dropped as sources already used, 4 to judge."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 2 of 4 new candidates, without search. Skipped: 4 no readable saved copy. Dropped rows: none. Replaced 18 earlier rows. Added 21 results: 19 from sources already used, 2 from newly found sources."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 2 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 21 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-15"
- },
- "review": {
-  "state": "published",
-  "note": null,
-  "into": null,
-  "at": "2026-11-15",
-  "log": [
-   {
-    "date": "2026-11-15",
-    "state": "published"
-   }
-  ]
+  "results_run": "2026-11-21"
  }
 }
