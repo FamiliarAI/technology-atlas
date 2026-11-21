@@ -324,12 +324,15 @@
  "page": {
   "id": "SWE-03",
   "title": "Validation of formal software specifications",
-  "definition": "A repeatable method establishes whether a formal specification—a mathematical description of required software behavior—captures recorded stakeholder intent under evidenced environmental assumptions. It produces a mechanically checkable adequacy argument or a concrete disagreement within declared observable behaviors and scenarios.",
+  "definition": "A repeatable method checks whether a formal specification, a mathematical description of permitted software behavior, captures recorded stakeholder intent for a stated set of observable behaviors and scenarios. It links mechanical checks to stakeholders’ judgments and to evidence for assumptions about the operating environment. The result is an argument others can reproduce or a concrete behavior on which the specification and the recorded intent disagree.",
   "goal": {
-   "need": "Two independent review teams missed the A-7 aircraft requirements errors tabulated below; automated consistency checking found them in minutes. A study posted on 11 February 2021 covered two industrial examples and reported about 40 issues in a train-control requirements document. These results motivate validating requirements themselves alongside proving implementation conformance.",
+   "need": "Of 228 companies surveyed, 109 ranked incomplete or hidden requirements among their five most critical requirements problems. Software can satisfy every property its developers prove and still omit behavior its users need. Checking the specified behavior with users before implementation gives them a chance to correct omissions and misunderstandings before the team builds them into the software. That assurance depends on the scenarios users examine and on whether the assumptions hold in use.",
    "need_refs": [
-    1,
-    2
+    20,
+    2,
+    21,
+    4,
+    19
    ],
    "figures": {
     "caption": "Automated consistency-checking findings reported in November 1998",
@@ -360,28 +363,27 @@
      "checked": true
     },
     {
-     "body": "Anthropic",
-     "year": "2026",
-     "quote": "The difficulty of obtaining a comprehensive and unambiguous spec is a significant obstacle to verifying software at a larger scale.",
-     "context": "Research report published on 22 October 2026.",
-     "ref": 4,
+     "body": "Austrian Science Fund, IVOIRE project",
+     "year": "2020",
+     "quote": "The IVOIRE project will enable continuous validation of formal models during their development by stepwise refinement.",
+     "context": "The grant describes validation as developers add detail to Event-B models.",
+     "ref": 22,
      "checked": true
     }
    ]
   },
   "completion": {
    "title": "An independent team reproduces a bounded adequacy argument for a formal software specification.",
-   "criterion": "For one bounded software application, a published method links recorded stakeholder intent and environmental evidence to separate requirements R, domain assumptions K and machine specification S. A proof checker accepts both S ∧ K ⇒ R and the consistency of S ∧ K. Stakeholders validate R, its interpretation and the design choices permitted by S; evidence independent of those proofs supports K. A separate team reconstructs these links and reproduces the checks from the recorded inputs. The claim covers only the declared observable behaviors and scenarios.",
-   "set_by": "Technology Atlas; provisional test restricted to one bounded application.",
+   "criterion": "For one bounded application, a published method links recorded stakeholder intent to requirements R, evidence about the environment to assumptions K, and permitted software behavior to a machine specification S. S uses only shared phenomena, constrains only machine-controlled behavior and makes no reference to future events. A proof checker accepts proofs that S ∧ K implies R and that S ∧ K is consistent. Stakeholders validate R, its interpretation and the choices S permits. A separate team reconstructs the links and reproduces the checks from the recorded inputs for the declared behaviors and scenarios.",
+   "set_by": "Technology Atlas. No external body was identified that defines the combined test for one bounded application.",
    "set_by_kind": "atlas",
    "threshold_quote": null,
    "threshold_ref": null,
-   "basis": "Searches of NASA requirements-validation guidance, the accessible ISO/IEC/IEEE 29148 preview, Zave–Jackson completion rules, the Brun roadmap and validation-obligation studies found no published acceptance test for an independently reproduced method combining mechanical adequacy checks with stakeholder and environmental validation. This test combines their constituent checks within one bounded application.",
+   "basis": "Zave and Jackson’s completion rules distinguish customer acceptance, the truth of domain assumptions, restrictions on the machine specification and two proofs. ISO/IEC/IEEE 29148:2018, section 6.3.3.6, assigns requirements-validation approval to the project authority and key stakeholders. Independent reconstruction of the combined evidence is the Atlas criterion.",
    "refs": [
     5,
+    21,
     6,
-    7,
-    8,
     3,
     2
    ],
@@ -394,10 +396,10 @@
    {
     "id": "m1",
     "title": "An abstract counterexample exposes a confirmed violation in the original requirements specification.",
-    "criterion": "An abstract counterexample is executed against the original requirements specification and confirmed to violate a stated requirement. This excludes discrepancies introduced solely by abstraction. In November 1998, NRL reported this result for one contractor specification of a weapons-control panel: Spin found a safety-property violation and SCR simulation confirmed the corresponding behavior.",
-    "set_by": "U.S. Naval Research Laboratory, SCR research programme, 1998 SCR/Spin study. The published demonstration concerns a weapons-control-panel specification.",
+    "criterion": "For a counterexample found in an abstract model, construct a corresponding sequence of inputs for the original requirements specification. Execute that sequence and confirm that the resulting behavior violates the stated requirement.",
+    "set_by": "U.S. Naval Research Laboratory, SCR research programme, 1998 SCR/Spin study, section 5.6.",
     "set_by_kind": "government_programme",
-    "threshold_quote": "Simulation demonstrated that the safety violation was not spurious but an actual defect in the original specification.",
+    "threshold_quote": "evaluate the counterexample in the original specification\nto ensure that the property violation is not spurious.",
     "threshold_ref": 1,
     "refs": [
      1
@@ -409,14 +411,14 @@
    {
     "id": "m2",
     "title": "A specification admits an implementation that meets its guarantees for every allowed environmental input.",
-    "criterion": "For a reactive system, an implementation strategy exists that satisfies the specified guarantees for every input sequence satisfying the environmental assumptions. This is stronger than finding one jointly satisfying execution. In 2022, FRET researchers reported that 11 corrected requirements for one lift-plus-cruise concept aircraft were shown realizable in about 8 seconds.",
+    "criterion": "For a reactive system, show that there exists one implementation strategy whose outputs satisfy the specified guarantees for every input sequence satisfying the assumptions on the environment.",
     "set_by": "Reactive-synthesis community; realizability definition stated by NASA Ames in Compositional Realizability Checking within FRET. The criterion concerns reactive systems, which continually respond to environmental inputs.",
     "set_by_kind": "community_convention",
     "threshold_quote": "for any sequence of inputs that satisfy the assumptions on the environment, the guarantees always hold.",
-    "threshold_ref": 9,
+    "threshold_ref": 7,
     "refs": [
-     9,
-     10
+     7,
+     8
     ],
     "status": "active",
     "replaced_by": [],
@@ -425,15 +427,13 @@
    {
     "id": "m3",
     "title": "A machine specification and domain assumptions imply the requirements without contradiction.",
-    "criterion": "For requirements R, domain knowledge K and machine specification S, prove S ∧ K ⇒ R and prove S ∧ K consistent. S uses shared phenomena, does not constrain the environment and does not refer to the future. Evidence for implication includes one Arrival Manager example in a preprint posted on 11 August 2023: Event-B proof obligations establish modeled aircraft spacing of at least 3 minutes. A separate preprint, revised on 7 October 2026 and not peer reviewed, reports 12 clean/defective package pairs whose K proofs all pass, illustrating why proof success alone does not establish adequacy.",
+    "criterion": "For requirements R, domain assumptions K and machine specification S, prove that S ∧ K implies R. Also prove that S ∧ K is consistent. S refers only to phenomena shared by the machine and its environment, constrains only machine-controlled behavior and makes no reference to the future.",
     "set_by": "Requirements-engineering community, Zave and Jackson's completion rules, Section 6.3, criteria 3–5; author manuscript dated 16 July 1996.",
     "set_by_kind": "community_convention",
     "threshold_quote": "This proof ensures that an implementation of S will satisfy the requirements.\n(5) There is a proof that S and K are consistent.",
     "threshold_ref": 5,
     "refs": [
-     5,
-     8,
-     11
+     5
     ],
     "status": "active",
     "replaced_by": [],
@@ -442,14 +442,45 @@
    {
     "id": "m4",
     "title": "Stakeholders validate the requirements, and reviewers check their traceability and environmental assumptions.",
-    "criterion": "Reviewers check bidirectional traceability to stakeholder expectations and valid assumptions. All relevant stakeholder groups identify and remove defects; requirements are feasible, verifiable, unique and necessary. Evidence includes domain-expert use of visualizations to correct ETCS train-control requirements in the 2021 validation-obligation study. That study does not establish empirical validation of every environmental assumption.",
+    "criterion": "Technical reviewers check that the requirements trace in both directions to the agreed stakeholder expectations, rest on valid assumptions and are essential to the intended solution. All relevant stakeholder groups review the requirements and remove identified defects. Each requirement must be feasible, verifiable, unique and necessary.",
     "set_by": "NASA Systems Engineering Handbook, Section 4.2.1.2.4, steps 2–6. These are requirements-review criteria; they do not prescribe a mechanically checked adequacy argument.",
     "set_by_kind": "government_programme",
     "threshold_quote": "Do the Requirements Satisfy Stakeholders? All relevant stakeholder groups identify and remove defects.",
-    "threshold_ref": 12,
+    "threshold_ref": 9,
     "refs": [
-     12,
-     2
+     9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "A formal model passes every validation obligation attached to one stated requirement.",
+    "criterion": "Identify a requirement, its formal model and the validation obligations that link them. Evaluate each obligation on that model according to its specified checks and expected outcomes. Every obligation attached to the requirement must succeed.",
+    "set_by": "IVOIRE project, Deliverable 1.1, version 1.2.0, section 4.4.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "validating a requirement succeeds if all associated VOs yield successful\nresults.",
+    "threshold_ref": 23,
+    "refs": [
+     23,
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m6",
+    "title": "Every domain assumption used in the proof is checked against the operating environment.",
+    "criterion": "Identify each statement of domain knowledge used to derive the requirements from the machine specification. For every statement, supply evidence about the intended environment that supports treating the statement as true within the declared scope.",
+    "set_by": "Requirements-engineering community, Zave and Jackson’s completion rule 2 in section 6.3.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "Each member of K has been validated (checked\ninformally) as true of the environment.",
+    "threshold_ref": 5,
+    "refs": [
+     5,
+     19
     ],
     "status": "active",
     "replaced_by": [],
@@ -459,8 +490,8 @@
   "measures": [],
   "not_found": [
    "No independent reproduction establishing the combined completion criterion was located.",
-   "The full normative text of ISO/IEC/IEEE 29148:2018 was not accessible; its public preview was available.",
-   "The ACM-hosted roadmap and Zave–Jackson documents returned access errors; author-hosted copies were available."
+   "The ACM-hosted roadmap and Zave–Jackson documents returned access errors; author-hosted copies were available.",
+   "No standards body or formal-methods programme was found that disputes the value or feasibility of bounded validation with stakeholder and environmental evidence."
   ],
   "references": [
    {
@@ -535,34 +566,6 @@
    },
    {
     "id": 6,
-    "kind": "journal",
-    "url": "https://people.cs.umass.edu/brun/pubs/pubs/Brun26tosem.pdf",
-    "doi": "10.1145/3779132",
-    "title": "Automatically Engineering Trusted Software: A Research Roadmap",
-    "authors": "Brun Y, Chakraborty S, Le Goues C, Păsăreanu C, Singla A",
-    "container": "ACM Trans. Softw. Eng. Methodol.",
-    "year": "2026",
-    "volume": "35",
-    "issue": "9",
-    "pages": "1-30",
-    "citation_source": "crossref"
-   },
-   {
-    "id": 7,
-    "kind": "report",
-    "url": "https://cdn.standards.iteh.ai/samples/72089/d67a2360308046938cad282e229a39ca/ISO-IEC-IEEE-29148-2018.pdf",
-    "doi": null,
-    "title": "Systems and software engineering — Life cycle processes — Requirements engineering",
-    "authors": "ISO, IEC, IEEE.",
-    "container": "ISO/IEC/IEEE",
-    "year": "2018",
-    "volume": null,
-    "issue": null,
-    "pages": null,
-    "citation_source": "model"
-   },
-   {
-    "id": 8,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2308.06028v1",
     "doi": "10.48550/arXiv.2308.06028",
@@ -576,7 +579,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 9,
+    "id": 7,
     "kind": "report",
     "url": "https://ntrs.nasa.gov/citations/20210013008",
     "doi": null,
@@ -590,7 +593,7 @@
     "citation_source": "model"
    },
    {
-    "id": 10,
+    "id": 8,
     "kind": "book",
     "url": "https://link.springer.com/chapter/10.1007/978-3-031-13188-2_24",
     "doi": "10.1007/978-3-031-13188-2_24",
@@ -604,21 +607,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 11,
-    "kind": "preprint",
-    "url": "https://arxiv.org/html/2609.39022v3",
-    "doi": "10.48550/arXiv.2609.39022",
-    "title": "From Verification Failures to Reusable Guidance for Coding Agents",
-    "authors": "Zhai Y, Chen X, Zhang L, Vishwanath S, Rosu G",
-    "container": "arXiv",
-    "year": "2026",
-    "volume": null,
-    "issue": null,
-    "pages": null,
-    "citation_source": "arxiv"
-   },
-   {
-    "id": 12,
+    "id": 9,
     "kind": "web",
     "url": "https://www.nasa.gov/reference/4-2-technical-requirements-definition/",
     "doi": null,
@@ -632,7 +621,7 @@
     "citation_source": "model"
    },
    {
-    "id": 13,
+    "id": 10,
     "kind": "web",
     "url": "https://sel4.systems/Verification/proofs.html",
     "doi": null,
@@ -646,7 +635,7 @@
     "citation_source": "model"
    },
    {
-    "id": 14,
+    "id": 11,
     "kind": "web",
     "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
     "doi": null,
@@ -660,7 +649,7 @@
     "citation_source": "model"
    },
    {
-    "id": 15,
+    "id": 12,
     "kind": "report",
     "url": "https://ntrs.nasa.gov/api/citations/20210013008/downloads/TechnicalReport__Unrealizability_in_FRET_FSESubmission.pdf",
     "doi": null,
@@ -674,7 +663,7 @@
     "citation_source": "model"
    },
    {
-    "id": 16,
+    "id": 13,
     "kind": "report",
     "url": "https://ntrs.nasa.gov/api/citations/20220017032/downloads/TechnicalReport_Lift_Plus_Cruise_FRET_case_study%20(4).pdf?attachment=true",
     "doi": null,
@@ -688,7 +677,7 @@
     "citation_source": "model"
    },
    {
-    "id": 17,
+    "id": 14,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2308.06028",
     "doi": null,
@@ -702,7 +691,7 @@
     "citation_source": "model"
    },
    {
-    "id": 18,
+    "id": 15,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2102.06037",
     "doi": null,
@@ -716,7 +705,7 @@
     "citation_source": "model"
    },
    {
-    "id": 19,
+    "id": 16,
     "kind": "journal",
     "url": "https://eprints.whiterose.ac.uk/id/eprint/170541/7/Foster2021_Article_IntegrationOfFormalProofIntoUn.pdf",
     "doi": "10.1007/s00165-021-00537-4",
@@ -730,7 +719,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 20,
+    "id": 17,
     "kind": "preprint",
     "url": "https://arxiv.org/pdf/2312.08717",
     "doi": null,
@@ -744,7 +733,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 21,
+    "id": 18,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2605.15131v1",
     "doi": null,
@@ -756,614 +745,1106 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 19,
+    "kind": "report",
+    "url": "https://ntrs.nasa.gov/api/citations/19940018820/downloads/19940018820.pdf",
+    "doi": null,
+    "title": "Formal Methods and Digital Systems Validation for Airborne Systems",
+    "authors": "John Rushby",
+    "container": "NASA Contractor Report 4551",
+    "year": "1993",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 20,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/1611.10288",
+    "doi": "10.48550/arXiv.1611.10288",
+    "title": "Naming the Pain in Requirements Engineering: Contemporary Problems, Causes, and Effects in Practice",
+    "authors": "Fernández DM, Wagner S, Kalinowski M, Felderer M, Mafra P, Vetrò A, et al.",
+    "container": "arXiv",
+    "year": "2016",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 21,
+    "kind": "report",
+    "url": "https://iso.ieclist.ink/iso/ISO%20IEC%20IEEE%2029148-2018%20PDF.pdf",
+    "doi": "10.1109/IEEESTD.2018.8559686",
+    "title": "Systems and software engineering — Life cycle processes — Requirements engineering",
+    "authors": "ISO, IEC, IEEE",
+    "container": "ISO/IEC/IEEE 29148:2018",
+    "year": "2018",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 22,
+    "kind": "registry",
+    "url": "https://www.fwf.ac.at/en/research-radar/10.55776/I4744",
+    "doi": "10.55776/I4744",
+    "title": "IVOIRE",
+    "authors": "Atif Mashkoor",
+    "container": "Austrian Science Fund (FWF)",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 23,
+    "kind": "report",
+    "url": "https://arxiv.org/pdf/2205.06138",
+    "doi": "10.48550/arXiv.2205.06138",
+    "title": "IVOIRE Deliverable 1.1: Classification of existing VOs & tools and Formalization of VOs semantics",
+    "authors": "Sebastian Stock, Fabian Vu, Atif Mashkoor, Michael Leuschel, Alexander Egyed",
+    "container": "arXiv",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 24,
+    "kind": "report",
+    "url": "https://docserv.uni-duesseldorf.de/servlets/DerivateServlet/Derivate-77041/Dissertation_Fabian_Vu_A1b.pdf",
+    "doi": null,
+    "title": "Simulation and Code Generation for Validation and Verification of Formal B Models",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 25,
+    "kind": "preprint",
+    "url": "https://people.kth.se/~hsan/surf_files/Rogersten.pdf",
+    "doi": null,
+    "title": "An Aircraft Electric Power Testbed for Validating Automatically Synthesized Reactive Control Protocols",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 26,
+    "kind": "preprint",
+    "url": "https://www.cs.tau.ac.il/~maozs/papers/syntech-forklift-synt15.pdf",
+    "doi": null,
+    "title": "Synthesizing a Lego Forklift Controller in GR(1): A Case Study",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 27,
+    "kind": "preprint",
+    "url": "https://tnelson.github.io/publications/peterson.pdf",
+    "doi": null,
+    "title": "Validation of Formal Models: A Case Study",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
    }
   ],
   "milestone_order": [
+   "m5",
    "m1",
    "m2",
    "m3",
-   "m4"
+   "m4",
+   "m6"
   ],
   "results": [
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For seL4 configurations with security proofs, the specification entails 3 security properties under the required setup conditions.",
+    "detail": "The page gives no count of configurations with security proofs. It identifies restrictions on write access for integrity and applies confidentiality between scheduler security domains.",
+    "quote": "The security theorem statements provide requirements on how\n      the system must be set up.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "seL4 reports defects in 3 classes outside its verified code, including hardware and compiler assumptions.",
+    "detail": "The page gives no count of individual assumptions or defects. Unverified boot code is the third class and is grouped separately from hardware and compiler assumptions.",
+    "quote": "detected small defects in every class of unverified code in the kernel in that\n  time — hardware assumptions, compiler assumptions, unverified boot code.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Rocq checked the no-crash property for 239 modeled OSS-Fuzz entry points.",
+    "detail": "Where Claude patched the program, the proof applies to the model regenerated from the patched binary.",
+    "quote": "Claude successfully patched the bugs it found and then proved that there are no crashes on any input (up to 64 MB) for 239 entry points across 123 different OSS-Fuzz libraries.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 4,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
-    "finding": "One seL4 kernel has functional-correctness proofs across verified configurations on 3 architectures.",
-    "detail": "The page reports that verified C code behaves as specified, but does not establish an implementation strategy satisfying guarantees for every permitted environmental input sequence.",
-    "quote": "the C code of all verified\n      configurations of seL4 behaves precisely as specified in the seL4\n      specification and nothing more.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "For one seL4 kernel, the specification is proved to enforce 3 security properties in supported configurations.",
-    "detail": "The page reports security theorems and assumptions, but does not establish the required R, K and S formulation or consistency of S ∧ K.",
-    "quote": "the specification, and\n      by extension the kernel code, prevents an application running on top of seL4\n      from modifying data without authorisation (integrity), from interfering\n      with resource access of other applications (availability), and from\n      learning information from other applications without explicit authorisation\n      (confidentiality).",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "No-crash proofs covered 239 entry points across 123 open-source libraries.",
-    "detail": "The proofs concern compiled programs under modeled RISC-V and Linux semantics. The source does not establish a separate machine specification S, domain assumptions K and requirements R, or prove S ∧ K consistent.",
+    "finding": "Fixed binaries satisfy bounded no-crash guarantees at 239 OSS-Fuzz entry points.",
+    "detail": null,
     "quote": "Claude successfully patched the bugs it found and then proved that there are no crashes on any input (up to 64 MB) for 239 entry points across 123 different OSS-Fuzz libraries.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 4,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Rocq checked conditional no-crash proofs for 239 OSS-Fuzz entry points.",
+    "detail": null,
+    "quote": "Claude successfully patched the bugs it found and then proved that there are no crashes on any input (up to 64 MB) for 239 entry points across 123 different OSS-Fuzz libraries.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 4,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The x86 semantics used in the zlib proof supported one reported Ubuntu userspace boot.",
+    "detail": "The source gives no coverage count for the assumptions exercised by the boot.",
+    "quote": "empirically we have found that single-stepping through our semantics can boot an Ubuntu userspace on top of a Linux kernel.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 4,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One DynamoDB algorithm component passed the reported TLA+ model check.",
+    "detail": null,
+    "quote": "The model checker verified that a small,\ncomplicated part of the algorithm worked as expected.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "One DynamoDB fault-tolerance algorithm had a model-checked bug with a 35-step shortest error trace.",
-    "detail": "The source reports a design bug but does not say the counterexample was executed against the original requirements specification or confirmed to violate a stated requirement.",
+    "finding": "For one DynamoDB fault-tolerance bug, the shortest model-checker trace showing potential data loss had 35 high-level steps.",
+    "detail": null,
     "quote": "This was a very subtle bug;\nthe shortest error trace exhibiting the bug contained 35 high-level\nsteps.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "One contractor weapons-control panel specification: 1 safety-property violation confirmed by simulation.",
-    "detail": "Spin found the violation in an abstracted specification; the SCR simulator reproduced the scenario in the complete specification, confirming an actual defect.",
-    "quote": "Analyzing the reduced specification with the model checker Spin uncovered a possible safety violation. Simulation demonstrated that the safety violation was not spurious but an actual defect in the original specification.",
+    "finding": "For one Weapons Control Panel specification, replay of a five-event counterexample confirmed a safety requirement violation.",
+    "detail": "The authors executed the sequence in the SCR simulator using the full executable translation of the contractor requirements.",
+    "quote": "Simulation demonstrated that the safety violation was not spurious but an actual defect in the original specification.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 1,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "met",
-    "finding": "Liquid mixer: either of two 11-requirement specifications was realizable after removing one conflicting requirement.",
-    "detail": "The original specification had 12 requirements and no environmental assumptions. Removing either LM-001 or LM-009 made the remaining specification realizable.",
-    "quote": "the rest of the specification is realizable when either[LM-001] or [LM-009]\nare not part of it.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "met",
-    "finding": "One lift-plus-cruise aircraft specification was realizable with hover reached within 13 ticks.",
-    "detail": "The result assumes wind speed stays within 20 knots and airspeed is nonnegative. Hover control mode was treated as a system-controlled output.",
-    "quote": "Strengthening the assumption to|wind_speed| <= 20\nfixed the issue, as the requirements were shown to be realizable within 13 ticks, which makes\nsense as kias needs to be reduced to zero for kgs to be<= 20, for any valid wind speed.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
+    "milestone": "m5",
     "case": null,
     "verdict": "partial",
-    "finding": "Arrival Manager: 1 case study; Event-B proof addresses aircraft spacing of at least 3 minutes.",
-    "detail": "The example provides evidence for a modeled spacing requirement, but the text does not establish S ∧ K consistency or all stated restrictions on S.",
+    "finding": "In one Weapons Control Panel model, the invariant check for one stated safety requirement failed.",
+    "detail": null,
+    "quote": "Running Spin exposed a pair of reachable states that\nviolate property q and produced a counterexample",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 1,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "NASA’s inlined flight control computer contract (79 requirements) was realizable across all 38 components.",
+    "detail": "The monolithic JSyn-vg run timed out. The technical memorandum reports the solver outcome without an independently checked proof certificate.",
+    "quote": "JSyn-vg was finally able to determine the contract as realizable, requiring in total\nonly 16.41s (∼0.43s per SCC).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The 12-requirement liquid mixer specification yielded one minimal conflict, between LM-001 and LM-009.",
+    "detail": "The authors describe replaying counterexamples in the FRET simulator as future work.",
+    "quote": "the counterexample appears for the conflict between requirements[LM-001] and\n[LM-009].",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The Infusion_Manager translation of 12 original requirements into 26 FRETish requirements passed a KIND 2 equivalence check.",
+    "detail": null,
+    "quote": "We used KIND 2 [35] to show equivalence between our\nrequirements and the original specification.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "In one Lift Plus Cruise case study, a FRET trace skipped both intended intermediate lift modes.",
+    "detail": "Table 4.2 shows the direct jump at the first transition. The authors derived the initial FRET requirements from informal control diagrams.",
+    "quote": "reported a realizable trace\nwhere the aircraft state transitions from wing-borne mode directly to thrust-borne mode\nwithout visiting intermediate modes.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "In one Lift Plus Cruise case study, FRET established realizability of the landing transition within 13 ticks.",
+    "detail": "Section 4.3 makes ground speed the sum of indicated airspeed and wind speed. The technical memorandum reports the model-checker result without an independent replication or a proof-assistant verification.",
+    "quote": "fixed the issue, as the requirements were shown to be realizable within 13 ticks",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "met",
+    "finding": "Arrival Manager model M1 passed the sole reported validation obligation for REQ5, which requires at least 3 minutes between scheduled aircraft.",
+    "detail": "The preprint reports proof discharge without explicitly identifying a proof checker for REQ5. The proposed rerun of the aircraft-addition check concerns REQ1.",
     "quote": "After discharging the proof, we establish that our requirement is truly represented in the specification.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 17,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
-    "milestone": "m4",
+    "milestone": "m5",
     "case": null,
     "verdict": "partial",
-    "finding": "In one ETCS case study, validation-obligation-inspired development uncovered around 40 requirements-document issues.",
-    "detail": "Domain experts used visualizations to understand and correct issues. The study does not establish bidirectional traceability, validation by all relevant stakeholder groups, or empirical validation of environmental assumptions.",
+    "finding": "One adaptive exterior light and speed control case study applied model checking and animation to validate its formal models.",
+    "detail": null,
+    "quote": "In this VOs-inspired formal development, before checking POs, we validated our models using model checking and animation with visualizations as shown in Fig.\n1\nand Fig.\n2\n.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One hybrid Level 3 European Train Control System study uncovered around 40 issues in the original requirements document.",
+    "detail": "The issue count covers requirements issues in general. The text gives no count of violations confirmed by replaying abstract counterexamples.",
     "quote": "The VOs-inspired development leads the uncovering of around 40 issues in the original requirements document, leading to changes both to the original requirements document (updated versions of\n[\n22\n]\nare now available) as well as to our initial formal model.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 18,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "For one weapons control panel specification, model checking exposed a violation of one safety property.",
-    "detail": "The result compares an operational requirements specification with a property-based specification; it does not establish S ∧ K ⇒ R or consistency of S ∧ K.",
-    "quote": "Hence, we applied automation—in particular, the Spin\nmodel checker—which quickly detected an inconsistency\nbetween the operational SCR specification and one of the\nproperties.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 1,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "partial",
-    "finding": "Two safety engineers familiar with the weapons control panel confirmed the researchers’ interpretation of latches.",
-    "detail": "This checks one aspect of requirements interpretation, but does not demonstrate validation by all relevant stakeholder groups or review of environmental assumptions and bidirectional traceability.",
-    "quote": "Two safety engineers familiar with the\nWCP have confirmed our interpretation of latches.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 1,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "partial",
-    "finding": "For one liquid-mixer specification, FRET identified one minimal conflict between two requirements.",
-    "detail": "The report describes counterexamples for conflicts, but does not report executing a counterexample against the original requirements specification to confirm a violation.",
-    "quote": "Using\nthe diagnosis algorithm over the unrealizable connected component yielded a single minimal\nconflict between[LM-001] and [LM-009], a result consistent with the findings by Lúcio et\nal. [1].",
+    "finding": "Domain experts used model visualizations to help correct requirements in one train control study that uncovered around 40 issues overall.",
+    "detail": "The text does not give a separate count of defects corrected by the domain experts.",
+    "quote": "The visualizations of the formal model (see Fig.\n5\n) were extremely useful to allow domain experts to understand and correct the issues.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Tokeneer SFR1 was formally verified, with 1 linked validation claim left assumed.",
+    "detail": "The assumed claim FSFR1 V1 concerns whether the Isabelle formula correctly captures the natural-language requirement.",
+    "quote": "FSFR1 V1 is marked as assumed, since this is the validation claim that must be satisﬁed elsewhere by\nreview.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "For one liquid-mixer specification, five of six connected requirement components were realizable.",
-    "detail": "Realizability bears on consistency, but the report does not prove that a separate machine specification and domain assumptions imply the requirements. The complete liquid-mixer contract was unrealizable.",
-    "quote": "Of the six connected components inliquid_mixer (Figure 5.1), only one was found\nto be unrealizable, consisting of requirements[LM-001], [LM-002] and [LM-009].",
+    "finding": "The Isabelle/UTP model of Tokeneer satisfied formal versions of 3 of its 6 security requirements.",
+    "detail": null,
+    "quote": "We have now formalised and veriﬁed three of the SFRs.",
     "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "One aircraft case study found the landing-transition requirements realizable within 13 ticks under a strengthened wind assumption.",
-    "detail": "Realizability bears on consistency, but the report does not establish separate machine specification S and domain assumptions K, or prove S ∧ K ⇒ R and S ∧ K consistent.",
-    "quote": "Strengthening the assumption to|wind_speed| <= 20\nfixed the issue, as the requirements were shown to be realizable within 13 ticks, which makes\nsense as kias needs to be reduced to zero for kgs to be<= 20, for any valid wind speed.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
+    "confirmed": true,
+    "peer_reviewed": true,
     "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
-    "milestone": "m4",
+    "milestone": "m2",
     "case": null,
-    "verdict": "partial",
-    "finding": "In one aircraft case study, requirements and controls were refined with aircraft controls researchers over eight months.",
-    "detail": "The iterative work involved domain researchers, but the report does not establish bidirectional traceability, validation by all relevant stakeholder groups, or empirical validation of environmental assumptions.",
-    "quote": "Require-\nments development was done iteratively, over a period of eight months part-time, with the\nrequirements researchers meeting with the aircraft controls researchers regularly to refine\nboth the requirements and controls.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": null,
-    "verdict": "partial",
-    "finding": "In 1 arrival-manager case study, a validation obligation addressed a 3-minute aircraft separation requirement.",
-    "detail": "The authors report discharging a proof linking the requirement to the specification. They do not report stakeholder validation, bidirectional traceability review, or checks of environmental assumptions.",
-    "quote": "After discharging the proof, we establish that our requirement is truly represented in the specification.",
+    "verdict": "met",
+    "finding": "MoBy synthesized winning strategies for all 28 benchmark specifications.",
+    "detail": "The method uses supplied modes and initial conditions. Strix solves the mode projections, and Lemma 1 supplies the composition argument. At least one tested decomposition timed out, for CM100, while other decompositions of that instance succeeded.",
+    "quote": "Our evaluation shows thatMoBy success-\nfully synthesizes implementations efficiently, including cases for which monolithic\nsynthesis fails.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 17,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "GPT-5.5's initial pass yielded verified implementation strategies for 640 of 1,586 SYNTCOMP specifications.",
+    "detail": "The 640 count comes from the initial pass. The later totals combine realizability and unrealizability results. Parameterized templates were checked only at selected parameter values.",
+    "quote": "For example, the 1392 specifications solved by GPT-5.5 split into 640 realizable and 752 unrealizable specifications.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Across 57 NATURAL benchmarks, a mean of 9.3 autoformalized specifications were proven equivalent to their references.",
+    "detail": "Equivalence establishes agreement with the formal reference. The paper also notes that a natural-language description can admit multiple valid formalizations.",
+    "quote": "9.3\n±\n0.6\n9.3\\pm 0.6\n/57 are proven equivalent, while\n8.7\n±\n0.6\n8.7\\pm 0.6\n/57 are provably inequivalent.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Automotive exterior-light model: 100% of 10,000 SimB runs kept the lights off until activation by the pitman controller or warning-light button.",
+    "detail": "The experiment used a fixed seed of 1000. The text reports a successful individual check. Requirement-level completion remains unestablished.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 24,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "For one centralized aircraft power specification, TuLiP synthesized a 16-state strategy that satisfies the formal guarantees on every allowed input sequence.",
+    "detail": "The formal always-powered guarantee applies at discrete model steps. Physical switching delays produced measurable outages on the hardware testbed.",
+    "quote": "The controller with centralized\nlogic had a 16-state automaton synthesized as explained in\nSection 2.3.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 25,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "LEGO forklift reactive controllers: both tested specification variants admitted a synthesized implementation.",
+    "detail": "In physical tests of the continuous variant, erroneous sensor readings violated environment assumptions and led to indefinite stopping or continued driving past obstacles. The realizability result applies to sequences satisfying the formal assumptions.",
+    "quote": "For both variants a controller that implements the speciﬁcation can be synthesized in a few seconds us-\ning the Java-based BDD engine that comes with JTLV [19].",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 26,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "For one Tokeneer case study, the authors formally verified three security requirements against the functional specification.",
-    "detail": "The reported proofs bear on implication, but the text does not establish S ∧ K consistency or all the stipulated restrictions on S.",
-    "quote": "With our mechanisati on we are able to formally verify three\nsecurity requirements that could only be argued semi-formally in th e original [ C+08b].",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 19,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "met",
-    "finding": "A 100-bound counter-machine specification was synthesized in 3.23 seconds using 100 modes.",
-    "detail": "MoBy decomposed the specification into mode-specific problems; modes and their initial conditions were supplied manually. The reported time aggregates synthesis across projections.",
-    "quote": null,
-    "checked": null,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 20,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "met",
-    "finding": "GPT-5.5 produced implementations for 640 realizable specifications among 1,586 reactive synthesis benchmarks.",
-    "detail": "The reported 640 realizable specifications were solved without counterexample iterations. Generated Verilog modules were model-checked against their formal specifications.",
-    "quote": "For example, the 1392 specifications solved by GPT-5.5 split into 640 realizable and 752 unrealizable specifications.",
+    "finding": "In one Peterson lock case study, Alloy verified 2 bounded implications from specification properties to requirements.",
+    "detail": "The authors use a Lock 3 trace to establish consistency and remove the locking mechanism for the implication checks. The interface specification's progress clauses refer to future states.",
+    "quote": "The assertions are saying that if any trace satisﬁes a speciﬁcation property,\nit also satisﬁes the corresponding requirement. The assertions would not be true\nfor any model, but they are true for this one, because the domain model ensures\nthat progState and lockState are always equal.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 21,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 27,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    }
   ],
   "judged": [
    {
     "url": "https://sel4.systems/Verification/proofs.html",
+    "milestone": "m5",
+    "hash": "f5bfbd9110f3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sel4.systems/Verification/proofs.html",
     "milestone": "m1",
-    "hash": "7bab8c34673d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "28334de15cd4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sel4.systems/Verification/proofs.html",
     "milestone": "m2",
-    "hash": "bf0122db365d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f066a05ffea6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sel4.systems/Verification/proofs.html",
     "milestone": "m3",
-    "hash": "f16a14b12646",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2f23843b2325",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sel4.systems/Verification/proofs.html",
     "milestone": "m4",
-    "hash": "52ba6cf24e22",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5060edecd2dc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sel4.systems/Verification/proofs.html",
+    "milestone": "m6",
+    "hash": "8f53758a9048",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://sel4.systems/Verification/proofs.html",
     "milestone": "completion",
-    "hash": "d2a80fdaebad",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fc7acee67e3e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.anthropic.com/research/formal-verification",
+    "milestone": "m5",
+    "hash": "f5bfbd9110f3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.anthropic.com/research/formal-verification",
     "milestone": "m1",
-    "hash": "7bab8c34673d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "28334de15cd4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.anthropic.com/research/formal-verification",
     "milestone": "m2",
-    "hash": "bf0122db365d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f066a05ffea6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.anthropic.com/research/formal-verification",
     "milestone": "m3",
-    "hash": "f16a14b12646",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2f23843b2325",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.anthropic.com/research/formal-verification",
     "milestone": "m4",
-    "hash": "52ba6cf24e22",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5060edecd2dc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.anthropic.com/research/formal-verification",
+    "milestone": "m6",
+    "hash": "8f53758a9048",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.anthropic.com/research/formal-verification",
     "milestone": "completion",
-    "hash": "d2a80fdaebad",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fc7acee67e3e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
+    "milestone": "m5",
+    "hash": "f5bfbd9110f3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
     "milestone": "m1",
-    "hash": "7bab8c34673d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "28334de15cd4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
     "milestone": "m2",
-    "hash": "bf0122db365d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f066a05ffea6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
     "milestone": "m3",
-    "hash": "f16a14b12646",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2f23843b2325",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
     "milestone": "m4",
-    "hash": "52ba6cf24e22",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5060edecd2dc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
+    "milestone": "m6",
+    "hash": "8f53758a9048",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
     "milestone": "completion",
-    "hash": "d2a80fdaebad",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fc7acee67e3e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://homepages.laas.fr/kader/Heitmeyer.pdf",
+    "milestone": "m5",
+    "hash": "f5bfbd9110f3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://homepages.laas.fr/kader/Heitmeyer.pdf",
     "milestone": "m1",
-    "hash": "7bab8c34673d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://ntrs.nasa.gov/api/citations/20210013008/downloads/TechnicalReport__Unrealizability_in_FRET_FSESubmission.pdf",
-    "milestone": "m2",
-    "hash": "bf0122db365d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://ntrs.nasa.gov/api/citations/20220017032/downloads/TechnicalReport_Lift_Plus_Cruise_FRET_case_study%20(4).pdf?attachment=true",
-    "milestone": "m2",
-    "hash": "bf0122db365d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2308.06028",
-    "milestone": "m3",
-    "hash": "f16a14b12646",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2102.06037",
-    "milestone": "m4",
-    "hash": "52ba6cf24e22",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://eprints.whiterose.ac.uk/id/eprint/170541/7/Foster2021_Article_IntegrationOfFormalProofIntoUn.pdf",
-    "milestone": "completion",
-    "hash": "d2a80fdaebad",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "28334de15cd4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://homepages.laas.fr/kader/Heitmeyer.pdf",
     "milestone": "m2",
-    "hash": "bf0122db365d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f066a05ffea6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://homepages.laas.fr/kader/Heitmeyer.pdf",
     "milestone": "m3",
-    "hash": "f16a14b12646",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2f23843b2325",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://homepages.laas.fr/kader/Heitmeyer.pdf",
     "milestone": "m4",
-    "hash": "52ba6cf24e22",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5060edecd2dc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://homepages.laas.fr/kader/Heitmeyer.pdf",
+    "milestone": "m6",
+    "hash": "8f53758a9048",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://homepages.laas.fr/kader/Heitmeyer.pdf",
     "milestone": "completion",
-    "hash": "d2a80fdaebad",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fc7acee67e3e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ntrs.nasa.gov/api/citations/20210013008/downloads/TechnicalReport__Unrealizability_in_FRET_FSESubmission.pdf",
+    "milestone": "m5",
+    "hash": "f5bfbd9110f3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://ntrs.nasa.gov/api/citations/20210013008/downloads/TechnicalReport__Unrealizability_in_FRET_FSESubmission.pdf",
     "milestone": "m1",
-    "hash": "7bab8c34673d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "28334de15cd4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ntrs.nasa.gov/api/citations/20210013008/downloads/TechnicalReport__Unrealizability_in_FRET_FSESubmission.pdf",
+    "milestone": "m2",
+    "hash": "f066a05ffea6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://ntrs.nasa.gov/api/citations/20210013008/downloads/TechnicalReport__Unrealizability_in_FRET_FSESubmission.pdf",
     "milestone": "m3",
-    "hash": "f16a14b12646",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2f23843b2325",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://ntrs.nasa.gov/api/citations/20210013008/downloads/TechnicalReport__Unrealizability_in_FRET_FSESubmission.pdf",
     "milestone": "m4",
-    "hash": "52ba6cf24e22",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5060edecd2dc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ntrs.nasa.gov/api/citations/20210013008/downloads/TechnicalReport__Unrealizability_in_FRET_FSESubmission.pdf",
+    "milestone": "m6",
+    "hash": "8f53758a9048",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://ntrs.nasa.gov/api/citations/20210013008/downloads/TechnicalReport__Unrealizability_in_FRET_FSESubmission.pdf",
     "milestone": "completion",
-    "hash": "d2a80fdaebad",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fc7acee67e3e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ntrs.nasa.gov/api/citations/20220017032/downloads/TechnicalReport_Lift_Plus_Cruise_FRET_case_study%20(4).pdf?attachment=true",
+    "milestone": "m5",
+    "hash": "f5bfbd9110f3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://ntrs.nasa.gov/api/citations/20220017032/downloads/TechnicalReport_Lift_Plus_Cruise_FRET_case_study%20(4).pdf?attachment=true",
     "milestone": "m1",
-    "hash": "7bab8c34673d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "28334de15cd4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ntrs.nasa.gov/api/citations/20220017032/downloads/TechnicalReport_Lift_Plus_Cruise_FRET_case_study%20(4).pdf?attachment=true",
+    "milestone": "m2",
+    "hash": "f066a05ffea6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://ntrs.nasa.gov/api/citations/20220017032/downloads/TechnicalReport_Lift_Plus_Cruise_FRET_case_study%20(4).pdf?attachment=true",
     "milestone": "m3",
-    "hash": "f16a14b12646",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2f23843b2325",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://ntrs.nasa.gov/api/citations/20220017032/downloads/TechnicalReport_Lift_Plus_Cruise_FRET_case_study%20(4).pdf?attachment=true",
     "milestone": "m4",
-    "hash": "52ba6cf24e22",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5060edecd2dc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ntrs.nasa.gov/api/citations/20220017032/downloads/TechnicalReport_Lift_Plus_Cruise_FRET_case_study%20(4).pdf?attachment=true",
+    "milestone": "m6",
+    "hash": "8f53758a9048",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://ntrs.nasa.gov/api/citations/20220017032/downloads/TechnicalReport_Lift_Plus_Cruise_FRET_case_study%20(4).pdf?attachment=true",
     "milestone": "completion",
-    "hash": "d2a80fdaebad",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fc7acee67e3e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2308.06028",
+    "milestone": "m5",
+    "hash": "f5bfbd9110f3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2308.06028",
     "milestone": "m1",
-    "hash": "7bab8c34673d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "28334de15cd4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2308.06028",
     "milestone": "m2",
-    "hash": "bf0122db365d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f066a05ffea6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2308.06028",
+    "milestone": "m3",
+    "hash": "2f23843b2325",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2308.06028",
     "milestone": "m4",
-    "hash": "52ba6cf24e22",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5060edecd2dc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2308.06028",
+    "milestone": "m6",
+    "hash": "8f53758a9048",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2308.06028",
     "milestone": "completion",
-    "hash": "d2a80fdaebad",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fc7acee67e3e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2102.06037",
+    "milestone": "m5",
+    "hash": "f5bfbd9110f3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2102.06037",
     "milestone": "m1",
-    "hash": "7bab8c34673d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "28334de15cd4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2102.06037",
     "milestone": "m2",
-    "hash": "bf0122db365d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f066a05ffea6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2102.06037",
     "milestone": "m3",
-    "hash": "f16a14b12646",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2f23843b2325",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2102.06037",
+    "milestone": "m4",
+    "hash": "5060edecd2dc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2102.06037",
+    "milestone": "m6",
+    "hash": "8f53758a9048",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2102.06037",
     "milestone": "completion",
-    "hash": "d2a80fdaebad",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fc7acee67e3e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprints.whiterose.ac.uk/id/eprint/170541/7/Foster2021_Article_IntegrationOfFormalProofIntoUn.pdf",
+    "milestone": "m5",
+    "hash": "f5bfbd9110f3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprints.whiterose.ac.uk/id/eprint/170541/7/Foster2021_Article_IntegrationOfFormalProofIntoUn.pdf",
     "milestone": "m1",
-    "hash": "7bab8c34673d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "28334de15cd4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprints.whiterose.ac.uk/id/eprint/170541/7/Foster2021_Article_IntegrationOfFormalProofIntoUn.pdf",
     "milestone": "m2",
-    "hash": "bf0122db365d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f066a05ffea6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprints.whiterose.ac.uk/id/eprint/170541/7/Foster2021_Article_IntegrationOfFormalProofIntoUn.pdf",
     "milestone": "m3",
-    "hash": "f16a14b12646",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2f23843b2325",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprints.whiterose.ac.uk/id/eprint/170541/7/Foster2021_Article_IntegrationOfFormalProofIntoUn.pdf",
     "milestone": "m4",
-    "hash": "52ba6cf24e22",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5060edecd2dc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprints.whiterose.ac.uk/id/eprint/170541/7/Foster2021_Article_IntegrationOfFormalProofIntoUn.pdf",
+    "milestone": "m6",
+    "hash": "8f53758a9048",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprints.whiterose.ac.uk/id/eprint/170541/7/Foster2021_Article_IntegrationOfFormalProofIntoUn.pdf",
+    "milestone": "completion",
+    "hash": "fc7acee67e3e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2312.08717",
+    "milestone": "m5",
+    "hash": "f5bfbd9110f3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2312.08717",
+    "milestone": "m1",
+    "hash": "28334de15cd4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2312.08717",
     "milestone": "m2",
-    "hash": "bf0122db365d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f066a05ffea6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2312.08717",
+    "milestone": "m3",
+    "hash": "2f23843b2325",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2312.08717",
+    "milestone": "m4",
+    "hash": "5060edecd2dc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2312.08717",
+    "milestone": "m6",
+    "hash": "8f53758a9048",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2312.08717",
+    "milestone": "completion",
+    "hash": "fc7acee67e3e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2605.15131v1",
+    "milestone": "m5",
+    "hash": "f5bfbd9110f3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2605.15131v1",
+    "milestone": "m1",
+    "hash": "28334de15cd4",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2605.15131v1",
     "milestone": "m2",
-    "hash": "bf0122db365d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f066a05ffea6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2605.15131v1",
+    "milestone": "m3",
+    "hash": "2f23843b2325",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2605.15131v1",
+    "milestone": "m4",
+    "hash": "5060edecd2dc",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2605.15131v1",
+    "milestone": "m6",
+    "hash": "8f53758a9048",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2605.15131v1",
+    "milestone": "completion",
+    "hash": "fc7acee67e3e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://docserv.uni-duesseldorf.de/servlets/DerivateServlet/Derivate-77041/Dissertation_Fabian_Vu_A1b.pdf",
+    "milestone": "m5",
+    "hash": "f5bfbd9110f3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.kth.se/~hsan/surf_files/Rogersten.pdf",
+    "milestone": "m2",
+    "hash": "f066a05ffea6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.tau.ac.il/~maozs/papers/syntech-forklift-synt15.pdf",
+    "milestone": "m2",
+    "hash": "f066a05ffea6",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://tnelson.github.io/publications/peterson.pdf",
+    "milestone": "m3",
+    "hash": "2f23843b2325",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1435,8 +1916,133 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 9 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"A repeatable method checks whether a formal specification, a mathematical description of permitted software behavior, captures recorded stakeholder intent for a stated set of observable behaviors and scenarios. It links mechanical checks to stakeholders\\u2019 judgments and to evidence for assumptions about the operating environment. The result is an argument others can reproduce or a concrete behavior on which the specification and the recorded intent disagree.\". Reason: The definition makes the whole adequacy argument sound mechanically decidable, although stakeholder judgments and evidence about the environment determine what the formal checks establish."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Of 228 companies surveyed, 109 ranked incomplete or hidden requirements among their five most critical requirements problems. Software can satisfy every property its developers prove and still omit behavior its users need. Checking the specified behavior with users before implementation gives them a chance to correct omissions and misunderstandings before the team builds them into the software. That assurance depends on the scenarios users examine and on whether the assumptions hold in use.\". Reason: The current rationale points to a missing table and recounts individual studies without explaining the scale of the problem or what earlier validation would change for users."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Austrian Science Fund, IVOIRE project, 2020: \"The IVOIRE project will enable continuous validation of formal models during their development by stepwise refinement.\". Reason: The IVOIRE grant explicitly names validation of formal models as a goal and identifies the development stages it covers."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit completion: criterion = \"For one bounded application, a published method links recorded stakeholder intent to requirements R, evidence about the environment to assumptions K, and permitted software behavior to a machine specification S. S uses only shared phenomena, constrains only machine-controlled behavior and makes no reference to future events. A proof checker accepts proofs that S \\u2227 K implies R and that S \\u2227 K is consistent. Stakeholders validate R, its interpretation and the choices S permits. A separate team reconstructs the links and reproduces the checks from the recorded inputs for the declared behaviors and scenarios.\"; set_by = \"Technology Atlas. No external body was identified that defines the combined test for one bounded application.\"; set_by_kind = \"atlas\"; basis = \"Zave and Jackson\\u2019s completion rules distinguish customer acceptance, the truth of domain assumptions, restrictions on the machine specification and two proofs. ISO/IEC/IEEE 29148:2018, section 6.3.3.6, assigns requirements-validation approval to the project authority and key stakeholders. Independent reconstruction of the combined evidence is the Atlas criterion.\"; refs = [5, 24, 8, 3, 2]. Reason: The current formula permits a specification to imply a requirement by constraining an environmental input that the software cannot control."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after None: \"A formal model passes every validation obligation attached to one stated requirement.\". Reason: The existing milestones cover finding a violation but omit the positive demonstration that a model satisfies the checks attached to one stated requirement."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"For a counterexample found in an abstract model, construct a corresponding sequence of inputs for the original requirements specification. Execute that sequence and confirm that the resulting behavior violates the stated requirement.\"; set_by = \"U.S. Naval Research Laboratory, SCR research programme, 1998 SCR/Spin study, section 5.6.\"; threshold_quote = \"evaluate the counterexample in the original specification\\nto ensure that the property violation is not spurious.\"; threshold_ref = 1; refs = [1]. Reason: The SCR test requires a corresponding execution in the original specification, and the current criterion mixes that test with the result of one study."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"For a reactive system, show that there exists one implementation strategy whose outputs satisfy the specified guarantees for every input sequence satisfying the assumptions on the environment.\"; refs = [9, 10]. Reason: The aircraft requirement count and solver runtime are case results, while realizability depends on one implementation strategy meeting the guarantees for every allowed input sequence."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"For requirements R, domain assumptions K and machine specification S, prove that S \\u2227 K implies R. Also prove that S \\u2227 K is consistent. S refers only to phenomena shared by the machine and its environment, constrains only machine-controlled behavior and makes no reference to the future.\"; refs = [5]. Reason: The two case reports obscure the formal test and invite confusion between K as domain knowledge and K as the name of a verification framework."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"Technical reviewers check that the requirements trace in both directions to the agreed stakeholder expectations, rest on valid assumptions and are essential to the intended solution. All relevant stakeholder groups review the requirements and remove identified defects. Each requirement must be feasible, verifiable, unique and necessary.\"; refs = [12]. Reason: The train-control example is evidence about an application, while the NASA review criteria specify what reviewers and stakeholder groups must check."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m4: \"Every domain assumption used in the proof is checked against the operating environment.\". Reason: A requirements review can check how assumptions were used without establishing that each assumption invoked by a proof holds in the operating environment."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 1. Reason: The full text of ISO/IEC/IEEE 29148:2018 is accessible, including the requirements-validation provisions in section 6.3.3.6."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No standards body or formal-methods programme was found that disputes the value or feasibility of bounded validation with stakeholder and environmental evidence.\". Reason: The sources distinguish limits on formal proof from an objection to pursuing the bounded validation goal."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "remove statement 1. Reason: The Anthropic passage identifies an obstacle to verifying code but does not set validation of formal specifications as a goal."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Applied 13 of 13 proposed operations from SWE-03-revise-20261121T160006433711Z; now version 2."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: completion, m5, m1, m2, m3, m4, m6."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 1 from arXiv, 3 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 4 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Structural problems after applying: references never cited: [6, 7, 11]"
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "definition is 460 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 11 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 4 candidates returned, 0 dropped as sources already used, 4 to judge."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 4 of 4 new candidates, without search. Skipped: 2 no readable saved copy. Dropped rows: none. Replaced 19 earlier rows. Added 28 results: 24 from sources already used, 4 from newly found sources."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 4 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 27 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Removed 3 references no longer cited; renumbered."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-21"
  }
 }
