@@ -351,9 +351,13 @@
   "title": "Verified synthesis of fault-tolerant distributed programs",
   "definition": "A tool derives a distributed service from sequential application code and explicit consistency, availability and fault requirements. Machine-checked proofs establish refinement—observable executions obey the source specification—and progress under stated communication and failure assumptions.",
   "goal": {
-   "need": "Building IronFleet's methodology and verifying two systems took approximately 3.7 person-years. Automating distributed implementation must address proof construction as well as code generation.",
+   "need": "In 2018, a 43-second network split at a code-hosting service triggered 24 hours and 11 minutes of degraded service. Users saw stale information. Tests cannot cover every order in which messages and crashes can occur. In a replicated bank account, deposits can proceed locally while coordinated withdrawals prevent overdrafts. Generating both the implementation and its proof would let developers enforce such rules without designing and verifying a protocol for each application. Operations that need agreement across a network split must wait.",
    "need_refs": [
-    1
+    14,
+    6,
+    15,
+    7,
+    4
    ],
    "figures": {
     "caption": "IronFleet code sizes, reported in 2015",
@@ -427,7 +431,7 @@
    {
     "id": "m1",
     "title": "Automatically inserted coordination prevents a distributed dataflow's replicas from diverging.",
-    "criterion": "For a supplied dataflow with accurate component and stream annotations, generate ordering or sealing coordination that prevents replica divergence. Replicas agree on stored values after delivery of all messages; sealing additionally requires complete finite input partitions. Blazes reports two case studies in ICDE 2014: Storm word counting and a Bloom ad-tracking network.",
+    "criterion": "Given a distributed dataflow with accurate component and stream annotations, generate ordering or sealing code so that replicas agree on their stored values after all messages have been delivered. For sealing, the stream must have finite partitions compatible with the component's semantics, and the component must be able to determine when each partition is complete.",
     "set_by": "Blazes developers, ICDE 2014, sections III.B–III.C, V and VIII; convergence is a field convention and coordination generation is specific to Blazes.",
     "set_by_kind": "community_convention",
     "threshold_quote": "when all messages have been delivered, all replicas agree on the set of stored values",
@@ -442,10 +446,10 @@
    {
     "id": "m2",
     "title": "A distributed service has checked refinement proofs and a conditional progress theorem.",
-    "criterion": "Prove implementation and protocol refinement plus conditional liveness. IronRSL's progress theorem requires eventual synchrony of a live quorum and repeated client submissions. SOSP 2015 reports these proofs, while the reduction from interleaved execution to atomic host steps remains an informal argument.",
+    "criterion": "Machine-check that the implementation refines its protocol, that the protocol refines the centralized specification, and that the stated progress property holds under explicit assumptions. For IronRSL, a client that keeps sending its request to all replicas must eventually receive a reply under the quorum, scheduling, message-delay, packet-load, clock-error and resource assumptions of section 5.1.4. The refinement proof uses atomic host steps and assumes the reduction from interleaved network operations.",
     "set_by": "Microsoft Research, IronFleet, sections 3–5; refinement and conditional-liveness proof conventions.",
     "set_by_kind": "community_convention",
-    "threshold_quote": "the implementation of a distributed system meets a high-level, centralized specification.",
+    "threshold_quote": "if the network is eventually synchronous for a live quorum of replicas, then a client repeatedly submitting a request eventually receives a reply.",
     "threshold_ref": 1,
     "refs": [
      1
@@ -457,7 +461,7 @@
    {
     "id": "m3",
     "title": "A verified transformer preserves a sequential state machine's linearizability despite crashes and reboot.",
-    "criterion": "Transform an arbitrary state machine into replicated code whose operation histories match legal sequential executions and respect response-before-request order. Safety covers message reordering, duplication, delay and loss, and node crashes and reboots under the stated runtime and storage assumptions. The CPP 2016 Verdi/Raft paper completes the earlier conditional proof by proving 90 invariants; extracted OCaml code runs on networks. Liveness is a separate obligation.",
+    "criterion": "Transform an arbitrary single-node state machine into replicated code. Prove that each observable client history linearizes to a legal execution of the original state machine with matching responses. If one command was acknowledged before another was issued, the first must precede the second in that execution. The proof must cover message reordering, duplication, delay and loss, and node crashes and reboots under the stated runtime and storage assumptions.",
     "set_by": "Verdi developers, PLDI 2015, section 7, and CPP 2016, section 3.3; linearizability is the published Raft-transformer correctness relation.",
     "set_by_kind": "community_convention",
     "threshold_quote": "the traces it generates linearize (see below) to traces generated by the single-node state machine.",
@@ -472,11 +476,11 @@
    },
    {
     "id": "m4",
-    "title": "A synthesizer produces replicated data types that satisfy unbounded sequential-equivalence checks.",
-    "criterion": "Given a sequential data type and user-defined ordering constraints for conflicting operations, synthesize a convergent replicated data type and inductive invariants establishing identical query results for every permitted operation sequence, of unbounded length. Katara reports successful synthesis for nine benchmark specifications at OOPSLA 2022. Ordering annotations determine concurrency semantics; the result covers data-type designs.",
+    "title": "A synthesized replicated type matches sequential queries over operation histories of unbounded length.",
+    "criterion": "Given a sequential data type and ordering constraints for conflicting operations, synthesize a convergent replicated type and inductive invariants. Prove that every query gives the same answer as on the sequential type for every permitted operation sequence, with no bound on sequence length. The guarantee applies to the data structures covered by the verifier. For a map verified with a fixed size bound, equivalence holds only within that bound.",
     "set_by": "Katara developers, OOPSLA 2022, sections 3–5; their published CRDT correctness and synthesis conditions.",
     "set_by_kind": "protocol",
-    "threshold_quote": "the sequential type and the CRDT respond identically to any query.",
+    "threshold_quote": "our CRDT matches the sequential data type under the operation ordering for any unbounded execution.",
     "threshold_ref": 3,
     "refs": [
      3
@@ -487,14 +491,15 @@
    },
    {
     "id": "m5",
-    "title": "A synthesizer produces verified distributed services in at least 2 of 3 runs per specification.",
-    "criterion": "Under the IDS evaluation protocol, each formal service specification passes when at least two of three synthesis runs yield a complete Rocq proof, pass the unchanged-specification and nonvacuity audit, and produce extracted OCaml code that executes the harness. The preprint submitted on 22 May 2026 reports all seven specifications passing: six at 3/3 and one at 2/3. Inputs are formal Rocq specifications; fault recovery is outside their scope.",
+    "title": "A synthesizer passes at least two of three runs for each IDS key-value-store specification.",
+    "criterion": "For each of the seven distributed key-value-store specifications in IDS Table 1, at least two of three independent runs must succeed within the per-specification time and cost budgets. Rocq must accept the completed proof with no admitted obligations. The implementation must pass the audit for specification changes and vacuous proofs, and the extracted OCaml code must run on the distributed test harness.",
     "set_by": "IDS developers, Table 1 and appendices F.2–F.3; this is their published evaluation protocol, not a field-wide acceptance standard.",
     "set_by_kind": "protocol",
     "threshold_quote": "Rocq Qed accepted, audit step passed, extracted OCaml runs on the harness",
     "threshold_ref": 7,
     "refs": [
-     7
+     7,
+     17
     ],
     "status": "active",
     "replaced_by": [],
@@ -503,7 +508,7 @@
    {
     "id": "m6",
     "title": "A tool synthesizes fault-tolerant distributed code from sequential code with a checked refinement proof.",
-    "criterion": "Atlas integration test: for a declared source class, synthesize executable distributed service code from sequential code and consistency, availability and fault requirements, including crashes and partitions. The tool chooses representations and coordination and supplies a machine-checked refinement proof without application-specific distributed code or proofs from the programmer. Progress verification remains the completion step. No located source establishes this integration: Katara covers data types, Verdi applies predefined transformers, and IDS starts from formal distributed specifications.",
+    "criterion": "For a declared class of sequential programs, synthesize executable distributed service code from the sequential code and its consistency, availability and fault requirements, including crashes and network partitions. The tool must choose the distributed representations and coordination and supply a machine-checked proof that observable executions refine the sequential specification under the declared operation-order relation and fault model. The programmer supplies neither application-specific distributed code nor application-specific proofs.",
     "set_by": "Atlas; searches of CALM/Bloom/Blazes, IronFleet, Verdi, Katara and IDS found no published criterion for this integration gate.",
     "set_by_kind": "atlas",
     "threshold_quote": null,
@@ -519,13 +524,43 @@
     "status": "active",
     "replaced_by": [],
     "threshold_checked": null
+   },
+   {
+    "id": "m7",
+    "title": "A tool adds fault recovery to a distributed program while preserving its safety condition.",
+    "criterion": "Given processes with declared read and write permissions, an invariant, fault actions, a safety condition and a reachability condition, synthesize a program respecting those permissions. Without faults, each computation must be permitted by the input program. Safety must hold in the presence of the specified faults. From every state reachable by program and fault steps, the synthesized program must satisfy the reachability condition in finitely many program steps once faults cease.",
+    "set_by": "SYCRAFT developers, CONCUR 2008, sections 1 and 2.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "from any state reachable by program and fault transitions, p′ satisfies its reachability condition in a finite number of steps.",
+    "threshold_ref": 16,
+    "refs": [
+     16
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m8",
+    "title": "A tool infers coordination that preserves a sequential object's invariant and makes replicas converge.",
+    "criterion": "Given a sequential object with guarded methods and a state invariant, infer conflicting and dependent method pairs and synthesize a replication protocol. Each call must be permissible at its originating replica, replicas must agree on the order of conflicting calls, and a call's dependencies must execute before it does. Calls must respect the guards and invariant at each replica, and replicas that have executed the same set of requests must reach the same final state.",
+    "set_by": "Hamsaz developers, POPL 2019, section 3, definitions of well-coordination and correctness and Theorem 1.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "Every well-coordinated replicated execution is correct.",
+    "threshold_ref": 15,
+    "refs": [
+     15
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
    }
   ],
   "measures": [],
   "not_found": [
    "No external acceptance test was located for the combined completion test or its integration milestone.",
    "The searched literature did not establish a system meeting either combined test.",
-   "A peer-reviewed publication or independent replication of the IDS evaluation was not located."
+   "No independent replication of the seven-specification IDS synthesis evaluation was located."
   ],
   "references": [
    {
@@ -709,12 +744,84 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 14,
+    "kind": "web",
+    "url": "https://github.blog/news-insights/company-news/oct21-post-incident-analysis/",
+    "doi": null,
+    "title": "October 21 post-incident analysis",
+    "authors": "Jason Warner",
+    "container": "The GitHub Blog",
+    "year": "2018",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 15,
+    "kind": "journal",
+    "url": "https://mohsenlesani.github.io/companion/popl19/POPL19.pdf",
+    "doi": "10.1145/3290387",
+    "title": "Hamsaz: Replication Coordination Analysis and Synthesis",
+    "authors": "Houshmand F, Lesani M",
+    "container": "Proc. ACM Program. Lang.",
+    "year": "2019",
+    "volume": "3",
+    "issue": "POPL",
+    "pages": "1-32",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 16,
+    "kind": "book",
+    "url": "https://cse.msu.edu/~sandeep/sycraft/concur08.pdf",
+    "doi": "10.1007/978-3-540-85361-9_16",
+    "title": "SYCRAFT: A Tool for Synthesizing Distributed Fault-Tolerant Programs",
+    "authors": "Bonakdarpour B, Kulkarni SS",
+    "container": "Lecture Notes in Computer Science",
+    "year": "2008",
+    "volume": null,
+    "issue": null,
+    "pages": "167-171",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 17,
+    "kind": "web",
+    "url": "https://neurips.cc/Downloads/2026",
+    "doi": null,
+    "title": "Downloads 2026",
+    "authors": "NeurIPS",
+    "container": "NeurIPS",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 18,
+    "kind": "book",
+    "url": "https://link.springer.com/chapter/10.1007/978-3-030-53288-8_16",
+    "doi": "10.1007/978-3-030-53288-8_16",
+    "title": "Hampa: Solver-Aided Recency-Aware Replication",
+    "authors": "Li X, Houshmand F, Lesani M",
+    "container": "Lecture Notes in Computer Science",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": "324-349",
+    "citation_source": "crossref"
    }
   ],
   "milestone_order": [
+   "m7",
    "m1",
    "m2",
    "m3",
+   "m8",
    "m4",
    "m5",
    "m6"
@@ -724,622 +831,818 @@
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Blazes generated coordination for 2 distributed dataflow case studies: Storm word counting and a Bloom ad-tracking network.",
-    "detail": "Ordering makes replicas process state-modifying events in the same order. Sealing requires compatible annotations and complete finite input partitions.",
-    "quote": "BLAZES will automatically repair dataﬂows that are not\nconﬂuent or convergent by constraining how messages are\ndelivered to certain components.",
+    "finding": "Blazes generated coordination for Bloom CAMPAIGN in experiments averaged over three runs. All 3 reporting replicas received events in the same order with generated ordering.",
+    "detail": "The uncoordinated baseline returned inconsistent answers to some queries. The sealing experiments covered both single-producer and shared campaigns.",
+    "quote": "By inserting calls to Zookeeper, all click\nlog entries and requests were delivered in the same order to\nall replicas.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
-    "verdict": "met",
-    "finding": "Two Jolteon implementations have mechanized refinement-based safety and liveness proofs in Coq.",
-    "detail": "The liveness result assumes partial synchrony and guarantees responses infinitely often, not a response to every client request. The unpipelined implementation was extracted to an OCaml executable.",
+    "verdict": "partial",
+    "finding": "LiDO verifies safety and conditional liveness in Coq for 2 Jolteon variants.",
+    "detail": "Only unpipelined Jolteon was extracted to executable OCaml. The executable uses a manually added networking shim and timer.",
     "quote": "Based on our LiDO model, we provide mechanized safety and liveness proofs for both\nunpipelined and pipelined Jolteon in Coq.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "met",
-    "finding": "Verdi/Raft transformer: sample size not applicable; completed linearizability proof required 90 invariants.",
-    "detail": "The proof covers reordered, duplicated, delayed or dropped messages and node crashes and reboots. Extracted OCaml runs on real networks; liveness remains unverified. The supplied text does not establish peer-review status.",
-    "quote": "This proof required iteratively discovering\nand proving 90 system invariants. Our veriﬁed implementation is\nextracted to OCaml and runs on real networks.",
+    "finding": "One Verdi Raft transformer provides Coq-checked linearizable replication under network and node faults, using 90 invariants.",
+    "detail": "The guarantee is stated for Verdi’s network and node fault semantics. The supplied text describes the trusted OCaml runtime shim but does not specify concrete storage guarantees on reboot.",
+    "quote": "We connected our proof to previous work to establish an\nend-to-end guarantee that our implementation provides linearizable\nstate machine replication. This proof required iteratively discovering\nand proving 90 system invariants.",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One Verdi Raft transformer produces executable replicas from sequential state-machine code, with refinement established using 90 invariants.",
+    "detail": "The proof covers crashes, reboots and arbitrary packet loss. The paper discusses partitions, but reports no input for declaring partition behavior or choosing an availability policy.",
+    "quote": "Then, Raft transforms this into a system where the original state\nmachine is consistently replicated across a number of nodes.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "met",
-    "finding": "Katara synthesizes and verifies a convergent CRDT for 1 shopping-cart specification.",
-    "detail": "The example uses a sequential set and a user-defined operation ordering. The text describes inductive invariants for unbounded verification, but does not report the nine-benchmark result.",
-    "quote": "This synthesized implementation is provably correct for the given sequential specification with the operation reordering, so we can deploy it in our distributed application without having to worry about manually proving complex CRDT properties.",
+    "finding": "Katara synthesized convergent CRDTs with inductive query-equivalence invariants for all 9 benchmark specifications.",
+    "detail": "CVC5 supports unbounded sets. Map-based designs used a fixed-size Rosette encoding. The supplied arXiv version reports SMT verification and gives no proof-assistant certificate or independent confirmation.",
+    "quote": "When run with our collection of benchmarks, our synthesis algorithm is able to successfully\ngenerate designs that conform to all of the specifications, and it identifies the inductive invariants\nnecessary to prove correctness of each CRDT over unbounded executions.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Katara generated replicated data-type logic and checked sequential query equivalence for all 9 benchmark specifications.",
+    "detail": "The checked obligations concern CRDT queries under the supplied operation orderings. The synthesis interface takes no explicit availability or fault requirements.",
+    "quote": "When run with our collection of benchmarks, our synthesis algorithm is able to successfully\ngenerate designs that conform to all of the specifications, and it identifies the inductive invariants\nnecessary to prove correctness of each CRDT over unbounded executions.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m5",
     "case": null,
     "verdict": "met",
-    "finding": "IDS passed 7 of 7 distributed key-value-store specifications in at least two of three runs each.",
-    "detail": "Six specifications passed 3/3 runs and one passed 2/3. Successful runs required an accepted Rocq proof, an audit, and extracted OCaml executing the harness. Inputs were formal specifications; fault recovery was outside their scope.",
-    "quote": "IDS returns verified implementations for all seven specifications",
+    "finding": "IDS met the pass threshold on 7/7 key-value-store specifications, with three independent runs per specification.",
+    "detail": "The preprint reports the run counts, budget compliance, audits, and harness execution. Rocq checks the refinement proofs for the generated implementations.",
+    "quote": "IDS returns verified implementations for all seven specifications,",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m6",
     "case": null,
     "verdict": "partial",
-    "finding": "Blazes synthesizes coordination code for distributed programs, evaluated in 2 case studies.",
-    "detail": "Blazes analyzes existing distributed dataflows and inserts coordination. The source does not report synthesis from sequential service code or a machine-checked refinement proof.",
-    "quote": "In this paper we present B LAZES , a cross-platform program\nanalysis framework that (a) identiﬁes program locations that\nrequire coordination to ensure consistent executions, and (b)\nautomatically synthesizes application-speciﬁc coordination code\nthat can signiﬁcantly outperform general-purpose techniques.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "LiDO provides mechanized safety and liveness proofs for 2 Jolteon implementations.",
-    "detail": "The paper verifies specific Byzantine consensus implementations; it does not report a transformer from arbitrary state machines or establish crash-and-reboot coverage.",
-    "quote": "Based on our LiDO model, we provide mechanized safety and liveness proofs for both\nunpipelined and pipelined Jolteon in Coq.",
+    "finding": "IDS synthesized executable implementations with Rocq-checked trace refinement for 7/7 distributed key-value-store specifications.",
+    "detail": "The checked result concerns trace inclusion in the supplied distributed consistency specifications. The paper leaves fault recovery outside the evaluated interfaces.",
+    "quote": "From the\nRefinement\nwe obtain a\nTraceInclusion\ntheorem: every observable trace of the implementation is also a trace of the abstract spec.",
     "checked": true,
     "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "peer_reviewed": false,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
-    "finding": "One Raft implementation has a checked linearizability proof supported by 90 invariants.",
-    "detail": "The paper verifies safety but leaves liveness for future work; it does not establish the required conditional progress theorem.",
-    "quote": "This proof required iteratively discovering\nand proving 90 system invariants.",
+    "finding": "For 1 replicated key-value service, Grove proves linearizable map semantics for Put, Get, and CondPut.",
+    "detail": "A write can block when any backup is unavailable. An operator or failure detector can initiate reconfiguration, whose proof establishes safety.",
+    "quote": "functions behave as though accessing a local in-memory key-value map with linearizable\noperations.",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
-    "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m6",
-    "case": null,
-    "verdict": "partial",
-    "finding": "One verified Raft transformer turns a single-node state machine into a fault-tolerant replicated system.",
-    "detail": "The transformer uses a predefined Raft protocol; the paper does not report selecting representations and coordination from explicit application requirements.",
-    "quote": "We implemented Raft as a veriﬁed system transformer from a sin-\ngle node semantics with no faults to a multi-node semantics with\nnetwork and machine faults.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m6",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Katara synthesizes verified CRDTs from sequential data types; 1 shopping-cart example is illustrated.",
-    "detail": "Katara synthesizes coordination-free data types, not a fault-tolerant distributed service from explicit availability and fault requirements. The text does not establish the full integration criterion.",
-    "quote": "This synthesized implementation is\nprovably correct for the given sequential specification with the operation reordering, so we can\ndeploy it in our distributed application without having to worry about manually proving complex\nCRDT properties.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m6",
-    "case": null,
-    "verdict": "partial",
-    "finding": "IDS synthesized verified distributed key-value-store implementations for 7 of 7 consistency specifications.",
-    "detail": "IDS starts from expert-written formal specifications, not sequential application code and explicit fault requirements. The evaluated specifications do not cover fault recovery, and the source does not establish the full integration criterion.",
-    "quote": "Each specification is a high-level reference implementation of a key-value store; its state type and operations define the consistency notion. IDS takes a specification and produces a refining implementation paired with a machine-checked proof of correctness on every input.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "Grove verifies 1 replicated key-value service, vKV, with crash recovery and linearizable operations.",
-    "detail": "The source describes a library that replicates application-supplied state machines and verifies vKV under crashes and an unreliable network. It does not establish the full linearizability criterion for an arbitrary state machine transformer.",
-    "quote": "These components use sophisticated techniques to achieve high\nperformance and strong correctness guarantees. For instance, they\nuse threads on each machine to execute RPCs in parallel; store data\ndurably on disk",
+    "finding": "Grove verifies crash-recovery linearizability for 1 concrete vRSM application, the vKV key-value store.",
+    "detail": "The developer supplies Apply, Read, SetState, and GetState and proves their interface obligations, including that a read's reported write dependency is sufficient.",
+    "quote": "achieve linearizability even in the presence of\nretransmission, crashes, and in-flight client requests while adding or\nremoving servers through reconfiguration",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m8",
+    "case": null,
+    "verdict": "met",
+    "finding": "Hamsaz inferred method conflicts and dependencies and synthesized invariant-preserving, convergent replicas across 13 use cases.",
+    "detail": "For synchronized calls, §6.3 allows any replica where the call is permissible to supply its dependencies. Replicas wait for those dependencies before executing the call.",
+    "quote": "We automatically identified conflicting and dependent methods for a suite of use-cases. We used\nthis information to reduce the coordination avoidance problem to classical graph optimization\nproblems and instantiated the protocols to synthesize replicated objects.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m8",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Hampa synthesized invariant-preserving, convergent replication for 2 evaluated objects: a bank account and a movie-booking system.",
+    "detail": "Buffering can bypass synchronization for individually conflicting calls when the composite update passes the solver checks. The movie-booking benchmark omitted offScreen calls, which feature in the paper’s dependency example.",
+    "quote": "it automatically synthesizes a correct-by-construction replicated object that guarantees integrity, convergence and recency while avoiding unnecessary coordination.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    }
   ],
   "judged": [
    {
     "url": "https://github.com/papers-we-love/papers-we-love/blob/main/distributed_systems/ironFleet-proving-practical-distributed-systems-correct.pdf",
+    "milestone": "m7",
+    "hash": "63822098977d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/papers-we-love/papers-we-love/blob/main/distributed_systems/ironFleet-proving-practical-distributed-systems-correct.pdf",
     "milestone": "m1",
-    "hash": "0cd6c3972d5c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7cd3dba4b55d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://github.com/papers-we-love/papers-we-love/blob/main/distributed_systems/ironFleet-proving-practical-distributed-systems-correct.pdf",
     "milestone": "m2",
-    "hash": "a3d13aa7f42c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "abc69a6e65e9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://github.com/papers-we-love/papers-we-love/blob/main/distributed_systems/ironFleet-proving-practical-distributed-systems-correct.pdf",
     "milestone": "m3",
-    "hash": "fe0caf35e08a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9e6dbc56afe3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/papers-we-love/papers-we-love/blob/main/distributed_systems/ironFleet-proving-practical-distributed-systems-correct.pdf",
+    "milestone": "m8",
+    "hash": "72501d2bc192",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://github.com/papers-we-love/papers-we-love/blob/main/distributed_systems/ironFleet-proving-practical-distributed-systems-correct.pdf",
     "milestone": "m4",
-    "hash": "cab4aed9678d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "0f5e4c34df96",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://github.com/papers-we-love/papers-we-love/blob/main/distributed_systems/ironFleet-proving-practical-distributed-systems-correct.pdf",
     "milestone": "m5",
-    "hash": "047eb5015050",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1348dea881f5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://github.com/papers-we-love/papers-we-love/blob/main/distributed_systems/ironFleet-proving-practical-distributed-systems-correct.pdf",
     "milestone": "m6",
-    "hash": "963f43595141",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "eed6b87fb764",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://github.com/papers-we-love/papers-we-love/blob/main/distributed_systems/ironFleet-proving-practical-distributed-systems-correct.pdf",
     "milestone": "completion",
     "hash": "3ef094b3b46c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
+    "milestone": "m7",
+    "hash": "63822098977d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
     "milestone": "m1",
-    "hash": "0cd6c3972d5c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7cd3dba4b55d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
     "milestone": "m2",
-    "hash": "a3d13aa7f42c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "abc69a6e65e9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
     "milestone": "m3",
-    "hash": "fe0caf35e08a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9e6dbc56afe3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
+    "milestone": "m8",
+    "hash": "72501d2bc192",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
     "milestone": "m4",
-    "hash": "cab4aed9678d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "0f5e4c34df96",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
     "milestone": "m5",
-    "hash": "047eb5015050",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1348dea881f5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
     "milestone": "m6",
-    "hash": "963f43595141",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "eed6b87fb764",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://lamport.azurewebsites.net/tla/amazon-excerpt.html",
     "milestone": "completion",
     "hash": "3ef094b3b46c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/1901.01930",
+    "milestone": "m7",
+    "hash": "63822098977d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1901.01930",
     "milestone": "m1",
-    "hash": "0cd6c3972d5c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7cd3dba4b55d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1901.01930",
     "milestone": "m2",
-    "hash": "a3d13aa7f42c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "abc69a6e65e9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1901.01930",
     "milestone": "m3",
-    "hash": "fe0caf35e08a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9e6dbc56afe3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/1901.01930",
+    "milestone": "m8",
+    "hash": "72501d2bc192",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1901.01930",
     "milestone": "m4",
-    "hash": "cab4aed9678d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "0f5e4c34df96",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1901.01930",
     "milestone": "m5",
-    "hash": "047eb5015050",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1348dea881f5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1901.01930",
     "milestone": "m6",
-    "hash": "963f43595141",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "eed6b87fb764",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1901.01930",
     "milestone": "completion",
     "hash": "3ef094b3b46c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/1805.06358v1",
+    "milestone": "m7",
+    "hash": "63822098977d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/1805.06358v1",
     "milestone": "m1",
-    "hash": "0cd6c3972d5c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7cd3dba4b55d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/1805.06358v1",
     "milestone": "m2",
-    "hash": "a3d13aa7f42c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "abc69a6e65e9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/1805.06358v1",
     "milestone": "m3",
-    "hash": "fe0caf35e08a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9e6dbc56afe3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/1805.06358v1",
+    "milestone": "m8",
+    "hash": "72501d2bc192",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/1805.06358v1",
     "milestone": "m4",
-    "hash": "cab4aed9678d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "0f5e4c34df96",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/1805.06358v1",
     "milestone": "m5",
-    "hash": "047eb5015050",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1348dea881f5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/1805.06358v1",
     "milestone": "m6",
-    "hash": "963f43595141",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "eed6b87fb764",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/1805.06358v1",
     "milestone": "completion",
     "hash": "3ef094b3b46c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1309.3324",
+    "milestone": "m7",
+    "hash": "63822098977d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1309.3324",
     "milestone": "m1",
-    "hash": "0cd6c3972d5c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://jieung.kim/papers/pldi24.pdf",
-    "milestone": "m2",
-    "hash": "a3d13aa7f42c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://homes.cs.washington.edu/~mernst/pubs/raft-proof-cpp2016.pdf",
-    "milestone": "m3",
-    "hash": "fe0caf35e08a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/pdf/2205.12425",
-    "milestone": "m4",
-    "hash": "cab4aed9678d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2605.23109v1",
-    "milestone": "m5",
-    "hash": "047eb5015050",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7cd3dba4b55d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1309.3324",
     "milestone": "m2",
-    "hash": "a3d13aa7f42c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "abc69a6e65e9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1309.3324",
     "milestone": "m3",
-    "hash": "fe0caf35e08a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9e6dbc56afe3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1309.3324",
+    "milestone": "m8",
+    "hash": "72501d2bc192",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1309.3324",
     "milestone": "m4",
-    "hash": "cab4aed9678d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "0f5e4c34df96",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1309.3324",
     "milestone": "m5",
-    "hash": "047eb5015050",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1348dea881f5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1309.3324",
     "milestone": "m6",
-    "hash": "963f43595141",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "eed6b87fb764",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1309.3324",
     "milestone": "completion",
     "hash": "3ef094b3b46c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://jieung.kim/papers/pldi24.pdf",
+    "milestone": "m7",
+    "hash": "63822098977d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://jieung.kim/papers/pldi24.pdf",
     "milestone": "m1",
-    "hash": "0cd6c3972d5c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7cd3dba4b55d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://jieung.kim/papers/pldi24.pdf",
+    "milestone": "m2",
+    "hash": "abc69a6e65e9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://jieung.kim/papers/pldi24.pdf",
     "milestone": "m3",
-    "hash": "fe0caf35e08a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9e6dbc56afe3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://jieung.kim/papers/pldi24.pdf",
+    "milestone": "m8",
+    "hash": "72501d2bc192",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://jieung.kim/papers/pldi24.pdf",
     "milestone": "m4",
-    "hash": "cab4aed9678d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "0f5e4c34df96",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://jieung.kim/papers/pldi24.pdf",
     "milestone": "m5",
-    "hash": "047eb5015050",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1348dea881f5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://jieung.kim/papers/pldi24.pdf",
     "milestone": "m6",
-    "hash": "963f43595141",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "eed6b87fb764",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://jieung.kim/papers/pldi24.pdf",
     "milestone": "completion",
     "hash": "3ef094b3b46c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://homes.cs.washington.edu/~mernst/pubs/raft-proof-cpp2016.pdf",
+    "milestone": "m7",
+    "hash": "63822098977d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://homes.cs.washington.edu/~mernst/pubs/raft-proof-cpp2016.pdf",
     "milestone": "m1",
-    "hash": "0cd6c3972d5c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7cd3dba4b55d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://homes.cs.washington.edu/~mernst/pubs/raft-proof-cpp2016.pdf",
     "milestone": "m2",
-    "hash": "a3d13aa7f42c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "abc69a6e65e9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://homes.cs.washington.edu/~mernst/pubs/raft-proof-cpp2016.pdf",
+    "milestone": "m3",
+    "hash": "9e6dbc56afe3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://homes.cs.washington.edu/~mernst/pubs/raft-proof-cpp2016.pdf",
+    "milestone": "m8",
+    "hash": "72501d2bc192",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://homes.cs.washington.edu/~mernst/pubs/raft-proof-cpp2016.pdf",
     "milestone": "m4",
-    "hash": "cab4aed9678d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "0f5e4c34df96",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://homes.cs.washington.edu/~mernst/pubs/raft-proof-cpp2016.pdf",
     "milestone": "m5",
-    "hash": "047eb5015050",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1348dea881f5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://homes.cs.washington.edu/~mernst/pubs/raft-proof-cpp2016.pdf",
     "milestone": "m6",
-    "hash": "963f43595141",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "eed6b87fb764",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://homes.cs.washington.edu/~mernst/pubs/raft-proof-cpp2016.pdf",
     "milestone": "completion",
     "hash": "3ef094b3b46c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2205.12425",
+    "milestone": "m7",
+    "hash": "63822098977d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2205.12425",
     "milestone": "m1",
-    "hash": "0cd6c3972d5c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7cd3dba4b55d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2205.12425",
     "milestone": "m2",
-    "hash": "a3d13aa7f42c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "abc69a6e65e9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2205.12425",
     "milestone": "m3",
-    "hash": "fe0caf35e08a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9e6dbc56afe3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2205.12425",
+    "milestone": "m8",
+    "hash": "72501d2bc192",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2205.12425",
+    "milestone": "m4",
+    "hash": "0f5e4c34df96",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2205.12425",
     "milestone": "m5",
-    "hash": "047eb5015050",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1348dea881f5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2205.12425",
     "milestone": "m6",
-    "hash": "963f43595141",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "eed6b87fb764",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2205.12425",
     "milestone": "completion",
     "hash": "3ef094b3b46c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2605.23109v1",
+    "milestone": "m7",
+    "hash": "63822098977d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2605.23109v1",
     "milestone": "m1",
-    "hash": "0cd6c3972d5c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7cd3dba4b55d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2605.23109v1",
     "milestone": "m2",
-    "hash": "a3d13aa7f42c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "abc69a6e65e9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2605.23109v1",
     "milestone": "m3",
-    "hash": "fe0caf35e08a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9e6dbc56afe3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2605.23109v1",
+    "milestone": "m8",
+    "hash": "72501d2bc192",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2605.23109v1",
     "milestone": "m4",
-    "hash": "cab4aed9678d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "0f5e4c34df96",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2605.23109v1",
+    "milestone": "m5",
+    "hash": "1348dea881f5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2605.23109v1",
     "milestone": "m6",
-    "hash": "963f43595141",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "eed6b87fb764",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2605.23109v1",
     "milestone": "completion",
     "hash": "3ef094b3b46c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2309.03046",
+    "milestone": "m7",
+    "hash": "63822098977d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2309.03046",
+    "milestone": "m1",
+    "hash": "7cd3dba4b55d",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2309.03046",
+    "milestone": "m2",
+    "hash": "abc69a6e65e9",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2309.03046",
     "milestone": "m3",
-    "hash": "fe0caf35e08a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9e6dbc56afe3",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2309.03046",
+    "milestone": "m8",
+    "hash": "72501d2bc192",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2309.03046",
+    "milestone": "m4",
+    "hash": "0f5e4c34df96",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2309.03046",
+    "milestone": "m5",
+    "hash": "1348dea881f5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2309.03046",
+    "milestone": "m6",
+    "hash": "eed6b87fb764",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2309.03046",
+    "milestone": "completion",
+    "hash": "3ef094b3b46c",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://mohsenlesani.github.io/companion/popl19/POPL19.pdf",
+    "milestone": "m8",
+    "hash": "72501d2bc192",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://link.springer.com/chapter/10.1007/978-3-030-53288-8_16",
+    "milestone": "m8",
+    "hash": "72501d2bc192",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-15",
   "log": [
    {
@@ -1406,8 +1709,108 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 7 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"In 2018, a 43-second network split at a code-hosting service triggered 24 hours and 11 minutes of degraded service. Users saw stale information. Tests cannot cover every order in which messages and crashes can occur. In a replicated bank account, deposits can proceed locally while coordinated withdrawals prevent overdrafts. Generating both the implementation and its proof would let developers enforce such rules without designing and verifying a protocol for each application. Operations that need agreement across a network split must wait.\". Reason: The existing rationale measures the cost of one research project but gives no example of the cost to users or of a decision the tool could make for them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after None: \"A tool adds fault recovery to a distributed program while preserving its safety condition.\". Reason: SYCRAFT supplies an early test of automated fault-tolerance synthesis in which the programmer already supplies the distributed processes."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Given a distributed dataflow with accurate component and stream annotations, generate ordering or sealing code so that replicas agree on their stored values after all messages have been delivered. For sealing, the stream must have finite partitions compatible with the component's semantics, and the component must be able to determine when each partition is complete.\"; threshold_quote = \"when all messages have been delivered, all replicas agree on the set of stored values\"; threshold_ref = 5. Reason: The criterion mixes case studies into the test and omits the requirement that the partition used for sealing be compatible with the component."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"Machine-check that the implementation refines its protocol, that the protocol refines the centralized specification, and that the stated progress property holds under explicit assumptions. For IronRSL, a client that keeps sending its request to all replicas must eventually receive a reply under the quorum, scheduling, message-delay, packet-load, clock-error and resource assumptions of section 5.1.4. The refinement proof uses atomic host steps and assumes the reduction from interleaved network operations.\"; threshold_quote = \"if the network is eventually synchronous for a live quorum of replicas, then a client repeatedly submitting a request eventually receives a reply.\"; threshold_ref = 1. Reason: The existing quotation supports refinement alone, and the criterion understates the assumptions needed for IronRSL to reply."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Transform an arbitrary single-node state machine into replicated code. Prove that each observable client history linearizes to a legal execution of the original state machine with matching responses. If one command was acknowledged before another was issued, the first must precede the second in that execution. The proof must cover message reordering, duplication, delay and loss, and node crashes and reboots under the stated runtime and storage assumptions.\"; threshold_quote = \"the traces it generates linearize (see below) to traces generated by the single-node state machine.\"; threshold_ref = 8. Reason: The number of invariants and the reported OCaml execution are evidence about one implementation, whereas the acceptance test concerns every permitted client history."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m3: \"A tool infers coordination that preserves a sequential object's invariant and makes replicas converge.\". Reason: Hamsaz tests a missing capability by deriving which operations must coordinate from a sequential object's methods and invariant."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: title = \"A synthesized replicated type matches sequential queries over operation histories of unbounded length.\"; criterion = \"Given a sequential data type and ordering constraints for conflicting operations, synthesize a convergent replicated type and inductive invariants. Prove that every query gives the same answer as on the sequential type for every permitted operation sequence, with no bound on sequence length. The guarantee applies to the data structures covered by the verifier. For a map verified with a fixed size bound, equivalence holds only within that bound.\"; threshold_quote = \"our CRDT matches the sequential data type under the operation ordering for any unbounded execution.\"; threshold_ref = 3. Reason: Katara distinguishes unbounded operation histories from unbounded data structures and uses a size bound when verifying maps."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m5: title = \"A synthesizer passes at least two of three runs for each IDS key-value-store specification.\"; criterion = \"For each of the seven distributed key-value-store specifications in IDS Table 1, at least two of three independent runs must succeed within the per-specification time and cost budgets. Rocq must accept the completed proof with no admitted obligations. The implementation must pass the audit for specification changes and vacuous proofs, and the extracted OCaml code must run on the distributed test harness.\"; threshold_quote = \"Rocq Qed accepted, audit step passed, extracted OCaml runs on the harness\"; threshold_ref = 7; refs = [7, 17]. Reason: The IDS protocol counts independent runs within a budget and applies specifically to distributed key-value-store specifications."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m6: criterion = \"For a declared class of sequential programs, synthesize executable distributed service code from the sequential code and its consistency, availability and fault requirements, including crashes and network partitions. The tool must choose the distributed representations and coordination and supply a machine-checked proof that observable executions refine the sequential specification under the declared operation-order relation and fault model. The programmer supplies neither application-specific distributed code nor application-specific proofs.\". Reason: The comparison of published systems belongs with the evidence and obscures the precise safety obligation at the integration milestone."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 2. Reason: The NeurIPS 2026 programme now lists the IDS paper, so the combined statement about publication and replication is outdated."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No independent replication of the seven-specification IDS synthesis evaluation was located.\". Reason: Conference acceptance leaves independent replication of the benchmark as a separate evidence gap."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Applied 11 of 11 proposed operations from SWE-08-revise-20261121T161726132733Z; now version 2."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m7, m1, m2, m3, m8, m4, m5, m6."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 0 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 6 found, 0 not found, 1 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 10 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 4 candidates returned, 0 dropped as sources already used, 4 to judge."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 2 of 4 new candidates, without search. Skipped: 2 no readable saved copy. Dropped rows: none. Replaced 12 earlier rows. Added 12 results: 10 from sources already used, 2 from newly found sources."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 0 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 12 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-21"
  }
 }
