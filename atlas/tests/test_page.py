@@ -611,6 +611,34 @@ class PageTests(unittest.TestCase):
         self.assertTrue(path.is_file())
         self.assertEqual(pages.latest_proposal('BME-99'), path)
 
+    def test_a_revision_can_start_cases_and_clears_the_results_judged_without_them(self):
+        self.define()
+        page = self.stored()
+        page['case_label'], page['cases'] = None, []
+        page['milestones'][2]['status'] = 'retired'
+        page['milestone_order'].remove('m3')
+        page['results'] = [
+            {**held_row('m1', case=None), 'ref': 1, 'checked': True},
+            {**held_row('m3', case=None), 'ref': 1, 'checked': True},
+        ]
+        self.write(page)
+        self.propose(
+            [
+                op('add_case', value='Genotype 1'),
+                op('add_case', value='Genotype 2'),
+                op('edit_text', field='case_label', value='Genotype'),
+            ]
+        )
+        line = pages.apply('BME-99')
+        self.assertIn('applied 3 of 3 operations', line)
+        page = self.stored()
+        self.assertEqual(
+            (page['case_label'], page['cases']), ('Genotype', ['Genotype 1', 'Genotype 2'])
+        )
+        self.assertEqual([r['milestone'] for r in page['results']], ['m3'])
+        self.assertEqual(pages.validate(page), [])
+        self.assertIn('Genotype', self.revise_prompt)
+
     def test_the_latest_proposal_is_the_newest_by_stamp_not_by_folder_name(self):
         older = pages.CALLS / 'BME-99-revise-fable-20261116T054742636421Z' / 'proposal.json'
         newer = pages.CALLS / 'BME-99-revise-20261121T105847075214Z' / 'proposal.json'

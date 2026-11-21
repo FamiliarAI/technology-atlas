@@ -1177,10 +1177,12 @@ def validate(page):
         found.append('cases given without case_label')
     if len(set(page['cases'])) != len(page['cases']):
         found.append('cases repeat')
+    retired_ids = set(ids) - set(live)
     for n, result in enumerate(page['results']):
         if result.get('milestone') not in ids + ['completion']:
             found.append(f'results[{n}] is on unknown milestone {result.get("milestone")!r}')
-        if page['cases'] and result.get('case') not in page['cases']:
+        before_cases = result.get('case') is None and result.get('milestone') in retired_ids
+        if page['cases'] and result.get('case') not in page['cases'] and not before_cases:
             found.append(f'results[{n}] is on unknown case {result.get("case")!r}')
         if not page['cases'] and result.get('case') is not None:
             found.append(f'results[{n}] names a case but the entry has none')
@@ -2265,7 +2267,7 @@ REVISE_SCHEMA = obj(
                     'index': MAYBE_REF,
                     'field': {
                         'type': ['string', 'null'],
-                        'enum': ['title', 'definition', 'goal.need', None],
+                        'enum': ['title', 'definition', 'goal.need', 'case_label', None],
                     },
                     'value': MAYBE,
                     'refs': {
@@ -2352,10 +2354,12 @@ others to null or an empty list.
   "parallel" if they are separate parts of the problem that can be reached in any order.
 - edit_completion: fields with the values that change (basis may change too).
 - add_statement: statement (body, year, quote, context, ref). remove_statement: index, from 0.
-- edit_text: field ("title", "definition" or "goal.need") and value; for goal.need also refs,
-  the references the new text rests on.
-- add_case: value, a case name of at most 4 words; only on an entry that already lists cases
-  (an entry with none cannot start them in a revision). rename_case: rename_from and rename_to.
+- edit_text: field ("title", "definition", "goal.need" or "case_label") and value; for
+  goal.need also refs, the references the new text rests on.
+- add_case: value, a case name of at most 4 words. To start cases on an entry with none, also
+  set case_label with edit_text, the singular noun for one case (such as "Genotype"); starting
+  cases clears the active milestones' results, which are then re-judged for each case.
+  rename_case: rename_from and rename_to.
 - add_not_found: value, one short sentence. remove_not_found: index, from 0.
 Milestone ids are permanent: never reuse one, and refer to milestones only by id.
 
@@ -2558,7 +2562,10 @@ def apply(identifier, path=None):
         (step for step in steps if step[1]['op'] == 'remove_statement'),
         key=lambda step: -(step[1]['index'] if isinstance(step[1]['index'], int) else -1),
     )
-    steps = [step for step in steps if step[1]['op'] != 'remove_statement'] + removals
+    # A new case_label goes first, so the cases it names can start.
+    labels = [s for s in steps if s[1]['op'] == 'edit_text' and s[1]['field'] == 'case_label']
+    steps = [s for s in steps if s[1]['op'] != 'remove_statement' and s not in labels]
+    steps = labels + steps + removals
     removing = len(removals)
     for n, op in steps:
         if op['op'] == 'remove_statement':
@@ -2774,7 +2781,7 @@ def operate(page, op, numbers, removing=0):
                 refs = [renumber(n, numbers) for n in op['refs']]
                 check_refs(page, refs)
                 page['goal']['need_refs'] = refs
-        elif op['field'] in ('title', 'definition'):
+        elif op['field'] in ('title', 'definition', 'case_label'):
             page[op['field']] = op['value']
         else:
             raise Invalid(f'{op["field"]} cannot be edited as text')
@@ -2783,9 +2790,18 @@ def operate(page, op, numbers, removing=0):
         if not op['value'] or op['value'] in page['cases']:
             raise Invalid('the case is empty or already listed')
         if not page['case_label']:
-            raise Invalid('the entry has no case_label; cases cannot start here')
+            raise Invalid('the entry has no case_label; set it with edit_text first')
         page['cases'].append(op['value'])
-        return []
+        if len(page['cases']) > 1:
+            return []
+        # The first case: results judged without cases are cleared on the active milestones
+        # and the completion test, to be re-judged for each case. Retired milestones keep theirs.
+        live = [m['id'] for m in page['milestones'] if m['status'] == 'active']
+        live.append('completion')
+        page['results'] = [
+            r for r in page['results'] if r['milestone'] not in live or r['case'] is not None
+        ]
+        return live
     if kind == 'rename_case':
         old, new = op['rename_from'], op['rename_to']
         if old not in page['cases'] or not new or new in page['cases']:
