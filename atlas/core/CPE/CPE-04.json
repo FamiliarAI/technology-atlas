@@ -274,12 +274,14 @@
  "page": {
   "id": "CPE-04",
   "title": "All-optical general-purpose digital computer with optical memory",
-  "definition": "A programmable digital computer with optically read and written working memory, optical control flow and logic whose outputs directly drive later gates. Its architecture can express any classical algorithm, subject to available memory; signal restoration prevents degradation from accumulating between gates.",
+  "definition": "A programmable digital computer reads and writes working memory with light and uses computed values to choose the next instruction optically. Its gates restore optical signals to valid logic levels so that their outputs can drive later gates. Electronics may power or tune components. The data remain optical within each gate as well as between gates. Given sufficient memory, the architecture can execute any classical algorithm.",
   "goal": {
-   "need": "The PACE comparison below concerns a recurrent Ising solver, which searches for low-energy configurations of binary variables. PACE performs matrix arithmetic optically but sends each result through electronic comparators and SRAM. Optical working memory and restoring logic would allow the state-dependent computational path to remain optical.",
+   "need": "Data center aggregation switches handle several to hundreds of terabits per second. Even a network that switches packets optically can use electronics to process their headers and buffer traffic. Network operators could run routing programs and update stored data directly on optical signals, avoiding the delay and energy cost of converting to electronics and back. A net energy saving depends on how much power the optical logic, memory and lasers require.",
    "need_refs": [
-    1,
-    2
+    12,
+    4,
+    2,
+    1
    ],
    "figures": {
     "caption": "Reported Ising-solver timings, published on 9 April 2025.",
@@ -319,6 +321,14 @@
      "context": "SPRIND gives its reason for supporting the Akhetonics validation project.",
      "ref": 4,
      "checked": true
+    },
+    {
+     "body": "US National Research Council, Harnessing Light: Optical Science and Engineering for the 21st Century",
+     "year": "1998",
+     "quote": "Breakthrough technologies will be required before general-purpose optical computing is likely to be important.",
+     "context": "The committee judged that electrons perform logic more readily than light and identified nearer-term applications in image processing and pattern recognition.",
+     "ref": 13,
+     "checked": null
     }
    ]
   },
@@ -329,12 +339,13 @@
    "set_by_kind": "atlas",
    "threshold_quote": null,
    "threshold_ref": null,
-   "basis": "Searches for qualification standards and benchmarks, and checks of SPRIND's project, Akhetonics's architecture, Miller's gate criteria and optical-memory reviews, found no complete-machine acceptance test. This synthesis combines all-optical processing with general-purpose programmability without adding numerical performance targets. The 2024 CPU paper claims the capability, but its displayed logic measurements and deferred memory results do not establish measured autonomous program execution.",
+   "basis": "Miller's criteria apply to gates. The complete-machine test combines them with general-purpose programmability and measured autonomous execution. A 1993 stored-program computer used glass-fiber delay-line memory, but each switch used detector, amplifier and driver electronics. The 2024 all-optical CPU manuscript shows gate responses before regeneration and defers its custom memory results. Neither report establishes autonomous program execution with optical logic and optical working memory together.",
    "refs": [
     2,
     3,
     4,
-    5
+    5,
+    8
    ],
    "threshold_checked": null
   },
@@ -345,14 +356,15 @@
    {
     "id": "m1",
     "title": "An optical memory cell retains either of two states selected by optical set and reset pulses.",
-    "criterion": "A bistable optical cell retains one of two distinguishable output states after a write pulse ends; optical set/reset pulses select the state. A paper published on 7 July 2017 reports an InP flip-flop operating at 10 Gb/s with an 80 ps recovery time in a binary content-addressable memory experiment.",
+    "criterion": "An optical set pulse selects one of two distinguishable output states and an optical reset pulse selects the other. After either pulse ends, the cell retains the selected state under its operating bias.",
     "set_by": "The all-optical set–reset flip-flop convention, described by Alexoudi, Kanellos and Pleros in Optical RAM and integrated optical memories: a survey.",
     "set_by_kind": "community_convention",
     "threshold_quote": "two stable states (“logical zero” or “logical one”)",
     "threshold_ref": 6,
     "refs": [
      6,
-     7
+     7,
+     10
     ],
     "status": "active",
     "replaced_by": [],
@@ -361,7 +373,7 @@
    {
     "id": "m2",
     "title": "An optical RAM cell permits and blocks optical read and write access while retaining unselected state.",
-    "criterion": "An optical random-access memory (RAM) cell combines storage with access gating: optical commands permit or block reads and writes, and blocked access preserves stored state. The paper published on 7 July 2017 reports RAM-cell read/write operation at 5 Gb/s using 127-bit pseudorandom patterns and bit-error-ratio characterization at 10⁻⁹.",
+    "criterion": "With access enabled, an optical write changes the stored bit and an optical read returns its value. With access blocked, the cell retains its previous value and the access gate blocks communication with the data port.",
     "set_by": "The optical RAM functional convention, distinguished from simple latching in the section From elementary optical memory cells to optical random access memories (RAMs) of Alexoudi et al.",
     "set_by_kind": "community_convention",
     "threshold_quote": "complete optical RAMs with controllable access at any random time",
@@ -377,7 +389,7 @@
    {
     "id": "m3",
     "title": "Optical logic restores signals, isolates input from output and drives at least two later gates.",
-    "criterion": "A logically complete optical gate set, such as NAND or NOR, drives at least two subsequent gates with compatible wavelength, beam and pulse shape; restores signal levels and beam/pulse quality; and isolates input from output. Data are not electrically regenerated between gates. Smith reported cascadable InSb and ZnSe circuits and restoring logic at the OSA meeting held from 19 October 1986 to 25 October 1986; that abstract does not establish all these criteria together.",
+    "criterion": "A functionally complete set of optical gates can drive at least two subsequent gate inputs from one output, with compatible wavelengths, beam shapes and pulse shapes. Each stage restores valid logic levels and the beam or pulse quality needed by the next stage. A signal reflected into an output does not act as a logic input. Regeneration between stages is optical.",
     "set_by": "Miller's essential optical-logic criteria, published in Are optical transistors the logical next step? and reproduced by Akhetonics in its architecture paper.",
     "set_by_kind": "community_convention",
     "threshold_quote": "The output of one stage must be sufficient to drive the inputs of at least two subsequent stages",
@@ -393,7 +405,7 @@
    {
     "id": "m4",
     "title": "An optical datapath completes subtraction, write-back and a branch for a result of zero or less.",
-    "criterion": "For the published four-operand SUBLEQ variant, read M[A] and M[B], write M[C] = M[A] − M[B], and select address J if M[C] ≤ 0, otherwise the next instruction. Data, write-back and next-address selection remain optical. This tests one instruction cycle before autonomous program execution. The CPU paper published on 10 September 2024 claims a 2-bit all-optical implementation; its author manuscript shows full-adder and three-input NAND responses before regeneration and defers custom memory results.",
+    "criterion": "Execute one cycle of the four-operand SUBLEQ instruction. Read the words at addresses A and B, subtract the word at B from the word at A, and write the result at C. Select J as the next instruction address when the result is zero or negative and the following instruction address when it is positive. Operand reads, subtraction, write-back and next-address selection are optical.",
     "set_by": "The universal single-instruction computer convention established by Mavaddat and Parhami, applied optically by Akhetonics. The four-operand SUBLEQ formulation is specified in Section II-A and Figure 9 of Kissner et al.",
     "set_by_kind": "community_convention",
     "threshold_quote": "subtract and branch if less-than or equal to zero",
@@ -405,13 +417,30 @@
     "status": "active",
     "replaced_by": [],
     "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "An optical address selects which word is written in a multiword RAM bank.",
+    "criterion": "Supply different optical addresses to the same bank and write distinguishable data words. The address decoder must enable the addressed word for each write, and the other stored words must retain their contents.",
+    "set_by": "The optical RAM-bank addressing convention described by Alexoudi and colleagues and tested in a multiword bank by Pappas and colleagues.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "addressable random access storage of four 4-bit WDM-formatted optical Data Words",
+    "threshold_ref": 14,
+    "refs": [
+     6,
+     14
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
    }
   ],
   "measures": [],
   "not_found": [
    "The supplied Progress and Challenges of Optical Logic Computation review, its PDF and its SciEngine mirror could not be opened.",
    "No measured optical-only stored-program execution trace was found in the Akhetonics author manuscript.",
-   "No externally specified minimum cascade depth, working-memory capacity or whole-system error rate was found for a complete all-optical general-purpose computer."
+   "No externally specified minimum cascade depth, working-memory capacity or whole-system error rate was found for a complete all-optical general-purpose computer.",
+   "No standards-body or programme acceptance test was found for autonomous stored-program execution with all-optical logic, control and working memory."
   ],
   "references": [
    {
@@ -567,11 +596,68 @@
     "issue": "1",
     "pages": null,
     "citation_source": "crossref"
+   },
+   {
+    "id": 12,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41467-022-29913-1?error=cookies_not_supported",
+    "doi": "10.1038/s41467-022-29913-1",
+    "title": "Nanosecond optical switching and control system for data center networks",
+    "authors": "Xue X, Calabretta N",
+    "container": "Nat Commun",
+    "year": "2022",
+    "volume": "13",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 13,
+    "kind": "book",
+    "url": "https://www.nationalacademies.org/read/5954/chapter/4",
+    "doi": "10.17226/5954",
+    "title": "Harnessing Light: Optical Science and Engineering for the 21st Century",
+    "authors": "National Research Council",
+    "container": "The National Academies Press",
+    "year": "1998",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 14,
+    "kind": "journal",
+    "url": "https://opg.optica.org/jlt/abstract.cfm?uri=jlt-41-3-949",
+    "doi": "10.1109/JLT.2022.3205712",
+    "title": "16-Bit (4 × 4) Optical Random Access Memory (RAM) Bank",
+    "authors": "Pappas C, Moschos T, Alexoudi T, Vagionas C, Pleros N",
+    "container": "J. Lightwave Technol.",
+    "year": "2023",
+    "volume": "41",
+    "issue": "3",
+    "pages": "949-956",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 15,
+    "kind": "preprint",
+    "url": "https://ora.ox.ac.uk/objects/uuid%3A93064ccf-46db-41a9-8eff-10e79885a18d/files/sfn106x98h",
+    "doi": null,
+    "title": "Integrated 256 cell photonic phase-change memory with 512-bit capacity",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
    }
   ],
   "milestone_order": [
    "m1",
    "m2",
+   "m5",
    "m3",
    "m4"
   ],
@@ -580,104 +666,265 @@
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "One microdisk optical memory cell switched between two stable states using 1.8 fJ optical pulses.",
-    "detail": "The electrically pumped cell retained a distinguishable lasing state after the optical pulse. The text does not establish the manuscript’s publication or peer-review status.",
-    "quote": "Even after the pulse has passed th rough, the microdisk laser will stay in the \nCCW dominant state (Fig. 3(c)). In this case, th e power at the left side of the SOI waveguide \nbecomes low. Similarly, the CW dominant stat e can be recovered by in jecting an optical set \npulse from the right side (Fig. 3(d) and 3(e)).",
+    "finding": "One microdisk flip-flop retained optically set and reset states with 11 dB output extinction in the high-speed test.",
+    "detail": "The high-speed test used 100 ps pulses with switching energy as low as 1.8 fJ. The measured 60 ps transition was the switch-off transient.",
+    "quote": "An ex tinction ratio of 11 dB was obtained, slightly \nless than that in the static conditions, probabl y due to the spontaneous emission noise from \nthe Er-doped fiber amplifier used  to amplify the signal.",
     "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
+    "confirmed": true,
+    "peer_reviewed": true,
     "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One microdisk flip-flop supported optical writes and output readout with about 13 dB extinction in the low-speed test.",
+    "detail": null,
+    "quote": "As \nshown in Fig. 3(f) and 3(g), pow er extinction ratios of about 13 dB were measured at both \nsides of the SOI waveguide.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "Polariton logic: two cascaded NOT gates demonstrated; the second reached approximately −13 dB extinction.",
-    "detail": "A universal NOR gate was also demonstrated, but fan-out to two later gates was projected from an assumed threshold, not demonstrated. The text does not establish signal and pulse-quality restoration and input–output isolation together.",
+    "finding": "In a two-gate polariton NOT cascade, the downstream gate’s extinction ratio plateaued at ≈−13 dB.",
+    "detail": "The authors projected fan-out to at least two gates using an assumed −5 dB switching threshold. The cascade experiment drove one downstream input.",
     "quote": "We observe that the extinction ratio reaches a plateau at ≈−13 dB due to the exciton-reservoir depletion at the second gate.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One optical decoder–crossbar demonstrator produced full-adder and 3-input NAND waveforms.",
+    "detail": "The authors attribute the amplitude and timing variation to directional-coupler ratios. They report multiple copies on the dies without specifying how many were tested for the plotted result.",
+    "quote": "Response of the full-adder and\nNAND3\nof the sparse crossbar logic from Figure\n6\nprior to regeneration.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 2,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "partial",
-    "finding": "Authors report a 2-bit all-optical CPU implementation; sample size not reported.",
-    "detail": "The supplied text describes the four-operand SUBLEQ architecture but does not report a completed cycle demonstrating optical subtraction, memory write-back and next-address selection together.",
-    "quote": "For this demonstration we implemented a URISC architecture capable of running any classical piece of software all-optically and present a comprehensive architectural framework for all-optical computing to go beyond.",
+    "finding": "One 2-bit optical SUBLEQ prototype reports measured full-adder waveforms.",
+    "detail": "The reported electrical test-equipment limit set the clock below 1 GHz. The authors defer results on the custom phase-change memory and details of the optical write scheme to separate reporting.",
+    "quote": "On a logic level, our CPU implements the 2-bit SUBLEQ scheme outlined in\nII-A\n.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 2,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "met",
+    "finding": "In one six-cell photonic RAM row, wavelength-selected writes stored distinguishable 2-bit words while preserving the other cells’ contents.",
+    "detail": "The write pulse enters through the selected row port. Its wavelength selects the cell within that row. The supplied manuscript does not establish peer-review status.",
+    "quote": "All memory elements in \nthis row can be addressed and set to a certain state individually \nwithout influencing the other PCM -cells.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    }
   ],
   "judged": [
    {
     "url": "https://www.nature.com/articles/s41586-025-08786-6",
     "milestone": "m1",
-    "hash": "f250b8a52924",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "3f28a789902e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-08786-6",
     "milestone": "m2",
-    "hash": "be2783097b0f",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "dae319a4d232",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-025-08786-6",
+    "milestone": "m5",
+    "hash": "a14e01995b59",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-08786-6",
     "milestone": "m3",
-    "hash": "2c6edcf02b3e",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "8cab3a74a2c5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-08786-6",
     "milestone": "m4",
-    "hash": "f6a8e4da4fe4",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "477d5e396959",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-08786-6",
     "milestone": "completion",
     "hash": "82d71a7cb335",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://biblio.ugent.be/publication/1144712/file/1144797.pdf",
     "milestone": "m1",
-    "hash": "f250b8a52924",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "3f28a789902e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://biblio.ugent.be/publication/1144712/file/1144797.pdf",
+    "milestone": "m2",
+    "hash": "dae319a4d232",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://biblio.ugent.be/publication/1144712/file/1144797.pdf",
+    "milestone": "m5",
+    "hash": "a14e01995b59",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://biblio.ugent.be/publication/1144712/file/1144797.pdf",
+    "milestone": "m3",
+    "hash": "8cab3a74a2c5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://biblio.ugent.be/publication/1144712/file/1144797.pdf",
+    "milestone": "m4",
+    "hash": "477d5e396959",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://biblio.ugent.be/publication/1144712/file/1144797.pdf",
+    "milestone": "completion",
+    "hash": "82d71a7cb335",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11199649/",
+    "milestone": "m1",
+    "hash": "3f28a789902e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11199649/",
+    "milestone": "m2",
+    "hash": "dae319a4d232",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11199649/",
+    "milestone": "m5",
+    "hash": "a14e01995b59",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11199649/",
     "milestone": "m3",
-    "hash": "2c6edcf02b3e",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "8cab3a74a2c5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11199649/",
+    "milestone": "m4",
+    "hash": "477d5e396959",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11199649/",
+    "milestone": "completion",
+    "hash": "82d71a7cb335",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2403.00045v2",
+    "milestone": "m1",
+    "hash": "3f28a789902e",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2403.00045v2",
+    "milestone": "m2",
+    "hash": "dae319a4d232",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2403.00045v2",
+    "milestone": "m5",
+    "hash": "a14e01995b59",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2403.00045v2",
+    "milestone": "m3",
+    "hash": "8cab3a74a2c5",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2403.00045v2",
     "milestone": "m4",
-    "hash": "f6a8e4da4fe4",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "477d5e396959",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2403.00045v2",
+    "milestone": "completion",
+    "hash": "82d71a7cb335",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ora.ox.ac.uk/objects/uuid%3A93064ccf-46db-41a9-8eff-10e79885a18d/files/sfn106x98h",
+    "milestone": "m5",
+    "hash": "a14e01995b59",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -739,8 +986,108 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 0 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"A programmable digital computer reads and writes working memory with light and uses computed values to choose the next instruction optically. Its gates restore optical signals to valid logic levels so that their outputs can drive later gates. Electronics may power or tune components. The data remain optical within each gate as well as between gates. Given sufficient memory, the architecture can execute any classical algorithm.\". Reason: The definition needs to distinguish optical links between electronic switches from optical operation within each gate."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Data center aggregation switches handle several to hundreds of terabits per second. Even a network that switches packets optically can use electronics to process their headers and buffer traffic. Network operators could run routing programs and update stored data directly on optical signals, avoiding the delay and energy cost of converting to electronics and back. A net energy saving depends on how much power the optical logic, memory and lasers require.\". Reason: The current rationale describes an Ising solver without explaining who benefits from programmable optical processing or what determines the energy saving."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by US National Research Council, Harnessing Light: Optical Science and Engineering for the 21st Century, 1998: \"Breakthrough technologies will be required before general-purpose optical computing is likely to be important.\". Reason: The entry omits a dated assessment by a national committee of the difficulty of competing with electronic logic."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit completion: basis = \"Miller's criteria apply to gates. The complete-machine test combines them with general-purpose programmability and measured autonomous execution. A 1993 stored-program computer used glass-fiber delay-line memory, but each switch used detector, amplifier and driver electronics. The 2024 all-optical CPU manuscript shows gate responses before regeneration and defers its custom memory results. Neither report establishes autonomous program execution with optical logic and optical working memory together.\"; refs = [2, 3, 4, 5, 12]. Reason: The basis omits a demonstrated stored-program machine whose switch electronics explain precisely why it falls short."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"An optical set pulse selects one of two distinguishable output states and an optical reset pulse selects the other. After either pulse ends, the cell retains the selected state under its operating bias.\"; threshold_quote = \"two stable states (\\u201clogical zero\\u201d or \\u201clogical one\\u201d)\"; threshold_ref = 6; refs = [6, 7, 10]. Reason: The date, bit rate and recovery time of one flip-flop experiment are observations rather than requirements for retaining a bit."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"With access enabled, an optical write changes the stored bit and an optical read returns its value. With access blocked, the cell retains its previous value and the access gate blocks communication with the data port.\". Reason: The 2017 experiment's pattern length, bit rate and bit-error measurement obscure the functional distinction between a latch and a RAM cell."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m2: \"An optical address selects which word is written in a multiword RAM bank.\". Reason: Enabling access to one RAM cell does not test whether an optical address can select a particular word for writing in a memory bank."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"A functionally complete set of optical gates can drive at least two subsequent gate inputs from one output, with compatible wavelengths, beam shapes and pulse shapes. Each stage restores valid logic levels and the beam or pulse quality needed by the next stage. A signal reflected into an output does not act as a logic input. Regeneration between stages is optical.\". Reason: The meeting dates and assessment of Smith's circuits are results, while the criterion needs to specify what isolation and restoration require of a gate."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"Execute one cycle of the four-operand SUBLEQ instruction. Read the words at addresses A and B, subtract the word at B from the word at A, and write the result at C. Select J as the next instruction address when the result is zero or negative and the following instruction address when it is positive. Operand reads, subtraction, write-back and next-address selection are optical.\". Reason: The current criterion mixes the instruction semantics with a CPU claim and measurements of individual gates."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No standards-body or programme acceptance test was found for autonomous stored-program execution with all-optical logic, control and working memory.\". Reason: The existing evidence gap concerns numerical minima and leaves open whether an external body sets a functional test for the whole machine."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Applied 10 of 10 proposed operations from CPE-04-revise-20261121T165104979329Z; now version 2."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m5, m3, m4."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 3 from Crossref, 0 from PubMed, 0 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 1 found, 0 not found, 2 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "definition is 430 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 4 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 5 candidates returned, 0 dropped as sources already used, 5 to judge."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 1 of 5 new candidates, without search. Skipped: 5 no readable saved copy. Dropped rows: none. Replaced 3 earlier rows. Added 6 results: 5 from sources already used, 1 from newly found sources."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 6 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-14"
+  "results_run": "2026-11-21"
  }
 }
