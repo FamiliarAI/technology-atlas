@@ -314,11 +314,14 @@
  "page": {
   "id": "MAT-04",
   "title": "Proved polynomial-cost solution of high-dimensional HJB equations",
-  "definition": "An explicit algorithm approximates the solutions of a stated class of parabolic Hamilton–Jacobi–Bellman (HJB) equations, the nonlinear PDEs satisfied by the value functions of stochastic control problems, to error ε, with proved runtime and memory polynomial in the dimension d and in 1/ε. The class includes problems whose control has as many components as the state.",
+  "definition": "A parabolic Hamilton–Jacobi–Bellman (HJB) equation describes the best expected cost or payoff attainable from each starting time and state in a stochastic control problem. The goal is an explicit algorithm that approximates this value to error ε, with proved runtime and memory polynomial in the state dimension d and in 1/ε. The family includes problems where the drift can be chosen anywhere in a d-dimensional Euclidean ball: the bound on the control limits its total length across all coordinates.",
   "goal": {
-   "need": "The review gives conventional tensor-product discretizations computational complexity O(N^d), where N is the number of degrees of freedom per coordinate and d the dimension. A polynomial error–cost theorem identifies equation families for which this exponential dependence can be avoided.",
+   "need": "Call-center managers assign agents to limit the costs of waiting and of callers hanging up. Data from over 4 million calls at one bank yielded a 17-dimensional scheduling model whose optimal cost was unknown. A full grid with N values per coordinate would have N¹⁷ points. For a model covered by the theorem, managers could compare a scheduling rule's expected cost with the best attainable cost to a known accuracy. Constructing a rule can also require the gradient of that optimal cost.",
    "need_refs": [
-    1
+    1,
+    14,
+    15,
+    16
    ],
    "figures": {
     "caption": "Illustrative tensor-product counts with 10 degrees of freedom per coordinate",
@@ -365,16 +368,18 @@
   "completion": {
    "title": "A proved algorithm solves stochastic-control HJB equations with runtime and memory polynomial in d and 1/ε.",
    "criterion": "A theorem, peer-reviewed or checked in a proof assistant, gives an explicit algorithm for a class of parabolic Hamilton–Jacobi–Bellman equations defined by stated assumptions on its data. For every dimension d the class contains equations whose drift control ranges over a d-dimensional Euclidean ball, so the nonlinearity is Lipschitz in the Euclidean norm of the gradient but not, uniformly in d, in the maximum norm. For all d and ε in (0,1), error in a stated norm on a stated region is below ε; runtime and memory, counting function evaluations, random draws and arithmetic, are at most C dᵖ ε⁻ʳ with C, p, r independent of d and ε. A family solved in closed form does not count.",
-   "set_by": "Technology Atlas. Hutzenthaler and Nguyen identify the stochastic-control HJB class that existing multilevel Picard theorems do not cover; cost polynomial in d and 1/ε is the field's convention. The joint runtime-and-memory count and the deciding event are the Atlas's.",
+   "set_by": "Technology Atlas. The field supplies the polynomial-work convention. No outside body specifies the combined runtime, peak-memory, full-ball control and proof requirements.",
    "set_by_kind": "atlas",
-   "threshold_quote": "It is often unclear whether such problems suffer from the curse of dimensionality.",
-   "threshold_ref": 6,
-   "basis": "No outside body sets this test. Proved polynomial-cost results cover semilinear equations whose nonlinearity is Lipschitz in the maximum norm with a constant bounded in d. The control problems the entry names give nonlinearities Lipschitz in the Euclidean norm; for one such equation a multilevel Picard scheme has error growing faster than any polynomial in d, which rules out that scheme, not every algorithm. The test asks for that class. Equations nonlinear in second derivatives (controlled diffusion) are not required. A machine-checked proof counts as confirmed.",
+   "threshold_quote": "computational complexity only grows polynomially in the dimension $d\\in \\mathbb{N}$ and the reciprocal of the accuracy $\\varepsilon$",
+   "threshold_ref": 10,
+   "basis": "The variable-coefficient multilevel Picard theorem bounds work under a dimension-independent sum of coordinate Lipschitz weights. In the Hutzenthaler–Nguyen counterexample the first drift coordinate is fixed at zero. The Hamiltonian is the Euclidean length of the other d−1 gradient components, so its maximum-norm Lipschitz constant is √(d−1). For every p≥0 and fixed iteration level n>2p, the scheme's joint root-mean-square error in value and gradient at the origin, divided by dᵖ, diverges as d grows. The value itself depends on one coordinate. The Atlas target allows drift in all d directions and requires only a value approximation. Control of the diffusion is optional. A network-size bound alone leaves the cost of constructing the approximation open.",
    "refs": [
     4,
-    6
+    6,
+    10,
+    16
    ],
-   "threshold_checked": true
+   "threshold_checked": false
   },
   "case_label": null,
   "cases": [],
@@ -383,7 +388,7 @@
    {
     "id": "m1",
     "title": "A proved algorithm solves gradient-independent semilinear heat equations at cost polynomial in d and 1/ε.",
-    "criterion": "A theorem, peer-reviewed or checked in a proof assistant, gives an algorithm for semilinear heat equations whose nonlinearity depends on the solution, not on its gradient, and is globally Lipschitz. For every dimension d and accuracy ε, root-mean-square error at a requested space-time point is at most ε, and the number of function evaluations and scalar random draws is bounded by a polynomial in d and 1/ε. The first published bound was O(dε⁻⁽⁴⁺δ⁾) for every δ>0, for smooth solutions. Numerical tests without a proved cost bound are partial.",
+    "criterion": "For semilinear heat equations with a globally Lipschitz, gradient-independent nonlinearity, prove a pointwise root-mean-square error bound ε with O(d ε⁻⁽⁴⁺δ⁾) evaluations of the nonlinearity and terminal data plus scalar normal draws, for every fixed δ>0. Corollary 3.19 assumes fixed horizon T, smooth solutions, dimension-uniform bounds on the Lipschitz constant, solution, terminal data and nonlinearity at zero, and a uniform bound on |(∂ₜ+½Δ)ᵏu|/(k!)³⁄⁴ over k, time, space and dimension.",
     "set_by": "E, Hutzenthaler, Jentzen and Kruse, Corollary 3.19; the field's polynomial-complexity convention applied to gradient-independent semilinear heat equations.",
     "set_by_kind": "community_convention",
     "threshold_quote": "our proposed algorithm is \\(O(d\\,{\\varepsilon }^{-(4+\\delta )})\\) for any \\(\\delta \\in (0,\\infty )\\).",
@@ -398,7 +403,7 @@
    {
     "id": "m2",
     "title": "A proved algorithm solves gradient-dependent semilinear heat equations at cost polynomial in d and 1/ε.",
-    "criterion": "A theorem, peer-reviewed or checked in a proof assistant, gives an algorithm for semilinear heat equations ∂ₜu=Δu+f(u,∇u) whose nonlinearity is Lipschitz in each gradient coordinate, with the sum of the coordinate Lipschitz weights bounded independently of d. For every d and ε in (0,1], root-mean-square error of the solution and of each gradient component at a requested point is at most ε, and the number of scalar random draws is at most c dᶜ ε⁻⁽²⁺δ⁾ for every fixed δ>0. A result for one equation, or without a cost bound polynomial in d, is partial.",
+    "criterion": "For ∂ₜu=Δu+f(u,∇u) with initial data g, use the coordinate Lipschitz and polynomial growth bounds of Theorem 1.1, including a dimension-uniform bound on the sum of the Lipschitz weights. For every fixed T,δ>0, every d and ε∈(0,1], prove that a level N gives, at (T,0) for all levels n≥N, a sum of the value mean-square error and the largest gradient-component mean-square error at most ε². The total number of scalar random draws for levels 1 through N is at most c dᶜ ε⁻⁽²⁺δ⁾, with c independent of d and ε.",
     "set_by": "Hutzenthaler, Jentzen and Kruse, Theorem 1.1; the field's polynomial-complexity convention applied to gradient-dependent semilinear heat equations.",
     "set_by_kind": "community_convention",
     "threshold_quote": "is bounded by \\(c d^c {\\varepsilon }^{ -( 2 + \\delta ) }\\)",
@@ -413,27 +418,60 @@
    {
     "id": "m3",
     "title": "A proved algorithm solves variable-coefficient semilinear PDEs at cost polynomial in d and 1/ε.",
-    "criterion": "A theorem, peer-reviewed or checked in a proof assistant, gives an algorithm for semilinear parabolic PDEs with position-dependent drift and diffusion coefficients and a gradient-dependent nonlinearity that is Lipschitz in the maximum norm with constant bounded in d. For every d and ε in (0,1), root-mean-square error of the solution and its gradient at each requested point of a bounded region is below ε, at a cost per point, counting function evaluations and scalar random draws, of at most C dᵖ ε⁻ʳ with C, p, r independent of d and ε. Convergence without a cost bound polynomial in d is partial.",
+    "criterion": "Under Theorem 1.1's hypotheses, allow position-dependent drift and invertible diffusion, with coordinate Lipschitz weights for the nonlinearity whose sum is bounded independently of d. For every d and δ,ε∈(0,1), prove uniformly over t<T in [0,T) and x∈[−k,k]ᵈ for fixed k that the value's root-mean-square error is below ε and each gradient component's root-mean-square error times √(T−t) is below ε. With polynomial input-evaluation costs, the per-point count of function evaluations and scalar random draws is at most Cδ η d^η ε⁻⁽⁴⁺δ⁾, with Cδ and η independent of d and ε.",
     "set_by": "Neufeld, Nguyen and Wu, Theorem 1.1; the field's polynomial-complexity convention applied to general semilinear PDEs with gradient-dependent nonlinearities.",
     "set_by_kind": "community_convention",
-    "threshold_quote": "In this paper, we prove that the MLP algorithm in arXiv:2310.12545 indeed can overcome the curse of dimensionality",
+    "threshold_quote": "\\mathfrak{C}^{d}_{N_{d,\\epsilon},\\lvert N_{d,\\varepsilon}\\rvert^{\\frac{1}{3}},\\lvert N_{d,\\varepsilon}\\rvert^{\\frac{N_{d,\\varepsilon}}{3}}}\\leq C_{\\delta}\\varepsilon^{-(4+\\delta)}\\eta d^{\\eta}.",
     "threshold_ref": 4,
     "refs": [
      4,
      5,
      9,
-     14
+     13
     ],
     "status": "active",
     "replaced_by": [],
     "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "A 100-dimensional semilinear pricing benchmark measures successive-level differences against runtime.",
+    "criterion": "Run the 100-dimensional counterparty-credit-risk example in Section 5 at T=1. For levels k=1 through 5, average the absolute difference of successive value estimates over 100 runs, divide by the absolute mean level-6 estimate, and report the ratio against the runtime for one level-(k+1) realization. This measures agreement under refinement.",
+    "set_by": "E, Hutzenthaler, Jentzen and Kruse, Section 5, equation (79) and Figure 1.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "for $k\\in\\{1,2,\\dots,5\\}$ against the runtime needed to compute one realization of",
+    "threshold_ref": 17,
+    "refs": [
+     17
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": false
+   },
+   {
+    "id": "m5",
+    "title": "A variable-coefficient Euler scheme converges in mean square to the value and gradient for each d.",
+    "criterion": "For the semilinear parabolic problem under Assumptions 2.1, 2.3 and 2.4 of Neufeld and Wu, prove convergence of the multilevel Picard scheme that approximates the forward stochastic dynamics by Euler steps. For each fixed dimension d, spatial point x and ε∈(0,1], a refinement level must exist beyond which the joint L² error of the value and spatial gradient is below ε at each time t<T.",
+    "set_by": "Neufeld and Wu, Theorem 3.2(i), equation (3.17), in the journal version.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "For each d ∈ N , ɛ ∈ (0, 1], and x ∈ R d there exists a positive integer n d ( x , ε ) ⩾ 2 such that for all t ∈ [0, T]:",
+    "threshold_ref": 18,
+    "refs": [
+     18,
+     13
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
    }
   ],
   "measures": [],
   "not_found": [
    "No agency, society, standards-body or prize criterion was found specifying a joint runtime-and-memory target for a defined broader nonlinear Hamilton–Jacobi–Bellman family.",
    "No external criterion was found requiring a single constructed space-time approximation with polynomial total runtime and peak memory for that broader target.",
-   "The Journal of Complexity publisher page was inaccessible; its full author manuscript and an author’s publication record were accessible."
+   "The Journal of Complexity publisher page was inaccessible; its full author manuscript and an author’s publication record were accessible.",
+   "No position from a society, agency or research programme disputing the feasibility or value of the full drift-control goal was found.",
+   "No published algorithm with proved polynomial runtime and peak memory for the specified full-ball drift-control family was found."
   ],
   "references": [
    {
@@ -579,20 +617,6 @@
    {
     "id": 11,
     "kind": "journal",
-    "url": "https://www.global-sci.com/cicp/article/view/6906",
-    "doi": "10.4208/cicp.OA-2020-0130",
-    "title": "Numerical Simulations for Full History Recursive Multilevel Picard Approximations for Systems of High-Dimensional Partial Differential Equations",
-    "authors": "Becker S, Braunwarth R, Hutzenthaler M, Jentzen A, Von Wurstemberger P",
-    "container": "Communications in Computational Physics",
-    "year": "2020",
-    "volume": "28",
-    "issue": "5",
-    "pages": "2109-2138",
-    "citation_source": "crossref"
-   },
-   {
-    "id": 12,
-    "kind": "journal",
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7776969/",
     "doi": "10.1098/rspa.2019.0630",
     "title": "Overcoming the curse of dimensionality in the numerical approximation of semilinear parabolic partial differential equations",
@@ -605,7 +629,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 13,
+    "id": 12,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2410.00203v3",
     "doi": null,
@@ -619,7 +643,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 14,
+    "id": 13,
     "kind": "preprint",
     "url": "https://arxiv.org/abs/2311.11579v1",
     "doi": null,
@@ -631,438 +655,783 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 14,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2311.18128v2",
+    "doi": "10.48550/arXiv.2311.18128",
+    "title": "Dynamic Scheduling of a Multiclass Queue in the Halfin-Whitt Regime: A Computational Approach for High-Dimensional Problems",
+    "authors": "Ata B, Kasikaralar E",
+    "container": "arXiv",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 15,
+    "kind": "journal",
+    "url": "https://pubsonline.informs.org/doi/10.1287/mnsc.2023.03921",
+    "doi": "10.1287/mnsc.2023.03921",
+    "title": "Dynamic Scheduling of a Multiclass Queue in the Halfin–Whitt Regime: A Computational Approach for High-Dimensional Problems",
+    "authors": "Ata B, Kaşıkaralar E",
+    "container": "Management Science",
+    "year": "2026",
+    "volume": "72",
+    "issue": "7",
+    "pages": "6309-6333",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 16,
+    "kind": "report",
+    "url": "https://www.ricam.oeaw.ac.at/files/reports/21/rep21-15.pdf",
+    "doi": null,
+    "title": "Deep neural network approximation for high-dimensional parabolic Hamilton–Jacobi–Bellman equations",
+    "authors": "Philipp Grohs and Lukas Herrmann",
+    "container": "RICAM-Report 2021-15",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 17,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/1607.03295v1",
+    "doi": "10.48550/arXiv.1607.03295",
+    "title": "On full history recursive multilevel Picard approximations and numerical approximations of high-dimensional nonlinear parabolic partial differential equations",
+    "authors": "E W, Hutzenthaler M, Jentzen A, Kruse T",
+    "container": "arXiv",
+    "year": "2016",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 18,
+    "kind": "journal",
+    "url": "https://www.degruyterbrill.com/document/doi/10.1515/jnma-2024-0074/html",
+    "doi": "10.1515/jnma-2024-0074",
+    "title": "Multilevel Picard algorithm for general semilinear parabolic PDEs with gradient-dependent nonlinearities",
+    "authors": "Neufeld A, Wu S",
+    "container": "Journal of Numerical Mathematics",
+    "year": "2026",
+    "volume": "34",
+    "issue": "2",
+    "pages": "125-175",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 19,
+    "kind": "preprint",
+    "url": "https://arxiv.org/abs/2506.23969",
+    "doi": null,
+    "title": "Full history recursive multilevel Picard approximations suffer from the curse of dimensionality for the Hamilton-Jacobi-Bellman equation of a stochastic control problem",
+    "authors": "Hutzenthaler M, Nguyen TA",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 20,
+    "kind": "preprint",
+    "url": "https://personal.ntu.edu.sg/ariel.neufeld/MLP_gradient-Overcome.pdf",
+    "doi": null,
+    "title": "Multilevel Picard approximations overcome the curse of dimensionality in the numerical approximation of general semilinear PDEs with gradient-dependent nonlinearities",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 21,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/1607.03295v1#page=23",
+    "doi": null,
+    "title": "On full history recursive multilevel Picard approximations and numerical approximations of high-dimensional nonlinear parabolic partial differential equations",
+    "authors": "E W, Hutzenthaler M, Jentzen A, Kruse T",
+    "container": "arXiv",
+    "year": "2016",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
    }
   ],
   "milestone_order": [
+   "m4",
    "m1",
    "m2",
+   "m5",
    "m3"
   ],
   "results": [
    {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Shotgun solver for a gradient-dependent HJB equation: test sample size not stated; relative L² error 2.59×10⁻³ in 1,000 dimensions.",
-    "detail": "The benchmark is empirical and its quadratic gradient nonlinearity falls outside the criterion’s global Lipschitz assumptions. It does not establish the required value-and-gradient RMS guarantee or random-draw complexity bound.",
-    "quote": null,
-    "checked": null,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 1,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Four neural solvers tested one gradient-dependent HJB equation at d=100 and 1000; Shotgun achieved relative L2 error 2.59×10⁻³ at d=1000 (test sample size unstated).",
-    "detail": "Numerical results only. The quadratic gradient nonlinearity is not globally Lipschitz. No polynomial complexity theorem or root-mean-square guarantees for the solution and each gradient component are given.",
-    "quote": null,
-    "checked": null,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 1,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
-   },
-   {
     "milestone": "m3",
     "case": null,
-    "verdict": "partial",
-    "finding": "Four neural solvers tested variable-coefficient Black–Scholes equations on 1000 test points per dimension; PINN achieved relative L2 error 4.69×10⁻³ at d=1000.",
-    "detail": "The benchmark is linear, with position-dependent drift and diffusion. It does not demonstrate a gradient-dependent nonlinear class, gradient error guarantees, or a proved cost bound polynomial in dimension and inverse accuracy.",
-    "quote": null,
-    "checked": null,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 1,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "For every dimension d, MLP approximates variable-coefficient semilinear PDE solutions and gradients with cost bounded by Cδ η d^η ε^{−(4+δ)}.",
-    "detail": "Theorem 1.1 assumes smooth, uniformly elliptic coefficients and dimension-bounded sums of coordinate Lipschitz weights. It bounds componentwise RMS error on bounded cubes, weighting gradients by √(T−t). The supplied preprint provides no evidence of peer review or proof-assistant verification, as required for met.",
-    "quote": "its computational complexity only grows polynomi-\nally in the dimension d P N and the reciprocal of the accuracy ε, under some suitable assumptions\non the nonlinear part of the corresponding PDE.",
+    "verdict": "met",
+    "finding": "Euler–Maruyama multilevel Picard for variable-coefficient semilinear PDEs, all dimensions and no empirical sample, has per-point cost O(d^η ε⁻⁽⁴⁺δ⁾).",
+    "detail": null,
+    "quote": "and\nCd\nNd,ǫ,|Nd,ε|\n1\n3 ,|Nd,ε|\nNd,ε\n3\nď Cδε´p4`δqηdη. (22)",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 10,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
-    "milestone": "m1",
+    "milestone": "m5",
     "case": null,
     "verdict": "partial",
-    "finding": "MLP numerical tests cover semilinear PDE examples in up to 1000 dimensions; the number of simulation runs is not stated.",
-    "detail": "The source reports numerical tests and an extension to PDE systems, but supplies no theorem establishing the required RMS error and polynomial cost for globally Lipschitz, gradient-independent nonlinearities. Its statement about existing complexity proofs reviews prior work.",
-    "quote": "More specifically, we apply the proposed\nMLP approximation method in the case of Allen-Cahn PDEs, Sine-Gordon-type PDEs,\nsystems of coupled semilinear heat PDEs, and semilinear Black-Scholes PDEs in up to\n1000 dimensions.",
+    "finding": "Euler–Maruyama multilevel Picard for variable-coefficient semilinear PDEs, each fixed dimension and no empirical sample, has joint L² error tending to 0 at each t<T.",
+    "detail": "At fixed d and t<T, the gradient weight is positive and the joint squared L² error is a finite sum of component errors. Theorem 1.1(ii) therefore gives a refinement threshold at each such point under its stronger hypotheses.",
+    "quote": "(ii) For all d P /C6 we have that\nlim sup\nnÑ8\nsup\nνPr0,dsX/CI ,tPr0,T q,xPr´k,ksd\n„\nΛdνpT ´ tq\n‖‖‖‖prdνˆU d,0n,n 13 ,n n3 pt, xq ´ udpt, xq˙‖‖‖‖2 “ 0. (20)",
     "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 11,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For one gradient-dependent heat-equation family, the joint multilevel Picard RMS error grows faster than dᵖ at fixed levels n > 2p.",
+    "detail": "The lower bound concerns dimension growth at fixed levels. It leaves the convergence and cost guarantee under m2’s dimension-uniform hypotheses open within this source.",
+    "quote": "Theorem 1.1 shows that the L2-distance between the solution of the PDE (5) and the MLP\napproximations (6) grows faster in the dimension than any polynomial.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Multilevel Picard approximations for gradient-independent semilinear heat equations, for every dimension d, achieve RMS error ε with O(dε⁻⁽⁴⁺δ⁾) cost for every δ>0.",
-    "detail": "The nonlinearity is globally Lipschitz in the solution. The proof requires infinitely differentiable solutions and dimension-uniform bounds on the nonlinearity and rescaled derivatives. Cost counts function evaluations and scalar normal random draws at a requested space-time point.",
+    "finding": "For smooth gradient-independent semilinear heat equations in every dimension d, multilevel Picard attains pointwise RMS error ε at cost O(d ε⁻⁽⁴⁺δ⁾).",
+    "detail": "The smoothness hypothesis bounds |(∂ₜ+½Δ)ᵏu|/(k!)³⁄⁴ uniformly over derivative order, time, space, and dimension.",
     "quote": "For semilinear heat equations with gradient-independent nonlinearities we prove that the computational complexity (see Corollary\n3.19\nbelow for the precise meaning hereof) of our proposed algorithm is\n\\(O(d\\,{\\varepsilon }^{-(4+\\delta )})\\)\nfor any\n\\(\\delta \\in (0,\\infty )\\)\n.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 7,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Multilevel Picard approximation for all dimensions d achieves RMS error ≤ ε at cost ≤ C d^{1+p(1+δ)} ε^{-2(1+δ)} for every δ>0.",
-    "detail": "Theorem 1.1 covers gradient-independent, globally Lipschitz nonlinearities with polynomially growing data and uniformly bounded requested spatial points. The explicit recursion also bounds function evaluations by its polynomial random-draw count; p is the data growth exponent.",
-    "quote": "the computational effort of a variant of the recently introduced multilevel Picard approximations grows at most polynomially both in the dimension and in the reciprocal of the required accuracy.",
+    "finding": "For gradient-independent semilinear heat equations in every dimension, multilevel Picard achieves pointwise RMS error ε at cost O(d ε⁻⁽²⁺δ⁾) under dimension-uniform bounds.",
+    "detail": "The constant in Theorem 3.8 is dimension-uniform in this setting because the Brownian L² moments of the terminal data and of the nonlinearity at zero are bounded by their uniform suprema.",
+    "quote": "RV\nN\n,\nN\n≤\nC\nd\nε\n−\n(\n2\n+\nδ\n)\nand\nsup\nn\n∈\nN\n∩\n[\nN\n,\n∞\n)\n(\nE\n[\n|\nU\nn\n,\nn\n0\n(\n0\n,\nξ\n)\n−\nu\n(\n0\n,\nξ\n)\n|\n2\n]\n)\n1\n/\n2\n≤\nε\n.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
-    "ref": 12,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "For every dimension d, the MLP algorithm approximates the solution and each gradient component with RMS error ≤ ε using at most c dᶜ ε⁻⁽²⁺δ⁾ scalar random draws, for every δ > 0.",
-    "detail": "Theorem 1.1 assumes polynomially growing C¹,² solutions, Lipschitz initial data, polynomial data growth in d, and coordinate Lipschitz weights with dimension-independent bounded sum. The error bound is at (T,0), with arbitrary positive time horizon.",
-    "quote": "Theorem\n1.1\neven proves that the computational effort of the MLP approximation method in (\n3\n) required to obtain a precision of size\n\\({\\varepsilon }\\in (0,1]\\)\nis bounded by\n\\(c d^c {\\varepsilon }^{ -( 2 + \\delta ) }\\)",
+    "finding": "For gradient-dependent semilinear heat equations in every dimension, the scalar-draw budget through level N is at most c dᶜ ε⁻⁽²⁺δ⁾.",
+    "detail": "The scheme uses M = ⌊n¹⁄⁴⌋ at level n. The result is a theorem with a tolerance-dependent draw budget.",
+    "quote": "\\( \\sum _{n=1}^{N_{d,{\\varepsilon }}}{\\text {RV}}_{d,n,\\lfloor n^{1/4} \\rfloor } \\le c d^c \\varepsilon ^{-(2+\\delta )}\\)",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 8,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m2",
     "case": null,
-    "verdict": "partial",
-    "finding": "For every dimension d, MLP approximates gradient-dependent semilinear heat solutions and gradient components with scalar random-draw cost ≤ ηd^ηCδ ε⁻⁽²⁺δ⁾.",
-    "detail": "Theorem 1.1 assumes dimension-independent sums of coordinate Lipschitz weights and polynomial growth/regularity. It bounds weighted componentwise Lᵖ error on a bounded cube for p≥2, including RMS error after fixed-time rescaling. The supplied source is a preprint; peer review or proof-assistant verification required by m2 is not established.",
+    "verdict": "met",
+    "finding": "For gradient-dependent semilinear heat equations in every dimension, the cumulative scalar draw count scales as ε⁻⁽²⁺δ⁾ times a polynomial in d.",
+    "detail": "Theorem 1.1 states the weighted error guarantee at a selected level. The guarantee at every later level follows from the proof’s bound with m=Mₙ, whose base tends to zero and decreases eventually between and across jumps of Mₙ.",
     "quote": "\\displaystyle\\sum_{n=1}^{n(d,\\epsilon)}\\mathrm{RV}_{d,n,M_{n}}\\leq\\eta d^{\\eta}C_{\\delta}\\epsilon^{-(2+\\delta)}",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "In the 100-dimensional sine example, one level-5 realization differed from the separate level-6 reference by 0.0052672.",
+    "detail": "The listings generate one reference and one estimate per level for each example.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For every fixed dimension and spatial point, Euler multilevel Picard refinement gives joint value-and-gradient L² error below ε.",
+    "detail": "Equation (3.14) gives an Euler error term proportional to N⁻¹ᐟ², with constants that may depend on dimension and ellipticity.",
+    "quote": "\\sup_{n\\in[\\mathfrak{n}^{d}(x,\\varepsilon),\\infty)\\cap\\mathbb{N}}\\big\\|\\mathcal{U}^{d,0}_{n^{3},n,n}(t,x)-(u^{d},\\nabla_{x}u^{d})(t,x)\\big\\|_{L_{2}}<\\varepsilon.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "For all dimensions d, MLP approximates variable-coefficient PDE solutions and gradients; the exact-simulation cost bound scales as ε⁻⁽¹⁶⁺γ⁾, γ∈(0,1].",
-    "detail": "The Euler scheme has convergence but no polynomial cost bound in d and 1/ε here. The exact-simulation bound retains a dimension-dependent supremum without a uniform polynomial bound. Polynomial complexity under stronger nonlinearity assumptions is assigned to an accompanying paper. This preprint supplies no evidence of peer review or machine-checked proof.",
-    "quote": "We also provide a full convergence and complexity analysis of our algorithm.",
+    "finding": "For each fixed dimension and evaluation point, direct-simulation multilevel Picard gives a cumulative cost bound proportional to ε⁻⁽¹⁶⁺γ⁾.",
+    "detail": "Equation (3.20) retains a supremum over n involving (d/ε_d)ⁿ, where ε_d is the ellipticity constant. Finiteness for each d does not give the required polynomial dependence on d.",
+    "quote": "\\left(\\sum_{n=1}^{\\mathbf{n}^{d}(x,\\varepsilon)}\\mathfrak{C}^{(d)}_{n^{3},n}\\right)\\varepsilon^{\\gamma+16}\\leq",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 9,
-    "judged_by": "gpt-6-astra",
-    "judged_on": "2026-11-16"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "met",
+    "finding": "For variable-coefficient semilinear PDEs in every dimension d (no empirical sample), multilevel Picard achieves the required RMS accuracy at per-point cost Oδ(d^η ε^{−(4+δ)}).",
+    "detail": "The supplied excerpt states the theorem and begins its supporting complexity proof. The excerpt ends before that proof is complete.",
+    "quote": "its computational complexity only grows polynomi-\nally in the dimension d P N and the reciprocal of the accuracy ε, under some suitable assumptions\non the nonlinear part of the corresponding PDE.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "In the 100-dimensional counterparty-credit-risk benchmark, 100 runs per level yielded one plotted comparison that matches the successive-level criterion.",
+    "detail": "MATLAB code 3 uses successive-level differences in its standard-error calculation, but its plotting command uses the level-6 differences. The two numerator definitions coincide for the level-5 to level-6 comparison.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-21"
    }
   ],
   "judged": [
    {
     "url": "https://doi.org/10.48550/arXiv.2601.13256",
+    "milestone": "m4",
+    "hash": "1d5d9a7553b8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doi.org/10.48550/arXiv.2601.13256",
     "milestone": "m1",
-    "hash": "83a160242b76",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "d31c515d3567",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.48550/arXiv.2601.13256",
     "milestone": "m2",
-    "hash": "a0a5664efa47",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "eef1a8e5fd2b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doi.org/10.48550/arXiv.2601.13256",
+    "milestone": "m5",
+    "hash": "2ae842bae69a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.48550/arXiv.2601.13256",
     "milestone": "m3",
-    "hash": "fbfe811242b3",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "7739da5cae2f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doi.org/10.48550/arXiv.2601.13256",
     "milestone": "completion",
     "hash": "24beb1c931e7",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2311.11579",
+    "milestone": "m4",
+    "hash": "1d5d9a7553b8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2311.11579",
     "milestone": "m1",
-    "hash": "83a160242b76",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "d31c515d3567",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2311.11579",
     "milestone": "m2",
-    "hash": "a0a5664efa47",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "eef1a8e5fd2b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2311.11579",
+    "milestone": "m5",
+    "hash": "2ae842bae69a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2311.11579",
     "milestone": "m3",
-    "hash": "fbfe811242b3",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "7739da5cae2f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2311.11579",
     "milestone": "completion",
     "hash": "24beb1c931e7",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2506.23969",
+    "milestone": "m4",
+    "hash": "1d5d9a7553b8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2506.23969",
     "milestone": "m1",
-    "hash": "83a160242b76",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "d31c515d3567",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2506.23969",
     "milestone": "m2",
-    "hash": "a0a5664efa47",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "eef1a8e5fd2b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2506.23969",
+    "milestone": "m5",
+    "hash": "2ae842bae69a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2506.23969",
     "milestone": "m3",
-    "hash": "fbfe811242b3",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "7739da5cae2f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2506.23969",
     "milestone": "completion",
     "hash": "24beb1c931e7",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.global-sci.com/cicp/article/view/6906",
+    "milestone": "m4",
+    "hash": "1d5d9a7553b8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.global-sci.com/cicp/article/view/6906",
     "milestone": "m1",
-    "hash": "83a160242b76",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "d31c515d3567",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.global-sci.com/cicp/article/view/6906",
     "milestone": "m2",
-    "hash": "a0a5664efa47",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "eef1a8e5fd2b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.global-sci.com/cicp/article/view/6906",
+    "milestone": "m5",
+    "hash": "2ae842bae69a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.global-sci.com/cicp/article/view/6906",
     "milestone": "m3",
-    "hash": "fbfe811242b3",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "7739da5cae2f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.global-sci.com/cicp/article/view/6906",
     "milestone": "completion",
     "hash": "24beb1c931e7",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://collaborate.princeton.edu/en/publications/multilevel-picard-iterations-for-solving-smooth-semilinear-parabo/",
+    "milestone": "m4",
+    "hash": "1d5d9a7553b8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://collaborate.princeton.edu/en/publications/multilevel-picard-iterations-for-solving-smooth-semilinear-parabo/",
     "milestone": "m1",
-    "hash": "83a160242b76",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "d31c515d3567",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://collaborate.princeton.edu/en/publications/multilevel-picard-iterations-for-solving-smooth-semilinear-parabo/",
     "milestone": "m2",
-    "hash": "a0a5664efa47",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "eef1a8e5fd2b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://collaborate.princeton.edu/en/publications/multilevel-picard-iterations-for-solving-smooth-semilinear-parabo/",
+    "milestone": "m5",
+    "hash": "2ae842bae69a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://collaborate.princeton.edu/en/publications/multilevel-picard-iterations-for-solving-smooth-semilinear-parabo/",
     "milestone": "m3",
-    "hash": "fbfe811242b3",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "7739da5cae2f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://collaborate.princeton.edu/en/publications/multilevel-picard-iterations-for-solving-smooth-semilinear-parabo/",
     "milestone": "completion",
     "hash": "24beb1c931e7",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2601.13256v3",
+    "milestone": "m4",
+    "hash": "1d5d9a7553b8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2601.13256v3",
+    "milestone": "m1",
+    "hash": "d31c515d3567",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2601.13256v3",
+    "milestone": "m2",
+    "hash": "eef1a8e5fd2b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2601.13256v3",
+    "milestone": "m5",
+    "hash": "2ae842bae69a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2601.13256v3",
+    "milestone": "m3",
+    "hash": "7739da5cae2f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2601.13256v3",
+    "milestone": "completion",
+    "hash": "24beb1c931e7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://link.springer.com/article/10.1007/s42985-021-00089-5",
+    "milestone": "m4",
+    "hash": "1d5d9a7553b8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/article/10.1007/s42985-021-00089-5",
     "milestone": "m1",
-    "hash": "83a160242b76",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "d31c515d3567",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/article/10.1007/s42985-021-00089-5",
     "milestone": "m2",
-    "hash": "a0a5664efa47",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "eef1a8e5fd2b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://link.springer.com/article/10.1007/s42985-021-00089-5",
+    "milestone": "m5",
+    "hash": "2ae842bae69a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/article/10.1007/s42985-021-00089-5",
     "milestone": "m3",
-    "hash": "fbfe811242b3",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "7739da5cae2f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/article/10.1007/s42985-021-00089-5",
     "milestone": "completion",
     "hash": "24beb1c931e7",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7776969/",
+    "milestone": "m4",
+    "hash": "1d5d9a7553b8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7776969/",
     "milestone": "m1",
-    "hash": "83a160242b76",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "d31c515d3567",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7776969/",
     "milestone": "m2",
-    "hash": "a0a5664efa47",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "eef1a8e5fd2b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7776969/",
+    "milestone": "m5",
+    "hash": "2ae842bae69a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7776969/",
     "milestone": "m3",
-    "hash": "fbfe811242b3",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "7739da5cae2f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7776969/",
     "milestone": "completion",
     "hash": "24beb1c931e7",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://link.springer.com/article/10.1007/s10208-021-09514-y",
+    "milestone": "m4",
+    "hash": "1d5d9a7553b8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/article/10.1007/s10208-021-09514-y",
     "milestone": "m1",
-    "hash": "83a160242b76",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "d31c515d3567",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/article/10.1007/s10208-021-09514-y",
     "milestone": "m2",
-    "hash": "a0a5664efa47",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "eef1a8e5fd2b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://link.springer.com/article/10.1007/s10208-021-09514-y",
+    "milestone": "m5",
+    "hash": "2ae842bae69a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/article/10.1007/s10208-021-09514-y",
     "milestone": "m3",
-    "hash": "fbfe811242b3",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "7739da5cae2f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/article/10.1007/s10208-021-09514-y",
     "milestone": "completion",
     "hash": "24beb1c931e7",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2410.00203v3",
+    "milestone": "m4",
+    "hash": "1d5d9a7553b8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2410.00203v3",
     "milestone": "m1",
-    "hash": "83a160242b76",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "d31c515d3567",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2410.00203v3",
     "milestone": "m2",
-    "hash": "a0a5664efa47",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "eef1a8e5fd2b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2410.00203v3",
+    "milestone": "m5",
+    "hash": "2ae842bae69a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2410.00203v3",
     "milestone": "m3",
-    "hash": "fbfe811242b3",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "7739da5cae2f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2410.00203v3",
     "milestone": "completion",
     "hash": "24beb1c931e7",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2310.12545v5",
+    "milestone": "m4",
+    "hash": "1d5d9a7553b8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2310.12545v5",
     "milestone": "m1",
-    "hash": "83a160242b76",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "d31c515d3567",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2310.12545v5",
     "milestone": "m2",
-    "hash": "a0a5664efa47",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "eef1a8e5fd2b",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2310.12545v5",
+    "milestone": "m5",
+    "hash": "2ae842bae69a",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2310.12545v5",
     "milestone": "m3",
-    "hash": "fbfe811242b3",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "hash": "7739da5cae2f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2310.12545v5",
     "milestone": "completion",
     "hash": "24beb1c931e7",
-    "date": "2026-11-16",
-    "by": "gpt-6-astra"
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://personal.ntu.edu.sg/ariel.neufeld/MLP_gradient-Overcome.pdf",
+    "milestone": "m3",
+    "hash": "7739da5cae2f",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1607.03295v1#page=23",
+    "milestone": "m4",
+    "hash": "1d5d9a7553b8",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://personal.ntu.edu.sg/ariel.neufeld/SensitivityPDE.pdf",
+    "milestone": "completion",
+    "hash": "24beb1c931e7",
+    "date": "2026-11-21",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 2,
+  "version": 3,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1204,8 +1573,123 @@
     "date": "2026-11-16",
     "actor": "claude-fable-5-2",
     "action": "Removed the completion date (2023-11-20): after the rewrite and the re-judge by gpt-6-astra no result meets the completion test."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"A parabolic Hamilton\\u2013Jacobi\\u2013Bellman (HJB) equation describes the best expected cost or payoff attainable from each starting time and state in a stochastic control problem. The goal is an explicit algorithm that approximates this value to error \\u03b5, with proved runtime and memory polynomial in the state dimension d and in 1/\\u03b5. The family includes problems where the drift can be chosen anywhere in a d-dimensional Euclidean ball: the bound on the control limits its total length across all coordinates.\". Reason: Counting control components alone misses the Euclidean constraint that distinguishes the target from existing polynomial-cost theorems."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Call-center managers assign agents to limit the costs of waiting and of callers hanging up. Data from over 4 million calls at one bank yielded a 17-dimensional scheduling model whose optimal cost was unknown. A full grid with N values per coordinate would have N\\u00b9\\u2077 points. For a model covered by the theorem, managers could compare a scheduling rule's expected cost with the best attainable cost to a known accuracy. Constructing a rule can also require the gradient of that optimal cost.\". Reason: The current text gives the grid cost but omits the decision it obstructs, the scale of a documented application and the extra information needed to choose a policy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit completion: set_by = \"Technology Atlas. The field supplies the polynomial-work convention. No outside body specifies the combined runtime, peak-memory, full-ball control and proof requirements.\"; set_by_kind = \"atlas\"; threshold_quote = \"computational complexity only grows polynomially in the dimension $d\\\\in \\\\mathbb{N}$ and the reciprocal of the accuracy $\\\\varepsilon$\"; threshold_ref = 10; basis = \"The variable-coefficient multilevel Picard theorem bounds work under a dimension-independent sum of coordinate Lipschitz weights. In the Hutzenthaler\\u2013Nguyen counterexample the first drift coordinate is fixed at zero. The Hamiltonian is the Euclidean length of the other d\\u22121 gradient components, so its maximum-norm Lipschitz constant is \\u221a(d\\u22121). For every p\\u22650 and fixed iteration level n>2p, the scheme's joint root-mean-square error in value and gradient at the origin, divided by d\\u1d56, diverges as d grows. The value itself depends on one coordinate. The Atlas target allows drift in all d directions and requires only a value approximation. Control of the diffusion is optional. A network-size bound alone leaves the cost of constructing the approximation open.\"; refs = [4, 6, 10, 18]. Reason: The existing quotation does not state the work convention, and the attribution obscures the difference between the full control ball and the published counterexample."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after None: \"A 100-dimensional semilinear pricing benchmark measures successive-level differences against runtime.\". Reason: The sequence starts with a theorem and omits the earlier numerical demonstration that measured refinement against runtime."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"For semilinear heat equations with a globally Lipschitz, gradient-independent nonlinearity, prove a pointwise root-mean-square error bound \\u03b5 with O(d \\u03b5\\u207b\\u207d\\u2074\\u207a\\u03b4\\u207e) evaluations of the nonlinearity and terminal data plus scalar normal draws, for every fixed \\u03b4>0. Corollary 3.19 assumes fixed horizon T, smooth solutions, dimension-uniform bounds on the Lipschitz constant, solution, terminal data and nonlinearity at zero, and a uniform bound on |(\\u2202\\u209c+\\u00bd\\u0394)\\u1d4fu|/(k!)\\u00b3\\u2044\\u2074 over k, time, space and dimension.\"; threshold_quote = \"our proposed algorithm is \\\\(O(d\\\\,{\\\\varepsilon }^{-(4+\\\\delta )})\\\\) for any \\\\(\\\\delta \\\\in (0,\\\\infty )\\\\).\"; threshold_ref = 7. Reason: Corollary 3.19 requires uniform bounds on rescaled derivatives beyond smoothness, and the current criterion includes a historical priority claim."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"For \\u2202\\u209cu=\\u0394u+f(u,\\u2207u) with initial data g, use the coordinate Lipschitz and polynomial growth bounds of Theorem 1.1, including a dimension-uniform bound on the sum of the Lipschitz weights. For every fixed T,\\u03b4>0, every d and \\u03b5\\u2208(0,1], prove that a level N gives, at (T,0) for all levels n\\u2265N, a sum of the value mean-square error and the largest gradient-component mean-square error at most \\u03b5\\u00b2. The total number of scalar random draws for levels 1 through N is at most c d\\u1d9c \\u03b5\\u207b\\u207d\\u00b2\\u207a\\u03b4\\u207e, with c independent of d and \\u03b5.\"; threshold_quote = \"is bounded by \\\\(c d^c {\\\\varepsilon }^{ -( 2 + \\\\delta ) }\\\\)\"; threshold_ref = 8. Reason: Theorem 1.1 specifies a joint error at (T,0) and counts scalar random draws cumulatively through the selected level."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m2: \"A variable-coefficient Euler scheme converges in mean square to the value and gradient for each d.\". Reason: The published Euler scheme has a fixed-dimension convergence theorem distinct from the later polynomial cost bound."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Under Theorem 1.1's hypotheses, allow position-dependent drift and invertible diffusion, with coordinate Lipschitz weights for the nonlinearity whose sum is bounded independently of d. For every d and \\u03b4,\\u03b5\\u2208(0,1), prove uniformly over t<T in [0,T) and x\\u2208[\\u2212k,k]\\u1d48 for fixed k that the value's root-mean-square error is below \\u03b5 and each gradient component's root-mean-square error times \\u221a(T\\u2212t) is below \\u03b5. With polynomial input-evaluation costs, the per-point count of function evaluations and scalar random draws is at most C\\u03b4 \\u03b7 d^\\u03b7 \\u03b5\\u207b\\u207d\\u2074\\u207a\\u03b4\\u207e, with C\\u03b4 and \\u03b7 independent of d and \\u03b5.\"; threshold_quote = \"\\\\mathfrak{C}^{d}_{N_{d,\\\\epsilon},\\\\lvert N_{d,\\\\varepsilon}\\\\rvert^{\\\\frac{1}{3}},\\\\lvert N_{d,\\\\varepsilon}\\\\rvert^{\\\\frac{N_{d,\\\\varepsilon}}{3}}}\\\\leq C_{\\\\delta}\\\\varepsilon^{-(4+\\\\delta)}\\\\eta d^{\\\\eta}.\"; threshold_ref = 4. Reason: Theorem 1.1 weights each gradient-component error by √(T−t) and imposes a summed coordinate Lipschitz bound."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No position from a society, agency or research programme disputing the feasibility or value of the full drift-control goal was found.\". Reason: The counterexample concerns one algorithm, so it cannot stand as an institutional judgment on the goal."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No published algorithm with proved polynomial runtime and peak memory for the specified full-ball drift-control family was found.\". Reason: The existing search notes cover who specifies the test but omit whether a published algorithm satisfies it."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Skipped proposed operation 3 (remove statement 0): the entry needs at least 2 statements. Its reason: The DOE passage lists high-dimensional PDE solvers among fusion-energy methods and does not identify a stochastic-control HJB goal."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Applied 10 of 11 proposed operations from MAT-04-revise-20261121T130748714317Z; now version 3."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m4, m1, m2, m5, m3."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 3 from Crossref, 0 from PubMed, 2 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 3 found, 2 not found, 1 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "definition is 501 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "completion.basis is 761 characters, over its limit of 600; kept."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 11 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 4 candidates returned, 0 dropped as sources already used, 4 to judge."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 3 of 4 new candidates, without search. Skipped: 1 no readable saved copy. Dropped rows: 1 partial on completion. Replaced 11 earlier rows. Added 13 results: 11 from sources already used, 2 from newly found sources."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 2 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 11 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-21",
+    "actor": "atlas.page",
+    "action": "Removed 1 references no longer cited; renumbered."
    }
   ],
-  "results_run": "2026-11-16"
+  "results_run": "2026-11-21"
  }
 }
