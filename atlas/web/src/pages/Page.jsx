@@ -294,6 +294,27 @@ function Unit({ number, id, title, criterion, setBy, kind, refs, results, basis,
   );
 }
 
+// The log shows its latest entries; earlier ones fold away, since a long log buries the page's end.
+const LOG_SHOWN = 6;
+
+function LogTable({ entries }) {
+  return (
+    <table className="ideal-table page-log">
+      <tbody>
+        {entries.map((entry, n) => (
+          <tr key={n}>
+            <th scope="row" className="mono">
+              {entry.date}
+            </th>
+            <td className="mono">{entry.actor}</td>
+            <td>{entry.action}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
 export default function PageBody({ page }) {
   const at = progress(page);
   const { goal, completion } = page;
@@ -541,19 +562,13 @@ export default function PageBody({ page }) {
 
       <Section id="log-title" title="Entry log">
         <p className="ideal-note">Version {page.version || 1}.</p>
-        <table className="ideal-table page-log">
-          <tbody>
-            {page.log.map((entry, n) => (
-              <tr key={n}>
-                <th scope="row" className="mono">
-                  {entry.date}
-                </th>
-                <td className="mono">{entry.actor}</td>
-                <td>{entry.action}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {page.log.length > LOG_SHOWN && (
+          <details className="page-log-earlier">
+            <summary>Earlier entries ({page.log.length - LOG_SHOWN})</summary>
+            <LogTable entries={page.log.slice(0, -LOG_SHOWN)} />
+          </details>
+        )}
+        <LogTable entries={page.log.slice(-LOG_SHOWN)} />
       </Section>
     </div>
   );

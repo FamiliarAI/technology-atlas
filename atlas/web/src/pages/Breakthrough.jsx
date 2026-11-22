@@ -15,6 +15,90 @@ import { plural, useTitle } from './common.jsx';
 import NotFound from './NotFound.jsx';
 import { ReviewPanel } from '../Review.jsx';
 
+// A published page reads as a light editorial document (paper). ?style=sky shows the older dark
+// style; the choice is kept for the tab's session, and ?style=paper goes back.
+function usePaper(active) {
+  let on = true;
+  try {
+    const asked = new URLSearchParams(window.location.search).get('style');
+    if (asked) sessionStorage.setItem('atlas-style', asked);
+    on = (asked || sessionStorage.getItem('atlas-style')) !== 'sky';
+  } catch {
+    on = true;
+  }
+  on = on && active;
+  useEffect(() => {
+    document.documentElement.classList.toggle('paper', on);
+    return () => document.documentElement.classList.remove('paper');
+  }, [on]);
+  return on;
+}
+
+// The paper rail: where the page sits, and its sections.
+function PaperRail({ item, field, page }) {
+  const [sections, setSections] = useState([]);
+  useEffect(() => {
+    const found = [...document.querySelectorAll('.ideal h2[id]')].map((h) => ({ id: h.id, title: h.textContent }));
+    setSections(found);
+  }, [page]);
+  // The section being read: the last heading above the upper third of the screen.
+  const [current, setCurrent] = useState(null);
+  useEffect(() => {
+    if (!sections.length) return undefined;
+    const mark = () => {
+      const line = window.innerHeight / 3;
+      let at = null;
+      for (const s of sections) {
+        const h = document.getElementById(s.id);
+        if (h && h.getBoundingClientRect().top < line) at = s.id;
+      }
+      setCurrent(at);
+    };
+    mark();
+    window.addEventListener('scroll', mark, { passive: true });
+    return () => window.removeEventListener('scroll', mark);
+  }, [sections]);
+  return (
+    <aside className="paper-rail" aria-label="About this page">
+      <dl className="paper-facts">
+        <div>
+          <dt>Field</dt>
+          <dd>
+            <Link to={`/field/${field.id}`}>{field.name}</Link>
+          </dd>
+        </div>
+        <div>
+          <dt>Region</dt>
+          <dd>{field.region}</dd>
+        </div>
+        <div>
+          <dt>Entry</dt>
+          <dd>
+            {item.id}, version {page.version || 1}
+          </dd>
+        </div>
+      </dl>
+      {sections.length > 0 && (
+        <nav className="paper-contents" aria-label="Contents">
+          <p className="paper-rail-label">Contents</p>
+          <ol>
+            {sections.map((s) => (
+              <li key={s.id}>
+                <a href={'#' + s.id} aria-current={current === s.id ? 'location' : undefined}>
+                  {s.title}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )}
+      <Link to={`/atlas?field=${field.id}&star=${item.id}`} className="paper-sky-link">
+        Find it in the sky
+      </Link>
+    </aside>
+  );
+}
+
 const list = (value) => (Array.isArray(value) ? value : []);
 
 const papers = (n) => (n === 1 ? '1 paper' : `${n} papers`);
@@ -120,6 +204,7 @@ export default function Breakthrough({ draft = false, hand = false }) {
       ? record.brief
       : null;
   const plain = typeof brief?.title === 'string' && brief.title.trim() ? brief.title.trim() : null;
+  const paper = usePaper(showPage);
   useTitle(item ? `${(showPage && page.title) || plain || item.title} (${item.id})` : atlas ? 'Not found' : id);
 
   if (atlasError) return <p className="page-state">The atlas data could not be loaded: {atlasError}.</p>;
@@ -168,6 +253,27 @@ export default function Breakthrough({ draft = false, hand = false }) {
           transition: { duration: 0.7, delay: 0.05 + n * 0.08, ease: EASE },
         };
 
+  const head = (
+    <motion.header className="bpage-head" {...fade(0)}>
+      {old && (
+        <p className="eyebrow bpage-id">
+          <span className="mono">{item.id}</span>
+        </p>
+      )}
+      <h1>{(showPage && page.title) || (draft && IDEAL[item.id]?.title) || plain || item.title}</h1>
+      {plain && old && <p className="bpage-subtitle">{item.title}</p>}
+      {old && (
+        <p className="status-line">
+          <span className="bpage-head-glyph">
+            <StarGlyph item={item} size={40} />
+          </span>
+          <StatusLabel status={stateOf(item)} />
+          <span>{summaryLine(item)}</span>
+        </p>
+      )}
+    </motion.header>
+  );
+
   return (
     <article className={'bpage' + ((draft && IDEAL[item.id]) || showPage ? ' bpage-ideal' : '')}>
       <div className="bpage-wash" aria-hidden="true" />
@@ -181,26 +287,12 @@ export default function Breakthrough({ draft = false, hand = false }) {
         </span>
       </nav>
       <ReviewPanel id={item.id} local={atlas.local} />
+      {/* On paper the head spans the page, above the rail and the reading column. */}
+      {paper && head}
       <div className="bpage-grid">
+        {paper && <PaperRail item={item} field={field} page={page} />}
         <div className="bpage-main">
-          <motion.header className="bpage-head" {...fade(0)}>
-            {old && (
-              <p className="eyebrow bpage-id">
-                <span className="mono">{item.id}</span>
-              </p>
-            )}
-            <h1>{(showPage && page.title) || (draft && IDEAL[item.id]?.title) || plain || item.title}</h1>
-            {plain && old && <p className="bpage-subtitle">{item.title}</p>}
-            {old && (
-              <p className="status-line">
-                <span className="bpage-head-glyph">
-                  <StarGlyph item={item} size={40} />
-                </span>
-                <StatusLabel status={stateOf(item)} />
-                <span>{summaryLine(item)}</span>
-              </p>
-            )}
-          </motion.header>
+          {!paper && head}
 
           {showPage ? (
             <PageBody page={page} />
