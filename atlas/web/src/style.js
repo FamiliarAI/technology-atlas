@@ -11,9 +11,9 @@ export function paperChosen() {
 }
 
 // Sets the class on <html> that every paper rule hangs from.
-// Share cards (/share/...) are images drawn in the sky style, so they stay dark.
+// Share cards (/share/...) follow it too, so link previews match the site.
 export function applyStyle() {
-  const paper = paperChosen() && !window.location.pathname.startsWith('/share/');
+  const paper = paperChosen();
   document.documentElement.classList.toggle('paper', paper);
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', paper ? '#fbfaf7' : '#05070d');
   return paper;

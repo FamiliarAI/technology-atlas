@@ -26,6 +26,9 @@ const FONTS = [
   '400 20px Newsreader',
   'italic 400 20px Newsreader',
   '400 20px "JetBrains Mono"',
+  '400 20px "DM Sans"',
+  '500 20px "DM Sans"',
+  '500 20px Newsreader',
 ];
 
 const signal = (key, value) => {
@@ -149,7 +152,7 @@ function Wordmark() {
   return (
     <div className="card-wordmark">
       <svg width="34" height="34" viewBox="-13 -13 26 26" aria-hidden="true">
-        <circle r="2.8" fill="#FFF1C9" />
+        <circle r="2.8" fill="#FFF1C9" className="card-wm-core" />
         {ringSegments(['in_progress', 'none', 'none', 'none'], 9).map((s, n) => (
           <path key={n} d={s.d} className={'cseg ' + s.status} strokeWidth={s.status === 'none' ? 1.1 : 1.9} />
         ))}
@@ -249,12 +252,14 @@ function BigStar({ item, size = 300 }) {
       </defs>
       <circle r="136" className="dial" />
       <path d={ticks} className="dial-ticks" />
-      {item.glow > 0 && <circle r={R * 1.25} fill="url(#card-halo)" opacity={0.5 + item.glow * 0.5} />}
+      {item.glow > 0 && (
+        <circle r={R * 1.25} fill="url(#card-halo)" opacity={0.5 + item.glow * 0.5} className="card-halo" />
+      )}
       {ringSegments(item.complete ? item.status.map(() => 'met') : item.status, R).map((s, k) => (
         <path key={k} d={s.d} className={'cseg ' + s.status} strokeWidth={s.status === 'none' ? 2.4 : 7} />
       ))}
       <circle r={9 + n * 1.2} fill={color} opacity={item.glow > 0 ? 1 : 0.8} />
-      {item.glow > 0 && <circle r={4 + n * 0.5} fill="#FFF8E6" />}
+      {item.glow > 0 && <circle r={4 + n * 0.5} fill="#FFF8E6" className="card-star-heart" />}
     </svg>
   );
 }
@@ -357,7 +362,7 @@ function Constellation({ atlas, field, w = 500, h = 520 }) {
         return (
           <g key={i.id} transform={`translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})`}>
             <circle r={r + 5} className="con-gap" />
-            {i.glow > 0 && <circle r={r * 2.4} fill="url(#card-halo-s)" />}
+            {i.glow > 0 && <circle r={r * 2.4} fill="url(#card-halo-s)" className="card-halo" />}
             {ringSegments(i.status, r).map((s, n) => (
               <path key={n} d={s.d} className={'cseg ' + s.status} strokeWidth={s.status === 'none' ? 1.6 : 4} />
             ))}
