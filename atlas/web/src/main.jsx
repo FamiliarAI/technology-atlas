@@ -12,7 +12,12 @@ import '@fontsource/dm-sans/latin-400.css';
 import '@fontsource/dm-sans/latin-500.css';
 import './styles.css';
 import './paper.css';
+import './paper-site.css';
 import App from './App.jsx';
+import { applyStyle } from './style.js';
+
+// Before the first paint, so a paper page never flashes dark.
+applyStyle();
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>

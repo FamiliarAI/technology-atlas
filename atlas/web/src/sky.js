@@ -1,3 +1,4 @@
+import { onPaper } from './style.js';
 // The sky's geometry: a flat, wide chart. Everything here is a pure function of the field and
 // breakthrough IDs, the field names and regions, so the same data always gives the same sky.
 //
@@ -61,9 +62,9 @@ export const starRadius = (milestones) => 1.75 + 0.34 * milestones;
 // Radius of the star's point inside the ring.
 export const coreRadius = (milestones) => 0.8 + 0.13 * milestones;
 
-// A field name in at most two balanced lines of capitals.
+// A field name in at most two balanced lines: capitals in the sky, as written on paper.
 export function wrapName(name) {
-  const text = name.toUpperCase();
+  const text = onPaper() ? name : name.toUpperCase();
   if (text.length <= 12 || !text.includes(' ')) return [text];
   const words = text.split(' ');
   let best = [text];
@@ -88,7 +89,7 @@ export const labelWidth = (lines) => Math.max(...lines.map((l) => l.length)) * L
 // top-left corner, in one line or two, always clear of the constellations.
 export const REGION_TYPE = { size: 11, char: 10.8, lead: 14.5 };
 export function regionLines(name) {
-  const text = name.toUpperCase();
+  const text = onPaper() ? name : name.toUpperCase();
   const words = text.split(' ');
   if (words.length < 3 && text.length <= 14) return [text];
   let best = [text];

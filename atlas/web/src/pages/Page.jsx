@@ -244,13 +244,30 @@ function Threshold({ unit }) {
   );
 }
 
-function Unit({ number, id, title, criterion, setBy, kind, refs, results, basis, unit, completed }) {
+// A unit's marks under its heading, so a reader deep in a long section sees its state there.
+function UnitState({ cases, cells, claimed }) {
+  if (!cells) return null;
+  return (
+    <p className="page-unit-state">
+      {cells.map((g, k) => (
+        <span key={k}>
+          <Mark state={g} />
+          {cases.length ? `${cases[k]}: ${WORD[g].toLowerCase()}` : WORD[g]}
+          <Flags claimed={claimed[k]} />
+        </span>
+      ))}
+    </p>
+  );
+}
+
+function Unit({ number, id, title, criterion, setBy, kind, refs, results, basis, unit, completed, state }) {
   return (
     <li id={id}>
       <h3>
         {number && <span className="ideal-ms-num mono">{number}</span>}
         <span>{title}</span>
       </h3>
+      {state}
       <dl className="ideal-fields">
         <div>
           <dt>Criterion</dt>
@@ -323,6 +340,9 @@ export default function PageBody({ page }) {
   const milestones = activeMilestones(page);
   const retired = page.milestones.filter((m) => m.status === 'retired');
   const titles = [...milestones.map((m) => m.title), completion.title];
+  const stateOf = (n) => (
+    <UnitState cases={page.cases} cells={at.cells[n]} claimed={at.claimedCells[n]} />
+  );
   const anchor = (n) => (n === milestones.length ? '#done' : `#${milestones[n].id}`);
   const on = (unit) => page.results.filter((r) => r.milestone === unit);
   return (
@@ -442,6 +462,7 @@ export default function PageBody({ page }) {
             unit={completion}
             completed={at.complete ? page.completed : null}
             results={on('completion')}
+            state={stateOf(titles.length - 1)}
           />
         </ol>
       </Section>
@@ -518,6 +539,7 @@ export default function PageBody({ page }) {
               refs={m.refs}
               unit={m}
               results={on(m.id)}
+              state={stateOf(n)}
             />
           ))}
         </ol>

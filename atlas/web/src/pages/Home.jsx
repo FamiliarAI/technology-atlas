@@ -8,6 +8,7 @@ import { FieldEmblem, StarGlyph, StarMark, StatusLabel, ringSegments } from '../
 import { useNarrow } from './Atlas.jsx';
 import { EASE } from '../motion.js';
 import { Arrow } from './common.jsx';
+import { onPaper } from '../style.js';
 
 const rise = (n, still) =>
   still
@@ -273,12 +274,12 @@ function HowToRead() {
     [
       <DemoRing key="d" />,
       'Its ring is its milestones',
-      'One segment per milestone along the way. A segment turns amber when a paper advances it and white-gold when it is met. Until a paper is judged against it, it reads as not yet assessed.',
+      `One segment per milestone along the way. A segment turns ${onPaper() ? 'ochre' : 'amber'} when a paper advances it and ${onPaper() ? 'ink' : 'white-gold'} when it is met. Until a paper is judged against it, it reads as not yet assessed.`,
     ],
     [
       <DemoPapers key="d" />,
       'Papers are steps along the way',
-      'A paper that moves a breakthrough forward is added with an exact quote, as a step toward one milestone or toward the breakthrough as a whole. Either kind warms the star.',
+      `A paper that moves a breakthrough forward is added with an exact quote, as a step toward one milestone or toward the breakthrough as a whole. Either kind ${onPaper() ? 'darkens' : 'warms'} the star.`,
     ],
   ];
   return (

@@ -6,6 +6,7 @@ import { SharedDefs, StarGlyph, Wordmark } from './glyphs.jsx';
 import Starfield from './Starfield.jsx';
 import { EASE } from './motion.js';
 import { AUTHOR, REPOSITORY_PUBLIC, REPOSITORY_URL } from './site.js';
+import { applyStyle } from './style.js';
 
 function Search({ open, onClose }) {
   const { atlas } = useAtlas();
@@ -256,6 +257,10 @@ function Footer() {
 
 export default function Layout({ children }) {
   const location = useLocation();
+  // ?style= may come with any link, so the look is settled again on each navigation.
+  useEffect(() => {
+    applyStyle();
+  }, [location.search]);
   useEffect(() => {
     // A link to a section (/about#limits) lands on it once the page has faded in.
     if (location.hash) {

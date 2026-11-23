@@ -13,26 +13,8 @@ import { EASE } from '../motion.js';
 import * as sky from '../sky.js';
 import { plural, useTitle } from './common.jsx';
 import NotFound from './NotFound.jsx';
+import { paperChosen } from '../style.js';
 import { ReviewPanel } from '../Review.jsx';
-
-// A published page reads as a light editorial document (paper). ?style=sky shows the older dark
-// style; the choice is kept for the tab's session, and ?style=paper goes back.
-function usePaper(active) {
-  let on = true;
-  try {
-    const asked = new URLSearchParams(window.location.search).get('style');
-    if (asked) sessionStorage.setItem('atlas-style', asked);
-    on = (asked || sessionStorage.getItem('atlas-style')) !== 'sky';
-  } catch {
-    on = true;
-  }
-  on = on && active;
-  useEffect(() => {
-    document.documentElement.classList.toggle('paper', on);
-    return () => document.documentElement.classList.remove('paper');
-  }, [on]);
-  return on;
-}
 
 // The paper rail: where the page sits, and its sections.
 function PaperRail({ item, field, page }) {
@@ -187,6 +169,22 @@ export default function Breakthrough({ draft = false, hand = false }) {
       live = false;
     };
   }, [id]);
+  // A link to a section (/b/MAT-13/#ms-title) lands on it once the record has drawn the page;
+  // the layout's own landing runs before the record arrives.
+  useEffect(() => {
+    if (!record || !window.location.hash) return undefined;
+    const land = () =>
+      document.getElementById(decodeURIComponent(window.location.hash.slice(1)))?.scrollIntoView({ behavior: 'instant' });
+    land();
+    // Again once the fonts are in, since they change the heights above the target.
+    let live = true;
+    document.fonts?.ready.then(() => live && requestAnimationFrame(land));
+    const timer = setTimeout(land, 600);
+    return () => {
+      live = false;
+      clearTimeout(timer);
+    };
+  }, [record, atlas]);
   const item = atlas?.items[id];
   // The reader's version, when the breakthrough has one: it leads, and the record follows collapsed.
   // An empty brief counts as none.
@@ -204,7 +202,8 @@ export default function Breakthrough({ draft = false, hand = false }) {
       ? record.brief
       : null;
   const plain = typeof brief?.title === 'string' && brief.title.trim() ? brief.title.trim() : null;
-  const paper = usePaper(showPage);
+  // The paper layout (title band, rail) is for a published page; the class comes from Layout.
+  const paper = paperChosen() && showPage;
   useTitle(item ? `${(showPage && page.title) || plain || item.title} (${item.id})` : atlas ? 'Not found' : id);
 
   if (atlasError) return <p className="page-state">The atlas data could not be loaded: {atlasError}.</p>;

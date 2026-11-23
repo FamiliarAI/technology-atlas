@@ -1,5 +1,6 @@
 import { STATUS } from './data.jsx';
 import { arc, emblem } from './sky.js';
+import { onPaper } from './style.js';
 
 const mix = (a, b, t) => {
   const pa = a.match(/\w\w/g).map((h) => parseInt(h, 16));
@@ -9,7 +10,13 @@ const mix = (a, b, t) => {
 
 // Colour means progress and nothing else: a dim blue-grey point warms to amber as milestones
 // advance and ignites white-gold when all are met.
+// On paper the scale is a printed one: a pale grey point darkens through ochre to ink.
 export function starColor(glow) {
+  if (onPaper()) {
+    if (glow <= 0) return '#A4A8B0';
+    if (glow >= 1) return '#1D2027';
+    return glow < 0.5 ? mix('A4A8B0', 'B0680C', glow * 2) : mix('B0680C', '1D2027', (glow - 0.5) * 2);
+  }
   if (glow <= 0) return '#7D89A3';
   if (glow >= 1) return '#FFF1C9';
   return glow < 0.5 ? mix('9AA3B8', 'FFB454', glow * 2) : mix('FFB454', 'FFF1C9', (glow - 0.5) * 2);
@@ -36,7 +43,7 @@ export function StarMark({ item, r, ring = true, core }) {
     <>
       {item.glow > 0 && <circle r={r * 1.9} fill="url(#halo)" opacity={0.45 + item.glow * 0.55} />}
       <circle r={c} fill={color} opacity={starOpacity(item.glow)} />
-      {item.glow > 0 && <circle r={c * 0.45} fill="#FFF8E6" />}
+      {item.glow > 0 && <circle r={c * 0.45} fill="#FFF8E6" className="star-heart" />}
       {ring &&
         (item.complete ? (
           <g className="sparkle">
@@ -137,7 +144,7 @@ export function Wordmark() {
   return (
     <span className="wordmark">
       <svg width="26" height="26" viewBox="-13 -13 26 26" aria-hidden="true">
-        <circle r="2.6" fill="#FFF1C9" />
+        <circle r="2.6" fill="#FFF1C9" className="wordmark-core" />
         {ringSegments(['in_progress', 'none', 'none', 'none'], 9).map((s, n) => (
           <path key={n} d={s.d} className={'seg ' + s.status} strokeWidth="1.6" />
         ))}

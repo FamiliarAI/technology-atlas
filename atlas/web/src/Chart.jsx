@@ -1,6 +1,7 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { animate, useReducedMotion } from 'framer-motion';
 import { ringSegments, starColor } from './glyphs.jsx';
+import { onPaper } from './style.js';
 import { chartCoord, coreRadius, hash, LABEL, REGION_TYPE, starRadius, UNITS_ACROSS } from './sky.js';
 import { EASE } from './motion.js';
 import './sky.css';
@@ -40,7 +41,7 @@ const fitBox = (box, w, h, pad, kMin, kMax) => {
 // A star with nothing met is a cool point of light; more milestones, a little larger and
 // brighter. Amber and white-gold stay reserved for progress.
 const DIM = '#C3CDE2';
-const starFill = (item) => (item.glow > 0 ? starColor(item.glow) : DIM);
+const starFill = (item) => (item.glow > 0 ? starColor(item.glow) : onPaper() ? '#A4A8B0' : DIM);
 const starAlpha = (item) => (item.glow > 0 ? 1 : Math.min(1, 0.5 + 0.09 * item.status.length));
 
 // Does the segment p–q cross the box?
@@ -1125,7 +1126,7 @@ export function Locator({ atlas, field, star, size = 132, width, names = false, 
           >
             {r.label.lines.map((line, n) => (
               <tspan key={n} x={r.label.x} y={r.label.y + stroke(6 + n * 8)}>
-                {line.toUpperCase()}
+                {onPaper() ? line : line.toUpperCase()}
               </tspan>
             ))}
           </text>
