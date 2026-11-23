@@ -12,10 +12,12 @@ const mix = (a, b, t) => {
 // advance and ignites white-gold when all are met.
 // On paper the scale is a printed one: a pale grey point darkens through ochre to ink.
 export function starColor(glow) {
+  // On paper, progress shows as saturation where the dark sky used brightness: grey, then
+  // ochre, then a strong vermilion as the last milestones fall. Ink is kept for complete stars.
   if (onPaper()) {
     if (glow <= 0) return '#A4A8B0';
-    if (glow >= 1) return '#1D2027';
-    return glow < 0.5 ? mix('A4A8B0', 'B0680C', glow * 2) : mix('B0680C', '1D2027', (glow - 0.5) * 2);
+    if (glow >= 1) return '#C2410C';
+    return glow < 0.5 ? mix('B4A896', 'C98A1B', glow * 2) : mix('C98A1B', 'C2410C', (glow - 0.5) * 2);
   }
   if (glow <= 0) return '#7D89A3';
   if (glow >= 1) return '#FFF1C9';

@@ -4,8 +4,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Chart, { Locator } from '../Chart.jsx';
 import Starfield from '../Starfield.jsx';
 import { useAtlas, useField, warm as isWarm } from '../data.jsx';
-import { FieldEmblem, StarGlyph, StatusMark, ringSegments } from '../glyphs.jsx';
-import { chartCoord, REGION_GRID } from '../sky.js';
+import { FieldEmblem, StarGlyph, StatusMark, ringSegments, starColor } from '../glyphs.jsx';
+import { onPaper } from '../style.js';
+import { chartCoord, REGION_GRID, regionInk } from '../sky.js';
 import { whenText } from './Page.jsx';
 import { EASE } from '../motion.js';
 import '../sky.css';
@@ -51,7 +52,7 @@ function FieldList({ atlas, regions, filter, onPick, onHover, onRegion }) {
     <div className="sa-regions">
       {shown.map((r) => (
         <section key={r.name} aria-label={r.name} id={regionAnchor(r.name)}>
-          <h2 className="sa-region-head">
+          <h2 className="sa-region-head" style={regionInk(r.name)}>
             {onRegion ? (
               <button type="button" onClick={() => onRegion(r.name)} title={`Zoom to ${r.name}`}>
                 {r.name}
@@ -237,12 +238,12 @@ function Legend() {
       </p>
       <p className="sa-legend-row">
         <svg width="34" height="16" viewBox="0 0 34 16" aria-hidden="true">
-          <circle cx="4" cy="8" r="1.6" fill="#C3CDE2" opacity="0.85" />
-          <circle cx="17" cy="8" r="2.4" fill="#FFB454" />
-          <circle cx="30" cy="8" r="2.6" fill="#FFF1C9" />
+          <circle cx="4" cy="8" r="1.6" fill={onPaper() ? starColor(0) : '#C3CDE2'} opacity="0.85" />
+          <circle cx="17" cy="8" r="2.4" fill={onPaper() ? starColor(0.5) : '#FFB454'} />
+          <circle cx="30" cy="8" r="2.6" fill={onPaper() ? starColor(1) : '#FFF1C9'} />
         </svg>
         <span>
-          <b>Brightness</b> <em className="t-none">not yet assessed</em> · <em className="t-amber">under way</em> ·{' '}
+          <b>{onPaper() ? 'Colour' : 'Brightness'}</b> <em className="t-none">not yet assessed</em> · <em className="t-amber">under way</em> ·{' '}
           <em className="t-met">all met</em>
         </span>
       </p>

@@ -124,12 +124,12 @@ html.paper #halo stop {
 }
 html.paper .sparkle-spikes {
   stroke: var(--ink);
-  stroke-width: 0.8;
+  stroke-width: 1;
 }
 html.paper .sparkle-disc {
-  fill: var(--paper);
-  stroke: var(--ink);
-  stroke-width: 1;
+  fill: var(--ink);
+  stroke: var(--paper);
+  stroke-width: 0.8;
   filter: none;
 }
 html.paper .plate-tick {
@@ -227,30 +227,60 @@ html.paper .sky-ruler text {
   fill: var(--muted);
   font-family: var(--sans);
 }
-/* Region names: italic serif, the cartographer's convention for areas. */
+/* Hand-coloured, as printed atlases were: each region has its own ink (--rc, set from
+   REGION_INK in sky.js) for a pale wash, its constellation figures and its name. Progress keeps
+   its own scale on the stars (grey, ochre, ink), so the two never compete. */
+html.paper .sky-region-wash {
+  fill: var(--rc);
+  fill-opacity: 0.055;
+  transition: fill-opacity 0.4s var(--ease);
+}
+html.paper .sky-world.region-focused .sky-region-wash {
+  fill-opacity: 0.025;
+}
+html.paper .sky-world.region-focused .sky-region-wash.focus {
+  fill-opacity: 0.085;
+}
+/* Region names: italic serif, the cartographer's convention for areas, in the region's ink. */
 html.paper .sky-regions text {
-  fill: #7c7f86;
+  fill: var(--rc);
   font-family: var(--display);
   font-style: italic;
 }
+html.paper .sky-region-name:hover text,
 html.paper .sky-region-name.focus text {
-  fill: var(--ink);
+  fill: color-mix(in srgb, var(--rc) 70%, #000);
 }
 html.paper .sky-region-hit:hover {
-  fill: rgba(29, 32, 39, 0.025);
+  fill: rgba(29, 32, 39, 0.02);
 }
-/* The focused constellation is marked by its darker figure, not a wash. */
+html.paper .sky-region-hit.focus {
+  fill: transparent;
+}
+/* The focused constellation is marked by its darker figure, not a glow. */
 html.paper .sky-con-glow {
   display: none;
 }
 html.paper .sky-fig {
-  stroke: rgba(29, 32, 39, 0.34);
+  stroke: color-mix(in srgb, var(--rc) 62%, transparent);
+  stroke-width: calc(1px * var(--ik));
 }
+html.paper .sky-con.hover .sky-fig,
 html.paper .sky-con.focus .sky-fig {
-  stroke: rgba(29, 32, 39, 0.7);
+  stroke: var(--rc);
+  stroke-width: calc(1.3px * var(--ik));
 }
 html.paper .sky-con.dim .sky-fig {
-  stroke: rgba(29, 32, 39, 0.12);
+  stroke: color-mix(in srgb, var(--rc) 22%, transparent);
+}
+html.paper .sa-region-head {
+  color: var(--rc);
+  font-family: var(--display);
+  font-style: italic;
+}
+html.paper .sa-region-head .mono {
+  color: var(--muted);
+  font-style: normal;
 }
 /* Labels sit on a paper-coloured halo so figure lines never cut through them. */
 html.paper .sky-name text,
@@ -292,24 +322,50 @@ html.paper .sky-beacon-ring {
 html.paper .sky-beacon-ring.met {
   stroke: var(--ink);
 }
-html.paper #sky-halo stop,
-html.paper #sky-halo-met stop {
+html.paper #sky-halo stop {
   stop-opacity: 0;
 }
-/* A complete star: the printed symbol for a bright star, a ringed point with four rays. */
+/* A complete star sits on a wash of gold, as hand-coloured charts gilded their brightest
+   stars: it reads from the widest view, where the dark sky used a glow. */
+html.paper #sky-halo-met stop {
+  stop-color: #e0a526;
+}
+html.paper #sky-halo-met stop:nth-child(1) {
+  stop-opacity: 0.6;
+}
+html.paper #sky-halo-met stop:nth-child(2) {
+  stop-opacity: 0.32;
+}
+/* The mark itself: a solid ink disc with a gold heart and four rays, unlike any ring. */
 html.paper .sky-sparkle-disc,
 html.paper .sky-sparkle-disc:not(.sky-sparkle .sky-sparkle-disc) {
-  fill: var(--paper);
-  stroke: var(--ink);
-  stroke-width: calc(1px * var(--ik));
+  fill: var(--ink);
+  stroke: var(--paper);
+  stroke-width: calc(0.8px * var(--ik));
   filter: none;
 }
+html.paper .sky-sparkle-disc:not(.sky-sparkle .sky-sparkle-disc) {
+  stroke-width: 0.8px;
+}
 html.paper .sky-sparkle-heart {
-  fill: var(--ink);
+  fill: #f2c14e;
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(0.6);
+}
+html.paper .sky-sparkle .sky-sparkle-disc {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(0.82);
 }
 html.paper .sky-sparkle-spikes {
   stroke: var(--ink);
-  stroke-width: calc(0.7px * var(--ik));
+  stroke-width: calc(1px * var(--ik));
+  opacity: 1;
+}
+html.paper .sky-sparkle-spikes.far,
+html.paper .sky-sparkle-spikes.legend {
+  stroke-width: 1.2px;
 }
 html.paper .sky-field-bar rect.none {
   fill: rgba(29, 32, 39, 0.14);
@@ -337,16 +393,23 @@ html.paper .loc-frame {
   fill: #fff;
   stroke: var(--hair-strong);
 }
+html.paper .loc-wash {
+  fill: var(--rc);
+  fill-opacity: 0.06;
+}
 html.paper .loc-figures,
-html.paper .sa-phone-sky .loc-figures {
-  stroke: rgba(29, 32, 39, 0.3);
+html.paper .sa-phone-sky .loc-figures,
+html.paper .card-sky .loc-figures {
+  stroke: color-mix(in srgb, var(--rc) 60%, transparent);
+}
+html.paper .loc-region {
+  fill: var(--rc);
+  font-family: var(--display);
+  font-style: italic;
 }
 html.paper .loc-dot,
 html.paper .sa-phone-sky .loc-dot {
   fill: #a4a8b0;
-}
-html.paper .loc-region {
-  fill: var(--muted);
 }
 /* Complete stars are ink, as on the chart; the stars of the field in view are in the accent. */
 html.paper .loc-dot.lit,
@@ -381,9 +444,6 @@ html.paper .sa-b.selected {
 html.paper .sa-b.selected {
   box-shadow: inset 2px 0 0 var(--ink);
 }
-html.paper .sa-region-head {
-  color: var(--soft);
-}
 html.paper .sa-b-id span {
   color: var(--muted);
 }
@@ -394,7 +454,9 @@ html.paper .sa-filter input {
   color: var(--ink);
   border-color: var(--hair-strong);
 }
-html.paper .sa-legend .t-met,
+html.paper .sa-legend .t-met {
+  color: #c2410c;
+}
 html.paper .sa-card-complete,
 html.paper .sa-card-milestones li.met .status-mark {
   color: var(--ink);

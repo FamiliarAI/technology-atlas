@@ -3,8 +3,9 @@ import { Route, Routes, useParams } from 'react-router-dom';
 import { Locator } from './Chart.jsx';
 import { STATUS, loadBreakthrough, useAtlas, warm as isWarm } from './data.jsx';
 import { ringSegments, starColor } from './glyphs.jsx';
+import { onPaper } from './style.js';
 import { whenText } from './pages/Page.jsx';
-import { chartCoord, starRadius } from './sky.js';
+import { chartCoord, regionInk, starRadius } from './sky.js';
 import './share.css';
 
 // Share cards: the 1200×630 images that link previews show, drawn by the site itself and
@@ -232,7 +233,9 @@ const stateOf = (item) =>
 function BigStar({ item, size = 300 }) {
   const n = item.status.length;
   const R = 100;
-  const color = starColor(item.glow);
+  // On paper a complete star is the chart's mark for it: an ink disc with a gold heart.
+  const gilt = item.complete && onPaper();
+  const color = gilt ? '#1D2027' : starColor(item.glow);
   let ticks = '';
   for (let i = 0; i < 120; i++) {
     const a = (i / 120) * Math.PI * 2 - Math.PI / 2;
@@ -260,6 +263,7 @@ function BigStar({ item, size = 300 }) {
       ))}
       <circle r={9 + n * 1.2} fill={color} opacity={item.glow > 0 ? 1 : 0.8} />
       {item.glow > 0 && <circle r={4 + n * 0.5} fill="#FFF8E6" className="card-star-heart" />}
+      {gilt && <circle r={4 + n * 0.5} fill="#F2C14E" />}
     </svg>
   );
 }
@@ -343,7 +347,14 @@ function Constellation({ atlas, field, w = 500, h = 520 }) {
   const at = (i) => ({ x: w / 2 + (i.x - cx) * k, y: h / 2 + (i.y - cy) * k });
   const scale = Math.min(1.5, Math.max(0.9, k / 6));
   return (
-    <svg className="card-constellation" width={w} height={h} viewBox={`0 0 ${w} ${h}`} aria-hidden="true">
+    <svg
+      className="card-constellation"
+      width={w}
+      height={h}
+      viewBox={`0 0 ${w} ${h}`}
+      style={regionInk(field.region)}
+      aria-hidden="true"
+    >
       <defs>
         <radialGradient id="card-halo-s">
           <stop offset="0%" stopColor="#FFD08A" stopOpacity="0.5" />
@@ -366,7 +377,14 @@ function Constellation({ atlas, field, w = 500, h = 520 }) {
             {ringSegments(i.status, r).map((s, n) => (
               <path key={n} d={s.d} className={'cseg ' + s.status} strokeWidth={s.status === 'none' ? 1.6 : 4} />
             ))}
-            <circle r={r * 0.34} fill={starColor(i.glow)} />
+            {i.complete && onPaper() ? (
+              <>
+                <circle r={r * 0.5} fill="#1D2027" />
+                <circle r={r * 0.24} fill="#F2C14E" />
+              </>
+            ) : (
+              <circle r={r * 0.34} fill={starColor(i.glow)} />
+            )}
           </g>
         );
       })}

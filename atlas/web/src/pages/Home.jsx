@@ -279,7 +279,7 @@ function HowToRead() {
     [
       <DemoPapers key="d" />,
       'Papers are steps along the way',
-      `A paper that moves a breakthrough forward is added with an exact quote, as a step toward one milestone or toward the breakthrough as a whole. Either kind ${onPaper() ? 'darkens' : 'warms'} the star.`,
+      `A paper that moves a breakthrough forward is added with an exact quote, as a step toward one milestone or toward the breakthrough as a whole. Either kind warms the star.`,
     ],
   ];
   return (

@@ -2,7 +2,7 @@ import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useStat
 import { animate, useReducedMotion } from 'framer-motion';
 import { ringSegments, starColor } from './glyphs.jsx';
 import { onPaper } from './style.js';
-import { chartCoord, coreRadius, hash, LABEL, REGION_TYPE, starRadius, UNITS_ACROSS } from './sky.js';
+import { chartCoord, coreRadius, hash, LABEL, REGION_TYPE, regionInk, starRadius, UNITS_ACROSS } from './sky.js';
 import { EASE } from './motion.js';
 import './sky.css';
 
@@ -142,6 +142,19 @@ const Graticule = memo(function Graticule({ world, regions, fine, bare, names, f
   return (
     <g className="sky-structure">
       <g aria-hidden="true">
+        <g className="sky-washes">
+          {regions.map((r) => (
+            <rect
+              key={r.name}
+              x={r.x}
+              y={r.y}
+              width={r.w}
+              height={r.h}
+              style={regionInk(r.name)}
+              className={'sky-region-wash' + (focusRegion === r.name ? ' focus' : '')}
+            />
+          ))}
+        </g>
         <g className="sky-grid">{lines}</g>
         <path d={bounds} className="sky-bounds" />
         <rect x={frame} y={frame} width={x1 - frame} height={y1 - frame} className="sky-frame" />
@@ -154,6 +167,7 @@ const Graticule = memo(function Graticule({ world, regions, fine, bare, names, f
               key={r.name}
               transform={`translate(${r.label.x.toFixed(1)} ${r.label.y.toFixed(1)})`}
               className={'sky-region-name' + (focusRegion === r.name ? ' focus' : '')}
+              style={regionInk(r.name)}
               role={onFocusRegion ? 'button' : undefined}
               tabIndex={onFocusRegion ? 0 : undefined}
               aria-label={onFocusRegion ? `${r.name}: zoom in` : undefined}
@@ -371,7 +385,7 @@ const Constellation = memo(function Constellation({
   return (
     <g
       className={'sky-con ' + state}
-      style={{ '--d': delay.toFixed(2) + 's' }}
+      style={{ '--d': delay.toFixed(2) + 's', ...regionInk(field.region) }}
       onPointerEnter={interactive ? () => onHoverField(field.id) : undefined}
       onPointerLeave={interactive ? () => onHoverField(null) : undefined}
     >
@@ -1052,16 +1066,19 @@ export function Locator({ atlas, field, star, size = 132, width, names = false, 
   const px = width || Math.round(size * 1.5);
   const scale = px / vw;
   const stroke = (n) => n / scale; // n screen pixels in world units
+  // Figure lines, one path per region so each can take its region's ink on paper.
   const all = useMemo(() => {
-    let figures = '';
+    const byRegion = new Map();
     for (const x of atlas.fields) {
+      let figures = byRegion.get(x.region) || '';
       for (const [a, b] of sky.figures[x.id].edges) {
         const p = atlas.items[a];
         const q = atlas.items[b];
         figures += `M${p.x.toFixed(1)} ${p.y.toFixed(1)}L${q.x.toFixed(1)} ${q.y.toFixed(1)}`;
       }
+      byRegion.set(x.region, figures);
     }
-    return figures;
+    return [...byRegion];
   }, [atlas, sky]);
   const mine = useMemo(() => {
     if (!fig) return '';
@@ -1116,13 +1133,18 @@ export function Locator({ atlas, field, star, size = 132, width, names = false, 
         className="loc-bounds"
         style={{ strokeWidth: stroke(0.7), strokeDasharray: `${stroke(2.5)} ${stroke(2.5)}` }}
       />
-      <path d={all} className="loc-figures" style={{ strokeWidth: stroke(0.6) }} />
+      {sky.regions.map((r) => (
+        <rect key={r.name} x={r.x} y={r.y} width={r.w} height={r.h} className="loc-wash" style={regionInk(r.name)} />
+      ))}
+      {all.map(([region, d]) => (
+        <path key={region} d={d} className="loc-figures" style={{ strokeWidth: stroke(0.6), ...regionInk(region) }} />
+      ))}
       {names &&
         sky.regions.map((r) => (
           <text
             key={r.name}
             className="loc-region"
-            style={{ fontSize: stroke(5.6), letterSpacing: stroke(0.6) }}
+            style={{ fontSize: stroke(5.6), letterSpacing: stroke(0.6), ...regionInk(r.name) }}
           >
             {r.label.lines.map((line, n) => (
               <tspan key={n} x={r.label.x} y={r.label.y + stroke(6 + n * 8)}>

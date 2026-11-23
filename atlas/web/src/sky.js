@@ -16,6 +16,20 @@ export const REGION_GRID = [
   ['Earth and Space', 'Chemistry and Materials', 'Life Sciences', 'Medicine'],
 ];
 
+// Each region's ink on paper, as on a hand-coloured printed atlas: its wash, its figures and its
+// name. Neighbours differ in hue; none is the ochre that marks progress.
+export const REGION_INK = {
+  'Engineering and Energy': '#3f6c94',
+  'Mathematics and Physics': '#6a56a0',
+  'Computing and Information': '#2b7c74',
+  'Mind and Society': '#4a5596',
+  'Earth and Space': '#6b7b37',
+  'Chemistry and Materials': '#8e4f86',
+  'Life Sciences': '#3d8050',
+  Medicine: '#a63a55',
+};
+export const regionInk = (name) => ({ '--rc': REGION_INK[name] || '#6e737c' });
+
 // Order within a region, read left to right and top to bottom, so fields that border another
 // region sit near it. Fields not listed (new ones) follow in ID order.
 export const FIELD_ORDER = [
