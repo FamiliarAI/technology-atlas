@@ -297,12 +297,12 @@
  "page": {
   "id": "CRY-02",
   "title": "Public-key encryption from one-way functions",
-  "definition": "A general construction turns any classical one-way function—efficient to compute but hard to invert on a uniformly random input—into public-key encryption, where anyone can encrypt with a published key and only the secret-key holder can decrypt. Security follows from one-wayness alone, using classical polynomial-time algorithms without an ideal random oracle or shared setup.",
+  "definition": "A general construction would turn any classical one-way function into public-key encryption: anyone could encrypt with the published key, and the recipient could decrypt with the secret key. A one-way function is efficient to compute, but given its output on a uniformly random input, every efficient algorithm has negligible probability of finding any input with that output. Known constructions can use a function with a secret shortcut for inversion, called a trapdoor. The goal assumes only one-wayness and uses classical polynomial-time algorithms without an ideal random oracle or shared setup.",
   "goal": {
-   "need": "The cited Merkle-style benchmark gives an eavesdropper roughly N² computation steps against N steps by the participants; its realization from one-way functions assumes exponential inversion hardness. Ordinary encryption requires security against every polynomial-time attacker. One-way functions already suffice for pseudorandom generators. Extending that implication to public-key encryption would put both capabilities on the same computational assumption.",
+   "need": "With a recipient’s public key, a sender can deliver a fresh encryption key for a private conversation. A 2020 study counted 2,691,273 OpenPGP subkeys for ElGamal encryption, which depends on discrete logarithms being hard to compute. Larger keys retain that dependence. If discrete logarithms became easy, senders could still establish new keys securely against classical eavesdroppers using any function that remained one-way. They would still need to verify whose public key they had.",
    "need_refs": [
-    1,
-    2,
+    6,
+    16,
     3
    ],
    "figures": null,
@@ -322,31 +322,24 @@
      "context": null,
      "ref": 5,
      "checked": true
-    },
-    {
-     "body": "National Academies of Sciences, Engineering, and Medicine",
-     "year": "2022",
-     "quote": "known methods for constructing efficient public-key encryption and digital signature algorithms take advantage of sophisticated mathematical structures",
-     "context": "The committee describes the mathematical structure used by existing public-key constructions; it does not set an OWF-only construction target.",
-     "ref": 6,
-     "checked": true
     }
    ]
   },
   "completion": {
    "title": "One-way functions imply public-key encryption secure against chosen-plaintext attack.",
-   "criterion": "Prove a general construction from any classical one-way function, with classical probabilistic polynomial-time key generation, encryption and decryption, without additional hardness or setup assumptions. Decryption error is negligible. Given the public key and two chosen equal-length messages, every probabilistic polynomial-time adversary identifies the encrypted message with probability at most 1/2 + negl(n). Here n is the security parameter; negl(n) is eventually below n^−c for every c > 0. A non-negligible distinguishing attack must yield an efficient inverter. The construction and reduction may use code.",
+   "criterion": "From any classical one-way function alone, construct classical probabilistic polynomial-time key generation, encryption and decryption without shared setup or an ideal oracle. For each message, decryption error over key generation and algorithm randomness is negligible. Give the adversary the public key, let it choose two equal-length messages, then encrypt the one selected by a uniform secret bit. Every probabilistic polynomial-time adversary guesses that bit with probability at most 1/2 + negl(n), where negl(n) is eventually below n^−c for every c > 0. The construction and security proof may use code.",
    "set_by": "Cryptographic community; Barak’s Lecture 10 states the desired implication and defines its chosen-plaintext security game. Håstad et al. establish equivalence of the pseudorandom-generator and one-way-function assumptions.",
    "set_by_kind": "community_convention",
    "threshold_quote": "If the PRG assumption is true then there exists a CPA-secure public key encryption.",
    "threshold_ref": 3,
-   "basis": "The published implication and CPA game specify the theoretical goal. A fixed quadratic work gap does not satisfy security against every polynomial-time attacker. Li, Ni and Zan’s 2023 construction claim is catalogued as a preprint. A separate preprint submitted on 28 September 2026 still describes Minicrypt assumptions as not known to imply public-key encryption.",
+   "basis": "One-way functions and pseudorandom generators are equivalent as existence assumptions. The Impagliazzo–Rudich separation rules out a fully black-box construction, in which the construction calls the function as an oracle and the security reduction has only oracle access to the function and adversary. The unrestricted implication remains open. Li, Ni and Zan claim it in a 2023 preprint. A September 2026 paper still describes public-key encryption as unknown from Minicrypt assumptions.",
    "refs": [
     2,
     3,
-    4,
+    5,
     7,
-    8
+    8,
+    10
    ],
    "threshold_checked": true
   },
@@ -357,7 +350,7 @@
    {
     "id": "m1",
     "title": "Any one-way function yields a pseudorandom generator that stretches its seed by at least one bit.",
-    "criterion": "From any one-way function, construct a polynomial-time generator G that maps an n-bit uniform seed to at least n+1 bits. For every probabilistic polynomial-time distinguisher, the acceptance-probability difference between G’s output and a uniform string of the same length is negligible in n. Håstad, Impagliazzo, Levin and Luby proved this implication; their journal article was published on 7 April 1999.",
+    "criterion": "From any one-way function, construct a deterministic polynomial-time generator G mapping an n-bit seed to a string of length ℓ(n) ≥ n + 1. For every probabilistic polynomial-time distinguisher, the absolute difference between its acceptance probabilities on G applied to a uniform seed and on a uniform ℓ(n)-bit string is negligible in n.",
     "set_by": "Cryptographic community; Håstad, Impagliazzo, Levin and Luby, Definition 3.5 and Theorem 6.3.",
     "set_by_kind": "community_convention",
     "threshold_quote": "The definition of a pseudorandom generator only requires the generator to stretch the input by at least one bit.",
@@ -372,11 +365,11 @@
    {
     "id": "m2",
     "title": "A random-oracle key-agreement protocol achieves a quadratic oracle-query gap.",
-    "criterion": "In the random-oracle model, honest parties use O(N) oracle queries to agree on a secret, while an eavesdropper making o(N²) queries recovers it with probability o(1). A random oracle is an ideal uniformly random function accessible to all parties. Merkle published the puzzle construction in 1978; Barak and Mahmoody-Ghidary give its oracle-query analysis and prove a matching quadratic upper bound. Query counts do not bound the attacker’s computation between queries.",
-    "set_by": "Merkle’s published puzzle protocol; its random-oracle security benchmark is formalized by Barak and Mahmoody-Ghidary.",
+    "criterion": "Give all parties access to the same uniformly random function. Using O(N) queries each, the honest parties obtain a matching oracle output with probability at least 0.9 and abort if there is no match. On a match, their selected inputs agree except with negligible probability for oracle output length ω(log N). Conditioned on a match, every passive eavesdropper making o(N²) queries recovers the secret with probability o(1) as N grows, regardless of its computation between queries.",
+    "set_by": "Merkle’s puzzle protocol in the random-oracle formulation of Barak and Mahmoody-Ghidary, Figure 1.",
     "set_by_kind": "protocol",
-    "threshold_quote": "work which increases as the square of the work required of the two communicants to select the key.",
-    "threshold_ref": 9,
+    "threshold_quote": "With at least 0.9 probability, there will be at least one “collision”",
+    "threshold_ref": 10,
     "refs": [
      9,
      10
@@ -388,7 +381,7 @@
    {
     "id": "m3",
     "title": "Key agreement from exponentially hard one-way functions attains a nearly quadratic time gap.",
-    "criterion": "Assume a function on k-bit inputs cannot be inverted with probability above 2^(−αk) in time 2^(αk), where α ≥ 1/2 − δ and 0 < δ < 1/10 are constants. Obtain key agreement with honest-party running time N for which adversaries running in time at most N^(2−10δ) recover the secret with probability o(1). Biham, Goren and Ishai proved this in 2008; Barak and Mahmoody-Ghidary state these quantitative parameters. This assumes exponential hardness and gives a fixed polynomial time gap.",
+    "criterion": "Assume that on a uniformly random k-bit input, no algorithm running in time 2^(αk) inverts the function’s output with probability greater than 2^(−αk), for constants 0 < δ < 1/10 and α ≥ 1/2 − δ. Construct a key-agreement protocol in which each honest party runs in time N and every passive adversary running in time at most N^(2−10δ) recovers the agreed secret with probability o(1) as N grows.",
     "set_by": "Biham, Goren and Ishai’s TCC 2008 protocol; quantitative parameters as stated by Barak and Mahmoody-Ghidary.",
     "set_by_kind": "protocol",
     "threshold_quote": "a key agreement protocol resisting adversaries whose running time is nearly quadratic in the running time of the honest parties.",
@@ -405,13 +398,29 @@
    {
     "id": "m4",
     "title": "Key agreement from any one-way function resists every polynomial-time eavesdropper.",
-    "criterion": "From an arbitrary classical one-way function alone, construct polynomial-time parties communicating classically over a public channel, without an ideal oracle or shared setup. Their n-bit outputs agree with probability 1 − negl(n); every probabilistic polynomial-time eavesdropper given the transcript recovers the first party’s output with probability at most negl(n). Ball et al. characterize the OWF-to-key-agreement question through a reduction between two promise problems. Interaction is allowed; obtaining public-key encryption remains a further step.",
+    "criterion": "From any classical one-way function alone, construct two probabilistic polynomial-time parties that interact over a public classical channel without shared setup or an ideal oracle. Let π be their transcript and x and y their outputs at security parameter n. Require Pr[x = y] ≥ 1 − negl(n) and, for every probabilistic polynomial-time eavesdropper E, Pr[E(π) = x] ≤ negl(n). Probabilities include the parties’ and eavesdropper’s randomness.",
     "set_by": "Cryptographic community; Ball, Liu, Mazor and Pass, Definition 2.11 and the stated OWF-to-key-agreement question. The security definition is independent of the underlying assumption.",
     "set_by_kind": "community_convention",
     "threshold_quote": "Such a protocol is a key-agreement protocol if it is a (1 − neg(n), neg(n))-key-agreement.",
     "threshold_ref": 12,
     "refs": [
      12
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "Trapdoor one-way functions with polynomially many preimages per output yield secure public-key encryption.",
+    "criterion": "Start with an efficiently generated family of trapdoor one-way functions with efficiently samplable domains. The trapdoor permits efficient inversion, and a fixed polynomial in the security parameter bounds the number of preimages of every output of every function in the family. Construct public-key encryption of a bit with negligible decryption error such that every probabilistic polynomial-time adversary given the public key distinguishes encryptions of 0 and 1 with negligible advantage.",
+    "set_by": "Bellare, Halevi, Sahai and Vadhan, Theorem 2 and its equivalence to semantically secure bit encryption.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "trapdoor functions with polynomial pre-image size are sufficient for public key encryption.",
+    "threshold_ref": 15,
+    "refs": [
+     15,
+     3
     ],
     "status": "active",
     "replaced_by": [],
@@ -423,7 +432,7 @@
    "No government programme or standards-body document specifying an OWF-to-PKE completion test or staged roadmap was found.",
    "No peer-reviewed validation of Li, Ni and Zan’s 2023 construction claim was found.",
    "No OWF-only construction meeting the interactive key-agreement criterion was found in the located peer-reviewed literature.",
-   "The ACM page for the 1989 Impagliazzo–Rudich paper returned HTTP 403; its CRYPTO ’88 version was accessible through Springer."
+   "No academy, society, prize committee or government programme statement explicitly endorsing or disputing the unrestricted classical implication was found."
   ],
   "references": [
    {
@@ -621,11 +630,54 @@
     "issue": null,
     "pages": null,
     "citation_source": "model"
+   },
+   {
+    "id": 15,
+    "kind": "book",
+    "url": "https://link.springer.com/chapter/10.1007/BFb0055735",
+    "doi": "10.1007/BFb0055735",
+    "title": "Many-to-one trapdoor functions and their relation to public-key cryptosystems",
+    "authors": "Bellare M, Halevi S, Sahai A, Vadhan S",
+    "container": "Lecture Notes in Computer Science",
+    "year": "1998",
+    "volume": null,
+    "issue": null,
+    "pages": "283-298",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 16,
+    "kind": "journal",
+    "url": "https://jowua.com/wp-content/uploads/2022/12/jowua-v11n3-6.pdf",
+    "doi": "10.22667/JOWUA.2020.09.30.107",
+    "title": "An Analysis of 5 Million OpenPGP Keys",
+    "authors": "Birger Schacht and Peter Kieseberg",
+    "container": "Journal of Wireless Mobile Networks, Ubiquitous Computing, and Dependable Applications",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 17,
+    "kind": "book",
+    "url": "https://www.cs.ucla.edu/~sahai/work/web/1998%20Publications/Crypto_Bellare1998.pdf",
+    "doi": null,
+    "title": "Many-to-One Trapdoor Functions and Their Relation to Public-Key Cryptosystems",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
    }
   ],
   "milestone_order": [
-   "m1",
    "m2",
+   "m1",
+   "m5",
    "m3",
    "m4"
   ],
@@ -634,160 +686,335 @@
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Any one-way function yields a pseudorandom generator with at least 1 bit of stretch; sample size not applicable.",
-    "detail": "The journal article defines the generator as polynomial-time and computationally indistinguishable from uniform. It was published electronically on 7 April 1999.",
+    "finding": "Any one-way function yields a pseudorandom generator with at least 1 bit of stretch.",
+    "detail": "The result is asymptotic. The paper removes the advice used in intermediate constructions to obtain a uniform generator.",
     "quote": "We show how to construct a pseudorandom generator from any one-way function.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 2,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "Random-oracle key agreement, theoretical construction: o(N²) adversary queries yield o(1) key-recovery probability.",
-    "detail": "Each honest party makes at most N queries and agreement is perfect. The formal security bound is 2(q+1)/N² + 2N²/M, which is o(1) when q=o(N²) and the oracle range M grows faster than N².",
+    "finding": "For every N, two parties make N random-oracle queries each, and passive secret recovery requires a quadratic query budget for constant success.",
+    "detail": "The paper proves perfect agreement even on failure, when both parties output 0. Conditional security counts only runs that pass the collision check and yield a secret.",
     "quote": "There exists a\nℓ\n-query key-agreement protocol with perfect agreement in the random oracle model, secure against all\no\n⁢\n(\nℓ\n2\n)\n-query adversaries.",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
-    "milestone": "m3",
+    "milestone": "m2",
     "case": null,
-    "verdict": "met",
-    "finding": "Key agreement from exponentially hard one-way functions; sample size not applicable; adversary time N^(2−10δ).",
-    "detail": "The source attributes the result to Biham, Goren, and Ishai: honest parties run in time N, while adversaries within the stated time bound have o(1) success. The supplied text does not establish the publication or peer-review status of that result.",
-    "quote": "In particular, they proved that assuming the existence of one-way functions that cannot be inverted\nwith probability more than 2−αn by adversaries running in time 2αn forα≥ 1/2−δ, there is a key\nagreement protocol in which Alice and Bob run in time n but any adversary whose running time\nis at most n2−10δ has o(1) chance of ﬁnding the secret.",
+    "verdict": "partial",
+    "finding": "For any two-party random-oracle protocol with at most n queries per party, a passive eavesdropper needs only O(n²) queries at fixed loss in success probability.",
+    "detail": "The quadratic upper bound appeared in the original CRYPTO publication cited in the excerpt. The supplied full manuscript gives no journal publication information.",
+    "quote": "In this work we answer the above question of [IR89], by showing that every protocol in the random\noracle model where Alice and Bob make n oracle queries can be broken with high probability by\nan adversary making O(n2) queries.",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "partial",
-    "finding": "Ball et al.: KA and OWFs characterized by promise problems with thresholds log n and 55 log n; sample size not applicable.",
-    "detail": "The paper relates the OWF-to-key-agreement question to a worst-case reduction between promise problems, but does not establish that reduction or construct key agreement from arbitrary one-way functions.",
+    "finding": "Key agreement for two parties follows from worst-case hardness under an output-closeness promise of at most log n.",
+    "detail": "The key-agreement characterization uses Δ ≤ log n. The one-way-function characterization uses Δ ≥ 55 log n. The reduction needed to derive hardness under the tighter promise remains open in the source.",
     "quote": "As such, as a direct consequence, we get that the question of basing KA on OWF is\nequivalent to demonstrating a worst-case reduction from RIKtPQ∆ with “large” ∆ to a “small” ∆.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "met",
+    "finding": "Theorem 2 gives secure public-key bit encryption with decryption error at most e⁻ᵏ for every polynomially bounded trapdoor one-way function family.",
+    "detail": "This is a general theorem with no empirical sample size. The source is a CRYPTO’98 proceedings paper.",
+    "quote": "Theorem 2. If there exist trapdoor one-way function families with polynomially\nbounded pre-image size, then there exists a family of unapproximable trapdoor\npredicates with exponentially small decryption error.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://link.springer.com/article/10.1007/s00145-024-09518-1",
-    "milestone": "m1",
-    "hash": "aac820123628",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m2",
+    "hash": "447548197030",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/article/10.1007/s00145-024-09518-1",
-    "milestone": "m2",
-    "hash": "b5aa4e3c5bbc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m1",
+    "hash": "cc90ed57d466",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://link.springer.com/article/10.1007/s00145-024-09518-1",
+    "milestone": "m5",
+    "hash": "d93997a071b4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/article/10.1007/s00145-024-09518-1",
     "milestone": "m3",
-    "hash": "469fd9c68631",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "df96462bc7c0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/article/10.1007/s00145-024-09518-1",
     "milestone": "m4",
-    "hash": "4e74f25d1e02",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3f67f5ddd590",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/article/10.1007/s00145-024-09518-1",
     "milestone": "completion",
-    "hash": "749e1eb45890",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://en.wikipedia.org/wiki/List_of_unsolved_problems_in_computer_science",
-    "milestone": "m1",
-    "hash": "aac820123628",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "8b3056a0e013",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://en.wikipedia.org/wiki/List_of_unsolved_problems_in_computer_science",
     "milestone": "m2",
-    "hash": "b5aa4e3c5bbc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "447548197030",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://en.wikipedia.org/wiki/List_of_unsolved_problems_in_computer_science",
+    "milestone": "m1",
+    "hash": "cc90ed57d466",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://en.wikipedia.org/wiki/List_of_unsolved_problems_in_computer_science",
+    "milestone": "m5",
+    "hash": "d93997a071b4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://en.wikipedia.org/wiki/List_of_unsolved_problems_in_computer_science",
     "milestone": "m3",
-    "hash": "469fd9c68631",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "df96462bc7c0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://en.wikipedia.org/wiki/List_of_unsolved_problems_in_computer_science",
     "milestone": "m4",
-    "hash": "4e74f25d1e02",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3f67f5ddd590",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://en.wikipedia.org/wiki/List_of_unsolved_problems_in_computer_science",
     "milestone": "completion",
-    "hash": "749e1eb45890",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "8b3056a0e013",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.bu.edu/fac/lnd/pdf/hill.pdf",
+    "milestone": "m2",
+    "hash": "447548197030",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.bu.edu/fac/lnd/pdf/hill.pdf",
     "milestone": "m1",
-    "hash": "aac820123628",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "cc90ed57d466",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.bu.edu/fac/lnd/pdf/hill.pdf",
+    "milestone": "m5",
+    "hash": "d93997a071b4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.bu.edu/fac/lnd/pdf/hill.pdf",
+    "milestone": "m3",
+    "hash": "df96462bc7c0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.bu.edu/fac/lnd/pdf/hill.pdf",
+    "milestone": "m4",
+    "hash": "3f67f5ddd590",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.bu.edu/fac/lnd/pdf/hill.pdf",
+    "milestone": "completion",
+    "hash": "8b3056a0e013",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol343-itc2025/html/LIPIcs.ITC.2025.12/LIPIcs.ITC.2025.12.html",
     "milestone": "m2",
-    "hash": "b5aa4e3c5bbc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "447548197030",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol343-itc2025/html/LIPIcs.ITC.2025.12/LIPIcs.ITC.2025.12.html",
+    "milestone": "m1",
+    "hash": "cc90ed57d466",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol343-itc2025/html/LIPIcs.ITC.2025.12/LIPIcs.ITC.2025.12.html",
+    "milestone": "m5",
+    "hash": "d93997a071b4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol343-itc2025/html/LIPIcs.ITC.2025.12/LIPIcs.ITC.2025.12.html",
+    "milestone": "m3",
+    "hash": "df96462bc7c0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol343-itc2025/html/LIPIcs.ITC.2025.12/LIPIcs.ITC.2025.12.html",
+    "milestone": "m4",
+    "hash": "3f67f5ddd590",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol343-itc2025/html/LIPIcs.ITC.2025.12/LIPIcs.ITC.2025.12.html",
+    "milestone": "completion",
+    "hash": "8b3056a0e013",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.virginia.edu/~mohammad/files/papers/MerkleFull.pdf",
+    "milestone": "m2",
+    "hash": "447548197030",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.virginia.edu/~mohammad/files/papers/MerkleFull.pdf",
+    "milestone": "m1",
+    "hash": "cc90ed57d466",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.virginia.edu/~mohammad/files/papers/MerkleFull.pdf",
+    "milestone": "m5",
+    "hash": "d93997a071b4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.virginia.edu/~mohammad/files/papers/MerkleFull.pdf",
     "milestone": "m3",
-    "hash": "469fd9c68631",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "df96462bc7c0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
-    "url": "https://eccc.weizmann.ac.il/report/2024/055/download",
+    "url": "https://www.cs.virginia.edu/~mohammad/files/papers/MerkleFull.pdf",
     "milestone": "m4",
-    "hash": "4e74f25d1e02",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3f67f5ddd590",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.virginia.edu/~mohammad/files/papers/MerkleFull.pdf",
+    "milestone": "completion",
+    "hash": "8b3056a0e013",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eccc.weizmann.ac.il/report/2024/055/download/",
+    "milestone": "m2",
+    "hash": "447548197030",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eccc.weizmann.ac.il/report/2024/055/download/",
+    "milestone": "m1",
+    "hash": "cc90ed57d466",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eccc.weizmann.ac.il/report/2024/055/download/",
+    "milestone": "m5",
+    "hash": "d93997a071b4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eccc.weizmann.ac.il/report/2024/055/download/",
+    "milestone": "m3",
+    "hash": "df96462bc7c0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eccc.weizmann.ac.il/report/2024/055/download/",
+    "milestone": "m4",
+    "hash": "3f67f5ddd590",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eccc.weizmann.ac.il/report/2024/055/download/",
+    "milestone": "completion",
+    "hash": "8b3056a0e013",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.ucla.edu/~sahai/work/web/1998%20Publications/Crypto_Bellare1998.pdf",
+    "milestone": "m5",
+    "hash": "d93997a071b4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -854,8 +1081,118 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 0 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"A general construction would turn any classical one-way function into public-key encryption: anyone could encrypt with the published key, and the recipient could decrypt with the secret key. A one-way function is efficient to compute, but given its output on a uniformly random input, every efficient algorithm has negligible probability of finding any input with that output. Known constructions can use a function with a secret shortcut for inversion, called a trapdoor. The goal assumes only one-wayness and uses classical polynomial-time algorithms without an ideal random oracle or shared setup.\". Reason: The definition should identify what an inverter must recover and explain which extra property a known encryption construction uses."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"With a recipient\\u2019s public key, a sender can deliver a fresh encryption key for a private conversation. A 2020 study counted 2,691,273 OpenPGP subkeys for ElGamal encryption, which depends on discrete logarithms being hard to compute. Larger keys retain that dependence. If discrete logarithms became easy, senders could still establish new keys securely against classical eavesdroppers using any function that remained one-way. They would still need to verify whose public key they had.\". Reason: The current rationale gives a puzzle protocol’s running time but omits who relies on public-key encryption and what a weaker assumption would provide."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit completion: criterion = \"From any classical one-way function alone, construct classical probabilistic polynomial-time key generation, encryption and decryption without shared setup or an ideal oracle. For each message, decryption error over key generation and algorithm randomness is negligible. Give the adversary the public key, let it choose two equal-length messages, then encrypt the one selected by a uniform secret bit. Every probabilistic polynomial-time adversary guesses that bit with probability at most 1/2 + negl(n), where negl(n) is eventually below n^\\u2212c for every c > 0. The construction and security proof may use code.\"; threshold_quote = \"If the PRG assumption is true then there exists a CPA-secure public key encryption.\"; threshold_ref = 3; basis = \"One-way functions and pseudorandom generators are equivalent as existence assumptions. The Impagliazzo\\u2013Rudich separation rules out a fully black-box construction, in which the construction calls the function as an oracle and the security reduction has only oracle access to the function and adversary. The unrestricted implication remains open. Li, Ni and Zan claim it in a 2023 preprint. A September 2026 paper still describes public-key encryption as unknown from Minicrypt assumptions.\"; refs = [2, 3, 5, 7, 8, 10]. Reason: The game needs a uniformly chosen challenge bit, and the basis should explain why the black-box impossibility leaves the completion test open."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"From any one-way function, construct a deterministic polynomial-time generator G mapping an n-bit seed to a string of length \\u2113(n) \\u2265 n + 1. For every probabilistic polynomial-time distinguisher, the absolute difference between its acceptance probabilities on G applied to a uniform seed and on a uniform \\u2113(n)-bit string is negligible in n.\". Reason: The publication date and attribution in m1 are results rather than conditions a generator must satisfy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"Give all parties access to the same uniformly random function. Using O(N) queries each, the honest parties obtain a matching oracle output with probability at least 0.9 and abort if there is no match. On a match, their selected inputs agree except with negligible probability for oracle output length \\u03c9(log N). Conditioned on a match, every passive eavesdropper making o(N\\u00b2) queries recovers the secret with probability o(1) as N grows, regardless of its computation between queries.\"; set_by = \"Merkle\\u2019s puzzle protocol in the random-oracle formulation of Barak and Mahmoody-Ghidary, Figure 1.\"; threshold_quote = \"With at least 0.9 probability, there will be at least one \\u201ccollision\\u201d\"; threshold_ref = 10; refs = [9, 10]. Reason: The cited puzzle protocol can abort, so m2 should specify when it produces a secret and distinguish oracle queries from computation."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Assume that on a uniformly random k-bit input, no algorithm running in time 2^(\\u03b1k) inverts the function\\u2019s output with probability greater than 2^(\\u2212\\u03b1k), for constants 0 < \\u03b4 < 1/10 and \\u03b1 \\u2265 1/2 \\u2212 \\u03b4. Construct a key-agreement protocol in which each honest party runs in time N and every passive adversary running in time at most N^(2\\u221210\\u03b4) recovers the agreed secret with probability o(1) as N grows.\". Reason: Removing the publication history from m3 leaves the inversion assumption and the time and success bounds as the test."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"From any classical one-way function alone, construct two probabilistic polynomial-time parties that interact over a public classical channel without shared setup or an ideal oracle. Let \\u03c0 be their transcript and x and y their outputs at security parameter n. Require Pr[x = y] \\u2265 1 \\u2212 negl(n) and, for every probabilistic polynomial-time eavesdropper E, Pr[E(\\u03c0) = x] \\u2264 negl(n). Probabilities include the parties\\u2019 and eavesdropper\\u2019s randomness.\"; threshold_quote = \"Such a protocol is a key-agreement protocol if it is a (1 \\u2212 neg(n), neg(n))-key-agreement.\"; threshold_ref = 12. Reason: Definition 2.11 bounds agreement and recovery probabilities without requiring the output length to equal the security parameter."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "reorder to ['m2', 'm1', 'm3', 'm4']. Reason: Putting the puzzle protocol first places the earliest public demonstration before the later constructions while preserving the parallel structure."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m1: \"Trapdoor one-way functions with polynomially many preimages per output yield secure public-key encryption.\". Reason: The existing milestones omit a construction that achieves public-key encryption once a trapdoor and a bound on preimage size are available."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 3. Reason: The HTTP status of one publisher page records an access issue rather than a gap in the evidence for the black-box separation."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No academy, society, prize committee or government programme statement explicitly endorsing or disputing the unrestricted classical implication was found.\". Reason: The research papers identify an open problem, while the question of formal institutional endorsement or opposition is separate."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove statement 2. Reason: The National Academies passage describes the mathematical structure of existing schemes without naming encryption from one-way functions as a goal."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 12 of 12 proposed operations from CRY-02-revise-20261125T102905534970Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: completion, m1, m2, m3, m4, m5."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 0 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 4 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "definition is 600 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 6 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 3 candidates returned, 0 dropped as sources already used, 3 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 1 of 3 new candidates, without search. Skipped: 3 no readable saved copy. Dropped rows: none. Replaced 4 earlier rows. Added 5 results: 4 from sources already used, 1 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 5 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-25"
  }
 }
