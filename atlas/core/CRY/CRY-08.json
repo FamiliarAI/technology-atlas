@@ -310,15 +310,30 @@
   ],
   "prompt": "5e97d4b8dfc3"
  },
+ "review": {
+  "state": "published",
+  "note": null,
+  "into": null,
+  "at": "2026-11-15",
+  "log": [
+   {
+    "date": "2026-11-15",
+    "state": "published"
+   }
+  ]
+ },
  "page": {
   "id": "CRY-08",
   "title": "Cryptographic metadata-private mobile messaging",
-  "definition": "A mobile messenger hides honest users’ sender–receiver relationships from an observer watching all network links, with distinguishing advantage negligible in a cryptographic security parameter. It supports multiple devices and offline recipients without trusted hardware or an individually trusted relay.",
+  "definition": "A mobile messenger hides who communicates with whom. Given two possible pairings of uncompromised users with the same disclosed information, an efficient observer watching all network links can tell which pairing occurred only with negligible advantage over guessing. As the security parameter λ grows, that advantage falls below 1/λᶜ for every fixed c > 0. Users can switch devices and retrieve messages sent while they were offline. Privacy requires neither trusted hardware nor trust in any individual relay.",
   "goal": {
-   "need": "Groove’s 2022 prototype demonstrated phone operation with differential privacy, which bounds how much changing a buddy relationship changes an observer’s view. Its server and phone measurements were separate. The goal is to combine that client flexibility with cryptographic relationship privacy and the published 10-second latency criterion for systems serving more than 100,000 clients.",
+   "need": "Over three years, 34 UK police investigations sought communications data about suspected contacts between public officials and journalists. They concerned 105 journalists and 242 suspected sources. End-to-end encryption protects what a source writes, but traffic timing can still reveal whom they contacted. Hiding that link would let a source reach a reporter from a phone with less risk of identification through network records, even if the reporter reads the message later. Both devices must remain uncompromised, and either person can disclose the contact.",
    "need_refs": [
+    11,
+    4,
     1,
-    4
+    9,
+    5
    ],
    "figures": {
     "caption": "Groove’s separate prototype measurements, 2022",
@@ -341,19 +356,19 @@
    },
    "statements": [
     {
-     "body": "Microsoft Research, Private Communication project",
-     "year": "Undated",
-     "quote": "This research project investigates systems that can provably hide all content and metadata while withstanding global adversaries.",
-     "context": "The page dates the project’s establishment to 26 November 2015, but does not date this passage.",
-     "ref": 2,
-     "checked": true
-    },
-    {
      "body": "DARPA, Resilient Anonymous Communication for Everyone programme",
      "year": "2018",
      "quote": "Confidentiality of who talks to who and when",
      "context": "Table 1 lists this as the desired confidentiality property for user message metadata.",
      "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "Microsoft Research, Private Communication project",
+     "year": "2015",
+     "quote": "This research project investigates systems that can provably hide all content and metadata while withstanding global adversaries.",
+     "context": "The project was established on November 26, 2015.",
+     "ref": 2,
      "checked": true
     }
    ]
@@ -365,7 +380,7 @@
    "set_by_kind": "atlas",
    "threshold_quote": null,
    "threshold_ref": null,
-   "basis": "Searches of DARPA RACE/SAFER targets, IETF privacy and MLS documents, prize rules and messaging benchmarks found no joint test. This synthesis combines Sasy and Goldberg’s 10-second, >100,000-client comparison criterion, Groove’s workload and phone bandwidth operating point, and cryptographic relationship privacy. The percentile follows Boomerang’s evaluation. These components do not define an ordinary total operating cost.",
+   "basis": "Sasy and Goldberg use 10 s for more than 100,000 clients in their latency comparison. Boomerang reports 99th-percentile latency. Groove supplies the 50-contact workload, the 102-byte message payload and the one-minute phone schedule. Its 106 MB monthly figure derives from phone traffic rates and circuit setup. The Atlas uses that figure as a 30-day ceiling and requires one configuration to meet it and the end-to-end latency target under the stated privacy assumptions.",
    "refs": [
     1,
     4,
@@ -381,7 +396,7 @@
    {
     "id": "m1",
     "title": "A messaging protocol hides honest correspondents’ relationships despite compromised infrastructure.",
-    "criterion": "The protocol meets Pung’s relationship-unobservability goal when communicating users follow the protocol and know their peers’ public keys or share secrets, even when all communication infrastructure behaves maliciously. Availability remains conditional on service. Pung’s 2016 prototype reports 135K messages/minute for a 32K-active-user workload on four servers, using generated load for additional clients; K follows the paper’s notation.",
+    "criterion": "An adversary observing or modifying all network traffic cannot determine whether or when an honest user sent or received a message, or link an exchange to its participants. The correspondents follow the protocol and know each other’s public keys or share a secret out of band. All communication infrastructure may behave maliciously. Delivery requires the infrastructure to provide service.",
     "set_by": "Angel and Setty, Pung protocol, §§2.1–2.2 and §7; this is its published security test.",
     "set_by_kind": "protocol",
     "threshold_quote": "In particular, Pung’s guarantees hold even if all of the infrastructure that Pung uses (servers, ISPs, DNS, etc.) is compromised and operates arbitrarily.",
@@ -396,7 +411,7 @@
    {
     "id": "m2",
     "title": "A mobile messenger supports multiple devices and offline recipients with relationship differential privacy.",
-    "criterion": "The protocol supports asynchronous receipt and multiple devices while satisfying Groove’s §3.2 differential-privacy definition under its §3.1 assumptions. Client schedules remain independent of buddy relationships. Groove’s 2022 prototype implements these functions.",
+    "criterion": "Users can switch devices and retrieve messages sent while they were offline. Under Groove’s §3.1 threat model, compare two scenarios differing in whether two honest users are buddies. For every observation event, its probability in either scenario is at most e^ε times its probability in the other plus δ, for the stated privacy parameters and observation period. Each client’s traffic schedule is independent of its buddy relationships.",
     "set_by": "Barman and colleagues, Groove protocol, §§3.1–3.2, 5–6 and 8.",
     "set_by_kind": "protocol",
     "threshold_quote": "Groove’s users can send messages to any of their buddies from any device, and can go offline and retrieve messages sent to them later.",
@@ -410,11 +425,11 @@
    },
    {
     "id": "m3",
-    "title": "Asynchronous messaging provides cryptographic metadata privacy with O(N log² N) server work.",
-    "criterion": "For N users, an asynchronous protocol provides cryptographic metadata privacy with O(N log² N) server work, holding other workload parameters fixed. Myco uses two servers and permits malicious clients and at most one malicious server; clients’ online patterns are independent of communication. Its 2025 publication reports this construction. The authors’ evaluation used cloud clients with 16 virtual CPUs and 64 GB RAM.",
-    "set_by": "Kaviani and colleagues, Myco protocol and complexity result; security assumptions and evaluation configuration appear in the authors’ accompanying slides.",
+    "title": "Asynchronous messaging hides relationships with O(N log² N) total server work per epoch.",
+    "criterion": "For N users and fixed remaining workload and security parameters, the two servers together perform O(N log² N) work in one protocol epoch. The protocol meets Myco’s Definition 1 with any malicious subset of clients and at most one malicious server. Honest correspondents can retrieve messages retained while they were offline. Their connection times and the timing of queries within an epoch are independent of their conversations.",
+    "set_by": "Kaviani and colleagues, Myco protocol, Definition 1, Theorem 1 and §5.1.2.",
     "set_by_kind": "protocol",
-    "threshold_quote": "We present Myco, a metadata-private messaging system that preserves strong cryptographic guarantees while achieving $O(N \\log^2 N)$ efficiency.",
+    "threshold_quote": "the servers perform O(N log2 N) work in N per epoch.",
     "threshold_ref": 7,
     "refs": [
      7,
@@ -422,12 +437,12 @@
     ],
     "status": "active",
     "replaced_by": [],
-    "threshold_checked": true
+    "threshold_checked": false
    },
    {
     "id": "m4",
     "title": "A cryptographically private messenger delivers within 10 s at the 99th percentile for >100,000 clients.",
-    "criterion": "A software prototype proves negligible relationship-linking advantage against a global passive observer under explicit leakage and corruption assumptions, without trusted hardware or an individually trusted relay. It supports offline recipients and multiple devices. With >100,000 clients, 50 contacts/client and one 102-byte message/client/minute, 99th-percentile online delivery, including scheduling and network delays, is ≤10 s. The phone traffic ceiling is the remaining completion requirement. Boomerang’s 2023 evaluation reports 7.76 s at the 99th percentile for a 2²⁰-client workload on 32 machines using trusted enclaves.",
+    "criterion": "A mobile prototype supports multiple devices and delivery to offline recipients. Its protocol proves negligible relationship-linking advantage against a global passive observer for uncompromised correspondents under explicit leakage, corruption and observation-duration assumptions. Privacy requires neither trusted hardware nor an individually trusted relay. With more than 100,000 clients, 50 contacts per client and one 102-byte message per client per minute, the 99th percentile of delivery time between online correspondents is at most 10 s, including client scheduling and network delays.",
     "set_by": "Atlas synthesis; searches found no externally specified integrated prototype gate with these security, functionality and performance conditions.",
     "set_by_kind": "atlas",
     "threshold_quote": null,
@@ -441,6 +456,21 @@
     "status": "active",
     "replaced_by": [],
     "threshold_checked": null
+   },
+   {
+    "id": "m5",
+    "title": "A recipient retrieves a message while hiding its position from any t of the t + 1 servers queried.",
+    "criterion": "A prototype retrieves a selected cell from a replicated message table. For the blinded read in Lemma 1, the client sends a query to each of t + 1 distinct servers and samples the bits of its t random query vectors independently with probability 1/2. The requests and responses visible to any t of those servers reveal no information about which cell the client read.",
+    "set_by": "Cooper and Birman, private message service protocol, §7.1, Lemma 1, and §8.1.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "will gain no information about which cell the client is reading.",
+    "threshold_ref": 12,
+    "refs": [
+     12
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": false
    }
   ],
   "measures": [],
@@ -448,7 +478,7 @@
    "No external joint completion test was found combining cryptographic relationship privacy, mobile flexibility, latency and client bandwidth.",
    "No published result meeting the integrated prototype gate or completion test was identified.",
    "No accepted numerical definition of ordinary total messaging cost was found.",
-   "Myco’s full paper PDF could not be opened; its abstract and authors’ slides were accessible."
+   "No programme or standards-body statement disputing the feasibility or value of this specific mobile messaging target was found."
   ],
   "references": [
    {
@@ -590,9 +620,38 @@
     "issue": null,
     "pages": "1967-1981",
     "citation_source": "crossref"
+   },
+   {
+    "id": 11,
+    "kind": "report",
+    "url": "https://ipco-wpmedia-prod-s3.s3.eu-west-2.amazonaws.com/IOCCO-Communications-Data-Journalist-Inquiry-Report-4Feb15.pdf",
+    "doi": null,
+    "title": "IOCCO inquiry into the use of Chapter 2 of Part 1 of the Regulation of Investigatory Powers Act (RIPA) to identify journalistic sources",
+    "authors": "Interception of Communications Commissioner’s Office",
+    "container": null,
+    "year": "2015",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 12,
+    "kind": "journal",
+    "url": "https://www.cs.cornell.edu/projects/Quicksilver/public_pdfs/1995-cooper-private-email.pdf",
+    "doi": "10.1007/BF01200848",
+    "title": "The design and implementation of a private message service for mobile computers",
+    "authors": "Cooper DA, Birman KP",
+    "container": "Wireless Netw",
+    "year": "1995",
+    "volume": "1",
+    "issue": "3",
+    "pages": "297-309",
+    "citation_source": "crossref"
    }
   ],
   "milestone_order": [
+   "m5",
    "m1",
    "m2",
    "m3",
@@ -600,184 +659,394 @@
   ],
   "results": [
    {
-    "milestone": "m2",
+    "milestone": "m1",
     "case": null,
-    "verdict": "met",
-    "finding": "Groove prototype: 32 s latency for 1 million users with 50 buddies each.",
-    "detail": "Groove supports multiple devices and offline receipt, with relationship differential privacy under its stated mixnet assumptions. Client schedules must be independent of buddy relationships.",
-    "quote": "An evaluation of a Groove prototype on AWS with 100\nservers, distributed across four data centers on two continents,\ndemonstrates that it can achieve 32 s of latency for 1 million\nusers with 50 buddies in their contact lists.",
+    "verdict": "partial",
+    "finding": "Groove’s 100-server configuration models 20% mixnet corruption and proves that compromising all service providers adds no observations.",
+    "detail": "The reduction applies to the attacker’s observations about communication. The separate mixnet guarantee depends on honest servers along the relevant routes.",
+    "quote": "A restricted attacker, who only controls the\nnetwork and the same mixnet servers (but not the service\nproviders), can obtain the same observations.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "Groove gives relationship differential privacy with δ = 10⁻⁴ in its 100-server configuration and supports device switching and offline retrieval.",
+    "detail": "Offline receipt lasts through the epochs for which the recipient prepared circuits in advance. The prototype also evaluated catch-up after a month offline.",
+    "quote": "Specifically, with 100 mixnet servers, each honest server\ncreates 88 000 noise circuits on average in every epoch to\nprovide (ε = ln2 , δ = 10−4)-differential privacy",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "partial",
-    "finding": "Groove prototype: 32 s latency for 1 million users with 50 buddies each.",
-    "detail": "The reported latency exceeds 10 s and is not identified as a 99th-percentile measurement. Groove proves differential privacy under mixnet assumptions, not the specified negligible relationship-linking advantage.",
-    "quote": "An evaluation of a Groove prototype on AWS with 100\nservers, distributed across four data centers on two continents,\ndemonstrates that it can achieve 32 s of latency for 1 million\nusers with 50 buddies in their contact lists.",
+    "finding": "Groove measured a 32.4 s messaging round at a simulated load equivalent to one million users with 50 buddies each.",
+    "detail": "The privacy analysis gives finite-horizon differential privacy under probabilistic mixnet corruption. It allows every service provider to be malicious.",
+    "quote": "In Figure 7, we observe that the Groove’s messaging round\nlatency is 32.4 s, 55.9 s and 79.83 s for 100M, 200M and\n300M circuits, respectively.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Groove analyzes honest correspondents’ relationship privacy in a 100-server configuration with 20% malicious mix servers.",
+    "detail": "An adversary can trace a circuit if it controls every mix server on that route.",
+    "quote": "We set Groove to resist f = 20% malicious mixnet servers,\nand the mixnet path length to be 14 hops (similar to prior\nwork with the same mixnet topology [19, 20]).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 1,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "Groove’s prototype supported 1 million users with 32 s latency.",
-    "detail": "Groove supports multiple devices and offline recipients under its relationship differential-privacy definition. Client schedules must be independent of buddy relationships; privacy depends on the stated mixnet assumptions.",
-    "quote": "An evaluation of a Groove prototype on AWS with 100\nservers, distributed across four data centers on two continents,\ndemonstrates that it can achieve 32 s of latency for 1 million\nusers with 50 buddies in their contact lists.",
+    "finding": "Groove’s 100-server configuration provides buddy-relationship differential privacy with δ = 10⁻⁴.",
+    "detail": "Offline receipt depends on circuits prepared for future epochs. Service providers buffer received messages for retrieval after reconnection.",
+    "quote": "Specifically, with 100 mixnet servers, each honest server\ncreates 88 000 noise circuits on average in every epoch to\nprovide (ε = ln2 , δ = 10−4)-differential privacy",
     "checked": true,
     "confirmed": true,
-    "peer_reviewed": false,
+    "peer_reviewed": true,
     "ref": 1,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Groove took 32.4 s per messaging round at simulated load equivalent to 1 million users with 50 contacts each.",
+    "detail": "The 1-minute phone schedule was evaluated separately. The server benchmark did not measure end-to-end delivery percentiles at one 102-byte message per client per minute.",
+    "quote": "In Figure 7, we observe that the Groove’s messaging round\nlatency is 32.4 s, 55.9 s and 79.83 s for 100M, 200M and\n300M circuits, respectively.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 1,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Pung’s four-server prototype handled 135K messages/minute for 32K active users.",
-    "detail": "Privacy holds for protocol-following users who know their peers’ public keys or share secrets, even if all infrastructure behaves maliciously. Availability depends on service. Performance was averaged over 10 trials in one data center.",
-    "quote": "We find that a 4-server deployment of Pung sup-\nports 135K messages/minute with 32K active users:105×\nmore messages and 103× more users than any prior sys-\ntem that withstands a similar adversary (§7.3).",
+    "finding": "Pung protects an honest pair’s communication metadata against compromise of all infrastructure.",
+    "detail": "System participation is visible. The privacy guarantee applies to actual message exchanges, and malicious infrastructure can deny delivery.",
+    "quote": "In particular, Pung’s guarantees hold even if all of the\ninfrastructure that Pung uses (servers, ISPs, DNS, etc.) is\ncompromised and operates arbitrarily.",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 5,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
-    "milestone": "m1",
+    "milestone": "m4",
     "case": null,
     "verdict": "partial",
-    "finding": "DPIR prototype: sample size not stated; performance improved 3.25× over prior work.",
-    "detail": "The abstract reports metadata-private messaging, but does not establish Pung’s relationship-unobservability goal against entirely malicious infrastructure.",
-    "quote": "We show through experiments on a prototype implementation that DPIR concretely improves performance by $3.25\\times$ and $4.31\\times$ over prior work and that the performance gap grows\r\nwith the user base size.",
+    "finding": "Pung sent and retrieved one message in up to 1.3 s with one client and one million stored tuples.",
+    "detail": "The latency test used an immediately available worker and reported means over 10 trials. The large-client experiment measured throughput with 256-byte messages and did not test the 50-contact workload.",
+    "quote": "The end-to-end latency of sending and retrieving\none message when the Pung cluster is under-utilized is up to 1.3\nseconds (when the server stores 1 million tuples).",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Pung’s XPIR client decoded a selected entry in 0.70 ms over 10 trials with 32,768 stored tuples.",
+    "detail": "The decode measurement is for 288-byte tuples. Pung’s cluster distributes work across workers and uses computational PIR for private reads.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "DPIR prototypes private message retrieval with one message-storing server delegating work to clients. The experiment size is unspecified.",
+    "detail": "The reported speedups measure performance. The excerpt gives no result for privacy against a coalition of t queried servers.",
+    "quote": "We introduce DPIR, a messaging system that uses\r\ndistributed PIR to let a server storing messages delegate the work to the\r\nsystem's clients, such that each client contributes proportional processing to\r\nthe number of messages it reads.",
+    "checked": true,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "Myco reports O(N log² N) efficiency for metadata-private messaging among N users.",
-    "detail": "The source describes a two-server distributed-trust model and reports publication at IEEE Security and Privacy 2025. It does not state the malicious-client and server assumptions, online-pattern condition, or evaluation client hardware required by the criterion.",
+    "finding": "Myco reports O(N log² N) efficiency for N users. The abstract gives no benchmark sample size.",
+    "detail": "The ePrint record identifies this full version as a major revision and lists IEEE Symposium on Security and Privacy 2025 as the publication venue. The supplied text does not establish that the revision itself was peer reviewed.",
     "quote": "We present Myco, a metadata-private messaging system that preserves strong cryptographic guarantees while achieving $O(N \\log^2 N)$ efficiency.",
     "checked": true,
-    "confirmed": true,
+    "confirmed": false,
     "peer_reviewed": false,
     "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Lemma 1 proves zero cell-position leakage from any t request–response pairs in a t + 1-server blinded read.",
+    "detail": "The excerpt ends during the message retrieval design and gives no prototype run or implementation detail tying the deployed sampler to Lemma 1. The quote preserves the supplied decimal encoding.",
+    "quote": "/103/97/105/110 /110/111 /105/110/102/111/114/109/97/116/105/111/110 /97/98/111/117/116\n/119/104/105/99/104 /99/101/108/108 /116/104/101 /99/108/105/101/110/116 /105/115 /114/101/97/100/105/110/103/46",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://www.usenix.org/conference/osdi22/presentation/barman",
+    "milestone": "m5",
+    "hash": "3dc85f3262fa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/conference/osdi22/presentation/barman",
     "milestone": "m1",
-    "hash": "5b64936ccb66",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6b5a66ba69c1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.usenix.org/conference/osdi22/presentation/barman",
     "milestone": "m2",
-    "hash": "f6c8187a05e3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "0593ecf4d965",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.usenix.org/conference/osdi22/presentation/barman",
     "milestone": "m3",
-    "hash": "0e85ca249924",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c87a1fd6f5f8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.usenix.org/conference/osdi22/presentation/barman",
     "milestone": "m4",
-    "hash": "234afaf21240",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1b981732ba4a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.usenix.org/conference/osdi22/presentation/barman",
     "milestone": "completion",
     "hash": "7b3248dac920",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/system/files/osdi22-barman.pdf",
+    "milestone": "m5",
+    "hash": "3dc85f3262fa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.usenix.org/system/files/osdi22-barman.pdf",
     "milestone": "m1",
-    "hash": "5b64936ccb66",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6b5a66ba69c1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.usenix.org/system/files/osdi22-barman.pdf",
     "milestone": "m2",
-    "hash": "f6c8187a05e3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "0593ecf4d965",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.usenix.org/system/files/osdi22-barman.pdf",
     "milestone": "m3",
-    "hash": "0e85ca249924",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c87a1fd6f5f8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.usenix.org/system/files/osdi22-barman.pdf",
     "milestone": "m4",
-    "hash": "234afaf21240",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1b981732ba4a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.usenix.org/system/files/osdi22-barman.pdf",
     "milestone": "completion",
     "hash": "7b3248dac920",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cis.upenn.edu/~sga001/papers/pung-osdi16.pdf",
+    "milestone": "m5",
+    "hash": "3dc85f3262fa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cis.upenn.edu/~sga001/papers/pung-osdi16.pdf",
     "milestone": "m1",
-    "hash": "5b64936ccb66",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6b5a66ba69c1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cis.upenn.edu/~sga001/papers/pung-osdi16.pdf",
+    "milestone": "m2",
+    "hash": "0593ecf4d965",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cis.upenn.edu/~sga001/papers/pung-osdi16.pdf",
+    "milestone": "m3",
+    "hash": "c87a1fd6f5f8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cis.upenn.edu/~sga001/papers/pung-osdi16.pdf",
+    "milestone": "m4",
+    "hash": "1b981732ba4a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cis.upenn.edu/~sga001/papers/pung-osdi16.pdf",
+    "milestone": "completion",
+    "hash": "7b3248dac920",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2024/978",
+    "milestone": "m5",
+    "hash": "3dc85f3262fa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2024/978",
     "milestone": "m1",
-    "hash": "5b64936ccb66",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6b5a66ba69c1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2024/978",
+    "milestone": "m2",
+    "hash": "0593ecf4d965",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2024/978",
+    "milestone": "m3",
+    "hash": "c87a1fd6f5f8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2024/978",
+    "milestone": "m4",
+    "hash": "1b981732ba4a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2024/978",
+    "milestone": "completion",
+    "hash": "7b3248dac920",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2025/687",
+    "milestone": "m5",
+    "hash": "3dc85f3262fa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2025/687",
+    "milestone": "m1",
+    "hash": "6b5a66ba69c1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2025/687",
+    "milestone": "m2",
+    "hash": "0593ecf4d965",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2025/687",
     "milestone": "m3",
-    "hash": "0e85ca249924",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c87a1fd6f5f8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2025/687",
+    "milestone": "m4",
+    "hash": "1b981732ba4a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2025/687",
+    "milestone": "completion",
+    "hash": "7b3248dac920",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.cornell.edu/projects/Quicksilver/public_pdfs/1995-cooper-private-email.pdf",
+    "milestone": "m5",
+    "hash": "3dc85f3262fa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -819,20 +1088,118 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 6 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"A mobile messenger hides who communicates with whom. Given two possible pairings of uncompromised users with the same disclosed information, an efficient observer watching all network links can tell which pairing occurred only with negligible advantage over guessing. As the security parameter \\u03bb grows, that advantage falls below 1/\\u03bb\\u1d9c for every fixed c > 0. Users can switch devices and retrieve messages sent while they were offline. Privacy requires neither trusted hardware nor trust in any individual relay.\". Reason: The definition uses distinguishing advantage without explaining what the observer must distinguish or what makes the advantage negligible."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Over three years, 34 UK police investigations sought communications data about suspected contacts between public officials and journalists. They concerned 105 journalists and 242 suspected sources. End-to-end encryption protects what a source writes, but traffic timing can still reveal whom they contacted. Hiding that link would let a source reach a reporter from a phone with less risk of identification through network records, even if the reporter reads the message later. Both devices must remain uncompromised, and either person can disclose the contact.\". Reason: The current rationale gives prototype measurements but omits the people affected and what exposure of a relationship can cost them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Microsoft Research, Private Communication project, 2015: \"This research project investigates systems that can provably hide all content and metadata while withstanding global adversaries.\". Reason: The project establishment date gives the existing goal statement a documented time reference."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit completion: basis = \"Sasy and Goldberg use 10 s for more than 100,000 clients in their latency comparison. Boomerang reports 99th-percentile latency. Groove supplies the 50-contact workload, the 102-byte message payload and the one-minute phone schedule. Its 106 MB monthly figure derives from phone traffic rates and circuit setup. The Atlas uses that figure as a 30-day ceiling and requires one configuration to meet it and the end-to-end latency target under the stated privacy assumptions.\". Reason: The basis needs to distinguish Groove’s one-minute phone schedule and monthly traffic estimate from the simultaneous latency and bandwidth requirements imposed by the Atlas."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after None: \"A recipient retrieves a message while hiding its position from any t of the t + 1 servers queried.\". Reason: The milestones omit the earlier laboratory demonstration that a recipient could retrieve a stored message without disclosing which one it read."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"An adversary observing or modifying all network traffic cannot determine whether or when an honest user sent or received a message, or link an exchange to its participants. The correspondents follow the protocol and know each other\\u2019s public keys or share a secret out of band. All communication infrastructure may behave maliciously. Delivery requires the infrastructure to provide service.\". Reason: Pung’s throughput measurement is not part of its relationship-unobservability test, and the criterion should say what remains hidden."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"Users can switch devices and retrieve messages sent while they were offline. Under Groove\\u2019s \\u00a73.1 threat model, compare two scenarios differing in whether two honest users are buddies. For every observation event, its probability in either scenario is at most e^\\u03b5 times its probability in the other plus \\u03b4, for the stated privacy parameters and observation period. Each client\\u2019s traffic schedule is independent of its buddy relationships.\". Reason: The criterion cites Groove’s privacy definition without stating its test and includes a prototype verdict."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: title = \"Asynchronous messaging hides relationships with O(N log\\u00b2 N) total server work per epoch.\"; criterion = \"For N users and fixed remaining workload and security parameters, the two servers together perform O(N log\\u00b2 N) work in one protocol epoch. The protocol meets Myco\\u2019s Definition 1 with any malicious subset of clients and at most one malicious server. Honest correspondents can retrieve messages retained while they were offline. Their connection times and the timing of queries within an epoch are independent of their conversations.\"; set_by = \"Kaviani and colleagues, Myco protocol, Definition 1, Theorem 1 and \\u00a75.1.2.\"; threshold_quote = \"the servers perform O(N log2 N) work in N per epoch.\"; threshold_ref = 7; refs = [7, 8]. Reason: Myco defines total server work per epoch, while the current criterion omits that unit and includes the evaluation hardware."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"A mobile prototype supports multiple devices and delivery to offline recipients. Its protocol proves negligible relationship-linking advantage against a global passive observer for uncompromised correspondents under explicit leakage, corruption and observation-duration assumptions. Privacy requires neither trusted hardware nor an individually trusted relay. With more than 100,000 clients, 50 contacts per client and one 102-byte message per client per minute, the 99th percentile of delivery time between online correspondents is at most 10 s, including client scheduling and network delays.\". Reason: The Boomerang+ enclave result is a comparison rather than a condition of the software prototype test."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 3. Reason: The full Myco paper linked from its ePrint record supplies the security definition and per-epoch work analysis."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No programme or standards-body statement disputing the feasibility or value of this specific mobile messaging target was found.\". Reason: General anonymity trade-offs do not establish an institutional judgment on this particular combination of requirements."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove statement 0. Reason: The undated attribution omits the establishment date printed on the Microsoft Research project page."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 12 of 12 proposed operations from CRY-08-revise-20261125T104335858952Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m5, m1, m2, m3, m4."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 0 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 1 found, 2 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "definition is 511 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 5 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 3 candidates returned, 0 dropped as sources already used, 3 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 1 of 3 new candidates, without search. Skipped: 2 no readable saved copy. Dropped rows: none. Replaced 6 earlier rows. Added 12 results: 11 from sources already used, 1 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 11 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-15"
- },
- "review": {
-  "state": "published",
-  "note": null,
-  "into": null,
-  "at": "2026-11-15",
-  "log": [
-   {
-    "date": "2026-11-15",
-    "state": "published"
-   }
-  ]
+  "results_run": "2026-11-25"
  }
 }
