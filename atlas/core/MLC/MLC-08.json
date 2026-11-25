@@ -315,10 +315,11 @@
   "title": "Machine discovery of new empirical laws",
   "definition": "A machine-learning system formulates a previously unknown equation relating measurable properties of a natural system and predicts a new measurement. An independent laboratory confirms the prediction under stated conditions and measurement uncertainties.",
   "goal": {
-   "need": "Discovery can require increasing research inputs: Bloom and colleagues' 2020 semiconductor study estimated that sustaining chip-density doubling required more than 18 times the researcher input of the early 1970s. DARPA's autonomous-scientist goal covers generating and examining hypotheses. The capability here applies those operations to new quantitative laws tested in physical experiments.",
+   "need": "Choosing which materials to make can require testing far more compositions than a laboratory can synthesize. One search for water-splitting catalysts had 3,545 candidate oxides. Common predictors require calculations of electronic properties that are uncertain at the catalyst surface. Discovering which combination of ionic radii predicts activity lets electrochemists rank candidates before synthesis. They still need to check which materials form the intended crystal structure: only five of 13 selected compositions yielded a pure perovskite.",
    "need_refs": [
-    1,
-    2
+    11,
+    12,
+    13
    ],
    "figures": null,
    "statements": [
@@ -327,7 +328,7 @@
      "year": "2020",
      "quote": "AI Scientists should be capable of independently motivating, making, understanding, and communicating discoveries.",
      "context": null,
-     "ref": 3,
+     "ref": 2,
      "checked": true
     },
     {
@@ -335,7 +336,7 @@
      "year": "2024",
      "quote": "develop creative hypotheses, and make decisions with its own knowledge in order to enable scientific discovery at speed and scale.",
      "context": "The March 2024 budget justification includes this passage in its research plan for an autonomous scientist.",
-     "ref": 2,
+     "ref": 1,
      "checked": true
     },
     {
@@ -343,7 +344,15 @@
      "year": "2020",
      "quote": "a computer, just like Kepler, discovers a useful and hitherto unknown physics formula through symbolic regression!",
      "context": "Symbolic regression searches for an equation's form as well as its numerical coefficients.",
-     "ref": 4,
+     "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "Organisers of the Royal Society discussion meeting on symbolic regression in the physical sciences",
+     "year": "2026",
+     "quote": "discover novel scientific laws or relationships from empirical evidence",
+     "context": "Introduction to the special issue from the April 2025 meeting.",
+     "ref": 13,
      "checked": true
     }
    ]
@@ -357,12 +366,12 @@
    "threshold_ref": null,
    "basis": "Searched the Turing challenge report, DARPA's autonomous-scientist goals, SRBench, SciLaws-Bench and laboratory equation-discovery papers. No combined criterion for ML authorship, law novelty and independent prospective physical confirmation was found. This Atlas test operationalizes the quoted goal; the National Academies' replication definition supplies the distinction between reanalysis and confirmation using new data.",
    "refs": [
-    3,
     2,
+    1,
+    4,
     5,
     6,
-    7,
-    8
+    7
    ],
    "threshold_checked": null
   },
@@ -373,14 +382,14 @@
    {
     "id": "m1",
     "title": "An ML equation matches a known law up to an additive or nonzero multiplicative constant.",
-    "criterion": "For a known, nonconstant target f, recover a nonconstant expression g such that f−g is constant or f/g is a nonzero constant, after symbolic simplification: SRBench Definition 4.1. This tests equation structure rather than predictive fit alone. AI Feynman's original study, published on 15 April 2020, reported recovering 100 of 100 selected textbook equations from generated data; these were known equations, not new empirical discoveries.",
+    "criterion": "For a known nonconstant target equation f, simplify the candidate expression g symbolically. It passes if g is nonconstant and either f − g simplifies to a constant or f/g simplifies to a nonzero constant.",
     "set_by": "La Cava and colleagues, SRBench, Definition 4.1, published in the NeurIPS 2021 proceedings.",
     "set_by_kind": "protocol",
     "threshold_quote": "This definition is designed to capture models that differ from the true model by a constant or scalar.",
-    "threshold_ref": 5,
+    "threshold_ref": 4,
     "refs": [
-     5,
-     4
+     4,
+     3
     ],
     "status": "active",
     "replaced_by": [],
@@ -389,13 +398,13 @@
    {
     "id": "m2",
     "title": "A symbolic-regression system recovers a double pendulum's Hamiltonian from measured motion.",
-    "criterion": "Infer the double pendulum's Hamiltonian, its energy-conservation expression, from measured angles and angular velocities. Schmidt and Lipson selected the simplest expression at the largest improvement in predictive accuracy on withheld experimental data. Their study, published on 3 April 2009, demonstrated law recovery in four laboratory configurations: single-mass and double-mass air tracks, a pendulum and a double pendulum. Final equation selection involved human inspection.",
+    "criterion": "Recover the double pendulum’s Hamiltonian, the expression for its conserved energy, from measured angles and angular velocities. Compare candidate equations by their number of terms and their error in predicting pairs of partial derivatives on withheld motion data. Select the simplest equation at the largest gain in predictive ability.",
     "set_by": "Schmidt and Lipson, Science, 2009; their published laboratory demonstration and equation-selection procedure. This is a study-specific test.",
     "set_by_kind": "protocol",
     "threshold_quote": "the simplest equation with the largest increase in predictive ability.",
-    "threshold_ref": 7,
+    "threshold_ref": 6,
     "refs": [
-     7
+     6
     ],
     "status": "active",
     "replaced_by": [],
@@ -404,23 +413,52 @@
    {
     "id": "m3",
     "title": "An ML-discovered new empirical law passes its first prospective physical experiment.",
-    "criterion": "An ML-originated relationship judged new relative to prior literature predicts a physical measurement before collection; an experiment by the originating team meets its prospectively specified acceptance criterion and uncertainty model. This is the first confirmation, before independent replication. The AI Scientist's 25 March 2026 report concerns computer-based ML experiments; AlphaEvolve's 16 June 2025 white paper excludes manual experimentation. Neither reports this test.",
+    "criterion": "An ML system supplies a quantitative relationship judged new relative to prior literature. Before the originating team takes a new physical measurement, it specifies the equation’s prediction, test conditions, uncertainty model and acceptance criterion. The measurement meets that criterion.",
     "set_by": "Atlas operational criterion. Searches of the Turing and DARPA goals, SRBench, SciLaws-Bench and laboratory equation-discovery studies found no external criterion for this first prospective confirmation.",
     "set_by_kind": "atlas",
     "threshold_quote": null,
     "threshold_ref": null,
     "refs": [
-     3,
      2,
+     1,
+     4,
      5,
      6,
-     7,
-     9,
-     10
+     11
     ],
     "status": "active",
     "replaced_by": [],
     "threshold_checked": null
+   },
+   {
+    "id": "m4",
+    "title": "Machine-derived equations for voltammetric peaks agree with a chemist’s analysis within experimental error.",
+    "criterion": "Vary pulse height from 10 to 40 mV in 5 mV steps in differential pulse voltammetry. From the measured current, infer how each cadmium, lead and copper peak’s position and height depend on pulse height. Compare the inferred regularities with a chemist’s analysis of the same measurements using the experimental error estimated from repeat measurements.",
+    "set_by": "Żytkow, Zhu and Hussam’s FAHRENHEIT laboratory protocol and accuracy comparison, 1990.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "both the maxima and regularities which are equivalent within empirical error",
+    "threshold_ref": 14,
+    "refs": [
+     14
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "A model earns the full structure score of 1 on a hidden SciLaws-Parallel equation.",
+    "criterion": "Starting with the public task information and no observations, query the simulator within the task’s input ranges and query budget. Submit an equation that the protocol judge rates 1 for recovery of the complete hidden structure, including the changes to the published form. Algebraic equivalents count when coefficient signs and scales are consistent.",
+    "set_by": "Huang and colleagues, SciLaws-Parallel structural-recovery protocol, Appendix C.5.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "full hidden-structure recovery up to algebraic equivalence with consistent coefficient signs and scales",
+    "threshold_ref": 5,
+    "refs": [
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
    }
   ],
   "measures": [],
@@ -430,20 +468,6 @@
   "references": [
    {
     "id": 1,
-    "kind": "journal",
-    "url": "https://www.aeaweb.org/articles?id=10.1257/aer.20180338",
-    "doi": "10.1257/aer.20180338",
-    "title": "Are Ideas Getting Harder to Find?",
-    "authors": "Bloom N, Jones CI, Van Reenen J, Webb M",
-    "container": "American Economic Review",
-    "year": "2020",
-    "volume": "110",
-    "issue": "4",
-    "pages": "1104-1144",
-    "citation_source": "crossref"
-   },
-   {
-    "id": 2,
     "kind": "report",
     "url": "https://www.darpa.mil/sites/default/files/attachment/2024-11/u-rdte-mjb-darpa-pb-2025-06-mar-2024-final.pdf",
     "doi": null,
@@ -457,7 +481,7 @@
     "citation_source": "model"
    },
    {
-    "id": 3,
+    "id": 2,
     "kind": "report",
     "url": "https://www.turing.ac.uk/sites/default/files/2021-02/summary_of_discussion_workshop_2020_ai_scientist_grand_challenge_clean.pdf",
     "doi": null,
@@ -471,7 +495,7 @@
     "citation_source": "model"
    },
    {
-    "id": 4,
+    "id": 3,
     "kind": "journal",
     "url": "https://arxiv.org/html/1905.11481v2",
     "doi": "10.1126/sciadv.aay2631",
@@ -485,7 +509,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 5,
+    "id": 4,
     "kind": "report",
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11074949/",
     "doi": "10.1038/s42256-019-0088-2",
@@ -499,7 +523,7 @@
     "citation_source": "pubmed"
    },
    {
-    "id": 6,
+    "id": 5,
     "kind": "preprint",
     "url": "https://arxiv.org/abs/2609.01552",
     "doi": "10.48550/arXiv.2609.01552",
@@ -513,7 +537,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 7,
+    "id": 6,
     "kind": "journal",
     "url": "https://pdodds.w3.uvm.edu/files/papers/others/2009/schmidt2009a.pdf",
     "doi": "10.1126/science.1165893",
@@ -527,7 +551,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 8,
+    "id": 7,
     "kind": "report",
     "url": "https://nap.nationalacademies.org/resource/25303/R&R.pdf",
     "doi": "10.17226/25303",
@@ -541,35 +565,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 9,
-    "kind": "journal",
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13017497/",
-    "doi": "10.1038/s41586-026-10265-5",
-    "title": "Towards end-to-end automation of AI research",
-    "authors": "Lu C, Lu C, Lange RT, Yamada Y, Hu S, Foerster J, et al.",
-    "container": "Nature",
-    "year": "2026",
-    "volume": "651",
-    "issue": "8107",
-    "pages": "914-919",
-    "citation_source": "crossref"
-   },
-   {
-    "id": 10,
-    "kind": "preprint",
-    "url": "https://arxiv.org/html/2506.13131v1",
-    "doi": "10.48550/arXiv.2506.13131",
-    "title": "AlphaEvolve: A coding agent for scientific and algorithmic discovery",
-    "authors": "Novikov A, Vũ N, Eisenberger M, Dupont E, Huang PS, Wagner AZ, et al.",
-    "container": "arXiv",
-    "year": "2025",
-    "volume": null,
-    "issue": null,
-    "pages": null,
-    "citation_source": "arxiv"
-   },
-   {
-    "id": 11,
+    "id": 8,
     "kind": "journal",
     "url": "https://arxiv.org/abs/1905.11481",
     "doi": null,
@@ -583,7 +579,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 12,
+    "id": 9,
     "kind": "report",
     "url": "https://papers.neurips.cc/paper_files/paper/2020/file/33a854e247155d590883b93bca53848a-Paper.pdf",
     "doi": null,
@@ -597,7 +593,7 @@
     "citation_source": "model"
    },
    {
-    "id": 13,
+    "id": 10,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2608.21051v2",
     "doi": null,
@@ -609,10 +605,96 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 11,
+    "kind": "journal",
+    "url": "https://www.academia.edu/117698471/Simple_descriptor_derived_from_symbolic_regression_accelerating_the_discovery_of_new_perovskite_catalysts",
+    "doi": "10.1038/s41467-020-17263-9",
+    "title": "Simple descriptor derived from symbolic regression accelerating the discovery of new perovskite catalysts",
+    "authors": "Weng B, Song Z, Zhu R, Yan Q, Sun Q, Grice CG, et al.",
+    "container": "Nat Commun",
+    "year": "2020",
+    "volume": "11",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 12,
+    "kind": "web",
+    "url": "https://communities.springernature.com/posts/new-catalysis-descriptor-discovered-by-interpretable-machine-learning?channel_id=behind-the-paper",
+    "doi": null,
+    "title": "New Catalysis Descriptor Discovered by Interpretable Machine Learning",
+    "authors": "Wan-Jian Yin",
+    "container": "Research Communities by Springer Nature",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 13,
+    "kind": "journal",
+    "url": "https://pure.port.ac.uk/ws/portalfiles/portal/128064253/rsta.2024.0600.pdf",
+    "doi": "10.1098/rsta.2024.0600",
+    "title": "Introduction to the Special issue on symbolic regression in the physical sciences",
+    "authors": "Bartlett DJ, Desmond H, Ferreira PG, Kronberger G",
+    "container": "Philosophical Transactions of the Royal Society A: Mathematical, Physical and Engineering Sciences",
+    "year": "2026",
+    "volume": "384",
+    "issue": "2317",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 14,
+    "kind": "report",
+    "url": "https://cdn.aaai.org/AAAI/1990/AAAI90-133.pdf",
+    "doi": null,
+    "title": "Automated Discovery in a Chemistry Laboratory",
+    "authors": "Jan M. Żytkow, Jieming Zhu and Abul Hussam",
+    "container": "AAAI-90 Proceedings",
+    "year": "1990",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 15,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/2609.01552v2",
+    "doi": null,
+    "title": "Can LLMs Discover Scientific Laws in Real and Parallel Worlds?",
+    "authors": "Huang Y, Liu Z, Cui J, Wu Z, Wang Y, Zou X, et al.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 16,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2503.19043",
+    "doi": null,
+    "title": "Enhancing Symbolic Regression with Quality-Diversity and Physics-Inspired Constraints",
+    "authors": "Bruneton JP",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
    }
   ],
   "milestone_order": [
+   "m4",
    "m1",
+   "m5",
    "m2",
    "m3"
   ],
@@ -621,265 +703,461 @@
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "AI Feynman recovered all 100 of 100 known Feynman Lectures equations.",
-    "detail": "The equations were tested on generated data; the paper checked solutions by algebraically simplifying their difference from the target to zero.",
-    "quote": "We apply it to 100 equations from the Feynman Lectures on Physics,\nand it discovers all of them, while previous publicly available software cracks only 71; for a more\ndiﬃcult physics-based test set, we improve the state of the art success rate from 15% to 90%.",
+    "finding": "AI Feynman exactly recovered 100% of 100 known equations from the Feynman Lectures on Physics.",
+    "detail": "The authors tuned the algorithm on the 100 basic equations and selected and analyzed the 20 bonus equations after finalizing the algorithm and its hyperparameters.",
+    "quote": "We apply it to 100 equations from the Feynman Lectures on Physics,\nand it discovers all of them",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
-    "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "AI Feynman 2.0 recovered 73 of 100 benchmark equations with Gaussian noise of standard deviation 0.1.",
-    "detail": "The study reports discovery of the correct mystery functions, a stricter match than recovery up to an additive or nonzero multiplicative constant.",
-    "quote": "As seen in Table 3, our method solves 73 of 100 baseline problems from the Feynman Symbolic\nRegression Database [25] withr =−1, and is typically 1-3 orders of magnitude more robust than that\nof [25].",
+    "finding": "AI Feynman 2.0 recovered Einstein’s kinetic-energy law and solved 73 of 100 Feynman benchmark problems under added Gaussian noise.",
+    "detail": "The exact recovery in Figure 1 establishes the symbolic match. The 73-of-100 result is a separate benchmark total.",
+    "quote": "Convex corners reveal particularly useful formulas, in this case Einstein’s formula and\nthe classical approximationmv2/2.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
-    "verdict": "met",
-    "finding": "Symbolic regression recovered the exact known energy-conservation law for 1 double pendulum.",
-    "detail": "The reported exact match satisfies the structural criterion; final equation selection involved human inspection.",
-    "quote": "The\nequation at the cliff corresponds to the exact energy conservation law of\nthe double pendulum (highlighted in the figure).",
+    "verdict": "partial",
+    "finding": "Symbolic regression recovered the known Hamiltonian of 1 physical double pendulum.",
+    "detail": "The physical time-series sample count is unstated. The coefficient normalization was part of a separate analysis using simulated pendula.",
+    "quote": "In all of our\nexperiments, the solution at this point has been an\nexact theoretical law",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
-    "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 6,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "Symbolic regression recovered the Hamiltonian of 1 double pendulum from measured motion.",
-    "detail": "The researchers combined chaotic and low-velocity motion data and manually inspected candidate equations; predictive accuracy was assessed using withheld experimental data.",
-    "quote": "Without any prior knowledge about physics or geometry, the\nalgorithm found the conservation law (C), which turns out to be the double\npendulum’s Hamiltonian.",
+    "finding": "For 1 physical double pendulum, the recovered Hamiltonian gave the largest gain in held-out derivative-pair prediction.",
+    "detail": "The text gives neither the number of time-series samples nor the numerical validation error.",
+    "quote": "The\ndouble pendulum’s Hamiltonian lies at the point\nrepresenting the simplest equation with the larg-\nest increase in predictive ability.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
-    "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 6,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "For 1 double pendulum, symbolic regression recovered its Hamiltonian.",
-    "detail": "The paper identifies the recovered expression as the double pendulum’s exact energy conservation law.",
-    "quote": "Without any prior knowledge about physics or geometry, the\nalgorithm found the conservation law (C), which turns out to be the double\npendulum’s Hamiltonian.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "met",
-    "finding": "NestyNet-SR reported exact symbolic recovery of 120 of 120 noiseless SRBench AI Feynman equations.",
-    "detail": "The benchmark is described as factorized search in oracle mode; the result is an author claim in a preprint.",
-    "quote": "On the\nSRBench AI Feynman benchmark, NestyNet-SR achieves exact symbolic recovery\nof all 120 noiseless equations, the first such result, and under noise a\nstatistical audit certifies which structures survive.",
+    "finding": "NestyNet-SR recovered 120 of 120 noiseless AI Feynman equations exactly.",
+    "detail": "The exact-recovery run used the neural-surrogate pipeline with factorized symbolic search disabled.",
+    "quote": "NestyNet-SR achieves exact symbolic recovery\nof all 120 noiseless equations",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "Across 4 physical systems, symbolic regression recovered exact known laws, corresponding to a symbolic difference of 0 on the same scale.",
+    "detail": "The constant difference and ratio follow from the reported exact recovery and normalization. The article gives no separate symbolic simplification trace.",
+    "quote": "In all of our\nexperiments, the solution at this point has been an\nexact theoretical law",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 6,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "For 1 physical double pendulum, the Hamiltonian was the simplest equation at the largest predictive gain among about 10 candidates.",
+    "detail": "High-energy data alone favored approximate angular-momentum conservation. Low-velocity data alone favored small-angle approximations and uncoupled energy terms. The combined data yielded the Hamiltonian.",
+    "quote": "double pendulum’s Hamiltonian lies at the point\nrepresenting the simplest equation with the larg-\nest increase in predictive ability.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 6,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "FAHRENHEIT inferred six cadmium, lead, and copper peak-position and peak-height regularities from 2,320 current measurements.",
+    "detail": "Seven pulse heights are consistent with the requested 10–40 mV sweep in 5 mV steps, but the supplied text does not establish those settings.",
+    "quote": "The experiment \nlasted 50 minutes, during which for seven pulse heights \nthe total of 2320 datapoints were collected and anal- \nysed, 21 maxima have been located and six regularities \nhave been found.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "met",
+    "finding": "GPT-6 earned the full structure score on 42% of 118 SciLaws-Parallel tasks.",
+    "detail": null,
+    "quote": "Full-law recovery instead varies substantially across models, from 0% for GPT-4o-mini\nto 42% for GPT-6, which also reaches 39% on Moat tasks (Figure 5(c)).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "QDSR achieved 91.6% exact symbolic recovery across 117 Feynman AI physics equations on noiseless data.",
+    "detail": "The author rounded fitted scalars to recognized exact forms before checking symbolic equivalence.",
+    "quote": "On this widely used collection of 117 physics equations, QDSR achieves an exact recovery rate of 91.6\n%\n\\%\n, surpassing all previous SR methods by over 20 percentage points.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://arxiv.org/abs/2506.13131",
+    "milestone": "m4",
+    "hash": "09b9667607d7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2506.13131",
     "milestone": "m1",
-    "hash": "58dcdbaf9546",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "b6489e1b752a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2506.13131",
+    "milestone": "m5",
+    "hash": "ad60fccd4ff3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2506.13131",
     "milestone": "m2",
-    "hash": "49c3505eca20",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "87f81e686a78",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2506.13131",
     "milestone": "m3",
-    "hash": "32c12b9ce8f3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6399ac0dec9d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2506.13131",
     "milestone": "completion",
     "hash": "1d82fc9ca90e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/1905.11481",
+    "milestone": "m4",
+    "hash": "09b9667607d7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1905.11481",
     "milestone": "m1",
-    "hash": "58dcdbaf9546",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "b6489e1b752a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/1905.11481",
+    "milestone": "m5",
+    "hash": "ad60fccd4ff3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1905.11481",
     "milestone": "m2",
-    "hash": "49c3505eca20",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "87f81e686a78",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1905.11481",
     "milestone": "m3",
-    "hash": "32c12b9ce8f3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6399ac0dec9d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1905.11481",
     "milestone": "completion",
     "hash": "1d82fc9ca90e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2408.06292",
+    "milestone": "m4",
+    "hash": "09b9667607d7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2408.06292",
     "milestone": "m1",
-    "hash": "58dcdbaf9546",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "b6489e1b752a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2408.06292",
+    "milestone": "m5",
+    "hash": "ad60fccd4ff3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2408.06292",
     "milestone": "m2",
-    "hash": "49c3505eca20",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "87f81e686a78",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2408.06292",
     "milestone": "m3",
-    "hash": "32c12b9ce8f3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6399ac0dec9d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2408.06292",
     "milestone": "completion",
     "hash": "1d82fc9ca90e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://papers.neurips.cc/paper_files/paper/2020/file/33a854e247155d590883b93bca53848a-Paper.pdf",
+    "milestone": "m4",
+    "hash": "09b9667607d7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://papers.neurips.cc/paper_files/paper/2020/file/33a854e247155d590883b93bca53848a-Paper.pdf",
     "milestone": "m1",
-    "hash": "58dcdbaf9546",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "b6489e1b752a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
-    "url": "https://cdanfort.w3.uvm.edu/courses/237/schmidt-lipson-2009.pdf",
-    "milestone": "m2",
-    "hash": "49c3505eca20",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "url": "https://papers.neurips.cc/paper_files/paper/2020/file/33a854e247155d590883b93bca53848a-Paper.pdf",
+    "milestone": "m5",
+    "hash": "ad60fccd4ff3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://papers.neurips.cc/paper_files/paper/2020/file/33a854e247155d590883b93bca53848a-Paper.pdf",
     "milestone": "m2",
-    "hash": "49c3505eca20",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "87f81e686a78",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://papers.neurips.cc/paper_files/paper/2020/file/33a854e247155d590883b93bca53848a-Paper.pdf",
     "milestone": "m3",
-    "hash": "32c12b9ce8f3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6399ac0dec9d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://papers.neurips.cc/paper_files/paper/2020/file/33a854e247155d590883b93bca53848a-Paper.pdf",
     "milestone": "completion",
     "hash": "1d82fc9ca90e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pdodds.w3.uvm.edu/files/papers/others/2009/schmidt2009a.pdf",
+    "milestone": "m4",
+    "hash": "09b9667607d7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pdodds.w3.uvm.edu/files/papers/others/2009/schmidt2009a.pdf",
     "milestone": "m1",
-    "hash": "58dcdbaf9546",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "b6489e1b752a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pdodds.w3.uvm.edu/files/papers/others/2009/schmidt2009a.pdf",
+    "milestone": "m5",
+    "hash": "ad60fccd4ff3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pdodds.w3.uvm.edu/files/papers/others/2009/schmidt2009a.pdf",
     "milestone": "m2",
-    "hash": "49c3505eca20",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "87f81e686a78",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pdodds.w3.uvm.edu/files/papers/others/2009/schmidt2009a.pdf",
     "milestone": "m3",
-    "hash": "32c12b9ce8f3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6399ac0dec9d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pdodds.w3.uvm.edu/files/papers/others/2009/schmidt2009a.pdf",
     "milestone": "completion",
     "hash": "1d82fc9ca90e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
-    "url": "https://cdanfort.w3.uvm.edu/courses/237/schmidt-lipson-2009.pdf",
-    "milestone": "m1",
-    "hash": "58dcdbaf9546",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://cdanfort.w3.uvm.edu/courses/237/schmidt-lipson-2009.pdf",
-    "milestone": "m3",
-    "hash": "32c12b9ce8f3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://cdanfort.w3.uvm.edu/courses/237/schmidt-lipson-2009.pdf",
-    "milestone": "completion",
-    "hash": "1d82fc9ca90e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "url": "https://arxiv.org/html/2608.21051v2",
+    "milestone": "m4",
+    "hash": "09b9667607d7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2608.21051v2",
     "milestone": "m1",
-    "hash": "58dcdbaf9546",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "b6489e1b752a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2608.21051v2",
+    "milestone": "m5",
+    "hash": "ad60fccd4ff3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2608.21051v2",
+    "milestone": "m2",
+    "hash": "87f81e686a78",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2608.21051v2",
+    "milestone": "m3",
+    "hash": "6399ac0dec9d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2608.21051v2",
+    "milestone": "completion",
+    "hash": "1d82fc9ca90e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cdanfort.w3.uvm.edu/courses/237/schmidt-lipson-2009.pdf",
+    "milestone": "m4",
+    "hash": "09b9667607d7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cdanfort.w3.uvm.edu/courses/237/schmidt-lipson-2009.pdf",
+    "milestone": "m1",
+    "hash": "b6489e1b752a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cdanfort.w3.uvm.edu/courses/237/schmidt-lipson-2009.pdf",
+    "milestone": "m5",
+    "hash": "ad60fccd4ff3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cdanfort.w3.uvm.edu/courses/237/schmidt-lipson-2009.pdf",
+    "milestone": "m2",
+    "hash": "87f81e686a78",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cdanfort.w3.uvm.edu/courses/237/schmidt-lipson-2009.pdf",
+    "milestone": "m3",
+    "hash": "6399ac0dec9d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cdanfort.w3.uvm.edu/courses/237/schmidt-lipson-2009.pdf",
+    "milestone": "completion",
+    "hash": "1d82fc9ca90e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cdn.aaai.org/AAAI/1990/AAAI90-133.pdf",
+    "milestone": "m4",
+    "hash": "09b9667607d7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2609.01552v2",
+    "milestone": "m5",
+    "hash": "ad60fccd4ff3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2503.19043",
+    "milestone": "m1",
+    "hash": "b6489e1b752a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -946,8 +1224,98 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 4 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Choosing which materials to make can require testing far more compositions than a laboratory can synthesize. One search for water-splitting catalysts had 3,545 candidate oxides. Common predictors require calculations of electronic properties that are uncertain at the catalyst surface. Discovering which combination of ionic radii predicts activity lets electrochemists rank candidates before synthesis. They still need to check which materials form the intended crystal structure: only five of 13 selected compositions yielded a pure perovskite.\". Reason: The semiconductor staffing figure measures the cost of sustaining chip-density growth, while the catalyst example quantifies a decision that a new empirical law can directly improve."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Organisers of the Royal Society discussion meeting on symbolic regression in the physical sciences, 2026: \"discover novel scientific laws or relationships from empirical evidence\". Reason: The discussion-meeting organisers identify empirical law discovery itself as a goal, more specifically than the autonomous-scientist programmes do."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after None: \"Machine-derived equations for voltammetric peaks agree with a chemist’s analysis within experimental error.\". Reason: The 1990 electrochemistry experiment supplies an earlier physical demonstration with a direct comparison between machine-derived equations and a chemist’s analysis."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"For a known nonconstant target equation f, simplify the candidate expression g symbolically. It passes if g is nonconstant and either f \\u2212 g simplifies to a constant or f/g simplifies to a nonzero constant.\". Reason: The criterion currently mixes the SRBench equivalence test with a historical result on 100 textbook equations."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m1: \"A model earns the full structure score of 1 on a hidden SciLaws-Parallel equation.\". Reason: Recovering new terms in a hidden simulator equation tests an ability that matching a published formula leaves unresolved."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"Recover the double pendulum\\u2019s Hamiltonian, the expression for its conserved energy, from measured angles and angular velocities. Compare candidate equations by their number of terms and their error in predicting pairs of partial derivatives on withheld motion data. Select the simplest equation at the largest gain in predictive ability.\". Reason: The revised test specifies what was scored on withheld motion data and removes the results for other apparatus from the double-pendulum criterion."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"An ML system supplies a quantitative relationship judged new relative to prior literature. Before the originating team takes a new physical measurement, it specifies the equation\\u2019s prediction, test conditions, uncertainty model and acceptance criterion. The measurement meets that criterion.\"; refs = [3, 2, 5, 6, 7, 14]. Reason: The catalyst study supplies relevant originating-team measurements for assessment against this milestone, while the current criterion discusses two computer-based experiments."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 7 of 7 proposed operations from MLC-08-revise-20261125T092359081432Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m4, m1, m5, m2, m3."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 0 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 3 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Structural problems after applying: references never cited: [1, 9, 10]"
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 7 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 3 candidates returned, 0 dropped as sources already used, 3 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 3 of 3 new candidates, without search. Skipped: none. Dropped rows: none. Replaced 6 earlier rows. Added 10 results: 7 from sources already used, 3 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 2 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 10 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Removed 3 references no longer cited; renumbered."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-25"
  }
 }
