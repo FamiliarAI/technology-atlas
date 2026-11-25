@@ -300,21 +300,17 @@
   "title": "Mechanistic interpretability for model prediction and editing",
   "definition": "A causal account of a pretrained language model's internal computation lets an independent team predict its outputs and make a lasting edit to its stored numerical weights, with predicted effects on a target behavior and named controls.",
   "goal": {
-   "need": "On 21 May 2024, Anthropic reported extracting up to 33,554,432 features from Claude 3 Sonnet. On 27 March 2025, it estimated that attribution graphs gave satisfying insight for about one quarter of attempted Claude 3.5 Haiku prompts; this was a subjective estimate without a stated sample size. The goal is to connect internal features to causal accounts that support prediction and model editing.",
+   "need": "In three experiments with 2,405 participants, people who received overly agreeable AI advice were less willing to repair an interpersonal conflict. User ratings and tests of sample replies can miss this behavior. Knowing which computation produces unwarranted agreement would help operators anticipate when it recurs and correct it. People seeking advice would benefit if the correction held in real conversations and preserved other answers they rely on.",
    "need_refs": [
-    1,
-    2
+    10,
+    11,
+    4,
+    7,
+    12,
+    13
    ],
    "figures": null,
    "statements": [
-    {
-     "body": "National Institute of Standards and Technology, Four Principles of Explainable Artificial Intelligence",
-     "year": "2021",
-     "quote": "An explanation correctly reflects the reason for generating the output and/or accurately reflects the system’s process.",
-     "context": "NIST's explanation-accuracy principle.",
-     "ref": 3,
-     "checked": true
-    },
     {
      "body": "DARPA, AI Forge, Challenge 1: Scaling Causal Interpretability for Predictive Diagnostics",
      "year": "2026",
@@ -322,6 +318,22 @@
      "context": null,
      "ref": 4,
      "checked": true
+    },
+    {
+     "body": "International AI Safety Report 2025",
+     "year": "2025",
+     "quote": "understand models well enough to edit their behaviours by modifying their weights",
+     "context": "The report identifies this as a research goal and finds that the available interpretability tools had yet to show they could guide edits reliably.",
+     "ref": 14,
+     "checked": false
+    },
+    {
+     "body": "Schmidt Sciences, Request for Proposals: AI Interpretability",
+     "year": "2026",
+     "quote": "mitigations for deceptive behaviors",
+     "context": "The program seeks methods that use model internals to detect deception and steer models toward truthful answers in realistic settings. It asks for comparisons with methods that lack access to weights.",
+     "ref": 12,
+     "checked": null
     }
    ]
   },
@@ -347,8 +359,8 @@
   "milestones": [
    {
     "id": "m1",
-    "title": "An algorithm predicts 100% of a neural model's aligned interchange-intervention outputs.",
-    "criterion": "For each specified intermediate variable, the algorithm and neural model must return identical outputs under aligned internal-state swaps for every ordered input pair in the declared finite domain, using a specified output mapping. This is interchange-intervention accuracy of 1. Geiger et al.'s 2022 illustrative Boolean-conjunction network reached 100% after one training update: four inputs, 16 ordered pairs per aligned variable and two aligned variables. Its causal structure was deliberately trained into the network; this was not recovery from a pretrained language model.",
+    "title": "A causal algorithm matches the neural model’s output on every aligned internal-state swap.",
+    "criterion": "Specify a finite input domain, an alignment between the algorithm’s variables and the neural model’s internal states, and a mapping between their outputs. For each aligned variable and every ordered pair of base and source inputs, run both systems on the base input with the aligned value replaced by its value on the source input. The mapped outputs must agree on every swap, giving interchange-intervention accuracy of 1.",
     "set_by": "Geiger et al., ICML 2022, causal-abstraction relationship and interchange-intervention accuracy, Equations 2–3.",
     "set_by_kind": "protocol",
     "threshold_quote": "Where every pair of inputs b and s is considered, and INTINVACC is 1, the two models are in the causal abstraction relationship.",
@@ -363,7 +375,7 @@
    {
     "id": "m2",
     "title": "An internal intervention changes a language model's output as its proposed mechanism predicts.",
-    "criterion": "Change the activity of an interpreted internal feature or feature group in the original language model and observe the predicted behavioral effect. This is a local causal-validation test, without a published aggregate success-rate cutoff. On 27 March 2025, Anthropic reported that, for one Dallas geography prompt in Claude 3.5 Haiku, suppressing Texas-related activations and activating California-related features changed the answer to Sacramento. This intervention changed inference-time activity, not stored weights.",
+    "criterion": "Specify the behavioral effect predicted from increasing or suppressing the activity of an interpreted feature or group of features. Apply that intervention during inference in the original language model and compare its response with the unmodified response on the same prompt. The observed change must have the predicted effect.",
     "set_by": "Anthropic's feature-steering validation in Scaling Monosemanticity and original-model perturbation experiments in On the Biology of a Large Language Model.",
     "set_by_kind": "protocol",
     "threshold_quote": "establishing that features do have the causal effect we expect them to",
@@ -379,7 +391,7 @@
    {
     "id": "m3",
     "title": "An activation edit swaps a held-out entity's target attribute and preserves its other queried attributes.",
-    "criterion": "For a held-out base/source entity pair, replacing the target feature must produce the source entity's target attribute; control queries must retain the base entity's non-target attribute values. These are RAVEL's per-intervention Cause and Iso success conditions, not a benchmark-wide pass mark. In the 2024 Llama2-7B evaluation (2,800 entities), Multi-task Distributed Alignment Search obtained mean Disentangle scores of 60.1% on Entity and 65.6% on Context. Disentangle averages Cause and Iso; it is not joint success. The intervention changes activations during inference.",
+    "criterion": "For a held-out base and source entity pair, replace the base entity’s activation for the proposed target feature with the source entity’s activation. On a query about the target attribute, the predicted token must give the source entity’s value (Cause). On a query about another attribute, apply the same feature swap and require the base entity’s value (Iso). RAVEL scores the two kinds of query separately.",
     "set_by": "Huang et al., ACL 2024, RAVEL Section 2.2; the published protocol concerns entity-attribute representations and activation interventions.",
     "set_by_kind": "protocol",
     "threshold_quote": "If F encodes A, then interventions on F should change the value of A.",
@@ -408,6 +420,21 @@
     "status": "active",
     "replaced_by": [],
     "threshold_checked": null
+   },
+   {
+    "id": "m5",
+    "title": "A stored-weight edit ranks the requested answer above the original answer on a CounterFact prompt.",
+    "criterion": "Edit the model’s stored weights for a specified subject and relation. On the CounterFact rewrite prompt, the edited model must assign higher probability to the requested object than to the original object. Report the same comparison on paraphrases. For prompts about nearby subjects that share the original object, report how often the original object still ranks higher. These are three separate success fractions. The threshold for an individual comparison is a strict probability ordering.",
+    "set_by": "Meng et al., CounterFact evaluation protocol, section 3.3.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "Our Efficacy Score (ES) is the portion of cases for which we have \\(\\mathbb{P}[o^*] > \\mathbb{P}[o^c]\\) post-edit",
+    "threshold_ref": 15,
+    "refs": [
+     15
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": false
    }
   ],
   "measures": [],
@@ -542,12 +569,181 @@
     "issue": null,
     "pages": null,
     "citation_source": "model"
+   },
+   {
+    "id": 10,
+    "kind": "journal",
+    "url": "https://s3.amazonaws.com/media.mediapost.com/uploads/science.aec8352.pdf",
+    "doi": "10.1126/science.aec8352",
+    "title": "Sycophantic AI decreases prosocial intentions and promotes dependence",
+    "authors": "Cheng M, Lee C, Khadpe P, Yu S, Han D, Jurafsky D",
+    "container": "Science",
+    "year": "2026",
+    "volume": "391",
+    "issue": "6792",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 11,
+    "kind": "web",
+    "url": "https://openai.com/index/expanding-on-sycophancy/",
+    "doi": null,
+    "title": "Expanding on what we missed with sycophancy",
+    "authors": "OpenAI",
+    "container": null,
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 12,
+    "kind": "report",
+    "url": "https://research-authority.tau.ac.il/sites/resauth.tau.ac.il/files/Schmidt%20Sciences%202026%20RFP%20AI%20Interpretability.pdf",
+    "doi": null,
+    "title": "Request for Proposals: AI Interpretability",
+    "authors": "Schmidt Sciences",
+    "container": "2026 Interpretability RFP",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 13,
+    "kind": "journal",
+    "url": "https://aclanthology.org/2023.findings-acl.733/",
+    "doi": "10.18653/v1/2023.findings-acl.733",
+    "title": "Detecting Edit Failures In Large Language Models: An Improved Specificity Benchmark",
+    "authors": "Hoelscher-Obermaier J, Persson J, Kran E, Konstas I, Barez F",
+    "container": "Findings of the Association for Computational Linguistics: ACL 2023",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": "11548-11559",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 14,
+    "kind": "report",
+    "url": "https://internationalaisafetyreport.org/publication/international-ai-safety-report-2025",
+    "doi": null,
+    "title": "International AI Safety Report 2025",
+    "authors": "Yoshua Bengio et al.",
+    "container": "DSIT 2025/001",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 15,
+    "kind": "journal",
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2022/file/6f1d43d5a82a37e89b0665b33bf3a182-Paper-Conference.pdf",
+    "doi": "10.52202/068431-1262",
+    "title": "Locating and Editing Factual Associations in GPT",
+    "authors": "Meng K, Bau D, Andonian A, Belinkov Y",
+    "container": "Advances in Neural Information Processing Systems 35",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": "17359-17372",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 16,
+    "kind": "report",
+    "url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/4ae163cb8788970e53b4fd9578141139-Paper-Conference.pdf",
+    "doi": null,
+    "title": "Function Vectors in Large Language Models",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 17,
+    "kind": "book",
+    "url": "https://papers.nips.cc/paper/2023/file/efbba7719cc5172d175240f24be11280-Paper-Conference.pdf",
+    "doi": null,
+    "title": "How does GPT-2 compute greater-than?: Interpreting mathematical abilities in a pre-trained language model",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 18,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2606.11722",
+    "doi": null,
+    "title": "ICA Lens: Non-Gaussianity Reveals Interpretable Directions in Language Models",
+    "authors": "Liu S, Han F, Wiegreffe S, Huang F",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 19,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2605.18229",
+    "doi": null,
+    "title": "Are Sparse Autoencoder Benchmarks Reliable?",
+    "authors": "Chanin D",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 20,
+    "kind": "report",
+    "url": "https://papers.neurips.cc/paper_files/paper/2022/file/6f1d43d5a82a37e89b0665b33bf3a182-Paper-Conference.pdf",
+    "doi": null,
+    "title": "Locating and Editing Factual Associations in GPT",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 21,
+    "kind": "report",
+    "url": "https://aclanthology.org/2024.emnlp-main.1210.pdf",
+    "doi": null,
+    "title": "Rebuilding ROME : Resolving Model Collapse during Sequential Model Editing",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
    }
   ],
   "milestone_order": [
    "m1",
    "m2",
    "m3",
+   "m5",
    "m4"
   ],
   "results": [
@@ -555,391 +751,608 @@
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "Claude 3.5 Haiku: 1 Dallas prompt produced Sacramento after the predicted feature swap.",
-    "detail": "The intervention suppressed Texas-related activations and injected California-related features during inference; it did not edit stored weights.",
-    "quote": "We now return to our original prompt, and swap “Texas” for “California” by inhibiting the activations of the Texas cluster and activating the\nCalifornia\nfeatures identified from the “Oakland” prompt. In response to these perturbations, the model outputs “Sacramento” (the capital of California).",
+    "finding": "In a random sample of 25 Claude 3.5 Haiku poems, the model ended its line with the injected planned word in 70% of cases.",
+    "detail": "The 70% is the frequency of the injected ending under intervention. The text shows unmodified responses for individual prompts and gives no aggregate baseline rate for the 25 poems.",
+    "quote": "In addition to the examples above, we injected two planned word features (“rabbit” and “green”) in a random sample of 25 poems, and found that the model ended its line with the injected planned word in 70% of cases.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 2,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "On one Dallas prompt, Claude 3.5 Haiku returned the injected region’s capital in all five reported substitutions.",
+    "detail": "The five reported substitutions used California, Georgia, British Columbia, China and the Byzantine Empire. Some required stronger feature injection to change the output.",
+    "quote": "In response to these perturbations, the model outputs “Sacramento” (the capital of California).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 2,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "Claude 3 Sonnet: in one example, clamping a transit infrastructure feature to 5× its maximum activation induced a bridge mention.",
-    "detail": "The intervention changed feature activity during the forward pass. Its observed effect was consistent with the feature's interpretation.",
+    "finding": "On one prompt, Claude 3 Sonnet mentioned a bridge after its transit infrastructure feature was clamped to 5× its maximum activation.",
+    "detail": "This is a qualitative comparison on one prompt. The 5× value measures intervention strength.",
     "quote": "Similarly, clamping the Transit infrastructure feature\n1M/3\nto 5× its maximum activation value causes the model to mention a bridge when it otherwise would not.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 1,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Boolean-conjunction network: 100% interchange-intervention accuracy across 16 ordered input pairs for each of two aligned variables.",
-    "detail": "The network reached this result after one interchange-intervention training update. Its causal structure was deliberately trained, not recovered from a pretrained language model.",
+    "finding": "Boolean conjunction network after one training update: 100% agreement across 32 aligned swaps.",
+    "detail": "The exhaustive result is for the toy network. The source is a peer-reviewed ICML proceedings paper, published in PMLR.",
     "quote": "all aligned interchange interventions\nresult in the same output (the interchange intervention accuracy is now 1)",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 5,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
-    "case": null,
-    "verdict": "met",
-    "finding": "GPT-2 small, sample size not stated: patching positional signals caused a logit-difference drop at least 88% as large as patching S-Inhibition Heads.",
-    "detail": "The intervention patched Induction and Duplicate Token Head outputs from sentences with altered position signals. A same-position control with different subject tokens caused less than 8% of the comparison drop.",
-    "quote": "We patched the output of the Induction and Duplicate Token Heads from sentences with altered position signals. We observed a drop in logit difference of almost the same size as patching the S-Inhibition Heads (at least 88%).",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "met",
-    "finding": "Across 13 chat models, adding an interpreted refusal direction induced refusals when tested on 100 harmless instructions.",
-    "detail": "The authors selected directions using separate validation sets. They note that the directions’ precise semantic meaning remains unclear.",
-    "quote": "Specifically, for each model, we find a single direction such that erasing this direction from the model’s residual stream activations prevents it from refusing harmful instructions, while adding this direction elicits refusal on even harmless instructions.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "On RAVEL's 2,800-entity Llama2-7B instance, MDAS achieved a 60.1% mean Disentangle score on the Entity split.",
-    "detail": "Disentangle averages Cause and Iso across interventions; it does not establish joint success for a held-out base/source pair. The Paris–Tokyo example describes expected behavior, not an observed result.",
-    "quote": null,
-    "checked": null,
-    "confirmed": true,
-    "peer_reviewed": false,
-    "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "met",
-    "finding": "IIT-trained BERT on MQNLI: approximately 100% interchange intervention accuracy; evaluation sample size not stated.",
-    "detail": "Interventions swapped aligned internal representations in a fine-tuned model and were evaluated against the causal model’s predicted output changes.",
-    "quote": "Our results, shown in ﬁgure 4, demonstrate that IIT training\nonC\nQPObj\nNatLog solves MQNLI with near perfect accuracy and\nIIT accuracy (≈100%).",
+    "finding": "Fine-tuned BERT on MQNLI (10,000 test examples, swap count unstated): approximately 100% agreement with predicted intervention effects.",
+    "detail": "The one million pairs in Appendix C are training pairs. The reported evaluation accuracy does not specify the number of swaps tested.",
+    "quote": "solves MQNLI with near perfect accuracy and\nIIT accuracy (≈100%).",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 5,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": null,
-    "verdict": "partial",
-    "finding": "GPT-2 small IOI circuit: 26 attention heads; evaluation sample size not stated.",
-    "detail": "The circuit achieved 87% of the full model’s average logit-difference performance, not 100% discrete-output prediction. The source does not report a stored-weight edit or predictions before and after one.",
-    "quote": "We discover a circuit of 26 attention heads–1.1% of the total number of (head, token position) pairs–that completes the bulk of this task.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": null,
-    "verdict": "partial",
-    "finding": "On 159 HarmBench behaviors, weight-edited Llama-2 7B achieved a 22.6% attack success rate with its default system prompt.",
-    "detail": "The authors used an interpretable stored-weight edit and evaluated other capabilities. They did not report frozen competing causal accounts predicting every unedited and edited output, or unchanged control outputs on complete held-out sets.",
-    "quote": "For\nLlama-2\nmodels, including the system prompt substantially reduces ASR compared to evaluation without it (e.g. 22.6% vs 79.9% for\nLlama-2 7B\n).",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "MDAS achieved a 60.1% disentanglement score on the RAVEL Entity split, with approximately 50,000 test input pairs.",
-    "detail": "The score averages intervention effects on target and other attributes; it is not an exhaustive interchange-intervention accuracy of 100%.",
-    "quote": null,
-    "checked": null,
-    "confirmed": true,
+    "finding": "GPT-2 small’s IOI circuit and full model differed by up to 3.09 in mean logit difference across 10 greedily selected knockout sets.",
+    "detail": "The sample size counts the greedy knockout sets shown in Figure 6. The source does not give the number of prompts used to estimate their mean logit differences.",
+    "quote": "However, the third resulted in sets\nK\nK\nthat had high incompleteness score: up to 3.09 (87% of the original logit difference).",
+    "checked": true,
+    "confirmed": false,
     "peer_reviewed": false,
-    "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "Llama2-7B feature interventions achieved a 60.1% disentanglement score on approximately 50,000 Entity-split test pairs.",
-    "detail": "The score combines predicted target changes with preservation of other attributes. The interventions changed inference-time activations.",
+    "finding": "GPT-2 small’s mean IO-minus-subject logit difference reversed to −3.16 after S-Inhibition signal inversion. Prompt count unreported.",
+    "detail": null,
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "Llama-3 8B Instruct showed a 94-percentage-point drop in refusal rate across 100 harmful JailbreakBench prompts after feature suppression.",
+    "detail": "Refusal was scored by substring matching. The authors assessed response safety separately with a classifier.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "After the stored-weight edit, Qwen 14B Chat had an 84.3% attack success rate on 159 HarmBench standard behaviors.",
+    "detail": "The HarmBench rate measures classifier-scored attack success. The capability benchmarks compare aggregate scores, which cannot establish unchanged individual outputs.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Llama2-7B with MDAS achieved 69.2% continent Cause on the held-out city split, which contains about 15,000 test pairs across attributes.",
+    "detail": "The continent-specific denominator is unreported.",
     "quote": null,
     "checked": null,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "HyperDAS on Llama3-8B city queries (7,016 Cause and 9,930 Iso test examples): 82.4% Disentangle.",
-    "detail": "Disentangle averages separate Cause and Iso scores; it does not establish joint success for a held-out entity pair. The text says train and test prompts are disjoint, but does not establish that test entities are held out.",
+    "finding": "Llama2-7B with MDAS scored 60.1% Disentangle on about 50,000 held-out Entity test pairs across five entity types.",
+    "detail": "Disentangle averages Cause and Iso. The illustrative Paris–Tokyo example shows expected outputs rather than a measured result on an identified held-out pair. The source is a peer-reviewed ACL conference paper published in proceedings.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 6,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "HyperDAS on Llama3-8B averaged 84.7% Disentangle across 46,629 RAVEL test queries.",
+    "detail": "Disentangle averages target-attribute success and other-attribute preservation. It does not measure the response change against a separately reported unmodified run.",
     "quote": null,
     "checked": null,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "HyperDAS on Llama3-8B scored 70.8% Cause on 7,016 RAVEL city test queries.",
+    "detail": "HyperDAS selects token positions and the feature subspace from each prompt pair. The source reports separate Cause and Iso fractions without a paired result showing that the same swap passed both checks.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "GPT-J gained 52.0 percentage points in mean zero-shot top-1 accuracy across six tasks after function-vector addition.",
+    "detail": "The aggregate is from Table 2. The supplied text gives six tasks and five random seeds, with no exact count for the filtered test prompts. The source is an ICLR 2024 conference proceedings paper.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "Across 10,000 year-span prompts, patching GPT-2 small’s greater-than circuit drove the valid-minus-invalid next-token probability gap to −36.6 percentage points.",
+    "detail": "The patch replaced the circuit’s activations with those from matched 01 prompts while paths outside the circuit retained the original prompt inputs. The paper appeared in the peer-reviewed NeurIPS 2023 conference proceedings.",
+    "quote": "The circuit\nis also necessary: performing the opposite of the prior experiment, giving nodes in our circuit the\n01-dataset, and those outside it the normal dataset, leaves GPT-2 unable to perform the task: it\nachieves a probability difference of -36.6%.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Gemma 2 2B ICA activation swaps scored 0.767 on RAVEL Disentangle across six attribute tasks and two seeds.",
+    "detail": "The supplied text gives no entity-pair count. Paris and Tokyo illustrate the expected behavior, with no observed outputs reported for that pair.",
+    "quote": "On Gemma 2 2B (layer 12), ICA achieves the highest Disentangle score (0.767), outperforming PCA (0.721) and Gemma Scope SAE (0.664) across six city and Nobel laureate attribute tasks (Figure\n10\n).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The canonical 65k Gemma Scope SAE averaged 0.676 on RAVEL Cause across five evaluation seeds.",
+    "detail": "Five is the number of evaluation seeds. The text gives no count of held-out entity pairs for this result.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "met",
+    "finding": "ROME on GPT-2 XL ranked the requested object above the original on 100.0% of rewrite prompts as reported for 7,500 CounterFact records.",
+    "detail": "The numerical results come from Table 4 of the peer-reviewed NeurIPS 2022 conference proceedings.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "GPT-J-6B with r-ROME, 5,000 independent CounterFact edits: 99.74% rewrite success.",
+    "detail": "The source is an EMNLP main-conference proceedings paper. The journal-specific peer_reviewed field is false.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://transformer-circuits.pub/2025/attribution-graphs/biology.html",
     "milestone": "m1",
-    "hash": "31727dc3e52e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "480b5783d3dd",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://transformer-circuits.pub/2025/attribution-graphs/biology.html",
     "milestone": "m2",
-    "hash": "b0a2991ad752",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7546628423c2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://transformer-circuits.pub/2025/attribution-graphs/biology.html",
     "milestone": "m3",
-    "hash": "8d0d9686b42a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e968285f4d09",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://transformer-circuits.pub/2025/attribution-graphs/biology.html",
+    "milestone": "m5",
+    "hash": "ab8bebb67c18",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://transformer-circuits.pub/2025/attribution-graphs/biology.html",
     "milestone": "m4",
     "hash": "d441d219a67e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://transformer-circuits.pub/2025/attribution-graphs/biology.html",
     "milestone": "completion",
     "hash": "36f7db9d6d5c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://transformer-circuits.pub/2024/scaling-monosemanticity/",
     "milestone": "m1",
-    "hash": "31727dc3e52e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "480b5783d3dd",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://transformer-circuits.pub/2024/scaling-monosemanticity/",
     "milestone": "m2",
-    "hash": "b0a2991ad752",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7546628423c2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://transformer-circuits.pub/2024/scaling-monosemanticity/",
     "milestone": "m3",
-    "hash": "8d0d9686b42a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e968285f4d09",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://transformer-circuits.pub/2024/scaling-monosemanticity/",
+    "milestone": "m5",
+    "hash": "ab8bebb67c18",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://transformer-circuits.pub/2024/scaling-monosemanticity/",
     "milestone": "m4",
     "hash": "d441d219a67e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://transformer-circuits.pub/2024/scaling-monosemanticity/",
     "milestone": "completion",
     "hash": "36f7db9d6d5c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v162/geiger22a/geiger22a.pdf",
     "milestone": "m1",
-    "hash": "31727dc3e52e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2211.00593",
-    "milestone": "m2",
-    "hash": "b0a2991ad752",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2406.11717",
-    "milestone": "m2",
-    "hash": "b0a2991ad752",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://aclanthology.org/2024.acl-long.470.pdf",
-    "milestone": "m3",
-    "hash": "8d0d9686b42a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "480b5783d3dd",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v162/geiger22a/geiger22a.pdf",
     "milestone": "m2",
-    "hash": "b0a2991ad752",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7546628423c2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v162/geiger22a/geiger22a.pdf",
     "milestone": "m3",
-    "hash": "8d0d9686b42a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e968285f4d09",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.mlr.press/v162/geiger22a/geiger22a.pdf",
+    "milestone": "m5",
+    "hash": "ab8bebb67c18",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v162/geiger22a/geiger22a.pdf",
     "milestone": "m4",
     "hash": "d441d219a67e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v162/geiger22a/geiger22a.pdf",
     "milestone": "completion",
     "hash": "36f7db9d6d5c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2211.00593",
     "milestone": "m1",
-    "hash": "31727dc3e52e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "480b5783d3dd",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2211.00593",
+    "milestone": "m2",
+    "hash": "7546628423c2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2211.00593",
     "milestone": "m3",
-    "hash": "8d0d9686b42a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e968285f4d09",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2211.00593",
+    "milestone": "m5",
+    "hash": "ab8bebb67c18",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2211.00593",
     "milestone": "m4",
     "hash": "d441d219a67e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2211.00593",
     "milestone": "completion",
     "hash": "36f7db9d6d5c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2406.11717",
     "milestone": "m1",
-    "hash": "31727dc3e52e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "480b5783d3dd",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2406.11717",
+    "milestone": "m2",
+    "hash": "7546628423c2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2406.11717",
     "milestone": "m3",
-    "hash": "8d0d9686b42a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e968285f4d09",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2406.11717",
+    "milestone": "m5",
+    "hash": "ab8bebb67c18",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2406.11717",
     "milestone": "m4",
     "hash": "d441d219a67e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2406.11717",
     "milestone": "completion",
     "hash": "36f7db9d6d5c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://aclanthology.org/2024.acl-long.470.pdf",
     "milestone": "m1",
-    "hash": "31727dc3e52e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "480b5783d3dd",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://aclanthology.org/2024.acl-long.470.pdf",
     "milestone": "m2",
-    "hash": "b0a2991ad752",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7546628423c2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aclanthology.org/2024.acl-long.470.pdf",
+    "milestone": "m3",
+    "hash": "e968285f4d09",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aclanthology.org/2024.acl-long.470.pdf",
+    "milestone": "m5",
+    "hash": "ab8bebb67c18",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://aclanthology.org/2024.acl-long.470.pdf",
     "milestone": "m4",
     "hash": "d441d219a67e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://aclanthology.org/2024.acl-long.470.pdf",
     "milestone": "completion",
     "hash": "36f7db9d6d5c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.iclr.cc/paper_files/paper/2025/file/180d2acb13633fe78688d0d2347c731f-Paper-Conference.pdf",
+    "milestone": "m1",
+    "hash": "480b5783d3dd",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.iclr.cc/paper_files/paper/2025/file/180d2acb13633fe78688d0d2347c731f-Paper-Conference.pdf",
+    "milestone": "m2",
+    "hash": "7546628423c2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.iclr.cc/paper_files/paper/2025/file/180d2acb13633fe78688d0d2347c731f-Paper-Conference.pdf",
     "milestone": "m3",
-    "hash": "8d0d9686b42a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e968285f4d09",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.iclr.cc/paper_files/paper/2025/file/180d2acb13633fe78688d0d2347c731f-Paper-Conference.pdf",
+    "milestone": "m5",
+    "hash": "ab8bebb67c18",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.iclr.cc/paper_files/paper/2025/file/180d2acb13633fe78688d0d2347c731f-Paper-Conference.pdf",
+    "milestone": "m4",
+    "hash": "d441d219a67e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.iclr.cc/paper_files/paper/2025/file/180d2acb13633fe78688d0d2347c731f-Paper-Conference.pdf",
+    "milestone": "completion",
+    "hash": "36f7db9d6d5c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/4ae163cb8788970e53b4fd9578141139-Paper-Conference.pdf",
+    "milestone": "m2",
+    "hash": "7546628423c2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://papers.nips.cc/paper/2023/file/efbba7719cc5172d175240f24be11280-Paper-Conference.pdf",
+    "milestone": "m2",
+    "hash": "7546628423c2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2606.11722",
+    "milestone": "m3",
+    "hash": "e968285f4d09",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2605.18229",
+    "milestone": "m3",
+    "hash": "e968285f4d09",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://papers.neurips.cc/paper_files/paper/2022/file/6f1d43d5a82a37e89b0665b33bf3a182-Paper-Conference.pdf",
+    "milestone": "m5",
+    "hash": "ab8bebb67c18",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aclanthology.org/2024.emnlp-main.1210.pdf",
+    "milestone": "m5",
+    "hash": "ab8bebb67c18",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1006,8 +1419,93 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 3 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"In three experiments with 2,405 participants, people who received overly agreeable AI advice were less willing to repair an interpersonal conflict. User ratings and tests of sample replies can miss this behavior. Knowing which computation produces unwarranted agreement would help operators anticipate when it recurs and correct it. People seeking advice would benefit if the correction held in real conversations and preserved other answers they rely on.\". Reason: The feature count and prompt-analysis rate describe experiments but leave out who experiences model failures and why diagnosing their cause matters."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by International AI Safety Report 2025, 2025: \"understand models well enough to edit their behaviours by modifying their weights\". Reason: The international expert report explicitly identifies changing behavior through a weight edit as a goal of mechanistic understanding."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Schmidt Sciences, Request for Proposals: AI Interpretability, 2026: \"mitigations for deceptive behaviors\". Reason: The funding call names a concrete use for mechanistic understanding and specifies the baseline its proposed tools should improve on."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: title = \"A causal algorithm matches the neural model\\u2019s output on every aligned internal-state swap.\"; criterion = \"Specify a finite input domain, an alignment between the algorithm\\u2019s variables and the neural model\\u2019s internal states, and a mapping between their outputs. For each aligned variable and every ordered pair of base and source inputs, run both systems on the base input with the aligned value replaced by its value on the source input. The mapped outputs must agree on every swap, giving interchange-intervention accuracy of 1.\". Reason: The Boolean-network result belongs with the evidence, while the criterion needs only the alignment, input domain and exact agreement condition."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"Specify the behavioral effect predicted from increasing or suppressing the activity of an interpreted feature or group of features. Apply that intervention during inference in the original language model and compare its response with the unmodified response on the same prompt. The observed change must have the predicted effect.\". Reason: The Dallas example is a result on one prompt, while the test applies to any specified feature intervention with a predicted effect."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"For a held-out base and source entity pair, replace the base entity\\u2019s activation for the proposed target feature with the source entity\\u2019s activation. On a query about the target attribute, the predicted token must give the source entity\\u2019s value (Cause). On a query about another attribute, apply the same feature swap and require the base entity\\u2019s value (Iso). RAVEL scores the two kinds of query separately.\". Reason: The benchmark averages in the criterion obscure which answer counts as correct on a target query and which counts on a control query."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m3: \"A stored-weight edit ranks the requested answer above the original answer on a CounterFact prompt.\". Reason: A published test of stored-weight editing fills the gap between temporary activation swaps and predicting every output of an edited model."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove statement 0. Reason: NIST’s explanation-accuracy principle applies to explanations generally and does not name prediction from model internals or targeted editing as a goal."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 8 of 8 proposed operations from MLC-06-revise-20261125T090356923389Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m3, m5."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 4 from Crossref, 0 from PubMed, 0 from arXiv, 3 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 0 found, 2 not found, 1 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 7 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 6 candidates returned, 0 dropped as sources already used, 6 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 6 of 6 new candidates, without search. Skipped: none. Dropped rows: none. Replaced 12 earlier rows. Added 19 results: 13 from sources already used, 6 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 2 from arXiv, 4 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 8 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-25"
  }
 }
