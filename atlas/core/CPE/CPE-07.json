@@ -354,28 +354,32 @@
  "page": {
   "id": "CPE-07",
   "title": "Continental quantum-repeater networks",
-  "definition": "A fibre network distributes entanglement—shared quantum correlations—across continental distances through concatenated quantum repeaters. Quantum memories retain quantum states while entanglement swapping joins shorter links; error correction counters loss and operational errors.",
+  "definition": "A chain of quantum repeaters distributes entanglement across continental distances over optical fibre. In a memory-based repeater, quantum memories hold states on adjacent links until a joint measurement at the repeater entangles the outer qubits. Repeating this operation extends the shared state to the endpoints. Classical signals coordinate the links, and quantum error correction addresses photon loss and errors in local operations. Trusted key relays instead pass classical key material between successive stations.",
   "goal": {
-   "need": "At 1550 nm, standard single-mode fibre loses 0.2 dB/km: only one photon in 100 survives 100 km. This attenuation limits direct distribution of entanglement and secret keys. Quantum repeaters address that limit by connecting shorter links; shared entanglement also supports distributed quantum processing.",
+   "need": "At 1550 nm, only about one photon in 100 survives 100 km of standard single-mode fibre. An ordinary amplifier cannot copy an unknown quantum state. China’s quantum key network reaches 80 cities by relying on trusted relays. With end-to-end entanglement, distant users could establish encryption keys without entrusting them to those relays. Quantum processors at different sites could also perform gates between their qubits. Each use requires entangled pairs of sufficient fidelity.",
    "need_refs": [
-    1
+    1,
+    2,
+    3,
+    20,
+    21
    ],
    "figures": null,
    "statements": [
     {
      "body": "U.S. Department of Energy, Office of Science",
-     "year": "2026",
-     "quote": "create a reliable multi-hop network that controls the route of flying qubits and corrects for errors.",
-     "context": "A research priority for integrating quantum-network building blocks. Flying qubits carry quantum information between nodes.",
-     "ref": 2,
+     "year": "2020",
+     "quote": "Interstate Quantum Entanglement Distribution using Quantum Repeaters",
+     "context": "Milestone 4 of the Quantum Internet Blueprint Workshop report specifies continental distances and correction of loss and operational errors.",
+     "ref": 23,
      "checked": true
     },
     {
-     "body": "Internet Research Task Force, Quantum Internet Research Group",
-     "year": "2023",
-     "quote": "Support distributed quantum applications.",
-     "context": "An architectural goal in RFC 9340, a research-group consensus document published for information rather than as an Internet Standard.",
-     "ref": 3,
+     "body": "Quantum Internet Alliance, Horizon Europe",
+     "year": "2022",
+     "quote": "fully functional quantum repeaters unlocking Pan-European end-to-end quantum communication.",
+     "context": "The Phase 1 grant agreement defines a prototype connecting two metropolitan networks over standard optical fibre.",
+     "ref": 22,
      "checked": true
     }
    ]
@@ -383,12 +387,13 @@
   "completion": {
    "title": "Concatenated quantum repeaters distribute entanglement across continental distances with error correction.",
    "criterion": "Demonstrate interstate entanglement distribution over continental distances through concatenated quantum repeaters, with quantum communication corrected for loss and operational errors and integrated classical and quantum networking.",
-   "set_by": "U.S. Department of Energy, Quantum Internet Blueprint (2020), Milestone 4, official summary.",
+   "set_by": "U.S. Department of Energy, Report of the DOE Quantum Internet Blueprint Workshop (2020), section 3.4, Milestone 4.",
    "set_by_kind": "government_programme",
    "threshold_quote": "quantum repeaters and quantum error corrected communication with respect to loss and operational errors over continental-scale distances",
    "threshold_ref": 4,
-   "basis": "DOE places this target after intercity quantum-memory networks. It requires an integrated repeater system. Kinos et al., published on 28 August 2025, calculate secret-key rates of 1–1000 Hz at 1000 km across modeled parameter sets; these calculations do not establish an experimental network.",
+   "basis": "DOE places this demonstration after the intercity quantum-memory network and gives no fixed distance in kilometres or minimum service rate. Kinos and colleagues calculated secret-key rates of 1–1000 Hz at 1000 km across modelled parameter sets. The completion test requires an experimental network.",
    "refs": [
+    23,
     4,
     5
    ],
@@ -401,13 +406,14 @@
    {
     "id": "m1",
     "title": "Two quantum memories share entanglement heralded independently of endpoint measurement.",
-    "criterion": "Generate entanglement between two separated memories, with success signalled independently of measurement of the endpoint qubits. Zhu et al.'s preprint revised on 15 April 2026 reports two memories 14.5 km apart, linked by 17.8 km of deployed fibre. At 3 mW pump power and a 20 ns coincidence window, the reported retrieved-state fidelity is 78.6% ± 2.0% and retrieved-pair rate 5.5 ± 0.2 mHz, with 36 h acquisition. This is one elementary link.",
+    "criterion": "Generate entanglement between two separated quantum memories. Signal success with an event independent of measuring the two stored qubits, so the memories still hold the entangled state when success is announced.",
     "set_by": "Community convention for heralding, defined in Wehner, Elkouss and Hanson's 2018 staged vision; applied to memory-based elementary links.",
     "set_by_kind": "community_convention",
     "threshold_quote": "signal the successful generation of entanglement by an event that is independent of the (immediate) measurement of the entangled qubits themselves.",
     "threshold_ref": 6,
     "refs": [
      6,
+     24,
      7
     ],
     "status": "active",
@@ -417,7 +423,7 @@
    {
     "id": "m2",
     "title": "Two remote memories deliver states with average Bell-state fidelity above 0.5 at preset times.",
-    "criterion": "Deliver a state at every preset clock cycle, including failed entangling attempts, with average fidelity to the target Bell state above 0.5 and without preselection or postselection. Fidelity is the overlap with that maximally entangled two-qubit state. Humphreys et al.'s author manuscript revised on 15 January 2018 reports two diamond spin nodes 2 m apart delivering states at 9.9 Hz with fidelity 0.56 ± 0.01.",
+    "criterion": "Deliver a two-qubit state at every preset time, including cycles in which all entangling attempts failed. The fidelity, or overlap with the target Bell state, must exceed 0.5 on average over all delivered states, without preselection or postselection.",
     "set_by": "Humphreys et al., Figure 1a's deterministic-delivery benchmark; QuTech identifies the 2018 on-demand demonstration as a quantum-internet milestone.",
     "set_by_kind": "community_convention",
     "threshold_quote": "Deterministic entanglement delivery guarantees the output of states with average entanglement fidelity exceeding 0.5 at pre-specified times.",
@@ -433,7 +439,7 @@
    {
     "id": "m3",
     "title": "A memory node swaps two stored links into heralded entanglement between nonadjacent endpoints.",
-    "criterion": "Establish two remote elementary links, retain the first while generating the second, and perform a local Bell-state measurement and outcome-dependent endpoint operations to deliver heralded entanglement between previously unconnected nodes. Pompili et al.'s author manuscript posted on 8 February 2021 reports three diamond-spin nodes, average swapped-state fidelity 0.551 ± 0.013 across all measurement outcomes, and a combined heralding rate of one event per 40 s.",
+    "criterion": "Establish entanglement on two links that meet at a memory node, storing the first link while generating the second. Perform a joint Bell-state measurement at the middle node and use its outcome to apply the endpoint correction. Herald entanglement between the two outer nodes independently of measuring their qubits.",
     "set_by": "Community convention for swapping stored remote entanglement, identified in Azuma et al. (2023), Section V.H.3, and demonstrated by Pompili et al. (2021).",
     "set_by_kind": "community_convention",
     "threshold_quote": "deterministic entanglement swapping in a heralded fashion between distant nodes that were not originally connected.",
@@ -449,7 +455,7 @@
    {
     "id": "m4",
     "title": "Memory-assisted communication exceeds the repeaterless secret-key capacity per channel use.",
-    "criterion": "Exceed K(η) = −log₂(1−η) secret bits per optical mode for a pure-loss channel of transmissivity η, using consistent loss and mode counting. Bhaskar et al., published online on 23 March 2020, report a one-memory laboratory experiment exceeding the bound at 99.2% statistical confidence. Loss was emulated with weak pulses; the key rate was inferred under an individual-attack analysis, with finite-key and decoy-state implementation left open.",
+    "criterion": "Demonstrate a memory-assisted secret-key rate greater than −log₂(1−η) secret bits per optical mode, where η is the end-to-end transmissivity of the comparison pure-loss channel. Use the same end-to-end loss and a consistent count of optical modes for the protocol and the direct-transmission bound.",
     "set_by": "Pirandola, Laurenza, Ottaviani and Banchi's 2017 capacity theorem; Azuma et al., Section IV, recognises exceeding repeaterless bounds as a repeater-development milestone.",
     "set_by_kind": "community_convention",
     "threshold_quote": "the repeaterless bound K(η) = − log2(1 − η)",
@@ -477,13 +483,60 @@
     "status": "active",
     "replaced_by": [],
     "threshold_checked": null
+   },
+   {
+    "id": "m6",
+    "title": "A quantum repeater node performs quantum error correction.",
+    "criterion": "Demonstrate quantum error correction on encoded quantum information at a repeater node. The roadmap gives no numerical logical-error-rate threshold for this node-level demonstration.",
+    "set_by": "Fraunhofer ISI, German Umbrella Project for Quantum Communication (SquAD), Quantum Repeaters – A Technology Roadmap, Figure 7.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "Demonstrate error correction at repeater node",
+    "threshold_ref": 21,
+    "refs": [
+     21
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": false
+   },
+   {
+    "id": "m7",
+    "title": "Any two users on an inter-campus or intra-city network can obtain and measure entangled qubits.",
+    "criterion": "Distribute end-to-end entanglement between any chosen pair of users on an inter-campus or intra-city network. Generate the entanglement deterministically or herald success independently of the users’ measurements. Both users must be able to measure their qubits locally.",
+    "set_by": "U.S. Department of Energy, Quantum Internet Blueprint (2020), Milestone 2.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "end-to-end creation of quantum entanglement in a deterministic or heralded fashion, as well as local measurements.",
+    "threshold_ref": 4,
+    "refs": [
+     4,
+     6,
+     17,
+     23
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m8",
+    "title": "Two metropolitan-scale networks share entanglement through a repeater backbone longer than 500 km.",
+    "criterion": "Demonstrate an integrated prototype that distributes entanglement between two metropolitan-scale networks through quantum repeaters on a standard optical-fibre backbone longer than 500 km. The distance applies to the backbone.",
+    "set_by": "Quantum Internet Alliance, Horizon Europe Phase 1 grant agreement 101102140 (2022), prototype network objective.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "two metropolitan-scale networks via a long-distance backbone (>500 km) using quantum repeaters.",
+    "threshold_ref": 22,
+    "refs": [
+     22
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
    }
   ],
   "measures": [],
   "not_found": [
    "No universal service-level pair-rate, fidelity or availability threshold was found in the DOE roadmaps, RFC 9340 or the cited reviews.",
-   "No experimental report satisfying the complete DOE intercity memory-network test or continental concatenated-repeater target was found.",
-   "The full DOE workshop report and the Science and Nature publisher pages were inaccessible; the DOE summary and author manuscripts were accessible."
+   "No experimental report satisfying the complete DOE intercity memory-network test or continental concatenated-repeater target was found."
   ],
   "references": [
    {
@@ -751,349 +804,1276 @@
     "issue": "8012",
     "pages": "573-578",
     "citation_source": "crossref"
+   },
+   {
+    "id": 20,
+    "kind": "journal",
+    "url": "https://inspirehep.net/files/6199e8babe422c19c82503042b37fd91",
+    "doi": "10.1038/s41534-025-01089-8",
+    "title": "Implementation of carrier-grade quantum communication networks over 10000 km",
+    "authors": "Chen HZ, Li MH, Wang YZ, Zhao ZG, Ye C, Li FL, et al.",
+    "container": "npj Quantum Inf",
+    "year": "2025",
+    "volume": "11",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 21,
+    "kind": "report",
+    "url": "https://www.squad-germany.de/wp-content/uploads/2026/07/4.-Quantum-Repeaters.pdf",
+    "doi": "10.24406/publica-8668",
+    "title": "Quantum Repeaters – A Technology Roadmap",
+    "authors": "Lukas Weymann, Abhay Sankar Enchoormana Vasudevan, Chie Endo, Saeideh Shirinzadeh, Thomas Schmaltz, Christoph Becher",
+    "container": "Fraunhofer Institute for Systems and Innovation Research ISI",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 22,
+    "kind": "registry",
+    "url": "https://cordis.europa.eu/project/id/101102140",
+    "doi": "10.3030/101102140",
+    "title": "Quantum Internet Alliance - Phase1",
+    "authors": "European Commission",
+    "container": "CORDIS",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 23,
+    "kind": "report",
+    "url": "https://www.energy.gov/sites/prod/files/2020/07/f76/QuantumWkshpRpt20FINAL_Nav_0.pdf",
+    "doi": null,
+    "title": "From Long-distance Entanglement to Building a Nationwide Quantum Internet: Report of the DOE Quantum Internet Blueprint Workshop",
+    "authors": "U.S. Department of Energy, Office of Science",
+    "container": null,
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 24,
+    "kind": "journal",
+    "url": "https://pubmed.ncbi.nlm.nih.gov/16341008/",
+    "doi": "10.1038/nature04353",
+    "title": "Measurement-induced entanglement for excitation stored in remote atomic ensembles",
+    "authors": "Chou CW, de Riedmatten H, Felinto D, Polyakov SV, van Enk SJ, Kimble HJ",
+    "container": "Nature",
+    "year": "2005",
+    "volume": "438",
+    "issue": "7069",
+    "pages": "828-832",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 25,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2611.30150",
+    "doi": null,
+    "title": "500 Hz atom-atom entanglement distribution over metropolitan-scale fibers",
+    "authors": "Shi J, Sun Y, Liang Y, Zhang S, Liu P, Cui Z, et al.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 26,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2408.01299",
+    "doi": null,
+    "title": "Complete Self-Testing of a System of Remote Superconducting Qubits",
+    "authors": "Storz S, Kulikov A, Schär JD, Barizien V, Valcarce X, Berterottière F, et al.",
+    "container": "arXiv",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 27,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41567-025-02831-x?error=cookies_not_supported",
+    "doi": "10.1038/s41567-025-02831-x",
+    "title": "Hybrid entanglement and bit-flip error correction in a scalable quantum network node",
+    "authors": "Chang XY, Hou PY, Zhang WG, Meng XQ, Yu YF, Lu YN, et al.",
+    "container": "Nat. Phys.",
+    "year": "2025",
+    "volume": "21",
+    "issue": "4",
+    "pages": "583-589",
+    "citation_source": "crossref"
    }
   ],
   "milestone_order": [
    "m1",
    "m2",
    "m3",
+   "m6",
    "m4",
-   "m5"
+   "m7",
+   "m5",
+   "m8"
   ],
   "results": [
    {
     "milestone": "m1",
     "case": null,
-    "verdict": "met",
-    "finding": "Two remote quantum memories shared heralded entanglement with retrieved-state fidelity of 78.6% ± 2.0%.",
-    "detail": "The memories were 14.5 km apart. A central Bell-state measurement heralded entanglement independently of endpoint measurements; the reported fidelity used a 3 mW pump and 20 ns coincidence window.",
+    "verdict": "partial",
+    "finding": "Two remote solid-state memories yielded 78.6 ± 2.0% Bell-state fidelity across 712 fourfold coincidences.",
+    "detail": "The 712 events are summed across the three measurement bases in Table S5. The fidelity was measured at 3 mW with a 20-ns coincidence window.",
     "quote": "At a pump power of 3 mW\nand a 20-ns coincidence window, entanglement-witness\nmeasurements on the retrieved atomic excitation yield a\nfidelity of 78.6 ± 2.0% for |ψ+⟩ (Fig. 3b).",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
-    "finding": "Two remote memories delivered heralded states with retrieved-state fidelity of 78.6% ± 2.0%.",
-    "detail": "The fidelity is conditional on heralding and selective analysis. The source does not report average fidelity over every preset cycle, including failed attempts, without preselection or postselection.",
+    "finding": "The two memories yielded 78.6 ± 2.0% Bell-state fidelity across 712 selected fourfold coincidences.",
+    "detail": "The analysis selected heralds with a 500-ns separation and required a retrieved photon detection at each endpoint. The reported fidelity excludes failed cycles.",
     "quote": "At a pump power of 3 mW\nand a 20-ns coincidence window, entanglement-witness\nmeasurements on the retrieved atomic excitation yield a\nfidelity of 78.6 ± 2.0% for |ψ+⟩ (Fig. 3b).",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Central photonic swapping with endpoint feed-forward yielded 78.6 ± 2.0% fidelity across 712 fourfold coincidences.",
+    "detail": "The memories were at the endpoints. The central station measured incoming photons to establish a single elementary repeater link.",
+    "quote": "When the two detections at node C originate from differ-\nent detectors, a signal prompts node A to apply a π phase\nshift via the EOM, mapping the heralded state from |ψ−⟩\nto |ψ+⟩, ensuring the delivered state is consistently |ψ+⟩.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One intra-city user pair locally measured entanglement with a CHSH value of 2.22 ± 0.06.",
+    "detail": "The central station supplied a herald and had no user qubit. The CHSH analysis required a detection at each of the two user endpoints.",
+    "quote": "As shown in Fig. 4, we observe a maximal vio-\nlation of S = 2.22±0.06 exceeding the classical bound by\n3.7 standard deviations.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For two remote memory qubits, the modeled heralding probability per trial is η²/2.",
+    "detail": "The model assumes negligible or measurable fibre phase shifts, indistinguishable photons and negligible detector dark counts.",
+    "quote": "Thus, the success probability for a HEG trial is\npHEG = η2/2, (4)",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The authors estimate remote Bell-pair fidelity conditional on success using 1,000 simulated sessions per setting.",
+    "detail": "A session fails if any link has no successful entangling trial. Failed end-node purification also produces no final pair.",
+    "quote": "To validate the theoretical calculations, we also per-\nform numerical simulations to estimate the rate and av-\nerage fidelity of the final EPR pairs.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Stored-link swapping into remote Bell pairs was modeled and checked over 1,000 simulated sessions per setting.",
+    "detail": "The protocol records the endpoint Pauli frame and allows the corresponding correction to be applied using the middle-node outcomes.",
+    "quote": "After this, entanglement swapping combines the den-\nsity matrices for all links, two at a time. This generates\na final density matrix for the EPR pair of that session.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "partial",
-    "finding": "A modeled repeater network spanning 1000 km is estimated to achieve a secret-key rate of about 10 Hz.",
-    "detail": "The result is a theoretical estimate, not a memory-assisted communication experiment. The comparison with the repeaterless bound uses rates in Hz and assumes a 1 GHz repetition rate for the bound; it does not establish an experimental exceedance per optical mode.",
+    "finding": "For one modeled 1,000 km rare-earth-ion repeater chain, the estimated secret-key rate is about 10 bits/s.",
+    "detail": "The model uses 40% fibre-independent efficiency, 500 ms spin coherence and 0.001 initialization, gate and measurement error probabilities.",
     "quote": "All combined, an experimental implementation of the\nquantum repeater network spanning 1000 km should be\nable to reach secret key rates of around 10 Hz as shown\nin Fig. 5(a).",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 5,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Two atomic ensemble memories achieved heralded entanglement over 420 km of fibre.",
-    "detail": "The two memory nodes were in the same laboratory; the 420 km optical path included coiled fibre and deployed fibre. A write-out photon detection heralded entanglement before the memories were read out for verification.",
-    "quote": "The entanglement\ncan be verified even at 420 km, where we get a concur-\nrence ofC = 0.046(22) heralded by the clicks ofD1 (Ψ+).",
+    "finding": "Two atomic-ensemble memories showed heralded entanglement over 420 km of fibre.",
+    "detail": "The 420 km is the total optical path, including long fibre spools. Both memories were at USTC, and the middle station was at Hefei Software Park.",
+    "quote": "In summary, we have experimentally realized entan-\nglement between two quantum memories via fibers up\nto 420 km.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For two memories across six fibre-length settings, heralded entanglement probability per trial exceeded the plotted PLOB bound below a transmissivity of 10⁻⁴·⁵.",
+    "detail": null,
+    "quote": "As shown in\nFig. 4, when channel transmittance is lower than10−4.5\n(which refers to a distance over 230 km in our experi-\nment), the entangling probability in our experiment is\nhigher than the PLOB bound.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
-    "verdict": "partial",
-    "finding": "Two trapped-ion memory nodes shared entanglement across 10 km of spooled fibre.",
-    "detail": "The text reports memory–memory entanglement but does not state that success was heralded independently of endpoint-qubit measurement.",
+    "verdict": "met",
+    "finding": "Two trapped-ion memories shared heralded entanglement over 10 km of spooled fibre.",
+    "detail": "The heralding mechanism is inferred from the abstract’s description of the single-photon entanglement protocol.",
     "quote": "Here we demonstrate memory–memory entanglement between two nodes connected by 10 km of spooled fibre surviving beyond the average entanglement establishment time.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "A two-node trapped-ion system yielded a positive asymptotic device-independent key rate over 101 km.",
+    "detail": null,
+    "quote": "we report a proof-of-principle device-independent quantum key distribution demonstration with finite-size analysis over 10 km and a positive key rate over 101 km in the asymptotic limit",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Two diamond spin-qubit memories shared heralded entanglement across 10 km.",
-    "detail": "A midpoint photon detection heralded success before endpoint readout. The fully heralded state fidelity was 0.534 ± 0.015; the nodes were connected by 25 km of deployed fibre.",
-    "quote": "Here, we report on heralded entanglement between two independently operated quantum network nodes separated by 10 kilometers.",
+    "finding": "Two remote diamond spin qubits shared heralded entanglement with Bell-state fidelity 0.534.",
+    "detail": "A detector-dependent phase flip delivered the same target Bell state for either detector click. The supplied text does not state the total number of heralded events.",
+    "quote": "We find that the delivered entangled states have a fidelity of 0.534 (\n15\n).",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Two remote spin memories delivered states with Bell-state fidelity 0.534 on successful heralds.",
+    "detail": "Delivery was triggered by the herald. The supplied text does not state the total number of heralded events.",
+    "quote": "We find that the delivered entangled states have a fidelity of 0.534 (\n15\n).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One pair of metropolitan-scale endpoints shared heralded entanglement over 25 km of deployed fiber and measured their qubits locally.",
+    "detail": "The extensible architecture was demonstrated with two endpoint nodes and one midpoint heralding station.",
+    "quote": "The two network nodes are combined with a midpoint heralding station via 25 km of deployed fiber, with all relevant classic and quantum signals propagating over the same fiber bundle in telecom bands (see\nFig. 1\n).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Two quantum memories shared heralded entanglement across 12.5 km.",
-    "detail": "A detector at the server heralded entanglement between atomic ensembles. In a second experiment, the entanglement was stored for 107 μs, exceeding the round-trip communication time.",
+    "finding": "Two rubidium-ensemble memories 12.5 km apart shared independently heralded entanglement.",
+    "detail": "The 107 μs storage run kept the state available after heralding. In the 5 μs delayed-choice run, endpoint readout preceded heralding.",
     "quote": "We demonstrated heralded entanglement generation between two quantum nodes situated 12.5 km apart, and the storage of entanglement exceeding the round-trip communication time.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 17,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
-    "verdict": "met",
-    "finding": "Two remote diamond spin nodes delivered states with Bell-state fidelity 0.56 ± 0.01; 42,000 cycles across settings.",
-    "detail": "At 9.9 Hz, states were delivered at preset times without preselection or postselection. Failed entanglement attempts and offline cycles were included.",
-    "quote": "We ﬁnd that forα = 0.2\nand a rate of 9.9 Hz, we are able to create states with\na ﬁdelity of0.56(1), proving successful deterministic en-\ntanglement delivery.",
+    "verdict": "partial",
+    "finding": "Two remote memories yielded a postselected Bell-state fidelity of 0.672(32) for the positive-sign state.",
+    "detail": "The fidelity was measured on polarization states formed from the memory readouts and local probe pulses, with a detector click required at each endpoint.",
+    "quote": "Meanwhile, we find the fidelity\nℱ\n=\n0.672\n​\n(\n32\n)\n\\mathcal{F}=0.672(32)",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
-    "milestone": "m3",
+    "milestone": "m7",
     "case": null,
     "verdict": "met",
-    "finding": "Three diamond-spin nodes produced heralded swapped entanglement at a combined rate of one event per 40 seconds.",
-    "detail": "The first link was stored while the second was generated; Bob then performed a Bell-state measurement and Charlie applied outcome-dependent feed-forward. Average fidelity across all outcomes was 0.551 ± 0.013.",
-    "quote": "The combined herald-\ning rate is 1/(40 s).",
+    "finding": "The Hefei network demonstrated heralded entanglement with local readout on all 3 user pairs.",
+    "detail": "The all-pairs measurements used delayed-choice readout. Pair selection was randomized to simulate user requests.",
+    "quote": "We also showed the concurrent entanglement generation on three links.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "met",
-    "finding": "Three diamond-spin nodes established swapped endpoint entanglement with an estimated fidelity of 0.61.",
-    "detail": "The first link was stored while the second was generated. Bob performed a Bell-state measurement, and Charlie applied an outcome-dependent gate. The protocol continued only for selected readout and check outcomes.",
-    "quote": "At this point, the teleporter is ready and Alice and Charlie share an entangled state with an estimated fidelity of 0.61.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 18,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Two 29Si nuclear-spin memories entangled through 40 km fibre spools; heralded by photon detection.",
-    "detail": "Heralded by TDI measurement of the photonic time-bin qubit, not endpoint readout; deployed-link Bell-state fidelity 0.69(7) and storage up to 1 s.",
-    "quote": "Using this frequency conversion scheme together with the entanglement method described above (Fig. 3a ), we remotely entangle two  29 Si nuclei through spools of low-loss telecom fibre up to 40 km in length (Fig. 4b ).",
+    "finding": "Two remote diamond spin memories shared heralded entanglement with Bell-state fidelity 0.81(2).",
+    "detail": "The source gives the number of memories but does not state the number of heralded events used for this fidelity estimate.",
+    "quote": "Choosing α to maximise ﬁdelity, we ﬁnd that our pro-\ntocol allows us to generate entanglement with a ﬁdelity\nof 0.81(2) at a rate ofrent = 6 Hz (forα = 0.05).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "Two remote diamond spin memories achieved mean Bell-state fidelity 0.56(1) in a 42,000-cycle experiment spanning multiple settings.",
+    "detail": "Each run contained 1,500 cycles. The source gives the total across settings and does not specify the cycle count for the 9.9 Hz, α = 0.2 result. When no herald arrived, the spins were still delivered and read out.",
+    "quote": "We ﬁnd that forα = 0.2\nand a rate of 9.9 Hz, we are able to create states with\na ﬁdelity of0.56(1), proving successful deterministic en-\ntanglement delivery.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "Alice and Charlie’s stored NV-spin Bell states had fidelity 0.551(13) across 4,055 heralded events.",
+    "detail": "The endpoint memories were the NV communication spins. Bob used a separate carbon-13 nuclear spin to store the first link.",
+    "quote": "Figure 5C compares the state ﬁdelities across the dif-\nferent BSM outcomes, displaying the expected lower ﬁ-\ndelities for outcomes of |1⟩ and an average ﬁdelity over\nall outcomes of F = 0 .551(13).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Alice–Charlie Bell-state fidelity averaged 0.551(13) across 4,055 heralded deliveries.",
+    "detail": "The preset timeout triggered a restart. The reported average covers all Bell-measurement outcomes within heralded events.",
+    "quote": "Figure 5C compares the state ﬁdelities across the dif-\nferent BSM outcomes, displaying the expected lower ﬁ-\ndelities for outcomes of |1⟩ and an average ﬁdelity over\nall outcomes of F = 0 .551(13).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "met",
+    "finding": "Bob’s memory-assisted swap produced Alice–Charlie Bell states with fidelity 0.551(13) across 4,055 heralded events.",
+    "detail": "The herald required Bob to pass a charge-and-resonance check after the Bell-state measurement. The reported average includes all four Bell-measurement outcomes.",
+    "quote": "Figure 5C compares the state ﬁdelities across the dif-\nferent BSM outcomes, displaying the expected lower ﬁ-\ndelities for outcomes of |1⟩ and an average ﬁdelity over\nall outcomes of F = 0 .551(13).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Any pair in the three-node lab network could share entanglement. The swapped pair had fidelity 0.551(13) over 4,055 heralds.",
+    "detail": null,
+    "quote": "We achieved multipar-\ntite entanglement distribution across the three nodes and\nany-to-any connectivity through entanglement swapping.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Bob teleported his stored qubit to Charlie in 4,055 heralded swaps, giving Alice–Charlie Bell fidelity 0.551(13).",
+    "detail": "The teleported qubit was Bob’s half of the Alice–Bob entangled state. The protocol used real-time classical feed-forward to Charlie.",
+    "quote": "One way to read\nthis protocol is that the BSM induces teleportation of\nthe state stored on Bob’s memory qubit to Charlie, by\nconsuming the entangled state shared by Bob’s commu-\nnication qubit and Charlie.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Across three nodes, heralded Alice–Charlie entanglement with storage at Charlie had an estimated Bell-state fidelity of 0.61.",
+    "detail": "The adjacent-link heralds entangled electronic communication qubits. The final Alice–Charlie state was transferred to a dedicated memory qubit only at Charlie.",
+    "quote": "At this point, the teleporter is ready and Alice and Charlie share an entangled state with an estimated fidelity of 0.61.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "met",
+    "finding": "Three-node entanglement swapping heralded an Alice–Charlie state with an estimated Bell-state fidelity of 0.61.",
+    "detail": "The swap herald required an accepted Bob communication-qubit readout, consistent memory readouts and a passed charge-resonance check. The Bell-state fidelity was estimated.",
+    "quote": "At this point, the teleporter is ready and Alice and Charlie share an entangled state with an estimated fidelity of 0.61.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Charlie-to-Alice teleportation of six cardinal input states achieved mean fidelity 0.688(10) after heralded preparation.",
+    "detail": "The teleportation step accepted every input after the shared entangled state had been prepared. This result used 7.5 ns optical detection windows.",
+    "quote": "We find that, indeed, the average unconditional teleportation fidelity increases with shorter window lengths, reaching\nF\n= 0.688(10) for a length of 7.5 ns and a rate of 1/(100 s); see Extended Data Fig.\n4\n.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "Two silicon-29 nuclear-spin memories shared photon-heralded entanglement over up to 40 km of spooled telecom fibre.",
+    "detail": null,
+    "quote": "Using this frequency conversion scheme together with the entanglement method described above (Fig.  3a ), we remotely entangle two  29 Si nuclei through spools of low-loss telecom fibre up to 40 km in length (Fig.  4b ).",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 19,
-    "judged_by": "deepseek/deepseek-v4.1-flash-1017",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Two remote nuclear-spin memories achieved 0.64 ± 0.05 Bell-state fidelity on heralded trials before flag filtering.",
+    "detail": "The raw fidelity still conditions on photon heralding. The 10 ms interval is a storage interval following entanglement generation.",
+    "quote": "After using error detection by discarding measurements in which the electronic flag qubits are measured in the |↑ e ⟩ state, the Bell-state fidelity is  F Φ nn −  ED = 0.77 ( 5 ) , which is an improvement from the directly measured value of  F Φ nn −  raw = 0.64 ( 5 )  without error detection.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Electron-spin error flags at two memory nodes yielded nuclear Bell-state fidelity of 0.77 ± 0.05 after flagged trials were discarded.",
+    "detail": "The protocol removed flagged trials from the fidelity estimate. It applied no recovery operation to the flagged nuclear states.",
+    "quote": "After using error detection by discarding measurements in which the electronic flag qubits are measured in the |↑ e ⟩ state, the Bell-state fidelity is  F Φ nn −  ED = 0.77 ( 5 ) , which is an improvement from the directly measured value of  F Φ nn −  raw = 0.64 ( 5 )  without error detection.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Two fixed memory nodes shared heralded entanglement over a 35 km deployed Boston-area fibre loop.",
+    "detail": "The two laboratory endpoints were 6 m apart in line of sight. The fibre ran to an off-site location and back.",
+    "quote": "We demonstrate that our system is compatible with conventional fibre infrastructure and is resilient to these error sources by generating nuclear entanglement through a 35-km loop of telecom fibre deployed in the Boston area urban environment (Fig.  4d ).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "Two rubidium quantum memory arrays generated independently heralded spin-wave entanglement at 1.6 kHz.",
+    "detail": "The 1.6 kHz rate refers to the stored spin-wave states. The reported 546 Hz rate refers to the polarization-entangled state produced by fusing two such states during readout.",
+    "quote": "The returned TTL signal heralds the successful generation of a memory-memory EME state, and the control units identify the specific pair of entangled memory cells based on the arrival time of the heralding signals.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 25,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Two remote transmons achieved an average Bell-state fidelity lower bound of 58.9% over 16,777,216 trials.",
+    "detail": "The 58.9% bound is obtained from CHSH correlations and applies to Bell-state fidelity under local extraction maps. The reported timing characterizes the Bell-test sequence.",
+    "quote": "Taking into account finite size statistics on the S-value (see Appendix\nA\n), we can guarantee a minimal state fidelity of\nℱ\ns\n=\n58.9\n%\n\\mathcal{F}_{\\text{s}}=58.9\\%\nat a\n99\n%\n99\\%\nconfidence level, in a device-independent manner.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 26,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "met",
+    "finding": "A diamond NV repeater-node prototype improved encoded spin–photon joint-state population with active bit-flip correction over up to 12 rounds (20,000 runs per setting).",
+    "detail": "The repetition code corrects single bit flips. The experiment evaluated joint-state populations in the Z basis, and the encoded memory still relaxed faster than a single physical memory qubit.",
+    "quote": "We perform our protocol for up to 12 rounds and demonstrate an improvement in the logical–photonic joint state population compared with its uncorrected counterpart.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 27,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://arxiv.org/abs/2508.17940",
     "milestone": "m1",
-    "hash": "29d5f307ecb9",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "49160ca276e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2508.17940",
     "milestone": "m2",
-    "hash": "eba64be95b7e",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "a777bb633494",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2508.17940",
     "milestone": "m3",
-    "hash": "4137e6daab18",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "36a45ea96355",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2508.17940",
+    "milestone": "m6",
+    "hash": "ea656b09138c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2508.17940",
     "milestone": "m4",
-    "hash": "17515c6d1a6c",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "676c0da46769",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2508.17940",
+    "milestone": "m7",
+    "hash": "415366c5621d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2508.17940",
     "milestone": "m5",
     "hash": "21a108080484",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2508.17940",
+    "milestone": "m8",
+    "hash": "489587c989ef",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2508.17940",
     "milestone": "completion",
     "hash": "f2cb9eda28e8",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://journals.aps.org/prresearch/abstract/10.1103/frtv-p5zy",
     "milestone": "m1",
-    "hash": "29d5f307ecb9",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "49160ca276e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://journals.aps.org/prresearch/abstract/10.1103/frtv-p5zy",
     "milestone": "m2",
-    "hash": "eba64be95b7e",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "a777bb633494",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://journals.aps.org/prresearch/abstract/10.1103/frtv-p5zy",
     "milestone": "m3",
-    "hash": "4137e6daab18",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "36a45ea96355",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://journals.aps.org/prresearch/abstract/10.1103/frtv-p5zy",
+    "milestone": "m6",
+    "hash": "ea656b09138c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://journals.aps.org/prresearch/abstract/10.1103/frtv-p5zy",
     "milestone": "m4",
-    "hash": "17515c6d1a6c",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "676c0da46769",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://journals.aps.org/prresearch/abstract/10.1103/frtv-p5zy",
+    "milestone": "m7",
+    "hash": "415366c5621d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://journals.aps.org/prresearch/abstract/10.1103/frtv-p5zy",
     "milestone": "m5",
     "hash": "21a108080484",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://journals.aps.org/prresearch/abstract/10.1103/frtv-p5zy",
+    "milestone": "m8",
+    "hash": "489587c989ef",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://journals.aps.org/prresearch/abstract/10.1103/frtv-p5zy",
     "milestone": "completion",
     "hash": "f2cb9eda28e8",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2504.05660",
     "milestone": "m1",
-    "hash": "29d5f307ecb9",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "49160ca276e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2504.05660",
+    "milestone": "m2",
+    "hash": "a777bb633494",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2504.05660",
+    "milestone": "m3",
+    "hash": "36a45ea96355",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2504.05660",
+    "milestone": "m6",
+    "hash": "ea656b09138c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2504.05660",
+    "milestone": "m4",
+    "hash": "676c0da46769",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2504.05660",
+    "milestone": "m7",
+    "hash": "415366c5621d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2504.05660",
+    "milestone": "m5",
+    "hash": "21a108080484",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2504.05660",
+    "milestone": "m8",
+    "hash": "489587c989ef",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2504.05660",
+    "milestone": "completion",
+    "hash": "f2cb9eda28e8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-026-10177-4?error=cookies_not_supported",
     "milestone": "m1",
-    "hash": "29d5f307ecb9",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "49160ca276e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-026-10177-4?error=cookies_not_supported",
+    "milestone": "m2",
+    "hash": "a777bb633494",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-026-10177-4?error=cookies_not_supported",
+    "milestone": "m3",
+    "hash": "36a45ea96355",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-026-10177-4?error=cookies_not_supported",
+    "milestone": "m6",
+    "hash": "ea656b09138c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-026-10177-4?error=cookies_not_supported",
+    "milestone": "m4",
+    "hash": "676c0da46769",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-026-10177-4?error=cookies_not_supported",
+    "milestone": "m7",
+    "hash": "415366c5621d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-026-10177-4?error=cookies_not_supported",
+    "milestone": "m5",
+    "hash": "21a108080484",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-026-10177-4?error=cookies_not_supported",
+    "milestone": "m8",
+    "hash": "489587c989ef",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-026-10177-4?error=cookies_not_supported",
+    "milestone": "completion",
+    "hash": "f2cb9eda28e8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11524177/",
     "milestone": "m1",
-    "hash": "29d5f307ecb9",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "49160ca276e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11524177/",
+    "milestone": "m2",
+    "hash": "a777bb633494",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11524177/",
+    "milestone": "m3",
+    "hash": "36a45ea96355",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11524177/",
+    "milestone": "m6",
+    "hash": "ea656b09138c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11524177/",
+    "milestone": "m4",
+    "hash": "676c0da46769",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11524177/",
+    "milestone": "m7",
+    "hash": "415366c5621d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11524177/",
+    "milestone": "m5",
+    "hash": "21a108080484",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11524177/",
+    "milestone": "m8",
+    "hash": "489587c989ef",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11524177/",
+    "milestone": "completion",
+    "hash": "f2cb9eda28e8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2309.00221v1",
     "milestone": "m1",
-    "hash": "29d5f307ecb9",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "49160ca276e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2309.00221v1",
+    "milestone": "m2",
+    "hash": "a777bb633494",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2309.00221v1",
+    "milestone": "m3",
+    "hash": "36a45ea96355",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2309.00221v1",
+    "milestone": "m6",
+    "hash": "ea656b09138c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2309.00221v1",
+    "milestone": "m4",
+    "hash": "676c0da46769",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2309.00221v1",
+    "milestone": "m7",
+    "hash": "415366c5621d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2309.00221v1",
+    "milestone": "m5",
+    "hash": "21a108080484",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2309.00221v1",
+    "milestone": "m8",
+    "hash": "489587c989ef",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2309.00221v1",
+    "milestone": "completion",
+    "hash": "f2cb9eda28e8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1712.07567",
+    "milestone": "m1",
+    "hash": "49160ca276e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1712.07567",
     "milestone": "m2",
-    "hash": "eba64be95b7e",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "a777bb633494",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1712.07567",
+    "milestone": "m3",
+    "hash": "36a45ea96355",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1712.07567",
+    "milestone": "m6",
+    "hash": "ea656b09138c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1712.07567",
+    "milestone": "m4",
+    "hash": "676c0da46769",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1712.07567",
+    "milestone": "m7",
+    "hash": "415366c5621d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1712.07567",
+    "milestone": "m5",
+    "hash": "21a108080484",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1712.07567",
+    "milestone": "m8",
+    "hash": "489587c989ef",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1712.07567",
+    "milestone": "completion",
+    "hash": "f2cb9eda28e8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2102.04471",
+    "milestone": "m1",
+    "hash": "49160ca276e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2102.04471",
+    "milestone": "m2",
+    "hash": "a777bb633494",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2102.04471",
     "milestone": "m3",
-    "hash": "4137e6daab18",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "36a45ea96355",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2102.04471",
+    "milestone": "m6",
+    "hash": "ea656b09138c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2102.04471",
+    "milestone": "m4",
+    "hash": "676c0da46769",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2102.04471",
+    "milestone": "m7",
+    "hash": "415366c5621d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2102.04471",
+    "milestone": "m5",
+    "hash": "21a108080484",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2102.04471",
+    "milestone": "m8",
+    "hash": "489587c989ef",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2102.04471",
+    "milestone": "completion",
+    "hash": "f2cb9eda28e8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-022-04697-y?error=cookies_not_supported",
+    "milestone": "m1",
+    "hash": "49160ca276e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-022-04697-y?error=cookies_not_supported",
+    "milestone": "m2",
+    "hash": "a777bb633494",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-022-04697-y?error=cookies_not_supported",
     "milestone": "m3",
-    "hash": "4137e6daab18",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "36a45ea96355",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-022-04697-y?error=cookies_not_supported",
+    "milestone": "m6",
+    "hash": "ea656b09138c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-022-04697-y?error=cookies_not_supported",
+    "milestone": "m4",
+    "hash": "676c0da46769",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-022-04697-y?error=cookies_not_supported",
+    "milestone": "m7",
+    "hash": "415366c5621d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-022-04697-y?error=cookies_not_supported",
+    "milestone": "m5",
+    "hash": "21a108080484",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-022-04697-y?error=cookies_not_supported",
+    "milestone": "m8",
+    "hash": "489587c989ef",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-022-04697-y?error=cookies_not_supported",
+    "milestone": "completion",
+    "hash": "f2cb9eda28e8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://nano-optics.seas.harvard.edu/sites/g/files/omnuum6446/files/s41586-024-07252-z.pdf",
     "milestone": "m1",
-    "hash": "29d5f307ecb9",
-    "date": "2026-11-15",
-    "by": "deepseek/deepseek-v4.1-flash-1017"
+    "hash": "49160ca276e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://nano-optics.seas.harvard.edu/sites/g/files/omnuum6446/files/s41586-024-07252-z.pdf",
     "milestone": "m2",
-    "hash": "eba64be95b7e",
-    "date": "2026-11-15",
-    "by": "deepseek/deepseek-v4.1-flash-1017"
+    "hash": "a777bb633494",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://nano-optics.seas.harvard.edu/sites/g/files/omnuum6446/files/s41586-024-07252-z.pdf",
     "milestone": "m3",
-    "hash": "4137e6daab18",
-    "date": "2026-11-15",
-    "by": "deepseek/deepseek-v4.1-flash-1017"
+    "hash": "36a45ea96355",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://nano-optics.seas.harvard.edu/sites/g/files/omnuum6446/files/s41586-024-07252-z.pdf",
+    "milestone": "m6",
+    "hash": "ea656b09138c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://nano-optics.seas.harvard.edu/sites/g/files/omnuum6446/files/s41586-024-07252-z.pdf",
     "milestone": "m4",
-    "hash": "17515c6d1a6c",
-    "date": "2026-11-15",
-    "by": "deepseek/deepseek-v4.1-flash-1017"
+    "hash": "676c0da46769",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://nano-optics.seas.harvard.edu/sites/g/files/omnuum6446/files/s41586-024-07252-z.pdf",
+    "milestone": "m7",
+    "hash": "415366c5621d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://nano-optics.seas.harvard.edu/sites/g/files/omnuum6446/files/s41586-024-07252-z.pdf",
     "milestone": "m5",
     "hash": "21a108080484",
-    "date": "2026-11-15",
-    "by": "deepseek/deepseek-v4.1-flash-1017"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://nano-optics.seas.harvard.edu/sites/g/files/omnuum6446/files/s41586-024-07252-z.pdf",
+    "milestone": "m8",
+    "hash": "489587c989ef",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://nano-optics.seas.harvard.edu/sites/g/files/omnuum6446/files/s41586-024-07252-z.pdf",
     "milestone": "completion",
     "hash": "f2cb9eda28e8",
-    "date": "2026-11-15",
-    "by": "deepseek/deepseek-v4.1-flash-1017"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2611.30150",
+    "milestone": "m1",
+    "hash": "49160ca276e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2408.01299",
+    "milestone": "m2",
+    "hash": "a777bb633494",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41567-025-02831-x?error=cookies_not_supported",
+    "milestone": "m6",
+    "hash": "ea656b09138c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1155,8 +2135,133 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 1 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"A chain of quantum repeaters distributes entanglement across continental distances over optical fibre. In a memory-based repeater, quantum memories hold states on adjacent links until a joint measurement at the repeater entangles the outer qubits. Repeating this operation extends the shared state to the endpoints. Classical signals coordinate the links, and quantum error correction addresses photon loss and errors in local operations. Trusted key relays instead pass classical key material between successive stations.\". Reason: The definition now explains what a swap does and distinguishes end-to-end entanglement from continental key delivery through trusted relays."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"At 1550 nm, only about one photon in 100 survives 100 km of standard single-mode fibre. An ordinary amplifier cannot copy an unknown quantum state. China\\u2019s quantum key network reaches 80 cities by relying on trusted relays. With end-to-end entanglement, distant users could establish encryption keys without entrusting them to those relays. Quantum processors at different sites could also perform gates between their qubits. Each use requires entangled pairs of sufficient fidelity.\". Reason: The existing account quantifies fibre loss but omits the users who already depend on trusted relays and the condition for using shared entanglement."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by U.S. Department of Energy, Office of Science, 2020: \"Interstate Quantum Entanglement Distribution using Quantum Repeaters\". Reason: The 2020 workshop report supplies the original date and names the network capability in its milestone heading."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Quantum Internet Alliance, Horizon Europe, 2022: \"fully functional quantum repeaters unlocking Pan-European end-to-end quantum communication.\". Reason: The European programme independently names a fibre repeater backbone as the route to pan-European end-to-end communication."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit completion: set_by = \"U.S. Department of Energy, Report of the DOE Quantum Internet Blueprint Workshop (2020), section 3.4, Milestone 4.\"; basis = \"DOE places this demonstration after the intercity quantum-memory network and gives no fixed distance in kilometres or minimum service rate. Kinos and colleagues calculated secret-key rates of 1\\u20131000 Hz at 1000 km across modelled parameter sets. The completion test requires an experimental network.\"; refs = [24, 4, 5]. Reason: Section 3.4 of the full workshop report confirms the existing test and clarifies that the published 1000 km calculation supplies no distance cutoff."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Generate entanglement between two separated quantum memories. Signal success with an event independent of measuring the two stored qubits, so the memories still hold the entangled state when success is announced.\"; refs = [6, 25, 7]. Reason: The current criterion mixes the heralding test with one experiment’s pump power, acquisition time and measured performance."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"Deliver a two-qubit state at every preset time, including cycles in which all entangling attempts failed. The fidelity, or overlap with the target Bell state, must exceed 0.5 on average over all delivered states, without preselection or postselection.\". Reason: The revision removes one apparatus’s distance, delivery rate and measured fidelity while preserving the all-cycle average that defines the test."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Establish entanglement on two links that meet at a memory node, storing the first link while generating the second. Perform a joint Bell-state measurement at the middle node and use its outcome to apply the endpoint correction. Herald entanglement between the two outer nodes independently of measuring their qubits.\". Reason: The existing criterion appends a particular swapped-state fidelity and heralding rate to the test for joining two stored links."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"Demonstrate a memory-assisted secret-key rate greater than \\u2212log\\u2082(1\\u2212\\u03b7) secret bits per optical mode, where \\u03b7 is the end-to-end transmissivity of the comparison pure-loss channel. Use the same end-to-end loss and a consistent count of optical modes for the protocol and the direct-transmission bound.\"; threshold_quote = \"the repeaterless bound K(\\u03b7) = \\u2212 log2(1 \\u2212 \\u03b7)\"; threshold_ref = 11. Reason: The revision states the capacity comparison in secret bits per optical mode and removes the confidence level and security assumptions of one experiment."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m3: \"A quantum repeater node performs quantum error correction.\". Reason: The completion test requires error-corrected communication, but the existing milestones do not test error correction at even one repeater."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m4: \"Any two users on an inter-campus or intra-city network can obtain and measure entangled qubits.\". Reason: DOE distinguishes metropolitan entanglement available to any pair of users from both a single memory link and an intercity teleportation network."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m5: \"Two metropolitan-scale networks share entanglement through a repeater backbone longer than 500 km.\". Reason: The European prototype defines a measurable backbone integration test between the intercity demonstrations and the continental target."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 2. Reason: The full DOE workshop report and the Nature article on teleportation between non-neighbouring nodes are accessible."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove statement 1. Reason: RFC 9340 names support for distributed applications as an architectural goal without specifying a continental repeater network."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove statement 0. Reason: The DOE explainer describes multi-hop networking in general, while the dated workshop report names the interstate repeater goal directly."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 15 of 15 proposed operations from CPE-07-revise-20261125T084221115282Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m3, m4, m6, m7, m8."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 3 from Crossref, 0 from PubMed, 0 from arXiv, 3 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 3 found, 2 not found, 1 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "definition is 522 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 10 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 5 candidates returned, 0 dropped as sources already used, 5 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 3 of 5 new candidates, without search. Skipped: 4 no readable saved copy. Dropped rows: none. Replaced 11 earlier rows. Added 35 results: 32 from sources already used, 3 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 2 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 35 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-14"
+  "results_run": "2026-11-25"
  }
 }
