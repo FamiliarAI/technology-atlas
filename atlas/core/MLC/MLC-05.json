@@ -325,11 +325,13 @@
  "page": {
   "id": "MLC-05",
   "title": "Local learning with backpropagation parity",
-  "definition": "A deep network learns through objectives confined to individual layers or gradient-isolated blocks: task-error derivatives do not cross their boundaries. One rule matches the cited end-to-end backpropagation comparisons across image tasks and language-model sizes, without retaining an end-to-end activation graph for backward computation.",
+  "definition": "One learning rule trains a deep network layer by layer or in groups of layers called blocks. Each block passes its output forward and updates its weights from its own objective. Gradients may flow within a block but stop at its boundary, so training requires no network-wide record of activations for a backward pass. The rule matches end-to-end backpropagation both in image classification with a linear classifier trained on frozen features and in next-token prediction at the specified language-model sizes.",
   "goal": {
-   "need": "An OpenWebText language-model comparison reports backpropagation validation perplexities of 138 and 28 at approximately 7 million and 124 million backbone parameters; local cross-entropy gives 166 and 42. Lower perplexity means better next-token prediction. At the larger setting, auxiliary local heads increase the local model’s total parameter count to 586.9 million. The goal is to remove backward dependencies between layers while preserving learning quality.",
+   "need": "Teams that split a model across GPUs send activations forward and wait for gradients to travel back. Compression reduces traffic but leaves that wait. At equal prediction quality, local updates would let each GPU train its block as soon as it computes its own loss. In a 400M-class language model, peak memory fell from 29.2 GiB end to end to 14.5–15.8 GiB for the largest of four stages measured separately. Each stage still needed its input from the preceding stage, and the extra prediction heads added training computation.",
    "need_refs": [
-    1
+    6,
+    9,
+    10
    ],
    "figures": {
     "caption": "Two scales from the OpenWebText language-model comparison",
@@ -374,12 +376,12 @@
   },
   "completion": {
    "title": "Independent investigators reproduce one local rule’s parity across the cited image and language comparisons.",
-   "criterion": "Independent investigators reproduce one rule with no task-error derivatives crossing layer/block boundaries or retained end-to-end activation graph. At the cited architectures and budgets, its mean linear-readout accuracy is at least 80.69%, 81.97%, 36.78% and 55.19% on CIFAR-10, STL-10, Tiny ImageNet and ImageNet, respectively; mean validation loss is at most 2.771/2.418 nats/token at the 125M/400M parameter classes, for both two and four blocks. It must also equal or improve matched end-to-end baseline reruns in every setting. Local updates use current-minibatch activities, targets and local parameter/optimizer state.",
+   "criterion": "Independent investigators reproduce one rule using current-minibatch activities, targets and local parameter/optimizer state, with no task-error gradient crossing a layer or block boundary and no retained end-to-end backward graph. Under the cited image protocols, mean linear-readout accuracy reaches 80.69% on CIFAR-10, 81.97% on STL-10, 36.78% on Tiny ImageNet and 55.19% on ImageNet or better. On FineWeb-Edu, at equal token budgets, mean validation loss is at most 2.771 nats/token at step 5,000 for the 125M class and 2.418 at step 14,000 for the 400M class, each with both two and four equal-depth blocks. The rule also matches or improves on matched end-to-end reruns in every setting.",
    "set_by": "Technology Atlas fallback, using published comparison settings; no external body was found that sets this combined test.",
    "set_by_kind": "atlas",
    "threshold_quote": null,
    "threshold_ref": null,
-   "basis": "Searches covered IEEE IRDS, MLCommons AlgoPerf, DARPA-related goals, local-learning prizes and published comparison papers. No joint locality, scale and parity criterion was found. This fallback adopts published architecture-matched baselines, zero mean performance deficit and independent reproduction. It establishes parity within these settings; the image paper explicitly says its global baseline is below the state of the art.",
+   "basis": "The Atlas combines the published image and language baselines with a zero mean performance deficit and independent reproduction. The image comparison uses an architecture-matched baseline below the state of the art. The language comparison matches training tokens and evaluation steps. Its auxiliary heads add computation, and the published quality comparisons use one seed. AlgoPerf scores time to target on separate workloads.",
    "refs": [
     2,
     4,
@@ -396,48 +398,48 @@
    {
     "id": "m1",
     "title": "A locally trained network reaches at most 1.36% MNIST test error after 60 epochs.",
-    "criterion": "Use Hinton’s supervised Forward-Forward comparison: four fully connected hidden layers, each containing 2,000 rectified linear units, with labels included in the input. Reach at most 1.36% MNIST test error after 60 epochs. The preprint dated 27 December 2022 reports this result and says backpropagation takes about 20 epochs for similar performance; it does not state an independent-run count.",
+    "criterion": "Train four fully connected hidden layers of 2,000 rectified linear units each on MNIST with supervised Forward-Forward learning. Encode the label in the first ten input pixels, pairing each image with a correct label for positive examples and an incorrect label for negative examples. Reach at most 1.36% test error after 60 epochs under the unaugmented protocol in section 3.3.",
     "set_by": "Technology Atlas fallback, adopting Hinton’s reported demonstration as a reference result; Hinton did not designate it as a field milestone.",
     "set_by_kind": "atlas",
-    "threshold_quote": null,
-    "threshold_ref": null,
+    "threshold_quote": "1.36% test errors on MNIST after 60 epochs.",
+    "threshold_ref": 3,
     "refs": [
      3
     ],
     "status": "active",
     "replaced_by": [],
-    "threshold_checked": null
+    "threshold_checked": true
    },
    {
     "id": "m2",
     "title": "Locally learned image features reach at least 80.69% CIFAR-10 linear-readout accuracy.",
-    "criterion": "Use the self-supervised VGG architecture, augmentation and linear-readout comparison in Table 2 of Zihan and colleagues. Reach mean CIFAR-10 accuracy of at least 80.69%, the architecture-matched BP-InfoNCE result. The ICML paper reports 81.18% ± 0.18% for CLAPP++both against 80.69% ± 0.84% for BP-InfoNCE; uncertainties are 95% confidence intervals from four random seeds. The paper’s ImageNet comparison retains a performance gap.",
+    "criterion": "Train the six-layer VGG encoder on CIFAR-10 with local self-supervised objectives, using the Table 2 architecture and augmentations, batch size 128 and 300 training epochs. Freeze the encoder, average-pool each layer’s features and concatenate them to train a linear classifier on labeled training images. Mean test accuracy across four random seeds must reach at least 80.69%.",
     "set_by": "Technology Atlas fallback, adopting the published CIFAR-10 comparison; the authors did not designate this numerical result as a field milestone.",
     "set_by_kind": "atlas",
-    "threshold_quote": null,
-    "threshold_ref": null,
+    "threshold_quote": "80.69",
+    "threshold_ref": 5,
     "refs": [
      4,
      5
     ],
     "status": "active",
     "replaced_by": [],
-    "threshold_checked": null
+    "threshold_checked": true
    },
    {
     "id": "m3",
     "title": "A four-block 400M-class language model comes within 0.062 nats/token of end-to-end training.",
-    "criterion": "Use Moon and colleagues’ 24-layer, 400M-class decoder-only Transformer, partitioned into four gradient-isolated blocks, on the FineWeb-Edu 10BT sample. At the reported 14,000-step checkpoint, reach a validation negative-log-likelihood gap no greater than 0.062 nats/token above the end-to-end reference of 2.418. The preprint revised on 26 October 2026 reports this gap with first-block multi-token prediction. Quality comparisons use one seed. Gradients remain permitted inside each block.",
+    "criterion": "Train the 24-layer, 400M-class decoder-only Transformer on the FineWeb-Edu 10BT sample in sequences of 4,096 tokens. Use four equal-depth blocks with local objectives and stop gradients at each boundary. At step 14,000, evaluate held-out next-token negative log likelihood through the final block’s output head. The loss must be no more than 0.062 nats/token above the end-to-end reference of 2.418 nats/token.",
     "set_by": "Technology Atlas fallback, adopting Moon and colleagues’ reported Table 1 gap; the authors did not set it as a field milestone.",
     "set_by_kind": "atlas",
-    "threshold_quote": null,
-    "threshold_ref": null,
+    "threshold_quote": "+0.062",
+    "threshold_ref": 6,
     "refs": [
      6
     ],
     "status": "active",
     "replaced_by": [],
-    "threshold_checked": null
+    "threshold_checked": true
    },
    {
     "id": "m4",
@@ -455,6 +457,36 @@
     "status": "active",
     "replaced_by": [],
     "threshold_checked": null
+   },
+   {
+    "id": "m5",
+    "title": "A locally trained network distinguishes five digit patterns across shifts in position.",
+    "criterion": "Use Fukushima’s three-stage neocognitron and the five digit patterns 0 through 4 in Figure 6a. Present each pattern 20 times with random shifts, using the local learning rule without class labels. For the positions in Figure 6a–c, each digit must activate the same single final-layer cell at every position, and different digits must activate different cells.",
+    "set_by": "Technology Atlas, adopting Fukushima’s pattern-recognition demonstration as an early test. No external body sets it as a milestone.",
+    "set_by_kind": "atlas",
+    "threshold_quote": "each stimulus pattern has become to elicit an output only from one of the C-cells of the last layer",
+    "threshold_ref": 12,
+    "refs": [
+     12
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m6",
+    "title": "A greedily trained VGG-11 reaches 88.0% top-five accuracy on supervised ImageNet.",
+    "criterion": "Use the supervised VGG-11 comparison in Table 3 of Belilovsky and colleagues. Train successive convolutional layers with local auxiliary classifiers, freezing the previously trained layers. Under the paper’s VGG-11 training schedule, the single model must place the correct class among its five highest-scoring predictions on at least 88.0% of ImageNet evaluation images. Use the single-model column and exclude the ensemble.",
+    "set_by": "Technology Atlas, adopting the end-to-end VGG-11 top-five accuracy in Table 3. No external body sets this number as a milestone.",
+    "set_by_kind": "atlas",
+    "threshold_quote": "VGG-11 (e2e train) 67.9 88.0",
+    "threshold_ref": 11,
+    "refs": [
+     11
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
    }
   ],
   "measures": [],
@@ -462,7 +494,9 @@
    "No externally defined milestone ladder for local learning at backpropagation parity was found.",
    "No field-wide numerical bound on retained activity or agreed statistical noninferiority margin for parity was found.",
    "The Nature page for Backpropagation and the brain redirected to an inaccessible authentication service.",
-   "The PMLR-hosted full-text PDF could not be opened; the corresponding arXiv HTML version was accessible."
+   "The PMLR-hosted full-text PDF could not be opened; the corresponding arXiv HTML version was accessible.",
+   "No published independent reproduction was found of one rule meeting all four image targets and both language-model targets at both block counts.",
+   "No roadmap, programme or professional-society statement was found that judges parity across these image and language comparisons infeasible or unworthy of pursuit."
   ],
   "references": [
    {
@@ -576,10 +610,82 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 9,
+    "kind": "web",
+    "url": "https://proceedings.mlr.press/v119/belilovsky20a.html",
+    "doi": null,
+    "title": "Decoupled Greedy Learning of CNNs",
+    "authors": "Eugene Belilovsky, Michael Eickenberg, Edouard Oyallon",
+    "container": "Proceedings of the 37th International Conference on Machine Learning, PMLR 119:736–745",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 10,
+    "kind": "web",
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2025/hash/fff96431843f625a90c5a9a4d969ec9e-Abstract-Conference.html",
+    "doi": "10.52202/085713-5823",
+    "title": "Subspace Networks: Scaling Decentralized Training with Communication-Efficient Model Parallelism",
+    "authors": "Ramasinghe S, Ajanthan T, Avraham G, Zuo Y, Long A",
+    "container": "Advances in Neural Information Processing Systems 38",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": "193941-193960",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 11,
+    "kind": "report",
+    "url": "https://proceedings.mlr.press/v97/belilovsky19a/belilovsky19a.pdf",
+    "doi": null,
+    "title": "Greedy Layerwise Learning Can Scale to ImageNet",
+    "authors": "Eugene Belilovsky, Michael Eickenberg, Edouard Oyallon",
+    "container": "Proceedings of the 36th International Conference on Machine Learning, PMLR 97:583–593",
+    "year": "2019",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 12,
+    "kind": "journal",
+    "url": "https://www.cs.princeton.edu/courses/archive/spring08/cos598B/Readings/Fukushima1980.pdf",
+    "doi": "10.1007/BF00344251",
+    "title": "Neocognitron: A Self-organizing Neural Network Model for a Mechanism of Pattern Recognition Unaffected by Shift in Position",
+    "authors": "Fukushima K",
+    "container": "Biol. Cybernetics",
+    "year": "1980",
+    "volume": "36",
+    "issue": "4",
+    "pages": "193-202",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 13,
+    "kind": "journal",
+    "url": "https://www.cs.princeton.edu/courses/archive/spr08/cos598B/Readings/Fukushima1980.pdf",
+    "doi": null,
+    "title": "Neocognitron: A Self-organizing Neural Network Model for a Mechanism of Pattern Recognition Unaffected by Shift in Position",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
    }
   ],
   "milestone_order": [
+   "m5",
    "m1",
+   "m6",
    "m2",
    "m3",
    "m4"
@@ -589,265 +695,391 @@
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Forward-Forward achieved 1.36% MNIST test error on 10,000 test images.",
-    "detail": "Four fully connected hidden layers of 2,000 ReLUs; labels were included in the input. The independent-run count was not stated.",
+    "finding": "Supervised Forward-Forward reached 1.36% error on 10,000 MNIST test images.",
+    "detail": null,
     "quote": "A network with 4 hidden layers each containing 2000 ReLUs and full\nconnectivity between layers gets 1.36% test errors on MNIST after 60 epochs.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
-    "finding": "CIFAR-10 local features, seed count unstated: accuracy was roughly 5–8 percentage points below BP.",
-    "detail": "The reported comparison uses supervised local methods and ResNets with a detached readout, rather than the specified self-supervised VGG and linear-readout protocol.",
+    "finding": "Goodness-based Forward-Forward across three ResNet depths reached up to 42% CIFAR-10 detached-readout accuracy.",
+    "detail": "The reported range spans model depths and variants. The supplied text gives no seed count for this comparison.",
+    "quote": "while goodness-based FFA variants remain much lower at\n0.31\n0.31\n–\n0.42\n0.42\n.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 1,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The 124M-parameter Transformer trained with local cross-entropy on a 2.48B-token OpenWebText budget reached perplexity 42.",
+    "detail": "At this scale, the local cross-entropy gap to the study’s own end-to-end baseline is about 0.405 nats/token, calculated as ln(42/28).",
     "quote": null,
     "checked": null,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 1,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "CLAPP++both achieved 81.18% mean CIFAR-10 linear-readout accuracy across four random seeds.",
-    "detail": "The 95% confidence interval was ±0.18 percentage points. The architecture-matched BP-InfoNCE baseline reached 80.69% ± 0.84%.",
+    "finding": "CLAPP++both achieved 81.18% mean CIFAR-10 linear-readout test accuracy across four random seeds.",
+    "detail": null,
     "quote": null,
     "checked": null,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 5,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "CLAPP++both reached 79.62% mean STL-10 linear-readout test accuracy across four random seeds.",
+    "detail": "The STL-10 mean falls below the 81.97% reference and the 80.36% matched BP-CLAPP++ baseline. The ImageNet result also falls below both comparisons.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "met",
-    "finding": "Four-block 400M-class language model, one seed: validation NLL gap of 0.062 nats/token.",
-    "detail": "The 24-layer model used first-block MTP on FineWeb-Edu 10BT. At step 14,000, its gap was measured against an end-to-end NLL of 2.418. Gradients were isolated at block boundaries.",
-    "quote": "(iii) a multi-token-prediction (MTP) auxiliary objective helps at the first block boundary but hurts when added at deeper ones, and restricting it to the first block yields the best\nK\n=\n4\nK{=}4\nconfiguration (\n+\n0.062\n+0.062\nvs.\n+\n0.075\n+0.075\nnats at 400M);",
+    "finding": "The four-block 400M-class Transformer (one seed) finished 0.062 nats/token above end-to-end training on held-out FineWeb-Edu.",
+    "detail": null,
+    "quote": "restricting it to the first block yields the best\nK\n=\n4\nK{=}4\nconfiguration (\n+\n0.062\n+0.062\nvs.\n+\n0.075\n+0.075\nnats at 400M)",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "partial",
-    "finding": "CLAPP++both reached 81.18% CIFAR-10 linear-readout accuracy across four simulations.",
-    "detail": "The image results do not meet all specified references: CLAPP++both reached 79.62% on STL-10 and 42.49% on ImageNet. The source reports no language-model comparison for this rule.",
-    "quote": null,
-    "checked": null,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 5,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": null,
-    "verdict": "partial",
-    "finding": "First-block MTP, 125M language model, two blocks, one seed: validation loss 2.788 nats/token.",
-    "detail": "The matched end-to-end baseline was 2.771 nats/token. Local results also fell short at 400M and with four blocks; the study did not test the specified image comparisons.",
+    "finding": "Across four FineWeb-Edu configurations (one seed each), the local rule’s smallest loss gap to matched backpropagation was 0.017 nats/token.",
+    "detail": "The smallest gap occurred in the two-block 125M-class run at step 5,000.",
     "quote": null,
     "checked": null,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "met",
+    "finding": "Fukushima’s three-stage neocognitron assigned each of 5 digit patterns to its own single final-layer cell across the tested shifts.",
+    "detail": null,
+    "quote": "Each stimulus pattern has become to elicit an \noutput only from one of the C-cells of layer Uc3, and \nconversely, this C-cell has become selectively respon- \nsive only to that stimulus pattern.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "met",
+    "finding": "One greedily trained VGG-11 achieved 88.0% top-five accuracy on ImageNet-1k validation images (evaluation sample size unstated).",
+    "detail": "Training used k = 3 auxiliary problems through the penultimate convolutional layer. The final convolutional layer used VGG-11’s final max-pooling and two-hidden-layer fully connected network as its auxiliary classifier. The paper appeared in the peer-reviewed ICML proceedings.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://www.nature.com/articles/s41583-020-0277-3",
+    "milestone": "m5",
+    "hash": "d7f98e10179c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41583-020-0277-3",
     "milestone": "m1",
-    "hash": "6199edd45855",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "57554eb91e4d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41583-020-0277-3",
+    "milestone": "m6",
+    "hash": "6b73608c1d12",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41583-020-0277-3",
     "milestone": "m2",
-    "hash": "316f727c6858",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "23291989e8bf",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41583-020-0277-3",
     "milestone": "m3",
-    "hash": "63eb7b86a03d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bded7df341a5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41583-020-0277-3",
     "milestone": "m4",
     "hash": "6996a80e7074",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41583-020-0277-3",
     "milestone": "completion",
-    "hash": "fb05c292e8d7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1c92e768ab09",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2212.13345",
+    "milestone": "m5",
+    "hash": "d7f98e10179c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2212.13345",
     "milestone": "m1",
-    "hash": "6199edd45855",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "57554eb91e4d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2212.13345",
+    "milestone": "m6",
+    "hash": "6b73608c1d12",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2212.13345",
     "milestone": "m2",
-    "hash": "316f727c6858",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "23291989e8bf",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2212.13345",
     "milestone": "m3",
-    "hash": "63eb7b86a03d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bded7df341a5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2212.13345",
     "milestone": "m4",
     "hash": "6996a80e7074",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2212.13345",
     "milestone": "completion",
-    "hash": "fb05c292e8d7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1c92e768ab09",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2609.33240v1",
+    "milestone": "m5",
+    "hash": "d7f98e10179c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2609.33240v1",
     "milestone": "m1",
-    "hash": "6199edd45855",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "57554eb91e4d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2609.33240v1",
+    "milestone": "m6",
+    "hash": "6b73608c1d12",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2609.33240v1",
     "milestone": "m2",
-    "hash": "316f727c6858",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "23291989e8bf",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2609.33240v1",
     "milestone": "m3",
-    "hash": "63eb7b86a03d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bded7df341a5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2609.33240v1",
     "milestone": "m4",
     "hash": "6996a80e7074",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2609.33240v1",
     "milestone": "completion",
-    "hash": "fb05c292e8d7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1c92e768ab09",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2601.21683v2",
-    "milestone": "m2",
-    "hash": "316f727c6858",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2610.04867v2",
-    "milestone": "m3",
-    "hash": "63eb7b86a03d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m5",
+    "hash": "d7f98e10179c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2601.21683v2",
     "milestone": "m1",
-    "hash": "6199edd45855",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "57554eb91e4d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2601.21683v2",
+    "milestone": "m6",
+    "hash": "6b73608c1d12",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2601.21683v2",
+    "milestone": "m2",
+    "hash": "23291989e8bf",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2601.21683v2",
     "milestone": "m3",
-    "hash": "63eb7b86a03d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bded7df341a5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2601.21683v2",
     "milestone": "m4",
     "hash": "6996a80e7074",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2601.21683v2",
     "milestone": "completion",
-    "hash": "fb05c292e8d7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1c92e768ab09",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.04867v2",
+    "milestone": "m5",
+    "hash": "d7f98e10179c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.04867v2",
     "milestone": "m1",
-    "hash": "6199edd45855",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "57554eb91e4d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.04867v2",
+    "milestone": "m6",
+    "hash": "6b73608c1d12",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.04867v2",
     "milestone": "m2",
-    "hash": "316f727c6858",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "23291989e8bf",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.04867v2",
+    "milestone": "m3",
+    "hash": "bded7df341a5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.04867v2",
     "milestone": "m4",
     "hash": "6996a80e7074",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.04867v2",
     "milestone": "completion",
-    "hash": "fb05c292e8d7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1c92e768ab09",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.princeton.edu/courses/archive/spr08/cos598B/Readings/Fukushima1980.pdf",
+    "milestone": "m5",
+    "hash": "d7f98e10179c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.mlr.press/v97/belilovsky19a/belilovsky19a.pdf",
+    "milestone": "m6",
+    "hash": "6b73608c1d12",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -914,8 +1146,113 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 0 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"One learning rule trains a deep network layer by layer or in groups of layers called blocks. Each block passes its output forward and updates its weights from its own objective. Gradients may flow within a block but stop at its boundary, so training requires no network-wide record of activations for a backward pass. The rule matches end-to-end backpropagation both in image classification with a linear classifier trained on frozen features and in next-token prediction at the specified language-model sizes.\". Reason: The definition now explains what passes between blocks, where gradients stop, and what parity measures in each task."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Teams that split a model across GPUs send activations forward and wait for gradients to travel back. Compression reduces traffic but leaves that wait. At equal prediction quality, local updates would let each GPU train its block as soon as it computes its own loss. In a 400M-class language model, peak memory fell from 29.2 GiB end to end to 14.5\\u201315.8 GiB for the largest of four stages measured separately. Each stage still needed its input from the preceding stage, and the extra prediction heads added training computation.\". Reason: The perplexity figures describe the quality gap but omit who faces the hardware constraint, its measured size, and the cost of reducing it."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit completion: criterion = \"Independent investigators reproduce one rule using current-minibatch activities, targets and local parameter/optimizer state, with no task-error gradient crossing a layer or block boundary and no retained end-to-end backward graph. Under the cited image protocols, mean linear-readout accuracy reaches 80.69% on CIFAR-10, 81.97% on STL-10, 36.78% on Tiny ImageNet and 55.19% on ImageNet or better. On FineWeb-Edu, at equal token budgets, mean validation loss is at most 2.771 nats/token at step 5,000 for the 125M class and 2.418 at step 14,000 for the 400M class, each with both two and four equal-depth blocks. The rule also matches or improves on matched end-to-end reruns in every setting.\"; basis = \"The Atlas combines the published image and language baselines with a zero mean performance deficit and independent reproduction. The image comparison uses an architecture-matched baseline below the state of the art. The language comparison matches training tokens and evaluation steps. Its auxiliary heads add computation, and the published quality comparisons use one seed. AlgoPerf scores time to target on separate workloads.\". Reason: The cited language runs ended after their last saved checkpoints, and the phrase “at the cited architectures and budgets” leaves the evaluation steps and the meaning of budget ambiguous."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after None: \"A locally trained network distinguishes five digit patterns across shifts in position.\". Reason: Fukushima’s experiment supplies a test of learned pattern recognition with local updates that predates the MNIST demonstration by decades."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Train four fully connected hidden layers of 2,000 rectified linear units each on MNIST with supervised Forward-Forward learning. Encode the label in the first ten input pixels, pairing each image with a correct label for positive examples and an incorrect label for negative examples. Reach at most 1.36% test error after 60 epochs under the unaugmented protocol in section 3.3.\"; threshold_quote = \"1.36% test errors on MNIST after 60 epochs.\"; threshold_ref = 3. Reason: The current MNIST criterion includes publication history and a backpropagation result while omitting how the supervised comparison encodes the digit label."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m1: \"A greedily trained VGG-11 reaches 88.0% top-five accuracy on supervised ImageNet.\". Reason: The existing image milestones omit a supervised ImageNet comparison in which a single greedily trained VGG-11 matched the end-to-end model on top-five accuracy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"Train the six-layer VGG encoder on CIFAR-10 with local self-supervised objectives, using the Table 2 architecture and augmentations, batch size 128 and 300 training epochs. Freeze the encoder, average-pool each layer\\u2019s features and concatenate them to train a linear classifier on labeled training images. Mean test accuracy across four random seeds must reach at least 80.69%.\"; threshold_quote = \"80.69\"; threshold_ref = 5. Reason: The current CIFAR-10 criterion reports observed scores and leaves out the frozen encoder and multilayer readout used to obtain them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Train the 24-layer, 400M-class decoder-only Transformer on the FineWeb-Edu 10BT sample in sequences of 4,096 tokens. Use four equal-depth blocks with local objectives and stop gradients at each boundary. At step 14,000, evaluate held-out next-token negative log likelihood through the final block\\u2019s output head. The loss must be no more than 0.062 nats/token above the end-to-end reference of 2.418 nats/token.\"; threshold_quote = \"+0.062\"; threshold_ref = 6. Reason: The current language criterion mixes the test with the authors’ result and omits the output head used to measure validation loss."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No published independent reproduction was found of one rule meeting all four image targets and both language-model targets at both block counts.\". Reason: The existing search notes cover milestone ladders and statistical margins but omit the status of independent reproduction."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No roadmap, programme or professional-society statement was found that judges parity across these image and language comparisons infeasible or unworthy of pursuit.\". Reason: The roadmap’s description of a technical challenge should not be read as an institutional judgment against pursuing parity."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Skipped proposed operation 3 (remove statement 1): the entry needs at least 2 statements. Its reason: Hinton’s video example describes a conditional benefit if positive and negative passes can be separated in time and does not name backpropagation parity as a goal."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 10 of 11 proposed operations from MLC-05-revise-20261125T092357678965Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: completion, m5, m1, m6, m2, m3."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 0 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 5 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "definition is 510 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 5 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 2 candidates returned, 0 dropped as sources already used, 2 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 2 of 2 new candidates, without search. Skipped: none. Dropped rows: none. Replaced 6 earlier rows. Added 9 results: 7 from sources already used, 2 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 4 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-25"
  }
 }
