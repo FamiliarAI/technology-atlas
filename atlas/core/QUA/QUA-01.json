@@ -326,15 +326,28 @@
   ],
   "prompt": "5e97d4b8dfc3"
  },
+ "review": {
+  "state": "published",
+  "note": null,
+  "into": null,
+  "at": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "state": "published"
+   }
+  ]
+ },
  "page": {
   "id": "QUA-01",
   "title": "Below-threshold universal quantum computation",
-  "definition": "A quantum computer executes operations sufficient to approximate arbitrary quantum circuits, with errors per logical operation falling as code distance increases. A logical qubit encodes information across physical qubits; distance is the minimum weight of an undetectable logical error. Decoding interprets error-check measurements during execution.",
+  "definition": "A quantum computer executes encoded operations sufficient to approximate arbitrary quantum circuits, with lower error per logical operation as code distance increases. One such universal set combines Clifford gates with a non-Clifford gate called T. A logical qubit stores information across physical qubits. Code distance is the fewest physical qubits on which an error can act undetected while changing the encoded information. A decoder interprets error-check measurements so later operations can use the corrected outcomes.",
   "goal": {
-   "need": "The Willow study contrasts physical entangling-gate performance with the error rates required by many applications. Error correction must bridge this gap during universal computation: protected Clifford operations require an additional non-Clifford operation, such as the T gate, to approximate arbitrary quantum circuits.",
+   "need": "Chemists tracing a reaction mechanism may need energies for thousands of candidate steps. Density functional calculations can locate plausible structures yet give uncertain energy differences. More accurate energies could help distinguish competing pathways, including those for nitrogen fixation. At a fixed error rate per gate, errors accumulate as a quantum calculation grows. Correcting them during execution would make longer calculations possible. Some proposed applications also need hundreds to thousands of logical qubits operating through billions of gates.",
    "need_refs": [
-    1,
-    2
+    18,
+    4,
+    1
    ],
    "figures": {
     "caption": "Error scales contrasted in the Willow study",
@@ -371,23 +384,30 @@
      "context": "The preceding sentence identifies the goal as executing long algorithms with end-to-end error rates below those physical qubits can support directly.",
      "ref": 4,
      "checked": true
+    },
+    {
+     "body": "National Academies of Sciences, Engineering, and Medicine",
+     "year": "2019",
+     "quote": "possible future pathways toward a universal, fault-tolerant quantum computer",
+     "context": "Chapter 7 of Quantum Computing: Progress and Prospects identifies milestones on those pathways, including error-corrected qubits with better error rates than physical qubits.",
+     "ref": 5,
+     "checked": true
     }
    ]
   },
   "completion": {
    "title": "Universal logical circuits show below-threshold scaling with real-time decoding.",
-   "criterion": "Execute full encoded Clifford-plus-T circuits at increasing code distances, with repeated error checks, magic-state preparation and consumption, real-time decoding and required measurement-conditioned feedback. Logical error per operation must decrease with distance, including the non-Clifford contribution; for distances differing by two, the suppression ratio Λ = ε_d/ε_(d+2) must exceed 1. The published proposal specifies color codes and supplies no fixed circuit length or statistical significance cutoff.",
-   "set_by": "The quantum error-correction below-threshold convention, applied to universal circuits by the Quantinuum Helios team in its Discussion. Its explicit experimental proposal concerns color codes.",
+   "criterion": "Execute comparable encoded circuits containing a universal set of operations at increasing code distances, with repeated error checks, real-time decoding and any feedback the circuit requires. The logical error per operation for the full circuit, including its non-Clifford operations, must decrease. For distances d and d+2 this means ε_d/ε_(d+2) > 1. In the proposed color-code test, run Clifford-plus-T circuits with preparation and consumption of the magic states used to teleport T gates.",
+   "set_by": "The below-threshold distance-scaling convention. The Quantinuum Helios team specifies a Clifford-plus-T color-code experiment in its Discussion.",
    "set_by_kind": "community_convention",
-   "threshold_quote": "below threshold behavior on a full Clifford plus T circuit",
+   "threshold_quote": "below threshold behavior on a full Clifford plus T circuit encoded in color code using real-time decoding of the syndromes.",
    "threshold_ref": 2,
-   "basis": "The below-threshold convention tests whether added protection reduces logical errors. Quantinuum explicitly proposes extending it to a full universal circuit with real-time decoding. Microsoft/Qolab likewise requires universal logical operations, distance-dependent improvement and measurement-conditioned control. This is a published experimental target, rather than a certification standard. The cited demonstrations do not establish the complete integrated test.",
+   "basis": "The proposed experiment extends a distance comparison from memory and Clifford gates to a full universal circuit. An algorithm at one distance shows that its components can operate together. Establishing scaling requires the distance comparison on the integrated computation. The proposal specifies neither a circuit length nor a statistical significance cutoff.",
    "refs": [
-    1,
     2,
+    1,
     4,
-    6,
-    7
+    17
    ],
    "threshold_checked": true
   },
@@ -395,14 +415,16 @@
   "cases": [
    "Superconducting circuits",
    "Trapped ions",
-   "Neutral atoms"
+   "Neutral atoms",
+   "Silicon spin qubits",
+   "Photonic qubits"
   ],
   "milestone_structure": "parallel",
   "milestones": [
    {
     "id": "m1",
-    "title": "A logical memory has a lower error rate than its constituent physical qubits.",
-    "criterion": "Quantum error correction produces at least one logical qubit whose error rate is lower than that of physical qubits under a comparable task. The National Academies calls this milestone G2b. Willow, published on 9 December 2024, reports a distance-7 memory using 101 physical qubits with lifetime 291 ± 6 μs, exceeding its best constituent physical-qubit lifetime by a factor of 2.4 ± 0.3.",
+    "title": "A logical memory outlasts its best constituent physical qubit.",
+    "criterion": "Compare the error-corrected logical memory with its best constituent physical qubit on the same storage task. The logical memory lifetime must exceed that physical-qubit lifetime.",
     "set_by": "National Academies of Sciences, Engineering, and Medicine, Quantum Computing: Progress and Prospects, section 7.3.4, milestone G2b; the memory comparison is operationalized in the Willow study.",
     "set_by_kind": "community_convention",
     "threshold_quote": "yielding one or more logical qubits of better error rates than possible with physical qubits",
@@ -418,15 +440,15 @@
    {
     "id": "m2",
     "title": "Logical memory errors decrease with code distance, with suppression factor Λ > 1.",
-    "criterion": "Increasing distance reduces memory error per correction cycle: Λ = ε_d/ε_(d+2) > 1. Superconducting: Willow tests d = 3, 5, 7 with 100,000 repetitions per plotted point, obtaining Λ = 2.14 ± 0.02; its separate d = 5 real-time experiment reaches one million cycles. Trapped ions: the Helios preprint of 16 October 2026 uses 15,840/21,600/29,000 shots at d = 3/5/7, with 20 rounds per shot. Neutral atoms: the study published on 10 November 2025 obtains Λ = 2.14 ± 0.13 from d = 3 versus 5 over four rounds without postselection.",
+    "criterion": "Measure the logical memory error probability per correction cycle, ε_d, for the same storage task at increasing code distances d. For distances d and d+2, the suppression factor Λ = ε_d/ε_(d+2) must exceed 1.",
     "set_by": "The below-threshold quantum error-correction convention, expressed quantitatively in the Willow study, equation 1 and the following definition of Λ.",
     "set_by_kind": "community_convention",
-    "threshold_quote": "the logical error rate should be suppressed exponentially as we increase the number of physical qubits per logical qubit.",
+    "threshold_quote": "representing the reduction in logical error rate when increasing the code distance by two",
     "threshold_ref": 1,
     "refs": [
      1,
      2,
-     6
+     14
     ],
     "status": "active",
     "replaced_by": [],
@@ -434,8 +456,8 @@
    },
    {
     "id": "m3",
-    "title": "Logical Clifford-circuit errors decrease with code distance, with suppression factor Λ > 1.",
-    "criterion": "Logical Clifford-circuit error per operation decreases with code distance, with suppression ratio Λ > 1. The Helios preprint, not peer reviewed, compares d = 3 and 5 using 2,220, 1,110 and 666 sampled two-qubit Clifford circuits of lengths 69, 139 and 209 gates. Each sampled circuit runs once at each distance and unencoded. At d = 5 it reports (7 ± 3) × 10^-5 error per two-qubit Clifford. Error decoding is offline.",
+    "title": "Error per logical two-qubit Clifford decreases with code distance.",
+    "criterion": "Run two-qubit Clifford randomized benchmarking at increasing code distances. Sample sequences of logical Clifford gates at several lengths, apply the inverse of each sequence, and estimate error per logical two-qubit Clifford from the decay of the return probability. For distances d and d+2, the ratio of the lower-distance error to the higher-distance error must exceed 1.",
     "set_by": "The below-threshold convention applied to logical two-qubit Clifford randomized benchmarking by the Quantinuum Helios team; its published implementation uses color codes.",
     "set_by_kind": "community_convention",
     "threshold_quote": "below threshold scaling of error rates for Clifford two-qubit randomized benchmarking circuits",
@@ -450,16 +472,16 @@
    {
     "id": "m4",
     "title": "Logical non-Clifford gates use real-time decoding and measurement-conditioned feedback.",
-    "criterion": "Logical non-Clifford operations execute with repeated error correction, real-time error decoding and feedback conditioned on decoded measurements. Superconducting: Garner et al.'s 30 October 2026 preprint, not peer reviewed, tests three-T-state synthesis in 15 settings with 14,861,490 raw shots; S corrections run in real time, but error decoding is offline. Neutral atoms: Bluvstein et al. apply universal-gate feed-forward in software. Trapped ions: Helios also decodes offline. These results do not establish this complete control-loop test.",
+    "criterion": "Execute a logical non-Clifford operation with repeated error checks. Decode the relevant measurements during execution and use the decoded outcome to select the correction or subsequent gate before the step that depends on it.",
     "set_by": "Microsoft Quantum and Qolab, Scalable logical qubits, capability items 4 and 5: universal operations and measurement-conditioned control under repeated error correction.",
     "set_by_kind": "community_convention",
-    "threshold_quote": "allow program execution to branch on measurement outcomes",
+    "threshold_quote": "allow program execution to branch on measurement outcomes, requiring low-latency real-time decoding, feedforward",
     "threshold_ref": 4,
     "refs": [
      4,
-     7,
-     6,
-     2
+     2,
+     17,
+     6
     ],
     "status": "active",
     "replaced_by": [],
@@ -476,8 +498,78 @@
     "refs": [
      4,
      2,
-     8,
-     9
+     7,
+     8
+    ],
+    "status": "retired",
+    "replaced_by": [
+     "m8",
+     "m9"
+    ],
+    "threshold_checked": true
+   },
+   {
+    "id": "m6",
+    "title": "An encoded qubit is protected against a specified class of physical errors.",
+    "criterion": "Encode a qubit across physical qubits, expose it to an error the code is designed to correct, and demonstrate recovery of the encoded information. A three-qubit code correcting a single phase flip is one implementation.",
+    "set_by": "Quantum Information Science and Technology Experts Panel, Quantum Computation Roadmap version 2.0, metric 4.6.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "Demonstrate quantum error-correcting codes.",
+    "threshold_ref": 20,
+    "refs": [
+     20,
+     19
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m7",
+    "title": "A simple algorithm runs fault tolerantly on three to ten logical qubits.",
+    "criterion": "Execute a simple quantum algorithm on three to ten logical qubits using fault-tolerant logical operations. A demonstration at one code distance suffices for this stage.",
+    "set_by": "Quantum Information Science and Technology Experts Panel, Quantum Computation Roadmap version 2.0, section 7, metric 7.5.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "Demonstrate fault-tolerant implementation of simple quantum algorithms with logical qubits.",
+    "threshold_ref": 20,
+    "refs": [
+     20,
+     17
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m8",
+    "title": "The error in preparing an encoded magic state decreases with code distance.",
+    "criterion": "Prepare the same target magic state at increasing code distances and compare the output-state infidelity, one minus its fidelity to the target. Infidelity must decrease with preparation distance. For a protocol that discards attempts, compare the preparation errors under a stated acceptance rule and report the fraction accepted at each distance.",
+    "set_by": "The Quantinuum Helios team’s proposed test of below-threshold magic-state preparation in color codes.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "below threshold scaling of high-fidelity color code magic state preparation",
+    "threshold_ref": 2,
+    "refs": [
+     2,
+     7,
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m9",
+    "title": "The error per executed logical non-Clifford gate decreases with code distance.",
+    "criterion": "Implement the same logical non-Clifford gate at increasing code distances and compare its error acting on the encoded data. Include the operations that apply the gate, including consumption of a prepared state when the implementation uses one. For distances d and d+2, the ratio of the gate error at d to that at d+2 must exceed 1.",
+    "set_by": "The logical-error distance-scaling convention applied to Microsoft Quantum and Qolab’s requirement for fault-tolerant non-Clifford operations.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "increasing code distance (and corresponding resources) predictably reduces logical error rate",
+    "threshold_ref": 4,
+    "refs": [
+     4,
+     1,
+     2,
+     17
     ],
     "status": "active",
     "replaced_by": [],
@@ -488,8 +580,8 @@
   "not_found": [
    "No platform-independent acceptance standard specifying circuit length, statistical significance or permissible postselection for the integrated universal-circuit test was located.",
    "The Science full text for DOI 10.1126/science.aee7961 could not be opened; the accessible cultivation preprint was read.",
-   "The Willow author correction published on 28 April 2026 could not be opened.",
-   "Total shot counts underlying the cultivation fidelity lower bound were not located in the accessible text."
+   "Total shot counts underlying the cultivation fidelity lower bound were not located in the accessible text.",
+   "No experimental report was found showing lower error at increasing code distances for a full logical Clifford-plus-T circuit with real-time decoding."
   ],
   "references": [
    {
@@ -564,20 +656,6 @@
    },
    {
     "id": 6,
-    "kind": "journal",
-    "url": "https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=960314",
-    "doi": "10.1038/s41586-025-09848-5",
-    "title": "A fault-tolerant neutral-atom architecture for universal quantum computation",
-    "authors": "Bluvstein D, Geim AA, Li SH, Evered SJ, Bonilla Ataides JP, Baranes G, et al.",
-    "container": "Nature",
-    "year": "2026",
-    "volume": "649",
-    "issue": "8095",
-    "pages": "39-46",
-    "citation_source": "crossref"
-   },
-   {
-    "id": 7,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2611.00404v1",
     "doi": "10.48550/arXiv.2611.00404",
@@ -591,7 +669,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 8,
+    "id": 7,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2512.13908v1",
     "doi": "10.48550/arXiv.2512.13908",
@@ -605,7 +683,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 9,
+    "id": 8,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2412.15165",
     "doi": "10.48550/arXiv.2412.15165",
@@ -619,7 +697,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 10,
+    "id": 9,
     "kind": "preprint",
     "url": "https://arxiv.org/abs/2610.24077",
     "doi": null,
@@ -633,7 +711,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 11,
+    "id": 10,
     "kind": "preprint",
     "url": "https://arxiv.org/abs/2408.13687",
     "doi": null,
@@ -647,7 +725,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 12,
+    "id": 11,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2606.06455v2",
     "doi": null,
@@ -661,7 +739,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 13,
+    "id": 12,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2602.22211v1",
     "doi": null,
@@ -675,7 +753,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 14,
+    "id": 13,
     "kind": "journal",
     "url": "https://www.nature.com/articles/s41586-026-10759-2?error=cookies_not_supported",
     "doi": null,
@@ -689,7 +767,7 @@
     "citation_source": "model"
    },
    {
-    "id": 15,
+    "id": 14,
     "kind": "journal",
     "url": "https://www.nature.com/articles/s41586-025-09848-5?error=cookies_not_supported",
     "doi": null,
@@ -703,7 +781,7 @@
     "citation_source": "model"
    },
    {
-    "id": 16,
+    "id": 15,
     "kind": "journal",
     "url": "https://www.nature.com/articles/s41586-023-06927-3",
     "doi": null,
@@ -717,7 +795,7 @@
     "citation_source": "model"
    },
    {
-    "id": 17,
+    "id": 16,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2605.04892v1",
     "doi": null,
@@ -731,7 +809,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 18,
+    "id": 17,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2603.04584v1",
     "doi": null,
@@ -743,267 +821,795 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 18,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5530650/",
+    "doi": "10.1073/pnas.1619152114",
+    "title": "Elucidating reaction mechanisms on quantum computers",
+    "authors": "Reiher M, Wiebe N, Svore KM, Wecker D, Troyer M",
+    "container": "Proc. Natl. Acad. Sci. U.S.A.",
+    "year": "2017",
+    "volume": "114",
+    "issue": "29",
+    "pages": "7555-7560",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 19,
+    "kind": "journal",
+    "url": "https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.81.2152",
+    "doi": "10.1103/PhysRevLett.81.2152",
+    "title": "Experimental Quantum Error Correction",
+    "authors": "Cory DG, Price MD, Maas W, Knill E, Laflamme R, Zurek WH, et al.",
+    "container": "Phys. Rev. Lett.",
+    "year": "1998",
+    "volume": "81",
+    "issue": "10",
+    "pages": "2152-2155",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 20,
+    "kind": "report",
+    "url": "https://mfix.netl.doe.gov/workshop-files/2006/references/QuantumComputingRoadmap.pdf",
+    "doi": null,
+    "title": "A Quantum Information Science and Technology Roadmap, Part 1: Quantum Computation",
+    "authors": "Quantum Information Science and Technology Experts Panel",
+    "container": "LA-UR-04-1778, Version 2.0",
+    "year": "2004",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 21,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2606.04079",
+    "doi": null,
+    "title": "Quantum error correction with the toric code",
+    "authors": "Computing A, Collaborators",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 22,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/2201.08581",
+    "doi": null,
+    "title": "Quantum error correction with silicon spin qubits",
+    "authors": "Takeda K, Noiri A, Nakajima T, Kobayashi T, Tarucha S",
+    "container": "arXiv",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 23,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41467-026-68533-x",
+    "doi": "10.1038/s41467-026-68533-x",
+    "title": "Demonstration of measurement-free universal logical quantum computation",
+    "authors": "Butt F, Pogorelov I, Freund R, Steiner A, Meyer M, Monz T, et al.",
+    "container": "Nat Commun",
+    "year": "2026",
+    "volume": "17",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 24,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2610.14202",
+    "doi": null,
+    "title": "Below-threshold execution of fault-tolerant ripple-carry addition on a trapped-ion quantum computer",
+    "authors": "Nelson JS, Landahl AJ, Baczewski AD",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
    }
   ],
   "milestone_order": [
+   "m6",
    "m1",
    "m2",
    "m3",
    "m4",
-   "m5"
+   "m8",
+   "m9",
+   "m7"
   ],
   "results": [
+   {
+    "milestone": "m6",
+    "case": "Superconducting circuits",
+    "verdict": "met",
+    "finding": "Distance-15 repetition-code recovery, 10⁶ repetitions per experiment: halving the detection probability reduced logical error 250-fold.",
+    "detail": "The authors subsampled the distance-15 code from distance-29 data. Recovery was assessed from the decoded logical readout.",
+    "quote": "For example, reducing the detection probability by a factor of 2 manifests in reduction by a factor of 250 in logical error at distance 15",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 1,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
    {
     "milestone": "m1",
     "case": "Superconducting circuits",
     "verdict": "met",
-    "finding": "A 101-qubit logical memory exceeded its best constituent physical-qubit lifetime by a factor of 2.4 ± 0.3.",
-    "detail": "The distance-7 memory had a lifetime of 291 ± 6 μs; each plotted memory-duration point used 100,000 repetitions.",
+    "finding": "One 101-qubit distance-7 surface-code memory outlasted its best constituent physical qubit by a factor of 2.4 ± 0.3.",
+    "detail": null,
     "quote": "The distance-7 logical qubit lifetime is 291 ± 6 μs, exceeding the lifetimes of all the constituent physical qubits (median, 85 ± 7 μs; best, 119 ± 13 μs) by a factor of 2.4 ± 0.3.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 1,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": "Superconducting circuits",
     "verdict": "met",
-    "finding": "Surface-code memories with 100,000 repetitions per plotted point achieved Λ = 2.14 ± 0.02.",
-    "detail": "The fit compared distances 3, 5 and 7 using an offline neural-network decoder. A separate experiment also demonstrated suppression with real-time decoding.",
-    "quote": "With our neural network decoder, we observe\nΛ\n= 2.14 ± 0.02 and\nε\n7\n= (1.43 ± 0.03) × 10\n−3\n(Fig.\n1c,d\n).",
+    "finding": "Willow surface-code memory at distances 3, 5 and 7, with 10⁵ repetitions per data point, achieved Λ = 2.14 ± 0.02.",
+    "detail": "The main fit used logical X and Z storage data through 250 cycles. Repetition-code data also showed suppression, with Λ = 8.4 ± 0.1 over distances 5–11.",
+    "quote": "The logical error rate of our larger quantum memory is suppressed by a factor of\nΛ\n= 2.14 ± 0.02 when increasing the code distance by 2, culminating in a 101-qubit distance-7 code with 0.143% ± 0.003 per cent error per cycle of error correction.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 1,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Trapped ions",
+    "verdict": "met",
+    "finding": "Helios-1 color-code QEC recovered logical readout under phase-tracking errors in a pooled dataset of 66,440 memory records.",
+    "detail": "The pooled sample includes runs before and after the software fix. The source gives no separate shot count or recovery rate for records affected by the phase-tracking issue.",
+    "quote": "as the additional phase errors were routinely corrected\nin QEC and did not significantly affect the LER.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": "Trapped ions",
     "verdict": "met",
-    "finding": "Logical memory: 15,840, 21,600 and 29,000 shots at distances 3, 5 and 7; fitted suppression factor Λ = 12 +3/−2.",
-    "detail": "Each shot used 20 error-check cycles. The reported suppression factor uses the Tesseract decoder; decoding was offline.",
-    "quote": "Leveraging both circuit- and hardware-\nlevel leakage reduction schemes, we achieve logical error rates as low as 5+4−2 ×10 −6, and demonstrate\nerror suppression by over an order of magnitude, Λ = 12 +3−2, with each successive increase in code\ndistance.",
+    "finding": "Helios-1 color-code memory yielded fitted suppression Λ = 12 (+3/−2) across 66,440 records.",
+    "detail": "The per-cycle estimate divides the failure fraction by 20.5 to account for 20 syndrome rounds and a half-round preparation contribution. The reported Λ is a fit across all three distances.",
+    "quote": "we find sup-\npression factors of Λ Tesseract = 12 +3−2, Λ Frontier = 11 +2−2,\nΛCNN = 7+1−1 and ΛRTT = 8+1−1",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": "Trapped ions",
     "verdict": "met",
-    "finding": "Logical Clifford benchmarking: 2,220, 1,110 and 666 sampled circuits at three lengths; suppression factor Λ = 9 +8/−4.",
-    "detail": "The same sampled circuits ran once each at distances 3 and 5 and unencoded. The encoded circuits used repeated error checks and offline decoding.",
+    "finding": "Helios-1 logical two-qubit Clifford benchmarking used 3,996 sequences per distance and reported Λ = 9 (+8/−4).",
+    "detail": "Tesseract decoded the syndrome data offline. The main results give a lower uncertainty of −4, while the abstract gives −3.",
     "quote": "The observed logical error rates correspond\nto the suppression factor of Λ Logic3/5 = 9+8−4 (see Fig. 5b).",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Superconducting circuits",
+    "verdict": "met",
+    "finding": "Distance-15 repetition-code memory, 10⁶ repetitions per injection experiment, showed a 250-fold reduction in decoded logical error when detection probability halved.",
+    "detail": "The distance-15 code was subsampled from distance-29 data. Recovery was assessed through decoded logical readout in the basis protected by each repetition code.",
+    "quote": "For ex-\nample, reducing detection probability by a factor of 2\nmanifests in a factor of 250 reduction in logical error at\ndistance-15, consistent with the expected O(p8) scaling.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
     "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": "Superconducting circuits",
     "verdict": "met",
-    "finding": "A 101-qubit logical memory, with 100,000 repetitions per plotted point, exceeded its best physical qubit’s lifetime by 2.4 ± 0.3 times.",
-    "detail": "The distance-7 logical lifetime was 291 ± 6 µs, compared with 119 ± 13 µs for the best constituent physical qubit.",
-    "quote": "This logical memory is also beyond break-even, exceeding\nits best physical qubit’s lifetime by a factor of 2 .4 ± 0.3.",
+    "finding": "One distance-7 surface-code memory outlasted its best constituent physical qubit by a factor of 2.4 ± 0.3.",
+    "detail": "The lifetime metric averages uniformly over pure states. The logical estimate uses measured X- and Z-basis error rates to bound the effective depolarization rate.",
+    "quote": "The distance-7 logical qubit lifetime is 291 ± 6 µs, ex-\nceeding the lifetimes of all the constituent physical qubits\n(median 85±7 µs, best 119±13 µs) by a factor of 2.4±0.3.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": "Superconducting circuits",
     "verdict": "met",
-    "finding": "Surface-code memory, with 100,000 repetitions per plotted point, achieved Λ = 2.14 ± 0.02.",
-    "detail": "The experiment compared distances 3, 5 and 7 using an offline neural-network decoder. A separate distance-5 experiment also maintained suppression with real-time decoding.",
-    "quote": "The logical error rate of our larger quantum memory is suppressed by a factor of Λ = 2 .14 ± 0.02\nwhen increasing the code distance by two, culminating in a 101-qubit distance-7 code with 0.143% ±\n0.003% error per cycle of error correction.",
+    "finding": "Surface-code memory across 14 code patches at distances 3, 5, and 7 achieved a fitted suppression factor Λ = 2.14 ± 0.02.",
+    "detail": "The 105-qubit experiment used nine distance-3 patches, four distance-5 patches, and one distance-7 patch, with 100,000 repetitions per plotted point averaged over the two logical bases.",
+    "quote": "With our neural\n\n[Page 3]\n3\nnetwork decoder, we observe Λ = 2 .14 ± 0.02 and ε7 =\n(1.43 ± 0.03) × 10−3 (see Fig. 1c-d).",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": "Superconducting circuits",
+    "verdict": "partial",
+    "finding": "Distance-5 surface-code memory, with 10 shots per tested duration, achieved a mean real-time decoder latency of 63 ± 17 µs.",
+    "detail": "The latency runs from receipt of the final syndrome cycle to return of the decoder's correction. Feedback into the logical circuit was outside that measurement.",
+    "quote": "We observe that the average latency remains\nroughly constant at a net average of 63 ± 17 µs indepen-\ndent of the length of the experiment (up to 1.1 seconds),\nindicating that the decoding problem is being processed\nin real time.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Trapped ions",
+    "verdict": "partial",
+    "finding": "Distance-3 BB5 memory, 48,000 shots: 1.95% decoded X-basis error per logical qubit per cycle.",
+    "detail": "The measured rate is for ambient circuit noise after rejecting shots with detected leakage. Decoding used the syndrome and final readout records after execution.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
     "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": "Trapped ions",
     "verdict": "partial",
-    "finding": "Trapped-ion memory with 26 data qubits and 48,000 shots per code: logical lifetime 3.95 ± 0.71 s.",
-    "detail": "The physical-qubit lifetime was 3.84 ± 0.48 s. The logical estimate is slightly higher, but the uncertainties overlap substantially, so a lower logical error rate is not demonstrated. The experiment rejected shots with detected leakage. The introduction reports the logical uncertainty as ± 0.68 s; the table reports ± 0.71 s.",
-    "quote": "several code instances exhibit logical qubit lifetimes comparable to, and in one case marginally exceeding, that of the underlying physical qubits.",
+    "finding": "Distance-5 GB4 memory, 48,000 shots: 3.95 s estimated logical lifetime.",
+    "detail": "The logical lifetime uses a Pauli-channel assumption to infer behavior outside the measured X and Z bases. Table 2 gives ±0.71 s for the logical estimate, while the introduction gives ±0.68 s.",
+    "quote": "In one code, the lifetime exhibited was\n3.95\n±\n0.68\n3.95\\pm 0.68\ns, compared to\n3.84\n±\n0.48\n3.84\\pm 0.48\ns for our physical qubits.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": "Trapped ions",
+    "verdict": "partial",
+    "finding": "BB5 X-basis memory, 48,000 shots per distance: Λ ≈ 0.55 from distance 3 to 5.",
+    "detail": "The GB4 Z-basis point estimate decreases from distance 4 to 5, a one-step increase in distance. Shots with detected leakage were discarded.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Trapped ions",
+    "verdict": "partial",
+    "finding": "Distance-4 memory with 48 logical qubits and 5,000 submitted shots per basis recorded zero logical errors after decoding and postselection.",
+    "detail": "The authors accepted 708 X-basis shots and 958 Z-basis shots. They also verified decoder behavior by computational fault enumeration on a smaller code.",
+    "quote": "Of the 708 accepted shots in the X basis and 958 accepted shots in the Z basis, no errors occurred.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": "Trapped ions",
-    "verdict": "met",
-    "finding": "Trapped-ion memory: 48 logical qubits, 5,000 shots per basis; average error per QEC cycle per logical qubit bounded by 4 × 10⁻⁵.",
-    "detail": "The comparison physical memory error was 1.1(3) × 10⁻⁴. No logical errors were recorded. Results were conditioned on leakage and preparation checks and postselection of uncorrectable errors; the reported QEC-cycle acceptance rate was 0.62(2).",
-    "quote": "By this comparison, QEC improves the memory error over that for unencoded physical qubits",
+    "verdict": "partial",
+    "finding": "The 48-qubit logical memory, with 5,000 shots per basis, had a per-qubit correction-cycle infidelity bound of 4 × 10⁻⁵.",
+    "detail": "The logical result uses dynamical decoupling, leakage heralding and postselection on uncorrectable errors.",
+    "quote": "By this comparison, QEC improves the memory error over that for unencoded physical qubits, indicating that the hardware is below the pseudo-threshold for this",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": "Trapped ions",
+    "verdict": "partial",
+    "finding": "Four-qubit logical memory used 1,000 shots per length, basis and code. The data did not establish Λ > 1.",
+    "detail": "Distance 2 used error detection and distance 4 used error correction. Circuit-level simulations showed improved fidelity with concatenation, while the hardware data resolved an improvement in acceptance.",
+    "quote": "respectively, are indistinguishable up to statistical uncertainty.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": "Trapped ions",
+    "verdict": "partial",
+    "finding": "Distance-2 inter-block UZZ(π/2) cycle benchmarking used 6,000 shots per depth and measured gate infidelity of 1.2 × 10⁻⁴.",
+    "detail": "Syndrome extraction occurred every eight cycles. Shots with detected errors were discarded.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": "Trapped ions",
+    "verdict": "partial",
+    "finding": "The 64-logical-qubit XY mirror experiment used one mid-circuit syndrome-extraction round.",
+    "detail": "Real-time random numbers were used for Pauli twirling. The supplied text does not give the shot count for this benchmark.",
+    "quote": "The data is postselected on detecting no errors in the mid-circuit SE or final measurement.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Trapped ions",
+    "verdict": "partial",
+    "finding": "The XY simulation mirror benchmark ran on 64 logical qubits.",
+    "detail": null,
+    "quote": "This pFT computation scheme mixing FT state preparation, syndrome extraction, and measurement with non-FT Hamiltonian simulation gates enables a significant fidelity improvement over unencoded simulations of quantum computations at a scale that challenges classical simulation.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m9",
+    "case": "Trapped ions",
+    "verdict": "partial",
+    "finding": "The 64-logical-qubit XY mirror benchmark gave an effective two-qubit error of 7.1 × 10⁻⁴.",
+    "detail": "The supplied text does not give the shot count for this benchmark.",
+    "quote": "which reflects a combination of gate errors and memory errors",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Superconducting circuits",
+    "verdict": "partial",
+    "finding": "On one Willow processor, steering improved the distance-5 surface-code memory’s stability 3.5-fold under injected drift.",
+    "detail": "Stability was measured by the standard deviation of the logical error rate. The reported improvement combines physical control adaptation with decoder reweighting.",
+    "quote": "We experimentally demonstrate this framework on a Willow superconducting processor, improving the logical stability of the surface code 3.5-fold against injected drift.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
     "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": "Superconducting circuits",
     "verdict": "partial",
-    "finding": "Willow distance-7 surface-code memory: logical error per cycle 7.72(9) × 10⁻⁴; sample size not stated.",
-    "detail": "The experiment reports a memory error rate at distance 7, but the supplied text does not give a comparable distance-5 surface-code error rate or an experimental suppression factor for this result.",
+    "finding": "Across two tested surface-code distances on Willow, the distance-7 memory reached 7.72(9) × 10⁻⁴ logical errors per cycle.",
+    "detail": "The quoted record distance-5 error rate is for the colour code. The surface-code suppression-factor estimates reported in the scaling section come from simulation.",
     "quote": "our distance-7 surface code reaches the LER of\nε\nL\n= 7.72(9) × 10\n−4\nwith the AlphaQubit2 neural network decoder",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Neutral atoms",
+    "verdict": "met",
+    "finding": "One surface-code qubit on 25 data atoms showed reduced logical error under injected coherent rotations with up to five rounds of error checking.",
+    "detail": "The analysis averaged two initialization bases and used maximum-likelihood decoding with 50% acceptance and preselection on full initial atom filling.",
+    "quote": "On injecting global coherent errors at regular intervals, we find repeated correction significantly suppresses logical errors, as coherent errors are projected into incoherent ones (with quadratic suppression) due to the quantum Zeno effect",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
     "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": "Neutral atoms",
     "verdict": "met",
-    "finding": "Neutral-atom surface codes, d = 3 and 5; shot count not stated: Λ = 2.14 ± 0.13.",
-    "detail": "The four-round experiment used loss information and machine-learning decoding, without postselection. Results were averaged across two initialization bases.",
-    "quote": "We find that\nd\n= 5 has a 2.14(13)× lower error per round than\nd\n= 3, indicating below-threshold behaviour for this four-round characterization circuit (Fig.\n2d\n) (see also discussion below).",
+    "finding": "Four-round surface-code memory achieved Λ = 2.14(13) from d = 3 to d = 5, with 14,855 shots at d = 5 and about 5,057 per d = 3 quadrant.",
+    "detail": "The result averages X and Z memory bases and uses a hybrid decoder incorporating atom-loss information. The analysis used no postselection after initial atom-filling preselection.",
+    "quote": "Machine learning with loss renders the error per round for\nd\n= 5 as 2.14(13)x lower than\nd\n= 3.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
-    "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": "Neutral atoms",
     "verdict": "partial",
-    "finding": "Neutral-atom logical Bell-pair experiment, sample size not stated: Bell-pair fidelity improved as code distance increased from 3 to 7.",
-    "detail": "The experiment used a single transversal CNOT and projective readout. It did not report a logical Clifford-circuit error per operation or a suppression ratio Λ.",
+    "finding": "Repeated-CNOT benchmarking on two logical qubits found an optimum near three CNOTs per error-check round.",
+    "detail": "The optimum was clearest when the authors postselected on decoder confidence.",
+    "quote": "We find optimal performance for several CNOTs per QEC round, and using postselection on decoding confidence (\nMethods\n), observe that approximately three CNOTs per round is optimal at low error rates (Fig.\n3d\n).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": "Neutral atoms",
+    "verdict": "partial",
+    "finding": "Reed–Muller rotation synthesis used up to three logical T gates per sequence with feedforward applied in software.",
+    "detail": "The methods state that without logical feedforward during the circuit, the protocol randomly synthesizes one of several rotations. Conditional control at each teleportation would make the outcome deterministic.",
+    "quote": "Figure\n4c\nshows the set of angles generated by the circuit in Fig.\n4b\nusing up to three\nT\ngates.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m8",
+    "case": "Neutral atoms",
+    "verdict": "partial",
+    "finding": "One-T synthesis using 15-atom Reed–Muller blocks achieved 98.2(2)% mean output-state fidelity.",
+    "detail": "The reported fidelity is averaged over generated angles for the one-T sequences. It does not isolate the preparation infidelity of the T-state input.",
+    "quote": "Averaged over all generated angles, we find fidelities of 98.98(7)%, 98.2(2)%, 98.9(5)%, and 93.7(1.3)% for\nN\n=0, 1, 2 and 3 T gates, respectively.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m9",
+    "case": "Neutral atoms",
+    "verdict": "partial",
+    "finding": "Distance-3 rotation synthesis with three executed T gates yielded 93.7(1.3)% mean output-state fidelity.",
+    "detail": "Sequence fidelity combines preparation, logical operations and readout. The teleportation experiment changes code families while keeping both code distances at 3.",
+    "quote": "Averaged over all generated angles, we find fidelities of 98.98(7)%, 98.2(2)%, 98.9(5)%, and 93.7(1.3)% for\nN\n=0, 1, 2 and 3 T gates, respectively.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Neutral atoms",
+    "verdict": "partial",
+    "finding": "Steane-code cluster-state circuits used 32 logical blocks and ran for up to 27 layers.",
+    "detail": "The 32 distance-3 blocks were split into two alternating groups of 16. The source does not identify a separate run within the required qubit range.",
+    "quote": "The same atomic qubits are reused every other time layer for up to 27 layers.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Neutral atoms",
+    "verdict": "partial",
+    "finding": "Two distance-7 surface-code qubits reached roughly 0.95 Bell-state populations after correlated decoding.",
+    "detail": "The decoder accounts for physical X and Z errors that propagate between blocks during CNOT.",
+    "quote": "showing entanglement between the\nd\n= 7 logical qubits.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": "Neutral atoms",
+    "verdict": "partial",
+    "finding": "In a 40-colour-code experiment, logical storage decoherence was roughly 1% per additional encoding step.",
+    "detail": null,
+    "quote": "Repeating this process four times, we create 40 colour codes with 280 physical qubits, at the cost of slow idling errors of roughly 1% logical decoherence per additional encoding step (Fig.\n4c\n).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": "Neutral atoms",
+    "verdict": "partial",
+    "finding": "For two surface-code qubits, decoded Bell-pair error fell across 3 code distances after a transversal CNOT.",
+    "detail": "At distances 5 and 7, state preparation used a single stabilizer round and was non-fault-tolerant.",
     "quote": "Studying the performance as a function of code size (Fig.\n2d\n) reveals that the logical Bell pair improves with larger code distance, demonstrating improvement of the entangling operation.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": "Neutral atoms",
+    "verdict": "partial",
+    "finding": "Three-logical-qubit entanglement teleportation achieved 77(2)% Bell-state fidelity with real-time decoded feedforward.",
+    "detail": null,
+    "quote": "by applying the feedforward correction, we recover a Bell-state fidelity of 77(2)%, limited by imperfections in the original underlying GHZ state.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m9",
+    "case": "Neutral atoms",
+    "verdict": "partial",
+    "finding": "A 12-logical-qubit sampling circuit with transversal CCZ gates reached normalized XEB of 0.616(7) with error detection.",
+    "detail": "CCZ was applied transversally without consuming a prepared magic state.",
+    "quote": "Consistent with Fig.\n5b\n, the 12-logical-qubit circuit XEB increases from 0.156(2) to 0.616(7) when applying error detection (Fig.\n5e\n).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Neutral atoms",
+    "verdict": "met",
+    "finding": "A fault-tolerant four-logical-qubit GHZ preparation achieved 72(2)% state fidelity.",
+    "detail": "The circuit used ten logical qubits in total. The reported fidelity conditions on the preparation flags.",
+    "quote": "the resulting GHZ state fidelity obtained using the fault-tolerant algorithm is 72(2)% (again using correlated decoding), demonstrating genuine multipartite entanglement.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Superconducting circuits",
+    "verdict": "met",
+    "finding": "On one distance-3 logical qubit, feedback restored logical fidelity under single-qubit Z noise tested at rotation angles up to 60°.",
+    "detail": "The periodic-feedback experiment initialized the logical plus state and omitted the final Pauli-frame update, isolating the effect of the physical feedback pulses. The shot count for this experiment is unstated.",
+    "quote": "For nonzero artificial noise, however, each inserted feedback correction restores the logical fidelity toward the uncorrected reference line, demonstrating that mid-circuit feedback effectively preserves logical-state fidelity.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
     "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": "Superconducting circuits",
+    "verdict": "partial",
+    "finding": "Distance-3 logical-zero memory had 6.9(2)% error per correction cycle with real-time decoding over 10,000 shots per point.",
+    "detail": "The real-time decoder corrected this dataset through Pauli-frame updates. Larger-distance projections address decoder resources and latency.",
+    "quote": "The total logical error rate is\n6.9\n​\n(\n2\n)\n%\n6.9(2)\\%\n, with dominant contributions from CZ gates and dynamical decoupling (DD).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m4",
     "case": "Superconducting circuits",
     "verdict": "met",
-    "finding": "A 17-qubit superconducting processor demonstrated real-time feedback in non-Clifford logical circuits, with 550 ns closed-loop latency; shot count not stated.",
-    "detail": "The distance-3 experiment used repeated stabilizer measurements and decoder-triggered feedback before two logical rotations. The rotation protocol was non-fault-tolerant and used post-selection to stabilize the demonstration.",
-    "quote": "We further demonstrate mid-circuit feedback correction in non-Clifford logical circuits, where Pauli-frame updating alone becomes insufficient.",
+    "finding": "Real-time feedback preserved greater non-Clifford rotation coherence on one encoded qubit across 10 injected-error settings.",
+    "detail": "The authors used a non-fault-tolerant rotation protocol and post-selected on consistent A4A7 outcomes across two consecutive checks in both feedback and control data. The operation still used live, decoder-conditioned corrections. The shot count is unstated.",
+    "quote": "Across different error probabilities, the mid-circuit feedback preserves significantly larger oscillation amplitudes compared with the uncorrected data, demonstrating improved logical coherence.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Trapped ions",
+    "verdict": "partial",
+    "finding": "Helios HHL with two active QEC cycles reached 0.97 ± 0.02 logical output fidelity. Shot count unstated in the supplied text.",
+    "detail": "The experiment measures aggregate output fidelity under device noise. Four QEC cycles could degrade performance.",
+    "quote": "We find that the addition of two QEC cycles in the middle of the circuit improves the fidelity of the measured logical state with respect to the expected state in\nEq.\n16\n, which can be as high as\n0.97\n±\n0.02\n0.97\\pm 0.02\n.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 17,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": "Trapped ions",
+    "verdict": "partial",
+    "finding": "Emulated Steane-swap memory, 2,000 shots per initial state per estimate, yielded 1.79(3) × 10⁻³ entanglement infidelity per cycle.",
+    "detail": "The study varied the QEC gadget and the number of cycles. The reported per-cycle infidelity comes from a depolarizing-model fit.",
+    "quote": "and\n1.79\n​\n(\n3\n)\n×\n10\n−\n3\n1.79(3)\\times 10^{-3}\nfor the\nSteane-swap\nprotocol, where uncertainties in the final digits reflect the standard error from the fit.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m4",
     "case": "Trapped ions",
-    "verdict": "partial",
-    "finding": "H2-1 logical T-gate Ramsey tests used 1,000 shots per data point, with active bit-flip correction after every T gate in some experiments.",
-    "detail": "The source does not establish that real-time error decoding and feedback conditioned on decoded measurements were used with repeated error correction. Full QEC cycles between T gates were simulated.",
+    "verdict": "met",
+    "finding": "H2-1 logical T-gate Ramsey runs used 1,000 shots per point and applied syndrome-conditioned bit-flip correction after every logical T gate.",
+    "detail": "The hardware benchmark post-selected on successful magic-state preparation. The active syndrome feedback corrected bit flips.",
     "quote": "Experiments labeled\ncor\napply active bit-flip corrections after every logical\nT\nT\ngate based on a measured syndrome.\nEvery data point is obtained from 1000 shots.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 18,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m8",
+    "case": "Trapped ions",
+    "verdict": "partial",
+    "finding": "Emulated |H⟩ preparation, 78,000 shots per expectation value, yielded accepted-state fidelity statistically indistinguishable from 1.",
+    "detail": null,
+    "quote": "After post-selection, all\n|\nH\n⟩\n\\ket{H}\n-state preparation methods have logical fidelities that are statistically indistinguishable from 1, but the specialized circuits have roughly half the discard rate.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m9",
+    "case": "Trapped ions",
+    "verdict": "partial",
+    "finding": "H2-1 T-swap, 1,000 shots per Ramsey point, yielded an estimated logical T-gate infidelity of 2.6(4) × 10⁻³.",
+    "detail": "The benchmark post-selected on successful magic-state preparation. The observed Ramsey decay was poorly fit by an exponential model with independent, identically distributed gate errors.",
+    "quote": "The Ramsey fidelity of\n0.960\n​\n(\n6\n)\n0.960(6)\nfor\nT-swap\nat 16\nT\nT\ngates thereby corresponds to a\nT\nT\ngate infidelity of\n2.6\n​\n(\n4\n)\n×\n10\n−\n3\n2.6(4)\\times 10^{-3}\n.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Trapped ions",
+    "verdict": "met",
+    "finding": "Fault-tolerant LABS QAOA performed comparably to unencoded circuits through 8 logical qubits. Shot count unstated in the supplied text.",
+    "detail": "The QAOA circuits used transversal Clifford gates and T-swap gates consuming fault-tolerantly prepared magic states.",
+    "quote": "We further show that QAOA circuits with up to 8 logical qubits and 9 logical\nT\nT\ngates perform similarly to unencoded circuits.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": "Neutral atoms",
+    "verdict": "partial",
+    "finding": "The distance-7 neutral-atom repetition code had a fitted logical lifetime of 225 ± 33 s (shot count unreported).",
+    "detail": "The longest reported atom-survival baseline came from the register. The logical lifetime measures decay of stored phase information, while the physical baseline measures whether atoms remain trapped.",
+    "quote": "Using a repetition code of distance 3 or 7 to periodically correct for errors occurring in interleaved wait-times, we show that logical information decays on a timescale of over 3 minutes for the larger distance, even when underlying qubits have lifetimes in the system on the order of 10 seconds.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Silicon spin qubits",
+    "verdict": "met",
+    "finding": "On one Si/SiGe device, the phase-flip code suppressed the first-order dependence of process fidelity on the applied error rate to a fitted coefficient of 0.01.",
+    "detail": "The single-spin tests used controlled virtual phase rotations. Correction removed the dependence of process fidelity on rotation angle. The fitted coefficient comes from a separate test applying equal effective error rates to all three spins.",
+    "quote": "A polynomial fit to the data results in a coefficient of the first-order term as \nsmall as 0.01.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 22,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Trapped ions",
+    "verdict": "met",
+    "finding": "Trapped-ion Grover search ran fault-tolerantly on 3 logical qubits, with 37,500 shots per measurement basis.",
+    "detail": "The circuit used end-of-run stabilizer checks and postselection, with no mid-circuit measurements. The reported success probability of 0.40(4) was below the single-query classical benchmark of 0.46.",
+    "quote": "We apply this toolbox to experimentally realize Grover’s quantum search algorithm fault-tolerantly on three logical qubits encoded in eight physical qubits, with the implementation displaying clear identification of the desired solution states.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 23,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Trapped ions",
+    "verdict": "met",
+    "finding": "Helios-1 ran one-bit ripple-carry addition on 4 logical qubits, with 1,000–10,000 shots per job.",
+    "detail": "Addends were classical and tracked in a Pauli frame. The experiment used syndrome-based postselection and separately reported results with a check that the initial carry qubit returned to zero.",
+    "quote": "We compiled Cuccaro’s quantum ripple-carry adder, for instances of up to five-bit addends, onto an early fault-tolerant quantum computing architecture that we developed and deployed on Quantinuum’s trapped-ion platform Helios-1.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 24,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://www.nature.com/articles/s41586-024-08449-y",
-    "milestone": "m1",
-    "hash": "f577e14f7350",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.nature.com/articles/s41586-024-08449-y",
-    "milestone": "m2",
-    "hash": "2d0f196e5bf8",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.nature.com/articles/s41586-024-08449-y",
-    "milestone": "m3",
-    "hash": "f93dbe5970f8",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.nature.com/articles/s41586-024-08449-y",
-    "milestone": "m4",
-    "hash": "95e170a474e1",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.nature.com/articles/s41586-024-08449-y",
     "milestone": "m5",
     "hash": "9f27a55572c7",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.nature.com/articles/s41586-024-08449-y",
-    "milestone": "completion",
-    "hash": "b3f2834925e1",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/abs/2610.24077",
-    "milestone": "m1",
-    "hash": "f577e14f7350",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/abs/2610.24077",
-    "milestone": "m2",
-    "hash": "2d0f196e5bf8",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/abs/2610.24077",
-    "milestone": "m3",
-    "hash": "f93dbe5970f8",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/abs/2610.24077",
-    "milestone": "m4",
-    "hash": "95e170a474e1",
     "date": "2026-11-14",
     "by": "gpt-6.1-terra"
    },
@@ -1015,147 +1621,742 @@
     "by": "gpt-6.1-terra"
    },
    {
+    "url": "https://arxiv.org/html/2511.09124v3",
+    "milestone": "m5",
+    "hash": "9f27a55572c7",
+    "date": "2026-11-14",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://arxiv.org/abs/2408.13687",
+    "milestone": "m5",
+    "hash": "9f27a55572c7",
+    "date": "2026-11-14",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-024-08449-y",
+    "milestone": "m6",
+    "hash": "ecabd44040b9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-024-08449-y",
+    "milestone": "m1",
+    "hash": "5e877a14fcd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-024-08449-y",
+    "milestone": "m2",
+    "hash": "826692c2ad30",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-024-08449-y",
+    "milestone": "m3",
+    "hash": "5761ae420aa6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-024-08449-y",
+    "milestone": "m4",
+    "hash": "468d8293528d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-024-08449-y",
+    "milestone": "m8",
+    "hash": "01ed498930a0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-024-08449-y",
+    "milestone": "m9",
+    "hash": "6196753f7421",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-024-08449-y",
+    "milestone": "m7",
+    "hash": "901bdfb4608c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-024-08449-y",
+    "milestone": "completion",
+    "hash": "7c4203f58d03",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2610.24077",
+    "milestone": "m6",
+    "hash": "ecabd44040b9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2610.24077",
+    "milestone": "m1",
+    "hash": "5e877a14fcd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2610.24077",
+    "milestone": "m2",
+    "hash": "826692c2ad30",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2610.24077",
+    "milestone": "m3",
+    "hash": "5761ae420aa6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2610.24077",
+    "milestone": "m4",
+    "hash": "468d8293528d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2610.24077",
+    "milestone": "m8",
+    "hash": "01ed498930a0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2610.24077",
+    "milestone": "m9",
+    "hash": "6196753f7421",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2610.24077",
+    "milestone": "m7",
+    "hash": "901bdfb4608c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
     "url": "https://arxiv.org/abs/2610.24077",
     "milestone": "completion",
-    "hash": "b3f2834925e1",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "7c4203f58d03",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2511.09124v3",
+    "milestone": "m6",
+    "hash": "ecabd44040b9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2511.09124v3",
     "milestone": "m1",
-    "hash": "f577e14f7350",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "5e877a14fcd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2511.09124v3",
     "milestone": "m2",
-    "hash": "2d0f196e5bf8",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "826692c2ad30",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2511.09124v3",
     "milestone": "m3",
-    "hash": "f93dbe5970f8",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "5761ae420aa6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2511.09124v3",
     "milestone": "m4",
-    "hash": "95e170a474e1",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "468d8293528d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2511.09124v3",
-    "milestone": "m5",
-    "hash": "9f27a55572c7",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "milestone": "m8",
+    "hash": "01ed498930a0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2511.09124v3",
+    "milestone": "m9",
+    "hash": "6196753f7421",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2511.09124v3",
+    "milestone": "m7",
+    "hash": "901bdfb4608c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2511.09124v3",
     "milestone": "completion",
-    "hash": "b3f2834925e1",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "7c4203f58d03",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2408.13687",
+    "milestone": "m6",
+    "hash": "ecabd44040b9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2408.13687",
     "milestone": "m1",
-    "hash": "f577e14f7350",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "5e877a14fcd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2408.13687",
     "milestone": "m2",
-    "hash": "2d0f196e5bf8",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "826692c2ad30",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2408.13687",
     "milestone": "m3",
-    "hash": "f93dbe5970f8",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "5761ae420aa6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2408.13687",
     "milestone": "m4",
-    "hash": "95e170a474e1",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "468d8293528d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2408.13687",
-    "milestone": "m5",
-    "hash": "9f27a55572c7",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "milestone": "m8",
+    "hash": "01ed498930a0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2408.13687",
+    "milestone": "m9",
+    "hash": "6196753f7421",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2408.13687",
+    "milestone": "m7",
+    "hash": "901bdfb4608c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2408.13687",
     "milestone": "completion",
-    "hash": "b3f2834925e1",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "7c4203f58d03",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2606.06455v2",
+    "milestone": "m6",
+    "hash": "ecabd44040b9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2606.06455v2",
     "milestone": "m1",
-    "hash": "f577e14f7350",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "5e877a14fcd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2606.06455v2",
+    "milestone": "m2",
+    "hash": "826692c2ad30",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2606.06455v2",
+    "milestone": "m3",
+    "hash": "5761ae420aa6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2606.06455v2",
+    "milestone": "m4",
+    "hash": "468d8293528d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2606.06455v2",
+    "milestone": "m8",
+    "hash": "01ed498930a0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2606.06455v2",
+    "milestone": "m9",
+    "hash": "6196753f7421",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2606.06455v2",
+    "milestone": "m7",
+    "hash": "901bdfb4608c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2606.06455v2",
+    "milestone": "completion",
+    "hash": "7c4203f58d03",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2602.22211v1",
+    "milestone": "m6",
+    "hash": "ecabd44040b9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2602.22211v1",
     "milestone": "m1",
-    "hash": "f577e14f7350",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "5e877a14fcd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2602.22211v1",
+    "milestone": "m2",
+    "hash": "826692c2ad30",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2602.22211v1",
+    "milestone": "m3",
+    "hash": "5761ae420aa6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2602.22211v1",
+    "milestone": "m4",
+    "hash": "468d8293528d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2602.22211v1",
+    "milestone": "m8",
+    "hash": "01ed498930a0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2602.22211v1",
+    "milestone": "m9",
+    "hash": "6196753f7421",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2602.22211v1",
+    "milestone": "m7",
+    "hash": "901bdfb4608c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2602.22211v1",
+    "milestone": "completion",
+    "hash": "7c4203f58d03",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-026-10759-2?error=cookies_not_supported",
+    "milestone": "m6",
+    "hash": "ecabd44040b9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-026-10759-2?error=cookies_not_supported",
+    "milestone": "m1",
+    "hash": "5e877a14fcd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-026-10759-2?error=cookies_not_supported",
     "milestone": "m2",
-    "hash": "2d0f196e5bf8",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "826692c2ad30",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-026-10759-2?error=cookies_not_supported",
+    "milestone": "m3",
+    "hash": "5761ae420aa6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-026-10759-2?error=cookies_not_supported",
+    "milestone": "m4",
+    "hash": "468d8293528d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-026-10759-2?error=cookies_not_supported",
+    "milestone": "m8",
+    "hash": "01ed498930a0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-026-10759-2?error=cookies_not_supported",
+    "milestone": "m9",
+    "hash": "6196753f7421",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-026-10759-2?error=cookies_not_supported",
+    "milestone": "m7",
+    "hash": "901bdfb4608c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-026-10759-2?error=cookies_not_supported",
+    "milestone": "completion",
+    "hash": "7c4203f58d03",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-025-09848-5?error=cookies_not_supported",
+    "milestone": "m6",
+    "hash": "ecabd44040b9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-025-09848-5?error=cookies_not_supported",
+    "milestone": "m1",
+    "hash": "5e877a14fcd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-09848-5?error=cookies_not_supported",
     "milestone": "m2",
-    "hash": "2d0f196e5bf8",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "826692c2ad30",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-025-09848-5?error=cookies_not_supported",
+    "milestone": "m3",
+    "hash": "5761ae420aa6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-025-09848-5?error=cookies_not_supported",
+    "milestone": "m4",
+    "hash": "468d8293528d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-025-09848-5?error=cookies_not_supported",
+    "milestone": "m8",
+    "hash": "01ed498930a0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-025-09848-5?error=cookies_not_supported",
+    "milestone": "m9",
+    "hash": "6196753f7421",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-025-09848-5?error=cookies_not_supported",
+    "milestone": "m7",
+    "hash": "901bdfb4608c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-025-09848-5?error=cookies_not_supported",
+    "milestone": "completion",
+    "hash": "7c4203f58d03",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-023-06927-3",
+    "milestone": "m6",
+    "hash": "ecabd44040b9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-023-06927-3",
+    "milestone": "m1",
+    "hash": "5e877a14fcd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-023-06927-3",
+    "milestone": "m2",
+    "hash": "826692c2ad30",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-023-06927-3",
     "milestone": "m3",
-    "hash": "f93dbe5970f8",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "5761ae420aa6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-023-06927-3",
+    "milestone": "m4",
+    "hash": "468d8293528d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-023-06927-3",
+    "milestone": "m8",
+    "hash": "01ed498930a0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-023-06927-3",
+    "milestone": "m9",
+    "hash": "6196753f7421",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-023-06927-3",
+    "milestone": "m7",
+    "hash": "901bdfb4608c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-023-06927-3",
+    "milestone": "completion",
+    "hash": "7c4203f58d03",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2605.04892v1",
+    "milestone": "m6",
+    "hash": "ecabd44040b9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2605.04892v1",
+    "milestone": "m1",
+    "hash": "5e877a14fcd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2605.04892v1",
+    "milestone": "m2",
+    "hash": "826692c2ad30",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2605.04892v1",
+    "milestone": "m3",
+    "hash": "5761ae420aa6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2605.04892v1",
     "milestone": "m4",
-    "hash": "95e170a474e1",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "468d8293528d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2605.04892v1",
+    "milestone": "m8",
+    "hash": "01ed498930a0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2605.04892v1",
+    "milestone": "m9",
+    "hash": "6196753f7421",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2605.04892v1",
+    "milestone": "m7",
+    "hash": "901bdfb4608c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2605.04892v1",
+    "milestone": "completion",
+    "hash": "7c4203f58d03",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2603.04584v1",
+    "milestone": "m6",
+    "hash": "ecabd44040b9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2603.04584v1",
+    "milestone": "m1",
+    "hash": "5e877a14fcd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2603.04584v1",
+    "milestone": "m2",
+    "hash": "826692c2ad30",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2603.04584v1",
+    "milestone": "m3",
+    "hash": "5761ae420aa6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2603.04584v1",
     "milestone": "m4",
-    "hash": "95e170a474e1",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "468d8293528d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2603.04584v1",
+    "milestone": "m8",
+    "hash": "01ed498930a0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2603.04584v1",
+    "milestone": "m9",
+    "hash": "6196753f7421",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2603.04584v1",
+    "milestone": "m7",
+    "hash": "901bdfb4608c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2603.04584v1",
+    "milestone": "completion",
+    "hash": "7c4203f58d03",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2606.04079",
+    "milestone": "m1",
+    "hash": "5e877a14fcd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2201.08581",
+    "milestone": "m6",
+    "hash": "ecabd44040b9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41467-026-68533-x",
+    "milestone": "m7",
+    "hash": "901bdfb4608c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.14202",
+    "milestone": "m7",
+    "hash": "901bdfb4608c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1197,20 +2398,143 @@
     "date": "2026-11-14",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 13 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"A quantum computer executes encoded operations sufficient to approximate arbitrary quantum circuits, with lower error per logical operation as code distance increases. One such universal set combines Clifford gates with a non-Clifford gate called T. A logical qubit stores information across physical qubits. Code distance is the fewest physical qubits on which an error can act undetected while changing the encoded information. A decoder interprets error-check measurements so later operations can use the corrected outcomes.\". Reason: The definition uses “weight” without explaining what it counts and leaves the role of a non-Clifford gate implicit."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Chemists tracing a reaction mechanism may need energies for thousands of candidate steps. Density functional calculations can locate plausible structures yet give uncertain energy differences. More accurate energies could help distinguish competing pathways, including those for nitrogen fixation. At a fixed error rate per gate, errors accumulate as a quantum calculation grows. Correcting them during execution would make longer calculations possible. Some proposed applications also need hundreds to thousands of logical qubits operating through billions of gates.\". Reason: The current text describes a study and a gate set without identifying a calculation people need, its scale or the conditions for using it."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by National Academies of Sciences, Engineering, and Medicine, 2019: \"possible future pathways toward a universal, fault-tolerant quantum computer\". Reason: The National Academies roadmap gives the entry an independent committee statement of the goal and connects it to the existing memory milestone."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit completion: criterion = \"Execute comparable encoded circuits containing a universal set of operations at increasing code distances, with repeated error checks, real-time decoding and any feedback the circuit requires. The logical error per operation for the full circuit, including its non-Clifford operations, must decrease. For distances d and d+2 this means \\u03b5_d/\\u03b5_(d+2) > 1. In the proposed color-code test, run Clifford-plus-T circuits with preparation and consumption of the magic states used to teleport T gates.\"; set_by = \"The below-threshold distance-scaling convention. The Quantinuum Helios team specifies a Clifford-plus-T color-code experiment in its Discussion.\"; threshold_quote = \"below threshold behavior on a full Clifford plus T circuit encoded in color code using real-time decoding of the syndromes.\"; threshold_ref = 2; basis = \"The proposed experiment extends a distance comparison from memory and Clifford gates to a full universal circuit. An algorithm at one distance shows that its components can operate together. Establishing scaling requires the distance comparison on the integrated computation. The proposal specifies neither a circuit length nor a statistical significance cutoff.\"; refs = [2, 1, 4, 18]. Reason: The existing criterion makes magic-state preparation mandatory for every implementation although the Helios proposal assumes a particular way of implementing T gates."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add case \"Silicon spin qubits\". Reason: The French academy’s fault-tolerant computing roadmap treats spins in silicon as a distinct hardware platform."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add case \"Photonic qubits\". Reason: The same roadmap tracks photonic implementations separately, including fault-tolerant computation by measurements on entangled photons."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after None: \"An encoded qubit is protected against a specified class of physical errors.\". Reason: The current milestones start at memory breakeven and skip the earlier laboratory test of whether a code corrects an error at all."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: title = \"A logical memory outlasts its best constituent physical qubit.\"; criterion = \"Compare the error-corrected logical memory with its best constituent physical qubit on the same storage task. The logical memory lifetime must exceed that physical-qubit lifetime.\"; threshold_quote = \"yielding one or more logical qubits of better error rates than possible with physical qubits\"; threshold_ref = 5; refs = [5, 1]. Reason: The criterion mixes the breakeven test with Willow’s measured lifetime and leaves the choice of physical comparator unclear."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"Measure the logical memory error probability per correction cycle, \\u03b5_d, for the same storage task at increasing code distances d. For distances d and d+2, the suppression factor \\u039b = \\u03b5_d/\\u03b5_(d+2) must exceed 1.\"; threshold_quote = \"representing the reduction in logical error rate when increasing the code distance by two\"; threshold_ref = 1; refs = [1, 2, 15]. Reason: The platform-specific shot counts and measured suppression factors obscure the common test of memory error per correction cycle."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: title = \"Error per logical two-qubit Clifford decreases with code distance.\"; criterion = \"Run two-qubit Clifford randomized benchmarking at increasing code distances. Sample sequences of logical Clifford gates at several lengths, apply the inverse of each sequence, and estimate error per logical two-qubit Clifford from the decay of the return probability. For distances d and d+2, the ratio of the lower-distance error to the higher-distance error must exceed 1.\"; threshold_quote = \"below threshold scaling of error rates for Clifford two-qubit randomized benchmarking circuits\"; threshold_ref = 2; refs = [2]. Reason: The Helios benchmark measures error per logical two-qubit Clifford, while the current criterion mixes that observable with the sampled sequence lengths and the measured result."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"Execute a logical non-Clifford operation with repeated error checks. Decode the relevant measurements during execution and use the decoded outcome to select the correction or subsequent gate before the step that depends on it.\"; threshold_quote = \"allow program execution to branch on measurement outcomes, requiring low-latency real-time decoding, feedforward\"; threshold_ref = 4; refs = [4, 2, 18, 7]. Reason: The current criterion lists experimental verdicts but does not say when a decoded result must reach the running circuit."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m5: \"A simple algorithm runs fault tolerantly on three to ten logical qubits.\". Reason: The roadmap recognizes running a fault-tolerant algorithm on several logical qubits as an integration test that can precede a full distance comparison."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "split m5 into \"The error in preparing an encoded magic state decreases with code distance.\" | \"The error per executed logical non-Clifford gate decreases with code distance.\". Reason: A prepared magic state and an executed gate have different error probabilities because using the state introduces further operations and measurements."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 2. Reason: The published Willow correction identifies the changes as the repetition-code axis label and legend in Figure 3a."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No experimental report was found showing lower error at increasing code distances for a full logical Clifford-plus-T circuit with real-time decoding.\". Reason: The cited fixed-distance algorithm and distance-scaled Clifford benchmarks leave the integrated universal-circuit result unresolved."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 15 of 15 proposed operations from QUA-01-revise-20261125T105024658751Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: completion, m6, m1, m2, m3, m4, m7, m8, m9."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 4 from Crossref, 0 from PubMed, 0 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 10 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Structural problems after applying: references never cited: [6]"
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "definition is 527 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 11 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 6 candidates returned, 0 dropped as sources already used, 6 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 4 of 6 new candidates, without search. Skipped: 3 no readable saved copy. Dropped rows: none. Replaced 13 earlier rows. Added 48 results: 44 from sources already used, 4 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 3 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 45 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Removed 1 references no longer cited; renumbered."
    }
   ],
-  "results_run": "2026-11-14"
- },
- "review": {
-  "state": "published",
-  "note": null,
-  "into": null,
-  "at": "2026-11-14",
-  "log": [
-   {
-    "date": "2026-11-14",
-    "state": "published"
-   }
-  ]
+  "results_run": "2026-11-25"
  }
 }
