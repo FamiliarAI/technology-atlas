@@ -320,17 +320,31 @@
   ],
   "prompt": "5e97d4b8dfc3"
  },
+ "review": {
+  "state": "published",
+  "note": null,
+  "into": null,
+  "at": "2026-11-15",
+  "log": [
+   {
+    "date": "2026-11-15",
+    "state": "published"
+   }
+  ]
+ },
  "page": {
   "id": "CRY-05",
-  "title": "Public-key quantum money and quantum copy protection",
-  "definition": "Physical quantum banknotes that anyone can authenticate, and quantum decryption programs that remain usable but resist duplication. Security means that efficient quantum attackers produce extra accepted notes or working decryptors only with negligible probability: eventually smaller than every inverse polynomial in the security parameter λ, which controls scheme size.",
+  "title": "Public-key quantum money and copy-protected decryption keys",
+  "definition": "A mint issues quantum banknotes that recipients can authenticate with a public key and pass on for another payment. Stored optical notes have been checked with the issuing bank’s secret record. A copy-protected quantum decryption key lets its holder repeatedly recover messages from ciphertexts. In each scheme, an efficient quantum adversary’s probability of producing more accepted notes or working decryptors than it received must be negligible: eventually smaller than every inverse polynomial in the security parameter λ.",
   "goal": {
-   "need": "A classical program admits unbounded copying. Quantum decryption-key protection instead requires that k authorised keys cannot become k+1 working decryptors, for any polynomial k. Public quantum money would let recipients authenticate a transferred note without returning it to the mint. Laboratory storage results quantify the conditions under which a private-key money protocol has operated.",
+   "need": "Cash recipients check printed security features by sight and touch. In 2025, 14 counterfeit euro notes were detected per million genuine notes in circulation. Merchants with quantum verifiers could authenticate a note locally and spend it again, provided its quantum state survives between payments. Software vendors could give several customers reusable decryption keys without enabling them to pool their keys and equip another user. A customer given a classical key can copy it regardless of its length.",
    "need_refs": [
-    1,
-    2,
+    15,
     3,
-    4
+    17,
+    16,
+    2,
+    1
    ],
    "figures": {
     "caption": "Private-key money storage, published 19 September 2025.",
@@ -375,6 +389,14 @@
      "context": null,
      "ref": 5,
      "checked": true
+    },
+    {
+     "body": "Swiss National Bank and Lucerne University of Applied Sciences and Arts, Practical Central Bank Quantum Money",
+     "year": "2025",
+     "quote": "a viable quantum money scheme",
+     "context": "The project calls for central-bank issuance and distribution to consumers through retail banks. Its deliverables include a cryptographic protocol, a security analysis and an implementation plan.",
+     "ref": 18,
+     "checked": true
     }
    ]
   },
@@ -403,7 +425,7 @@
    {
     "id": "m1",
     "title": "Stored private-key quantum money operates inside its proved noise-and-loss security region.",
-    "criterion": "In the Mamann et al. protocol, storage-and-retrieval efficiency η must exceed 50%, and the measured error ε must lie below the security boundary εsec(μ,η) in Figure 2, where μ is mean photons per pulse. These conditions apply to bank-assisted, single-round verification. The experiment published 19 September 2025 used the same 28-state key repeated 4,000 times; at μ=1 its stored-state error was 0.78 ± 0.07%, below the calculated boundary. This is component progress toward reusable public money.",
+    "criterion": "Store and retrieve polarization-encoded weak coherent pulses for one round of bank-assisted verification. The storage-and-retrieval efficiency η must exceed 50%, and the measured error rate must fall below the Figure 2 security boundary for that η and mean photon number per pulse μ.",
     "set_by": "Mamann et al., Wiesner-money protocol security analysis, Figure 2 and Supplementary Text; this threshold is for private-key verification.",
     "set_by_kind": "protocol",
     "threshold_quote": "We first observe that, owing to the no-cloning theorem, an efficiency above 50% is required to have a possible range of secure operations.",
@@ -418,15 +440,13 @@
    {
     "id": "m2",
     "title": "A public-money mini-scheme limits one-to-two counterfeiting to negligible probability.",
-    "criterion": "Honest notes are accepted with probability ≥2/3; no polynomial-time quantum attacker given one note produces two states accepted for its serial number except negligibly. Aaronson–Christiano prove this relative to a classical oracle. Zhandry’s paper published 19 August 2025 gives a generic-model proof under a new assumption and an alternative knowledge-assumption argument requiring further analysis. Doliskani’s preprint revised 9 July 2025 reports a group-action discrete-logarithm reduction in the generic model; it is not peer reviewed.",
+    "criterion": "Every valid note must be accepted with probability at least 2/3. Given one freshly issued note, any polynomial-size quantum circuit has negligible probability of producing two states that both pass public verification for that note’s serial number. The two output states may be entangled. The probability is over issuance, the circuit and both verification measurements.",
     "set_by": "Aaronson and Christiano, Definition 12; the security convention used for public-money mini-schemes.",
     "set_by_kind": "community_convention",
     "threshold_quote": "We call M secure if it has completeness error ≤ 1/3 and negligible soundness error.",
     "threshold_ref": 6,
     "refs": [
-     6,
-     8,
-     9
+     6
     ],
     "status": "active",
     "replaced_by": [],
@@ -435,13 +455,13 @@
    {
     "id": "m3",
     "title": "Quantum state obfuscation preserves every attainable two-output copy-protection security bound.",
-    "criterion": "For every program family already admitting a copy-protection scheme with joint piracy success ≤δ(λ)+negl(λ) in a specified verification game, quantum state indistinguishability obfuscation preserves that bound and honest evaluation. Coladangelo–Gunn prove this in Theorem 1 and construct the obfuscator relative to an efficient quantum oracle in Theorem 2, in the full version dated 3 May 2024. The result does not make every unlearnable program protectable.",
+    "criterion": "Fix a family of classical circuits, a verification procedure and a bound δ(λ) already attainable by copy protection for that family. Obfuscation must preserve honest evaluation. For a uniformly sampled circuit given in obfuscated form, any quantum polynomial-time adversary has probability at most δ(λ) plus a negligible term of producing two implementations that both pass the specified verifier, even when their states are entangled.",
     "set_by": "Coladangelo and Gunn, Definition 4 and Theorem 1; Theorem 2 supplies an oracle construction.",
     "set_by_kind": "protocol",
     "threshold_quote": "Then, $\\mathsf{qsiO}$ is a $(\\Ver,\\delta)$-secure copy protection scheme for $\\calF$.",
-    "threshold_ref": 10,
+    "threshold_ref": 9,
     "refs": [
-     10
+     9
     ],
     "status": "active",
     "replaced_by": [],
@@ -449,9 +469,9 @@
    },
    {
     "id": "m4",
-    "title": "A public-money oracle scheme accepts q-qubit errors with its proved counterfeiting bound.",
-    "criterion": "For n-qubit notes and q≥1, accept every allowed Pauli error X^eZ^e′ with |e|,|e′|≤q with probability 1, while bounding efficient one-to-two counterfeiting by |E|²/exp(n); E is the construction’s tolerated-error set. Parameters must make this bound negligible. Yuen’s Theorem 4.10 establishes the result relative to a classical oracle, published 7 April 2025. It does not instantiate that oracle on hardware.",
-    "set_by": "Yuen, Definitions 3.3–3.4 and Theorem 4.10, in Quantum.",
+    "title": "A public-money mini-scheme accepts all tolerated errors with negligible counterfeiting probability.",
+    "criterion": "Relative to the classical oracle, use an n/2-dimensional binary subspace C of length n with both C and its dual of distance at least 2q+1, for q≥1. Verification must accept with probability 1 after any Pauli error X^e Z^e′ in E, where each error string has at most q nonzero entries. Given one freshly minted note, an efficient quantum adversary’s probability of producing two accepted states for its serial number is at most |E|²/exp(n). Choose parameters for which this bound is negligible.",
+    "set_by": "Peter Yuen, Definitions 3.3–3.4, Equation 29 and Theorem 4.10.",
     "set_by_kind": "protocol",
     "threshold_quote": "has perfect completeness and $|\\mathcal{E}|^{2}/\\textsf{exp}(n)$ soundness error.",
     "threshold_ref": 7,
@@ -465,7 +485,7 @@
    {
     "id": "m5",
     "title": "Reusable decryption keys resist k-to-k+1 piracy for every polynomial number k of issued keys.",
-    "criterion": "Given a public key and any polynomial k quantum decryption keys, a polynomial-time quantum pirate passes the joint projective test for k+1 decryptors at threshold 1/2+γ only with negligible probability, for every inverse-polynomial γ>0. Honest decryption succeeds with probability 1 and permits reuse. Çakan–Goyal’s full version dated 4 November 2024 proves this in the plain model under subexponentially secure post-quantum indistinguishability obfuscation and Learning With Errors assumptions (Theorem 32, Corollary 6).",
+    "criterion": "In the plain model, honest decryption must succeed with probability 1 and permit reuse of the key. Give a quantum polynomial-time adversary the public key and generate a fresh quantum decryption key for each query. Setup takes no collusion bound. After k queries the adversary supplies k+1 candidate decryptors and a challenge message pair for each. For every inverse-polynomial γ>0, the probability that all k+1 pass their projective threshold tests for distinguishing honest encryptions at 1/2+γ must be negligible.",
     "set_by": "Çakan and Goyal, Definitions 23 and 26, Theorem 32 and Corollary 6; extends prior anti-piracy games.",
     "set_by_kind": "community_convention",
     "threshold_quote": "PKE satisfies strong γ-anti-piracy for any inverse polynomial γ.",
@@ -490,6 +510,36 @@
      1,
      3,
      5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m7",
+    "title": "An optical banknote passes the bank’s polarization-fidelity test.",
+    "criterion": "Prepare a sequence of single-photon polarization states and measure each in the basis recorded by the bank. The fraction of conclusive projections that give the expected state must exceed the mean verification fidelity F̄pass calibrated for the preparation distribution and the verifier’s resolution. This tests authentication of the prepared sequence.",
+    "set_by": "Bartkiewicz et al., optical banknote verification rule following Equation 12.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "A quantum banknote passes the verification process if $\\bar{F}_{i}>\\bar{F}_{\\mathrm{pass}}.$",
+    "threshold_ref": 19,
+    "refs": [
+     19
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": false
+   },
+   {
+    "id": "m8",
+    "title": "With k fixed at setup, k decryption keys resist conversion into k+1 working decryptors.",
+    "criterion": "For any polynomial bound k supplied at setup, give a quantum polynomial-time adversary the public key and all k quantum decryption keys. It chooses a pair of distinct messages and outputs k+1 possibly entangled decryptors. For every inverse-polynomial γ>0, the probability that all k+1 pass the 1/2+γ threshold test for distinguishing encryptions of that message pair must be negligible.",
+    "set_by": "Liu, Liu, Qian and Zhandry, Definitions 3.1 and 3.3–3.5 and Theorem 3.6.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "The challenger outputs 1 if and only if all the measurements output 1.",
+    "threshold_ref": 16,
+    "refs": [
+     16
     ],
     "status": "active",
     "replaced_by": [],
@@ -618,20 +668,6 @@
    {
     "id": 9,
     "kind": "preprint",
-    "url": "https://eprint.iacr.org/2025/092",
-    "doi": null,
-    "title": "Public-Key Quantum Money From Standard Assumptions (In The Generic Model)",
-    "authors": "Doliskani J",
-    "container": "Cryptology ePrint Archive",
-    "year": "2025",
-    "volume": null,
-    "issue": null,
-    "pages": null,
-    "citation_source": "model"
-   },
-   {
-    "id": 10,
-    "kind": "preprint",
     "url": "https://arxiv.org/html/2311.07794v3",
     "doi": "10.48550/arXiv.2311.07794",
     "title": "How to Use Quantum Indistinguishability Obfuscation",
@@ -644,7 +680,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 11,
+    "id": 10,
     "kind": "preprint",
     "url": "https://doliskani.net/jake/pdfs/qm_group_action.pdf",
     "doi": null,
@@ -658,7 +694,7 @@
     "citation_source": "model"
    },
    {
-    "id": 12,
+    "id": 11,
     "kind": "preprint",
     "url": "https://arxiv.org/pdf/2411.00529v2",
     "doi": null,
@@ -672,7 +708,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 13,
+    "id": 12,
     "kind": "preprint",
     "url": "https://arxiv.org/pdf/2401.10200",
     "doi": null,
@@ -686,7 +722,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 14,
+    "id": 13,
     "kind": "preprint",
     "url": "https://arxiv.org/pdf/2311.18318v2",
     "doi": null,
@@ -700,7 +736,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 15,
+    "id": 14,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2510.12626v1",
     "doi": null,
@@ -712,13 +748,127 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 15,
+    "kind": "press_release",
+    "url": "https://www.ecb.europa.eu/press/pr/date/2026/html/ecb.pr260227~66abdc6895.en.html",
+    "doi": null,
+    "title": "Number of counterfeit euro banknotes remains low in 2025",
+    "authors": "European Central Bank",
+    "container": "European Central Bank",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 16,
+    "kind": "book",
+    "url": "https://ntt-research.com/wp-content/uploads/2023/01/Collusion-Resistant-Copy-Protection-for-Watermarkable-Functionalities.pdf",
+    "doi": "10.1007/978-3-031-22318-1_11",
+    "title": "Collusion Resistant Copy-Protection for Watermarkable Functionalities",
+    "authors": "Liu J, Liu Q, Qian L, Zhandry M",
+    "container": "Lecture Notes in Computer Science",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": "294-323",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 17,
+    "kind": "book",
+    "url": "https://www.scottaaronson.com/papers/noclone-ccc.pdf",
+    "doi": "10.1109/CCC.2009.42",
+    "title": "Quantum Copy-Protection and Quantum Money",
+    "authors": "Aaronson S",
+    "container": "2009 24th Annual IEEE Conference on Computational Complexity",
+    "year": "2009",
+    "volume": null,
+    "issue": null,
+    "pages": "229-242",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 18,
+    "kind": "web",
+    "url": "https://www.hslu.ch/en/lucerne-university-of-applied-sciences-and-arts/research/projects/detail/?pid=7191",
+    "doi": null,
+    "title": "Practical Central Bank Quantum Money",
+    "authors": "Lucerne University of Applied Sciences and Arts",
+    "container": "Lucerne University of Applied Sciences and Arts",
+    "year": "2025–2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 19,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/1604.04453v2",
+    "doi": "10.48550/arXiv.1604.04453",
+    "title": "Experimental quantum forgery of quantum optical money",
+    "authors": "Bartkiewicz K, Černoch A, Chimczak G, Lemr K, Miranowicz A, Nori F",
+    "container": "arXiv",
+    "year": "2016",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 20,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2305.14504",
+    "doi": null,
+    "title": "Demonstration of quantum-digital payments",
+    "authors": "Schiansky P, Kalb J, Sztatecsny E, Roehsner MC, Guggemos T, Trenti A, et al.",
+    "container": "arXiv",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 21,
+    "kind": "journal",
+    "url": "https://miran.web.amu.edu.pl/miran_pdf/17npj.pdf",
+    "doi": "10.1038/s41534-017-0010-x",
+    "title": "Experimental quantum forgery of quantum optical money",
+    "authors": "Bartkiewicz K, Černoch A, Chimczak G, Lemr K, Miranowicz A, Nori F",
+    "container": "npj Quantum Inf",
+    "year": "2017",
+    "volume": "3",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 22,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/2507.11970",
+    "doi": null,
+    "title": "Obfuscation of Unitary Quantum Programs",
+    "authors": "Huang MY, Tang EC",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
    }
   ],
   "milestone_order": [
+   "m7",
    "m1",
    "m2",
    "m3",
    "m4",
+   "m8",
    "m5",
    "m6"
   ],
@@ -727,328 +877,923 @@
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "Public quantum money: one-to-two counterfeiting is negligible in the generic group action model; no experimental sample.",
-    "detail": "The proof uses a new computational assumption. The alternative knowledge-assumption argument requires further analysis.",
-    "quote": "We prove the quantum lightning security of our protocols in the generic group action model — a black box model for group actions — assuming a new but natural strengthening of the discrete log assumption on group actions.",
+    "finding": "Abelian group action quantum money has negligible joint acceptance probability for two outputs from one freshly minted note.",
+    "detail": "The proof uses the interactive D2X/min assumption and generic group action labels of length m′ ≥ 2m + ω(log λ). The paper flags that its lightning definition excludes nonuniform attackers with hard-coded quantum advice.",
+    "quote": "Then the quantum money construction is a secure quantum lightning scheme.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "An ideal abelian group action banknote passes each public check with probability 1 and remains intact.",
+    "detail": "The repeat-check result follows from the exact projection in Theorem 3.2. The generic counterfeiting proof uses an idealized group action oracle.",
+    "quote": "In particular, honest banknotes are accepted with probability 1.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "met",
-    "finding": "For every eligible program family, qsiO preserves the attainable two-output piracy bound δ(λ) + negl(λ).",
-    "detail": "Theorem 1 preserves the existing scheme’s security bound and honest evaluation. Theorem 2 constructs qsiO relative to an efficient quantum oracle; no experimental sample is involved.",
-    "quote": "We show that applying\n𝗊𝗌𝗂𝖮\n\\mathsf{qsiO}\nto a program immediately achieves best-possible copy protection.",
+    "finding": "For one uniformly sampled obfuscated classical circuit, the probability that both candidate implementations pass is at most δ(λ) + negl(λ).",
+    "detail": "Theorem 1 assumes a secure obfuscator and an existing copy-protection scheme for the same verifier and bound. Equation (7) omits δ(λ). Definition 4 supplies the δ(λ) + negl(λ) bound required by the reduction.",
+    "quote": "whatever definition of unclonability is satisfied by\n𝖢𝖯\n\\mathsf{CP}\n,\n𝗊𝗌𝗂𝖮\n\\mathsf{qsiO}\nachieves the same guarantee.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Optical banknote preparation achieved >99.5% polarization fidelity for a 28-state sequence repeated 4,000 times.",
+    "detail": "The fidelity result comes from the no-storage measurements. The vendor chose the basis randomly, and the bank excluded basis mismatches during verification.",
+    "quote": "To meet the stringent requirement on the error rate, we notably achieved more than 99.5% polarization fidelity, independent of the encoded state thanks to a specific temporal sequence optimization of the Pockels cell (see Materials and Methods), outperforming the previous on-the-fly implementation (",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 4,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Stored quantum money, using a 28-state key repeated 4,000 times, had an error rate of 0.78 ± 0.07% at μ=1.",
-    "detail": "Average storage-and-retrieval efficiency was 77 ± 2%, above 50%. At μ=1, the error rate was below the security threshold by about 20 standard deviations. Verification was bank-assisted and single-round.",
+    "finding": "Stored optical banknotes had a 0.78% verification error rate at μ = 1 for a 28-state sequence repeated 4,000 times.",
+    "detail": "The reported efficiency is an average across μ = 0.5, 1, 1.5, and 2. The bank verified detections in matching bases using its secret record.",
     "quote": "The error rates amount to ε = (1.84 ± 0.15)% for μ = 0.5, ε = (0.78 ± 0.07)% for μ = 1, ε = (0.69 ± 0.06)% for μ = 1.5, and ε = (0.87 ± 0.05)% for μ = 2.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 4,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "Group-action quantum money mini-scheme: one input note; honest notes pass verification with probability 1, while one-to-two counterfeiting is negligible.",
-    "detail": "The security claim is in the generic group action model, assuming group-action discrete-logarithm hardness and smooth group order. The source is a preprint and is not peer reviewed.",
-    "quote": "We prove that Zhandry’s scheme is secure in the generic model.",
+    "finding": "Given one issued Fourier-state banknote, a polynomial-size quantum counterfeiter has negligible probability of getting two outputs accepted for its serial number.",
+    "detail": "Theorems 4.8 and 5.1 establish security in the generic group action model under the group-action discrete logarithm hardness assumption. The proof relies on smooth group order.",
+    "quote": "Our main result is a quantum polynomial-time reduction from the group action discrete\nlogarithm (DLP) problem to a specific cloning problem. A consequence of this result is that the\npublic-key quantum money scheme proposed by Zhandry (2024), which is based on abelian group\nactions, is secure in the generic group action model.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "Non-Abelian public quantum money with one freshly minted note has negligible probability of two accepted outputs under preaction security.",
+    "detail": "The result is conditional on preaction security. The excerpt gives a plain-model reduction and presents the McEliece-based group action as a candidate for the assumption.",
+    "quote": "We show below\nthat if the group action is preaction secure, then the quantum money construction satisfies lightning\nsecurity.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
-    "milestone": "m2",
+    "milestone": "m6",
     "case": null,
-    "verdict": "met",
-    "finding": "Public-key quantum lightning: 2 notes with the same serial number are hard to produce under preaction security; sample size not applicable.",
-    "detail": "The authors claim a plain-model security reduction for non-Abelian group actions satisfying preaction security. They conjecture that a proposed McEliece-based action satisfies the assumption. This is a preprint.",
-    "quote": "Quantum lightning security requires it to be inefficient for any adversary to produce two bank-\nnote states corresponding to the same serial number.",
+    "verdict": "partial",
+    "finding": "For each valid note, uncomputing a public verification check restores the original state with probability 1 in the ideal circuit model.",
+    "detail": "The verifier checks the irreducible-representation label and leaves the other Fourier indices unmeasured so it can reverse the circuit.",
+    "quote": "However, the resulting modified banknote will also be valid for the same serial number, and\nfurthermore, the circuit can be uncomputed to return the original banknote.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "A quantum state obfuscator for pseudo-deterministic programs is constructed in the classical oracle model; no empirical sample.",
-    "detail": "The construction bears on the milestone, but the excerpt does not establish preservation of every specified two-output piracy bound. Its plain-model copy-protection result is conditional on a conjecture; the quantum-oracle construction and best-possible reduction are attributed to Coladangelo and Gunn.",
-    "quote": "Theorem 1.1 (Informal). There exists a quantum state obfuscator for the class of pseudo -deterministic\nquantum programs achieving the notion of ideal obfuscation (D eﬁnition 6.1) in the classical oracle model.",
+    "finding": "Quantum state obfuscation preserves honest evaluation with probability 1−negl(λ) per input in the classical oracle model. This is a theoretical result.",
+    "detail": "The conditional application relies on the conjecture that instantiating the classical oracle with a candidate quantum-secure classical indistinguishability obfuscator yields secure quantum state indistinguishability obfuscation.",
+    "quote": "Theorem 1.2 (Following [ CG23]). Assuming the above conjecture, there exists a best-possible co py-\nprotection scheme for all polynomial-time classical programs.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "Classical-oracle mini-scheme, from one issued n-qubit note: joint acceptance of two same-serial outputs is bounded by |E_q|²/exp(n).",
+    "detail": "The excerpt states the soundness result in §1.1 and ends before Theorem 4.10, which the text identifies as the extension to the full mini-scheme.",
+    "quote": "We show that our scheme has perfect completeness error and has\n|\nℰ\nq\n|\n2\n/\nexp\n​\n(\nn\n)\n|\\mathcal{E}_{q}|^{2}/\\textsf{exp}(n)\nsoundness error",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "met",
-    "finding": "Classical-oracle public quantum money with n-qubit notes: counterfeiting bound |E_q|²/exp(n).",
-    "detail": "All tolerated Pauli X and Z errors of weight at most q are accepted with probability 1. For fixed q, |E_q| grows polynomially in n, making the stated bound negligible. This is an oracle result, not a hardware implementation.",
-    "quote": "Intuitively, perfect completeness error stems from the fact that noise-tolerance is built into our verification procedure (a freshly minted banknote affected by tolerable noise will always be accepted).",
+    "finding": "Noise-tolerant mini-scheme, from one issued n-qubit note: the probability of two accepted same-serial outputs is at most |E_q|²/exp(n).",
+    "detail": "The q=1 parameter choice uses the source’s error-set formula. The excerpt gives the completeness proof in Lemma 3.5 and states the soundness bound in §1.1. It ends before Theorem 4.10.",
+    "quote": "We show that our scheme has perfect completeness error and has\n|\nℰ\nq\n|\n2\n/\nexp\n​\n(\nn\n)\n|\\mathcal{E}_{q}|^{2}/\\textsf{exp}(n)\nsoundness error",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m5",
     "case": null,
     "verdict": "met",
-    "finding": "Public-key quantum decryption keys: for every polynomial k issued keys, k-to-k+1 piracy succeeds with negligible probability.",
-    "detail": "The construction is in the plain model under post-quantum subexponentially secure iO and LWE assumptions. It uses a joint projective test for every inverse-polynomial threshold advantage; honest keys are reusable.",
-    "quote": "We construct (i) public-key encryption, (ii) public-key functional e ncryption, (iii) signature\nand (iv) pseudorandom function schemes whose keys are copy-pr otected against unbounded\ncollusions in the plain model (i.e. without any idealized oracles), assumin g (post-quantum)\nsubexponentially secure iO and L WE.",
+    "finding": "Reusable public-key decryption keys: from any polynomial k issued keys, the joint pass probability for k+1 candidate decryptors is negligible.",
+    "detail": "Theorem 1 states the existence result. Sections 2.1 and 2.2 describe the construction and projective threshold game, with the full security proof referenced in Section 7.3.",
+    "quote": "Theorem 1. Assuming post-quantum subexponentially secure indisting uishability obfuscation and\nsubexponentially secure L WE, there exists a public-key enc ryption scheme with fully collusion-\nresistant copy-protected secret keys.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Public quantum coins from 1 issued coin have negligible joint acceptance probability for 2 counterfeit outputs.",
+    "detail": "The compiled coins contain superpositions of signed mini-banknotes. Their public verifier checks the serial number carried by each branch rather than testing both outputs against one serial number supplied at issuance.",
+    "quote": "is a quantum coin scheme that satisfies correctness and unclonability (counterfeiting) security.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For any polynomial q of issued public quantum coins, the probability of producing q+1 jointly accepted coins is negligible.",
+    "detail": "Theorem 11 and Corollary 3 give the plain-model construction. Coherent verification and rewinding preserve honest coins in the ideal model.",
+    "quote": "Assuming the existence of subspace-hiding obfuscation and one-way functions, there exists a public-key quantum coin scheme.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m8",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Multi-copy SDE is reported for any polynomial k exact key copies in the k-to-(k+1) security setting.",
+    "detail": "The excerpt reports the construction at overview level. It gives general projective threshold machinery but does not state the SDE-specific test at 1/2+γ.",
+    "quote": "Finally, by applying our main compiler, this scheme can be further transformed into a multi-copy secure SDE.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m5",
     "case": null,
     "verdict": "partial",
-    "finding": "Single-decryptor encryption: a compiler yields collusion resistance for an arbitrary polynomial number of independently generated keys.",
-    "detail": "The authors report a collusion-resistant construction and a multi-copy variant under polynomially secure iO and one-way functions. The supplied text does not establish the specified joint projective test at threshold 1/2+γ or perfect, reusable decryption.",
-    "quote": "By applying this compiler to the single-copy secure scheme of\n[\nKY25\n]\n, we obtain a collusion-resistant SDE under the same assumption.",
+    "finding": "The SDE compiler upgrades single-key security to collusion resistance for independently generated keys in the k-to-(k+1) setting.",
+    "detail": "The result on exact copies is a separate construction step. The supplied text ends before Section 8.1, where the collusion-resistance game is defined.",
+    "quote": "To this end, we design a generic compiler that upgrades any single-copy secure SDE scheme into a collusion-resistant one using functional encryption (FE) as a building block.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Optical payment token, 4,482,440 ± 1,600 states per experimental sub-token: 3.28 ± 0.01% mean D/A error.",
+    "detail": "The reported sample size is the sub-token length. The source gives no count of conclusive D/A projections.",
+    "quote": "The average measured error rate is\n1.45\n±\n0.01\n%\n1.45\\>\\pm 0.01\\%\nfor H/V and\n3.28\n±\n0.01\n%\n3.28\\>\\pm 0.01\\%\nfor D/A.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Hybrid copies of optical banknote 2 reached 84.2 ± 0.2% mean fidelity. Hundreds of photon pairs were collected overall, with no count given for banknote 2.",
+    "detail": "The experiment inferred cloning fidelity from polarization coincidence measurements and used an 83.3% cutoff. The reported 98% characterizes the analyzer’s resolution calibration.",
+    "quote": "This provides us with the experimental\naverage cloning ﬁdelity of Fi;experiment ¼ 0:842 ± 0:002.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Ideal quantum state obfuscation preserves classical deterministic evaluation up to negligible error. The theorem has no empirical sample.",
+    "detail": "The stated negligible advantage concerns ideal-obfuscation indistinguishability. The copy-protection application invokes prior work without stating the two-output game or proving its δ(λ) + negl(λ) bound.",
+    "quote": "Accordingly, our construction realizes such a scheme and possibly\nextends to copy-protecting unitary functionalities.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 22,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://arxiv.org/html/2307.12120v5",
+    "milestone": "m7",
+    "hash": "5ebe738b7769",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2307.12120v5",
     "milestone": "m1",
-    "hash": "6ff52295aaeb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3c0639b6e4fa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2307.12120v5",
     "milestone": "m2",
-    "hash": "f1a704f94685",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6c02df3fb4fd",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2307.12120v5",
     "milestone": "m3",
-    "hash": "184d31109726",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "245a839bed2e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2307.12120v5",
     "milestone": "m4",
-    "hash": "ea7d12ad74c0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3b28046415a4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2307.12120v5",
+    "milestone": "m8",
+    "hash": "5372481b1abf",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2307.12120v5",
     "milestone": "m5",
-    "hash": "ae148fbfbd3e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "471df66ad99f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2307.12120v5",
     "milestone": "m6",
     "hash": "2883e8b6b1dd",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2307.12120v5",
     "milestone": "completion",
     "hash": "dc1e512c1dae",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2311.07794v3",
+    "milestone": "m7",
+    "hash": "5ebe738b7769",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2311.07794v3",
     "milestone": "m1",
-    "hash": "6ff52295aaeb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3c0639b6e4fa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2311.07794v3",
     "milestone": "m2",
-    "hash": "f1a704f94685",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6c02df3fb4fd",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2311.07794v3",
     "milestone": "m3",
-    "hash": "184d31109726",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "245a839bed2e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2311.07794v3",
     "milestone": "m4",
-    "hash": "ea7d12ad74c0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3b28046415a4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2311.07794v3",
+    "milestone": "m8",
+    "hash": "5372481b1abf",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2311.07794v3",
     "milestone": "m5",
-    "hash": "ae148fbfbd3e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "471df66ad99f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2311.07794v3",
     "milestone": "m6",
     "hash": "2883e8b6b1dd",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2311.07794v3",
     "milestone": "completion",
     "hash": "dc1e512c1dae",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2025/325",
+    "milestone": "m7",
+    "hash": "5ebe738b7769",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2025/325",
     "milestone": "m1",
-    "hash": "6ff52295aaeb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3c0639b6e4fa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2025/325",
     "milestone": "m2",
-    "hash": "f1a704f94685",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6c02df3fb4fd",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2025/325",
     "milestone": "m3",
-    "hash": "184d31109726",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "245a839bed2e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2025/325",
     "milestone": "m4",
-    "hash": "ea7d12ad74c0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3b28046415a4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2025/325",
+    "milestone": "m8",
+    "hash": "5372481b1abf",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2025/325",
     "milestone": "m5",
-    "hash": "ae148fbfbd3e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "471df66ad99f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2025/325",
     "milestone": "m6",
     "hash": "2883e8b6b1dd",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2025/325",
     "milestone": "completion",
     "hash": "dc1e512c1dae",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12448085/",
+    "milestone": "m7",
+    "hash": "5ebe738b7769",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12448085/",
     "milestone": "m1",
-    "hash": "6ff52295aaeb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3c0639b6e4fa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12448085/",
+    "milestone": "m2",
+    "hash": "6c02df3fb4fd",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12448085/",
+    "milestone": "m3",
+    "hash": "245a839bed2e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12448085/",
+    "milestone": "m4",
+    "hash": "3b28046415a4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12448085/",
+    "milestone": "m8",
+    "hash": "5372481b1abf",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12448085/",
+    "milestone": "m5",
+    "hash": "471df66ad99f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12448085/",
+    "milestone": "m6",
+    "hash": "2883e8b6b1dd",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12448085/",
+    "milestone": "completion",
+    "hash": "dc1e512c1dae",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doliskani.net/jake/pdfs/qm_group_action.pdf",
+    "milestone": "m7",
+    "hash": "5ebe738b7769",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doliskani.net/jake/pdfs/qm_group_action.pdf",
+    "milestone": "m1",
+    "hash": "3c0639b6e4fa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://doliskani.net/jake/pdfs/qm_group_action.pdf",
     "milestone": "m2",
-    "hash": "f1a704f94685",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6c02df3fb4fd",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doliskani.net/jake/pdfs/qm_group_action.pdf",
+    "milestone": "m3",
+    "hash": "245a839bed2e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doliskani.net/jake/pdfs/qm_group_action.pdf",
+    "milestone": "m4",
+    "hash": "3b28046415a4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doliskani.net/jake/pdfs/qm_group_action.pdf",
+    "milestone": "m8",
+    "hash": "5372481b1abf",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doliskani.net/jake/pdfs/qm_group_action.pdf",
+    "milestone": "m5",
+    "hash": "471df66ad99f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doliskani.net/jake/pdfs/qm_group_action.pdf",
+    "milestone": "m6",
+    "hash": "2883e8b6b1dd",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doliskani.net/jake/pdfs/qm_group_action.pdf",
+    "milestone": "completion",
+    "hash": "dc1e512c1dae",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2411.00529v2",
+    "milestone": "m7",
+    "hash": "5ebe738b7769",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2411.00529v2",
+    "milestone": "m1",
+    "hash": "3c0639b6e4fa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2411.00529v2",
     "milestone": "m2",
-    "hash": "f1a704f94685",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6c02df3fb4fd",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2411.00529v2",
+    "milestone": "m3",
+    "hash": "245a839bed2e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2411.00529v2",
+    "milestone": "m4",
+    "hash": "3b28046415a4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2411.00529v2",
+    "milestone": "m8",
+    "hash": "5372481b1abf",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2411.00529v2",
+    "milestone": "m5",
+    "hash": "471df66ad99f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2411.00529v2",
+    "milestone": "m6",
+    "hash": "2883e8b6b1dd",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2411.00529v2",
+    "milestone": "completion",
+    "hash": "dc1e512c1dae",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2401.10200",
+    "milestone": "m7",
+    "hash": "5ebe738b7769",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2401.10200",
+    "milestone": "m1",
+    "hash": "3c0639b6e4fa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2401.10200",
+    "milestone": "m2",
+    "hash": "6c02df3fb4fd",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2401.10200",
     "milestone": "m3",
-    "hash": "184d31109726",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "245a839bed2e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2401.10200",
+    "milestone": "m4",
+    "hash": "3b28046415a4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2401.10200",
+    "milestone": "m8",
+    "hash": "5372481b1abf",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2401.10200",
+    "milestone": "m5",
+    "hash": "471df66ad99f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2401.10200",
+    "milestone": "m6",
+    "hash": "2883e8b6b1dd",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2401.10200",
+    "milestone": "completion",
+    "hash": "dc1e512c1dae",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2407.06463v2",
+    "milestone": "m7",
+    "hash": "5ebe738b7769",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2407.06463v2",
+    "milestone": "m1",
+    "hash": "3c0639b6e4fa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2407.06463v2",
+    "milestone": "m2",
+    "hash": "6c02df3fb4fd",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2407.06463v2",
+    "milestone": "m3",
+    "hash": "245a839bed2e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2407.06463v2",
     "milestone": "m4",
-    "hash": "ea7d12ad74c0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3b28046415a4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2407.06463v2",
+    "milestone": "m8",
+    "hash": "5372481b1abf",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2407.06463v2",
+    "milestone": "m5",
+    "hash": "471df66ad99f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2407.06463v2",
+    "milestone": "m6",
+    "hash": "2883e8b6b1dd",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2407.06463v2",
+    "milestone": "completion",
+    "hash": "dc1e512c1dae",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2311.18318v2",
+    "milestone": "m7",
+    "hash": "5ebe738b7769",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2311.18318v2",
+    "milestone": "m1",
+    "hash": "3c0639b6e4fa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2311.18318v2",
+    "milestone": "m2",
+    "hash": "6c02df3fb4fd",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2311.18318v2",
+    "milestone": "m3",
+    "hash": "245a839bed2e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2311.18318v2",
+    "milestone": "m4",
+    "hash": "3b28046415a4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2311.18318v2",
+    "milestone": "m8",
+    "hash": "5372481b1abf",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2311.18318v2",
     "milestone": "m5",
-    "hash": "ae148fbfbd3e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "471df66ad99f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2311.18318v2",
+    "milestone": "m6",
+    "hash": "2883e8b6b1dd",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2311.18318v2",
+    "milestone": "completion",
+    "hash": "dc1e512c1dae",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2510.12626v1",
+    "milestone": "m7",
+    "hash": "5ebe738b7769",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2510.12626v1",
+    "milestone": "m1",
+    "hash": "3c0639b6e4fa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2510.12626v1",
+    "milestone": "m2",
+    "hash": "6c02df3fb4fd",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2510.12626v1",
+    "milestone": "m3",
+    "hash": "245a839bed2e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2510.12626v1",
+    "milestone": "m4",
+    "hash": "3b28046415a4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2510.12626v1",
+    "milestone": "m8",
+    "hash": "5372481b1abf",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2510.12626v1",
     "milestone": "m5",
-    "hash": "ae148fbfbd3e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "471df66ad99f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2510.12626v1",
+    "milestone": "m6",
+    "hash": "2883e8b6b1dd",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2510.12626v1",
+    "milestone": "completion",
+    "hash": "dc1e512c1dae",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2305.14504",
+    "milestone": "m7",
+    "hash": "5ebe738b7769",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://miran.web.amu.edu.pl/miran_pdf/17npj.pdf",
+    "milestone": "m7",
+    "hash": "5ebe738b7769",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2507.11970",
+    "milestone": "m3",
+    "hash": "245a839bed2e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1090,20 +1835,128 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 9 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "title = \"Public-key quantum money and copy-protected decryption keys\". Reason: The title currently covers software families beyond the decryption keys specified by the completion test."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"A mint issues quantum banknotes that recipients can authenticate with a public key and pass on for another payment. Stored optical notes have been checked with the issuing bank\\u2019s secret record. A copy-protected quantum decryption key lets its holder repeatedly recover messages from ciphertexts. In each scheme, an efficient quantum adversary\\u2019s probability of producing more accepted notes or working decryptors than it received must be negligible: eventually smaller than every inverse polynomial in the security parameter \\u03bb.\". Reason: The definition needs to distinguish a recipient’s public check from the bank-assisted optical demonstration and identify the decryption key as the protected object."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Cash recipients check printed security features by sight and touch. In 2025, 14 counterfeit euro notes were detected per million genuine notes in circulation. Merchants with quantum verifiers could authenticate a note locally and spend it again, provided its quantum state survives between payments. Software vendors could give several customers reusable decryption keys without enabling them to pool their keys and equip another user. A customer given a classical key can copy it regardless of its length.\". Reason: The current rationale gives a security game and a laboratory result but omits the scale of counterfeiting and the benefit to vendors who issue keys to several customers."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Swiss National Bank and Lucerne University of Applied Sciences and Arts, Practical Central Bank Quantum Money, 2025: \"a viable quantum money scheme\". Reason: The Swiss project adds a central bank’s stated goal and identifies the distribution requirement that a banknote protocol must meet in its monetary system."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after None: \"An optical banknote passes the bank’s polarization-fidelity test.\". Reason: The first listed laboratory test requires a memory, although the earlier optical banknote experiment already tested authentication against a calibrated fidelity threshold."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Store and retrieve polarization-encoded weak coherent pulses for one round of bank-assisted verification. The storage-and-retrieval efficiency \\u03b7 must exceed 50%, and the measured error rate must fall below the Figure 2 security boundary for that \\u03b7 and mean photon number per pulse \\u03bc.\". Reason: The criterion mixes the protocol’s error and efficiency limits with the date, repetition count and outcome of one experiment."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"Every valid note must be accepted with probability at least 2/3. Given one freshly issued note, any polynomial-size quantum circuit has negligible probability of producing two states that both pass public verification for that note\\u2019s serial number. The two output states may be entangled. The probability is over issuance, the circuit and both verification measurements.\"; refs = [6]. Reason: The mini-scheme definition gives one double-verification test independent of the papers, proof models and publication dates currently listed in its criterion."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Fix a family of classical circuits, a verification procedure and a bound \\u03b4(\\u03bb) already attainable by copy protection for that family. Obfuscation must preserve honest evaluation. For a uniformly sampled circuit given in obfuscated form, any quantum polynomial-time adversary has probability at most \\u03b4(\\u03bb) plus a negligible term of producing two implementations that both pass the specified verifier, even when their states are entangled.\". Reason: The criterion needs the conditions of the two-output game in place of the publication history of the obfuscation theorem."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: title = \"A public-money mini-scheme accepts all tolerated errors with negligible counterfeiting probability.\"; criterion = \"Relative to the classical oracle, use an n/2-dimensional binary subspace C of length n with both C and its dual of distance at least 2q+1, for q\\u22651. Verification must accept with probability 1 after any Pauli error X^e Z^e\\u2032 in E, where each error string has at most q nonzero entries. Given one freshly minted note, an efficient quantum adversary\\u2019s probability of producing two accepted states for its serial number is at most |E|\\u00b2/exp(n). Choose parameters for which this bound is negligible.\"; set_by = \"Peter Yuen, Definitions 3.3\\u20133.4, Equation 29 and Theorem 4.10.\"; threshold_quote = \"has perfect completeness and $|\\\\mathcal{E}|^{2}/\\\\textsf{exp}(n)$ soundness error.\"; threshold_ref = 7; refs = [7]. Reason: The cited theorem tests a one-note mini-scheme relative to a classical oracle and requires code distances that the current criterion omits."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m4: \"With k fixed at setup, k decryption keys resist conversion into k+1 working decryptors.\". Reason: A published decryption-key game fixes the number of keys at setup, a distinct intermediate stage before security for an adaptively chosen number of key queries."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m5: criterion = \"In the plain model, honest decryption must succeed with probability 1 and permit reuse of the key. Give a quantum polynomial-time adversary the public key and generate a fresh quantum decryption key for each query. Setup takes no collusion bound. After k queries the adversary supplies k+1 candidate decryptors and a challenge message pair for each. For every inverse-polynomial \\u03b3>0, the probability that all k+1 pass their projective threshold tests for distinguishing honest encryptions at 1/2+\\u03b3 must be negligible.\"; threshold_quote = \"PKE satisfies strong \\u03b3-anti-piracy for any inverse polynomial \\u03b3.\"; threshold_ref = 2; refs = [2]. Reason: The unbounded-collusion game lets the adversary choose how many keys to request and a challenge pair for each output, details obscured by the current result summary."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 11 of 11 proposed operations from CRY-05-revise-20261125T103404686801Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m7, m1, m2, m3, m4, m8, m5."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 1 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 1 found, 3 not found, 1 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Structural problems after applying: references never cited: [9]"
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "definition is 526 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 10 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 4 candidates returned, 0 dropped as sources already used, 4 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 3 of 4 new candidates, without search. Skipped: 1 no readable saved copy. Dropped rows: none. Replaced 9 earlier rows. Added 19 results: 16 from sources already used, 3 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 2 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 19 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Removed 1 references no longer cited; renumbered."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "result on m2 from reference 10: quote is 327 characters, over its limit of 320; kept."
    }
   ],
-  "results_run": "2026-11-15"
- },
- "review": {
-  "state": "published",
-  "note": null,
-  "into": null,
-  "at": "2026-11-15",
-  "log": [
-   {
-    "date": "2026-11-15",
-    "state": "published"
-   }
-  ]
+  "results_run": "2026-11-25"
  }
 }
