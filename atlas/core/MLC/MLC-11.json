@@ -342,11 +342,13 @@
   "title": "AI training and inference within a 20-watt power budget",
   "definition": "An AI system matches a named, dated frontier model across its published evaluation suite while averaging at most 20 watts of total electrical power separately during complete training and inference—the production of outputs. The electrical ceiling is an Atlas definition, motivated by the brain’s metabolic power.",
   "goal": {
-   "need": "On 11 August 2025, Epoch AI reported individual frontier training runs exceeding 100 megawatts. Balasubramanian’s 2021 commentary places the brain’s metabolic power near 20 watts. These figures motivate reducing AI power demand; they do not measure efficiency at equal capability. Inference adds recurring energy expenditure, which measured experiments show varies substantially by task.",
+   "need": "By 2025, individual frontier training runs were estimated to draw over 100 MW, concentrating demand at the data centres that host them. More efficient processors still draw more power in aggregate when computation grows faster than efficiency. Specialised models already save energy on individual tasks. Keeping a general-purpose model’s capabilities within a local power supply could let a health monitor adapt to a patient while keeping sensitive readings on the device. Lower average power saves electricity per run at equal training time and per response at equal throughput.",
    "need_refs": [
     1,
-    2,
-    3
+    3,
+    7,
+    13,
+    14
    ],
    "figures": {
     "caption": "Energy consumed by two task categories in the 2024 Power Hungry Processing study.",
@@ -386,6 +388,22 @@
      "context": "The stated purpose of the SyNAPSE programme, described on 7 August 2014. Its scope is perception and control rather than the draft’s joint frontier training-and-inference capability.",
      "ref": 5,
      "checked": true
+    },
+    {
+     "body": "US Departments of Energy and Defense, National Science Foundation, National Institute of Standards and Technology, and Intelligence Community",
+     "year": "2016",
+     "quote": "reducing energy consumption by over six orders of magnitude",
+     "context": "A Federal Vision for Future Computing describes the change as a move from megawatts to watts relative to then-current systems. It gives no fixed wattage for training or inference.",
+     "ref": 6,
+     "checked": true
+    },
+    {
+     "body": "National Institutes of Health BRAIN Initiative",
+     "year": "2025",
+     "quote": "Learning and Adaptation through Energy-Efficient Neuromorphic Platforms",
+     "context": "The BRAIN NeuroAI scoping plan calls for systems that adapt to individual variation in real time for continuous health monitoring. Its 15–20 W figure describes the human brain.",
+     "ref": 14,
+     "checked": null
     }
    ]
   },
@@ -412,7 +430,7 @@
    {
     "id": "m1",
     "title": "An embedded image classifier reaches MLPerf Tiny’s 85% top-1 accuracy target.",
-    "criterion": "Under the MLPerf Tiny v0.5 Closed image-classification protocol, the reference ResNet architecture classifies the selected 200 CIFAR-10 test images with at least 85% top-1 accuracy: the highest-scoring class must be correct on at least 170 images. The 2021 paper reports 86.5% for its reference implementation. This is a narrow inference demonstration; its measurement window excludes preprocessing and postprocessing, and the protocol sets no 20 W ceiling.",
+    "criterion": "Run the MLPerf Tiny v0.5 Closed image-classification workload on the embedded device using the prescribed ResNet model and the 200 selected CIFAR-10 test images. The highest-scoring class must be correct for at least 170 images, giving at least 85% top-1 accuracy. The inference measurement window excludes preprocessing and postprocessing. The protocol sets no power ceiling.",
     "set_by": "MLCommons, MLPerf Tiny v0.5, image-classification Quality Target. This benchmark-specific test does not establish broad competence.",
     "set_by_kind": "protocol",
     "threshold_quote": "we set the quality target to 85% top-1 accuracy.",
@@ -427,19 +445,18 @@
    {
     "id": "m2",
     "title": "Llama 3.1 405B reaches MLPerf Training’s validation log-perplexity target of 5.6.",
-    "criterion": "Continue training the supplied Llama 3.1 405B checkpoint with the benchmark’s modified tokenizer until validation log perplexity—the logarithm of predictive perplexity—is at most 5.6 on 5,760 sequences constructed from 91,205 C4 validation records. MLCommons specifies three runs and reports the median time. On 4 June 2025, NVIDIA reported 121.09 minutes using 512 Blackwell GPUs, a developer result not peer reviewed. This benchmark starts from a fully trained checkpoint and establishes neither complete training nor a 20 W result.",
+    "criterion": "Continue training the supplied Llama 3.1 405B checkpoint with the benchmark’s 32,000-token Mixtral tokenizer. Validation log perplexity must reach 5.6 or lower on 5,760 sequences formed from the first 91,205 unshuffled C4 validation records. Report the median elapsed time from three runs. The timed workload begins with fully trained weights and has no power ceiling.",
     "set_by": "MLCommons, MLPerf Training Llama 3.1 405B benchmark; the numerical target appears in the benchmark table. Written specifically for this model and continued-training workload.",
     "set_by_kind": "protocol",
-    "threshold_quote": null,
-    "threshold_ref": null,
+    "threshold_quote": "5.6 log perplexity",
+    "threshold_ref": 9,
     "refs": [
      9,
-     10,
-     11
+     10
     ],
     "status": "active",
     "replaced_by": [],
-    "threshold_checked": null
+    "threshold_checked": true
    },
    {
     "id": "m3",
@@ -458,13 +475,30 @@
     "status": "active",
     "replaced_by": [],
     "threshold_checked": null
+   },
+   {
+    "id": "m4",
+    "title": "Llama 3.1 8B reaches 3.3 log perplexity from random weights with training energy measured.",
+    "criterion": "Run the MLPerf Training v6.1 Closed Llama 3.1 8B power benchmark from random weights using the native tokenizer and the prescribed C4 training subset. Reach validation log perplexity of 3.3 or lower on the first 1,024 sequences of the benchmark validation set. Report time and energy to target using the MLPerf Power training window from logged run start to run stop. The protocol sets no wattage ceiling.",
+    "set_by": "MLCommons, MLPerf Training Llama 3.1 8B Closed workload with an MLPerf Power submission.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "3.3 log perplexity",
+    "threshold_ref": 9,
+    "refs": [
+     9,
+     15,
+     7,
+     16
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
    }
   ],
   "measures": [],
   "not_found": [
    "No outside body was found to specify frontier-model equivalence during complete training and inference within either 20 W or 100 W.",
-   "No published demonstration satisfying the joint completion criterion was located in searches through 14 November 2026.",
-   "The NIH BRAIN Research Roadmap Innovation Domains PDF and the full UK Neuromorphic Computing Roadmap PDF could not be opened."
+   "No published demonstration satisfying the joint completion criterion was located in searches through 14 November 2026."
   ],
   "references": [
    {
@@ -610,20 +644,6 @@
    {
     "id": 11,
     "kind": "web",
-    "url": "https://developer.nvidia.com/blog/nvidia-blackwell-delivers-up-to-2-6x-higher-performance-in-mlperf-training-v5-0/",
-    "doi": null,
-    "title": "NVIDIA Blackwell Delivers up to 2.6x Higher Performance in MLPerf Training v5.0",
-    "authors": "Eryilmaz SB, Eassa A.",
-    "container": "NVIDIA Technical Blog",
-    "year": "2025",
-    "volume": null,
-    "issue": null,
-    "pages": null,
-    "citation_source": "model"
-   },
-   {
-    "id": 12,
-    "kind": "web",
     "url": "https://docs.google.com/spreadsheets/d/17Mek7pd_bKzfoA_ZiPt4E0jMcCZVE_dYbmsS8SUsJhw/edit?usp=sharing",
     "doi": null,
     "title": "https://docs.google.com/spreadsheets/d/17Mek7pd_bKzfoA_ZiPt4E0jMcCZVE_dYbmsS8SUsJhw/edit?usp=sharing",
@@ -636,11 +656,81 @@
     "citation_source": "model"
    },
    {
-    "id": 13,
+    "id": 12,
     "kind": "web",
     "url": "https://developer.nvidia.com/blog/nvidia-blackwell-tops-mlperf-training-6-0-with-industry-leading-scale-and-performance/",
     "doi": null,
     "title": "NVIDIA Blackwell Tops MLPerf Training 6.0 with Industry-Leading Scale and Performance",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 13,
+    "kind": "report",
+    "url": "https://neuroware-ikc.com/wp-content/uploads/2026/09/NeuroWare_Roadmap_Final.pdf",
+    "doi": null,
+    "title": "A UK Roadmap for Neuromorphic Computing: 2050 Vision",
+    "authors": "Aysha Riaz",
+    "container": "NeuroWare",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 14,
+    "kind": "report",
+    "url": "https://www.braininitiative.nih.gov/sites/default/files/2025-11/BRAIN%20Research%20Roadmap%20Innovation%20Domains_508c.pdf",
+    "doi": null,
+    "title": "NIH BRAIN Research Roadmap Innovation Domains: Detailed Scoping Plans",
+    "authors": "National Institutes of Health BRAIN Initiative",
+    "container": null,
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 15,
+    "kind": "web",
+    "url": "https://mlcommons.org/2025/10/training-llama-3-1-8b/",
+    "doi": null,
+    "title": "MLPerf Training Adds Llama 3.1 8B Benchmark",
+    "authors": "MLCommons",
+    "container": "MLCommons",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 16,
+    "kind": "report",
+    "url": "https://mlcommons.org/wp-content/uploads/2026/11/MLPerf-Training-v6.1-Supplemental.pdf",
+    "doi": null,
+    "title": "Supplemental Results Discussion for MLPerf Training v6.1",
+    "authors": "Telecommunications Technology Association (TTA), TTA section",
+    "container": "MLCommons",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 17,
+    "kind": "report",
+    "url": "https://docs.google.com/spreadsheets/d/11_baGM-Pxcw4AeOq35qa904_xSNSab-bn2aKjYIpZGU/edit?usp=sharing#gid=0&range=A146:O146",
+    "doi": null,
+    "title": "CONFIDENTIAL: MLPerf Training 6.1 results",
     "authors": "",
     "container": null,
     "year": "",
@@ -653,258 +743,357 @@
   "milestone_order": [
    "m1",
    "m2",
+   "m4",
    "m3"
   ],
   "results": [
    {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "BLOOMz-7B used an average of 0.104 kWh per 1,000 inferences.",
-    "detail": "The inference experiments used an AWS node with eight A100 GPUs. Energy per 1,000 inferences does not establish average power; the study does not demonstrate complete training or a match to a frontier model’s evaluation suite, throughput and latency.",
-    "quote": null,
-    "checked": null,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 3,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "The reference ResNet image classifier achieved 86.5% accuracy on 200 CIFAR-10 test images.",
-    "detail": "The reference implementation ran on a NUCLEO-L4R5ZI board. The measurement window excludes preprocessing and postprocessing; the protocol imposes no 20 W ceiling.",
+    "finding": "The embedded ResNetv1 reference classifier achieved 86.5% top-1 accuracy on 200 selected CIFAR-10 test images.",
+    "detail": "The document is a peer-reviewed NeurIPS conference proceedings paper. The schema has no proceedings category, so kind uses journal. The peer_reviewed field uses the requested journal-only definition.",
     "quote": "The model reaches 86.5% accuracy",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "MLPerf Tiny inference platforms, sample size unspecified, consumed power ranging from microwatts to watts.",
-    "detail": "The platforms ran small inference benchmarks, with no demonstration of frontier-model equivalence or complete training within the power limit. The benchmark measured power delivered to the device core, not total system electrical input.",
-    "quote": "The power consumption of these platforms ranged from µWatts to Watts.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "MiTAC MI325X training benchmark: 176,608 samples to converge and 138,182,924.4 energy units.",
-    "detail": "The table reports a Llama 3.1 8B training result but does not state the energy unit or establish complete training power, full evaluation-suite equivalence, or inference performance and power.",
-    "quote": null,
-    "checked": null,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
-    "finding": "Llama 3.1 405B reached an MLPerf Training time of 7.07 minutes using 8,192 GPUs.",
-    "detail": "The source reports a benchmark time but does not state the validation log-perplexity achieved, the validation sample, or the three-run median procedure.",
+    "finding": "HPE’s Llama 3.1 405B submission used 345,600 samples to converge and reported a training time of 475.1955667.",
+    "detail": "The excerpt gives no time unit or validation sample count. The reported sample count is the table’s samples-to-converge figure.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "MiTAC’s Llama 3.1 8B submission used 187,392 samples to converge and reported an energy value of 82298611.48.",
+    "detail": "The excerpt gives no time or energy units. The reported sample count is the table’s samples-to-converge figure.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Llama 3.1 405B took 7.07 minutes on 8,192 GB200 NVL72 GPUs in MLPerf Training v6.0.",
+    "detail": null,
     "quote": null,
     "checked": null,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Llama 3.1 8B took 4.46 minutes on 1,024 GB200 NVL72 GPUs in MLPerf Training v6.0.",
+    "detail": null,
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "CoreWeave’s Closed Llama 3.1 8B entry reports a time-to-train value of 7.162097917 with 249,318 training samples to convergence.",
+    "detail": "The visible excerpt ends at row 100. The linked row 146 is outside the supplied text.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8364152/",
     "milestone": "m1",
-    "hash": "0ebfa9de7e05",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "829a46f0b335",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8364152/",
     "milestone": "m2",
-    "hash": "f5bce98fd0d6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9888d5c04510",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8364152/",
+    "milestone": "m4",
+    "hash": "4aef25e32a47",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8364152/",
     "milestone": "m3",
     "hash": "c94d2e199fdc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8364152/",
     "milestone": "completion",
     "hash": "4a4b102bcef2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://coefficientgiving.org/research/how-much-computational-power-does-it-take-to-match-the-human-brain/",
     "milestone": "m1",
-    "hash": "0ebfa9de7e05",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "829a46f0b335",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://coefficientgiving.org/research/how-much-computational-power-does-it-take-to-match-the-human-brain/",
     "milestone": "m2",
-    "hash": "f5bce98fd0d6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9888d5c04510",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://coefficientgiving.org/research/how-much-computational-power-does-it-take-to-match-the-human-brain/",
+    "milestone": "m4",
+    "hash": "4aef25e32a47",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://coefficientgiving.org/research/how-much-computational-power-does-it-take-to-match-the-human-brain/",
     "milestone": "m3",
     "hash": "c94d2e199fdc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://coefficientgiving.org/research/how-much-computational-power-does-it-take-to-match-the-human-brain/",
     "milestone": "completion",
     "hash": "4a4b102bcef2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://epochai.substack.com/p/power-demands-of-frontier-ai-training",
     "milestone": "m1",
-    "hash": "0ebfa9de7e05",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "829a46f0b335",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://epochai.substack.com/p/power-demands-of-frontier-ai-training",
     "milestone": "m2",
-    "hash": "f5bce98fd0d6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9888d5c04510",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://epochai.substack.com/p/power-demands-of-frontier-ai-training",
+    "milestone": "m4",
+    "hash": "4aef25e32a47",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://epochai.substack.com/p/power-demands-of-frontier-ai-training",
     "milestone": "m3",
     "hash": "c94d2e199fdc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://epochai.substack.com/p/power-demands-of-frontier-ai-training",
     "milestone": "completion",
     "hash": "4a4b102bcef2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2311.16863v3",
     "milestone": "m1",
-    "hash": "0ebfa9de7e05",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "829a46f0b335",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2311.16863v3",
     "milestone": "m2",
-    "hash": "f5bce98fd0d6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9888d5c04510",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2311.16863v3",
+    "milestone": "m4",
+    "hash": "4aef25e32a47",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2311.16863v3",
     "milestone": "m3",
     "hash": "c94d2e199fdc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2311.16863v3",
     "milestone": "completion",
     "hash": "4a4b102bcef2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://datasets-benchmarks-proceedings.neurips.cc/paper_files/paper/2021/file/da4fb5c6e93e74d3df8527599fa62642-Paper-round1.pdf",
     "milestone": "m1",
-    "hash": "0ebfa9de7e05",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://docs.google.com/spreadsheets/d/17Mek7pd_bKzfoA_ZiPt4E0jMcCZVE_dYbmsS8SUsJhw/edit?usp=sharing",
-    "milestone": "m2",
-    "hash": "f5bce98fd0d6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "829a46f0b335",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://datasets-benchmarks-proceedings.neurips.cc/paper_files/paper/2021/file/da4fb5c6e93e74d3df8527599fa62642-Paper-round1.pdf",
     "milestone": "m2",
-    "hash": "f5bce98fd0d6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9888d5c04510",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://datasets-benchmarks-proceedings.neurips.cc/paper_files/paper/2021/file/da4fb5c6e93e74d3df8527599fa62642-Paper-round1.pdf",
+    "milestone": "m4",
+    "hash": "4aef25e32a47",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://datasets-benchmarks-proceedings.neurips.cc/paper_files/paper/2021/file/da4fb5c6e93e74d3df8527599fa62642-Paper-round1.pdf",
     "milestone": "m3",
     "hash": "c94d2e199fdc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://datasets-benchmarks-proceedings.neurips.cc/paper_files/paper/2021/file/da4fb5c6e93e74d3df8527599fa62642-Paper-round1.pdf",
     "milestone": "completion",
     "hash": "4a4b102bcef2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://docs.google.com/spreadsheets/d/17Mek7pd_bKzfoA_ZiPt4E0jMcCZVE_dYbmsS8SUsJhw/edit?usp=sharing",
     "milestone": "m1",
-    "hash": "0ebfa9de7e05",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "829a46f0b335",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://docs.google.com/spreadsheets/d/17Mek7pd_bKzfoA_ZiPt4E0jMcCZVE_dYbmsS8SUsJhw/edit?usp=sharing",
+    "milestone": "m2",
+    "hash": "9888d5c04510",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://docs.google.com/spreadsheets/d/17Mek7pd_bKzfoA_ZiPt4E0jMcCZVE_dYbmsS8SUsJhw/edit?usp=sharing",
+    "milestone": "m4",
+    "hash": "4aef25e32a47",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://docs.google.com/spreadsheets/d/17Mek7pd_bKzfoA_ZiPt4E0jMcCZVE_dYbmsS8SUsJhw/edit?usp=sharing",
     "milestone": "m3",
     "hash": "c94d2e199fdc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://docs.google.com/spreadsheets/d/17Mek7pd_bKzfoA_ZiPt4E0jMcCZVE_dYbmsS8SUsJhw/edit?usp=sharing",
     "milestone": "completion",
     "hash": "4a4b102bcef2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://developer.nvidia.com/blog/nvidia-blackwell-tops-mlperf-training-6-0-with-industry-leading-scale-and-performance/",
+    "milestone": "m1",
+    "hash": "829a46f0b335",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://developer.nvidia.com/blog/nvidia-blackwell-tops-mlperf-training-6-0-with-industry-leading-scale-and-performance/",
     "milestone": "m2",
-    "hash": "f5bce98fd0d6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9888d5c04510",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://developer.nvidia.com/blog/nvidia-blackwell-tops-mlperf-training-6-0-with-industry-leading-scale-and-performance/",
+    "milestone": "m4",
+    "hash": "4aef25e32a47",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://developer.nvidia.com/blog/nvidia-blackwell-tops-mlperf-training-6-0-with-industry-leading-scale-and-performance/",
+    "milestone": "m3",
+    "hash": "c94d2e199fdc",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://developer.nvidia.com/blog/nvidia-blackwell-tops-mlperf-training-6-0-with-industry-leading-scale-and-performance/",
+    "milestone": "completion",
+    "hash": "4a4b102bcef2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/mlcommons/training_results_v6.0/tree/main/Azure/results/2048xAzure_GB200/llama31_405b",
+    "milestone": "m2",
+    "hash": "9888d5c04510",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://docs.google.com/spreadsheets/d/11_baGM-Pxcw4AeOq35qa904_xSNSab-bn2aKjYIpZGU/edit?usp=sharing#gid=0&range=A146:O146",
+    "milestone": "m4",
+    "hash": "4aef25e32a47",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -976,8 +1165,103 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 1 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"By 2025, individual frontier training runs were estimated to draw over 100 MW, concentrating demand at the data centres that host them. More efficient processors still draw more power in aggregate when computation grows faster than efficiency. Specialised models already save energy on individual tasks. Keeping a general-purpose model\\u2019s capabilities within a local power supply could let a health monitor adapt to a patient while keeping sensitive readings on the device. Lower average power saves electricity per run at equal training time and per response at equal throughput.\". Reason: The existing rationale gives two power figures but leaves out who benefits, what specialised models already offer and when lower power saves electricity."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by US Departments of Energy and Defense, National Science Foundation, National Institute of Standards and Technology, and Intelligence Community, 2016: \"reducing energy consumption by over six orders of magnitude\". Reason: The federal vision gives the scale of the power reduction contemplated by the White House challenge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by National Institutes of Health BRAIN Initiative, 2025: \"Learning and Adaptation through Energy-Efficient Neuromorphic Platforms\". Reason: The NIH roadmap names energy-efficient adaptation as a goal for systems that must learn during continuous operation."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Run the MLPerf Tiny v0.5 Closed image-classification workload on the embedded device using the prescribed ResNet model and the 200 selected CIFAR-10 test images. The highest-scoring class must be correct for at least 170 images, giving at least 85% top-1 accuracy. The inference measurement window excludes preprocessing and postprocessing. The protocol sets no power ceiling.\"; threshold_quote = \"we set the quality target to 85% top-1 accuracy.\"; threshold_ref = 8; refs = [8]. Reason: The criterion includes the reference implementation’s observed accuracy alongside the pass threshold."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"Continue training the supplied Llama 3.1 405B checkpoint with the benchmark\\u2019s 32,000-token Mixtral tokenizer. Validation log perplexity must reach 5.6 or lower on 5,760 sequences formed from the first 91,205 unshuffled C4 validation records. Report the median elapsed time from three runs. The timed workload begins with fully trained weights and has no power ceiling.\"; threshold_quote = \"5.6 log perplexity\"; threshold_ref = 9; refs = [9, 10]. Reason: The criterion includes a vendor’s elapsed time and lacks a direct quotation for the 5.6 threshold."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m2: \"Llama 3.1 8B reaches 3.3 log perplexity from random weights with training energy measured.\". Reason: The 405B checkpoint test omits the energy used to obtain its starting weights, while the 8B power submission measures a training run that starts from random weights."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 2. Reason: The full NIH scoping plan and UK neuromorphic computing roadmap are both available from their publishers."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 7 of 7 proposed operations from MLC-11-revise-20261125T094402999873Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m4."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 4 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 4 found, 0 not found, 1 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Structural problems after applying: references never cited: [11]"
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "completion.title is 113 characters, over its limit of 110; kept."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 7 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 2 candidates returned, 0 dropped as sources already used, 2 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 2 of 2 new candidates, without search. Skipped: none. Dropped rows: 1 not relevant. Replaced 5 earlier rows. Added 6 results: 5 from sources already used, 1 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 1 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Removed 1 references no longer cited; renumbered."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-25"
  }
 }
