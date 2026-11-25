@@ -318,15 +318,30 @@
   ],
   "prompt": "5e97d4b8dfc3"
  },
+ "review": {
+  "state": "published",
+  "note": null,
+  "into": null,
+  "at": "2026-11-15",
+  "log": [
+   {
+    "date": "2026-11-15",
+    "state": "published"
+   }
+  ]
+ },
  "page": {
   "id": "CRY-10",
   "title": "Quantum security classification of ML-KEM",
-  "definition": "A mathematical result decides whether each standardized ML-KEM parameter set meets its claimed NIST security category against general quantum computation. ML-KEM is a key-encapsulation mechanism: two parties use it to establish a shared secret for subsequent encryption.",
+  "definition": "ML-KEM lets two parties establish a shared secret over a public channel. A mathematical classification would decide whether ML-KEM-512, ML-KEM-768 and ML-KEM-1024 meet their respective NIST security categories 1, 3 and 5 against general quantum computation. The question is how much computation it takes to distinguish the shared key from a random key when the adversary can request decapsulation of ciphertexts other than the challenge.",
   "goal": {
-   "need": "FIPS 203, effective 13 August 2024, standardizes three ML-KEM parameter sets, each producing a 256-bit shared secret. Their security claims compare attack costs with symmetric cryptographic benchmarks. Resolving those claims would establish whether the standardized key-establishment mechanism provides its claimed protection against quantum computation.",
+   "need": "In September 2026, hybrid ML-KEM key exchange protected about 70% of browser traffic reaching one web infrastructure provider. Operators protecting data that must stay confidential for years choose parameter sets using estimates of the cost of known attacks. A proof would justify relying on a set at its claimed strength even against undiscovered quantum algorithms. A refutation would identify a set to reconsider for applications requiring that strength. Confidentiality also depends on secure implementation and deployment.",
    "need_refs": [
+    8,
+    3,
+    9,
     1,
-    2
+    4
    ],
    "figures": {
     "caption": "Standardized ML-KEM parameter sets and claimed security categories",
@@ -357,35 +372,34 @@
      "year": "2016",
      "quote": "The goal of this research is to develop cryptographic algorithms that would be secure against both quantum and classical computers.",
      "context": null,
-     "ref": 3,
+     "ref": 2,
      "checked": true
     },
     {
-     "body": "CRYSTALS-Kyber submission team",
-     "year": "2021",
-     "quote": "Kyber is an IND-CCA2-secure key-encapsulation mechanism (KEM)",
-     "context": "Kyber is ML-KEM’s predecessor. IND-CCA2 denotes security against adaptive chosen-ciphertext attacks.",
-     "ref": 4,
+     "body": "National Institute of Standards and Technology, FIPS 203, section 8",
+     "year": "2024",
+     "quote": "were designed to meet certain security strength\ncategories defined by NIST",
+     "context": "The targets are category 1 for ML-KEM-512, category 3 for ML-KEM-768 and category 5 for ML-KEM-1024. FIPS 203 presents each as a claim.",
+     "ref": 1,
      "checked": true
     }
    ]
   },
   "completion": {
    "title": "Each ML-KEM parameter set’s NIST category is proved or refuted against general quantum computation.",
-   "criterion": "For each parameter set, a peer-reviewed theorem establishes or refutes its claimed category in the chosen-ciphertext security experiment. Categories 1, 3 and 5 compare attack resources with key search on block ciphers having 128-, 192- and 256-bit keys, respectively. A refutation supplies a correct quantum attack violating that requirement; confirmation supplies an applicable quantum lower bound after all reduction losses. The result covers FIPS 203’s actual distributions and symmetric functions, with matched success probabilities and explicit computation, memory and access assumptions.",
+   "criterion": "For each FIPS 203 set, a peer-reviewed theorem proves or refutes its IND-CCA claim for the specified distributions and functions. Compare with AES-128, AES-192 or AES-256 key search, respectively, at matched success probabilities. State the classical decapsulation-query budget and compare computation, quantum circuit depth and memory under the same resource assumptions. Confirmation requires a lower bound against general quantum computation across the relevant metrics after all reduction losses. Refutation requires a correct attack on that set with a cost below its category benchmark.",
    "set_by": "Atlas synthesis using NIST’s security definitions and category benchmarks; NIST has not prescribed this conclusive-proof test.",
    "set_by_kind": "atlas",
    "threshold_quote": null,
    "threshold_ref": null,
-   "basis": "Searches of NIST’s call and evaluation criteria, FIPS 203, SP 800-227, Kyber documentation, CRYPTREC evaluations and quantum-security papers found no externally defined conclusive-classification test. NIST supplies resource benchmarks, but does not require unconditional proofs. Luo’s preprint submitted on 17 May 2026 claims quantum attacks; a preprint claim alone does not establish this completion test.",
+   "basis": "NIST defines the benchmarks and makes proofs optional for standardization. Its evaluation permits estimates assuming up to 2^64 chosen ciphertexts and also considers larger query counts. The conclusive theorem is an Atlas criterion. Luo’s preprint was revised on 25 May 2026. A critique of the May claim found that the quantity used for key recovery was unchanged when the secret changed at fixed public matrix. No independently confirmed classification of all three sets was found.",
    "refs": [
     1,
-    2,
-    3,
     4,
     5,
     6,
-    7
+    9,
+    10
    ],
    "threshold_checked": null
   },
@@ -400,31 +414,32 @@
    {
     "id": "m1",
     "title": "K-PKE has an IND-CPA reduction with two module-LWE terms and one pseudorandom-function term.",
-    "criterion": "Prove that the chosen-plaintext distinguishing advantage against K-PKE, ML-KEM’s underlying encryption scheme, is bounded by the sum of two module-LWE distinguishing advantages and one pseudorandom-function advantage. Matrix generation is modeled as a random oracle and noise generation as pseudorandom functions. CRYPTREC’s Theorem 4.1 gives this result in classical and quantum random-oracle models. It establishes a conditional reduction, rather than a lower bound on module-LWE attack costs.",
+    "criterion": "Bound the chosen-plaintext distinguishing advantage against K-PKE, the encryption scheme inside ML-KEM, by the sum of two module-LWE distinguishing advantages and one pseudorandom-function advantage. The first module-LWE term accounts for the public key and the second for the ciphertext. Model matrix generation as a random oracle and the secret and noise generators as pseudorandom functions. The reduction must hold with classical or quantum access to the random oracle.",
     "set_by": "The field’s IND-CPA security convention; Kyber specification Theorem 1, refined for standardized K-PKE in CRYPTREC Theorem 4.1. The quoted statement was written for Kyber.",
     "set_by_kind": "community_convention",
-    "threshold_quote": "Kyber.CPAPKE is tightly IND-CPA secure under the Module-LWE hardness assumption.",
-    "threshold_ref": 4,
+    "threshold_quote": "KYBER.CPAPKE is tightly IND-CPA secure under the Module-LWE hardness assumption.",
+    "threshold_ref": 3,
     "refs": [
-     4,
-     6
+     3,
+     5
     ],
     "status": "active",
     "replaced_by": [],
-    "threshold_checked": true
+    "threshold_checked": false
    },
    {
     "id": "m2",
     "title": "ML-KEM’s quantum IND-CCA reduction avoids a square-root loss in the base encryption advantage.",
-    "criterion": "Reduce the chosen-ciphertext distinguishing advantage of ML-KEM’s transformation to the chosen-plaintext distinguishing advantage of K-PKE without a square-root advantage loss, retaining the oracle-query, correctness and symmetric-primitive terms. The quantum random-oracle model permits superposition queries to ideal random functions replacing hashes. Ge, Liao and Xue publish the transformation result as a preprint received on 21 May 2024; CRYPTREC applies it to ML-KEM in Theorem 4.3. This remains conditional security in an idealized model.",
-    "set_by": "The field’s IND-CCA and quantum random-oracle conventions; Ge, Liao and Xue’s transformation theorem, applied to ML-KEM by CRYPTREC Theorem 4.3.",
+    "criterion": "For a chosen-ciphertext adversary that can query an ideal hash function in superposition, bound its ML-KEM distinguishing advantage by an expression linear in the chosen-plaintext advantage against K-PKE. Give the dependence on the quantum query count, the K-PKE correctness bound and the pseudorandomness of the function used on rejection.",
+    "set_by": "Ge, Liao and Xue’s ASIACRYPT 2024 reduction for the Fujisaki–Okamoto transform, specialized to ML-KEM in CRYPTREC Theorem 4.3.",
     "set_by_kind": "community_convention",
     "threshold_quote": "Their IND-CCA security can be reduced to the IND-CPA security of the underlying public key encryption (PKE) scheme without the square-root advantage loss.",
-    "threshold_ref": 8,
+    "threshold_ref": 11,
     "refs": [
+     4,
      5,
-     6,
-     8
+     7,
+     11
     ],
     "status": "active",
     "replaced_by": [],
@@ -433,20 +448,35 @@
    {
     "id": "m3",
     "title": "A concrete quantum reduction leaves ML-KEM’s NIST category conditional only on lattice hardness.",
-    "criterion": "For a parameter set, prove a theorem for the standardized mechanism that derives its claimed NIST category from an explicit numerical hardness hypothesis about a named lattice problem. The theorem covers general quantum circuits, the specified symmetric functions, classical chosen-ciphertext access, reduction costs, probability losses and decapsulation failures. Establishing or falsifying the remaining quantitative lattice hypothesis is then the final step on the security-proof route. The cited sources do not establish this theorem.",
+    "criterion": "For one FIPS 203 parameter set, derive its claimed category from an explicit numerical lower bound on the quantum cost of a named lattice problem. The implication must hold for general quantum circuits, classical chosen-ciphertext access, the specified sampling distributions and the actual symmetric functions. Account for decapsulation failures, resource overhead and probability losses, leaving the stated lattice lower bound as the sole unproved hypothesis.",
     "set_by": "Atlas synthesis from NIST’s category benchmarks and the conditional reductions; no external body’s published milestone requiring this result was found.",
     "set_by_kind": "atlas",
     "threshold_quote": null,
     "threshold_ref": null,
     "refs": [
      1,
-     2,
+     4,
      5,
-     6
+     9
     ],
     "status": "active",
     "replaced_by": [],
     "threshold_checked": null
+   },
+   {
+    "id": "m4",
+    "title": "ML-KEM has a tight chosen-ciphertext reduction in the classical random-oracle model.",
+    "criterion": "For K-PKE with correctness bound δ, let q be the maximum number of classical random-oracle queries. For every ML-KEM chosen-ciphertext adversary, exhibit a K-PKE chosen-plaintext adversary such that the former’s distinguishing advantage is at most three times the latter’s advantage plus (q + 1)δ + q/2^256.",
+    "set_by": "The field’s classical random-oracle reduction for the Fujisaki–Okamoto transform, specialized to ML-KEM in CRYPTREC Theorem 4.2.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "the IND-CCA security of ML-KEM is tightly bounded by\nthe IND-CPA security of K-PKE.",
+    "threshold_ref": 5,
+    "refs": [
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
    }
   ],
   "measures": [],
@@ -454,7 +484,7 @@
    "No external body’s published goal or completion criterion for a conclusive quantum classification of all three ML-KEM parameter sets was found.",
    "No externally prescribed sequence extending the existing conditional reductions to an unconditional concrete quantum classification was found.",
    "No independent confirmation or peer-reviewed version of Luo’s claimed ML-KEM quantum attack was found.",
-   "The INSPIRE record supplied for Regev’s paper did not expose readable article text."
+   "No NIST or CRYPTREC statement was found judging a conclusive quantum classification of all three sets infeasible or unnecessary."
   ],
   "references": [
    {
@@ -474,20 +504,6 @@
    {
     "id": 2,
     "kind": "web",
-    "url": "https://csrc.nist.gov/Projects/Post-Quantum-Cryptography/Post-Quantum-Cryptography-Standardization/Evaluation-Criteria/Security-(Evaluation-Criteria)",
-    "doi": null,
-    "title": "Post-Quantum Cryptography: Security (Evaluation Criteria)",
-    "authors": "National Institute of Standards and Technology",
-    "container": "Computer Security Resource Center",
-    "year": "2016",
-    "volume": null,
-    "issue": null,
-    "pages": null,
-    "citation_source": "model"
-   },
-   {
-    "id": 3,
-    "kind": "web",
     "url": "https://csrc.nist.gov/Projects/post-quantum-cryptography/post-quantum-cryptography-standardization/Call-for-Proposals",
     "doi": null,
     "title": "Post-Quantum Cryptography: Call for Proposals",
@@ -500,7 +516,7 @@
     "citation_source": "model"
    },
    {
-    "id": 4,
+    "id": 3,
     "kind": "report",
     "url": "https://pq-crystals.org/kyber/data/kyber-specification-round3-20210804.pdf",
     "doi": null,
@@ -514,7 +530,7 @@
     "citation_source": "model"
    },
    {
-    "id": 5,
+    "id": 4,
     "kind": "report",
     "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-227.pdf",
     "doi": "10.6028/NIST.SP.800-227",
@@ -528,7 +544,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 6,
+    "id": 5,
     "kind": "report",
     "url": "https://www.cryptrec.go.jp/exreport/cryptrec-ex-3502-2025.pdf",
     "doi": null,
@@ -542,7 +558,7 @@
     "citation_source": "model"
    },
    {
-    "id": 7,
+    "id": 6,
     "kind": "preprint",
     "url": "https://arxiv.org/abs/2605.17412",
     "doi": "10.48550/arXiv.2605.17412",
@@ -556,7 +572,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 8,
+    "id": 7,
     "kind": "preprint",
     "url": "https://eprint.iacr.org/2024/777",
     "doi": null,
@@ -568,87 +584,334 @@
     "issue": null,
     "pages": null,
     "citation_source": "model"
+   },
+   {
+    "id": 8,
+    "kind": "web",
+    "url": "https://blog.cloudflare.com/post-quantum-visibility/",
+    "doi": null,
+    "title": "Is your domain using post-quantum encryption? Now you can see for yourself",
+    "authors": "Andrew Depke, Sophie Park, and Sharon Goldberg",
+    "container": "Cloudflare Blog",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 9,
+    "kind": "report",
+    "url": "https://csrc.nist.gov/CSRC/media/Projects/Post-Quantum-Cryptography/documents/call-for-proposals-final-dec-2016.pdf",
+    "doi": null,
+    "title": "Submission Requirements and Evaluation Criteria for the Post-Quantum Cryptography Standardization Process",
+    "authors": "National Institute of Standards and Technology",
+    "container": null,
+    "year": "2016",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 10,
+    "kind": "web",
+    "url": "https://postquantum.com/security-pqc/luo-ml-kem-quantum-attack-analysis/",
+    "doi": null,
+    "title": "A New Paper Claims to Break ML-KEM, Falcon, Hawk, and NTRU. Should You Worry?",
+    "authors": "Marin Ivezic",
+    "container": "PostQuantum.com",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 11,
+    "kind": "book",
+    "url": "https://link.springer.com/chapter/10.1007/978-981-96-0894-2_1",
+    "doi": "10.1007/978-981-96-0894-2_1",
+    "title": "Measure-Rewind-Extract: Tighter Proofs of One-Way to Hiding and CCA Security in the Quantum Random Oracle Model",
+    "authors": "Ge J, Liao H, Xue R",
+    "container": "Lecture Notes in Computer Science",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": "3-34",
+    "citation_source": "crossref"
    }
   ],
   "milestone_order": [
    "m1",
+   "m4",
    "m2",
    "m3"
   ],
-  "results": [],
+  "results": [
+   {
+    "milestone": "m1",
+    "case": "ML-KEM-512",
+    "verdict": "met",
+    "finding": "ML-KEM-512 K-PKE has 3 advantage terms, with module-LWE sample counts k and k+1.",
+    "detail": "The report presents Theorem 4.1 as a refinement of the cited Kyber theorem for the identical underlying K-PKE.",
+    "quote": "AdvIND-CPAK-PKE,A(1λ) ď AdvMLWEB1 (1λ) + AdvMLWEB2 (1λ) + AdvPRFC (1λ).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": "ML-KEM-768",
+    "verdict": "met",
+    "finding": "ML-KEM-768 K-PKE has 3 advantage terms, with module-LWE sample counts k and k+1.",
+    "detail": "The report presents Theorem 4.1 as a refinement of the cited Kyber theorem for the identical underlying K-PKE.",
+    "quote": "AdvIND-CPAK-PKE,A(1λ) ď AdvMLWEB1 (1λ) + AdvMLWEB2 (1λ) + AdvPRFC (1λ).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": "ML-KEM-1024",
+    "verdict": "met",
+    "finding": "ML-KEM-1024 K-PKE has 3 advantage terms, with module-LWE sample counts k and k+1.",
+    "detail": "The report presents Theorem 4.1 as a refinement of the cited Kyber theorem for the identical underlying K-PKE.",
+    "quote": "AdvIND-CPAK-PKE,A(1λ) ď AdvMLWEB1 (1λ) + AdvMLWEB2 (1λ) + AdvPRFC (1λ).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": "ML-KEM-512",
+    "verdict": "met",
+    "finding": "ML-KEM-512 with at most q classical oracle queries has a factor of 3 on the K-PKE IND-CPA advantage.",
+    "detail": "The report applies the cited Fujisaki–Okamoto reduction to ML-KEM's transform in the single-user setting.",
+    "quote": "AdvIND-CCAML-KEM,A(1λ) ď 3 ¨ AdvIND-CPAK-PKE,B(1λ) + (qRO + 1) ¨ δ + qRO2256 .",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": "ML-KEM-768",
+    "verdict": "met",
+    "finding": "ML-KEM-768 with at most q classical oracle queries has a factor of 3 on the K-PKE IND-CPA advantage.",
+    "detail": "The report applies the cited Fujisaki–Okamoto reduction to ML-KEM's transform in the single-user setting.",
+    "quote": "AdvIND-CCAML-KEM,A(1λ) ď 3 ¨ AdvIND-CPAK-PKE,B(1λ) + (qRO + 1) ¨ δ + qRO2256 .",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": "ML-KEM-1024",
+    "verdict": "met",
+    "finding": "ML-KEM-1024 with at most q classical oracle queries has a factor of 3 on the K-PKE IND-CPA advantage.",
+    "detail": "The report applies the cited Fujisaki–Okamoto reduction to ML-KEM's transform in the single-user setting.",
+    "quote": "AdvIND-CCAML-KEM,A(1λ) ď 3 ¨ AdvIND-CPAK-PKE,B(1λ) + (qRO + 1) ¨ δ + qRO2256 .",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": "ML-KEM-512",
+    "verdict": "met",
+    "finding": "ML-KEM-512 with at most q quantum oracle queries has exponent 1 on K-PKE IND-CPA advantage.",
+    "detail": "The report applies GLX24, Corollary 1, to ML-KEM's Fujisaki–Okamoto transform.",
+    "quote": "AdvIND-CCAML-KEM,A(1λ) ď AdvPRFC (1λ) + 2 ¨ ?qRO ¨ (8 ¨ qRO + 3) ¨ AdvIND-CPAK-PKE,B(1λ)\n+ 16 ¨ (4 ¨ qRO + 1) ¨ δ + 4 ¨ ?qRO ¨ δ + 16 ¨ ?qRO ¨ (8 ¨ qRO + 3) ¨ 10 ¨ qRO + 12256 .",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": "ML-KEM-768",
+    "verdict": "met",
+    "finding": "ML-KEM-768 with at most q quantum oracle queries has exponent 1 on K-PKE IND-CPA advantage.",
+    "detail": "The report applies GLX24, Corollary 1, to ML-KEM's Fujisaki–Okamoto transform.",
+    "quote": "AdvIND-CCAML-KEM,A(1λ) ď AdvPRFC (1λ) + 2 ¨ ?qRO ¨ (8 ¨ qRO + 3) ¨ AdvIND-CPAK-PKE,B(1λ)\n+ 16 ¨ (4 ¨ qRO + 1) ¨ δ + 4 ¨ ?qRO ¨ δ + 16 ¨ ?qRO ¨ (8 ¨ qRO + 3) ¨ 10 ¨ qRO + 12256 .",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": "ML-KEM-1024",
+    "verdict": "met",
+    "finding": "ML-KEM-1024 with at most q quantum oracle queries has exponent 1 on K-PKE IND-CPA advantage.",
+    "detail": "The report applies GLX24, Corollary 1, to ML-KEM's Fujisaki–Okamoto transform.",
+    "quote": "AdvIND-CCAML-KEM,A(1λ) ď AdvPRFC (1λ) + 2 ¨ ?qRO ¨ (8 ¨ qRO + 3) ¨ AdvIND-CPAK-PKE,B(1λ)\n+ 16 ¨ (4 ¨ qRO + 1) ¨ δ + 4 ¨ ?qRO ¨ δ + 16 ¨ ?qRO ¨ (8 ¨ qRO + 3) ¨ 10 ¨ qRO + 12256 .",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": "ML-KEM-1024",
+    "verdict": "partial",
+    "finding": "Round-3 Kyber1024 IND-CPA advantage is bounded by twice the module-LWE advantage using 5 samples per instance, plus one PRF advantage.",
+    "detail": "Theorem 1 appears in the classical ROM section. Theorem 3 explicitly allows quantum oracle queries and gives a different IND-CCA bound for Kyber.CCAKEM.",
+    "quote": "Theorem 1. Suppose XOF and G are random oracles. For any adversaryA, there exist adversariesB and\nC with roughly the same running time as that ofA such that AdvcpaKyber.CPAPKE(A)≤ 2· Advmlwek+1,k,η(B) +\nAdvprfPRF(C).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 3,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   }
+  ],
   "judged": [
    {
     "url": "https://csrc.nist.gov/pubs/fips/203/final",
     "milestone": "m1",
-    "hash": "619dbcc74611",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9e1c3732d88e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://csrc.nist.gov/pubs/fips/203/final",
+    "milestone": "m4",
+    "hash": "457a84edfbd9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://csrc.nist.gov/pubs/fips/203/final",
     "milestone": "m2",
-    "hash": "3b25a99b996f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e326c507e3c3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://csrc.nist.gov/pubs/fips/203/final",
     "milestone": "m3",
-    "hash": "f83ba9c7a2d1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "b95163ff11fd",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://csrc.nist.gov/pubs/fips/203/final",
     "milestone": "completion",
-    "hash": "2074772d094c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "864efad35c7e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eccc.weizmann.ac.il/report/2006/148/download",
     "milestone": "m1",
-    "hash": "619dbcc74611",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9e1c3732d88e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eccc.weizmann.ac.il/report/2006/148/download",
+    "milestone": "m4",
+    "hash": "457a84edfbd9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eccc.weizmann.ac.il/report/2006/148/download",
     "milestone": "m2",
-    "hash": "3b25a99b996f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e326c507e3c3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eccc.weizmann.ac.il/report/2006/148/download",
     "milestone": "m3",
-    "hash": "f83ba9c7a2d1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "b95163ff11fd",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eccc.weizmann.ac.il/report/2006/148/download",
     "milestone": "completion",
-    "hash": "2074772d094c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "864efad35c7e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cryptrec.go.jp/exreport/cryptrec-ex-3502-2025.pdf",
     "milestone": "m1",
-    "hash": "619dbcc74611",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9e1c3732d88e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cryptrec.go.jp/exreport/cryptrec-ex-3502-2025.pdf",
+    "milestone": "m4",
+    "hash": "457a84edfbd9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cryptrec.go.jp/exreport/cryptrec-ex-3502-2025.pdf",
     "milestone": "m2",
-    "hash": "3b25a99b996f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e326c507e3c3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cryptrec.go.jp/exreport/cryptrec-ex-3502-2025.pdf",
+    "milestone": "m3",
+    "hash": "b95163ff11fd",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cryptrec.go.jp/exreport/cryptrec-ex-3502-2025.pdf",
+    "milestone": "completion",
+    "hash": "864efad35c7e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pq-crystals.org/kyber/data/kyber-specification-round3-20210804.pdf",
+    "milestone": "m1",
+    "hash": "9e1c3732d88e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://helda.helsinki.fi/server/api/core/bitstreams/c56a13d6-e2d8-48c4-8b34-2ff50ce2150f/content",
+    "milestone": "m4",
+    "hash": "457a84edfbd9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -690,20 +953,123 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 0 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"ML-KEM lets two parties establish a shared secret over a public channel. A mathematical classification would decide whether ML-KEM-512, ML-KEM-768 and ML-KEM-1024 meet their respective NIST security categories 1, 3 and 5 against general quantum computation. The question is how much computation it takes to distinguish the shared key from a random key when the adversary can request decapsulation of ciphertexts other than the challenge.\". Reason: The definition leaves both the category assigned to each parameter set and the meaning of security in the chosen-ciphertext experiment implicit."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"In September 2026, hybrid ML-KEM key exchange protected about 70% of browser traffic reaching one web infrastructure provider. Operators protecting data that must stay confidential for years choose parameter sets using estimates of the cost of known attacks. A proof would justify relying on a set at its claimed strength even against undiscovered quantum algorithms. A refutation would identify a set to reconsider for applications requiring that strength. Confidentiality also depends on secure implementation and deployment.\". Reason: The current rationale gives the standard’s date and output length but omits the scale of deployment and the decision a classification would inform."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by National Institute of Standards and Technology, FIPS 203, section 8, 2024: \"were designed to meet certain security strength\ncategories defined by NIST\". Reason: FIPS 203 identifies the security categories as design targets for the three standardized parameter sets."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit completion: criterion = \"For each FIPS 203 set, a peer-reviewed theorem proves or refutes its IND-CCA claim for the specified distributions and functions. Compare with AES-128, AES-192 or AES-256 key search, respectively, at matched success probabilities. State the classical decapsulation-query budget and compare computation, quantum circuit depth and memory under the same resource assumptions. Confirmation requires a lower bound against general quantum computation across the relevant metrics after all reduction losses. Refutation requires a correct attack on that set with a cost below its category benchmark.\"; basis = \"NIST defines the benchmarks and makes proofs optional for standardization. Its evaluation permits estimates assuming up to 2^64 chosen ciphertexts and also considers larger query counts. The conclusive theorem is an Atlas criterion. Luo\\u2019s preprint was revised on 25 May 2026. A critique of the May claim found that the quantity used for key recovery was unchanged when the secret changed at fixed public matrix. No independently confirmed classification of all three sets was found.\"; refs = [1, 5, 6, 7, 10, 11]. Reason: The test leaves the resource comparison and decapsulation access underspecified, and its basis omits a published objection to the claimed key recovery."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Bound the chosen-plaintext distinguishing advantage against K-PKE, the encryption scheme inside ML-KEM, by the sum of two module-LWE distinguishing advantages and one pseudorandom-function advantage. The first module-LWE term accounts for the public key and the second for the ciphertext. Model matrix generation as a random oracle and the secret and noise generators as pseudorandom functions. The reduction must hold with classical or quantum access to the random oracle.\"; threshold_quote = \"KYBER.CPAPKE is tightly IND-CPA secure under the Module-LWE hardness assumption.\"; threshold_ref = 4. Reason: The criterion mixes the test with its verdict and leaves the roles of the two module-LWE terms unexplained."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m1: \"ML-KEM has a tight chosen-ciphertext reduction in the classical random-oracle model.\". Reason: CRYPTREC’s Theorem 4.2 supplies the missing full-KEM bound between the base encryption proof and the analysis with quantum oracle queries."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"For a chosen-ciphertext adversary that can query an ideal hash function in superposition, bound its ML-KEM distinguishing advantage by an expression linear in the chosen-plaintext advantage against K-PKE. Give the dependence on the quantum query count, the K-PKE correctness bound and the pseudorandomness of the function used on rejection.\"; set_by = \"Ge, Liao and Xue\\u2019s ASIACRYPT 2024 reduction for the Fujisaki\\u2013Okamoto transform, specialized to ML-KEM in CRYPTREC Theorem 4.3.\"; threshold_quote = \"Their IND-CCA security can be reduced to the IND-CPA security of the underlying public key encryption (PKE) scheme without the square-root advantage loss.\"; threshold_ref = 13; refs = [5, 6, 8, 13]. Reason: The criterion reports a preprint date in place of a test and omits the ASIACRYPT publication of the transformation theorem."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"For one FIPS 203 parameter set, derive its claimed category from an explicit numerical lower bound on the quantum cost of a named lattice problem. The implication must hold for general quantum circuits, classical chosen-ciphertext access, the specified sampling distributions and the actual symmetric functions. Account for decapsulation failures, resource overhead and probability losses, leaving the stated lattice lower bound as the sole unproved hypothesis.\"; refs = [1, 5, 6, 10]. Reason: Falsifying a sufficient lattice-hardness hypothesis invalidates that proof route but does not by itself refute the ML-KEM category claim."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 3. Reason: Reference 14 provides Regev’s full paper, resolving the access issue recorded for the INSPIRE page."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No NIST or CRYPTREC statement was found judging a conclusive quantum classification of all three sets infeasible or unnecessary.\". Reason: The existing search note concerns endorsement of the goal and does not cover an explicit assessment that it is infeasible or unhelpful."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove statement 1. Reason: The submission team’s sentence claims a security property for Kyber without naming a goal for classifying the standardized ML-KEM parameter sets."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 11 of 11 proposed operations from CRY-10-revise-20261125T104500233194Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: completion, m1, m4, m2, m3."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 0 from arXiv, 4 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 3 found, 1 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Structural problems after applying: references never cited: [2]"
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "definition is 437 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 3 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 9 candidates returned, 0 dropped as sources already used, 9 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 6 of 9 new candidates, without search. Skipped: 4 no readable saved copy. Dropped rows: 2 not relevant. Replaced 3 earlier rows. Added 13 results: 9 from sources already used, 4 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 13 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Removed 2 references no longer cited; renumbered."
    }
   ],
-  "results_run": "2026-11-15"
- },
- "review": {
-  "state": "published",
-  "note": null,
-  "into": null,
-  "at": "2026-11-15",
-  "log": [
-   {
-    "date": "2026-11-15",
-    "state": "published"
-   }
-  ]
+  "results_run": "2026-11-25"
  }
 }
