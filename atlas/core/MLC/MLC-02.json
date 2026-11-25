@@ -401,10 +401,13 @@
   "title": "Human-level sample efficiency",
   "definition": "A learning procedure acquires unfamiliar domain rules, reaching human reference performance from no more domain-specific experience than comparison humans. The target rules are withheld from earlier training, retrieval and auxiliary systems.",
   "goal": {
-   "need": "In 2023, BabyLM’s organizers reported that typical language models required 3–4 orders of magnitude more data than children. Its 2026 tracks restrict training corpora to 10 million or 100 million words and also limit repeated exposure. These programmes target learning when the available evidence cannot be increased to match large-model training datasets.",
+   "need": "A 2020 survey placed languages spoken by 1.2 billion people in its lowest category for digital language resources. In 2023, typical large language models used 1,000 to 10,000 times as much language data as children need. Where little text exists, learning from fewer examples could give students access to more books in their own language. It could also reduce the work of adapting speech recognition to a new microphone. Translation quality still depends on whether the available texts cover the vocabulary and usage readers need.",
    "need_refs": [
-    1,
-    2
+    15,
+    8,
+    16,
+    3,
+    13
    ],
    "figures": {
     "caption": "BabyLM 2026 text-only training limits",
@@ -457,18 +460,19 @@
   },
   "completion": {
    "title": "One learner matches human performance and experience budgets on withheld language and interactive tasks.",
-   "criterion": "Under a published human-comparison protocol, the same learning procedure reaches at least the human reference performance on unfamiliar language and interactive rule-learning tasks, using no more target-domain experience than the human participants. Target-specific rules are excluded from prior training, retrieval and auxiliary models. Experience includes demonstrations, feedback and repeated exposure; allowed general priors are specified separately. This is an Atlas fallback criterion. The cited results do not establish this combined demonstration.",
+   "criterion": "Under a published human-comparison protocol, the same learning procedure reaches at least the human reference performance on both unfamiliar language tasks and unfamiliar interactive rule-learning tasks. In each comparison it uses no more target-domain experience than the human participants. Count demonstrations, feedback and repeated exposure. Specify allowed general prior knowledge and exclude the target rules from earlier training, retrieval and auxiliary models.",
    "set_by": "Technology Atlas fallback; no common externally published completion test was located.",
    "set_by_kind": "atlas",
    "threshold_quote": null,
    "threshold_ref": null,
-   "basis": "Searches covered BabyLM rules and findings, DARPA LwLL targets, ARC-AGI-3 scoring and human-comparison learning papers. No common test combined withheld domain rules, fully counted experience and cross-domain human parity. The fallback retains the published goals of closing the human–machine learning gap and matching human acquisition efficiency, without introducing an unsupported apprenticeship-hour limit.",
+   "basis": "BabyLM limits pretraining data, and ARC-AGI-3 measures actions in unfamiliar games. The Foundation reports a semi-private ARC-AGI-3 score of 100.0% for GPT-6.2 Astra with the Provider Adapter. A separate experiment compares people and a model on an unfamiliar instruction grammar. Neither result measures the same learner’s performance and target-specific exposure in both domains.",
    "refs": [
     1,
     2,
-    3,
     4,
-    5
+    5,
+    17,
+    18
    ],
    "threshold_checked": null
   },
@@ -479,10 +483,10 @@
    {
     "id": "m1",
     "title": "A learner matches human accuracy after one example of an unfamiliar handwritten character.",
-    "criterion": "On the published 20-choice Omniglot task, attain an error rate no greater than the human reference of 4.5% across 10 evaluation alphabets, after one target-character example. Background training uses separate alphabets. On 11 December 2015, Lake and colleagues reported 3.3% error for Bayesian program learning versus 4.5% for 40 human participants. The model learned its prior from 30 background alphabets. This demonstrates new-character classification within handwriting priors.",
+    "criterion": "Given one image of an unfamiliar character, select another instance of it from 20 distinct characters written by one person in the same alphabet. Across the 10 evaluation alphabets, the average error rate must be at most 4.5%. Use separate alphabets for background training.",
     "set_by": "Lake, Salakhutdinov and Tenenbaum, published Omniglot human-comparison protocol and Figure 6A; the reference concerns handwritten-character classification.",
     "set_by_kind": "protocol",
-    "threshold_quote": "On a challenging one-shot classification task, the model achieves human-level performance while outperforming recent deep learning approaches.",
+    "threshold_quote": "error rate of 4.5% (N = 40).",
     "threshold_ref": 6,
     "refs": [
      6
@@ -493,11 +497,11 @@
    },
    {
     "id": "m2",
-    "title": "A language model beats BabyLM’s large-data reference scores using under 100 million pretraining words.",
-    "criterion": "Under the 2023 Strict corpus limit of 100 million words, exceed the aggregate reference scores: Llama 2 70B, 0.71; RoBERTa-Base, 0.70. The aggregate weights grammar tests at 50%, GLUE at 30% and MSGS generalization tests at 20%. ELC-BERT scored 0.74 among 24 Strict models and used over 450 corpus passes. Task fine-tuning adds data outside the pretraining cap.",
-    "set_by": "BabyLM organizers, published skyline-comparison convention, 2023 Findings Section 5.4 and Table 2. This is a comparative benchmark result, not a competition pass mark.",
+    "title": "A model matches the 0.71 BabyLM reference score on at most 100 million pretraining words.",
+    "criterion": "Under the 2023 BabyLM Strict rules, use only the supplied English corpus for pretraining and reach an aggregate score of at least 0.71, the published Llama 2 reference. BLiMP and its supplement together carry 50% of the score, with equal weight per subtask. (Super)GLUE carries 30% and MSGS 20%. The word limit applies to corpus size. Repeated passes are allowed, and downstream fine-tuning uses separate task data.",
+    "set_by": "BabyLM Challenge organizers, 2023 Findings, section 5.4 and table 2. The threshold denotes parity with the higher published comparator. The competition ranks submissions by aggregate score.",
     "set_by_kind": "community_convention",
-    "threshold_quote": "BabyLM submissions that approach these scores can be considered to have greater sample efficiency than the skyline models",
+    "threshold_quote": "Llama 2 0.84 0.84 0.26 0.75 0.71",
     "threshold_ref": 1,
     "refs": [
      1
@@ -509,10 +513,10 @@
    {
     "id": "m3",
     "title": "An agent reaches a median human-normalized Atari score of 1 within 100,000 steps per game.",
-    "criterion": "On Atari 100k, train with at most 100,000 environment steps per game across 26 games, equivalent to 400,000 frames with frame skip 4, and attain a median human-normalized score of at least 1. The normalized score is (agent score − random score)/(human score − random score). The 2021 EfficientZero paper reports a median of 1.160 and mean of 1.904 over 32 seeds. This budget limits environment interaction; replay and learned-model simulation remain available.",
+    "criterion": "Train on each of the 26 Atari 100k games with at most 100,000 environment steps per game, or 400,000 frames at frame skip 4. For each game, subtract the random-agent reference from the agent’s score and divide by the human reference minus the random-agent reference. The median of the 26 normalized scores must be at least 1. Replay of collected experience and simulation inside a learned model are permitted.",
     "set_by": "Atari 100k benchmark community; budget and human-normalization convention documented by Ye and colleagues in Sections 5.1–5.2 and Table 1.",
     "set_by_kind": "community_convention",
-    "threshold_quote": "The benchmark allows the agent to interact with 100 thousand environment steps",
+    "threshold_quote": "Normed Median 0.000 1.000",
     "threshold_ref": 7,
     "refs": [
      7
@@ -524,14 +528,31 @@
    {
     "id": "m4",
     "title": "An agent scores 100% on ARC-AGI-3’s semi-private interactive environments.",
-    "criterion": "Reach 100% Relative Human Action Efficiency on ARC-AGI-3’s semi-private set under the Foundation’s scoring protocol. Scores compare action counts with first-time human baselines, cap level scores at 1.15, and aggregate weighted levels within games and then across games. On 3 September 2026, the Foundation reported GPT-6 Astra at 99.9% with its Provider Adapter and 62.7% with the Standard harness; these web results are not peer reviewed. Internal reasoning and tool calls do not count as environment actions.",
+    "criterion": "Attain 100% Relative Human Action Efficiency on the ARC-AGI-3 semi-private set, specified as 55 environments. For each completed level, square the ratio of the upper-median first-time human action count to the agent’s action count and cap the score at 1.15. Weight levels by their number, starting at 1. Cap each game’s score at the fraction of total level weight completed, then average game scores equally. Only actions affecting the environment count.",
     "set_by": "ARC Prize Foundation, ARC-AGI-3 Scoring Methodology; 100% is its published human-efficiency reference.",
     "set_by_kind": "protocol",
-    "threshold_quote": "To unlock a maximum game score of 100%, the AI must complete all levels, including the final one.",
+    "threshold_quote": "AI completes all games/levels while matching or surpassing human efficiency",
     "threshold_ref": 5,
     "refs": [
      5,
-     4
+     19,
+     4,
+     17
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "A learner reaches 80.7% exact accuracy on new instructions from 14 examples in an artificial language.",
+    "criterion": "Use Lake and Baroni’s 14 study instructions and 10 query instructions, with word and colour assignments randomized. Each answer is a sequence of coloured symbols. Count it as correct only if the whole sequence follows the test grammar. Match or exceed 80.7% exact accuracy across responses. Reserve the test grammar from training and validation, including versions equivalent under renaming input and output symbols. The 14 examples count distinct study pairs, including those people could revisit.",
+    "set_by": "Brenden M. Lake and Marco Baroni, few-shot instruction-learning protocol and measured human reference, 2023.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "exactly matched the algebraic standard in 80.7% of cases",
+    "threshold_ref": 18,
+    "refs": [
+     18
     ],
     "status": "active",
     "replaced_by": [],
@@ -543,7 +564,8 @@
    "No common externally published completion standard combining cross-domain learning, withheld rules and fully counted human-comparable experience was located.",
    "No published conversion between language words, environment actions and apprenticeship hours was located.",
    "No recognized milestone ladder joining the language and interactive benchmark protocols was located.",
-   "The opened Astra reports do not supply its total target-relevant training experience or the semi-private environment count underlying the headline score."
+   "The opened Astra reports do not supply its total target-relevant training experience or the semi-private environment count underlying the headline score.",
+   "No published result was found comparing one learner with people on both withheld language and interactive rules while counting all target-specific exposure."
   ],
   "references": [
    {
@@ -741,11 +763,110 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 15,
+    "kind": "report",
+    "url": "https://aclanthology.org/2020.acl-main.560.pdf",
+    "doi": "10.18653/v1/2020.acl-main.560",
+    "title": "The State and Fate of Linguistic Diversity and Inclusion in the NLP World",
+    "authors": "Joshi P, Santy S, Budhiraja A, Bali K, Choudhury M",
+    "container": "Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": "6282-6293",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 16,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41586-024-07335-x.pdf",
+    "doi": "10.1038/s41586-024-07335-x",
+    "title": "Scaling neural machine translation to 200 languages",
+    "authors": "NLLB Team, Costa-jussà MR, Cross J, Çelebi O, Elbayad M, Heafield K, et al.",
+    "container": "Nature",
+    "year": "2024",
+    "volume": "630",
+    "issue": "8018",
+    "pages": "841-846",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 17,
+    "kind": "web",
+    "url": "https://arcprize.org/results/openai-gpt-6-2-astra",
+    "doi": null,
+    "title": "GPT-6.2 Astra",
+    "authors": "ARC Prize Foundation",
+    "container": "ARC Prize",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 18,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41586-023-06668-3?code=0&error=cookies_not_supported",
+    "doi": "10.1038/s41586-023-06668-3",
+    "title": "Human-like systematic generalization through a meta-learning neural network",
+    "authors": "Lake BM, Baroni M",
+    "container": "Nature",
+    "year": "2023",
+    "volume": "623",
+    "issue": "7985",
+    "pages": "115-121",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 19,
+    "kind": "report",
+    "url": "https://arcprize.org/media/ARC_AGI_3_Technical_Report.pdf",
+    "doi": null,
+    "title": "ARC-AGI-3: A New Challenge for Frontier Agentic Intelligence",
+    "authors": "ARC Prize Foundation",
+    "container": null,
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 20,
+    "kind": "report",
+    "url": "https://proceedings.mlr.press/v70/shyam17a/shyam17a.pdf",
+    "doi": null,
+    "title": "Attentive Recurrent Comparators",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 21,
+    "kind": "journal",
+    "url": "https://www.cs.princeton.edu/~bl8144/papers/LakeBaroniNatureSI.pdf",
+    "doi": null,
+    "title": "Supplementary Information: Human-like systematic generalization through a meta-learning neural network",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
    }
   ],
   "milestone_order": [
    "m1",
    "m2",
+   "m5",
    "m3",
    "m4"
   ],
@@ -754,405 +875,580 @@
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "ELC-BERT scored 0.74 aggregate among 24 Strict-track models.",
-    "detail": "The Strict corpus contained 98.04 million words. ELC-BERT exceeded the Llama 2 and RoBERTa-Base aggregate scores of 0.71 and 0.70; it trained for over 450 epochs, and task fine-tuning added data.",
+    "finding": "ELC-BERT scored 0.74 aggregate in 2023 BabyLM Strict with a 98.04-million-word pretraining corpus.",
+    "detail": "The challenge organizers published the official track result in the CoNLL proceedings. ELC-BERT trained for over 450 epochs, and the Strict rules counted corpus size rather than repeated passes.",
     "quote": null,
     "checked": null,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
-    "finding": "Strict and Strict-Small submissions match Llama3-70B on linguistic ability; the number in the comparison is not stated.",
-    "detail": "The comparison concerns BLiMP and GLUE, not the specified 2023 weighted aggregate or its Llama 2 and RoBERTa reference scores. The 2026 Strict track permits datasets of up to 100 million words.",
-    "quote": "While strong GLUE\nperformance remains challenging for models of\nthis size, this result does show that theirlinguis-\nticabilities are on par with Llama3-70B, a model\nseveral orders of magnitude larger.",
+    "finding": "BabySteps ranked first in the 2026 BabyLM Strict track under a 100-million-word corpus cap.",
+    "detail": "The 2026 track also allowed multimodal data and interactive training, and capped cumulative exposure at 1 billion words, including repeated passes. The corpus cap is a track limit. The winner’s exact corpus size is unspecified.",
+    "quote": "Strict Track Winner.Satheesh et al. (2026) also\nachieved the highest score on the Strict track.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "partial",
-    "finding": "GPT-6 family: 99.95% on ARC-AGI-3; sample size not stated.",
-    "detail": "The reported score is below 100%. The table does not identify which GPT-6 model achieved it or specify the evaluation set and harness.",
+    "finding": "OpenAI’s GPT-6 scored 99.95% on ARC-AGI-3 (environment count unstated).",
+    "detail": "The leaderboard links Astra, Sol, and Luna from a single GPT-6 row and gives one score for that row.",
     "quote": null,
     "checked": null,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "partial",
-    "finding": "GPT-6 Astra scored 99.9% on ARC-AGI-3 with the Provider Adapter; sample size not stated.",
-    "detail": "The score falls short of the 100% threshold. The leaderboard also reports 62.7% with the Standard harness.",
+    "finding": "GPT-6 Astra scored 99.9% on ARC-AGI-3 with the Provider Adapter harness. The environment count is unreported.",
+    "detail": "The Provider Adapter harness preserves reasoning state and compacts longer conversations so the model can reuse prior work.",
     "quote": null,
     "checked": null,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
-    "verdict": "met",
-    "finding": "AttentiveMatcher, across 15 random seeds, achieved 2.35% error on one-shot Omniglot classification.",
-    "detail": "The image model used the unaugmented 30-alphabet Background set and the predefined 20-way evaluation episodes from 10 separate alphabets. Its reported mean accuracy was 97.65%.",
+    "verdict": "partial",
+    "finding": "Image-based AttentiveMatcher averaged 2.35% error on 20-way one-shot Omniglot across 10 test alphabets and 15 training seeds.",
+    "detail": "Table 1 gives the numeric result. Section 4.1 identifies the predefined Omniglot episodes and uses the other ten Evaluation alphabets for validation.",
     "quote": null,
     "checked": null,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "ELC-BERT scored 0.743 on the BabyLM aggregate using a 98.04 million-word pretraining corpus.",
-    "detail": "The score exceeds both reference aggregates. The evaluation included task fine-tuning beyond the pretraining corpus.",
+    "finding": "ELC-BERT scored 0.743 on BabyLM Strict using 98.04 million pretraining words.",
+    "detail": "The source is a conference proceedings paper, classified under journal because the format has no proceedings category. The score comes from the official shared-task leaderboard.",
     "quote": null,
     "checked": null,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "met",
-    "finding": "EfficientZero V2 achieved a median human-normalized score of 1.286 across 26 Atari games.",
-    "detail": "Training was limited to 100,000 steps per game with action repeat 4. The number of Atari seeds is not stated in the supplied text.",
-    "quote": "When scores are normalized against those of human players, EZ-V2 attains a mean score of 2.428 and a median score of 1.286, surpassing the previous state-of-the-art, BBF",
+    "finding": "EfficientZero V2 achieved a median human-normalized score of 1.286 across 26 Atari 100k games.",
+    "detail": null,
+    "quote": "When scores are normalized against those of human players, EZ-V2 attains a mean score of 2.428 and a median score of 1.286",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "met",
-    "finding": "EfficientZero achieved a median human-normalized score of 1.160 across 26 Atari games and 32 seeds.",
-    "detail": "The benchmark allowed 100,000 environment steps per game, equivalent to 400,000 frames with frame skip 4. The paper appeared in NeurIPS conference proceedings; the supplied text does not state its review status.",
+    "finding": "EfficientZero reached a median human-normalized score of 1.160 across 26 Atari 100k games.",
+    "detail": "The paper appeared in the peer-reviewed NeurIPS 2021 conference proceedings. The peer_reviewed field is reserved for journal publication.",
     "quote": "Normalizing our score with\nthe score of human players, EfﬁcientZero achieves a mean score of 1.904 and a median score of\n1.160.",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Full Context ConvARC reached 1.5% error on Omniglot with one example per character and 20 choices per trial.",
+    "detail": "Table 5 gives the within-alphabet score. The one-shot trial count is unreported.",
+    "quote": "In the task of one-shot classiﬁ-\ncation on the Omniglot dataset, we achieve the\nstate of the art performance with an error rate of\n1.5%.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "Bayesian program learning averaged 3.3% error across 10 alphabets on one-shot, 20-way handwritten-character matching.",
+    "detail": "Background training used images and pen strokes. Evaluation used only raw images of novel characters.",
+    "quote": "BPL showed a similar\nerror rate of 3.3%, achieving better performance\nthan a deep convolutional network (convnet; 13.5%\nerrors) and the HD model (34.8%)",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 6,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "MLC averaged 92.9% exact-match accuracy across 10 runs on Lake and Baroni’s 14-study-pair, 10-query instruction task.",
+    "detail": "The separate novel-rule experiment excludes equivalent individual rules from meta-training and uses newly generated test episodes. It leaves the full grammar holdout for the 14-study-pair task unverified.",
+    "quote": "achieving a mean of 92.9% (SD = 8.2) exact match accuracy on the key few-shot\ninstruction task",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "GPT-6.2 Astra with Provider Adapter scored 100.0% on ARC-AGI-3 at xhigh reasoning (semi-private sample size unstated).",
+    "detail": "The 25-environment count applies to the public demo. The Provider Adapter preserves reasoning state between requests and uses compaction for longer conversations.",
+    "quote": "at max reasoning and 100.0% with the\nProvider Adapter harness\nThe Provider Adapter harness preserves opaque reasoning state between requests and uses compaction for longer conversations, allowing the model to reuse prior work.\nat xhigh reasoning.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://aclanthology.org/2023.conll-babylm.1/",
     "milestone": "m1",
-    "hash": "34f198203b0d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1268c90b605b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://aclanthology.org/2023.conll-babylm.1/",
     "milestone": "m2",
-    "hash": "43b54ede2237",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e6f060cb0142",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aclanthology.org/2023.conll-babylm.1/",
+    "milestone": "m5",
+    "hash": "197e7c9be2ae",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://aclanthology.org/2023.conll-babylm.1/",
     "milestone": "m3",
-    "hash": "2c85f71206fd",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7b894bbcd7fa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://aclanthology.org/2023.conll-babylm.1/",
     "milestone": "m4",
-    "hash": "ebfaf28d926f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9f73b4eb166b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://aclanthology.org/2023.conll-babylm.1/",
     "milestone": "completion",
-    "hash": "63638d47c600",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "8bb6ca9df6d5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://aclanthology.org/2026.babylm-main.37/",
     "milestone": "m1",
-    "hash": "34f198203b0d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1268c90b605b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://aclanthology.org/2026.babylm-main.37/",
     "milestone": "m2",
-    "hash": "43b54ede2237",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e6f060cb0142",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aclanthology.org/2026.babylm-main.37/",
+    "milestone": "m5",
+    "hash": "197e7c9be2ae",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://aclanthology.org/2026.babylm-main.37/",
     "milestone": "m3",
-    "hash": "2c85f71206fd",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7b894bbcd7fa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://aclanthology.org/2026.babylm-main.37/",
     "milestone": "m4",
-    "hash": "ebfaf28d926f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9f73b4eb166b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://aclanthology.org/2026.babylm-main.37/",
     "milestone": "completion",
-    "hash": "63638d47c600",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "8bb6ca9df6d5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2407.21783v3",
     "milestone": "m1",
-    "hash": "34f198203b0d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1268c90b605b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2407.21783v3",
     "milestone": "m2",
-    "hash": "43b54ede2237",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e6f060cb0142",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2407.21783v3",
+    "milestone": "m5",
+    "hash": "197e7c9be2ae",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2407.21783v3",
     "milestone": "m3",
-    "hash": "2c85f71206fd",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7b894bbcd7fa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2407.21783v3",
     "milestone": "m4",
-    "hash": "ebfaf28d926f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9f73b4eb166b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2407.21783v3",
     "milestone": "completion",
-    "hash": "63638d47c600",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "8bb6ca9df6d5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arcprize.org/results",
     "milestone": "m1",
-    "hash": "34f198203b0d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1268c90b605b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arcprize.org/results",
     "milestone": "m2",
-    "hash": "43b54ede2237",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e6f060cb0142",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arcprize.org/results",
+    "milestone": "m5",
+    "hash": "197e7c9be2ae",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arcprize.org/results",
     "milestone": "m3",
-    "hash": "2c85f71206fd",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7b894bbcd7fa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arcprize.org/results",
     "milestone": "m4",
-    "hash": "ebfaf28d926f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9f73b4eb166b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arcprize.org/results",
     "milestone": "completion",
-    "hash": "63638d47c600",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "8bb6ca9df6d5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arcprize.org/leaderboard",
     "milestone": "m1",
-    "hash": "34f198203b0d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1268c90b605b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arcprize.org/leaderboard",
     "milestone": "m2",
-    "hash": "43b54ede2237",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e6f060cb0142",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arcprize.org/leaderboard",
+    "milestone": "m5",
+    "hash": "197e7c9be2ae",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arcprize.org/leaderboard",
     "milestone": "m3",
-    "hash": "2c85f71206fd",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7b894bbcd7fa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arcprize.org/leaderboard",
     "milestone": "m4",
-    "hash": "ebfaf28d926f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9f73b4eb166b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arcprize.org/leaderboard",
     "milestone": "completion",
-    "hash": "63638d47c600",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "8bb6ca9df6d5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://acris.aalto.fi/ws/portalfiles/portal/87261494/A_Relational_Model_for_One_Shot_Classification_of_Images_and_Pen_Strokes.pdf",
     "milestone": "m1",
-    "hash": "34f198203b0d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://aclanthology.org/2023.conll-babylm.20.pdf",
-    "milestone": "m2",
-    "hash": "43b54ede2237",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2403.00564",
-    "milestone": "m3",
-    "hash": "2c85f71206fd",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1268c90b605b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://acris.aalto.fi/ws/portalfiles/portal/87261494/A_Relational_Model_for_One_Shot_Classification_of_Images_and_Pen_Strokes.pdf",
     "milestone": "m2",
-    "hash": "43b54ede2237",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e6f060cb0142",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://acris.aalto.fi/ws/portalfiles/portal/87261494/A_Relational_Model_for_One_Shot_Classification_of_Images_and_Pen_Strokes.pdf",
+    "milestone": "m5",
+    "hash": "197e7c9be2ae",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://acris.aalto.fi/ws/portalfiles/portal/87261494/A_Relational_Model_for_One_Shot_Classification_of_Images_and_Pen_Strokes.pdf",
     "milestone": "m3",
-    "hash": "2c85f71206fd",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7b894bbcd7fa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://acris.aalto.fi/ws/portalfiles/portal/87261494/A_Relational_Model_for_One_Shot_Classification_of_Images_and_Pen_Strokes.pdf",
     "milestone": "m4",
-    "hash": "ebfaf28d926f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9f73b4eb166b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://acris.aalto.fi/ws/portalfiles/portal/87261494/A_Relational_Model_for_One_Shot_Classification_of_Images_and_Pen_Strokes.pdf",
     "milestone": "completion",
-    "hash": "63638d47c600",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "8bb6ca9df6d5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://aclanthology.org/2023.conll-babylm.20.pdf",
     "milestone": "m1",
-    "hash": "34f198203b0d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1268c90b605b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aclanthology.org/2023.conll-babylm.20.pdf",
+    "milestone": "m2",
+    "hash": "e6f060cb0142",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aclanthology.org/2023.conll-babylm.20.pdf",
+    "milestone": "m5",
+    "hash": "197e7c9be2ae",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://aclanthology.org/2023.conll-babylm.20.pdf",
     "milestone": "m3",
-    "hash": "2c85f71206fd",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7b894bbcd7fa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://aclanthology.org/2023.conll-babylm.20.pdf",
     "milestone": "m4",
-    "hash": "ebfaf28d926f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9f73b4eb166b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://aclanthology.org/2023.conll-babylm.20.pdf",
     "milestone": "completion",
-    "hash": "63638d47c600",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "8bb6ca9df6d5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2403.00564",
     "milestone": "m1",
-    "hash": "34f198203b0d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1268c90b605b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2403.00564",
     "milestone": "m2",
-    "hash": "43b54ede2237",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e6f060cb0142",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2403.00564",
+    "milestone": "m5",
+    "hash": "197e7c9be2ae",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2403.00564",
+    "milestone": "m3",
+    "hash": "7b894bbcd7fa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2403.00564",
     "milestone": "m4",
-    "hash": "ebfaf28d926f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9f73b4eb166b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2403.00564",
     "milestone": "completion",
-    "hash": "63638d47c600",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "8bb6ca9df6d5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2021/file/d5eca8dc3820cad9fe56a3bafda65ca1-Paper.pdf",
+    "milestone": "m1",
+    "hash": "1268c90b605b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2021/file/d5eca8dc3820cad9fe56a3bafda65ca1-Paper.pdf",
+    "milestone": "m2",
+    "hash": "e6f060cb0142",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2021/file/d5eca8dc3820cad9fe56a3bafda65ca1-Paper.pdf",
+    "milestone": "m5",
+    "hash": "197e7c9be2ae",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.neurips.cc/paper_files/paper/2021/file/d5eca8dc3820cad9fe56a3bafda65ca1-Paper.pdf",
     "milestone": "m3",
-    "hash": "2c85f71206fd",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7b894bbcd7fa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2021/file/d5eca8dc3820cad9fe56a3bafda65ca1-Paper.pdf",
+    "milestone": "m4",
+    "hash": "9f73b4eb166b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2021/file/d5eca8dc3820cad9fe56a3bafda65ca1-Paper.pdf",
+    "milestone": "completion",
+    "hash": "8bb6ca9df6d5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.mlr.press/v70/shyam17a/shyam17a.pdf",
+    "milestone": "m1",
+    "hash": "1268c90b605b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.cmu.edu/~rsalakhu/papers/LakeEtAl2015Science.pdf",
+    "milestone": "m1",
+    "hash": "1268c90b605b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.princeton.edu/~bl8144/papers/LakeBaroniNatureSI.pdf",
+    "milestone": "m5",
+    "hash": "197e7c9be2ae",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arcprize.org/results/openai-gpt-6-2-astra",
+    "milestone": "m4",
+    "hash": "9f73b4eb166b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1219,8 +1515,93 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 1 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"A 2020 survey placed languages spoken by 1.2 billion people in its lowest category for digital language resources. In 2023, typical large language models used 1,000 to 10,000 times as much language data as children need. Where little text exists, learning from fewer examples could give students access to more books in their own language. It could also reduce the work of adapting speech recognition to a new microphone. Translation quality still depends on whether the available texts cover the vocabulary and usage readers need.\". Reason: The current paragraph gives competition limits without identifying who lacks training data or what learning from fewer examples would make possible."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit completion: criterion = \"Under a published human-comparison protocol, the same learning procedure reaches at least the human reference performance on both unfamiliar language tasks and unfamiliar interactive rule-learning tasks. In each comparison it uses no more target-domain experience than the human participants. Count demonstrations, feedback and repeated exposure. Specify allowed general prior knowledge and exclude the target rules from earlier training, retrieval and auxiliary models.\"; basis = \"BabyLM limits pretraining data, and ARC-AGI-3 measures actions in unfamiliar games. The Foundation reports a semi-private ARC-AGI-3 score of 100.0% for GPT-6.2 Astra with the Provider Adapter. A separate experiment compares people and a model on an unfamiliar instruction grammar. Neither result measures the same learner\\u2019s performance and target-specific exposure in both domains.\"; refs = [1, 2, 4, 5, 17, 18]. Reason: The current test mixes its criterion with a verdict and omits the scope of the subsequently reported 100.0% interactive score."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Given one image of an unfamiliar character, select another instance of it from 20 distinct characters written by one person in the same alphabet. Across the 10 evaluation alphabets, the average error rate must be at most 4.5%. Use separate alphabets for background training.\"; threshold_quote = \"error rate of 4.5% (N = 40).\"; threshold_ref = 6. Reason: The existing quotation omits the numerical human reference, and the criterion includes the model’s result."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: title = \"A model matches the 0.71 BabyLM reference score on at most 100 million pretraining words.\"; criterion = \"Under the 2023 BabyLM Strict rules, use only the supplied English corpus for pretraining and reach an aggregate score of at least 0.71, the published Llama 2 reference. BLiMP and its supplement together carry 50% of the score, with equal weight per subtask. (Super)GLUE carries 30% and MSGS 20%. The word limit applies to corpus size. Repeated passes are allowed, and downstream fine-tuning uses separate task data.\"; set_by = \"BabyLM Challenge organizers, 2023 Findings, section 5.4 and table 2. The threshold denotes parity with the higher published comparator. The competition ranks submissions by aggregate score.\"; threshold_quote = \"Llama 2 0.84 0.84 0.26 0.75 0.71\"; threshold_ref = 1. Reason: The original title excludes the 100-million-word boundary and turns a published comparison score into a requirement to beat it."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m2: \"A learner reaches 80.7% exact accuracy on new instructions from 14 examples in an artificial language.\". Reason: The language milestones lack a test of whether a learner can infer withheld rules from examples and apply them to new instructions as accurately as people."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Train on each of the 26 Atari 100k games with at most 100,000 environment steps per game, or 400,000 frames at frame skip 4. For each game, subtract the random-agent reference from the agent\\u2019s score and divide by the human reference minus the random-agent reference. The median of the 26 normalized scores must be at least 1. Replay of collected experience and simulation inside a learned model are permitted.\"; threshold_quote = \"Normed Median 0.000 1.000\"; threshold_ref = 7. Reason: The Atari criterion includes one agent’s score and seed count, while its quotation establishes only the interaction budget."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"Attain 100% Relative Human Action Efficiency on the ARC-AGI-3 semi-private set, specified as 55 environments. For each completed level, square the ratio of the upper-median first-time human action count to the agent\\u2019s action count and cap the score at 1.15. Weight levels by their number, starting at 1. Cap each game\\u2019s score at the fraction of total level weight completed, then average game scores equally. Only actions affecting the environment count.\"; threshold_quote = \"AI completes all games/levels while matching or surpassing human efficiency\"; threshold_ref = 5; refs = [5, 19, 4, 17]. Reason: The current criterion embeds a September result and leaves out how the human reference, level weights and game caps determine a full score."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No published result was found comparing one learner with people on both withheld language and interactive rules while counting all target-specific exposure.\". Reason: The existing search note concerns a common standard and leaves open whether a published result independently satisfies the combined test."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 8 of 8 proposed operations from MLC-02-revise-20261125T090359317845Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: completion, m1, m2, m5, m3, m4."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 3 from Crossref, 0 from PubMed, 0 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 5 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 9 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 4 candidates returned, 0 dropped as sources already used, 4 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 4 of 4 new candidates, without search. Skipped: none. Dropped rows: none. Replaced 8 earlier rows. Added 12 results: 8 from sources already used, 4 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 7 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-25"
  }
 }
