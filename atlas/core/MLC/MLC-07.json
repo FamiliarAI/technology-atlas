@@ -308,10 +308,11 @@
   "title": "Open-ended autonomous skill learning",
   "definition": "An AI system repeatedly generates its own learning goals and acquires independently tested skills beyond its initial task list while retaining earlier skills. It also produces learning artifacts, such as executable programs or training examples, from which a separate learner acquires those skills.",
   "goal": {
-   "need": "In Voyager’s Minecraft ablation, substituting a random curriculum reduced discovered items by 93%; exploration used three trials per method and a budget of 160 prompting iterations. Task choice therefore affects measured exploration. GOAL-Robots set the goal of agents that generate their own goals and reuse the resulting skills on new user tasks.",
+   "need": "Teaching a robot by demonstration takes time for each task. In one study of six tasks using two robot arms, an operator spent 30–60 minutes per task collecting examples. Even if demonstrations are quick, someone must still choose what to teach. A service robot that practises on its own could prepare for requests its designers did not anticipate. Users would need to teach it less if the skills it acquired were useful for the work they asked it to do.",
    "need_refs": [
-    1,
-    2
+    15,
+    2,
+    16
    ],
    "figures": null,
    "statements": [
@@ -329,6 +330,14 @@
      "quote": "Furthermore, we claim that such open-endedness is an essential property of any artificial superhuman intelligence (ASI).",
      "context": "The authors define open-endedness through novelty and learnability relative to an observer.",
      "ref": 3,
+     "checked": true
+    },
+    {
+     "body": "GOAL-Robots, NeurIPS Robot open-Ended Autonomous Learning competition",
+     "year": "2019",
+     "quote": "the quality of the autonomously acquired knowledge will be measured with tasks unknown at design time.",
+     "context": "A simulated robot arm first explored objects without an external reward. It then received images of arrangements to reproduce.",
+     "ref": 17,
      "checked": true
     }
    ]
@@ -360,7 +369,7 @@
    {
     "id": "m1",
     "title": "An agent finishes an autonomously generated terrain with a reward score of at least 230.",
-    "criterion": "Generate a bipedal-walker terrain autonomously, then learn a controller that reaches its finish line and obtains a score of at least 230 under POET’s scoring function. This is POET’s definition of a solved environment. The 13 April 2020 Enhanced POET version reports growth in ANNECS, its count of qualifying environments created and solved, over 60,000 iterations; Figure 8 summarizes five runs.",
+    "criterion": "Generate a simulated obstacle course autonomously and train a controller for the two-legged walker. In the same episode, the walker must reach the finish line and earn a cumulative reward of at least 230 under Enhanced POET’s scoring function.",
     "set_by": "Uber AI, Enhanced POET, Appendix A.3.1; a protocol for simulated bipedal-walker terrains.",
     "set_by_kind": "protocol",
     "threshold_quote": "an environment is considered solved when the agent both reaches the finish line and obtains a score of 230 or above.",
@@ -375,10 +384,10 @@
    {
     "id": "m2",
     "title": "A solver learns a self-invented task its predecessor failed and retains all earlier tasks.",
-    "criterion": "At each accepted addition, the old solver fails the self-invented task, while the modified solver solves that task and every previously learned task. Task-specific correctness procedures supply the binary test; novelty is relative to the predecessor. The experimental preprint submitted on 31 October 2012 depicts one run with 340 self-generated tasks, including 67 non-compression action-sequence tasks learned in 8 hours. These tasks were internally validated.",
+    "criterion": "Accept a self-invented task and a modified solver only after establishing that the preceding solver fails the task and that the modified solver solves both the new task and every previously accepted task under their respective correctness tests.",
     "set_by": "IDSIA, POWERPLAY, Sections 1.1–2; the algorithm’s task-acceptance protocol.",
     "set_by_kind": "protocol",
-    "threshold_quote": "(3) The new solver can still solve the known set of previously learned tasks.",
+    "threshold_quote": "provably solves all previously learned tasks plus the new one, while the unmodified predecessor does not.",
     "threshold_ref": 4,
     "refs": [
      4,
@@ -391,7 +400,7 @@
    {
     "id": "m3",
     "title": "A second agent solves an unseen Minecraft task within 50 iterations using an exported skill library.",
-    "criterion": "Give a different agent the executable skill library acquired by an automatic curriculum. Voyager’s protocol clears inventory, starts a newly instantiated Minecraft world and allows 50 prompting iterations per unseen task: a diamond pickaxe, golden sword, lava bucket or compass. In the version of 19 October 2023, AutoGPT with Voyager’s library obtained a compass in 2 of 3 attempts; without it, 0 of 3. This demonstrates program reuse; acquisition of a skill by an independent learner was not tested.",
+    "criterion": "Give a different agent the executable skill library built during autonomous Minecraft exploration. Clear its inventory and start it in a newly generated world. An attempt succeeds if the agent obtains the specified item within 50 prompting iterations. Test a diamond pickaxe, golden sword, lava bucket and compass, and report successful attempts out of three for each item.",
     "set_by": "Voyager developers, Section 3.3 and Table 2; an experimental transfer protocol for Minecraft.",
     "set_by_kind": "protocol",
     "threshold_quote": "0/3 means the method fails to solve the task within the maximal prompting iterations (50).",
@@ -406,7 +415,7 @@
    {
     "id": "m4",
     "title": "Independent tests confirm that self-generated learning adds skills while retaining every earlier skill.",
-    "criterion": "During repeated autonomous additions, each new task lies outside the initially enumerated list and is unsolved by the preceding system. Independently implemented tests verify its acquisition and re-test all earlier accepted skills after later learning; the retained inventory grows. This integrates autonomous goal generation, learning and independent verification, before requiring artifact-mediated acquisition by a second learner. The cited POWERPLAY and Voyager experiments demonstrate separate components of this test.",
+    "criterion": "The system repeatedly proposes and learns tasks outside its initial list. For each addition, an independent evaluator uses tests the system did not write to confirm that the preceding version fails the new task and the updated version passes it. The evaluator also verifies that the updated version still passes the tests for every earlier accepted task.",
     "set_by": "Technology Atlas; provisional integration test, because the cited programme objectives and protocols provide no combined endpoint.",
     "set_by_kind": "atlas",
     "threshold_quote": null,
@@ -421,12 +430,28 @@
     "status": "active",
     "replaced_by": [],
     "threshold_checked": null
+   },
+   {
+    "id": "m5",
+    "title": "A second policy reproduces a generated block arrangement with errors below 4 cm and 0.2 radians.",
+    "criterion": "In the simulated one- or two-block task, a goal-setting policy moves blocks and its final arrangement becomes the target. Train a separate policy by reinforcement learning and by imitation of the goal setter’s trajectories for goals the learner failed. Allow the learner up to 200 steps per object. Success on a goal requires every block’s centre to be less than 4 cm from its target and its orientation to differ by less than 0.2 radians.",
+    "set_by": "OpenAI asymmetric self-play protocol, Section 3.2, Appendix A.2 and Table 3",
+    "set_by_kind": "protocol",
+    "threshold_quote": "for all objects are less than a small error (0.04 meters and 0.2 radians respectively)",
+    "threshold_ref": 18,
+    "refs": [
+     18
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
    }
   ],
   "measures": [],
   "not_found": [
    "No published run-duration, retention-duration or sample-size requirement was found for the combined demonstration.",
-   "No common protocol was found for the separate learner’s initial knowledge, resources and acquisition of skills from artifacts."
+   "No common protocol was found for the separate learner’s initial knowledge, resources and acquisition of skills from artifacts.",
+   "No position disputing the value or feasibility of autonomous skill learning was found in the GOAL-Robots objectives or REAL competition rules."
   ],
   "references": [
    {
@@ -624,12 +649,125 @@
     "issue": null,
     "pages": null,
     "citation_source": "model"
+   },
+   {
+    "id": 15,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2304.13705v1",
+    "doi": "10.48550/arXiv.2304.13705",
+    "title": "Learning Fine-Grained Bimanual Manipulation with Low-Cost Hardware",
+    "authors": "Zhao TZ, Kumar V, Levine S, Finn C",
+    "container": "arXiv",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 16,
+    "kind": "preprint",
+    "url": "https://arxiv.org/abs/2403.02514",
+    "doi": "10.48550/arXiv.2403.02514",
+    "title": "The Autonomy-Alignment Problem in Open-Ended Learning Robots: Formalising the Purpose Framework",
+    "authors": "Baldassarre G, Duro RJ, Cartoni E, Khamassi M, Romero A, Santucci VG",
+    "container": "arXiv",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 17,
+    "kind": "web",
+    "url": "https://www.aicrowd.com/challenges/neurips-2019-robot-open-ended-autonomous-learning",
+    "doi": null,
+    "title": "NeurIPS 2019 - Robot open-Ended Autonomous Learning",
+    "authors": "Emilio Cartoni, Gianluca Baldassarre",
+    "container": "AIcrowd",
+    "year": "2019",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 18,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2101.04882v1",
+    "doi": "10.48550/arXiv.2101.04882",
+    "title": "Asymmetric self-play for automatic goal discovery in robotic manipulation",
+    "authors": "OpenAI O, Plappert M, Sampedro R, Xu T, Akkaya I, Kosaraju V, et al.",
+    "container": "arXiv",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 19,
+    "kind": "report",
+    "url": "https://proceedings.mlr.press/v162/parker-holder22a/parker-holder22a.pdf",
+    "doi": null,
+    "title": "Evolving Curricula with Regret-Based Environment Design",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 20,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/1112.5309v1",
+    "doi": null,
+    "title": "POWERPLAY: Training an Increasingly General Problem Solver by Continually Searching for the Simplest Still Unsolvable Problem",
+    "authors": "Schmidhuber J",
+    "container": "arXiv",
+    "year": "2011",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 21,
+    "kind": "journal",
+    "url": "https://www2.informatik.uni-hamburg.de/wtm/publications/2026/ZWW26/1-s2.0-S0921889025003458-main.pdf",
+    "doi": "10.1016/j.robot.2025.105248",
+    "title": "Agentic skill discovery",
+    "authors": "Zhao X, Weber C, Wermter S",
+    "container": "Robotics and Autonomous Systems",
+    "year": "2026",
+    "volume": "196",
+    "issue": null,
+    "pages": "105248",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 22,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2101.04882",
+    "doi": null,
+    "title": "Asymmetric self-play for automatic goal discovery in robotic manipulation",
+    "authors": "OpenAI O, Plappert M, Sampedro R, Xu T, Akkaya I, Kosaraju V, et al.",
+    "container": "arXiv",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
    }
   ],
   "milestone_order": [
    "m1",
    "m2",
    "m3",
+   "m5",
    "m4"
   ],
   "results": [
@@ -637,356 +775,587 @@
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Enhanced POET solved 15 autonomously generated target terrains across 5 runs.",
-    "detail": "The targets were sampled from early, middle and late stages. The excerpt reports them as solved but does not give individual scores; the criterion defines a solved environment as scoring at least 230.",
-    "quote": "Target environments were selected from different stages\nof POET runs (see text) and are all solved by POET (blue).",
+    "finding": "Enhanced POET walkers solved 12 showcased courses from one run, earning at least 230 reward per solve.",
+    "detail": "The paper reports the threshold through its definition of a solve. It gives no exact episode scores for the 12 showcased courses.",
+    "quote": "The 12 sample environments illustrated in Figure 5 that\nwere created and solved by Enhanced POET with the\nCPPN-based EE in a single run",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "met",
-    "finding": "In one POWER PLAY run, a SLIM RNN learned 67 self-invented non-compression tasks while retaining earlier skills.",
-    "detail": "The run learned 340 tasks in total, including compression tasks. For novel tasks, predecessor failure was tested within a limited time budget; task outcomes were internally validated.",
-    "quote": "The system invents more and more novel skills, each\nbreaking the generalization ability of its previous SLIM NN weight matrix, without forgetting previously\nlearned skills. Within 8 hours on a standard PC, a SLIM RNN consisting of 20 WITAS, with 4 neurons in\neach WITAS, invented 67 novel action sequences guiding the fovea before halting.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "met",
-    "finding": "AutoGPT with Voyager’s skill library obtained a compass in 2 of 3 attempts.",
-    "detail": "Inventory was cleared and the agent reset to a new world, with a limit of 50 prompting iterations per task. AutoGPT without the library succeeded in 0 of 3 compass attempts. The experiment demonstrates program reuse; independent skill acquisition was not tested.",
-    "quote": null,
-    "checked": null,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 1,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Enhanced POET solved 15 sampled self-generated environments across five runs.",
-    "detail": "The experiment does not establish that each predecessor failed its new task or that the modified solver retained every earlier task.",
-    "quote": "Target environments were selected from different stages\nof POET runs (see text) and are all solved by POET (blue).",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "partial",
-    "finding": "Enhanced POET solved 15 sampled self-generated environments across five runs.",
-    "detail": "The source does not report independently implemented tests of each addition and all previously accepted skills after later learning.",
-    "quote": "Target environments were selected from different stages\nof POET runs (see text) and are all solved by POET (blue).",
+    "finding": "Enhanced POET’s paired agents solved all 80 courses in one run’s cross-test, with limited success on earlier courses.",
+    "detail": "The system maintained specialized controllers in a population and archive. The cross-test measured each controller’s performance across courses and established no sequence of updates that retained every earlier solution.",
+    "quote": "agents have limited success in environments that\nare created earlier than their paired environment as well.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
-    "milestone": "m4",
+    "milestone": "m2",
     "case": null,
-    "verdict": "partial",
-    "finding": "In one reported run, POWERPLAY invented 67 novel fovea-control action sequences while retaining earlier skills.",
-    "detail": "The system checked its own generated tasks and prior repertoire; independently implemented tests were not reported. The authors say results were consistent across many runs.",
+    "verdict": "met",
+    "finding": "In one reported run, POWER PLAY’s SLIM RNN learned 67 self-invented fovea-control tasks while retaining all earlier tasks.",
+    "detail": "The new task’s target internal state was recorded from the modified solver’s successful run. Earlier tasks were checked against their saved target states.",
     "quote": "Within 8 hours on a standard PC, a SLIM RNN consisting of 20 WITAS, with 4 neurons in\neach WITAS, invented 67 novel action sequences guiding the fovea before halting.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Voyager reached the diamond-tool level in 1 of 3 Minecraft runs.",
-    "detail": "Voyager generated its own tasks and accumulated reusable skills, but the experiment did not establish that each task defeated the preceding solver or retest every earlier task after each addition.",
-    "quote": null,
-    "checked": null,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 1,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "partial",
-    "finding": "Voyager solved the unseen diamond-pickaxe task in 3 of 3 trials using its skill library.",
-    "detail": "The experiment tested generalization using a library built during autonomous exploration. It did not independently verify every self-generated addition, establish predecessor failure, or retest all earlier skills after later learning.",
+    "finding": "In one reported run, POWER PLAY’s SLIM RNN added 67 fovea-control skills under its own novelty and retention checks.",
+    "detail": "POWER PLAY used self-generated task inputs and internal states as targets, then checked those targets during solver updates.",
+    "quote": "Within 8 hours on a standard PC, a SLIM RNN consisting of 20 WITAS, with 4 neurons in\neach WITAS, invented 67 novel action sequences guiding the fovea before halting.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "met",
+    "finding": "AutoGPT with Voyager’s skill library succeeded in 4 of 12 Minecraft attempts across the four item tasks.",
+    "detail": "Table 2 reports successful diamond pickaxe, golden sword, and compass attempts at 39, 30, and 30 prompting iterations, respectively. The compass figure is the reported average.",
     "quote": null,
     "checked": null,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 1,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Voyager’s autonomous Minecraft exploration reported 63 unique items across a three-trial evaluation.",
+    "detail": "The item count measures exploration progress. The paper does not equate each discovered item with a separately verified skill.",
+    "quote": "discovering 63 unique items within 160 prompting iterations",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 1,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
-    "verdict": "met",
-    "finding": "POET generated and solved 4 selected bipedal-walker environments, exceeding a score of 230 in each.",
-    "detail": "The four environments each had a different obstacle type. The paper defines solved as reaching the far end and scoring at least 230. This is the 2019 POET paper, not the 2020 Enhanced POET version.",
-    "quote": "The maximum scores\nout of the five ES runs for the gap, roughness, stump, and staircase\nenvironments are 17.9, 39.6, 13.6, and 24.0 respectively, far below\nthe success threshold of 230 that POET exceeds in each case.",
+    "verdict": "partial",
+    "finding": "Original POET’s bipedal walkers finished all five selected generated courses with scores above 230.",
+    "detail": "The five courses were selected from environments POET had already solved, so they do not give an overall success rate.",
+    "quote": "the success threshold of 230 that POET exceeds in each case.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "All three POET runs generated and solved courses spanning the full range of challenge levels.",
+    "detail": "POET maintained separate controller–terrain pairs and removed the oldest pairs when the active population reached its cap.",
+    "quote": "All three POET runs created and\nsolved sufficiently diverse environments to cover all three challenge\nlevels.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "ATEP and EPOET agents were tested on 80 environments solved by their respective models, with means over 30 runs.",
-    "detail": "The environments were generated by the algorithms, but the text does not report a specific finish-line result with a score of at least 230. Its generalization results group scores into broad categories.",
-    "quote": "We take into account\n80 environments that were solved by the model itself and observe\nhow each agent performs on all of them.",
-    "checked": true,
+    "finding": "Enhanced POET and ATEP walker cross-tests on 80 generated courses per method included fitness scores above 300.",
+    "detail": "The result appears in ACM conference companion proceedings. The supplied text does not state the review status.",
+    "quote": null,
+    "checked": null,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
+    "verdict": "met",
+    "finding": "One POWER PLAY perceptron learned self-invented patterns over 2 classes while retaining all earlier labels. The pattern count is unreported.",
+    "detail": "The experiment also accepted weight-compression updates. This verdict applies to new classification-task additions. The supplied text gives no publication venue or review status.",
+    "quote": "As expected, the experiments show that in the\nbeginning P OWER PLAY prefers to invent and learn\nsimple linear functions. However, there is a phase\ntransition to more complex non-linear functions\nafter a few tasks, indicating a new developmental\nstage [12], [17], [10].",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
     "verdict": "partial",
-    "finding": "In one run, a SLIM RNN invented 46 action sequences while retaining previous internal outcomes.",
-    "detail": "The experiment checked that the modified solver reproduced saved outcomes. The predecessor was given only a fraction of the time budget to halt; the text does not establish that it failed each new task under the same correctness test.",
+    "finding": "One POWER PLAY SLIM RNN invented 46 fovea-control sequences under a check that required retaining every earlier task outcome.",
+    "detail": "The fovea experiment used saved internal states as correctness targets. The supplied text gives no publication venue or review status.",
     "quote": "A SLIM RNN consisting\nof 40 WITAS, with 4 neurons in each WITAS,\ninvented 46 action sequences for guiding the fovea\nbefore halting, within 24 hours on a standard PC.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "ACCEL’s walker averaged a return of 236.0 on BipedalWalkerHardcore across 10 training runs with 100 trials per run.",
+    "detail": "Table 6 reports an aggregate return on the Hardcore test environment. Figure 10 labels generated courses as solved but supplies no episode returns for those courses. The source is an ICML conference proceedings paper.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "POWER PLAY’s feedforward classifier retained 100% of earlier patterns at each task addition while learning a self-invented pattern its predecessor misclassified. Sample size unreported.",
+    "detail": "The 100% figure follows from the all-pattern acceptance check. Section 8 reports successful task additions without giving per-run counts.",
+    "quote": "first p creates from sold a new version of s called snew correctly classifying all i training patterns so\nfar, where snew either is substantially simpler than sold (that is, ∑k,l(wkl)2 shrank by at least ǫ), or\ncan also classify a newly found pattern misclassiﬁed by sold.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Agentic Skill Discovery learned at least one human-validated policy for 17 of 24 self-proposed tasks in a simulated tabletop scenario.",
+    "detail": "The system stored separate policy networks and demonstrated reuse of a pickup skill in two task sequences. It did not retest the full set of earlier skills after each addition.",
+    "quote": "ASD autonomously acquires a substantial number of valid skill options, \n17 out of 24 in total (marked by ‘‘✓’’ for any task with non-zero 𝑇 𝑃 ), \nwith the number varying depending on the complexity of the task.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "met",
+    "finding": "Bob reproduced Alice-generated block arrangements within the 200-step-per-object budget across multiple self-play episodes per policy pair (exact count unstated).",
+    "detail": "Figure 6 summarizes success across policy checkpoint pairs. Appendix A.2 defines the strict pose thresholds, and Table 3 gives the block-task step budget.",
+    "quote": "Bob with more training steps can achieve more goals against the same Alice.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 22,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://arxiv.org/abs/2406.04268",
     "milestone": "m1",
-    "hash": "f3b8f0365ac0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c430984d222c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2406.04268",
     "milestone": "m2",
-    "hash": "ac4765c2badc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "0bc1b058468a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2406.04268",
     "milestone": "m3",
-    "hash": "a25033dadb09",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bb3f94eca0c7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2406.04268",
+    "milestone": "m5",
+    "hash": "b54fc3f7dee7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2406.04268",
     "milestone": "m4",
-    "hash": "c1eae4f782c2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2ec8bf1e1975",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2406.04268",
     "milestone": "completion",
     "hash": "14ad90e0fbca",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2506.13131",
     "milestone": "m1",
-    "hash": "f3b8f0365ac0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c430984d222c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2506.13131",
     "milestone": "m2",
-    "hash": "ac4765c2badc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "0bc1b058468a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2506.13131",
     "milestone": "m3",
-    "hash": "a25033dadb09",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bb3f94eca0c7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2506.13131",
+    "milestone": "m5",
+    "hash": "b54fc3f7dee7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2506.13131",
     "milestone": "m4",
-    "hash": "c1eae4f782c2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2ec8bf1e1975",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2506.13131",
     "milestone": "completion",
     "hash": "14ad90e0fbca",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2003.08536v2",
     "milestone": "m1",
-    "hash": "f3b8f0365ac0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/pdf/1210.8385",
-    "milestone": "m2",
-    "hash": "ac4765c2badc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2305.16291v2",
-    "milestone": "m3",
-    "hash": "a25033dadb09",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c430984d222c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2003.08536v2",
     "milestone": "m2",
-    "hash": "ac4765c2badc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "0bc1b058468a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2003.08536v2",
     "milestone": "m3",
-    "hash": "a25033dadb09",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bb3f94eca0c7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2003.08536v2",
+    "milestone": "m5",
+    "hash": "b54fc3f7dee7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2003.08536v2",
     "milestone": "m4",
-    "hash": "c1eae4f782c2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2ec8bf1e1975",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2003.08536v2",
     "milestone": "completion",
     "hash": "14ad90e0fbca",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1210.8385",
     "milestone": "m1",
-    "hash": "f3b8f0365ac0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c430984d222c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1210.8385",
+    "milestone": "m2",
+    "hash": "0bc1b058468a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1210.8385",
     "milestone": "m3",
-    "hash": "a25033dadb09",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bb3f94eca0c7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1210.8385",
+    "milestone": "m5",
+    "hash": "b54fc3f7dee7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1210.8385",
     "milestone": "m4",
-    "hash": "c1eae4f782c2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2ec8bf1e1975",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1210.8385",
     "milestone": "completion",
     "hash": "14ad90e0fbca",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2305.16291v2",
     "milestone": "m1",
-    "hash": "f3b8f0365ac0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c430984d222c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2305.16291v2",
     "milestone": "m2",
-    "hash": "ac4765c2badc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "0bc1b058468a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2305.16291v2",
+    "milestone": "m3",
+    "hash": "bb3f94eca0c7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2305.16291v2",
+    "milestone": "m5",
+    "hash": "b54fc3f7dee7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2305.16291v2",
     "milestone": "m4",
-    "hash": "c1eae4f782c2",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2ec8bf1e1975",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2305.16291v2",
     "milestone": "completion",
     "hash": "14ad90e0fbca",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cmap.polytechnique.fr/~nikolaus.hansen/proceedings/2019/GECCO/proceedings/proceedings_files/pap355s3-file1.pdf",
     "milestone": "m1",
-    "hash": "f3b8f0365ac0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c430984d222c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cmap.polytechnique.fr/~nikolaus.hansen/proceedings/2019/GECCO/proceedings/proceedings_files/pap355s3-file1.pdf",
+    "milestone": "m2",
+    "hash": "0bc1b058468a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cmap.polytechnique.fr/~nikolaus.hansen/proceedings/2019/GECCO/proceedings/proceedings_files/pap355s3-file1.pdf",
+    "milestone": "m3",
+    "hash": "bb3f94eca0c7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cmap.polytechnique.fr/~nikolaus.hansen/proceedings/2019/GECCO/proceedings/proceedings_files/pap355s3-file1.pdf",
+    "milestone": "m5",
+    "hash": "b54fc3f7dee7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cmap.polytechnique.fr/~nikolaus.hansen/proceedings/2019/GECCO/proceedings/proceedings_files/pap355s3-file1.pdf",
+    "milestone": "m4",
+    "hash": "2ec8bf1e1975",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cmap.polytechnique.fr/~nikolaus.hansen/proceedings/2019/GECCO/proceedings/proceedings_files/pap355s3-file1.pdf",
+    "milestone": "completion",
+    "hash": "14ad90e0fbca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.raillab.org/publication/nasir-2023-augmentative/nasir-2023-augmentative.pdf",
     "milestone": "m1",
-    "hash": "f3b8f0365ac0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c430984d222c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.raillab.org/publication/nasir-2023-augmentative/nasir-2023-augmentative.pdf",
+    "milestone": "m2",
+    "hash": "0bc1b058468a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.raillab.org/publication/nasir-2023-augmentative/nasir-2023-augmentative.pdf",
+    "milestone": "m3",
+    "hash": "bb3f94eca0c7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.raillab.org/publication/nasir-2023-augmentative/nasir-2023-augmentative.pdf",
+    "milestone": "m5",
+    "hash": "b54fc3f7dee7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.raillab.org/publication/nasir-2023-augmentative/nasir-2023-augmentative.pdf",
+    "milestone": "m4",
+    "hash": "2ec8bf1e1975",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.raillab.org/publication/nasir-2023-augmentative/nasir-2023-augmentative.pdf",
+    "milestone": "completion",
+    "hash": "14ad90e0fbca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.idsia.ch/~steunebrink/Publications/ICDL12_powerplay.pdf",
+    "milestone": "m1",
+    "hash": "c430984d222c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://people.idsia.ch/~steunebrink/Publications/ICDL12_powerplay.pdf",
     "milestone": "m2",
-    "hash": "ac4765c2badc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "0bc1b058468a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.idsia.ch/~steunebrink/Publications/ICDL12_powerplay.pdf",
+    "milestone": "m3",
+    "hash": "bb3f94eca0c7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.idsia.ch/~steunebrink/Publications/ICDL12_powerplay.pdf",
+    "milestone": "m5",
+    "hash": "b54fc3f7dee7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.idsia.ch/~steunebrink/Publications/ICDL12_powerplay.pdf",
+    "milestone": "m4",
+    "hash": "2ec8bf1e1975",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.idsia.ch/~steunebrink/Publications/ICDL12_powerplay.pdf",
+    "milestone": "completion",
+    "hash": "14ad90e0fbca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.mlr.press/v162/parker-holder22a/parker-holder22a.pdf",
+    "milestone": "m1",
+    "hash": "c430984d222c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1112.5309v1",
+    "milestone": "m2",
+    "hash": "0bc1b058468a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www2.informatik.uni-hamburg.de/wtm/publications/2026/ZWW26/1-s2.0-S0921889025003458-main.pdf",
+    "milestone": "m4",
+    "hash": "2ec8bf1e1975",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2101.04882",
+    "milestone": "m5",
+    "hash": "b54fc3f7dee7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2606.19419",
+    "milestone": "completion",
+    "hash": "14ad90e0fbca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1058,8 +1427,93 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 6 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Teaching a robot by demonstration takes time for each task. In one study of six tasks using two robot arms, an operator spent 30\\u201360 minutes per task collecting examples. Even if demonstrations are quick, someone must still choose what to teach. A service robot that practises on its own could prepare for requests its designers did not anticipate. Users would need to teach it less if the skills it acquired were useful for the work they asked it to do.\". Reason: The current paragraph reports a Minecraft exploration score but omits the cost of teaching tasks individually and the benefit to service-robot users."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by GOAL-Robots, NeurIPS Robot open-Ended Autonomous Learning competition, 2019: \"the quality of the autonomously acquired knowledge will be measured with tasks unknown at design time.\". Reason: The REAL competition made the usefulness of autonomous practice on later, undisclosed tasks an explicit objective."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Generate a simulated obstacle course autonomously and train a controller for the two-legged walker. In the same episode, the walker must reach the finish line and earn a cumulative reward of at least 230 under Enhanced POET\\u2019s scoring function.\". Reason: The five-run environment count in the criterion measures progress across a run, whereas the milestone tests whether one generated terrain is solved."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"Accept a self-invented task and a modified solver only after establishing that the preceding solver fails the task and that the modified solver solves both the new task and every previously accepted task under their respective correctness tests.\"; threshold_quote = \"provably solves all previously learned tasks plus the new one, while the unmodified predecessor does not.\"; threshold_ref = 4. Reason: The current criterion mixes the outcome of one POWERPLAY run with the rule for accepting any new task, and its quotation covers only retention."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Give a different agent the executable skill library built during autonomous Minecraft exploration. Clear its inventory and start it in a newly generated world. An attempt succeeds if the agent obtains the specified item within 50 prompting iterations. Test a diamond pickaxe, golden sword, lava bucket and compass, and report successful attempts out of three for each item.\". Reason: The compass result belongs with the evidence, and the criterion should specify how Voyager scores an attempt and reports three attempts per task."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m3: \"A second policy reproduces a generated block arrangement with errors below 4 cm and 0.2 radians.\". Reason: Asymmetric self-play tests a capability missing from the library-reuse milestone: a second policy learns from demonstrations generated by the first."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"The system repeatedly proposes and learns tasks outside its initial list. For each addition, an independent evaluator uses tests the system did not write to confirm that the preceding version fails the new task and the updated version passes it. The evaluator also verifies that the updated version still passes the tests for every earlier accepted task.\". Reason: The existing criterion appends an assessment of POWERPLAY and Voyager after stating the independent verification test."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No position disputing the value or feasibility of autonomous skill learning was found in the GOAL-Robots objectives or REAL competition rules.\". Reason: The programme objectives and competition rules do not answer whether a body with standing disputes the goal."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 8 of 8 proposed operations from MLC-07-revise-20261125T090401421608Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m3, m5, m4."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 3 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 3 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 8 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 6 candidates returned, 0 dropped as sources already used, 6 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 5 of 6 new candidates, without search. Skipped: 1 no readable saved copy. Dropped rows: 1 partial on completion. Replaced 11 earlier rows. Added 15 results: 11 from sources already used, 4 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 2 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 12 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-25"
  }
 }
