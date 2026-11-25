@@ -380,12 +380,15 @@
  },
  "page": {
   "id": "CRY-04",
-  "title": "Fully homomorphic encryption within 10× plaintext runtime",
-  "definition": "A programmable accelerator runs fully homomorphic encryption (FHE), which evaluates arbitrary circuits on encrypted data without the decryption key, within DARPA’s application runtime targets relative to unencrypted computation.",
+  "title": "Fully homomorphic encryption within 10× plaintext runtime on DARPA’s machine-learning benchmarks",
+  "definition": "Fully homomorphic encryption (FHE) lets a processor evaluate arbitrary circuits on encrypted inputs and return an encrypted result without holding the decryption key. Programmable FHE chips such as HERACLES already exist. DARPA’s goal is for such a chip to run a specified logistic regression within its unencrypted runtime and to train and run a specified image classifier within ten times its unencrypted runtime on a conventional CPU.",
   "goal": {
-   "need": "Li and colleagues’ survey, published on 7 April 2026, reports FHE operation latencies about 10,000× their unencrypted counterparts and representative word-wise bootstrapping times of 4–95 s. Bootstrapping refreshes ciphertext noise so computation can continue. Reducing this overhead addresses the cost of outsourcing computation without disclosing plaintext to its evaluator. These figures concern operations, rather than general-program benchmarks.",
+   "need": "A bank that sends card transactions to a service for fraud scoring exposes customer records if the service decrypts them. In a small fraud-detection benchmark, one machine took 0.69 seconds on plaintext and 10.09 or 193.78 seconds with two encrypted-computation libraries. Faster encrypted scoring could let a bank get a decision within its payment deadline while keeping the records and score private from the service. The larger encrypted records would still cost more to store and transmit.",
    "need_refs": [
-    1
+    2,
+    3,
+    4,
+    16
    ],
    "figures": null,
    "statements": [
@@ -394,7 +397,7 @@
      "year": "2020",
      "quote": "Execution of government defined FHE applications in time scales 10x or less of unencrypted computation",
      "context": "One of the technical challenges published in the programme’s special notice dated 12 February 2020.",
-     "ref": 2,
+     "ref": 1,
      "checked": true
     },
     {
@@ -402,25 +405,27 @@
      "year": "2023",
      "quote": "To be useful, FHE must significantly close the computation gap (within 10x) to make encrypted processing practical.",
      "context": null,
-     "ref": 3,
+     "ref": 2,
      "checked": true
     }
    ]
   },
   "completion": {
    "title": "An FHE accelerator meets DPRIVE’s final logistic-regression and CNN runtime targets.",
-   "criterion": "A fabricated, CPU-connected FHE accelerator executes DARPA’s specified seven-layer convolutional neural network on CIFAR-10: inference ≤25 ms per image and training for 10 epochs ≤10 h, each labelled 10× plaintext runtime. It also executes 1,024-point logistic regression in ≤0.1 ms. The specified CNN uses ReLU activations. The accelerator supports BGV and parameter ranges of plaintext modulus 2–1,024, ciphertext modulus 2^15–2^500 and ring dimension 512–16,384.",
-   "set_by": "DARPA, DPRIVE announcement HR001120S0032, amended 19 March 2020, Phase 3; units and training duration appear in its programme-metrics chart.",
+   "criterion": "A fabricated, CPU-connected FHE accelerator executes DARPA’s 1,024-point logistic regression in ≤0.1 ms (1× plaintext time). For both encrypted execution and the plaintext baseline, use the seven-layer convolutional neural network in Figure 7 of HR001120S0032, including its ReLU activations. On CIFAR-10, encrypted inference takes ≤25 ms per image and ten training epochs take ≤10 h (both 10× plaintext time). The accelerator runs BGV and supports plaintext moduli from 2 to 1,024, ciphertext moduli from 2^15 to 2^500, and ring dimensions from 512 to 16,384.",
+   "set_by": "DARPA, DPRIVE announcement HR001120S0032, amended 19 March 2020, sections I.C and I.H, and the DPRIVE program-metrics chart.",
    "set_by_kind": "government_programme",
-   "threshold_quote": "≤ 10 hours (within 10x).",
+   "threshold_quote": "≤ 0.1 ms (1x)",
    "threshold_ref": 4,
-   "basis": "DPRIVE supplies numerical application tests for encrypted outsourcing. These benchmarks do not establish arbitrary-program efficiency, private memory access or total MPC cost. A 2026 paper reports 22.4 ms CNN inference on an RTX 5090 after replacing ReLU activations with quadratic functions; that result does not establish the specified accelerator or encrypted training test.",
+   "basis": "The timings apply to the specified applications. Choi and colleagues measured 22.4 ms for inference on an RTX 5090 using quadratic replacements for ReLU. DARPA specifies a custom accelerator and the same ReLU network for plaintext and encrypted runs. Intel’s HERACLES demonstrates fabricated FHE hardware and reports arithmetic throughput. Neither result establishes all three application timings.",
    "refs": [
+    3,
     4,
     5,
-    6
+    14,
+    15
    ],
-   "threshold_checked": true
+   "threshold_checked": false
   },
   "case_label": null,
   "cases": [],
@@ -429,14 +434,14 @@
    {
     "id": "m1",
     "title": "A working FHE implementation evaluates circuits and refreshes ciphertexts without the decryption key.",
-    "criterion": "Implement correct circuit evaluation with decryption complexity bounded by the security parameter independently of circuit size, including bootstrapping to refresh ciphertexts. Gentry and Halevi’s 2011 implementation tested lattice dimensions 512, 2,048, 8,192 and 32,768. One bootstrap took 30 s at dimension 2,048 and 30 min at dimension 32,768 on a single-CPU 64-bit machine.",
+    "criterion": "Implement correct evaluation of arbitrary circuits on ciphertexts, including a working bootstrap that refreshes a ciphertext without the evaluator holding the decryption key. The size of the decryption circuit must be bounded by a polynomial in the security parameter independently of the size of the evaluated circuit.",
     "set_by": "Cryptography community convention: compact evaluation of all circuits, formalised in Gentry’s Definition 2.1.4 and implemented by Gentry and Halevi.",
     "set_by_kind": "community_convention",
     "threshold_quote": "it compactly evaluates all circuits.",
-    "threshold_ref": 7,
+    "threshold_ref": 6,
     "refs": [
-     7,
-     8
+     6,
+     7
     ],
     "status": "active",
     "replaced_by": [],
@@ -445,15 +450,15 @@
    {
     "id": "m2",
     "title": "An FHE accelerator emulator executes 1,024-point logistic regression in less than 10 ms.",
-    "criterion": "Execute the government-defined encrypted logistic-regression problem on 1,024 data points in <10 ms using a circuit emulator. TREBUCHET’s 2023 paper reports single-tile kernel emulation and modeled logistic-regression training times; it does not establish this complete application test.",
+    "criterion": "Execute the government-defined encrypted logistic-regression problem on 1,024 data points using a circuit emulator. The emulated design must complete the problem in <10 ms.",
     "set_by": "DARPA, DPRIVE announcement HR001120S0032, Phase 1.",
     "set_by_kind": "government_programme",
     "threshold_quote": "less than 10 ms.",
-    "threshold_ref": 4,
+    "threshold_ref": 3,
     "refs": [
+     3,
      4,
-     5,
-     3
+     2
     ],
     "status": "active",
     "replaced_by": [],
@@ -466,10 +471,11 @@
     "set_by": "DARPA, DPRIVE announcement HR001120S0032, Phase 2.",
     "set_by_kind": "government_programme",
     "threshold_quote": "less than 250 ms",
-    "threshold_ref": 4,
+    "threshold_ref": 3,
     "refs": [
+     3,
      4,
-     5
+     10
     ],
     "status": "active",
     "replaced_by": [],
@@ -477,16 +483,50 @@
    },
    {
     "id": "m4",
-    "title": "Hardware performs the specified encrypted seven-layer CNN inference in ≤25 ms per image.",
-    "criterion": "Execute DARPA’s specified seven-layer CNN, including its ReLU activations, on encrypted CIFAR-10 images in ≤25 ms per image. Choi and colleagues’ peer-reviewed 2026 paper reports 22.4 ms CNN inference on one NVIDIA RTX 5090 GPU using quadratic replacements for ReLU. That demonstrates the latency with a modified network, leaving conformity to the specified network unresolved.",
+    "title": "The fabricated FHE accelerator runs the specified CNN in ≤25 ms per encrypted CIFAR-10 image.",
+    "criterion": "On the fabricated, CPU-connected FHE accelerator, execute inference on encrypted CIFAR-10 images using the seven-layer convolutional neural network specified in Figure 7 of HR001120S0032, including its ReLU activations. Inference must take ≤25 ms per image.",
     "set_by": "DARPA, DPRIVE announcement HR001120S0032, inference component of the Phase 3 application test.",
     "set_by_kind": "government_programme",
     "threshold_quote": "≤ 25 ms (within 10x).",
+    "threshold_ref": 3,
+    "refs": [
+     3,
+     4,
+     5,
+     14
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "The full FHE accelerator design executes 1,024-point logistic regression in ≤1 ms in emulation.",
+    "criterion": "Execute DARPA’s encrypted 1,024-point logistic-regression model on the full accelerator emulator. The emulated design must complete the model in ≤1 ms, the Phase 2 target labelled 10× plaintext time in the 2020 program-metrics chart.",
+    "set_by": "DARPA, DPRIVE Proposers’ Day briefing, 2 March 2020, program-metrics chart reproduced on slide 4 of the IBM presentation.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "≤ 1 ms (10x)",
     "threshold_ref": 4,
     "refs": [
      4,
-     5,
-     6
+     3,
+     10
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": false
+   },
+   {
+    "id": "m6",
+    "title": "A host CPU loads data and runs FHE operations on a board carrying the fabricated accelerator.",
+    "criterion": "Package the fabricated FHE accelerator on a functional processing board. Demonstrate the board’s I/O, firmware and host software by using the CPU driver to load data and execute an FHE algorithm on the accelerator.",
+    "set_by": "DARPA, DPRIVE announcement HR001120S0032, section I.F, Phase 3 deliverables.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "Implemented and packaged DPRIVE accelerator on functional FHE processing board.",
+    "threshold_ref": 3,
+    "refs": [
+     3,
+     15
     ],
     "status": "active",
     "replaced_by": [],
@@ -498,26 +538,11 @@
    "Searches for DARPA programme, homomorphic-encryption standard and MPC roadmap targets found no common completion test covering general-purpose private RAM execution and malicious MPC at near-plaintext total cost.",
    "No public result establishing all DPRIVE final application metrics on a fabricated accelerator was found.",
    "No complete DPRIVE accounting rule covering setup, preprocessing, memory, communication and private memory access was found.",
-   "The TREBUCHET Phase Two Performance Estimation Results PDF could not be opened.",
-   "The 2026 CNN-inference paper’s full text was inaccessible at IEEE; its author-university abstract was available."
+   "No public DARPA specification was found relating TREBUCHET’s 100 ms Phase 2 regression-training target to the 2020 chart’s 1 ms regression test."
   ],
   "references": [
    {
     "id": 1,
-    "kind": "journal",
-    "url": "https://link.springer.com/article/10.1186/s42400-026-00571-w",
-    "doi": "10.1186/s42400-026-00571-w",
-    "title": "A survey of optimization techniques for bootstrapping algorithms in FHE",
-    "authors": "Li T, Wang Z, Zhao L, Wang R, Niu Q, Lu X, et al.",
-    "container": "Cybersecurity",
-    "year": "2026",
-    "volume": "9",
-    "issue": "1",
-    "pages": null,
-    "citation_source": "crossref"
-   },
-   {
-    "id": 2,
     "kind": "report",
     "url": "https://imlive.s3.amazonaws.com/Federal%20Government/ID62184416426800133908656852407565494044/DARPA-SN-20-28_DPRIVE%20Proposers%20Day_Final%20for%20Posting_12Feb2020.pdf",
     "doi": null,
@@ -531,7 +556,7 @@
     "citation_source": "model"
    },
    {
-    "id": 3,
+    "id": 2,
     "kind": "preprint",
     "url": "https://arxiv.org/abs/2304.05237",
     "doi": "10.48550/arXiv.2304.05237",
@@ -545,7 +570,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 4,
+    "id": 3,
     "kind": "report",
     "url": "https://govtribe.com/file/government-file/hr001120s0032-hr001120s0032-amendment-01-dot-pdf",
     "doi": null,
@@ -559,7 +584,7 @@
     "citation_source": "model"
    },
    {
-    "id": 5,
+    "id": 4,
     "kind": "report",
     "url": "https://www.itu.int/en/ITU-T/Workshops-and-Seminars/2022/0901/Documents/IBM%20Research.pdf",
     "doi": null,
@@ -573,7 +598,7 @@
     "citation_source": "model"
    },
    {
-    "id": 6,
+    "id": 5,
     "kind": "journal",
     "url": "https://snu.elsevierpure.com/en/publications/a-five-year-journey-to-accelerate-homomorphic-encryption-with-gpu/",
     "doi": "10.1109/MM.2026.3665245",
@@ -587,7 +612,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 7,
+    "id": 6,
     "kind": "report",
     "url": "https://crypto.stanford.edu/craig/craig-thesis.pdf",
     "doi": null,
@@ -601,7 +626,7 @@
     "citation_source": "model"
    },
    {
-    "id": 8,
+    "id": 7,
     "kind": "book",
     "url": "https://link.springer.com/chapter/10.1007/978-3-642-20465-4_9",
     "doi": "10.1007/978-3-642-20465-4_9",
@@ -615,7 +640,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 9,
+    "id": 8,
     "kind": "preprint",
     "url": "https://eprint.iacr.org/2010/520",
     "doi": null,
@@ -629,7 +654,7 @@
     "citation_source": "model"
    },
    {
-    "id": 10,
+    "id": 9,
     "kind": "preprint",
     "url": "https://eprint.iacr.org/2018/421",
     "doi": null,
@@ -643,7 +668,7 @@
     "citation_source": "model"
    },
    {
-    "id": 11,
+    "id": 10,
     "kind": "report",
     "url": "https://users.ece.cmu.edu/~franzf/papers/gomactech2024.pdf",
     "doi": null,
@@ -657,7 +682,7 @@
     "citation_source": "model"
    },
    {
-    "id": 12,
+    "id": 11,
     "kind": "web",
     "url": "https://www.zama.org/post/bootstrapping-tfhe-ciphertexts-in-less-than-one-millisecond",
     "doi": null,
@@ -671,7 +696,7 @@
     "citation_source": "model"
    },
    {
-    "id": 13,
+    "id": 12,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2512.18345",
     "doi": null,
@@ -685,7 +710,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 14,
+    "id": 13,
     "kind": "filing",
     "url": "https://patents.google.com/patent/US20240235810A1/en",
     "doi": null,
@@ -699,7 +724,7 @@
     "citation_source": "model"
    },
    {
-    "id": 15,
+    "id": 14,
     "kind": "web",
     "url": "https://www.scribd.com/document/1032239518/A-Five-Year-Journey-to-Accelerate-Homomorphic-Encryption-with-GPUs-Demonstrated-by-Sub-25ms-CNN-Inference",
     "doi": null,
@@ -711,481 +736,959 @@
     "issue": null,
     "pages": null,
     "citation_source": "model"
+   },
+   {
+    "id": 15,
+    "kind": "book",
+    "url": "https://eurekamag.com/research/105/378/105378980.php",
+    "doi": "10.1109/ISSCC49663.2026.11409291",
+    "title": "HERACLES: 8192-Way SIMD Programmable Scalable Fully-Homomorphic Encryption SoC for Privacy-Preserving Cloud Computing in Intel 3 CMOS",
+    "authors": "Golder A, Kumar R, Taneja S, Race K, Aseron P, Greensky J, et al.",
+    "container": "2026 IEEE International Solid-State Circuits Conference (ISSCC)",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": "424-426",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 16,
+    "kind": "report",
+    "url": "https://unstats.un.org/bigdata/task-teams/privacy/guide/2023_UN%20PET%20Guide.pdf",
+    "doi": null,
+    "title": "The United Nations Guide on Privacy-Enhancing Technologies for Official Statistics",
+    "authors": "Task Team on Privacy-Enhancing Technologies of the United Nations Committee of Experts on Big Data and Data Science for Official Statistics",
+    "container": null,
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 17,
+    "kind": "report",
+    "url": "https://www.shoup.net/papers/boot.pdf",
+    "doi": null,
+    "title": "Bootstrapping for HElib",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 18,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2205.14017",
+    "doi": null,
+    "title": "BASALISC: Programmable Hardware Accelerator for BGV Fully Homomorphic Encryption",
+    "authors": "Geelen R, Beirendonck MV, Pereira HVL, Huffman B, McAuley T, Selfridge B, et al.",
+    "container": "arXiv",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
    }
   ],
   "milestone_order": [
    "m1",
    "m2",
+   "m5",
    "m3",
+   "m6",
    "m4"
   ],
   "results": [
    {
     "milestone": "m1",
     "case": null,
-    "verdict": "met",
-    "finding": "Gentry and Halevi’s FHE implementation tested four lattice dimensions; one bootstrap took 30 seconds at dimension 2,048.",
-    "detail": "The authors report implementing all aspects of the fully homomorphic scheme, including bootstrapping. The timing was measured on a single-CPU, 64-bit machine with large memory.",
+    "verdict": "partial",
+    "finding": "Gentry and Halevi tested four lattice dimensions. At dimension 2,048, one bootstrap took 30 seconds.",
+    "detail": "The source identifies the EUROCRYPT 2011 publication as an extended abstract. The document assessed here is the full ePrint version.",
     "quote": "The time to run one bootstrapping operation (on a 1-CPU 64-bit machine with large memory) ranges from 30 seconds for the \"small\" setting to 30 minutes for the \"large\" setting.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "TFHE reports a 13 ms single-core bootstrap; sample size not stated.",
-    "detail": "The paper describes bootstrapped binary gates and circuit bootstrapping, but the supplied text does not establish the required bound on decryption complexity independently of circuit size.",
+    "finding": "TFHE reports a 13 ms single-core binary-gate bootstrap. The sample size is unreported.",
+    "detail": "The archive identifies a Journal of Cryptology publication. The supplied document is the ePrint record, and the assessment uses its abstract.",
     "quote": "As a consequence of this result and of other optimizations, we decrease the running time of their bootstrapping from 690ms to 13ms single core, using 16MB bootstrapping key instead of 1GB, and preserving the security parameter.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "OpenFHE reported 3 bootstraps for CKKS CNN inference on one image.",
+    "detail": "The source reports operation counts from instrumented workload runs.",
+    "quote": "One iteration of \nlogistic regression training includes 83 full HKS operations  \nand 1 bootstrapping operation , whereas single image infer-\nence of CNN requires 196 HKS operations  and 3 bootstrap-\nping operations.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
     "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "TREBUCHET SerDes estimates 89 ms for DARPA's encrypted logistic-regression benchmark. The data-point count is unstated.",
+    "detail": "The paper compares the estimate with its own ≤100 ms benchmark target.",
+    "quote": "SerDes takes slightly \nless time at 89 milliseconds and meets the performance metric \ntarget.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "TREBUCHET SerDes estimates 89 ms for DARPA's encrypted logistic-regression benchmark. The data-point count is unstated.",
+    "detail": "The authors estimate workload runtime from hybrid key-switching operation counts and modeled latency.",
+    "quote": "SerDes takes slightly \nless time at 89 milliseconds and meets the performance metric \ntarget.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "TREBUCHET SerDes CNN inference estimate: about 200 ms; sample size not stated.",
-    "detail": "The result is a modeled performance estimate, not a full-accelerator emulation result. The text does not specify the CNN’s layer count or identify the images as CIFAR-10.",
+    "finding": "TREBUCHET SerDes estimates about 200 ms for encrypted CNN inference. The timing's batch size is unstated.",
+    "detail": "The chip-emulation result concerns microcode correctness. The CNN timing comes from an analytical performance model.",
     "quote": "For the CNN inference task, SerDes completes  the task \nin about 200 milliseconds, while GPIO takes a significantly \nlonger time of 3.8 seconds.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One KCU105 surrogate board supported tested host-card polynomial processing.",
+    "detail": "Table 3 lists multiplication, addition, and subtraction across polynomial and integer operand combinations.",
+    "quote": "The initial development stage employs a host-card program \npair for remote polynomial processing.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "TREBUCHET SerDes estimates about 200 ms for encrypted CNN inference. The timing's batch size is unstated.",
+    "detail": null,
+    "quote": "For the CNN inference task, SerDes completes  the task \nin about 200 milliseconds, while GPIO takes a significantly \nlonger time of 3.8 seconds.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "TFHE-rs bootstraps one ciphertext carrying a 4-bit message in 945 µs on a GPU.",
-    "detail": "The source reports bootstrapping and encrypted arithmetic, but does not establish correct arbitrary-circuit evaluation or the required bound on decryption complexity.",
+    "finding": "TFHE-rs refreshed one ciphertext carrying a 4-bit message in 945 µs on a single H100 GPU.",
+    "detail": "The 4-bit result uses the TUniform parameters described in the prose. The post gives single-bootstrap latency without specifying the number of benchmark repetitions.",
     "quote": "In practice, in TFHE-rs a bootstrap that encrypts 4 bits of message with a TUniform noise distribution is used for blockchain: with these parameters the bootstrap takes 945 µs.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "Theodosian bootstrapped a ciphertext containing 32,768 complex numbers in 15.2 ms.",
-    "detail": "The implementation also evaluates encrypted workloads, but the text does not establish the required bound on decryption complexity independently of circuit size.",
+    "finding": "Theodosian bootstraps 32,768 complex numbers in 12.8 ms on an RTX 5090.",
+    "detail": "The optimized configuration reports maximum bootstrap error averaged over 100 iterations and leaves 15 usable multiplicative levels.",
     "quote": "On an RTX 5090, we reduce the bootstrapping latency for 32,768 complex numbers from 22.1ms to 15.2ms, and further to 12.8ms with additional algorithmic optimizations, establishing a new state-of-the-art GPU performance to the best of our knowledge.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
-    "finding": "Encrypted logistic-regression training on 1,024 MNIST images took 14.1 ms per iteration.",
-    "detail": "This was measured on an RTX 5090, not a circuit emulator. The workload is not identified as the government-defined problem, and the reported time is per iteration rather than the complete training time.",
+    "finding": "Theodosian encrypted logistic regression on 1,024 MNIST images took 14.1 ms per training iteration.",
+    "detail": "Table II reports per-iteration latency for the 32-iteration training run.",
     "quote": null,
     "checked": null,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Theodosian encrypted logistic regression on 1,024 MNIST images took 14.1 ms per training iteration.",
+    "detail": null,
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Theodosian encrypted ResNet20 inference took 467 ms for one CIFAR-10 image.",
+    "detail": null,
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "partial",
-    "finding": "Encrypted ResNet20 inference on one CIFAR-10 image took 467 ms on an RTX 5090.",
-    "detail": "The tested network has 20 layers rather than the specified seven, and its latency exceeds 25 ms.",
+    "finding": "Theodosian encrypted ResNet20 inference took 467 ms for one CIFAR-10 image on an RTX 5090.",
+    "detail": null,
     "quote": null,
     "checked": null,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
-    "finding": "A 1,024-point logistic regression benchmark is reported to run 192.6× faster than on an Intel Xeon processor.",
-    "detail": "The filing gives no absolute runtime and does not establish that the benchmark is the government-defined problem or that it was executed using a circuit emulator.",
-    "quote": "a cryptographic processor\nemploying an RNS architecture to execute a 1,024-point logistic regression benchmark including the ciphertext addition, multiplication and rotation modules, running at a frequency of 600 MHz, achieves a latency 192.6 times faster than an Intel Xeon Platinum 8175 processor",
+    "finding": "RNS accelerator design for DPRIVE’s 1,024-point logistic regression projects 0.087 ms per encrypted inference.",
+    "detail": "The per-inference figure is amortized over eight packed examples. The operating frequency was selected to meet the target given the design’s cycle counts.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "RNS accelerator design for DPRIVE’s 1,024-point logistic regression projects 0.087 ms per encrypted inference.",
+    "detail": "The benchmark timing is derived from simulations of constituent modules. The filing assumes required constants are available and excludes their precomputation from the cycle count.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Seven-layer homomorphic-encryption CNN inference took under 25 ms on an NVIDIA RTX 5090 GPU. Image count unspecified.",
+    "detail": "The timing comes from Scribd’s AI-enhanced description of the uploaded document.",
+    "quote": "a sub-25ms inference time for a seven-layer convolutional neural network (CNN7) using an NVIDIA RTX 5090 GPU.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
-    "milestone": "m4",
+    "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "A seven-layer CNN achieved sub-25 ms encrypted inference on one NVIDIA RTX 5090 GPU.",
-    "detail": "The supplied text does not establish that inference used encrypted CIFAR-10 images or the specified ReLU activations.",
-    "quote": "This article discusses the advancements in homomorphic encryption (HE) achieved by a team from Seoul National University, culminating in a sub-25ms inference time for a seven-layer convolutional neural network (CNN7) using an NVIDIA RTX 5090 GPU.",
+    "finding": "HElib bootstrapping left 11 usable multiplicative levels after one refresh of a fully packed ciphertext.",
+    "detail": "The benchmark used one recryption per randomly chosen key at each tested parameter setting. The usable depth was calculated from the remaining noise capacity and the measured cost of squaring.",
+    "quote": "the recryption procedure takes under 3 minutes (at\nsecurity-level≈ 80) on a single core, and allows a multiplicative depth-11 computation before the\nnext recryption is needed.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "BASALISC simulated one encrypted logistic-regression training iteration on 1,024 samples in 40.5 s.",
+    "detail": "The separate hardware-emulation tests covered individual processing elements using test vectors.",
+    "quote": "As a BASALISC instruction trace, logistic regression is composed of 900K high-level, 800M mid-level, and 27B micro-level instructions, which includes in total 513 bootstrapping operations. Simba-micro reports a simulated execution time of 40.5s.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://link.springer.com/article/10.1186/s42400-026-00571-w",
     "milestone": "m1",
-    "hash": "b58820f57a8b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5082504f6f97",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/article/10.1186/s42400-026-00571-w",
     "milestone": "m2",
-    "hash": "263d56595a33",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d8220ce14ed8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://link.springer.com/article/10.1186/s42400-026-00571-w",
+    "milestone": "m5",
+    "hash": "11e4014d3493",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/article/10.1186/s42400-026-00571-w",
     "milestone": "m3",
     "hash": "0abb2242c188",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://link.springer.com/article/10.1186/s42400-026-00571-w",
+    "milestone": "m6",
+    "hash": "c3bb6ef8c0da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/article/10.1186/s42400-026-00571-w",
     "milestone": "m4",
-    "hash": "47a307d1179f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c575c5eded9b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/article/10.1186/s42400-026-00571-w",
     "milestone": "completion",
-    "hash": "9cb44dd3bc19",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e75133144c49",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ITC.2021.2",
     "milestone": "m1",
-    "hash": "b58820f57a8b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5082504f6f97",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ITC.2021.2",
     "milestone": "m2",
-    "hash": "263d56595a33",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d8220ce14ed8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ITC.2021.2",
+    "milestone": "m5",
+    "hash": "11e4014d3493",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ITC.2021.2",
     "milestone": "m3",
     "hash": "0abb2242c188",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ITC.2021.2",
+    "milestone": "m6",
+    "hash": "c3bb6ef8c0da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ITC.2021.2",
     "milestone": "m4",
-    "hash": "47a307d1179f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c575c5eded9b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ITC.2021.2",
     "milestone": "completion",
-    "hash": "9cb44dd3bc19",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e75133144c49",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2025/235",
     "milestone": "m1",
-    "hash": "b58820f57a8b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5082504f6f97",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2025/235",
     "milestone": "m2",
-    "hash": "263d56595a33",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d8220ce14ed8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2025/235",
+    "milestone": "m5",
+    "hash": "11e4014d3493",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2025/235",
     "milestone": "m3",
     "hash": "0abb2242c188",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2025/235",
+    "milestone": "m6",
+    "hash": "c3bb6ef8c0da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2025/235",
     "milestone": "m4",
-    "hash": "47a307d1179f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c575c5eded9b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2025/235",
     "milestone": "completion",
-    "hash": "9cb44dd3bc19",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e75133144c49",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2026/2311",
     "milestone": "m1",
-    "hash": "b58820f57a8b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5082504f6f97",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2026/2311",
     "milestone": "m2",
-    "hash": "263d56595a33",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d8220ce14ed8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2026/2311",
+    "milestone": "m5",
+    "hash": "11e4014d3493",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2026/2311",
     "milestone": "m3",
     "hash": "0abb2242c188",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2026/2311",
+    "milestone": "m6",
+    "hash": "c3bb6ef8c0da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2026/2311",
     "milestone": "m4",
-    "hash": "47a307d1179f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c575c5eded9b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2026/2311",
     "milestone": "completion",
-    "hash": "9cb44dd3bc19",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e75133144c49",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2023/307",
     "milestone": "m1",
-    "hash": "b58820f57a8b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5082504f6f97",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2023/307",
     "milestone": "m2",
-    "hash": "263d56595a33",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d8220ce14ed8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2023/307",
+    "milestone": "m5",
+    "hash": "11e4014d3493",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2023/307",
     "milestone": "m3",
     "hash": "0abb2242c188",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2023/307",
+    "milestone": "m6",
+    "hash": "c3bb6ef8c0da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2023/307",
     "milestone": "m4",
-    "hash": "47a307d1179f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c575c5eded9b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2023/307",
     "milestone": "completion",
-    "hash": "9cb44dd3bc19",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e75133144c49",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2010/520",
     "milestone": "m1",
-    "hash": "b58820f57a8b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5082504f6f97",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2010/520",
+    "milestone": "m2",
+    "hash": "d8220ce14ed8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2010/520",
+    "milestone": "m5",
+    "hash": "11e4014d3493",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2010/520",
+    "milestone": "m3",
+    "hash": "0abb2242c188",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2010/520",
+    "milestone": "m6",
+    "hash": "c3bb6ef8c0da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2010/520",
+    "milestone": "m4",
+    "hash": "c575c5eded9b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2010/520",
+    "milestone": "completion",
+    "hash": "e75133144c49",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2018/421",
     "milestone": "m1",
-    "hash": "b58820f57a8b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5082504f6f97",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2018/421",
+    "milestone": "m2",
+    "hash": "d8220ce14ed8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2018/421",
+    "milestone": "m5",
+    "hash": "11e4014d3493",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2018/421",
+    "milestone": "m3",
+    "hash": "0abb2242c188",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2018/421",
+    "milestone": "m6",
+    "hash": "c3bb6ef8c0da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2018/421",
+    "milestone": "m4",
+    "hash": "c575c5eded9b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2018/421",
+    "milestone": "completion",
+    "hash": "e75133144c49",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://users.ece.cmu.edu/~franzf/papers/gomactech2024.pdf",
+    "milestone": "m1",
+    "hash": "5082504f6f97",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://users.ece.cmu.edu/~franzf/papers/gomactech2024.pdf",
+    "milestone": "m2",
+    "hash": "d8220ce14ed8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://users.ece.cmu.edu/~franzf/papers/gomactech2024.pdf",
+    "milestone": "m5",
+    "hash": "11e4014d3493",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://users.ece.cmu.edu/~franzf/papers/gomactech2024.pdf",
     "milestone": "m3",
     "hash": "0abb2242c188",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://users.ece.cmu.edu/~franzf/papers/gomactech2024.pdf",
+    "milestone": "m6",
+    "hash": "c3bb6ef8c0da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://users.ece.cmu.edu/~franzf/papers/gomactech2024.pdf",
+    "milestone": "m4",
+    "hash": "c575c5eded9b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://users.ece.cmu.edu/~franzf/papers/gomactech2024.pdf",
+    "milestone": "completion",
+    "hash": "e75133144c49",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.zama.org/post/bootstrapping-tfhe-ciphertexts-in-less-than-one-millisecond",
     "milestone": "m1",
-    "hash": "b58820f57a8b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5082504f6f97",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.zama.org/post/bootstrapping-tfhe-ciphertexts-in-less-than-one-millisecond",
     "milestone": "m2",
-    "hash": "263d56595a33",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d8220ce14ed8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.zama.org/post/bootstrapping-tfhe-ciphertexts-in-less-than-one-millisecond",
+    "milestone": "m5",
+    "hash": "11e4014d3493",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.zama.org/post/bootstrapping-tfhe-ciphertexts-in-less-than-one-millisecond",
     "milestone": "m3",
     "hash": "0abb2242c188",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.zama.org/post/bootstrapping-tfhe-ciphertexts-in-less-than-one-millisecond",
+    "milestone": "m6",
+    "hash": "c3bb6ef8c0da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.zama.org/post/bootstrapping-tfhe-ciphertexts-in-less-than-one-millisecond",
     "milestone": "m4",
-    "hash": "47a307d1179f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c575c5eded9b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.zama.org/post/bootstrapping-tfhe-ciphertexts-in-less-than-one-millisecond",
     "milestone": "completion",
-    "hash": "9cb44dd3bc19",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e75133144c49",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2512.18345",
     "milestone": "m1",
-    "hash": "b58820f57a8b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5082504f6f97",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2512.18345",
     "milestone": "m2",
-    "hash": "263d56595a33",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d8220ce14ed8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.18345",
+    "milestone": "m5",
+    "hash": "11e4014d3493",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2512.18345",
     "milestone": "m3",
     "hash": "0abb2242c188",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.18345",
+    "milestone": "m6",
+    "hash": "c3bb6ef8c0da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2512.18345",
     "milestone": "m4",
-    "hash": "47a307d1179f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c575c5eded9b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2512.18345",
     "milestone": "completion",
-    "hash": "9cb44dd3bc19",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e75133144c49",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://patents.google.com/patent/US20240235810A1/en",
     "milestone": "m1",
-    "hash": "b58820f57a8b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5082504f6f97",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://patents.google.com/patent/US20240235810A1/en",
     "milestone": "m2",
-    "hash": "263d56595a33",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d8220ce14ed8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://patents.google.com/patent/US20240235810A1/en",
+    "milestone": "m5",
+    "hash": "11e4014d3493",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://patents.google.com/patent/US20240235810A1/en",
     "milestone": "m3",
     "hash": "0abb2242c188",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://patents.google.com/patent/US20240235810A1/en",
+    "milestone": "m6",
+    "hash": "c3bb6ef8c0da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://patents.google.com/patent/US20240235810A1/en",
     "milestone": "m4",
-    "hash": "47a307d1179f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c575c5eded9b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://patents.google.com/patent/US20240235810A1/en",
     "milestone": "completion",
-    "hash": "9cb44dd3bc19",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e75133144c49",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.scribd.com/document/1032239518/A-Five-Year-Journey-to-Accelerate-Homomorphic-Encryption-with-GPUs-Demonstrated-by-Sub-25ms-CNN-Inference",
     "milestone": "m1",
-    "hash": "b58820f57a8b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5082504f6f97",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.scribd.com/document/1032239518/A-Five-Year-Journey-to-Accelerate-Homomorphic-Encryption-with-GPUs-Demonstrated-by-Sub-25ms-CNN-Inference",
     "milestone": "m2",
-    "hash": "263d56595a33",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d8220ce14ed8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.scribd.com/document/1032239518/A-Five-Year-Journey-to-Accelerate-Homomorphic-Encryption-with-GPUs-Demonstrated-by-Sub-25ms-CNN-Inference",
+    "milestone": "m5",
+    "hash": "11e4014d3493",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.scribd.com/document/1032239518/A-Five-Year-Journey-to-Accelerate-Homomorphic-Encryption-with-GPUs-Demonstrated-by-Sub-25ms-CNN-Inference",
     "milestone": "m3",
     "hash": "0abb2242c188",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.scribd.com/document/1032239518/A-Five-Year-Journey-to-Accelerate-Homomorphic-Encryption-with-GPUs-Demonstrated-by-Sub-25ms-CNN-Inference",
+    "milestone": "m6",
+    "hash": "c3bb6ef8c0da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.scribd.com/document/1032239518/A-Five-Year-Journey-to-Accelerate-Homomorphic-Encryption-with-GPUs-Demonstrated-by-Sub-25ms-CNN-Inference",
     "milestone": "m4",
-    "hash": "47a307d1179f",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c575c5eded9b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.scribd.com/document/1032239518/A-Five-Year-Journey-to-Accelerate-Homomorphic-Encryption-with-GPUs-Demonstrated-by-Sub-25ms-CNN-Inference",
     "milestone": "completion",
-    "hash": "9cb44dd3bc19",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e75133144c49",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.shoup.net/papers/boot.pdf",
+    "milestone": "m1",
+    "hash": "5082504f6f97",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2205.14017",
+    "milestone": "m2",
+    "hash": "d8220ce14ed8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.gomactech.net/assets/pdf/GOMAC_2024_COV_TXT.pdf",
+    "milestone": "m5",
+    "hash": "11e4014d3493",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.scribd.com/document/1001730307/ISSCC-DemoHandout",
+    "milestone": "m6",
+    "hash": "c3bb6ef8c0da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1247,8 +1750,138 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 4 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "title = \"Fully homomorphic encryption within 10\\u00d7 plaintext runtime on DARPA\\u2019s machine-learning benchmarks\". Reason: The current title extends the 10× claim beyond the applications for which DARPA set runtime targets."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"Fully homomorphic encryption (FHE) lets a processor evaluate arbitrary circuits on encrypted inputs and return an encrypted result without holding the decryption key. Programmable FHE chips such as HERACLES already exist. DARPA\\u2019s goal is for such a chip to run a specified logistic regression within its unencrypted runtime and to train and run a specified image classifier within ten times its unencrypted runtime on a conventional CPU.\". Reason: The definition leaves the applications unnamed and obscures the stricter plaintext-parity target for regression."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"A bank that sends card transactions to a service for fraud scoring exposes customer records if the service decrypts them. In a small fraud-detection benchmark, one machine took 0.69 seconds on plaintext and 10.09 or 193.78 seconds with two encrypted-computation libraries. Faster encrypted scoring could let a bank get a decision within its payment deadline while keeping the records and score private from the service. The larger encrypted records would still cost more to store and transmit.\". Reason: A timed fraud-detection workload shows what encrypted processing costs a potential user more directly than isolated bootstrapping times."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit completion: criterion = \"A fabricated, CPU-connected FHE accelerator executes DARPA\\u2019s 1,024-point logistic regression in \\u22640.1 ms (1\\u00d7 plaintext time). For both encrypted execution and the plaintext baseline, use the seven-layer convolutional neural network in Figure 7 of HR001120S0032, including its ReLU activations. On CIFAR-10, encrypted inference takes \\u226425 ms per image and ten training epochs take \\u226410 h (both 10\\u00d7 plaintext time). The accelerator runs BGV and supports plaintext moduli from 2 to 1,024, ciphertext moduli from 2^15 to 2^500, and ring dimensions from 512 to 16,384.\"; set_by = \"DARPA, DPRIVE announcement HR001120S0032, amended 19 March 2020, sections I.C and I.H, and the DPRIVE program-metrics chart.\"; threshold_quote = \"\\u2264 0.1 ms (1x)\"; threshold_ref = 5; basis = \"The timings apply to the specified applications. Choi and colleagues measured 22.4 ms for inference on an RTX 5090 using quadratic replacements for ReLU. DARPA specifies a custom accelerator and the same ReLU network for plaintext and encrypted runs. Intel\\u2019s HERACLES demonstrates fabricated FHE hardware and reports arithmetic throughput. Neither result establishes all three application timings.\"; refs = [4, 5, 6, 15, 16]. Reason: The test needs the same network on both sides of the comparison, the distinct regression baseline, and an explicit account of how the published GPU result differs."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Implement correct evaluation of arbitrary circuits on ciphertexts, including a working bootstrap that refreshes a ciphertext without the evaluator holding the decryption key. The size of the decryption circuit must be bounded by a polynomial in the security parameter independently of the size of the evaluated circuit.\"; threshold_quote = \"it compactly evaluates all circuits.\"; threshold_ref = 7. Reason: The historical lattice sizes and bootstrap timings are measurements from one implementation and do not define the first demonstration."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"Execute the government-defined encrypted logistic-regression problem on 1,024 data points using a circuit emulator. The emulated design must complete the problem in <10 ms.\"; threshold_quote = \"less than 10 ms.\"; threshold_ref = 4. Reason: The Phase 1 criterion mixes the required circuit-emulator run with an assessment of TREBUCHET’s results."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m2: \"The full FHE accelerator design executes 1,024-point logistic regression in ≤1 ms in emulation.\". Reason: DARPA’s 2020 chart specifies a full-design regression target between the 10 ms building-block test and the 0.1 ms hardware test."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: refs = [4, 5, 11]. Reason: TREBUCHET’s Phase Two paper bears directly on m3 because its 200 ms CNN figure is a performance estimate derived from operation counts."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m3: \"A host CPU loads data and runs FHE operations on a board carrying the fabricated accelerator.\". Reason: DARPA identifies a functional accelerator board as a distinct deliverable between full-design emulation and timing the applications on silicon."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: title = \"The fabricated FHE accelerator runs the specified CNN in \\u226425 ms per encrypted CIFAR-10 image.\"; criterion = \"On the fabricated, CPU-connected FHE accelerator, execute inference on encrypted CIFAR-10 images using the seven-layer convolutional neural network specified in Figure 7 of HR001120S0032, including its ReLU activations. Inference must take \\u226425 ms per image.\"; threshold_quote = \"\\u2264 25 ms (within 10x).\"; threshold_ref = 4; refs = [4, 5, 6, 15]. Reason: The current wording admits any hardware and embeds a GPU result in a criterion that DARPA applies to its fabricated accelerator."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 4. Reason: Reference 15 contains the accepted manuscript, including its CIFAR-10 evaluation and GPU timing comparison."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 3. Reason: Reference 11 provides the complete Phase Two paper, including the workload model and Table 5."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No public DARPA specification was found relating TREBUCHET’s 100 ms Phase 2 regression-training target to the 2020 chart’s 1 ms regression test.\". Reason: TREBUCHET compares its 89 ms training estimate with a 100 ms target, while DARPA’s 2020 chart gives 1 ms for the 1,024-point model."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 13 of 13 proposed operations from CRY-04-revise-20261125T103002306304Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: completion, m1, m2, m5, m6, m4."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 0 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 4 found, 2 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Structural problems after applying: references never cited: [1]"
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "title is 96 characters, over its limit of 70; kept."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "definition is 437 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 12 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 5 candidates returned, 0 dropped as sources already used, 5 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 4 of 5 new candidates, without search. Skipped: 2 no readable saved copy. Dropped rows: 2 not relevant. Replaced 9 earlier rows. Added 19 results: 17 from sources already used, 2 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 1 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 13 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Removed 1 references no longer cited; renumbered."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-25"
  }
 }
