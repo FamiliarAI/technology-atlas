@@ -335,9 +335,12 @@
   "title": "AI systems with machine-checked behavioral guarantees",
   "definition": "An AI system adapted from a leading general-purpose model performs a specified task while a computer-checked proof establishes a behavioral property, or bounds its failure probability, for every input or initial condition in a declared operating model. The guarantee includes any safeguard or abstention mechanism.",
   "goal": {
-   "need": "On 50 harmful AdvBench behaviours, four deterministic defenses across three language models retained 0–2% robustness against 20-token white-box suffix attacks. These attack results give upper bounds on robustness. A separate experiment certified a GPT-4o safety detector against an average of 2.02 token substitutions, using 1,000,000 samples and type-I error 0.01. This establishes local detector robustness rather than safety of every generated answer.",
+   "need": "Balancing Great Britain’s electricity grid cost £3.1 billion in 2025/26. Operators calculate how much each generator should supply while respecting generator and transmission-line limits. A learned controller could give them faster dispatch decisions, but testing it on past or simulated loads can miss the largest violation. A proof could bound that violation across the full range of loads operators intend to serve. Its value depends on whether the grid model captures actual operating conditions and the specified limits protect the network.",
    "need_refs": [
-    1
+    20,
+    21,
+    2,
+    22
    ],
    "figures": null,
    "statements": [
@@ -390,13 +393,14 @@
    {
     "id": "m1",
     "title": "A neural network satisfies a specified input–output property for every input in its stated region.",
-    "criterion": "Encode the network, allowed inputs and violation of the property as a satisfiability query. An UNSAT result establishes that no encoded counterexample exists. Katz et al. reported UNSAT for property φ1 on 41 of 45 ACAS Xu networks, with four timeouts; each network had 300 rectified linear units. Their floating-point implementation did not guarantee soundness, so these reported results do not constitute independently checked proof certificates.",
+    "criterion": "Encode the network, its allowed inputs and the negation of the required output property in one query. The solver must return UNSAT, meaning that no allowed input satisfies the encoded conditions for a violation.",
     "set_by": "Neural-network verification convention, applied by Katz et al. in Reluplex, Section 6 and Table 2.",
     "set_by_kind": "community_convention",
     "threshold_quote": "an UNSAT result indicates that a property holds",
     "threshold_ref": 6,
     "refs": [
-     6
+     6,
+     23
     ],
     "status": "active",
     "replaced_by": [],
@@ -405,14 +409,13 @@
    {
     "id": "m2",
     "title": "A classifier certifies an unchanged prediction within radius R with certification error at most α.",
-    "criterion": "For a Gaussian-smoothed classifier g, except on a certification-sampling event of probability at most α, a returned class c and radius R guarantee g(x+δ)=c for every perturbation with ℓ₂ norm below R. The procedure can abstain. Cohen et al. reported 49% certified top-1 accuracy at radius 0.5 on 500 ImageNet images, using α=0.001. This is a sampling-qualified mathematical guarantee, rather than an inspected machine-checked proof. Chen et al.'s token-substitution detector certificates are a language-model application of local certification.",
+    "criterion": "For a Gaussian-smoothed classifier g at input x, the certification procedure may abstain or return a class c and radius R. With probability at least 1 − α over the procedure’s samples, any returned pair satisfies g(x + δ) = c for every perturbation δ with Euclidean norm strictly less than R. An abstention supplies no certified radius.",
     "set_by": "Certified-robustness convention, formalised by Cohen, Rosenfeld and Kolter in Proposition 2 and their certified-accuracy evaluation.",
     "set_by_kind": "community_convention",
     "threshold_quote": "With probability at least 1 − α over the randomness in CERTIFY",
     "threshold_ref": 7,
     "refs": [
-     7,
-     1
+     7
     ],
     "status": "active",
     "replaced_by": [],
@@ -421,7 +424,7 @@
    {
     "id": "m3",
     "title": "An independent checker with a proved soundness theorem accepts a neural-network proof certificate.",
-    "criterion": "The checker validates every proof-tree split and leaf contradiction and returns true; its soundness theorem establishes that the encoded counterexample query has no satisfying assignment. Desmartin et al. implemented and proved such a checker in Imandra. Their evaluation certified all 276 collision-avoidance and 180 robot-navigation proofs selected for size below 5 MB. The result covers encoded queries; certified translation from higher-level task specifications remains outside that implementation.",
+    "criterion": "Given the encoded counterexample query and a proof tree, an independent checker validates each branch split and the contradiction at every leaf. It accepts only if every check passes. A machine-checked soundness theorem must establish that acceptance implies the encoded query has no satisfying assignment.",
     "set_by": "Desmartin et al., Imandra certificate-checking protocol, Algorithm 1, Theorem 15 and Section 6.",
     "set_by_kind": "protocol",
     "threshold_quote": "is certified if all checks pass.",
@@ -436,8 +439,8 @@
    {
     "id": "m4",
     "title": "A neural controller keeps its modelled physical system safe for arbitrarily many control cycles.",
-    "criterion": "Prove that every execution from the allowed initial states satisfies the safety predicate after any number of controller–plant iterations, including continuous evolution. VerSAILLE Theorem 2 derives this from a valid control-envelope contract and an UNSAT neural-network refinement query. Teuber et al. demonstrated infinite-time safety for some Vertical Airborne Collision Avoidance scenarios; their largest verified networks had 270 rectified linear units. That aircraft analysis assumes zero intruder vertical velocity and excludes clear-of-conflict advisories.",
-    "set_by": "Teuber, Mitsch and Platzer, VerSAILLE verification criterion, Theorem 2; the cited aircraft demonstration uses their stated benchmark restrictions.",
+    "criterion": "Prove that the allowed control actions preserve the safety predicate under the modelled physical dynamics for any number of control cycles from every allowed initial state. Then show that the neural controller selects only allowed actions in every state satisfying the proof’s inductive invariant. In VerSAILLE, a sound network verifier must return UNSAT for a state satisfying the invariant in which the network violates the controller monitor.",
+    "set_by": "Teuber, Mitsch and Platzer, VerSAILLE, Theorem 2.",
     "set_by_kind": "protocol",
     "threshold_quote": "a dL proof on the infinite-time safety of the NNCS.",
     "threshold_ref": 9,
@@ -451,14 +454,44 @@
    {
     "id": "m5",
     "title": "A verified controller beats non-certified baselines in simulated task performance and resilience.",
-    "criterion": "In simulation, a learned controller for a complex application has verifiable quantitative probabilistic safety bounds and exceeds non-certified baselines in both task performance and resilience to adverse events. This is ARIA's original TA2 target. Related evidence from Ma et al.'s preprint covers four vision-control settings: finite-horizon safety bounds use 2,000 sampled initial states and confidence parameter δ=0.05. Those results do not establish this complete ARIA target or a production deployment.",
+    "criterion": "Demonstrate in simulation a learned controller for a complex system of significance. The controller must have verifiable quantitative bounds on the probability of unsafe outcomes and outperform non-certified baselines on both task performance and resilience to adverse events.",
     "set_by": "ARIA, original Safeguarded AI programme thesis v1.2, TA2 target on page 7; a historical target preceding the May 2026 programme revision.",
     "set_by_kind": "government_programme",
     "threshold_quote": "achieves both better performance and better resilience to adverse events than non-certified baselines.",
     "threshold_ref": 2,
     "refs": [
      2,
-     10,
+     4
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m6",
+    "title": "The main controller, monitor and backup jointly meet safety, robustness and performance specifications.",
+    "criterion": "For a closed-loop system with a main controller, runtime monitor and backup controller, certify the behavior of all three operating together against the application’s stated safety, robustness and performance specifications. The certified behavior includes the monitor’s decisions to transfer control and the actions taken under backup control.",
+    "set_by": "ARIA, Safeguarded AI programme thesis v2.0, Technical Area 2, closed-loop cyber-physical applications.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "system consisting of a main controller, runtime monitor, and backup controller whose composite behaviour is certified against safety, robustness, and performance specifications.",
+    "threshold_ref": 22,
+    "refs": [
+     22
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m7",
+    "title": "A safeguarded AI system is delivered as a deployable product or piloted in its intended application.",
+    "criterion": "Deliver the safeguarded system as a deployable product for its specified application domain, or demonstrate it in a real pilot deployment in that domain.",
+    "set_by": "ARIA, April 2025 Safeguarded AI solicitation, TA3 delivery milestone on page 10, before the 2026 decision to cancel the planned TA3 Phase 2 call.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "TA3 teams deliver the deployable products or real pilot deployments for their respective application domains.",
+    "threshold_ref": 24,
+    "refs": [
+     24,
      4
     ],
     "status": "active",
@@ -469,8 +502,7 @@
   "measures": [],
   "not_found": [
    "No external joint threshold for frontier task capability, certified deployment coverage and proof-checking cost was found in the ARIA, DARPA or NIST materials searched.",
-   "No independently replicated production demonstration satisfying the combined completion test was found.",
-   "Peer-review status for the cited Chen and Ma preprint versions was not established."
+   "No independently replicated production demonstration satisfying the combined completion test was found."
   ],
   "references": [
    {
@@ -602,20 +634,6 @@
    {
     "id": 10,
     "kind": "preprint",
-    "url": "https://arxiv.org/html/2503.00191v2",
-    "doi": "10.48550/arXiv.2503.00191",
-    "title": "Learning Vision-Based Neural Network Controllers with Semi-Probabilistic Safety Guarantees",
-    "authors": "Ma X, Wu J, Sibai H, Kantaros Y, Vorobeychik Y",
-    "container": "arXiv",
-    "year": "2025",
-    "volume": null,
-    "issue": null,
-    "pages": null,
-    "citation_source": "arxiv"
-   },
-   {
-    "id": 11,
-    "kind": "preprint",
     "url": "https://arxiv.org/abs/2503.00191",
     "doi": null,
     "title": "Learning Vision-Based Neural Network Controllers with Semi-Probabilistic Safety Guarantees",
@@ -628,7 +646,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 12,
+    "id": 11,
     "kind": "journal",
     "url": "https://proceedings.mlr.press/v97/cohen19c.html",
     "doi": null,
@@ -642,7 +660,7 @@
     "citation_source": "model"
    },
    {
-    "id": 13,
+    "id": 12,
     "kind": "preprint",
     "url": "https://arxiv.org/abs/1702.01135",
     "doi": null,
@@ -656,7 +674,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 14,
+    "id": 13,
     "kind": "report",
     "url": "https://proceedings.neurips.cc/paper_files/paper/2025/file/5f326d2e040a20d52438873f5d727e58-Paper-Conference.pdf",
     "doi": null,
@@ -670,7 +688,7 @@
     "citation_source": "model"
    },
    {
-    "id": 15,
+    "id": 14,
     "kind": "book",
     "url": "https://link.springer.com/chapter/10.1007/978-3-032-32526-6_23",
     "doi": "10.1007/978-3-032-32526-6_23",
@@ -684,7 +702,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 16,
+    "id": 15,
     "kind": "journal",
     "url": "https://arxiv.org/html/2605.02790",
     "doi": "10.1145/3828680",
@@ -698,7 +716,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 17,
+    "id": 16,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2608.06481",
     "doi": null,
@@ -712,7 +730,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 18,
+    "id": 17,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2503.12083",
     "doi": null,
@@ -726,7 +744,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 19,
+    "id": 18,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2211.00322",
     "doi": null,
@@ -740,11 +758,207 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 20,
+    "id": 19,
     "kind": "book",
     "url": "https://repositum.tuwien.at/bitstream/20.500.12708/219540/1/Teuber%20Samuel%20-%202025%20-%20Of%20Good%20Demons%20and%20Bad%20Angels%20Guaranteeing%20Safe%20Control...pdf",
     "doi": "10.34727/2025/isbn.978-3-85448-084-6_12",
     "title": "Of Good Demons and Bad Angels: Guaranteeing Safe Control under Finite Precision",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 20,
+    "kind": "report",
+    "url": "https://www.neso.energy/document/390086/download",
+    "doi": null,
+    "title": "Outturn Balancing Costs: 2025/26",
+    "authors": "National Energy System Operator",
+    "container": null,
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 21,
+    "kind": "book",
+    "url": "https://arxiv.org/pdf/2006.11029",
+    "doi": "10.1109/SmartGridComm47815.2020.9302963",
+    "title": "Learning Optimal Power Flow: Worst-Case Guarantees for Neural Networks",
+    "authors": "Venzke A, Qu G, Low S, Chatzivasileiadis S",
+    "container": "2020 IEEE International Conference on Communications, Control, and Computing Technologies for Smart Grids (SmartGridComm)",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": "1-7",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 22,
+    "kind": "report",
+    "url": "https://aria.org.uk/media/ikrkutfk/safeguarded-ai-programme-thesis-v2.pdf",
+    "doi": null,
+    "title": "Safeguarded AI: Programme Thesis",
+    "authors": "Nora Ammann",
+    "container": "Advanced Research + Invention Agency",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 23,
+    "kind": "book",
+    "url": "https://link.springer.com/chapter/10.1007/978-3-642-14295-6_24",
+    "doi": "10.1007/978-3-642-14295-6_24",
+    "title": "An Abstraction-Refinement Approach to Verification of Artificial Neural Networks",
+    "authors": "Pulina L, Tacchella A",
+    "container": "Lecture Notes in Computer Science",
+    "year": "2010",
+    "volume": null,
+    "issue": null,
+    "pages": "243-257",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 24,
+    "kind": "report",
+    "url": "https://www.aria.org.uk/media/sasccn40/02042025-final-ta2-phase-1-programme-solicitation-call.pdf",
+    "doi": null,
+    "title": "Safeguarded AI: TA2 Phase 1 – Machine Learning Organisation",
+    "authors": "Advanced Research and Invention Agency",
+    "container": null,
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 25,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2512.19007",
+    "doi": null,
+    "title": "https://arxiv.org/html/2512.19007",
+    "authors": "Kaulen K, Ladner T, Bak S, Brix C, Duong H, Flinkow T, et al.",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 26,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2611.24114",
+    "doi": null,
+    "title": "The 7th International Verification of Neural Networks Competition (VNN-COMP 2026): Summary and Results",
+    "authors": "Ladner T, Kaulen K, Bak S, Girard-Satabin J, Johnson TT, Manino E, et al.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 27,
+    "kind": "report",
+    "url": "https://proceedings.iclr.cc/paper_files/paper/2025/file/eb9b5c5d2e6fad9922198168a7786874-Paper-Conference.pdf",
+    "doi": null,
+    "title": "Robust Representation Consistency Model via Contrastive Denoising",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 28,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2611.20781",
+    "doi": null,
+    "title": "Verification-Guided Safety-Repair of Learned Controllers",
+    "authors": "Kresse F, Gharanfoli S, Vertovec N, Abate A, Henzinger TA, Lampert CH",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 29,
+    "kind": "journal",
+    "url": "https://arxiv.org/html/2201.08355",
+    "doi": null,
+    "title": "Sim-to-Lab-to-Real: Safe Reinforcement Learning with Shielding and Generalization Guarantees",
+    "authors": "Hsu KC, Ren AZ, Nguyen DP, Majumdar A, Fisac JF",
+    "container": "arXiv",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 30,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/2203.14924",
+    "doi": null,
+    "title": "Sandboxing (AI-based) Unverified Controllers in Stochastic Games: An Abstraction-based Approach with Safe-visor Architecture",
+    "authors": "Zhong B, Cao H, Zamani M, Caccamo M",
+    "container": "arXiv",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 31,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2605.22763",
+    "doi": null,
+    "title": "Advancing Mathematics Research with AI-Driven Formal Proof Search",
+    "authors": "Tsoukalas G, Kovsharov A, Shirobokov S, Surina A, Firsching M, Bérczi G, et al.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 32,
+    "kind": "web",
+    "url": "https://aws.amazon.com/solutions/case-studies/pitcrew-case-study/",
+    "doi": null,
+    "title": "PitCrew verifies AI agent decisions with Automated Reasoning on AWS",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 33,
+    "kind": "report",
+    "url": "https://loonwerks.com/publications/pdf/cofer2022dasc.pdf",
+    "doi": null,
+    "title": "Flight Test of a Collision Avoidance Neural Network with Run-Time Assurance",
     "authors": "",
     "container": null,
     "year": "",
@@ -759,713 +973,1345 @@
    "m2",
    "m3",
    "m4",
-   "m5"
+   "m6",
+   "m5",
+   "m7"
   ],
   "results": [
    {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
-    "finding": "GPT-4o safety detector on AdvBench, sample size not stated: average certified token-substitution radius 2.02.",
-    "detail": "The detector uses uniform token smoothing and an ℓ₀ perturbation measure. The source does not report the Gaussian ℓ₂ certificate or certification error α specified in the criterion.",
-    "quote": "As shown in\nTable\n3\n, for\nℓ\n0\n\\ell_{0}\nattacks, we achieve a certified radius of\n2.02\n2.02\n.",
+    "finding": "The uniform-smoothed GPT-4o safety detector averaged a certified radius of 2.02 token substitutions on AdvBench (sample size unstated).",
+    "detail": null,
+    "quote": "For example, we certify the robustness of GPT-4o with uniform kernel smoothing against\nany possible attack\n, with an average\nℓ\n0\n\\ell_{0}\nperturbation of 2.02 or an average suffix length of 6.41 on the AdvBench dataset.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 1,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Two of eight VCAS advisory networks satisfied the encoded safety property.",
-    "detail": "The analysis covers level-flight intruders and excludes Clear-of-Conflict advisories.",
+    "finding": "For the two ACC Large networks compared, N3V returned UNSAT for the retrained network in 124 seconds.",
+    "detail": "Table 8 reports the solver status. The retrained network's guarantee excludes the residual region where relative distance is in [0, 0.08] and relative velocity is in [−2, 0.1].",
     "quote": null,
     "checked": null,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "met",
-    "finding": "Two of eight VCAS advisory networks were verified safe for an infinite time horizon.",
-    "detail": "The aircraft analysis assumes zero intruder vertical velocity, excludes Clear-of-Conflict advisories, and starts within the invariant.",
-    "quote": "We prove\ninfinite-time safety on the classical Vertical Airborne Collision Avoidance NNCS\nverification benchmark for some scenarios while (exhaustively) enumerating\ncounterexample regions in unsafe scenarios.",
-    "checked": true,
+    "finding": "Vertical collision avoidance was safe for arbitrarily many cycles in 2 of 8 tested level-flight advisory scenarios.",
+    "detail": "Table 3 reports the scenario outcomes. Both successful cases had counterexamples when the level-flight restriction was relaxed. The source is a peer-reviewed NeurIPS conference proceedings paper, and the peer_reviewed field is journal-specific.",
+    "quote": null,
+    "checked": null,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m5",
     "case": null,
     "verdict": "partial",
-    "finding": "SPVT controllers achieved higher safety-probability bounds than baselines using 2,000 sampled initial states.",
-    "detail": "The bounds cover a finite horizon and depend on an assumed approximation of the true visual observations. The source reports stronger nominal performance for the drone, but does not establish superior task performance and resilience to adverse events across the full target.",
-    "quote": "Figure 5 shows the resulting safety probability lower\nbounds as a function of horizonK. Compared to all base-\nline methods, the proposed SPVT approach significantly in-\ncreases these probabilistic safety bounds.",
+    "finding": "One learned Zeppelin controller completed a 30,000-step simulated wind evaluation without crashing.",
+    "detail": "Uniformly sampled wind rarely produced the specific sequences that exposed unsafe actions. The simulation outcome supplies an empirical observation, while verification identifies counterexample regions without assigning them a probability.",
+    "quote": "After 1.4 million training steps, we obtained an agent that\ndid not crash for an evaluation run of 30,000 time steps.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Four vision-based controllers were evaluated on 2,000 initial states per setting to derive finite-horizon safety bounds at 95% confidence.",
+    "detail": "The reachability check covers all modeled latent variations. The authors evaluated the perception coverage assumption empirically.",
+    "quote": "We it-\nerate this forward reachability analysis forKsteps, obtain-\ning empirical verified safety result, i.e. the proportion of ini-\ntial states in our dataset that are verified safe at each step.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "AirSim SPVT outscored the evaluated baselines over 100 episodes and used 2,000 initial states for safety bounds at 95% confidence.",
+    "detail": "Collision can terminate a reward episode. The reported drone verification predicate covers altitude, roll and pitch. VSRL training failed in the drone setting.",
+    "quote": "Notably, in the Drone experiment, which\nhas the highest-dimensional image input, SPVT demon-\nstrates significantly superior performance compared to all\nsafe training baselines.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "F1Tenth lane following was evaluated on a 1:10 physical testbed using 400 annotated images for generator fine-tuning.",
+    "detail": null,
+    "quote": "Our third experiment extend the CARLA experiments to a\nF1Tenth racing car, an open-source 1:10 scale autonomous\nvehicle, for lane following in aminiature city physical\ntestbed.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "On 500 ImageNet test images, randomized smoothing achieved 49% approximate certified top-1 accuracy at ℓ₂ radius 0.5.",
-    "detail": "Certification used α = 0.001. The guarantee applies to the smoothed classifier, is qualified by certification-sampling error, and permits abstention.",
-    "quote": "one of\nthem achieves 49% provable top-1 accuracy under adver-\nsarial perturbations with𝓁2 norm less than 127/255 (Table\n1).",
+    "finding": "Gaussian-smoothed ResNet-50 on 500 ImageNet test images had a per-input certification error bound of 0.1%.",
+    "detail": "The default procedure used 100 Monte Carlo samples to select a class and 100,000 fresh samples to estimate its probability.",
+    "quote": "In all experiments, unless otherwise stated, we ran CERTIFY\nwithα = 0.001, so there was at most a 0.1% chance that\nCERTIFY returned a radius in whichg was not truly robust.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Reluplex reported UNSAT for property φ1 on 41 of 45 ACAS Xu networks.",
-    "detail": "Four networks timed out. The floating-point implementation did not guarantee soundness; the results were not independently checked proof certificates.",
+    "finding": "Reluplex returned UNSAT for both directly-ahead advisory properties on all 42 tested ACAS Xu networks.",
+    "detail": "The supplied arXiv text is an extended version of a CAV 2017 paper. The reported runs used double-precision arithmetic with roundoff monitoring and tableau restoration.",
     "quote": null,
     "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "Marabou returned UNSAT on 54 of 400 benchmark robustness queries.",
+    "detail": "The source is a peer-reviewed NeurIPS conference proceedings paper, classified as report because the available kinds have no conference category.",
+    "quote": "Marabou successfully verified 54 problems from our benchmark suite.",
+    "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
-    "milestone": "m1",
+    "milestone": "m3",
     "case": null,
-    "verdict": "met",
-    "finding": "For 400 neural-network robustness problems, APTPchecker checked 93.7%–99.4% of generated UNSAT proofs.",
-    "detail": "The benchmark covered 16 networks and local input perturbation regions. The checker relies on an external solver that is not formally verified and may have floating-point errors.",
-    "quote": "Overall, both verifiers were able to generate proofs for all problems with APTP, and APTPchecker is\nable to check between 93.7% and 99.4% of the proofs that are generated.",
+    "verdict": "partial",
+    "finding": "On 400 benchmark problems, APTPchecker checked 93.7% to 99.4% of generated proofs.",
+    "detail": "CrossHair analyzed a simplified checker with a stand-in for the solver and timed out with overall status UNKNOWN. The implemented checker relies on Gurobi for feasibility checks.",
+    "quote": "able to check between 93.7% and 99.4% of the proofs that are generated.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
-    "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Nine neural networks with 1–9 activation functions were verified for monotonicity.",
-    "detail": "The prover checks each affine segment by solving a linear system encoding the input constraints and a property violation. Its guarantees use rational arithmetic; the benchmark networks were generated to be monotone.",
+    "finding": "Rocq-NN-Roll ruled out monotonicity violations for all 9 benchmark networks.",
+    "detail": "The guarantee uses exact rational arithmetic. The printed fme_correct theorem has an apparent inconsistency in its None branch. Sections 3.6–3.9 describe None as the unsatisfiable outcome, and Section 3.9 gives the end-to-end correctness theorem.",
     "quote": "For each network, we veriﬁed monotonicity ﬁve times and measured the\nruntimes, as shown in Fig. 4.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
-    "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "Marabou returned UNSAT with proof certificates for 506 ReLU network queries across collision avoidance and robot navigation.",
+    "detail": "The authors disabled ReLU-based bound-tightening proof optimizations. Some additional UNSAT queries yielded no certificate because preprocessing resolved them early.",
+    "quote": "Overall, Marabou has solved all queries and successfully generatedUNSAT proofs for 293\ncoav and 213 robotics queries.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "met",
-    "finding": "Imandra certified 100% of 456 selected neural-network verification proofs.",
-    "detail": "The sample comprised 276 collision-avoidance and 180 robot-navigation proofs under 5 MB. The soundness theorem covers encoded queries; certified translation from higher-level specifications remains future work.",
-    "quote": "We evaluated the results of 276 coav and 180 robotics\nqueries, which have proof size smaller than 5MB. AllUNSAT proofs were checked by the\nnative Marabou checker and by Imandra, and both checkers have certified all queries.",
+    "finding": "Imandra's soundness-proved checker accepted 100% of the 456 evaluated Marabou proof trees.",
+    "detail": "The evaluated certificates used single-variable and ReLU splits. The theorem covers the encoded query. Certified translation from higher-level specifications and soundness for dynamic bound-tightening lemmas remain future work. The source is an ITP conference proceedings article.",
+    "quote": "AllUNSAT proofs were checked by the\nnative Marabou checker and by Imandra, and both checkers have certified all queries.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "Marabou verified one vancomycin dosing network over its full 5-input region.",
+    "detail": "The region bounds current concentration, temperature, white blood cell count, age and weight. Vehicle uses conservative approximations for the peak concentration calculation.",
+    "quote": "Crucially, the execution of the above command gives us a \"Yes\" answer: the neural network is proven safe by the neural solver Marabou.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "met",
-    "finding": "One modeled medical device with a neural controller was verified safe over an infinite time horizon.",
-    "detail": "The proof uses Rocq and MathComp Analysis for the continuous system; neural-network properties are axiomatized in Rocq and justified by an external verifier. The Vehicle compiler is part of the trusted computing base.",
-    "quote": "Finally, to put the idea of\ncompositional neural-cyber-physical system verification\nto the test, we use the Mathematical Components libraries in Rocq to verify infinite time-horizon safety of a medical device, modelled as a\ncontinuous\ncyber-physical system with a neural controller.",
+    "finding": "One vancomycin controller keeps modelled concentration at or below 30 for arbitrarily many doses.",
+    "detail": "The dosing interval must be at least the time to peak concentration. Rocq checks the inductive dynamics proof, while the neural verification result enters as an axiom backed by an external Marabou run.",
+    "quote": "In summary, this case study serves as an example of how the proposed compositional approach enables\ninfinite-horizon safety verification in domains where the system dynamics is continuous.",
     "checked": true,
-    "confirmed": true,
+    "confirmed": false,
     "peer_reviewed": true,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Neural controllers on two simulated benchmarks had a 1% upper bound on finite-horizon safety violation probability.",
+    "detail": "The number of verification trajectories is unstated. Scenarios pair uniformly sampled initial states with disturbance sequences.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
     "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m5",
     "case": null,
+    "verdict": "met",
+    "finding": "Across two simulation benchmarks, Curr-ES-R passed verification with a 1% safety violation bound. The verification sample size is unstated.",
+    "detail": "The bound applies over finite-horizon scenarios drawn from the declared distribution of initial states and disturbances.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
     "verdict": "partial",
-    "finding": "Simulated quadrotor controller: sample size not stated; statistical verification sets a 1% violation-probability bound.",
-    "detail": "The controller has a higher worst-case return and lower observed violation probability than the non-certified baselines. The text does not establish a direct simulation comparison with those baselines on resilience to adverse events. The bound applies to the sampled scenario distribution at 99% confidence.",
+    "finding": "Curr-ES and Curr-ES-R ran on two physical platforms. The hardware trial count is unstated.",
+    "detail": "The 1,000-step Cartpole horizon is a trajectory length. The reported three consecutive quadrotor runs per policy were in Gazebo.",
+    "quote": "All three policies are tested under both nominal conditions and external disturbances generated by a high-power fan.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "Across 1,820 benchmark queries, parallel Picid produced 527 UNSAT results with valid Alethe proofs.",
+    "detail": "The authors report one erroneous UNSAT result on CERSYVE. The count in the finding includes only results whose proofs Carcara classified as valid.",
     "quote": null,
     "checked": null,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 17,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "APTPchecker checked 93.7%–99.4% of generated proofs across a benchmark of 400 verification problems.",
-    "detail": "The independent checker checks proof-tree structure and leaf infeasibility, and the paper gives a soundness argument. However, its LP solver is unverified, and symbolic checking of the implementation was depth-limited rather than an exhaustive soundness proof.",
-    "quote": "Overall, both verifiers were able to generate proofs for all problems with APTP, and APTPchecker is\nable to check between 93.7% and 99.4% of the proofs that are generated.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": false,
-    "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Rocq-NN-Roll verified monotonicity on 9 neural networks with 1–9 activation functions.",
-    "detail": "The prover has a machine-checked soundness theorem and produces verification results itself. It does not independently check an external proof certificate or validate its proof-tree splits and leaf contradictions.",
-    "quote": "We evaluated the runtime on nine neural networks, \neach containing between one and nine activation functions.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": false,
-    "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "met",
-    "finding": "Imandra certified UNSAT proofs for all 456 evaluated collision-avoidance and robotics queries.",
-    "detail": "The evaluated proofs covered 276 collision-avoidance and 180 robotics queries. The checker’s soundness was proved in Imandra; certified compilation from network specifications to queries remained future work.",
-    "quote": "We evaluated the results of 276 coav and 180 robotics\nqueries, which have proof size smaller than 5MB. AllUNSAT proofs were checked by the\nnative Marabou checker and by Imandra, and both checkers have certified all queries.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": false,
-    "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Neural controllers for two simulated systems had a reported violation-probability bound of 1%.",
-    "detail": "Statistical model checking used 1% error tolerance and 99% confidence over sampled scenario distributions. The assessment covers finite horizons, not a proof of safety for every execution over arbitrarily many cycles.",
-    "quote": "Across both the standard and enlarged regions, Curr-ES and it robust version Curr-ES-R always satisfies safety constraints, demonstrating strong safety assurance and robust performance.",
-    "checked": true,
+    "finding": "Carcara accepted 527 valid certificates among 598 UNSAT results from parallel Picid.",
+    "detail": "The checks apply to the SMT encoding after preprocessing. The paper describes proof reconstruction in proof assistants as possible and reports Carcara checks for the evaluation.",
+    "quote": null,
+    "checked": null,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 17,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
-    "milestone": "m1",
+    "milestone": "m2",
     "case": null,
-    "verdict": "met",
-    "finding": "Picid produced 94 valid UNSAT proofs among 180 ACAS Xu verification queries.",
-    "detail": "The networks had 300 neurons. One additional UNSAT proof contained a hole. Proof production did not cover preprocessing, which requires separate analysis.",
+    "verdict": "partial",
+    "finding": "DensePure achieved 67.0% certified accuracy on 500 ImageNet validation images.",
+    "detail": "Table B reports this result at radius 1.0 and Gaussian noise standard deviation 0.5. Certified accuracy measures coverage of correct predictions at the stated radius, while α bounds the chance of issuing an invalid certificate.",
     "quote": null,
     "checked": null,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 18,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
-    "milestone": "m2",
+    "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "DensePure achieved 77.8% certified accuracy at ℓ₂ radius 0.5 on ImageNet; sample size not stated.",
-    "detail": "The paper reports randomized-smoothing certificates, but the supplied text does not state the certification-sampling error probability used in this experiment.",
-    "quote": null,
-    "checked": null,
-    "confirmed": false,
+    "finding": "Four neural networks passed input–output safety verification, including discrete cruise control at a perturbation bound of 0.01.",
+    "detail": "The checked property is that the resulting action satisfies the controller monitor. A perturbation may change the selected action if the new action still satisfies the monitor.",
+    "quote": "we\nveriﬁed safety under perturbation for at rained NN for δ = \n0.01 which simultaneously shows the envelope’sr obustness.",
+    "checked": true,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 19,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "met",
-    "finding": "A discrete adaptive cruise controller with 256 ReLU nodes was verified safe over an infinite horizon under perturbations of 0.01.",
-    "detail": "One trained neural controller was verified against a safe control envelope. The guarantee applies to the declared model and bounded perturbations; a corresponding fixed-point implementation was synthesized.",
-    "quote": "For the chosen control envelope and idealized implementation we\nveriﬁed safety under perturbation for at rained NN for δ = \n0.01 which simultaneously shows the envelope’sr obustness.",
+    "finding": "Four neural controllers were verified for unbounded operation, including continuous cruise control at an output perturbation bound of 1.0.",
+    "detail": "The airborne collision-avoidance result covers the two individual advisory networks DNC and DND within their respective models. The paper reports that the full combination is unsafe.",
+    "quote": "Most importantly,t he proposed approach enhances war-\nranted trustinNNcontrollersbyensuring inﬁnite-time horizon\nsafety and bridging the gapb etween theoretical guarantees in\nreal arithmetic and their efﬁcient, deployable code on FPGAs.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
-    "ref": 20,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Four verified neural networks were compiled for FPGA targets, with continuous cruise control reporting a latency of 567 cycles.",
+    "detail": "The reported latency comes from synthesis for a standard FPGA architecture.",
+    "quote": "The latencyr emained at 567 cycles, as the limited\nreduction in bit widths wasn ot sufﬁcient to impact the overall\nexecution time.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "α,β-CROWN returned UNSAT on 433 of 1,080 safeNLP queries.",
+    "detail": "Table 31 gives the zero-tolerance results. Each UNSAT result applies to the specified embedding hyperrectangle for its classifier.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 25,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "α,β-CROWN verified 6 of 12 cersyve neural safety-certificate instances.",
+    "detail": "Table 21 gives aggregate counts for bounded-state checks. The paper does not provide a complete arbitrary-cycle safety proof with the initial-state and controller-monitor obligations.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 25,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "α,β-CROWN returned 1,982 UNSAT results across 3,373 VNN-COMP 2026 regular-track instances.",
+    "detail": "The 3,373 figure is the regular-track total. Table 14 reports an aggregate UNSAT count. The competition report lists requiring solvers to produce UNSAT proofs as a future goal.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 26,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Gaussian-smoothed rRCM used 99.9% certification confidence on 500 test images each from ImageNet and CIFAR10.",
+    "detail": "Section 4.1 states the certification confidence and cites prior work for the settings. The supplied text leaves the abstention rule and its effect on the returned certificate unspecified.",
+    "quote": "Specifically, on both ImageNet and\nCIFAR10, we certify a subset that contains 500 images from their test set with confidence 99.9%.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 27,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "ReachECO certified infinite-horizon collision avoidance for all 5 repaired neural adaptive cruise controllers.",
+    "detail": "The 200-step budget limits the search for a fixed point. Once the verifier finds one, the safety guarantee extends to arbitrarily many cycles.",
+    "quote": "and all runs reach a\nclosed-loop fixed point within this budget, certifying infinite-horizon\nsafety.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 28,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The shielded navigation controller had a 70.8% PAC-Bayes lower bound on collision-free operation using 1,000 simulated Lab environments.",
+    "detail": "Table 2 implies a 29.2% upper bound on collision probability averaged over sampled policies and unseen environments from the Lab distribution, at 99% confidence over training-environment draws. The surrounding prose calls the empirical safety rate a bound, so the finding uses the table’s labeled Safety Bound row.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 29,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Safe-visor quadrotor tracking met both axis-specific safety properties in 100% of 100,000 simulated runs.",
+    "detail": "The simulation used a uniformly random main controller. The physical test-bed used a deep reinforcement learning controller. The appendix presents a mathematical proof of the modeled safety bound, while the simulation satisfaction rate is empirical.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 30,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "AlphaProof Nexus Agent (D) was deployed in one reported textbook formalization project, the Stacks Project, where it generated several Lean proofs.",
+    "detail": "The research deployment is an author report. The Lean proofs establish mathematical claims and supply no formal proof of the system’s output policy or behavior when validation fails.",
+    "quote": "We also deployed Agent (D) within a larger effort on the AI-driven formalization of the Stacks Project algebraic geometry textbook",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 31,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "met",
+    "finding": "PitCrew reports three production financial-services agents that use Automated Reasoning policies to verify marketing content and form submissions.",
+    "detail": "The verdict applies to the deployment criterion. AWS describes checks of extracted claims against encoded rules and gives no formal guarantee covering claim extraction or the agents’ final decisions.",
+    "quote": "Three production agents use combinations of these policies at runtime to verify marketing content and form submissions, reducing manual cross-referencing from 2 weeks to 30 minutes without sacrificing rigor.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 32,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Boeing flight-tested its neural-network collision-avoidance system with run-time assurance across 38 two-aircraft test conditions.",
+    "detail": "The aircraft flew with 400 feet of vertical separation for test safety. In one encounter, the intruder advanced beyond its predicted position and the system did not update the avoidance plan. The architectural safety check assumed the backup plan was always safe.",
+    "quote": "Thirty-eight test conditions were flown with various collision\ncourse geometries to test the robustness of the neural net\ntrajectory generator and the RTA mitigations.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 33,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://arxiv.org/html/2501.19040v4",
     "milestone": "m1",
-    "hash": "b6fffa523f66",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "23146ddc39a2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2501.19040v4",
     "milestone": "m2",
-    "hash": "cc0591569541",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6761bfcc0163",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2501.19040v4",
     "milestone": "m3",
-    "hash": "fcd25d5f64f0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "8bb8d1098d8c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2501.19040v4",
     "milestone": "m4",
-    "hash": "052817a465e1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7097c1dbf300",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2501.19040v4",
+    "milestone": "m6",
+    "hash": "01746564f644",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2501.19040v4",
     "milestone": "m5",
-    "hash": "5c1f00814f3c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6650f131420b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2501.19040v4",
+    "milestone": "m7",
+    "hash": "0dbfacfa68e7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2501.19040v4",
     "milestone": "completion",
     "hash": "a50335d07ada",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://papers.neurips.cc/paper_files/paper/2024/file/031b5fd7d847f69ed33378a9a1117b4b-Paper-Conference.pdf",
     "milestone": "m1",
-    "hash": "b6fffa523f66",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "23146ddc39a2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://papers.neurips.cc/paper_files/paper/2024/file/031b5fd7d847f69ed33378a9a1117b4b-Paper-Conference.pdf",
     "milestone": "m2",
-    "hash": "cc0591569541",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6761bfcc0163",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://papers.neurips.cc/paper_files/paper/2024/file/031b5fd7d847f69ed33378a9a1117b4b-Paper-Conference.pdf",
     "milestone": "m3",
-    "hash": "fcd25d5f64f0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "8bb8d1098d8c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://papers.neurips.cc/paper_files/paper/2024/file/031b5fd7d847f69ed33378a9a1117b4b-Paper-Conference.pdf",
     "milestone": "m4",
-    "hash": "052817a465e1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7097c1dbf300",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://papers.neurips.cc/paper_files/paper/2024/file/031b5fd7d847f69ed33378a9a1117b4b-Paper-Conference.pdf",
+    "milestone": "m6",
+    "hash": "01746564f644",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://papers.neurips.cc/paper_files/paper/2024/file/031b5fd7d847f69ed33378a9a1117b4b-Paper-Conference.pdf",
     "milestone": "m5",
-    "hash": "5c1f00814f3c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6650f131420b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://papers.neurips.cc/paper_files/paper/2024/file/031b5fd7d847f69ed33378a9a1117b4b-Paper-Conference.pdf",
+    "milestone": "m7",
+    "hash": "0dbfacfa68e7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://papers.neurips.cc/paper_files/paper/2024/file/031b5fd7d847f69ed33378a9a1117b4b-Paper-Conference.pdf",
     "milestone": "completion",
     "hash": "a50335d07ada",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2503.00191",
     "milestone": "m1",
-    "hash": "b6fffa523f66",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "23146ddc39a2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2503.00191",
     "milestone": "m2",
-    "hash": "cc0591569541",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6761bfcc0163",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2503.00191",
     "milestone": "m3",
-    "hash": "fcd25d5f64f0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "8bb8d1098d8c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2503.00191",
     "milestone": "m4",
-    "hash": "052817a465e1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7097c1dbf300",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2503.00191",
+    "milestone": "m6",
+    "hash": "01746564f644",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2503.00191",
     "milestone": "m5",
-    "hash": "5c1f00814f3c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6650f131420b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2503.00191",
+    "milestone": "m7",
+    "hash": "0dbfacfa68e7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2503.00191",
     "milestone": "completion",
     "hash": "a50335d07ada",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v97/cohen19c.html",
     "milestone": "m1",
-    "hash": "b6fffa523f66",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "23146ddc39a2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v97/cohen19c.html",
     "milestone": "m2",
-    "hash": "cc0591569541",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6761bfcc0163",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v97/cohen19c.html",
     "milestone": "m3",
-    "hash": "fcd25d5f64f0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "8bb8d1098d8c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v97/cohen19c.html",
     "milestone": "m4",
-    "hash": "052817a465e1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7097c1dbf300",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.mlr.press/v97/cohen19c.html",
+    "milestone": "m6",
+    "hash": "01746564f644",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v97/cohen19c.html",
     "milestone": "m5",
-    "hash": "5c1f00814f3c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6650f131420b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.mlr.press/v97/cohen19c.html",
+    "milestone": "m7",
+    "hash": "0dbfacfa68e7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v97/cohen19c.html",
     "milestone": "completion",
     "hash": "a50335d07ada",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1702.01135",
     "milestone": "m1",
-    "hash": "b6fffa523f66",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "23146ddc39a2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1702.01135",
     "milestone": "m2",
-    "hash": "cc0591569541",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6761bfcc0163",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1702.01135",
     "milestone": "m3",
-    "hash": "fcd25d5f64f0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "8bb8d1098d8c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1702.01135",
     "milestone": "m4",
-    "hash": "052817a465e1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7097c1dbf300",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/1702.01135",
+    "milestone": "m6",
+    "hash": "01746564f644",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1702.01135",
     "milestone": "m5",
-    "hash": "5c1f00814f3c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6650f131420b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/1702.01135",
+    "milestone": "m7",
+    "hash": "0dbfacfa68e7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1702.01135",
     "milestone": "completion",
     "hash": "a50335d07ada",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.neurips.cc/paper_files/paper/2025/file/5f326d2e040a20d52438873f5d727e58-Paper-Conference.pdf",
     "milestone": "m1",
-    "hash": "b6fffa523f66",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://link.springer.com/chapter/10.1007/978-3-032-32526-6_23",
-    "milestone": "m1",
-    "hash": "b6fffa523f66",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol352-itp2025/html/LIPIcs.ITP.2025.1/LIPIcs.ITP.2025.1.html",
-    "milestone": "m3",
-    "hash": "fcd25d5f64f0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2605.02790",
-    "milestone": "m4",
-    "hash": "052817a465e1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2608.06481",
-    "milestone": "m5",
-    "hash": "5c1f00814f3c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "23146ddc39a2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.neurips.cc/paper_files/paper/2025/file/5f326d2e040a20d52438873f5d727e58-Paper-Conference.pdf",
     "milestone": "m2",
-    "hash": "cc0591569541",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6761bfcc0163",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.neurips.cc/paper_files/paper/2025/file/5f326d2e040a20d52438873f5d727e58-Paper-Conference.pdf",
     "milestone": "m3",
-    "hash": "fcd25d5f64f0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "8bb8d1098d8c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.neurips.cc/paper_files/paper/2025/file/5f326d2e040a20d52438873f5d727e58-Paper-Conference.pdf",
     "milestone": "m4",
-    "hash": "052817a465e1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7097c1dbf300",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2025/file/5f326d2e040a20d52438873f5d727e58-Paper-Conference.pdf",
+    "milestone": "m6",
+    "hash": "01746564f644",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.neurips.cc/paper_files/paper/2025/file/5f326d2e040a20d52438873f5d727e58-Paper-Conference.pdf",
     "milestone": "m5",
-    "hash": "5c1f00814f3c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6650f131420b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2025/file/5f326d2e040a20d52438873f5d727e58-Paper-Conference.pdf",
+    "milestone": "m7",
+    "hash": "0dbfacfa68e7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.neurips.cc/paper_files/paper/2025/file/5f326d2e040a20d52438873f5d727e58-Paper-Conference.pdf",
     "milestone": "completion",
     "hash": "a50335d07ada",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://link.springer.com/chapter/10.1007/978-3-032-32526-6_23",
+    "milestone": "m1",
+    "hash": "23146ddc39a2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/chapter/10.1007/978-3-032-32526-6_23",
     "milestone": "m2",
-    "hash": "cc0591569541",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6761bfcc0163",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/chapter/10.1007/978-3-032-32526-6_23",
     "milestone": "m3",
-    "hash": "fcd25d5f64f0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "8bb8d1098d8c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/chapter/10.1007/978-3-032-32526-6_23",
     "milestone": "m4",
-    "hash": "052817a465e1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7097c1dbf300",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://link.springer.com/chapter/10.1007/978-3-032-32526-6_23",
+    "milestone": "m6",
+    "hash": "01746564f644",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/chapter/10.1007/978-3-032-32526-6_23",
     "milestone": "m5",
-    "hash": "5c1f00814f3c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6650f131420b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://link.springer.com/chapter/10.1007/978-3-032-32526-6_23",
+    "milestone": "m7",
+    "hash": "0dbfacfa68e7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/chapter/10.1007/978-3-032-32526-6_23",
     "milestone": "completion",
     "hash": "a50335d07ada",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol352-itp2025/html/LIPIcs.ITP.2025.1/LIPIcs.ITP.2025.1.html",
     "milestone": "m1",
-    "hash": "b6fffa523f66",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "23146ddc39a2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol352-itp2025/html/LIPIcs.ITP.2025.1/LIPIcs.ITP.2025.1.html",
     "milestone": "m2",
-    "hash": "cc0591569541",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6761bfcc0163",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol352-itp2025/html/LIPIcs.ITP.2025.1/LIPIcs.ITP.2025.1.html",
+    "milestone": "m3",
+    "hash": "8bb8d1098d8c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol352-itp2025/html/LIPIcs.ITP.2025.1/LIPIcs.ITP.2025.1.html",
     "milestone": "m4",
-    "hash": "052817a465e1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7097c1dbf300",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol352-itp2025/html/LIPIcs.ITP.2025.1/LIPIcs.ITP.2025.1.html",
+    "milestone": "m6",
+    "hash": "01746564f644",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol352-itp2025/html/LIPIcs.ITP.2025.1/LIPIcs.ITP.2025.1.html",
     "milestone": "m5",
-    "hash": "5c1f00814f3c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6650f131420b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol352-itp2025/html/LIPIcs.ITP.2025.1/LIPIcs.ITP.2025.1.html",
+    "milestone": "m7",
+    "hash": "0dbfacfa68e7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol352-itp2025/html/LIPIcs.ITP.2025.1/LIPIcs.ITP.2025.1.html",
     "milestone": "completion",
     "hash": "a50335d07ada",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2605.02790",
     "milestone": "m1",
-    "hash": "b6fffa523f66",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "23146ddc39a2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2605.02790",
     "milestone": "m2",
-    "hash": "cc0591569541",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6761bfcc0163",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2605.02790",
     "milestone": "m3",
-    "hash": "fcd25d5f64f0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "8bb8d1098d8c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2605.02790",
+    "milestone": "m4",
+    "hash": "7097c1dbf300",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2605.02790",
+    "milestone": "m6",
+    "hash": "01746564f644",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2605.02790",
     "milestone": "m5",
-    "hash": "5c1f00814f3c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6650f131420b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2605.02790",
+    "milestone": "m7",
+    "hash": "0dbfacfa68e7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2605.02790",
     "milestone": "completion",
     "hash": "a50335d07ada",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2608.06481",
     "milestone": "m1",
-    "hash": "b6fffa523f66",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "23146ddc39a2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2608.06481",
     "milestone": "m2",
-    "hash": "cc0591569541",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6761bfcc0163",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2608.06481",
     "milestone": "m3",
-    "hash": "fcd25d5f64f0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "8bb8d1098d8c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2608.06481",
     "milestone": "m4",
-    "hash": "052817a465e1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7097c1dbf300",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2608.06481",
+    "milestone": "m6",
+    "hash": "01746564f644",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2608.06481",
+    "milestone": "m5",
+    "hash": "6650f131420b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2608.06481",
+    "milestone": "m7",
+    "hash": "0dbfacfa68e7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2608.06481",
     "milestone": "completion",
     "hash": "a50335d07ada",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2512.19007",
-    "milestone": "m1",
-    "hash": "b6fffa523f66",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2503.12083",
     "milestone": "m1",
-    "hash": "b6fffa523f66",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "23146ddc39a2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2503.12083",
+    "milestone": "m2",
+    "hash": "6761bfcc0163",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2503.12083",
+    "milestone": "m3",
+    "hash": "8bb8d1098d8c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2503.12083",
+    "milestone": "m4",
+    "hash": "7097c1dbf300",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2503.12083",
+    "milestone": "m6",
+    "hash": "01746564f644",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2503.12083",
+    "milestone": "m5",
+    "hash": "6650f131420b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2503.12083",
+    "milestone": "m7",
+    "hash": "0dbfacfa68e7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2503.12083",
+    "milestone": "completion",
+    "hash": "a50335d07ada",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2211.00322",
+    "milestone": "m1",
+    "hash": "23146ddc39a2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2211.00322",
     "milestone": "m2",
-    "hash": "cc0591569541",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "6761bfcc0163",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2211.00322",
+    "milestone": "m3",
+    "hash": "8bb8d1098d8c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2211.00322",
+    "milestone": "m4",
+    "hash": "7097c1dbf300",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2211.00322",
+    "milestone": "m6",
+    "hash": "01746564f644",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2211.00322",
+    "milestone": "m5",
+    "hash": "6650f131420b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2211.00322",
+    "milestone": "m7",
+    "hash": "0dbfacfa68e7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2211.00322",
+    "milestone": "completion",
+    "hash": "a50335d07ada",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://repositum.tuwien.at/bitstream/20.500.12708/219540/1/Teuber%20Samuel%20-%202025%20-%20Of%20Good%20Demons%20and%20Bad%20Angels%20Guaranteeing%20Safe%20Control...pdf",
+    "milestone": "m1",
+    "hash": "23146ddc39a2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://repositum.tuwien.at/bitstream/20.500.12708/219540/1/Teuber%20Samuel%20-%202025%20-%20Of%20Good%20Demons%20and%20Bad%20Angels%20Guaranteeing%20Safe%20Control...pdf",
+    "milestone": "m2",
+    "hash": "6761bfcc0163",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://repositum.tuwien.at/bitstream/20.500.12708/219540/1/Teuber%20Samuel%20-%202025%20-%20Of%20Good%20Demons%20and%20Bad%20Angels%20Guaranteeing%20Safe%20Control...pdf",
+    "milestone": "m3",
+    "hash": "8bb8d1098d8c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://repositum.tuwien.at/bitstream/20.500.12708/219540/1/Teuber%20Samuel%20-%202025%20-%20Of%20Good%20Demons%20and%20Bad%20Angels%20Guaranteeing%20Safe%20Control...pdf",
     "milestone": "m4",
-    "hash": "052817a465e1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7097c1dbf300",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://repositum.tuwien.at/bitstream/20.500.12708/219540/1/Teuber%20Samuel%20-%202025%20-%20Of%20Good%20Demons%20and%20Bad%20Angels%20Guaranteeing%20Safe%20Control...pdf",
+    "milestone": "m6",
+    "hash": "01746564f644",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://repositum.tuwien.at/bitstream/20.500.12708/219540/1/Teuber%20Samuel%20-%202025%20-%20Of%20Good%20Demons%20and%20Bad%20Angels%20Guaranteeing%20Safe%20Control...pdf",
+    "milestone": "m5",
+    "hash": "6650f131420b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://repositum.tuwien.at/bitstream/20.500.12708/219540/1/Teuber%20Samuel%20-%202025%20-%20Of%20Good%20Demons%20and%20Bad%20Angels%20Guaranteeing%20Safe%20Control...pdf",
+    "milestone": "m7",
+    "hash": "0dbfacfa68e7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://repositum.tuwien.at/bitstream/20.500.12708/219540/1/Teuber%20Samuel%20-%202025%20-%20Of%20Good%20Demons%20and%20Bad%20Angels%20Guaranteeing%20Safe%20Control...pdf",
+    "milestone": "completion",
+    "hash": "a50335d07ada",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.19007",
+    "milestone": "m1",
+    "hash": "23146ddc39a2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.19007",
+    "milestone": "m2",
+    "hash": "6761bfcc0163",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.19007",
+    "milestone": "m3",
+    "hash": "8bb8d1098d8c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.19007",
+    "milestone": "m4",
+    "hash": "7097c1dbf300",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.19007",
+    "milestone": "m6",
+    "hash": "01746564f644",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.19007",
+    "milestone": "m5",
+    "hash": "6650f131420b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.19007",
+    "milestone": "m7",
+    "hash": "0dbfacfa68e7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.19007",
+    "milestone": "completion",
+    "hash": "a50335d07ada",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2611.24114",
+    "milestone": "m1",
+    "hash": "23146ddc39a2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.iclr.cc/paper_files/paper/2025/file/eb9b5c5d2e6fad9922198168a7786874-Paper-Conference.pdf",
+    "milestone": "m2",
+    "hash": "6761bfcc0163",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2611.20781",
+    "milestone": "m4",
+    "hash": "7097c1dbf300",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2201.08355",
+    "milestone": "m5",
+    "hash": "6650f131420b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2203.14924",
+    "milestone": "m6",
+    "hash": "01746564f644",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2605.22763",
+    "milestone": "m7",
+    "hash": "0dbfacfa68e7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aws.amazon.com/solutions/case-studies/pitcrew-case-study/",
+    "milestone": "m7",
+    "hash": "0dbfacfa68e7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://loonwerks.com/publications/pdf/cofer2022dasc.pdf",
+    "milestone": "m7",
+    "hash": "0dbfacfa68e7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1552,8 +2398,108 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 0 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Balancing Great Britain\\u2019s electricity grid cost \\u00a33.1 billion in 2025/26. Operators calculate how much each generator should supply while respecting generator and transmission-line limits. A learned controller could give them faster dispatch decisions, but testing it on past or simulated loads can miss the largest violation. A proof could bound that violation across the full range of loads operators intend to serve. Its value depends on whether the grid model captures actual operating conditions and the specified limits protect the network.\". Reason: The existing rationale reports two language-model experiments without explaining a decision that a behavioral guarantee would let someone make."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Encode the network, its allowed inputs and the negation of the required output property in one query. The solver must return UNSAT, meaning that no allowed input satisfies the encoded conditions for a violation.\"; threshold_quote = \"an UNSAT result indicates that a property holds\"; threshold_ref = 6; refs = [6, 24]. Reason: The current criterion mixes the satisfiability test with the size, timeouts and numerical limitations of one experiment."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"For a Gaussian-smoothed classifier g at input x, the certification procedure may abstain or return a class c and radius R. With probability at least 1 \\u2212 \\u03b1 over the procedure\\u2019s samples, any returned pair satisfies g(x + \\u03b4) = c for every perturbation \\u03b4 with Euclidean norm strictly less than R. An abstention supplies no certified radius.\"; threshold_quote = \"With probability at least 1 \\u2212 \\u03b1 over the randomness in CERTIFY\"; threshold_ref = 7; refs = [7]. Reason: The revision makes the sampling probability and strict radius explicit and removes results for image classification and token substitution from the test."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Given the encoded counterexample query and a proof tree, an independent checker validates each branch split and the contradiction at every leaf. It accepts only if every check passes. A machine-checked soundness theorem must establish that acceptance implies the encoded query has no satisfying assignment.\"; threshold_quote = \"is certified if all checks pass.\"; threshold_ref = 8. Reason: The proof count and file-size cutoff describe the evaluation corpus and obscure what the checker must establish for each certificate."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"Prove that the allowed control actions preserve the safety predicate under the modelled physical dynamics for any number of control cycles from every allowed initial state. Then show that the neural controller selects only allowed actions in every state satisfying the proof\\u2019s inductive invariant. In VerSAILLE, a sound network verifier must return UNSAT for a state satisfying the invariant in which the network violates the controller monitor.\"; set_by = \"Teuber, Mitsch and Platzer, VerSAILLE, Theorem 2.\"; threshold_quote = \"a dL proof on the infinite-time safety of the NNCS.\"; threshold_ref = 9. Reason: The aircraft benchmark restrictions describe one application of the theorem, while the theorem itself specifies which controller states and actions must be checked."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m4: \"The main controller, monitor and backup jointly meet safety, robustness and performance specifications.\". Reason: A controller proof can omit the monitor that transfers control and the backup that takes over, both of which affect the behavior users experience."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m5: criterion = \"Demonstrate in simulation a learned controller for a complex system of significance. The controller must have verifiable quantitative bounds on the probability of unsafe outcomes and outperform non-certified baselines on both task performance and resilience to adverse events.\"; threshold_quote = \"achieves both better performance and better resilience to adverse events than non-certified baselines.\"; threshold_ref = 2; refs = [2, 4]. Reason: The sample count and confidence parameter from the vision-control experiment are incidental to ARIA’s two-part comparison in simulation."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m5: \"A safeguarded AI system is delivered as a deployable product or piloted in its intended application.\". Reason: ARIA’s historical delivery milestone fills the gap between a simulated comparison and an organisation maintaining the system in production."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 2. Reason: A revised version of Chen and colleagues’ paper appeared in Transactions on Machine Learning Research in November 2026, and Ma and colleagues’ paper appeared in the AAAI-26 proceedings."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 9 of 9 proposed operations from MLC-10-revise-20261125T094132113883Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m3, m4, m6, m5, m7."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 3 from Crossref, 0 from PubMed, 1 from arXiv, 3 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 7 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Structural problems after applying: references never cited: [10]"
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 14 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 8 candidates returned, 0 dropped as sources already used, 8 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 8 of 8 new candidates, without search. Skipped: none. Dropped rows: none. Replaced 18 earlier rows. Added 35 results: 27 from sources already used, 8 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 6 from arXiv, 3 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 22 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Removed 1 references no longer cited; renumbered."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-25"
  }
 }
