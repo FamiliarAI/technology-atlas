@@ -286,12 +286,12 @@
  "page": {
   "id": "QUA-06",
   "title": "Fault-tolerant modular quantum computing",
-  "definition": "A network of processor modules executes quantum computations on logical qubits, units of quantum information encoded to permit error correction. Errors in local processing and communication can be suppressed by increasing error-correction resources.",
+  "definition": "Separate processor modules execute one quantum circuit, including operations on qubits in different modules. The circuit uses logical qubits, units of quantum information encoded to permit error correction. Increasing the protection reduces the probability of logical failure during both local processing and communication.",
   "goal": {
-   "need": "A 2024 analysis estimates single-module limits of 10²–10⁴ physical qubits for trapped ions, superconducting circuits and Rydberg arrays. JST's networked-computer project estimates a requirement of one million physical qubits, with more than 1,000 per logical qubit. Interconnects let computation span modules while preserving quantum information.",
+   "need": "For a ruthenium catalyst that converts CO₂ to methanol, standard calculations of relative electronic energies differ by more than 50 kJ/mol and can reverse the order of two intermediates. More accurate energies would help chemists distinguish reaction pathways. One quantum algorithm for this catalyst calls for about 4,000 logical qubits, or millions of physical qubits under its assumptions. Estimates for a single trapped-ion, superconducting or Rydberg module are 10²–10⁴ physical qubits. Modules could share the calculation if errors within and between them can be corrected.",
    "need_refs": [
-    1,
-    2
+    14,
+    1
    ],
    "figures": {
     "caption": "Resource estimates in JST's networked-computer project",
@@ -328,17 +328,25 @@
      "context": null,
      "ref": 3,
      "checked": true
+    },
+    {
+     "body": "Fermi National Accelerator Laboratory, IBM and NVIDIA",
+     "year": "2026",
+     "quote": "a modular quantum computing co-design platform aimed at accelerating the development of scalable, fault-tolerant quantum computers for scientific discovery",
+     "context": "The partners announced an intended collaboration on processors and interconnects for scientific computing.",
+     "ref": 15,
+     "checked": true
     }
    ]
   },
   "completion": {
    "title": "Three or more processor modules form a fault-tolerant quantum computing network.",
-   "criterion": "At least three processor modules form a network in which any two modules can exchange quantum information and each supports universal fault-tolerant logical operations. Preparation, storage, transmission, gate and measurement errors can be made arbitrarily small by adding error-correction resources, including protection during communication delays. This meets the functionality of the roadmap's few-qubit fault-tolerant network stage.",
-   "set_by": "Wehner, Elkouss and Hanson, 2018 roadmap, Figure 4, Table 1 and 'Few-qubit fault-tolerant networks'; its stages are adopted in IRTF QIRG RFC 9583.",
+   "criterion": "At least three processor modules form a network in which any pair can exchange an unknown qubit. Each module can execute a universal gate set fault-tolerantly on at least one logical qubit. Increasing error-correction resources can make errors in preparation, storage, transmission, gates and measurement arbitrarily small, including storage errors while modules wait for communication.",
+   "set_by": "Wehner, Elkouss and Hanson, Figure 4 and Table 1 (2018). IRTF Quantum Internet Research Group describes the stages in RFC 9583, Section 5.",
    "set_by_kind": "community_convention",
-   "threshold_quote": "Fault tolerance implies that all error parameters (Table 1) of a quantum memory network can be made negligible by adding more resources.",
+   "threshold_quote": "a universal gate set on q logical qubits, where q ≥ 1",
    "threshold_ref": 4,
-   "basis": "The roadmap identifies three end nodes as the smallest network and includes distributed quantum computing at its few-qubit fault-tolerant stage. This criterion tests protected computation and communication together; it does not prescribe a carrier-specific link rate or fidelity.",
+   "basis": "Figure 4 uses three end nodes to distinguish a network from a single link. Table 1 includes distributed computation at the few-qubit fault-tolerant stage, where a local processor may still be efficiently simulated classically. The test therefore establishes network functionality without requiring a computational advantage.",
    "refs": [
     4,
     5
@@ -348,21 +356,23 @@
   "case_label": "Interconnect",
   "cases": [
    "Microwave links",
-   "Optical links"
+   "Optical links",
+   "Matter links"
   ],
   "milestone_structure": "parallel",
   "milestones": [
    {
     "id": "m1",
     "title": "Processor interfaces share an entangled pair of physical qubits.",
-    "criterion": "Create an entangled pair shared between processor interfaces and available for subsequent operations. Optical preprint, revised 9 October 2026: one barium ion and one diamond silicon-vacancy electron spin had Bell-state fidelity 87.9(7)% from 9,000 measurement outcomes. Pair generation was 1.03(1) kHz excluding 664 µs characterization readout, or 612(4) Hz including it. The result is not peer reviewed and uses physical qubits.",
+    "criterion": "Prepare an entangled pair with one physical qubit at each of two processor interfaces. The shared state must be available for a subsequent operation on the qubits.",
     "set_by": "IRTF Quantum Internet Research Group, RFC 9583, Section 4.3; an informational research-group consensus document.",
     "set_by_kind": "community_convention",
     "threshold_quote": "A shared entanglement is established between the quantum computer A and the quantum computer B",
     "threshold_ref": 5,
     "refs": [
      5,
-     6
+     6,
+     17
     ],
     "status": "active",
     "replaced_by": [],
@@ -371,10 +381,10 @@
    {
     "id": "m2",
     "title": "Separate processor modules execute deterministic, repeatable entangling gates on data qubits.",
-    "criterion": "Execute deterministic, repeatable entangling gates on data qubits in separate modules, leaving outputs available for further gates. Optical result published 5 February 2025: two ion-trap modules about 2 m apart; CZ fidelity 86.2(9)%; Grover success 71(1)% from 500 repetitions per marked state. Microwave preprint submitted 21 October 2026: four 80 cm links between two 120-qubit processors; mean distant CZ fidelity 94.75% across four links. Only a subset of processor qubits participated. The gates were physical; the microwave result is not peer reviewed.",
+    "criterion": "Apply an entangling gate to data qubits in separate modules and retain the outputs for another gate in the same circuit. For gate teleportation, attempts to prepare the shared entangled pair may be repeated before the gate. Once the pair is ready, the gate must accept every measurement outcome and apply the corresponding correction.",
     "set_by": "Main et al., deterministic and repeatable quantum-gate-teleportation protocol, Nature (2025); demonstrated with trapped-ion modules.",
     "set_by_kind": "protocol",
-    "threshold_quote": "For a scalable DQC architecture, the QGT implementation must be deterministic and repeatable",
+    "threshold_quote": "the QGT implementation must be deterministic and repeatable",
     "threshold_ref": 7,
     "refs": [
      7,
@@ -386,11 +396,11 @@
    },
    {
     "id": "m3",
-    "title": "Remote syndrome measurements drive error correction on data qubits in separate modules.",
-    "criterion": "Measure joint data-qubit parity across modules and use the syndrome, an error-indicating measurement outcome, for real-time correction. A preprint revised 15 October 2026 used two ion-trap modules about 2 m apart. A distributed [[2,1,1]] code detected phase flips; joint XX and ZZ measurements supported active correction of single-qubit Pauli errors on a two-data-qubit Bell state. Correction of this known state does not establish correction of arbitrary encoded information. The result is not peer reviewed.",
-    "set_by": "Ainley et al., remote syndrome-extraction and feedforward protocol, Sections II–III (2026 preprint); demonstrated with trapped-ion modules.",
+    "title": "Remote parity checks drive active correction of a single-qubit error on a shared Bell state.",
+    "criterion": "Prepare a Bell state of two data qubits, one in each module. Measure their joint X and Z parities during the circuit and use both outcomes to correct a single-qubit Pauli error in real time. The corrected pair must remain available in the same run.",
+    "set_by": "Ainley et al., distributed Bell-state correction protocol, Section III and Figure 3 (2026 preprint).",
     "set_by_kind": "protocol",
-    "threshold_quote": "measurement without disturbing the encoded state, and classical communication and feedforward to convert the measurement outcome into an error-detection or correction operation.",
+    "threshold_quote": "actively correct arbitrary single-qubit Pauli errors on a distributed Bell state",
     "threshold_ref": 9,
     "refs": [
      9
@@ -402,7 +412,7 @@
    {
     "id": "m4",
     "title": "Remote processors establish entanglement between separately encoded logical qubits.",
-    "criterion": "Establish entanglement between logical qubits encoded in separate processors, as specified by JST's project. A related experiment published 5 September 2018 teleported a controlled-NOT gate between two superconducting-cavity logical qubits and generated logical Bell states. Its modules were in one device; it supplied an encoded-operation precursor rather than a demonstration between remote processors.",
+    "criterion": "Establish entanglement between two logical qubits, with one qubit encoded in each of two remote processors. Verify entanglement in the logical encoding.",
     "set_by": "Japan Science and Technology Agency, Moonshot Goal 6, Yamamoto project's logical-entanglement-distribution milestone; written for atom/ion processors.",
     "set_by_kind": "government_programme",
     "threshold_quote": "establish entanglement between the logical qubits of remote processors",
@@ -418,13 +428,74 @@
    {
     "id": "m5",
     "title": "A surface-code intermodule operation suppresses logical errors as code distance increases.",
-    "criterion": "An implemented surface-code interface suppresses logical bit-flip and phase-flip failures as spatial code distance and syndrome-measurement rounds increase, with module and interface noise below their joint threshold. Code distance measures protection against physical errors. Ramette et al. establish this behavior analytically and numerically; their approximate 1% module and 10% interface thresholds belong to their noise model. Those theoretical thresholds are not acceptance limits for arbitrary hardware.",
+    "criterion": "Implement a logical operation across the interface between surface-code patches in two modules. At fixed physical noise in the modules and link, below their joint threshold, show that logical failures decrease as the spatial code distance and the number of syndrome-measurement rounds per gate increase. Test both bit-flip and phase-flip failures.",
     "set_by": "Ramette et al., surface-code interface protocol, Equations (3)–(7) and Figure 4 (2024); the conditions apply to this code and noise model.",
     "set_by_kind": "protocol",
     "threshold_quote": "logical failure from long time-like error chains can be suppressed by simply doing more rounds of syndrome extraction per logical gate",
     "threshold_ref": 1,
     "refs": [
      1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m6",
+    "title": "An ion moves between two processor modules while retaining qubit coherence.",
+    "criterion": "Transport an ion carrying a qubit between independently fabricated ion-trap modules. Measure ion survival and compare Ramsey fringe contrast with and without intermodule transport at the same elapsed time to test whether the transfer preserves phase coherence.",
+    "set_by": "Akhtar et al., intermodule transport and Ramsey-interferometry protocol, Figure 4 (2023).",
+    "set_by_kind": "protocol",
+    "threshold_quote": "the link does not measurably impact the phase coherence of the qubit",
+    "threshold_ref": 16,
+    "refs": [
+     16
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m7",
+    "title": "A remote parity check detects phase flips on a qubit encoded across two modules.",
+    "criterion": "Encode one logical qubit in the two-module phase-flip repetition code. Repeatedly measure the joint X parity of its two data qubits during the circuit and use the outcome to flag a phase flip in real time while retaining the encoded information in accepted runs.",
+    "set_by": "Ainley et al., distributed error-detection protocol, Section II and Figure 2 (2026 preprint).",
+    "set_by_kind": "protocol",
+    "threshold_quote": "aborting the protocol in real time and restarting when a phase-flip error is detected",
+    "threshold_ref": 9,
+    "refs": [
+     9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m8",
+    "title": "An atom or ion processor multiplexes entanglement generation across optical channels.",
+    "criterion": "Use multiple spatial channels for atom–photon entanglement generation, or multiple spatial or frequency channels for ion–photon entanglement generation. JST specifies multiplexing as the capability and gives no minimum aggregate pair rate.",
+    "set_by": "Japan Science and Technology Agency, Moonshot Goal 6, Yamamoto project, milestone by 2028.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "we will develop “entanglement multiplexing communication technology”",
+    "threshold_ref": 2,
+    "refs": [
+     2
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m9",
+    "title": "Any pair in a network of at least three modules can transfer an unknown qubit deterministically.",
+    "criterion": "Demonstrate transfer of an unknown input qubit for every pair of processor modules, with the output available for further local gates. Each end node must support local state preparation, universal control and measurement, and retain its qubits during the communication rounds and local circuit used for the test.",
+    "set_by": "Wehner, Elkouss and Hanson, Figure 4, Table 1 and the quantum memory network stage (2018).",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "The availability of quantum memories and the deterministic transmission of qubits",
+    "threshold_ref": 4,
+    "refs": [
+     4,
+     5
     ],
     "status": "active",
     "replaced_by": [],
@@ -619,475 +690,969 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 14,
+    "kind": "journal",
+    "url": "https://journals.aps.org/prresearch/pdf/10.1103/PhysRevResearch.3.033055",
+    "doi": "10.1103/PhysRevResearch.3.033055",
+    "title": "Quantum computing enhanced computational catalysis",
+    "authors": "von Burg V, Low GH, Häner T, Steiger DS, Reiher M, Roetteler M, et al.",
+    "container": "Phys. Rev. Research",
+    "year": "2021",
+    "volume": "3",
+    "issue": "3",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 15,
+    "kind": "press_release",
+    "url": "https://news.fnal.gov/2026/11/fermilab-ibm-and-nvidia-plan-modular-quantum-computing-co-design-platform-to-advance-scientific-discovery/",
+    "doi": null,
+    "title": "Fermilab, IBM and NVIDIA plan modular quantum computing co-design platform to advance scientific discovery",
+    "authors": "Fermi National Accelerator Laboratory",
+    "container": "Fermilab",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 16,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41467-022-35285-3?error=cookies_not_supported",
+    "doi": "10.1038/s41467-022-35285-3",
+    "title": "A high-fidelity quantum matter-link between ion-trap microchip modules",
+    "authors": "Akhtar M, Bonus F, Lebrun-Gallagher FR, Johnson NI, Siegele-Brown M, Hong S, et al.",
+    "container": "Nat Commun",
+    "year": "2023",
+    "volume": "14",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 17,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/nature06118?error=cookies_not_supported",
+    "doi": "10.1038/nature06118",
+    "title": "Entanglement of single-atom quantum bits at a distance",
+    "authors": "Moehring DL, Maunz P, Olmschenk S, Younge KC, Matsukevich DN, Duan LM, et al.",
+    "container": "Nature",
+    "year": "2007",
+    "volume": "449",
+    "issue": "7158",
+    "pages": "68-71",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 18,
+    "kind": "journal",
+    "url": "https://iontrap.duke.edu/files/2025/03/PhysRevLett.133.090802.pdf",
+    "doi": "10.1103/PhysRevLett.133.090802",
+    "title": "Fast Photon-Mediated Entanglement of Continuously Cooled Trapped Ions for Quantum Networking",
+    "authors": "O’Reilly J, Toh G, Goetting I, Saha S, Shalaev M, Carter AL, et al.",
+    "container": "Phys. Rev. Lett.",
+    "year": "2024",
+    "volume": "133",
+    "issue": "9",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 19,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/1801.05283",
+    "doi": null,
+    "title": "Deterministic teleportation of a quantum gate between two logical qubits",
+    "authors": "Chou KS, Blumoff JZ, Wang CS, Reinhold PC, Axline CJ, Gao YY, et al.",
+    "container": "arXiv",
+    "year": "2018",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 20,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41534-023-00723-7?error=cookies_not_supported",
+    "doi": "10.1038/s41534-023-00723-7",
+    "title": "Realizing all-to-all couplings among detachable quantum modules using a microwave quantum state router",
+    "authors": "Zhou C, Lu P, Praquin M, Chien TC, Kaufman R, Cao X, et al.",
+    "container": "npj Quantum Inf",
+    "year": "2023",
+    "volume": "9",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 21,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41586-022-04697-y?error=cookies_not_supported",
+    "doi": "10.1038/s41586-022-04697-y",
+    "title": "Qubit teleportation between non-neighbouring nodes in a quantum network",
+    "authors": "Hermans SLN, Pompili M, Beukers HKC, Baier S, Borregaard J, Hanson R",
+    "container": "Nature",
+    "year": "2022",
+    "volume": "605",
+    "issue": "7911",
+    "pages": "663-668",
+    "citation_source": "crossref"
    }
   ],
   "milestone_order": [
    "m1",
+   "m6",
    "m2",
+   "m7",
    "m3",
+   "m8",
    "m4",
-   "m5"
+   "m5",
+   "m9"
   ],
   "results": [
    {
     "milestone": "m1",
     "case": "Microwave links",
     "verdict": "met",
-    "finding": "One physical Bell pair shared across two modules reached 85.91±0.40% unmitigated fidelity.",
-    "detail": "The pair was created on lattice qubits connected through an intermodule L-coupler.",
+    "finding": "Two physical Bell pairs were prepared across two processors. Pair 115–233 reached 85.91±0.40% fidelity without readout mitigation.",
+    "detail": "Each lattice qubit couples locally to a dedicated L-qubit at its end of the microwave link.",
     "quote": "Created in-\ndividually, the Bell pair BP 115–233 through the 242–245\nL-coupler reachesF= 85.91±0.40% (93.94±0.27% mit-\nigated) and BP 117–231 through 243–244 reaches 76.93±\n0.49% (86.98±0.41%).",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": "Microwave links",
     "verdict": "met",
-    "finding": "Distant CZ gates across four links between two processors had mean fidelity 94.75%.",
-    "detail": "The gates acted on physical lattice qubits. Only a subset of each processor's qubits was wired and measured.",
+    "finding": "Distant CZ gates on data qubits across four microwave links between two processors averaged 94.75% fidelity.",
+    "detail": "Each distant CZ uses two coherent state transfers, three local CZ gates, four single-qubit gates and a virtual phase correction.",
     "quote": "Using state trans-\nfer, we construct distant CZ gates between lattice qubits\non separate processors at a mean fidelity of 94.75%, and\nuse them to distribute Bell and GHZ states across the\ntwo modules, including a demonstration of simultaneous\nBell pair generation on two neighbouring L-couplers.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m9",
+    "case": "Microwave links",
+    "verdict": "partial",
+    "finding": "Bidirectional qubit state transfer across four microwave links joining two processors averaged 99.00% fidelity.",
+    "detail": "All four links connect the same two modules. Network benchmarking removes state-preparation and measurement errors from the reported fidelity.",
+    "quote": "All four\nL-couplers transfer at or above 98.86%, with a mean of\n99.00% and a best link of 99.29±0.07% (Fig. 3a).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": "Optical links",
     "verdict": "met",
-    "finding": "A barium ion and a diamond SiV electron spin shared a Bell pair with 87.9(7)% fidelity, based on 9,000 measurement outcomes.",
-    "detail": "Photon detection heralded the pair; real-time corrections made each successful event deliver the same state for subsequent use. The qubits were physical.",
+    "finding": "Heralded barium-ion–silicon-vacancy Bell pairs reached 87.9(7)% fidelity across 9,000 tomography events.",
+    "detail": "The generation rate includes initialization and retries. Including tomography readout, the wall-clock rate was 612(4) Hz.",
     "quote": "Including all conversion losses, we generate ion–SiV\n-\nBell pairs at an average rate of 1.03(1) kHz with a fidelity of 87.9(7)%.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": "Microwave links",
     "verdict": "met",
-    "finding": "Two superconducting qubits in separate modules shared a Bell state with up to 99% fidelity; measurement sample size not stated.",
-    "detail": "The modules were linked by aluminum coaxial cables carrying microwave modes. The Bell state was subsequently used to generate a four-qubit GHZ state.",
-    "quote": "We use these interconnects to link five quantum modules with inter-module quantum state transfer and Bell state fidelities up to 99%.",
+    "finding": "Interface-transmon Bell pairs averaged 98.6% state fidelity across four microwave links.",
+    "detail": "The source reports 50 repeated measurements for its state-tomography fidelity estimates.",
+    "quote": "The other interconnects give similar results, with an average QST fidelity of 98.2% and Bell state fidelity of 98.6% respectively; see Supplementary Information.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": "Optical links",
-    "verdict": "met",
-    "finding": "Two remote trapped barium ion qubits reached 97% entanglement fidelity; parity scans included 11,435 post-selected joint photon detections.",
-    "detail": "The ions were in separate chambers 2 m apart. Photon detection heralded entanglement, and subsequent qubit rotations were used to characterize the state.",
-    "quote": "We establish high-fidelity entanglement between remotely separated trapped atomic qubit memories, mediated by photonic qubits stored in the timing of their pulses.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": "Optical links",
-    "verdict": "met",
-    "finding": "Remote network-qubit Bell pairs had a raw entanglement error of 2.38(17)%; tomography sample size not stated.",
-    "detail": "Photon interference entangled strontium-ion network qubits in two processors. The shared pair was then used for remote stabiliser measurements. The raw error was obtained by state tomography.",
-    "quote": null,
-    "checked": null,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": "Optical links",
-    "verdict": "met",
-    "finding": "Two circuit qubits in separate trapped-ion modules: teleported CZ gate fidelity was 86.2(9)%.",
-    "detail": "The modules were connected optically and separated by about 2 m. Sequential gates were demonstrated, with outputs available for further computation. Grover’s algorithm was repeated 500 times per marked state.",
-    "quote": "the reconstructed process matrix for the teleported gate, shown in \nFig. 2c, has an average gate fidelity of 86.2(9)%.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": "Optical links",
-    "verdict": "met",
-    "finding": "Two optically linked ion-trap modules used remote syndromes to correct single-qubit Pauli errors on a Bell state; 1,000 shots per data point.",
-    "detail": "Joint XX and ZZ measurements drove real-time feedforward correction. The protected Bell state was known; the experiment did not establish correction of arbitrary encoded quantum information.",
-    "quote": "We then combine these mid-circuit syndrome measurements with real-time feedforward to actively correct arbitrary single-qubit Pauli errors on a distributed Bell state.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": "Microwave links",
     "verdict": "partial",
-    "finding": "Five linked modules demonstrated intermodule Bell-state fidelity up to 99%.",
-    "detail": "The experiment generated entanglement across modules and applied subsequent local gates, but it did not demonstrate a general entangling gate acting on data qubits in separate modules.",
-    "quote": "We use these interconnects to link five quantum modules with inter-module quantum state transfer and Bell state fidelities up to 99%.",
+    "finding": "A microwave Bell-pair preparation followed by local CNOTs produced a four-qubit GHZ state at 92.0% fidelity over 50 tomography repeats.",
+    "detail": "The CNOTs following Bell-pair preparation operated within each module.",
+    "quote": "The generated inter-module four-qubit GHZ state exhibits 92.0% fidelity.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
-    "milestone": "m2",
-    "case": "Optical links",
+    "milestone": "m9",
+    "case": "Microwave links",
     "verdict": "partial",
-    "finding": "Two remote trapped-ion qubits achieved 97% entanglement fidelity using time-bin photons.",
-    "detail": "The experiment generated heralded entanglement between initialized qubits. It did not demonstrate a deterministic entangling gate on arbitrary data-qubit inputs.",
+    "finding": "Microwave qubit transfer averaged 98.2% process fidelity across four hub-to-periphery links in a five-module network.",
+    "detail": null,
+    "quote": "The other interconnects give similar results, with an average QST fidelity of 98.2% and Bell state fidelity of 98.6% respectively; see Supplementary Information.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": "Optical links",
+    "verdict": "met",
+    "finding": "Two remote trapped-ion qubits reached 97% Bell-state fidelity. The parity-scan histogram included 11,435 post-selected joint detections.",
+    "detail": "The fidelity was uncorrected for state preparation and measurement errors. The experiment used a 10 ns photon detection time-difference window.",
     "quote": "In this paper, the authors show high-fidelity entanglement of 97% between remote trapped ion memories, mediated by time-bin photons.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": "Optical links",
-    "verdict": "partial",
-    "finding": "A logical qubit distributed across two ion-trap modules underwent repeated remote error detection; 1,000 shots per data point.",
-    "detail": "The repetition code encodes one logical qubit across both processors. The experiment does not establish entanglement between two separately encoded logical qubits.",
-    "quote": "This demonstrates that the remote stabiliser measurement can be performed repeatedly and used to continuously suppress phase errors in a delocalised logical qubit.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m5",
-    "case": "Optical links",
-    "verdict": "partial",
-    "finding": "Two modules performed remote error detection and correction, with 1,000 shots per data point.",
-    "detail": "The experiment demonstrates remote syndrome measurements, but does not implement a surface-code interface or show suppression of both logical failure types as code distance and measurement rounds increase.",
-    "quote": "Here we report the first experimental demonstration of distributed quantum error detection and correction.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": "Optical links",
     "verdict": "met",
-    "finding": "Remote network-qubit Bell pairs: 200,000 copies characterized; fidelity 96.89(8)%.",
-    "detail": "The heralded entanglement linked physical Sr+ network qubits in two modules and was subsequently used to teleport a gate. The fidelity estimate accounts for imperfect tomographic measurements.",
-    "quote": "The other notable \nsource of error is the remote entanglement of the network qubits across \nthe photonic quantum network; we observe a fidelity of the remotely \nentangled network qubits to the desired |Ψ+⟩ state of 96.89(8)%.",
+    "finding": "Heralded Bell pair across two strontium interface qubits had 2.38(17)% raw entanglement error. The study reports 1,000 shots per data point.",
+    "detail": "Table 1 gives the raw entanglement error, which the authors obtained by quantum state tomography of the network qubits.",
+    "quote": "We generate entanglement between network qubits in two separate trapped-ion processors and use it to perform remote syndrome measurements on data qubits.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Optical links",
+    "verdict": "met",
+    "finding": "Repeated remote X-parity checks preserved the tested logical state in accepted runs at 30% injected phase-flip probability per data qubit, with 1,000 shots per data point.",
+    "detail": "The experiment tested logical |0⟩. Imperfect parity measurements missed some single-qubit phase flips in individual rounds.",
+    "quote": "We also show that the logical error rate remains approximately constant with repeated measurements, confirming that the encoded information is preserved in the process.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": "Optical links",
+    "verdict": "met",
+    "finding": "Real-time Pauli correction of a distributed data-qubit Bell pair used three entanglement-generation rounds per shot, with 1,000 shots per data point.",
+    "detail": "One round prepared the pair and one supplied the ancilla for each parity check. Bob applied a physical X rotation for a detected bit flip and a virtual Z rotation for a detected phase flip.",
+    "quote": "We then combine these mid-circuit syndrome measurements with real-time feedforward to actively correct arbitrary single-qubit Pauli errors on a distributed Bell state.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": "Optical links",
+    "verdict": "met",
+    "finding": "A heralded Bell pair across two Sr⁺ processor interfaces had 96.89(8)% fidelity over 200,000 tomographed copies.",
+    "detail": null,
+    "quote": "we observe a fidelity of the remotely \nentangled network qubits to the desired |Ψ+⟩ state of 96.89(8)%.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": "Optical links",
+    "verdict": "met",
+    "finding": "A deterministic CZ on two Ca⁺ data qubits in separate modules achieved 86.2(9)% average gate fidelity.",
+    "detail": "The text gives no shot count for the standalone CZ process tomography.",
+    "quote": "the reconstructed process matrix for the teleported gate, shown in \nFig. 2c, has an average gate fidelity of 86.2(9)%.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m9",
+    "case": "Optical links",
+    "verdict": "partial",
+    "finding": "A deterministic SWAP on two Ca⁺ circuit qubits across one module pair achieved 64(2)% average gate fidelity.",
+    "detail": "The text gives no shot count for the SWAP process tomography.",
+    "quote": "we measure average gate fidelities of 70(2)% and 64(2)% for \nthe iSWAP and SWAP gates, respectively.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": "Microwave links",
+    "verdict": "partial",
+    "finding": "Two cavity interfaces shared a cat-encoded Bell pair with 92 ± 1% fidelity from 10,000 shots per Wigner point before heralding.",
+    "detail": "The vacuum check heralded the pair in 34.9% of attempts at the highest measured fidelity.",
+    "quote": "state fidelity, including state preparation and measurement (SPAM) errors, between separated superconducting bosonic qubits in a high-loss regime where direct deterministic state transfer fails.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m4",
     "case": "Microwave links",
     "verdict": "met",
-    "finding": "Two separate modules with cat-encoded qubits achieved 92 ± 1% Bell-state fidelity over a microwave link.",
-    "detail": "Entanglement was heralded, with a 34.9% success probability per attempt; the reported fidelity includes state-preparation and measurement errors.",
-    "quote": "We realize our scheme in a superconducting circuit platform where we generate entanglement between two spatially separated qubit modules. Each module contains a 3D high-Q microwave cavity mode in which a qubit is bosonically encoded in the cat code.",
+    "finding": "Two separately encoded cavity qubits reached 92 ± 1% logical Bell-state fidelity from 10,000 shots per Wigner point before heralding.",
+    "detail": "The highest fidelity was measured at coherent-state amplitude 1.414 with Kerr cancellation. Cavity photon loss was identified as the likely dominant error.",
+    "quote": "We produce Bell states with\n92\n±\n1\n%\n92\\pm 1\\%\nstate fidelity, including state preparation and measurement (SPAM) errors, between separated superconducting bosonic qubits in a high-loss regime where direct deterministic state transfer fails.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m9",
+    "case": "Microwave links",
+    "verdict": "partial",
+    "finding": "Microwave teleportation across one processor pair achieved 90 ± 1% average transfer fidelity over four tested input states.",
+    "detail": "The input was prepared after heralding. The average fidelity for an unknown state was inferred from the four known inputs using symmetry.",
+    "quote": "We then use the heralded Bell state as a resource to deterministically teleport a qubit between modules with an average state transfer fidelity of\n90\n±\n1\n%\n90\\pm 1\\%\n.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Matter links",
+    "verdict": "met",
+    "finding": "One ¹⁷¹Yb⁺ qubit retained Ramsey contrast of 0.97(2) after 100 intermodule transfers, with 100 repetitions per phase point.",
+    "detail": "The survival test used ¹⁷⁴Yb⁺ for its higher fluorescence rate. The transported Ramsey fringes showed phase offsets relative to the stationary control, while contrast showed no measurable loss.",
+    "quote": "The Ramsey fringe contrasts measured were 0.96(2), 1.00(2) and 0.97(2) for 0, 2 and 100 links respectively.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m8",
+    "case": "Optical links",
+    "verdict": "met",
+    "finding": "Two cotrapped barium ions generated ion–photon entanglement across two spatial channels, with 200 detection events per characterization data point.",
+    "detail": "The authors characterized each path with the other physically blocked. In the entanglement-swapping experiment, they used both paths in the same trial to herald one ion–ion Bell pair.",
+    "quote": "Characterization of ion-photon entanglement using\nimaging systems A and B, each coupled to a unique ion. Each\ndata point is based on 200 detection events, making the statistical\nerror bars too small to be visible.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": "Microwave links",
+    "verdict": "partial",
+    "finding": "Two binomial-encoded logical qubits linked by a local microwave cavity bus achieved 68 ± 1% logical Bell-state fidelity.",
+    "detail": "The paper identifies spatially separated modules as future work. The shot count for the reported Bell-state fidelity is unspecified.",
+    "quote": "We reconstructed the two-qubit state in the Pauli basis\n(Figure 3b), extracting a state ﬁdelityFBell = (68± 1) %\nand concurrenceC = (0.37± 0.01), exceeding the thresh-\nold for a classically correlated state.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m9",
+    "case": "Microwave links",
+    "verdict": "partial",
+    "finding": "Microwave single-photon transfer from Q2 to Q4 achieved 72.5% fidelity on 1 processor pair, with more than 10,000 averages in the final dataset.",
+    "detail": "The input was a prepared |1⟩ state. The reported fidelity includes state preparation and measurement errors, and the authors identify mode coherence as the main limit.",
+    "quote": "The transfer fidelity between Q\n4\nand Q\n2\nis 72.5 ± 1.17 %.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m9",
+    "case": "Optical links",
+    "verdict": "partial",
+    "finding": "Charlie-to-Alice teleportation in a three-node optical network averaged 0.688(10) fidelity across six input states.",
+    "detail": "Every input inserted after heralded entanglement preparation was transferred. The input was prepared after heralding, and the neighbouring links were tested for entanglement generation only.",
+    "quote": "We find that, indeed, the average unconditional teleportation fidelity increases with shorter window lengths, reaching\nF\n= 0.688(10) for a length of 7.5 ns and a rate of 1/(100 s); see Extended Data Fig.\n4\n.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://arxiv.org/abs/2610.29986",
     "milestone": "m1",
-    "hash": "de554ecb6512",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f65f4676067b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2610.29986",
+    "milestone": "m6",
+    "hash": "0b3b29585cb1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2610.29986",
     "milestone": "m2",
-    "hash": "3485861dbc7d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5b4979e486e6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2610.29986",
+    "milestone": "m7",
+    "hash": "adcca5bd201d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2610.29986",
     "milestone": "m3",
-    "hash": "07a4789fc422",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a50a6850b9c1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2610.29986",
+    "milestone": "m8",
+    "hash": "19e51db9dd45",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2610.29986",
     "milestone": "m4",
-    "hash": "f89ac4d369db",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4484f9f670c2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2610.29986",
     "milestone": "m5",
-    "hash": "16e84726a9b4",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bdcd5c3006d8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2610.29986",
+    "milestone": "m9",
+    "hash": "c63163dfed23",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2610.29986",
     "milestone": "completion",
-    "hash": "a306f3ae7253",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "23659c12be59",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.10705v2",
     "milestone": "m1",
-    "hash": "de554ecb6512",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f65f4676067b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.10705v2",
+    "milestone": "m6",
+    "hash": "0b3b29585cb1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.10705v2",
     "milestone": "m2",
-    "hash": "3485861dbc7d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5b4979e486e6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.10705v2",
+    "milestone": "m7",
+    "hash": "adcca5bd201d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.10705v2",
     "milestone": "m3",
-    "hash": "07a4789fc422",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a50a6850b9c1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.10705v2",
+    "milestone": "m8",
+    "hash": "19e51db9dd45",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.10705v2",
     "milestone": "m4",
-    "hash": "f89ac4d369db",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4484f9f670c2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.10705v2",
     "milestone": "m5",
-    "hash": "16e84726a9b4",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bdcd5c3006d8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.10705v2",
+    "milestone": "m9",
+    "hash": "c63163dfed23",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.10705v2",
     "milestone": "completion",
-    "hash": "a306f3ae7253",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "23659c12be59",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2302.02751v1",
     "milestone": "m1",
-    "hash": "de554ecb6512",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f65f4676067b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2302.02751v1",
+    "milestone": "m6",
+    "hash": "0b3b29585cb1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2302.02751v1",
+    "milestone": "m2",
+    "hash": "5b4979e486e6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2302.02751v1",
+    "milestone": "m7",
+    "hash": "adcca5bd201d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2302.02751v1",
+    "milestone": "m3",
+    "hash": "a50a6850b9c1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2302.02751v1",
+    "milestone": "m8",
+    "hash": "19e51db9dd45",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2302.02751v1",
+    "milestone": "m4",
+    "hash": "4484f9f670c2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2302.02751v1",
+    "milestone": "m5",
+    "hash": "bdcd5c3006d8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2302.02751v1",
+    "milestone": "m9",
+    "hash": "c63163dfed23",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2302.02751v1",
+    "milestone": "completion",
+    "hash": "23659c12be59",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11909202/",
     "milestone": "m1",
-    "hash": "de554ecb6512",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f65f4676067b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11909202/",
+    "milestone": "m6",
+    "hash": "0b3b29585cb1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11909202/",
+    "milestone": "m2",
+    "hash": "5b4979e486e6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11909202/",
+    "milestone": "m7",
+    "hash": "adcca5bd201d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11909202/",
+    "milestone": "m3",
+    "hash": "a50a6850b9c1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11909202/",
+    "milestone": "m8",
+    "hash": "19e51db9dd45",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11909202/",
+    "milestone": "m4",
+    "hash": "4484f9f670c2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11909202/",
+    "milestone": "m5",
+    "hash": "bdcd5c3006d8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11909202/",
+    "milestone": "m9",
+    "hash": "c63163dfed23",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11909202/",
+    "milestone": "completion",
+    "hash": "23659c12be59",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2609.13065v2",
     "milestone": "m1",
-    "hash": "de554ecb6512",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f65f4676067b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
-    "url": "https://www.nature.com/articles/s41586-024-08404-x",
+    "url": "https://arxiv.org/html/2609.13065v2",
+    "milestone": "m6",
+    "hash": "0b3b29585cb1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2609.13065v2",
     "milestone": "m2",
-    "hash": "3485861dbc7d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5b4979e486e6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2609.13065v2",
+    "milestone": "m7",
+    "hash": "adcca5bd201d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2609.13065v2",
     "milestone": "m3",
-    "hash": "07a4789fc422",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2302.02751v1",
-    "milestone": "m2",
-    "hash": "3485861dbc7d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2302.02751v1",
-    "milestone": "m3",
-    "hash": "07a4789fc422",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2302.02751v1",
-    "milestone": "m4",
-    "hash": "f89ac4d369db",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2302.02751v1",
-    "milestone": "m5",
-    "hash": "16e84726a9b4",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2302.02751v1",
-    "milestone": "completion",
-    "hash": "a306f3ae7253",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11909202/",
-    "milestone": "m2",
-    "hash": "3485861dbc7d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11909202/",
-    "milestone": "m3",
-    "hash": "07a4789fc422",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11909202/",
-    "milestone": "m4",
-    "hash": "f89ac4d369db",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11909202/",
-    "milestone": "m5",
-    "hash": "16e84726a9b4",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11909202/",
-    "milestone": "completion",
-    "hash": "a306f3ae7253",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a50a6850b9c1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2609.13065v2",
-    "milestone": "m2",
-    "hash": "3485861dbc7d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m8",
+    "hash": "19e51db9dd45",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2609.13065v2",
     "milestone": "m4",
-    "hash": "f89ac4d369db",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4484f9f670c2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2609.13065v2",
     "milestone": "m5",
-    "hash": "16e84726a9b4",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bdcd5c3006d8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2609.13065v2",
+    "milestone": "m9",
+    "hash": "c63163dfed23",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2609.13065v2",
     "milestone": "completion",
-    "hash": "a306f3ae7253",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "23659c12be59",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-08404-x?code=test&error=cookies_not_supported",
     "milestone": "m1",
-    "hash": "de554ecb6512",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f65f4676067b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-024-08404-x?code=test&error=cookies_not_supported",
+    "milestone": "m6",
+    "hash": "0b3b29585cb1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-024-08404-x?code=test&error=cookies_not_supported",
+    "milestone": "m2",
+    "hash": "5b4979e486e6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-024-08404-x?code=test&error=cookies_not_supported",
+    "milestone": "m7",
+    "hash": "adcca5bd201d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-08404-x?code=test&error=cookies_not_supported",
     "milestone": "m3",
-    "hash": "07a4789fc422",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a50a6850b9c1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-024-08404-x?code=test&error=cookies_not_supported",
+    "milestone": "m8",
+    "hash": "19e51db9dd45",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-08404-x?code=test&error=cookies_not_supported",
     "milestone": "m4",
-    "hash": "f89ac4d369db",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4484f9f670c2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-08404-x?code=test&error=cookies_not_supported",
     "milestone": "m5",
-    "hash": "16e84726a9b4",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bdcd5c3006d8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-024-08404-x?code=test&error=cookies_not_supported",
+    "milestone": "m9",
+    "hash": "c63163dfed23",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-08404-x?code=test&error=cookies_not_supported",
     "milestone": "completion",
-    "hash": "a306f3ae7253",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "23659c12be59",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2509.18547",
+    "milestone": "m1",
+    "hash": "f65f4676067b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2509.18547",
+    "milestone": "m6",
+    "hash": "0b3b29585cb1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2509.18547",
+    "milestone": "m2",
+    "hash": "5b4979e486e6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2509.18547",
+    "milestone": "m7",
+    "hash": "adcca5bd201d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2509.18547",
+    "milestone": "m3",
+    "hash": "a50a6850b9c1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2509.18547",
+    "milestone": "m8",
+    "hash": "19e51db9dd45",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2509.18547",
     "milestone": "m4",
-    "hash": "f89ac4d369db",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "4484f9f670c2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2509.18547",
+    "milestone": "m5",
+    "hash": "bdcd5c3006d8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2509.18547",
+    "milestone": "m9",
+    "hash": "c63163dfed23",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2509.18547",
+    "milestone": "completion",
+    "hash": "23659c12be59",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9908934/",
+    "milestone": "m6",
+    "hash": "0b3b29585cb1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://iontrap.duke.edu/files/2025/03/PhysRevLett.133.090802.pdf",
+    "milestone": "m8",
+    "hash": "19e51db9dd45",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1801.05283",
+    "milestone": "m4",
+    "hash": "4484f9f670c2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41534-023-00723-7?error=cookies_not_supported",
+    "milestone": "m9",
+    "hash": "c63163dfed23",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-022-04697-y?error=cookies_not_supported",
+    "milestone": "m9",
+    "hash": "c63163dfed23",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1174,8 +1739,123 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 0 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"Separate processor modules execute one quantum circuit, including operations on qubits in different modules. The circuit uses logical qubits, units of quantum information encoded to permit error correction. Increasing the protection reduces the probability of logical failure during both local processing and communication.\". Reason: The definition leaves unclear what crosses a module boundary and which errors decrease as protection increases."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"For a ruthenium catalyst that converts CO\\u2082 to methanol, standard calculations of relative electronic energies differ by more than 50 kJ/mol and can reverse the order of two intermediates. More accurate energies would help chemists distinguish reaction pathways. One quantum algorithm for this catalyst calls for about 4,000 logical qubits, or millions of physical qubits under its assumptions. Estimates for a single trapped-ion, superconducting or Rydberg module are 10\\u00b2\\u201310\\u2074 physical qubits. Modules could share the calculation if errors within and between them can be corrected.\". Reason: The current rationale gives hardware counts without identifying a calculation, its users or the uncertainty they need to resolve."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Fermi National Accelerator Laboratory, IBM and NVIDIA, 2026: \"a modular quantum computing co-design platform aimed at accelerating the development of scalable, fault-tolerant quantum computers for scientific discovery\". Reason: The Fermilab initiative adds a national laboratory’s explicit goal of modular fault-tolerant computing for scientific users."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit completion: criterion = \"At least three processor modules form a network in which any pair can exchange an unknown qubit. Each module can execute a universal gate set fault-tolerantly on at least one logical qubit. Increasing error-correction resources can make errors in preparation, storage, transmission, gates and measurement arbitrarily small, including storage errors while modules wait for communication.\"; set_by = \"Wehner, Elkouss and Hanson, Figure 4 and Table 1 (2018). IRTF Quantum Internet Research Group describes the stages in RFC 9583, Section 5.\"; threshold_quote = \"a universal gate set on q logical qubits, where q \\u2265 1\"; threshold_ref = 4; basis = \"Figure 4 uses three end nodes to distinguish a network from a single link. Table 1 includes distributed computation at the few-qubit fault-tolerant stage, where a local processor may still be efficiently simulated classically. The test therefore establishes network functionality without requiring a computational advantage.\"; refs = [4, 5]. Reason: Table 1 specifies at least one logical qubit per end node, and Figure 4 supplies the three-node minimum specifically for a network."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add case \"Matter links\". Reason: Coherent transport of a trapped ion between separate chips provides an experimentally demonstrated third type of interconnect."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Prepare an entangled pair with one physical qubit at each of two processor interfaces. The shared state must be available for a subsequent operation on the qubits.\"; threshold_quote = \"A shared entanglement is established between the quantum computer A and the quantum computer B\"; threshold_ref = 5; refs = [5, 6, 18]. Reason: The physical-pair criterion includes one experiment’s rate, readout time and fidelity, none of which the RFC requires."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m1: \"An ion moves between two processor modules while retaining qubit coherence.\". Reason: The matter-link experiment tests preservation of a transported qubit, a first laboratory step that shared-pair generation does not test."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"Apply an entangling gate to data qubits in separate modules and retain the outputs for another gate in the same circuit. For gate teleportation, attempts to prepare the shared entangled pair may be repeated before the gate. Once the pair is ready, the gate must accept every measurement outcome and apply the corresponding correction.\"; threshold_quote = \"the QGT implementation must be deterministic and repeatable\"; threshold_ref = 7. Reason: The two reported gate fidelities obscure the protocol’s distinction between heralding a resource and postselecting a completed gate."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m2: \"A remote parity check detects phase flips on a qubit encoded across two modules.\". Reason: The distributed repetition-code protocol detects errors on an encoded qubit by rejecting runs, a distinct result from correcting a known Bell state."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: title = \"Remote parity checks drive active correction of a single-qubit error on a shared Bell state.\"; criterion = \"Prepare a Bell state of two data qubits, one in each module. Measure their joint X and Z parities during the circuit and use both outcomes to correct a single-qubit Pauli error in real time. The corrected pair must remain available in the same run.\"; set_by = \"Ainley et al., distributed Bell-state correction protocol, Section III and Figure 3 (2026 preprint).\"; threshold_quote = \"actively correct arbitrary single-qubit Pauli errors on a distributed Bell state\"; threshold_ref = 9. Reason: The active-correction test needs to identify the state the protocol protects and the action that distinguishes correction from rejection."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m3: \"An atom or ion processor multiplexes entanglement generation across optical channels.\". Reason: JST names multiplexed entanglement generation as its 2028 step toward logical entanglement distribution in 2030."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"Establish entanglement between two logical qubits, with one qubit encoded in each of two remote processors. Verify entanglement in the logical encoding.\"; threshold_quote = \"establish entanglement between the logical qubits of remote processors\"; threshold_ref = 2. Reason: The discussion of a cavity experiment is separate from JST’s test that each remote processor hold its own encoded qubit."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m5: criterion = \"Implement a logical operation across the interface between surface-code patches in two modules. At fixed physical noise in the modules and link, below their joint threshold, show that logical failures decrease as the spatial code distance and the number of syndrome-measurement rounds per gate increase. Test both bit-flip and phase-flip failures.\"; threshold_quote = \"logical failure from long time-like error chains can be suppressed by simply doing more rounds of syndrome extraction per logical gate\"; threshold_ref = 1. Reason: The percentages in the existing criterion are results of a particular noise model, whereas the experimental test is suppression of logical errors with increasing protection."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m5: \"Any pair in a network of at least three modules can transfer an unknown qubit deterministically.\". Reason: The roadmap stage immediately preceding fault tolerance requires quantum memory and deterministic transfer of an unknown qubit between any pair of end nodes."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 14 of 14 proposed operations from QUA-06-revise-20261125T110137065078Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: completion, m1, m6, m2, m7, m3, m8, m4, m5, m9."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 3 from Crossref, 0 from PubMed, 0 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 11 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 7 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 7 candidates returned, 0 dropped as sources already used, 7 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 5 of 7 new candidates, without search. Skipped: 2 no readable saved copy. Dropped rows: none. Replaced 14 earlier rows. Added 22 results: 17 from sources already used, 5 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 3 from Crossref, 0 from PubMed, 1 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 22 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-25"
  }
 }
