@@ -296,10 +296,12 @@
  "page": {
   "id": "MLC-09",
   "title": "Safe reinforcement learning from limited real-system samples",
-  "definition": "A controller learns an improved policy, a rule for choosing actions, within a real-system interaction budget despite sparse or delayed rewards and without an adequate external simulator. Learning respects explicit safety constraints when experiments consume material or irreversibly change the system.",
+  "definition": "A controller improves its policy, the rule it uses to choose actions, within a fixed budget of trials on a physical system. Trials consume material or change the system irreversibly. Feedback on performance may come only at rare events or long after the action that caused the outcome. The controller stays within explicit safety limits throughout learning. It has no adequate external simulator, but it may learn a predictive model from the permitted data.",
   "goal": {
-   "need": "The 2019 review describes learning regimes where additional data cannot be obtained by freely running parallel copies or accelerating the environment. Its illustrative operating scales below make sample efficiency a deployment constraint. It also identifies potential damage during exploration, requiring safety during learning.",
+   "need": "Each trial on an injection-molding machine uses resin and occupies the machine. For one part specified at 8.75 ± 0.03 g, the estimated cost of learning the settings from scratch was at least 250 molding cycles. Settings learned in simulation can still produce underweight parts when production conditions differ. Learning from fewer measured parts would let technicians bring a new mold into production with less waste, provided the machine stays within its operating limits during setup.",
    "need_refs": [
+    6,
+    7,
     1
    ],
    "figures": {
@@ -365,10 +367,10 @@
    {
     "id": "m1",
     "title": "A quadrotor controller improves its response while all evaluated parameters satisfy J ≥ 0.",
-    "criterion": "In the SafeOpt quadrotor protocol, improve the response to a 1 m position command evaluated over 5 s while every tested parameter setting satisfies J ≥ 0; J is the performance function in equations 15–16. The 2016 paper reports 30 experiments without evaluating an unsafe setting. The protocol assumes an initial stabilizing controller and a probabilistic model of performance. Its safety threshold concerns that performance function, rather than every possible physical hazard.",
+    "criterion": "Starting from a stabilizing controller, tune the two horizontal position-control gains on the quadrotor to improve its response to a 1 m change in the x-position command. Score each 5 s response using J from equations 15–16, which weights the tracking error, motion and control input relative to the initial controller. Every gain setting tested on the vehicle must satisfy J ≥ 0.",
     "set_by": "Berkenkamp, Schoellig and Krause, Safe Controller Optimization for Quadrotors with Gaussian Processes, Section V; a quadrotor-specific experimental protocol.",
     "set_by_kind": "protocol",
-    "threshold_quote": "No unsafe parameters below the threshold Jmin = 0 were evaluated on the real system.",
+    "threshold_quote": "The safe threshold is set at Jmin = 0.",
     "threshold_ref": 3,
     "refs": [
      3
@@ -380,7 +382,7 @@
    {
     "id": "m2",
     "title": "A robot learns to place objects in the opposite bin using sparse rewards without an external simulator.",
-    "criterion": "Meet the DayDreamer UR5 task endpoint: transfer one of three objects to the opposite bin, earning +10 reward; grasping earns +1 and dropping in the original bin earns −1. Training uses physical observations and a learned internal model, without external simulation. The 2023 paper reports 2.5 objects/min after 8 h on a UR5. Predetermined bin locations and restricted vertical motion reduce collision risks; the study does not establish zero violations of a comprehensive safety specification.",
+    "criterion": "Using physical observations and a model learned from them, train the UR5 arm to grasp one of three balls and carry it to the opposite bin. A grasp earns +1, release in the original bin earns −1 and placement in the opposite bin earns +10. The bin locations are supplied. Vertical motion is enabled only while the gripper holds an object, and the gripper opens automatically over the correct bin. Training uses no external simulator.",
     "set_by": "University of California, Berkeley, DayDreamer authors, Section 3.2 and Appendix E; a UR5-specific experimental task definition.",
     "set_by_kind": "protocol",
     "threshold_quote": "placing in the opposite bin gives a +10 reward.",
@@ -395,7 +397,7 @@
    {
     "id": "m3",
     "title": "A robot learns USB insertion within 2 mm in x/y, 5 mm in z and 0.15 rad in orientation.",
-    "criterion": "Meet SEVI's USB insertion endpoint using the tool centre point, the controlled reference point on the gripper: pose errors within 2 mm in x/y, 5 mm in z and 0.15 rad in orientation, optionally combined with a visual reward classifier. Three independent 3 h hardware training sessions used prior data, including 50 task demonstrations and 200 recovery trajectories; each final policy had 50 evaluation episodes. The paper reports 83 ± 3% success and 15 ± 4 unsafe events per training session, mean ± SD. These results do not establish zero-violation learning.",
+    "criterion": "Run three independent 3 h hardware training sessions with the same prior data, including 50 successful task demonstrations and 200 recovery trajectories. Evaluate each final policy over 50 hardware episodes. Score insertion by the error at the gripper’s controlled reference point: within 2 mm in x and y, 5 mm in z and 0.15 rad in orientation, optionally combined with the protocol’s visual classifier. Separately count keep-out-region breaches and excessive contact force during training, counting a continuous failure as one event.",
     "set_by": "Shithil and Liu, Indiana University, SEVI supplementary Sections VII and XIV; a USB-insertion-specific experimental protocol.",
     "set_by_kind": "protocol",
     "threshold_quote": "success is determined using TCP pose thresholds of 2 mm in x,y, 5 mm in z, and 0.15 rad in orientation",
@@ -500,6 +502,34 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 6,
+    "kind": "journal",
+    "url": "https://www.pt.bme.hu/publikaciok/1863_publ_1-s2.0-S156849462401010X-main.pdf",
+    "doi": "10.1016/j.asoc.2024.112236",
+    "title": "An experimental study on the application of reinforcement learning in injection molding in the spirit of Industry 4.0",
+    "authors": "Párizs RD, Török D",
+    "container": "Applied Soft Computing",
+    "year": "2024",
+    "volume": "167",
+    "issue": null,
+    "pages": "112236",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 7,
+    "kind": "preprint",
+    "url": "https://duepublico2.uni-due.de/servlets/MCRFileNodeServlet/duepublico_derivate_00084233/CIRP_ICME_25_Wistuba_Cremer_Schiffer_Preprint.pdf",
+    "doi": "10.17185/duepublico/84693",
+    "title": "Optimizing Injection Molding Quality with Reinforcement Learning: A Comparative Study of Algorithms",
+    "authors": "Pia Wistuba, Lennard Cremer, Reinhard Schiffers",
+    "container": "19th CIRP Conference on Intelligent Computation in Manufacturing Engineering",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
    }
   ],
   "milestone_order": [
@@ -513,335 +543,335 @@
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Quadrotor controller improved its response over 30 experiments, with no evaluated setting below J = 0.",
-    "detail": "The 1 m position change was evaluated over 5 s. The method used an initial stabilizing controller and a Gaussian-process model; safety was defined by the performance threshold.",
+    "finding": "Quadrotor gain tuning improved the step response with zero J ≥ 0 violations across 30 hardware evaluations.",
+    "detail": "The source is an IEEE ICRA conference proceedings paper, classified as report because the available kinds have no conference category.",
     "quote": "No unsafe parameters below the\nthreshold Jmin = 0 were evaluated on the real system.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 3,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Online quadrotor adaptation completed 30 hardware trials with zero observed violations of its performance threshold.",
+    "detail": "The 30 trials are a reported run length. The paper discusses wear generally and gives no run-specific evidence of irreversible consequences.",
+    "quote": "No unsafe parameters below the\nthreshold Jmin = 0 were evaluated on the real system.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 3,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "One UR5 with 3 objects reached an average pick rate of 2.5 objects per minute after 8 hours.",
-    "detail": "Training used physical observations and a learned world model without an external simulator. Predetermined bin locations and restricted vertical movement reduced collision risk; the paper does not establish zero safety violations. The number of training runs is not stated.",
+    "finding": "Dreamer trained a physical UR5 on a three-ball transfer task and averaged 2.5 objects per minute.",
+    "detail": "Section 3.2 does not state the number of independent Dreamer training runs.",
     "quote": "Dreamer reaches an average pick rate of 2.5 objects per minute within 8 hours.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 4,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Dreamer restored the original pick-and-place rate in about 5 hours in one reported XArm lighting-change run.",
+    "detail": "The reported time measures recovery. The study gives no prospective budget or safety-violation tally for this run.",
+    "quote": "However, the XArm is able to\nadapt to the change in lighting conditions in about 5 hours time and recover the original performance,\nwhich is faster than it would be to train from scratch.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 4,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "met",
-    "finding": "SEVI USB insertion: 83 ± 3% success across three hardware-trained policies, each evaluated over 50 episodes.",
-    "detail": "Each training session lasted 3 hours and used prior data, including 50 demonstrations and 200 recovery trajectories. The TCP success thresholds were 2 mm in x/y, 5 mm in z and 0.15 rad in orientation. Training incurred 15 ± 4 unsafe events per session; zero-violation learning was not established. The preprint states it was accepted by IEEE RA-L.",
-    "quote": null,
-    "checked": null,
-    "confirmed": true,
-    "peer_reviewed": false,
-    "ref": 5,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Quadrotor controller tuning: 30 experiments, with no parameters below the safety threshold evaluated.",
-    "detail": "The study does not specify an operator's numerical interaction budget or establish material consumption or non-resettable consequences. Performance was measured over a 5-second interval.",
-    "quote": "No unsafe parameters below the\nthreshold Jmin = 0 were evaluated on the real system.",
+    "finding": "SEVI achieved 83% mean USB insertion success across 150 hardware evaluation episodes from three independently trained policies.",
+    "detail": "The paper reports a combined unsafe-event count for keep-out breaches and excessive contact force. The supplied arXiv version states that the paper was accepted by IEEE Robotics and Automation Letters.",
+    "quote": "SEVI achieves a final task success rate of\n0.83\n±\n0.03\n0.83\\pm 0.03\nwith\n15\n±\n4\n15\\pm 4\nunsafe events",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
-    "ref": 3,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "partial",
-    "finding": "One UR5 robot learned sparse-reward pick and place, reaching 2.5 objects per minute in 8 hours; the number of training runs is not stated.",
-    "detail": "Learning was performed on hardware without a simulator, with motion restrictions to prevent collisions. The paper does not establish non-resettable consequences, a numerical interaction budget, or zero violations of specified hard safety limits.",
-    "quote": "Dreamer reaches an average pick rate of 2.5 objects per minute within 8 hours.",
+    "finding": "SEVI averaged 15 unsafe events per run across three online USB insertion hardware training runs.",
+    "detail": "The 3 h sessions establish a training duration. The source gives a per-episode horizon but no total action or trial budget for the adaptation run.",
+    "quote": "SEVI achieves a final task success rate of\n0.83\n±\n0.03\n0.83\\pm 0.03\nwith\n15\n±\n4\n15\\pm 4\nunsafe events",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
-    "ref": 4,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": null,
-    "verdict": "partial",
-    "finding": "USB insertion: 3 hardware training runs averaged 15 ± 4 unsafe events.",
-    "detail": "Each run trained for 3 hours. Unsafe events were observed, so the zero-violation criterion was not met. The text does not establish material consumption or non-resettable consequences, sparse rewards, or the absence of an adequate external simulator.",
-    "quote": null,
-    "checked": null,
-    "confirmed": true,
-    "peer_reviewed": false,
     "ref": 5,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://pubmed.ncbi.nlm.nih.gov/40175544/",
     "milestone": "m1",
-    "hash": "fbd9c7f2228e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a66006db7bc2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pubmed.ncbi.nlm.nih.gov/40175544/",
     "milestone": "m2",
-    "hash": "555ea727ddfa",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "454a997d7bfa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pubmed.ncbi.nlm.nih.gov/40175544/",
     "milestone": "m3",
-    "hash": "ed625807fb36",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1b303acd945d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pubmed.ncbi.nlm.nih.gov/40175544/",
     "milestone": "m4",
     "hash": "954d90571491",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pubmed.ncbi.nlm.nih.gov/40175544/",
     "milestone": "completion",
     "hash": "162915f44eb5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1904.12901",
     "milestone": "m1",
-    "hash": "fbd9c7f2228e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a66006db7bc2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1904.12901",
     "milestone": "m2",
-    "hash": "555ea727ddfa",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "454a997d7bfa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1904.12901",
     "milestone": "m3",
-    "hash": "ed625807fb36",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1b303acd945d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1904.12901",
     "milestone": "m4",
     "hash": "954d90571491",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1904.12901",
     "milestone": "completion",
     "hash": "162915f44eb5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/",
     "milestone": "m1",
-    "hash": "fbd9c7f2228e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a66006db7bc2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/",
     "milestone": "m2",
-    "hash": "555ea727ddfa",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "454a997d7bfa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/",
     "milestone": "m3",
-    "hash": "ed625807fb36",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1b303acd945d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/",
     "milestone": "m4",
     "hash": "954d90571491",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/",
     "milestone": "completion",
     "hash": "162915f44eb5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://metr.org/time-horizons",
     "milestone": "m1",
-    "hash": "fbd9c7f2228e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a66006db7bc2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://metr.org/time-horizons",
     "milestone": "m2",
-    "hash": "555ea727ddfa",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "454a997d7bfa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://metr.org/time-horizons",
     "milestone": "m3",
-    "hash": "ed625807fb36",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1b303acd945d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://metr.org/time-horizons",
     "milestone": "m4",
     "hash": "954d90571491",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://metr.org/time-horizons",
     "milestone": "completion",
     "hash": "162915f44eb5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://las.inf.ethz.ch/files/berkenkamp16safe.pdf",
     "milestone": "m1",
-    "hash": "fbd9c7f2228e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://proceedings.mlr.press/v205/wu23c/wu23c.pdf",
-    "milestone": "m2",
-    "hash": "555ea727ddfa",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2610.31829v1",
-    "milestone": "m3",
-    "hash": "ed625807fb36",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a66006db7bc2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://las.inf.ethz.ch/files/berkenkamp16safe.pdf",
     "milestone": "m2",
-    "hash": "555ea727ddfa",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "454a997d7bfa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://las.inf.ethz.ch/files/berkenkamp16safe.pdf",
     "milestone": "m3",
-    "hash": "ed625807fb36",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1b303acd945d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://las.inf.ethz.ch/files/berkenkamp16safe.pdf",
     "milestone": "m4",
     "hash": "954d90571491",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://las.inf.ethz.ch/files/berkenkamp16safe.pdf",
     "milestone": "completion",
     "hash": "162915f44eb5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v205/wu23c/wu23c.pdf",
     "milestone": "m1",
-    "hash": "fbd9c7f2228e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a66006db7bc2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.mlr.press/v205/wu23c/wu23c.pdf",
+    "milestone": "m2",
+    "hash": "454a997d7bfa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v205/wu23c/wu23c.pdf",
     "milestone": "m3",
-    "hash": "ed625807fb36",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1b303acd945d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v205/wu23c/wu23c.pdf",
     "milestone": "m4",
     "hash": "954d90571491",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v205/wu23c/wu23c.pdf",
     "milestone": "completion",
     "hash": "162915f44eb5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.31829v1",
     "milestone": "m1",
-    "hash": "fbd9c7f2228e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a66006db7bc2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.31829v1",
     "milestone": "m2",
-    "hash": "555ea727ddfa",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "454a997d7bfa",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.31829v1",
+    "milestone": "m3",
+    "hash": "1b303acd945d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.31829v1",
     "milestone": "m4",
     "hash": "954d90571491",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.31829v1",
     "milestone": "completion",
     "hash": "162915f44eb5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -908,8 +938,83 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 2 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"A controller improves its policy, the rule it uses to choose actions, within a fixed budget of trials on a physical system. Trials consume material or change the system irreversibly. Feedback on performance may come only at rare events or long after the action that caused the outcome. The controller stays within explicit safety limits throughout learning. It has no adequate external simulator, but it may learn a predictive model from the permitted data.\". Reason: The definition leaves sparse rewards unexplained and leaves readers to infer whether the controller may learn its own predictive model."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Each trial on an injection-molding machine uses resin and occupies the machine. For one part specified at 8.75 \\u00b1 0.03 g, the estimated cost of learning the settings from scratch was at least 250 molding cycles. Settings learned in simulation can still produce underweight parts when production conditions differ. Learning from fewer measured parts would let technicians bring a new mold into production with less waste, provided the machine stays within its operating limits during setup.\". Reason: The current paragraph refers to operating scales without giving one or explaining what fewer safe trials would mean for an operator."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Starting from a stabilizing controller, tune the two horizontal position-control gains on the quadrotor to improve its response to a 1 m change in the x-position command. Score each 5 s response using J from equations 15\\u201316, which weights the tracking error, motion and control input relative to the initial controller. Every gain setting tested on the vehicle must satisfy J \\u2265 0.\"; threshold_quote = \"The safe threshold is set at Jmin = 0.\"; threshold_ref = 3. Reason: The criterion mixes the observed experiment count with the test and leaves the reader to infer what the quadrotor performance floor measures."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"Using physical observations and a model learned from them, train the UR5 arm to grasp one of three balls and carry it to the opposite bin. A grasp earns +1, release in the original bin earns \\u22121 and placement in the opposite bin earns +10. The bin locations are supplied. Vertical motion is enabled only while the gripper holds an object, and the gripper opens automatically over the correct bin. Training uses no external simulator.\". Reason: The reported transfer rate and training time are outcomes, and automatic gripper opening is an important condition for interpreting what the robot learns."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Run three independent 3 h hardware training sessions with the same prior data, including 50 successful task demonstrations and 200 recovery trajectories. Evaluate each final policy over 50 hardware episodes. Score insertion by the error at the gripper\\u2019s controlled reference point: within 2 mm in x and y, 5 mm in z and 0.15 rad in orientation, optionally combined with the protocol\\u2019s visual classifier. Separately count keep-out-region breaches and excessive contact force during training, counting a continuous failure as one event.\". Reason: The criterion presents the observed success rate and unsafe-event count alongside the pose tolerances, obscuring which quantities define a successful insertion."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 5 of 5 proposed operations from MLC-09-revise-20261125T093725937318Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m3."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 0 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 1 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "definition is 457 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 7 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 0 candidates returned, 0 dropped as sources already used, 0 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 0 of 0 new candidates, without search. Skipped: none. Dropped rows: none. Replaced 6 earlier rows. Added 6 results: 6 from sources already used, 0 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 6 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-25"
  }
 }
