@@ -319,14 +319,29 @@
   ],
   "prompt": "5e97d4b8dfc3"
  },
+ "review": {
+  "state": "published",
+  "note": null,
+  "into": null,
+  "at": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "state": "published"
+   }
+  ]
+ },
  "page": {
   "id": "MLC-01",
   "title": "Predictive theory of deep learning",
   "definition": "A mathematical theory predicts specified task scores and failures under specified changes in test-data distributions before a deep network is trained. It covers feature learning, in which training changes internal representations, and states the architectures, training procedures, data and compute budgets to which its predictions apply.",
   "goal": {
-   "need": "Kaplan et al.'s experiments span the model and data ranges below. OpenAI subsequently forecast a code-task metric using models trained with at most 1/1,000 of GPT-4's training compute. Such forecasts permit comparisons before committing the corresponding training resources. Predicting failures under specified changes in test-data distributions would extend their scope.",
+   "need": "Training the Llama 3.1 model family took 39.3 million H100 GPU-hours. Small runs help developers estimate average loss, but that leaves open how well a model will perform on a particular task. A tumour detector, for example, classified 93.2% of tissue patches correctly in its original setting and 70.3% at a held-out hospital. Forecasts for specified tasks and populations could help teams choose which runs to fund and where a model needs testing before deployment.",
    "need_refs": [
+    12,
     1,
+    13,
+    5,
     2
    ],
    "figures": {
@@ -371,8 +386,8 @@
     {
      "body": "OpenAI",
      "year": "2023",
-     "quote": "Having a sense of the capabilities of a model before training can improve decisions around alignment, safety, and deployment.",
-     "context": null,
+     "quote": "register performance predictions across various capabilities before large model training begins",
+     "context": "Section 3.2 of the GPT-4 Technical Report names prospective capability prediction as a goal. Its scope is narrower than a theory of feature learning and distribution shift.",
      "ref": 2,
      "checked": true
     }
@@ -401,7 +416,7 @@
    {
     "id": "m1",
     "title": "A trained neural network receives a valid population-error bound below 1.",
-    "criterion": "Compute an upper bound below 1 on a trained network's population misclassification probability, retaining the bound's stated assumptions and confidence. This is the nonvacuity criterion. Dziugaite and Roy's 2017 binary-MNIST experiments used 55,000 training and 10,000 test images. Their true-label stochastic-network bounds were at most 0.23, each holding with probability 0.965 over training-set sampling and bound-estimation randomness. These bounds use trained weights.",
+    "criterion": "Compute a valid upper bound strictly below 1 on the trained network’s probability of misclassifying a new example from the stated population. Specify the sampling assumptions and confidence level. For a stochastic network, include the randomness of the classifier in the definition of its error.",
     "set_by": "The learning-theory convention of nonvacuity, explicitly defined by Dziugaite and Roy in their 2017 UAI paper, introduction; experimental confidence is specified in Section 4.4.",
     "set_by_kind": "community_convention",
     "threshold_quote": "nonvacuous, i.e., before the generalization error falls below 1.",
@@ -416,7 +431,7 @@
    {
     "id": "m2",
     "title": "A generalization predictor wins PGDL on its four hidden image-classification tasks.",
-    "criterion": "Finish first under the NeurIPS 2020 Predicting Generalization in Deep Learning competition's final evaluation. Predict generalization differences using trained networks and training data without test labels. The score uses conditional mutual information, minimized over conditioning sets and averaged across tasks. The 2021 report records interpex first with 22.92 on a scale whose maximum is 100. The four final tasks are numbered 6–9. This tests prediction after training.",
+    "criterion": "Finish first in the NeurIPS 2020 Predicting Generalization in Deep Learning final evaluation on hidden tasks 6–9. Use the trained networks and training data, without test labels, to predict which model in each pair generalizes better. For each task the organisers score agreement with the observed ordering using the minimum conditional mutual information over the prescribed hyperparameter conditioning sets. The final score is the mean across the four tasks.",
     "set_by": "NeurIPS 2020 PGDL competition organisers; evaluation procedure, final-winner rule and results in the 2021 competition report.",
     "set_by_kind": "prize",
     "threshold_quote": "the highest scoring solution is used for determining the final winners.",
@@ -431,9 +446,9 @@
    {
     "id": "m3",
     "title": "A feature-learning theory recovers the Tensor Programs dynamics at infinite width and γ₀ = 1.",
-    "criterion": "Recover the previously derived Tensor Programs stochastic process for changing hidden representations in the specified infinite-width parameterization at feature-learning strength γ₀ = 1. Bordelon and Pehlevan's peer-reviewed 2022 dynamical field theory meets this analytical consistency test and provides numerical comparisons with finite networks. Its infinite-width and gradient-flow assumptions restrict the result; it does not establish prospective task-and-shift forecasts for finite networks.",
-    "set_by": "Bordelon and Pehlevan, NeurIPS 2022, Section 1, contribution 2; the published analytical consistency test is specific to their parameterization.",
-    "set_by_kind": "community_convention",
+    "criterion": "For a network trained by discrete-time gradient descent in the infinite-width maximal-update parameterization, set the feature-learning strength γ₀ to 1. Derive the stochastic process for the hidden preactivations and show that it agrees with the Tensor Programs process in that parameterization.",
+    "set_by": "Atlas fallback. Bordelon and Pehlevan specify this analytical comparison in sections 1 and 1.1. No outside body was found to adopt it as a milestone.",
+    "set_by_kind": "atlas",
     "threshold_quote": "the same stochastic process obtained previously with Tensor Programs",
     "threshold_ref": 8,
     "refs": [
@@ -446,7 +461,7 @@
    {
     "id": "m4",
     "title": "A pretraining forecast predicts a declared task metric within an advance-specified error tolerance.",
-    "criterion": "Predict a specified task metric using only information available before evaluation training, then obtain agreement within an accuracy tolerance fixed in advance. OpenAI's 2023 report compares forecasts with measured mean log pass rates on 23 HumanEval coding problems. Predictions were registered before training completed using information available before training. The report supplies no numerical acceptance tolerance, so it does not establish this stricter test. The report is not peer reviewed.",
+    "criterion": "Before training the network to be evaluated, fix the task, scoring rule, numerical prediction and acceptable prediction error. Train the network and measure the declared score. The difference between the forecast and the measured score must fall within the tolerance fixed before training.",
     "set_by": "Atlas fallback; OpenAI's GPT-4 Technical Report, Section 3.2 and Figure 2, supplies a prospective comparison but no numerical acceptance tolerance or publicly specified registration protocol was found.",
     "set_by_kind": "atlas",
     "threshold_quote": null,
@@ -461,7 +476,7 @@
    {
     "id": "m5",
     "title": "One team validates pretraining forecasts of task scores and shift failures in feature-learning networks.",
-    "criterion": "One team obtains prospective agreement between theory and experiment for both specified task scores and a specified distribution-shift failure in finite networks that learn internal representations. The training setup, task thresholds, shifted distribution and prediction tolerances are fixed before evaluation training. The tolerances distinguish success from failure. This is the integrated demonstration before independent replication; no study establishing this combined result was found.",
+    "criterion": "One team obtains prospective agreement between theory and experiment for both specified task scores and a specified distribution-shift failure in finite networks that learn internal representations. The training setup, task thresholds, shifted distribution and prediction tolerances are fixed before evaluation training. The tolerances distinguish success from failure.",
     "set_by": "Atlas fallback; searches of NSF and DARPA programme goals, PGDL criteria and the learning-mechanics literature found no adopted test combining these requirements.",
     "set_by_kind": "atlas",
     "threshold_quote": null,
@@ -476,13 +491,45 @@
     "status": "active",
     "replaced_by": [],
     "threshold_checked": null
+   },
+   {
+    "id": "m6",
+    "title": "A theory predicts the order in which a three-layer linear network learns input–output modes.",
+    "criterion": "For a linear network with one hidden layer, use whitened inputs, squared-error gradient flow and small, balanced initial weights aligned with the singular vectors of the input–output correlation matrix. Predict the order in which modes of distinct strengths reach half their final amplitude. Compare the prediction with simulated learning curves: a mode with a larger singular value must reach its halfway point earlier when the modes start at the same sufficiently small amplitude.",
+    "set_by": "Atlas fallback. Saxe, McClelland and Ganguli derive the ordering in section 1.3 and compare half-learning times in Figure 3. No outside body was found to designate this experiment as a milestone.",
+    "set_by_kind": "atlas",
+    "threshold_quote": "Thus the stronger an input-output relationship, the quicker it is learned.",
+    "threshold_ref": 14,
+    "refs": [
+     14,
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m7",
+    "title": "A theory predicts which test-set reweighting raises a wide network’s error and which lowers it.",
+    "criterion": "Use a fixed uniform training distribution on 1,000 MNIST images of 8s and 9s and a fully connected depth-3 ReLU network with 2,000 units per hidden layer. Use its neural tangent kernel to select two reweightings of the test images, one predicted to increase mean squared error and one to decrease it. At the same training sample size, the measured changes averaged over random training draws must have the predicted signs relative to uniform test weighting.",
+    "set_by": "Atlas fallback. Section 3.1 and Figure 1 of Canatar, Bordelon and Pehlevan define the matched comparison and both directions of change. No outside body was found to adopt this comparison as a pass criterion.",
+    "set_by_kind": "atlas",
+    "threshold_quote": "lower generalization error while the detrimental measure (orange) has higher generalization error than the matched case",
+    "threshold_ref": 15,
+    "refs": [
+     15
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
    }
   ],
   "measures": [],
   "not_found": [
    "No external completion criterion combining pretraining task prediction, feature learning and specified distribution-shift failures was found.",
    "No numerical acceptance tolerance or public registration protocol for OpenAI's HumanEval forecasts was found.",
-   "No adopted milestone sequence or study establishing the combined prospective demonstration and its independent replication was found."
+   "No adopted milestone sequence or study establishing the combined prospective demonstration and its independent replication was found.",
+   "No academy or programme statement was found judging a predictive theory within a specified network family infeasible or unworthy of pursuit."
   ],
   "references": [
    {
@@ -638,12 +685,140 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 12,
+    "kind": "web",
+    "url": "https://huggingface.co/meta-llama/Llama-3.1-405B",
+    "doi": null,
+    "title": "meta-llama/Llama-3.1-405B",
+    "authors": "Meta",
+    "container": "Hugging Face",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 13,
+    "kind": "journal",
+    "url": "https://proceedings.mlr.press/v139/koh21a/koh21a.pdf",
+    "doi": null,
+    "title": "WILDS: A Benchmark of in-the-Wild Distribution Shifts",
+    "authors": "Pang Wei Koh, Shiori Sagawa, Henrik Marklund, Sang Michael Xie, Marvin Zhang, Akshay Balsubramani, Weihua Hu, Michihiro Yasunaga, Richard Lanas Phillips, Irena Gao, Tony Lee, Etienne David, Ian Stavness, Wei Guo, Berton A. Earnshaw, Imran S. Haque, Sara Beery, Jure Leskovec, Anshul Kundaje, Emma Pierson, Sergey Levine, Chelsea Finn, Percy Liang",
+    "container": "Proceedings of the 38th International Conference on Machine Learning",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 14,
+    "kind": "journal",
+    "url": "https://www.saxelab.org/assets/papers/Saxe2014.pdf",
+    "doi": null,
+    "title": "Exact solutions to the nonlinear dynamics of learning in deep linear neural networks",
+    "authors": "Andrew M. Saxe, James L. McClelland, Surya Ganguli",
+    "container": "International Conference on Learning Representations 2014",
+    "year": "2014",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 15,
+    "kind": "journal",
+    "url": "https://papers.nips.cc/paper_files/paper/2021/file/691dcb1d65f31967a874d18383b9da75-Paper.pdf",
+    "doi": null,
+    "title": "Out-of-Distribution Generalization in Kernel Regression",
+    "authors": "Abdulkadir Canatar, Blake Bordelon, Cengiz Pehlevan",
+    "container": "Advances in Neural Information Processing Systems 34",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 16,
+    "kind": "journal",
+    "url": "https://www.cambridge.org/core/journals/acta-numerica/article/deep-learning-a-statistical-viewpoint/7BCB89D860CEDDD5726088FAD64F2A5A",
+    "doi": "10.1017/S0962492921000027",
+    "title": "Deep learning: a statistical viewpoint",
+    "authors": "Bartlett PL, Montanari A, Rakhlin A",
+    "container": "Acta Numerica",
+    "year": "2021",
+    "volume": "30",
+    "issue": null,
+    "pages": "87-201",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 17,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/1312.6120",
+    "doi": null,
+    "title": "Exact solutions to the nonlinear dynamics of learning in deep linear neural networks",
+    "authors": "Saxe AM, McClelland JL, Ganguli S",
+    "container": "arXiv",
+    "year": "2013",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 18,
+    "kind": "report",
+    "url": "https://proceedings.neurips.cc/paper/2021/file/691dcb1d65f31967a874d18383b9da75-Paper.pdf",
+    "doi": null,
+    "title": "Out-of-Distribution Generalization in Kernel Regression",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 19,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2610.23729",
+    "doi": null,
+    "title": "Escaping Parameter Space: Tight Generalization Bounds via Representation Quality",
+    "authors": "Göring N, Zhang S, DeMoss B, Louis AA",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 20,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2503.07325",
+    "doi": null,
+    "title": "Non-vacuous Generalization Bounds for Deep Neural Networks without any modification to the trained models",
+    "authors": "Than K, Phan D",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
    }
   ],
   "milestone_order": [
+   "m6",
    "m1",
    "m2",
    "m3",
+   "m7",
    "m4",
    "m5"
   ],
@@ -652,272 +827,650 @@
     "milestone": "m4",
     "case": null,
     "verdict": "partial",
-    "finding": "Language-model loss scaling predicts a 0.95 loss factor when parameters double; number of training runs not stated.",
-    "detail": "The prediction comes from empirical scaling-law fits. The text does not report a prospectively registered forecast tested against an advance-specified error tolerance.",
-    "quote": "for example, doubling the number of parameters yields a loss that\nis smaller by a factor 2−αN = 0.95.",
+    "finding": "A two-layer random-features network trained on 400 examples was compared with asymptotic squared-error predictions over 20 simulation runs.",
+    "detail": "Figure 6.1 plots the forecast and measured error across widths without tabulating individual values.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "WebText2 Transformers trained on 22M–23B tokens yielded a compute–test-loss scaling exponent of 0.050.",
+    "detail": "The empirical exponent comes from a frontier adjusted for batch size. The agreement is between scaling exponents, with no advance-specified tolerance on an individual test score.",
+    "quote": "≈ 0.054 (6.4)\nin excellent agreement with the exponent of Figure 13.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "WebText2 Transformers showed parallel test-loss improvements on four shifted corpora. Shifted test sample sizes were unreported.",
+    "detail": "The shifted sets were Internet Books, Books Corpus, English Wikipedia, and Common Crawl. The paper relates shifted loss to measured in-distribution loss.",
+    "quote": "Generalization performance to other data distributions improves smoothly with model size,\nwith only a small and very slowly growing offset from the WebText2 training distribution.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "MNIST trained stochastic neural networks: 60,000 training examples; computed population-error bounds below 1.",
-    "detail": "The certificates apply to randomized predictors on unseen examples from the training distribution. The stated per-certificate confidence is at least 0.965 over data and Monte Carlo samples; selecting among hyperparameter runs requires a union-bound correction. The excerpt gives no numerical certificate value.",
-    "quote": "Our\nexperiments on MNIST and CIFAR-10 show that our training methods produce competitive\ntest set errors and non-vacuous risk bounds with much tighter values than previous results in\nthe literature, showing promise not only to guide the learning algorithm through bounding\nthe risk but also for model selection.",
+    "finding": "A stochastic MNIST CNN trained on 60,000 images had a 1.55% upper bound on population misclassification.",
+    "detail": "Table 1 gives the exact value. The conclusion reports it as 1.5%. The reported grid-selected value does not include the union-bound correction discussed in the paper.",
+    "quote": "In particular, our results in MNIST with a small convolutional neural\nnetwork (2 hidden layers) achieve 1% test set error and a risk certiﬁcate of 1.5%.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Binary MNIST08 CNN, 10,597 data points: mean population misclassification bound 5.05%.",
-    "detail": "The KL bounds are reported across five runs with different seeds; the standard deviation was 0.16 percentage points. The bound assumes i.i.d. data and holds with at least 99% confidence over the training-set draw.",
-    "quote": null,
-    "checked": null,
+    "finding": "Pick-To-Learn DistilBERT on Amazon Polarity (144,000 training reviews) had a mean population misclassification upper bound of 13.91%.",
+    "detail": "The 13.91% figure summarizes five run-specific certificates. Corollary 6 gives the confidence guarantee over the training draw and applies uniformly to the sample-compressed predictors for a fixed reconstruction function.",
+    "quote": "Our bound is much tighter than the binomial approximation bound, with a certificate of\n13.91\n%\n13.91\\%\nfor a train error of\n4.73\n%\n4.73\\%\n.",
+    "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "Interpex ranked first across four final image-classification tasks, with an average score of 22.92.",
-    "detail": "The winning measure combined the Davies-Bouldin Index with label-wise Mixup. The final tasks were 6–9, and the score’s theoretical maximum was 100.",
-    "quote": "Our winning solution involves quantifying both consistency and\nrobustness of intermediate representations by combining the DB Index and Mixup. This\ngives us an average score of 22.92 on the ﬁnal set of tasks.",
+    "finding": "Team Interpex won PGDL across four hidden image-classification tasks with a mean score of 22.92.",
+    "detail": "Table 1 gives the task scores and Table 4 records the official first-place finish. The source is a conference proceedings paper.",
+    "quote": "gives us an average score of 22.92 on the ﬁnal set of tasks.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "met",
-    "finding": "Bordelon and Pehlevan’s theory recovers Tensor Programs dynamics at γ₀ = 1; finite-network comparison used 10 CIFAR-10 training points.",
-    "detail": "The analytical result assumes infinite width and gradient flow; the authors describe the derivation as heuristic. The finite-network comparisons do not establish prospective task-and-shift forecasts.",
-    "quote": "We show that the\nﬁeld theory derivation recovers the recursive stochastic process of inﬁnite-width\nfeature learning networks obtained from Y ang & Hu with Tensor Programs [ 1].",
+    "finding": "For infinite-width networks with a fixed training-set size, the hidden-preactivation process agrees with Tensor Programs at γ₀ = 1.",
+    "detail": "The excerpt summarizes the discrete-time equivalence and points to Appendices M and N for the derivation. The source is a peer-reviewed NeurIPS conference proceedings paper.",
+    "quote": "We show that our discrete\ntime ﬁeld theory at unit feature learning strength \u00000 =1 recovers the stochastic process which was\nderived from TP .",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "A wide tanh network trained on 10 CIFAR-10 examples provides a measured MSE trajectory for comparison with theory.",
+    "detail": "The paper reports the numerical comparison in Figure 1(a) and gives no prediction-error tolerance for that comparison.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Three-layer linear network, 100 randomized simulations: compared predicted and simulated half-times, with 7 mode curves shown.",
+    "detail": "The analytical curves use u₀ = 10⁻⁶. The reported mode-by-mode simulation comparison uses small random weights, so it does not test the halfway ordering under the specified balanced, singular-vector-aligned initialization.",
+    "quote": "Thus the stronger an input-output relationship, the quicker it is\nlearned.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "met",
+    "finding": "On 1,000 MNIST 8s and 9s, the wide ReLU network’s mean squared error rose and fell as predicted under the two NTK-selected test reweightings.",
+    "detail": "Figure 1(d) compares the three test weightings at common training sample sizes. Error bars show standard deviations across 35 random trials. The source appears in peer-reviewed NeurIPS conference proceedings, represented here as a report because the schema has no proceedings category.",
+    "quote": "As promised, the beneﬁcial (blue) measure has\nlower generalization error while the detrimental measure (orange) has higher generalization error\nthan the matched case (black).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "Deterministic ReLU ResNet-18 trained on 60,000 MNIST examples had a mean certified population-error upper bound of 2.6%.",
+    "detail": "Five-fold cross-fitting used standard held-out test inputs without labels to measure fold-to-full prediction disagreement. The 95% guarantee applies per fixed training seed. The reported 2.6% summarizes the three seed-specific bounds.",
+    "quote": "On MNIST all architectures certify tightly (best:\nResNet-18 at\n2.6\n%\n2.6\\%\n)",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Pretrained ViT-L/16 V1, evaluated on 1,281,167 ImageNet training images, had a reported population misclassification upper bound of 29.957%.",
+    "detail": "Appendix A.1, equations (21)–(25), uses i.i.d. sampling and independence between regions after conditioning on the fitted classifier. Independence of the partition alone does not justify those steps.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://arxiv.org/abs/1611.03530",
+    "milestone": "m6",
+    "hash": "ae015b54e6be",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/1611.03530",
     "milestone": "m1",
-    "hash": "015ea91a3f18",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "8af582ea41d1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1611.03530",
     "milestone": "m2",
-    "hash": "c1258e51bae5",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "d0da1e56ea41",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1611.03530",
     "milestone": "m3",
-    "hash": "c794b93dd459",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "18c1495cf168",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/1611.03530",
+    "milestone": "m7",
+    "hash": "d23662c66a00",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1611.03530",
     "milestone": "m4",
-    "hash": "4a5972179f7b",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "b1f0f30c0f81",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1611.03530",
     "milestone": "m5",
-    "hash": "fb932c649111",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "88d5f3bda892",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1611.03530",
     "milestone": "completion",
     "hash": "774e7942957e",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cambridge.org/core/journals/acta-numerica/article/deep-learning-a-statistical-viewpoint/7BCB89D860CEDDD5726088FAD64F2A5A",
+    "milestone": "m6",
+    "hash": "ae015b54e6be",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cambridge.org/core/journals/acta-numerica/article/deep-learning-a-statistical-viewpoint/7BCB89D860CEDDD5726088FAD64F2A5A",
     "milestone": "m1",
-    "hash": "015ea91a3f18",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "8af582ea41d1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cambridge.org/core/journals/acta-numerica/article/deep-learning-a-statistical-viewpoint/7BCB89D860CEDDD5726088FAD64F2A5A",
     "milestone": "m2",
-    "hash": "c1258e51bae5",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "d0da1e56ea41",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cambridge.org/core/journals/acta-numerica/article/deep-learning-a-statistical-viewpoint/7BCB89D860CEDDD5726088FAD64F2A5A",
     "milestone": "m3",
-    "hash": "c794b93dd459",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "18c1495cf168",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cambridge.org/core/journals/acta-numerica/article/deep-learning-a-statistical-viewpoint/7BCB89D860CEDDD5726088FAD64F2A5A",
+    "milestone": "m7",
+    "hash": "d23662c66a00",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cambridge.org/core/journals/acta-numerica/article/deep-learning-a-statistical-viewpoint/7BCB89D860CEDDD5726088FAD64F2A5A",
     "milestone": "m4",
-    "hash": "4a5972179f7b",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "b1f0f30c0f81",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cambridge.org/core/journals/acta-numerica/article/deep-learning-a-statistical-viewpoint/7BCB89D860CEDDD5726088FAD64F2A5A",
     "milestone": "m5",
-    "hash": "fb932c649111",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "88d5f3bda892",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cambridge.org/core/journals/acta-numerica/article/deep-learning-a-statistical-viewpoint/7BCB89D860CEDDD5726088FAD64F2A5A",
     "milestone": "completion",
     "hash": "774e7942957e",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/1812.11118",
+    "milestone": "m6",
+    "hash": "ae015b54e6be",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1812.11118",
     "milestone": "m1",
-    "hash": "015ea91a3f18",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "8af582ea41d1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1812.11118",
     "milestone": "m2",
-    "hash": "c1258e51bae5",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "d0da1e56ea41",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1812.11118",
     "milestone": "m3",
-    "hash": "c794b93dd459",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "18c1495cf168",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/1812.11118",
+    "milestone": "m7",
+    "hash": "d23662c66a00",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1812.11118",
     "milestone": "m4",
-    "hash": "4a5972179f7b",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "b1f0f30c0f81",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1812.11118",
     "milestone": "m5",
-    "hash": "fb932c649111",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "88d5f3bda892",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1812.11118",
     "milestone": "completion",
     "hash": "774e7942957e",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2001.08361",
+    "milestone": "m6",
+    "hash": "ae015b54e6be",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2001.08361",
     "milestone": "m1",
-    "hash": "015ea91a3f18",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "8af582ea41d1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2001.08361",
     "milestone": "m2",
-    "hash": "c1258e51bae5",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "d0da1e56ea41",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2001.08361",
     "milestone": "m3",
-    "hash": "c794b93dd459",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "18c1495cf168",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2001.08361",
+    "milestone": "m7",
+    "hash": "d23662c66a00",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2001.08361",
     "milestone": "m4",
-    "hash": "4a5972179f7b",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "b1f0f30c0f81",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2001.08361",
     "milestone": "m5",
-    "hash": "fb932c649111",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "88d5f3bda892",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2001.08361",
     "milestone": "completion",
     "hash": "774e7942957e",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.jmlr.org/papers/volume22/20-879/20-879.pdf",
+    "milestone": "m6",
+    "hash": "ae015b54e6be",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.jmlr.org/papers/volume22/20-879/20-879.pdf",
     "milestone": "m1",
-    "hash": "015ea91a3f18",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "8af582ea41d1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.jmlr.org/papers/volume22/20-879/20-879.pdf",
+    "milestone": "m2",
+    "hash": "d0da1e56ea41",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.jmlr.org/papers/volume22/20-879/20-879.pdf",
+    "milestone": "m3",
+    "hash": "18c1495cf168",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.jmlr.org/papers/volume22/20-879/20-879.pdf",
+    "milestone": "m7",
+    "hash": "d23662c66a00",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.jmlr.org/papers/volume22/20-879/20-879.pdf",
+    "milestone": "m4",
+    "hash": "b1f0f30c0f81",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.jmlr.org/papers/volume22/20-879/20-879.pdf",
+    "milestone": "m5",
+    "hash": "88d5f3bda892",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.jmlr.org/papers/volume22/20-879/20-879.pdf",
+    "milestone": "completion",
+    "hash": "774e7942957e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2409.17932v3",
+    "milestone": "m6",
+    "hash": "ae015b54e6be",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2409.17932v3",
     "milestone": "m1",
-    "hash": "015ea91a3f18",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "8af582ea41d1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2409.17932v3",
+    "milestone": "m2",
+    "hash": "d0da1e56ea41",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2409.17932v3",
+    "milestone": "m3",
+    "hash": "18c1495cf168",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2409.17932v3",
+    "milestone": "m7",
+    "hash": "d23662c66a00",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2409.17932v3",
+    "milestone": "m4",
+    "hash": "b1f0f30c0f81",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2409.17932v3",
+    "milestone": "m5",
+    "hash": "88d5f3bda892",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2409.17932v3",
+    "milestone": "completion",
+    "hash": "774e7942957e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.mlr.press/v133/jiang21a/jiang21a.pdf",
+    "milestone": "m6",
+    "hash": "ae015b54e6be",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.mlr.press/v133/jiang21a/jiang21a.pdf",
+    "milestone": "m1",
+    "hash": "8af582ea41d1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.mlr.press/v133/jiang21a/jiang21a.pdf",
     "milestone": "m2",
-    "hash": "c1258e51bae5",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "d0da1e56ea41",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.mlr.press/v133/jiang21a/jiang21a.pdf",
+    "milestone": "m3",
+    "hash": "18c1495cf168",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.mlr.press/v133/jiang21a/jiang21a.pdf",
+    "milestone": "m7",
+    "hash": "d23662c66a00",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.mlr.press/v133/jiang21a/jiang21a.pdf",
+    "milestone": "m4",
+    "hash": "b1f0f30c0f81",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.mlr.press/v133/jiang21a/jiang21a.pdf",
+    "milestone": "m5",
+    "hash": "88d5f3bda892",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.mlr.press/v133/jiang21a/jiang21a.pdf",
+    "milestone": "completion",
+    "hash": "774e7942957e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2022/file/d027a5c93d484a4312cc486d399c62c1-Paper-Conference.pdf",
+    "milestone": "m6",
+    "hash": "ae015b54e6be",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2022/file/d027a5c93d484a4312cc486d399c62c1-Paper-Conference.pdf",
+    "milestone": "m1",
+    "hash": "8af582ea41d1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2022/file/d027a5c93d484a4312cc486d399c62c1-Paper-Conference.pdf",
+    "milestone": "m2",
+    "hash": "d0da1e56ea41",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedings.neurips.cc/paper_files/paper/2022/file/d027a5c93d484a4312cc486d399c62c1-Paper-Conference.pdf",
     "milestone": "m3",
-    "hash": "c794b93dd459",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "18c1495cf168",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2022/file/d027a5c93d484a4312cc486d399c62c1-Paper-Conference.pdf",
+    "milestone": "m7",
+    "hash": "d23662c66a00",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2022/file/d027a5c93d484a4312cc486d399c62c1-Paper-Conference.pdf",
+    "milestone": "m4",
+    "hash": "b1f0f30c0f81",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2022/file/d027a5c93d484a4312cc486d399c62c1-Paper-Conference.pdf",
+    "milestone": "m5",
+    "hash": "88d5f3bda892",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2022/file/d027a5c93d484a4312cc486d399c62c1-Paper-Conference.pdf",
+    "milestone": "completion",
+    "hash": "774e7942957e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1312.6120",
+    "milestone": "m6",
+    "hash": "ae015b54e6be",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.neurips.cc/paper/2021/file/691dcb1d65f31967a874d18383b9da75-Paper.pdf",
+    "milestone": "m7",
+    "hash": "d23662c66a00",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.23729",
+    "milestone": "m1",
+    "hash": "8af582ea41d1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2503.07325",
+    "milestone": "m1",
+    "hash": "8af582ea41d1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -959,20 +1512,108 @@
     "date": "2026-11-14",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 4 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Training the Llama 3.1 model family took 39.3 million H100 GPU-hours. Small runs help developers estimate average loss, but that leaves open how well a model will perform on a particular task. A tumour detector, for example, classified 93.2% of tissue patches correctly in its original setting and 70.3% at a held-out hospital. Forecasts for specified tasks and populations could help teams choose which runs to fund and where a model needs testing before deployment.\". Reason: The current rationale points to absent model ranges and gives no measure of the training commitment or of the error a change of deployment setting can expose."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by OpenAI, 2023: \"register performance predictions across various capabilities before large model training begins\". Reason: The report states both what OpenAI wanted registered and when registration should occur."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No academy or programme statement was found judging a predictive theory within a specified network family infeasible or unworthy of pursuit.\". Reason: The programme documents and the learning-mechanics agenda distinguish open technical questions from an institutional judgment against the goal."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after None: \"A theory predicts the order in which a three-layer linear network learns input–output modes.\". Reason: The existing milestones omit an early experiment in which a theory predicts what a network learns first."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Compute a valid upper bound strictly below 1 on the trained network\\u2019s probability of misclassifying a new example from the stated population. Specify the sampling assumptions and confidence level. For a stochastic network, include the randomness of the classifier in the definition of its error.\". Reason: The sample sizes, confidence level and observed bounds describe one experiment and obscure the general nonvacuity threshold."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"Finish first in the NeurIPS 2020 Predicting Generalization in Deep Learning final evaluation on hidden tasks 6\\u20139. Use the trained networks and training data, without test labels, to predict which model in each pair generalizes better. For each task the organisers score agreement with the observed ordering using the minimum conditional mutual information over the prescribed hyperparameter conditioning sets. The final score is the mean across the four tasks.\". Reason: PGDL scored the ordering of pairs of trained models, and the winning team’s score is a result rather than a threshold."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"For a network trained by discrete-time gradient descent in the infinite-width maximal-update parameterization, set the feature-learning strength \\u03b3\\u2080 to 1. Derive the stochastic process for the hidden preactivations and show that it agrees with the Tensor Programs process in that parameterization.\"; set_by = \"Atlas fallback. Bordelon and Pehlevan specify this analytical comparison in sections 1 and 1.1. No outside body was found to adopt it as a milestone.\"; set_by_kind = \"atlas\"; threshold_quote = \"the same stochastic process obtained previously with Tensor Programs\"; threshold_ref = 8; refs = [8]. Reason: The Tensor Programs comparison uses discrete-time gradient descent, and the cited paper presents it as an analytical check specific to its parameterization."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m3: \"A theory predicts which test-set reweighting raises a wide network’s error and which lowers it.\". Reason: The existing milestones first test distribution shift in the combined demonstration and omit a controlled test of the direction of the error change."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"Before training the network to be evaluated, fix the task, scoring rule, numerical prediction and acceptable prediction error. Train the network and measure the declared score. The difference between the forecast and the measured score must fall within the tolerance fixed before training.\". Reason: The current criterion mixes the timing required of a forecast with the timing, results and publication status of the HumanEval study."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m5: criterion = \"One team obtains prospective agreement between theory and experiment for both specified task scores and a specified distribution-shift failure in finite networks that learn internal representations. The training setup, task thresholds, shifted distribution and prediction tolerances are fixed before evaluation training. The tolerances distinguish success from failure.\". Reason: The final sentence reports a literature-search outcome that already has a separate place in the entry."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove statement 2. Reason: The current OpenAI quotation gives a benefit of forecasting, while the same report explicitly names the goal."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 11 of 11 proposed operations from MLC-01-revise-20261125T090359938982Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m6, m1, m2, m3, m7, m4, m5."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 4 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 4 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 8 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 4 candidates returned, 0 dropped as sources already used, 4 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 4 of 4 new candidates, without search. Skipped: none. Dropped rows: none. Replaced 5 earlier rows. Added 12 results: 8 from sources already used, 4 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 3 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 9 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-14"
- },
- "review": {
-  "state": "published",
-  "note": null,
-  "into": null,
-  "at": "2026-11-14",
-  "log": [
-   {
-    "date": "2026-11-14",
-    "state": "published"
-   }
-  ]
+  "results_run": "2026-11-25"
  }
 }
