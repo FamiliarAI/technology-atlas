@@ -315,15 +315,30 @@
   ],
   "prompt": "5e97d4b8dfc3"
  },
+ "review": {
+  "state": "published",
+  "note": null,
+  "into": null,
+  "at": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "state": "published"
+   }
+  ]
+ },
  "page": {
   "id": "CPE-08",
   "title": "Atomically precise digital computers",
-  "definition": "A stored-program digital computer uses active devices whose defining atoms are individually specified and tolerates fabrication defects. Including memory, wiring, control, redundancy and cooling, it occupies less volume and costs less per completed workload than a CMOS computer matched for throughput and output accuracy; CMOS is the transistor technology used in conventional integrated circuits.",
+  "definition": "A digital computer executes instructions stored in memory using devices whose active atomic sites are individually specified. In silicon, the chosen site can hold a dopant atom or expose a dangling bond, the unsatisfied bond left when hydrogen is removed from a surface atom. A wire and an OR gate made from dangling bonds are examples of circuit elements. The complete computer tolerates fabrication defects and, counting memory, contacts, wiring, control, redundancy and cooling, occupies less space and costs less per workload than a conventional CMOS computer matched for throughput, latency and output accuracy.",
   "goal": {
-   "need": "DOE's 2019 project contrasted 10 nm ion-implantation placement resolution with a ±0.3 nm positioning target for dopants in silicon. These are fabrication quantities, not transistor pitch. IEEE's 2024 roadmap identifies signal gain, restoration, reliability and manufacture at low cost as additional requirements for a competing logic technology.",
+   "need": "Data centres used about 415 TWh of electricity worldwide in 2024. In CMOS processors, heat limits how much logic can operate in a given area. One atomic alternative passes a bit along a wire through interactions between electrons shared by neighbouring pairs of silicon sites. If the savings extend to the whole machine, including control and cooling, operators could do more work within the same power budget. One application is the matrix multiplication used in machine learning.",
    "need_refs": [
-    1,
-    2
+    11,
+    2,
+    7,
+    12,
+    9
    ],
    "figures": {
     "caption": "Silicon dopant placement in DOE's 2019 project description",
@@ -371,6 +386,14 @@
      "context": "The review identifies this as a development objective following exploratory research on silicon dangling bonds.",
      "ref": 4,
      "checked": false
+    },
+    {
+     "body": "U.S. Department of Energy, Advanced Manufacturing Office",
+     "year": "2017",
+     "quote": "Develop and demonstrate a 1 μm² atomically precise circuit",
+     "context": "Target 16.5 in the draft Multi-Year Program Plan for fiscal years 2017–2021 specifies a circuit-area demonstration under Advanced Energy Efficient Computing.",
+     "ref": 13,
+     "checked": false
     }
    ]
   },
@@ -400,8 +423,8 @@
   "milestones": [
    {
     "id": "m1",
-    "title": "A working atomic electronic device has active sites positioned within one silicon lattice spacing.",
-    "criterion": "Fabricate and electrically characterize a device whose defining active sites are positioned to one silicon lattice spacing or better. This tests placement, not device pitch. Fuechsle et al. reported one phosphorus transistor on 19 February 2012, with one-site placement accuracy and transport measured at about 20 mK. In 2018, Huff et al. reported a wire and a two-input OR-gate design made from silicon dangling bonds, exposed atomic sites left by removing hydrogen. Measurements at 4.5 K covered all four gate-input combinations.",
+    "title": "A working silicon device has its active sites within one lattice spacing of their specified positions.",
+    "criterion": "Fabricate a silicon device, establish the positions of its defining active sites relative to their intended lattice sites, and measure its electrical response. The placement error must be no greater than one silicon lattice spacing.",
     "set_by": "Atomic-device research convention used by Fuechsle et al. and documented in Schofield et al.'s 2025 roadmap, section 5.4; the quoted numerical placement capability concerns silicon dopants.",
     "set_by_kind": "community_convention",
     "threshold_quote": "placement precision of ±1 atomic spacing.",
@@ -427,14 +450,17 @@
      2,
      7
     ],
-    "status": "active",
-    "replaced_by": [],
+    "status": "retired",
+    "replaced_by": [
+     "m5",
+     "m6"
+    ],
     "threshold_checked": true
    },
    {
     "id": "m3",
-    "title": "A scanning tunnelling microscope fabricates an atomic device without operator intervention.",
-    "criterion": "Starting from an operator's fabrication-strategy input file, the scanning tunnelling microscope and its controller complete the programmed atomic-fabrication steps without operator intervention, including tip recovery and recognition of existing features. This is an automation target, not a throughput or cost threshold. NIST's page updated 5 October 2026 describes it as a goal.",
+    "title": "A scanning tunnelling microscope completes all its device-fabrication steps without operator intervention.",
+    "criterion": "The operator supplies an input file specifying the fabrication strategy. The controller and scanning tunnelling microscope then complete every programmed microscope step, recognizing existing features and detecting and correcting tip changes as needed, without further operator intervention.",
     "set_by": "NIST Atom-scale Devices: Engineering, Metrology and Manufacturability programme, Towards manufacturability section; the target concerns STM fabrication.",
     "set_by_kind": "government_programme",
     "threshold_quote": "perform all fabrication steps without operator intervention.",
@@ -449,7 +475,7 @@
    {
     "id": "m4",
     "title": "An atomic-device computer executes stored programs correctly despite characterized fabrication defects.",
-    "criterion": "A physical computer uses its atomically defined devices to execute instructions stored in memory and produces the specified outputs on stated programs despite characterized fabrication defects. Implemented repair, avoidance or redundancy may provide tolerance. This is the prototype before cost and density qualification. Walter et al.'s 2023 preprint models 13 substrate-defect types; Ng et al.'s 2026 study synthesizes and simulates dangling-bond accelerator layouts. Neither is a hardware demonstration of this criterion.",
+    "criterion": "A physical computer uses its atomically defined devices to execute instructions stored in memory. Characterize the fabrication defects present, identify any repair, avoidance or redundancy used, and verify that the computer produces the specified outputs for the stated programs.",
     "set_by": "Atlas fallback: searches of IEEE IRDS, NIST, DOE and semiconductor roadmaps found no published acceptance test for an integrated, defect-tolerant stored-program atomic computer.",
     "set_by_kind": "atlas",
     "threshold_quote": null,
@@ -459,6 +485,69 @@
      4,
      8,
      9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m5",
+    "title": "Fabricated atomic gates implement a functionally complete set of Boolean operations.",
+    "criterion": "Measure the output of each gate for every combination of its binary inputs. The measured truth tables must form a set from which any Boolean function can be constructed. A two-input NAND gate alone or a two-input NOR gate alone is sufficient.",
+    "set_by": "IEEE IRDS Beyond CMOS Focus Team, Beyond CMOS (2024), section 7.1.1",
+    "set_by_kind": "professional_society",
+    "threshold_quote": "realizing any arbitrary logic function",
+    "threshold_ref": 2,
+    "refs": [
+     2,
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m6",
+    "title": "An atomic gate restores its signal and drives at least two following gates.",
+    "criterion": "Connect one gate output to at least two downstream gate inputs. Verify that both receive valid logic levels, that each stage restores its output to a valid level when its input is degraded within the operating range, and that the output is isolated from the input. Operate the clock and control circuitry needed for the demonstration.",
+    "set_by": "IEEE IRDS Beyond CMOS Focus Team, Beyond CMOS (2024), section 7.1.1",
+    "set_by_kind": "professional_society",
+    "threshold_quote": "output may drive more than one following gate",
+    "threshold_ref": 2,
+    "refs": [
+     2,
+     9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m7",
+    "title": "An atomically precise circuit operates over an area of one square micrometre.",
+    "criterion": "Fabricate and demonstrate an atomically precise circuit spanning 1 µm². Measure the area occupied by the circuit’s atomically patterned features separately from the area of its substrate and external contact pads.",
+    "set_by": "U.S. Department of Energy, Advanced Manufacturing Office, draft Multi-Year Program Plan for fiscal years 2017–2021, target 16.5",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "Develop and demonstrate a 1 μm² atomically precise circuit",
+    "threshold_ref": 13,
+    "refs": [
+     13
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": false
+   },
+   {
+    "id": "m8",
+    "title": "An automated layout for silicon dangling-bond logic avoids defects mapped on a measured surface.",
+    "criterion": "From a scanning tunnelling microscope image of the intended silicon surface, automatically locate and classify pre-existing defects. Use that map to place the gates and route their connections so that the specified circuit avoids sites excluded by each defect’s effect on the logic.",
+    "set_by": "Roadmap on atomic-scale semiconductor devices (2025), section 3.4, and the defect-aware physical-design method of Walter and colleagues",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "Automated mapping and categorising of pre-existing defects is needed, as is defect avoiding circuit layout.",
+    "threshold_ref": 5,
+    "refs": [
+     5,
+     8
     ],
     "status": "active",
     "replaced_by": [],
@@ -611,126 +700,500 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 11,
+    "kind": "report",
+    "url": "https://www.iea.org/reports/energy-and-ai/energy-demand-from-ai",
+    "doi": null,
+    "title": "Energy demand from AI",
+    "authors": "International Energy Agency",
+    "container": "Energy and AI",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 12,
+    "kind": "web",
+    "url": "https://research.google/pubs/power-provisioning-for-a-warehouse-sized-computer/",
+    "doi": "10.1145/1250662.1250665",
+    "title": "Power Provisioning for a Warehouse-sized Computer",
+    "authors": "Fan X, Weber WD, Barroso LA",
+    "container": "Proceedings of the 34th annual international symposium on Computer architecture",
+    "year": "2007",
+    "volume": null,
+    "issue": null,
+    "pages": "13-23",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 13,
+    "kind": "report",
+    "url": "https://www.energy.gov/sites/prod/files/2017/01/f34/Draft%20Advanced%20Manufacturing%20Office%20MYPP_0.pdf",
+    "doi": null,
+    "title": "Advanced Manufacturing Office Multi-Year Program Plan for Fiscal Years 2017 through 2021",
+    "authors": "U.S. Department of Energy, Advanced Manufacturing Office",
+    "container": null,
+    "year": "2017",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 14,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41467-017-02377-4.pdf",
+    "doi": "10.1038/s41467-017-02377-4",
+    "title": "A two-dimensional ON/OFF switching device based on anisotropic interactions of atomic quantum dots on Si(100):H",
+    "authors": "Yengui M, Duverger E, Sonnet P, Riedel D",
+    "container": "Nat Commun",
+    "year": "2017",
+    "volume": "8",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 15,
+    "kind": "report",
+    "url": "https://www.zyvexlabs.com/wp-content/uploads/2016/10/ICNTabstract.pdf",
+    "doi": null,
+    "title": "Automated Atomically Precise Lithography over Multiple Length Scales for Complete Nanodevice Fabrication",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 16,
+    "kind": "preprint",
+    "url": "https://arxiv.org/abs/1803.07059",
+    "doi": null,
+    "title": "Autonomous Scanning Probe Microscopy in-situ Tip Conditioning through Machine Learning",
+    "authors": "Rashidi M, Wolkow RA",
+    "container": "arXiv",
+    "year": "2018",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 17,
+    "kind": "journal",
+    "url": "https://orbi.uliege.be/handle/2268/34558",
+    "doi": "10.1002/cphc.200800568",
+    "title": "Reconfigurable Logic Devices on a Single Dopant Atom—Operation up to a Full Adder by Using Electrical Spectroscopy",
+    "authors": "Klein M, Lansbergen GP, Mol JA, Rogge S, Levine RD, Remacle F",
+    "container": "ChemPhysChem",
+    "year": "2009",
+    "volume": "10",
+    "issue": "1",
+    "pages": "162-173",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 18,
+    "kind": "report",
+    "url": "https://www.cda.cit.tum.de/files/eda/2023_nanoarch_minimal_gate_design.pdf",
+    "doi": null,
+    "title": "Minimal Design of SiDB Gates: An Optimal Basis for Circuits Based on Silicon Dangling Bonds",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 19,
+    "kind": "report",
+    "url": "https://www.cda.cit.tum.de/files/eda/2022_dac_hexagons_are_the_bestagons.pdf",
+    "doi": null,
+    "title": "Hexagons are the Bestagons: Design Automation for Silicon Dangling Bond Logic",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 20,
+    "kind": "preprint",
+    "url": "https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=923828",
+    "doi": null,
+    "title": "STM patterned nanowire measurements using photolithographically defined implants in Si(100)",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 21,
+    "kind": "preprint",
+    "url": "https://www.cda.cit.tum.de/files/eda/2026_bitplanarnet.pdf",
+    "doi": null,
+    "title": "BitPlanarNet: Learning-to-Layout Planar Gate Networks for Emerging Devices",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 22,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41467-018-05171-y.pdf",
+    "doi": "10.1038/s41467-018-05171-y",
+    "title": "Lithography for robust and editable atomic-scale silicon devices and memories",
+    "authors": "Achal R, Rashidi M, Croshaw J, Churchill D, Taucer M, Huff T, et al.",
+    "container": "Nat Commun",
+    "year": "2018",
+    "volume": "9",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 23,
+    "kind": "report",
+    "url": "https://www.cda.cit.tum.de/files/eda/2024_date_towards_atomic_defect_aware_sidb_design.pdf",
+    "doi": null,
+    "title": "Towards Atomic Defect-Aware Physical Design of Silicon Dangling Bond Logic on the H-Si(100)-2×1 Surface",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 24,
+    "kind": "report",
+    "url": "https://www.cda.cit.tum.de/files/eda/2024_ieee_nano_on_the_fly_gate_design.pdf",
+    "doi": null,
+    "title": "On-the-fly Defect-Aware Design of Circuits based on Silicon Dangling Bond Logic",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
    }
   ],
   "milestone_order": [
    "m1",
-   "m2",
+   "m5",
+   "m6",
    "m3",
+   "m8",
+   "m7",
    "m4"
   ],
   "results": [
    {
     "milestone": "m1",
     "case": "Dopant-defined silicon",
-    "verdict": "met",
-    "finding": "One single-phosphorus-atom transistor was fabricated with placement accuracy of one silicon lattice site.",
-    "detail": "The transistor operated at liquid helium temperatures; millikelvin electron transport measurements confirmed discrete quantum energy levels.",
-    "quote": "Here, we use a combination of scanning tunnelling microscopy and hydrogen-resist lithography to demonstrate a single-atom transistor in which an individual phosphorus dopant atom has been deterministically placed within an epitaxial silicon device architecture with a spatial accuracy of one lattice site.",
+    "verdict": "partial",
+    "finding": "The illustrated silicon fabrication sequence incorporates one phosphorus atom at a substitutional lattice site.",
+    "detail": "Comparison of experimental and simulated STM images identifies configurations during fabrication. The page gives no final target-to-site displacement for the incorporated atom.",
+    "quote": "Once the atom of interest has been isolated, the sample is heated to drive incorporation into the lattice, where the desired atom (phosphorus in figure 2) is substituted for one of the underlying silicon atoms.",
     "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 3,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": "Silicon dangling bonds",
     "verdict": "partial",
-    "finding": "One dangling-bond artificial molecule had its highest occupied and lowest unoccupied states measured.",
-    "detail": "The page reports spectroscopy of the structure but does not establish placement accuracy to one silicon lattice spacing or demonstrate an electrically operating device.",
-    "quote": "We were able to measure the highest occupied state and the lowest unoccupied state in detail and compare them to an analogous molecule in vacuum.",
+    "finding": "Scanning tunneling spectroscopy measured the electrical response of one STM-fabricated silicon dangling-bond molecule.",
+    "detail": null,
+    "quote": "Scanning tunneling spectroscopy of an artificial molecule created by an STM with dangling bonds on the hydrogen passivated silicon surface.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 3,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": "Dopant-defined silicon",
     "verdict": "partial",
-    "finding": "NIST reports automated STM tip-quality detection and in situ conditioning; sample size is not stated.",
-    "detail": "Tip recovery addresses part of the automation target. Completing all programmed fabrication steps without operator intervention, including feature recognition, remains a goal.",
-    "quote": "Automated tip quality detection and in situ conditioning.",
+    "finding": "Automated STM tip conditioning improved image quality in one illustrated before-and-after example.",
+    "detail": "The dangling bond serves as the imaging target for the tip-quality demonstration in the dopant-device fabrication workflow.",
+    "quote": "The black circle shows the appearance of a dangling bond as imaged by a tip that has been re-conditioned to be “sharp”.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 3,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": "Dopant-defined silicon",
+    "verdict": "met",
+    "finding": "One single-phosphorus silicon transistor showed electrical response with donor placement bounded to one lateral lattice spacing.",
+    "detail": "The placement bound comes from localization to the patterned patch. The exact occupied site within that patch was unresolved.",
+    "quote": "We have fabricated a single-atom transistor in which a single\nphosphorus atom is positioned between highly doped source and\ndrain leads with a lateral spatial accuracy of +1 atomic lattice\nspacing.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 6,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": "Silicon dangling bonds",
     "verdict": "met",
-    "finding": "One silicon dangling-bond OR gate was characterized across all 4 input combinations.",
-    "detail": "Dangling bonds were patterned at precise lattice locations. Charge configurations were measured by non-contact AFM at 4.5 K; fixed charges served as inputs.",
+    "finding": "One switchable silicon dangling-bond pair had both active sites at their intended lattice positions, implying zero lattice-site placement error.",
+    "detail": "Placement follows from STM identification of the intended lattice sites. The authors give no separate numerical uncertainty for placement.",
+    "quote": "After erasure of the first \nDB, the new DB was created two l attice sites away (teal marker), and the characterization was",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": "Silicon dangling bonds",
+    "verdict": "partial",
+    "finding": "One silicon dangling-bond OR gate produced the expected output for all four binary input combinations.",
+    "detail": null,
     "quote": "When a perturber is placed at either of the input \nbranches (Fig. 4g-i, j-l) or both (Fig. 4m-l) the effect of the perturber below the output branch is  \novercome, enforcing an output of 1 at the designated output DB. Together these configurations \nsatisfy the remaining rows of the truth table.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": "Silicon dangling bonds",
+    "verdict": "partial",
+    "finding": "STM hydrogen lithography produced one silicon structure with 8 dangling bonds.",
+    "detail": null,
+    "quote": "Hydrogen lithography was shown by \npatterning an 8 DB structure on the H-Si surface.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": "Silicon dangling bonds",
     "verdict": "partial",
-    "finding": "Silicon surface feature recognition achieved a weighted Dice score of 0.86; the dataset comprised 28 original images.",
-    "detail": "The authors report automated patterning of an 8-dangling-bond structure and integration with tip-shaping tools, but describe minimal user intervention. The text does not establish a run from an input file through completion including tip recovery without intervention; supplementary examples mention manual corrections.",
-    "quote": "The overall Dice score of the model is recorded at  0.86 which was calculated as a weighted \naverage of th e Dice score for each label.",
+    "finding": "The STM automation suite patterned one 8-dangling-bond structure in the main demonstration.",
+    "detail": "The authors describe integrating a previously developed tip-conditioning module. Automated lithography error detection and correction remained future work.",
+    "quote": "Once \nfound, the program begins patterning until it is complete (Figure 4b).",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m8",
+    "case": "Silicon dangling bonds",
+    "verdict": "partial",
+    "finding": "For one 8-dangling-bond pattern, automated placement used approximately 5 nm clearance around type 2 defects and step edges.",
+    "detail": "Clearance around type 2 defects was intended to reduce electrostatic interactions. Clearance around step edges kept the pattern on one terrace.",
+    "quote": "In order to decrease the local \nelectrostatic interactions of local charge defects with the DB pattern,24 an effective radius \nof ~5nm is applied to a ll type 2 defects on the surface.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": "Silicon dangling bonds",
+    "verdict": "partial",
+    "finding": "A Y-shaped silicon switch with 4 dangling-bond sites showed reversible changes in tunneling conductance. Measurements were repeated on three samples.",
+    "detail": "Figure 5 pairs the lattice-site design with STM topography, but gives no site-by-site placement error or uncertainty. The three-sample count applies to the study's measurements overall.",
+    "quote": "The Si-DBs are created in situ with the STM\ntip by applying a negative pulse on the desired Si –H bond.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": "Dopant-defined silicon",
+    "verdict": "partial",
+    "finding": "Automated STM lithography for phosphorus-in-silicon devices realigned to prewritten fiducials and achieved <1 pixel positioning error over ~100 nm. Sample size unreported.",
+    "detail": "The abstract claims unattended pattern writing as a system capability. The reported positioning tests and fiducial realignment establish component capabilities only. Realignment corrects tip position, and the abstract provides no evidence of recovery from changes to the tip itself.",
+    "quote": "our software can automatically re-align the tip position when \nnecessary to prewritten fiducial marks, so that errors do not accumulate.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": "Silicon dangling bonds",
+    "verdict": "partial",
+    "finding": "In one silicon dangling-bond wire fabrication run, the STM routine detected a double tip and restored it in 3 conditioning steps.",
+    "detail": "The operator preselected the dangling bond used to assess tip quality and the spot used for tip conditioning.",
+    "quote": "After three tip\nconditioning events the routine correctly identiﬁed that\nthe tip quality had been restored and the user resumed\nfabrication.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": "Dopant-defined silicon",
+    "verdict": "partial",
+    "finding": "A silicon transistor with 1 embedded dopant atom implemented reconfigurable binary logic up to a full adder.",
+    "detail": "The abstract gives no per-input output measurements or truth tables for NAND, NOR, or another functionally complete gate set.",
+    "quote": "First, we show how a complete set of binary logic gates can be realized on the same hardware. Then, we show that these gates can be operated in parallel on the very some dopant up to the logic level of a full adder.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": "Silicon dangling bonds",
+    "verdict": "partial",
+    "finding": "QuickExact simulation identified 40 silicon dangling-bond NOR layouts that matched the expected truth table for all four binary input combinations.",
+    "detail": "The cited fabrication of an OR gate is prior work. OR alone is insufficient for functional completeness.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Silicon dangling bonds",
+    "verdict": "partial",
+    "finding": "One silicon dangling-bond fan-out tile design provides 2 output branches.",
+    "detail": "The circuit verification checks logical correctness of the layout. The authors identify clocking-informed silicon dangling-bond simulation as future work.",
+    "quote": "For\nthis study, templates for 1-in-1-out, 1-in-2-out, 2-in-1-out, and 2-\nin-2-out are proposed, including designed tiles for wires (vertical,\ndiagonal, two parallel verticals), wire crossings, fan-outs, single-tile\nhalf adders, inverters (straight and diagonal), and common 2-in-1-\nout gates",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Dopant-defined silicon",
+    "verdict": "partial",
+    "finding": "One STM-patterned phosphorus-doped silicon nanowire device showed electrical conduction through wires about 300 nm wide.",
+    "detail": "The supplied text presents a manuscript without journal publication or peer-review information.",
+    "quote": "As a proxy for any selected nanodevice, we have182\nused a≈ 300 nm wire.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Silicon dangling bonds",
+    "verdict": "partial",
+    "finding": "One atomically patterned silicon dangling-bond sub-layout with three gates occupied a footprint of 0.000825 µm².",
+    "detail": "Verilog testbenches validated the full-adder design. STM imaging documented the fabricated sub-layout, with markers for missing dangling bonds or sites near charged defects.",
+    "quote": "A33×25 nm 2 sub-layout is fabricated using an STM,\ncomposited on the top left alongside the full trained version, demonstrating\na one-pass end-to-end flow from network training to physical patterning.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Silicon dangling bonds",
+    "verdict": "partial",
+    "finding": "Two atomically patterned silicon dangling-bond memories were demonstrated. The larger fit within an STM field of about 230 nm².",
+    "detail": "The 230 nm² figure is calculated from the Figure 4b image dimensions. Readout used STM image contrast at 4.5 K.",
+    "quote": "b (V = −1.8 V, I = 50 pA, T = 4.5 K, 21.5 × 10.7 nm2) An STM image of an expanded 192-bit memory",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 22,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m8",
+    "case": "Silicon dangling bonds",
+    "verdict": "partial",
+    "finding": "Defect-aware SiDB placement and routing yielded zero layouts for 10 benchmark circuits tested on two STM-measured silicon surfaces.",
+    "detail": "The authors attributed the measured-surface failures to high defect rates. Successful defect-aware layouts were obtained on simulated surfaces.",
+    "quote": "The defect-aware algorithm\napplied to benchmark circuits indicated no successful layout gener-\nation due to high defect rates, emphasizing the impact of atomic\ndefects on logic design [13].",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 23,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m8",
+    "case": "Silicon dangling bonds",
+    "verdict": "partial",
+    "finding": "Automated defect-avoiding placement and routing found layouts for 2 of 14 silicon dangling-bond benchmarks on the simulated surface with 1% defects.",
+    "detail": "Table I gives successful layouts for xor2 and xnor2 under the exclusion-based method at 1% defects. The proposed method also accommodates charged defects by simulating redesigned gates in their presence.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 24,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://www.nature.com/articles/nnano.2012.21",
-    "milestone": "m1",
-    "hash": "8ba76d7ca3c9",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.nature.com/articles/nnano.2012.21",
     "milestone": "m2",
     "hash": "4e5dfbd8dead",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.nature.com/articles/nnano.2012.21",
-    "milestone": "m3",
-    "hash": "8b2ca2232ca1",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.nature.com/articles/nnano.2012.21",
-    "milestone": "m4",
-    "hash": "09427df77df1",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.nature.com/articles/nnano.2012.21",
-    "milestone": "completion",
-    "hash": "5569cd6f669a",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://irds.ieee.org/images/files/pdf/2024/2024IRDS_BC.pdf",
-    "milestone": "m1",
-    "hash": "8ba76d7ca3c9",
     "date": "2026-11-14",
     "by": "gpt-6.1-terra"
    },
@@ -742,34 +1205,6 @@
     "by": "gpt-6.1-terra"
    },
    {
-    "url": "https://irds.ieee.org/images/files/pdf/2024/2024IRDS_BC.pdf",
-    "milestone": "m3",
-    "hash": "8b2ca2232ca1",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://irds.ieee.org/images/files/pdf/2024/2024IRDS_BC.pdf",
-    "milestone": "m4",
-    "hash": "09427df77df1",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://irds.ieee.org/images/files/pdf/2024/2024IRDS_BC.pdf",
-    "milestone": "completion",
-    "hash": "5569cd6f669a",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.nist.gov/programs-projects/atom-scale-devices-engineering-metrology-and-manufacturability",
-    "milestone": "m1",
-    "hash": "8ba76d7ca3c9",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
     "url": "https://www.nist.gov/programs-projects/atom-scale-devices-engineering-metrology-and-manufacturability",
     "milestone": "m2",
     "hash": "4e5dfbd8dead",
@@ -777,42 +1212,420 @@
     "by": "gpt-6.1-terra"
    },
    {
+    "url": "https://www.nature.com/articles/nnano.2012.21",
+    "milestone": "m1",
+    "hash": "a47e6e1dfbec",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/nnano.2012.21",
+    "milestone": "m5",
+    "hash": "b6d8fc775f10",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/nnano.2012.21",
+    "milestone": "m6",
+    "hash": "65115246f189",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/nnano.2012.21",
+    "milestone": "m3",
+    "hash": "853ce7f3f262",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/nnano.2012.21",
+    "milestone": "m8",
+    "hash": "cc8159c84759",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/nnano.2012.21",
+    "milestone": "m7",
+    "hash": "c4507f6c7371",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/nnano.2012.21",
+    "milestone": "m4",
+    "hash": "db6cd27312a9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/nnano.2012.21",
+    "milestone": "completion",
+    "hash": "5569cd6f669a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://irds.ieee.org/images/files/pdf/2024/2024IRDS_BC.pdf",
+    "milestone": "m1",
+    "hash": "a47e6e1dfbec",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://irds.ieee.org/images/files/pdf/2024/2024IRDS_BC.pdf",
+    "milestone": "m5",
+    "hash": "b6d8fc775f10",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://irds.ieee.org/images/files/pdf/2024/2024IRDS_BC.pdf",
+    "milestone": "m6",
+    "hash": "65115246f189",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://irds.ieee.org/images/files/pdf/2024/2024IRDS_BC.pdf",
+    "milestone": "m3",
+    "hash": "853ce7f3f262",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://irds.ieee.org/images/files/pdf/2024/2024IRDS_BC.pdf",
+    "milestone": "m8",
+    "hash": "cc8159c84759",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://irds.ieee.org/images/files/pdf/2024/2024IRDS_BC.pdf",
+    "milestone": "m7",
+    "hash": "c4507f6c7371",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://irds.ieee.org/images/files/pdf/2024/2024IRDS_BC.pdf",
+    "milestone": "m4",
+    "hash": "db6cd27312a9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://irds.ieee.org/images/files/pdf/2024/2024IRDS_BC.pdf",
+    "milestone": "completion",
+    "hash": "5569cd6f669a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nist.gov/programs-projects/atom-scale-devices-engineering-metrology-and-manufacturability",
+    "milestone": "m1",
+    "hash": "a47e6e1dfbec",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nist.gov/programs-projects/atom-scale-devices-engineering-metrology-and-manufacturability",
+    "milestone": "m5",
+    "hash": "b6d8fc775f10",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nist.gov/programs-projects/atom-scale-devices-engineering-metrology-and-manufacturability",
+    "milestone": "m6",
+    "hash": "65115246f189",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
     "url": "https://www.nist.gov/programs-projects/atom-scale-devices-engineering-metrology-and-manufacturability",
     "milestone": "m3",
-    "hash": "8b2ca2232ca1",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "853ce7f3f262",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nist.gov/programs-projects/atom-scale-devices-engineering-metrology-and-manufacturability",
+    "milestone": "m8",
+    "hash": "cc8159c84759",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nist.gov/programs-projects/atom-scale-devices-engineering-metrology-and-manufacturability",
+    "milestone": "m7",
+    "hash": "c4507f6c7371",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nist.gov/programs-projects/atom-scale-devices-engineering-metrology-and-manufacturability",
     "milestone": "m4",
-    "hash": "09427df77df1",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "db6cd27312a9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nist.gov/programs-projects/atom-scale-devices-engineering-metrology-and-manufacturability",
     "milestone": "completion",
     "hash": "5569cd6f669a",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://engineering.purdue.edu/gekcogrp/assets/pdf/published_nnano.2012.21.pdf",
+    "milestone": "m1",
+    "hash": "a47e6e1dfbec",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://engineering.purdue.edu/gekcogrp/assets/pdf/published_nnano.2012.21.pdf",
+    "milestone": "m5",
+    "hash": "b6d8fc775f10",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://engineering.purdue.edu/gekcogrp/assets/pdf/published_nnano.2012.21.pdf",
+    "milestone": "m6",
+    "hash": "65115246f189",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://engineering.purdue.edu/gekcogrp/assets/pdf/published_nnano.2012.21.pdf",
+    "milestone": "m3",
+    "hash": "853ce7f3f262",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://engineering.purdue.edu/gekcogrp/assets/pdf/published_nnano.2012.21.pdf",
+    "milestone": "m8",
+    "hash": "cc8159c84759",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://engineering.purdue.edu/gekcogrp/assets/pdf/published_nnano.2012.21.pdf",
+    "milestone": "m7",
+    "hash": "c4507f6c7371",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://engineering.purdue.edu/gekcogrp/assets/pdf/published_nnano.2012.21.pdf",
+    "milestone": "m4",
+    "hash": "db6cd27312a9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://engineering.purdue.edu/gekcogrp/assets/pdf/published_nnano.2012.21.pdf",
+    "milestone": "completion",
+    "hash": "5569cd6f669a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1706.07427",
     "milestone": "m1",
-    "hash": "8ba76d7ca3c9",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "a47e6e1dfbec",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1706.07427",
+    "milestone": "m5",
+    "hash": "b6d8fc775f10",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1706.07427",
+    "milestone": "m6",
+    "hash": "65115246f189",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1706.07427",
+    "milestone": "m3",
+    "hash": "853ce7f3f262",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1706.07427",
+    "milestone": "m8",
+    "hash": "cc8159c84759",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1706.07427",
+    "milestone": "m7",
+    "hash": "c4507f6c7371",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1706.07427",
+    "milestone": "m4",
+    "hash": "db6cd27312a9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1706.07427",
+    "milestone": "completion",
+    "hash": "5569cd6f669a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1902.08818",
+    "milestone": "m1",
+    "hash": "a47e6e1dfbec",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1902.08818",
+    "milestone": "m5",
+    "hash": "b6d8fc775f10",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1902.08818",
+    "milestone": "m6",
+    "hash": "65115246f189",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/1902.08818",
     "milestone": "m3",
-    "hash": "8b2ca2232ca1",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "853ce7f3f262",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1902.08818",
+    "milestone": "m8",
+    "hash": "cc8159c84759",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1902.08818",
+    "milestone": "m7",
+    "hash": "c4507f6c7371",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1902.08818",
+    "milestone": "m4",
+    "hash": "db6cd27312a9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1902.08818",
+    "milestone": "completion",
+    "hash": "5569cd6f669a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41467-017-02377-4.pdf",
+    "milestone": "m1",
+    "hash": "a47e6e1dfbec",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.zyvexlabs.com/wp-content/uploads/2016/10/ICNTabstract.pdf",
+    "milestone": "m3",
+    "hash": "853ce7f3f262",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/1803.07059",
+    "milestone": "m3",
+    "hash": "853ce7f3f262",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://orbi.uliege.be/handle/2268/34558",
+    "milestone": "m5",
+    "hash": "b6d8fc775f10",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cda.cit.tum.de/files/eda/2023_nanoarch_minimal_gate_design.pdf",
+    "milestone": "m5",
+    "hash": "b6d8fc775f10",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cda.cit.tum.de/files/eda/2022_dac_hexagons_are_the_bestagons.pdf",
+    "milestone": "m6",
+    "hash": "65115246f189",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=923828",
+    "milestone": "m7",
+    "hash": "c4507f6c7371",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cda.cit.tum.de/files/eda/2026_bitplanarnet.pdf",
+    "milestone": "m7",
+    "hash": "c4507f6c7371",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41467-018-05171-y.pdf",
+    "milestone": "m7",
+    "hash": "c4507f6c7371",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cda.cit.tum.de/files/eda/2024_date_towards_atomic_defect_aware_sidb_design.pdf",
+    "milestone": "m8",
+    "hash": "cc8159c84759",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cda.cit.tum.de/files/eda/2024_ieee_nano_on_the_fly_gate_design.pdf",
+    "milestone": "m8",
+    "hash": "cc8159c84759",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -854,20 +1667,103 @@
     "date": "2026-11-14",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 5 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"A digital computer executes instructions stored in memory using devices whose active atomic sites are individually specified. In silicon, the chosen site can hold a dopant atom or expose a dangling bond, the unsatisfied bond left when hydrogen is removed from a surface atom. A wire and an OR gate made from dangling bonds are examples of circuit elements. The complete computer tolerates fabrication defects and, counting memory, contacts, wiring, control, redundancy and cooling, occupies less space and costs less per workload than a conventional CMOS computer matched for throughput, latency and output accuracy.\". Reason: The definition leaves “defining atoms” abstract and does not explain which parts of the computer require atomic precision."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Data centres used about 415 TWh of electricity worldwide in 2024. In CMOS processors, heat limits how much logic can operate in a given area. One atomic alternative passes a bit along a wire through interactions between electrons shared by neighbouring pairs of silicon sites. If the savings extend to the whole machine, including control and cooling, operators could do more work within the same power budget. One application is the matrix multiplication used in machine learning.\". Reason: The current rationale gives fabrication tolerances but omits the scale of electricity use, the benefit to operators and the conditions for realizing it."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by U.S. Department of Energy, Advanced Manufacturing Office, 2017: \"Develop and demonstrate a 1 μm² atomically precise circuit\". Reason: DOE’s draft plan names a circuit-scale computing target more specific than the fabrication-method objective in its project brief."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: title = \"A working silicon device has its active sites within one lattice spacing of their specified positions.\"; criterion = \"Fabricate a silicon device, establish the positions of its defining active sites relative to their intended lattice sites, and measure its electrical response. The placement error must be no greater than one silicon lattice spacing.\". Reason: The title can be read as a limit on spacing between devices, and the criterion mixes placement accuracy with accounts of published experiments."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "split m2 into \"Fabricated atomic gates implement a functionally complete set of Boolean operations.\" | \"An atomic gate restores its signal and drives at least two following gates.\". Reason: Measuring the truth table of a universal gate and showing that its output can drive other physical gates establish different results."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: title = \"A scanning tunnelling microscope completes all its device-fabrication steps without operator intervention.\"; criterion = \"The operator supplies an input file specifying the fabrication strategy. The controller and scanning tunnelling microscope then complete every programmed microscope step, recognizing existing features and detecting and correcting tip changes as needed, without further operator intervention.\". Reason: NIST’s automation target covers the steps performed by the microscope, while the current title implies that the microscope fabricates the entire device."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m3: \"An atomically precise circuit operates over an area of one square micrometre.\". Reason: DOE supplies a numerical target for scaling atomic fabrication from individual devices to a circuit covering one square micrometre."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m3: \"An automated layout for silicon dangling-bond logic avoids defects mapped on a measured surface.\". Reason: The atomic-device roadmap identifies layout around measured surface defects as a distinct step that can be tested before a defect-tolerant computer exists."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"A physical computer uses its atomically defined devices to execute instructions stored in memory. Characterize the fabrication defects present, identify any repair, avoidance or redundancy used, and verify that the computer produces the specified outputs for the stated programs.\". Reason: The prototype criterion includes a literature summary that obscures the hardware evidence needed to pass it."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 9 of 9 proposed operations from CPE-08-revise-20261125T084224709890Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m5, m6, m3, m7, m8, m4."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 0 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 2 found, 2 not found, 1 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "definition is 616 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 6 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 12 candidates returned, 0 dropped as sources already used, 12 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 11 of 12 new candidates, without search. Skipped: 1 no readable saved copy. Dropped rows: none. Replaced 6 earlier rows. Added 21 results: 10 from sources already used, 11 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 3 from Crossref, 0 from PubMed, 1 from arXiv, 7 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 19 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-14"
- },
- "review": {
-  "state": "published",
-  "note": null,
-  "into": null,
-  "at": "2026-11-14",
-  "log": [
-   {
-    "date": "2026-11-14",
-    "state": "published"
-   }
-  ]
+  "results_run": "2026-11-25"
  }
 }
