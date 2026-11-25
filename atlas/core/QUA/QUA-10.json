@@ -316,12 +316,16 @@
  "page": {
   "id": "QUA-10",
   "title": "Foundry-made fault-tolerant quantum computing without dilution cooling",
-  "definition": "A foundry-fabricated quantum processor supports a universal logical gate set: error-corrected operations sufficient to approximate any quantum circuit, with errors suppressed by stronger correction. Its computational qubits require no millikelvin stage, and no indispensable preparation, detection or control depends on dilution refrigeration.",
+  "definition": "A processor fabricated in a semiconductor foundry performs error-corrected operations sufficient to approximate any quantum circuit. Increasing the error correction suppresses logical errors. The photonic approaches encode a qubit in the two paths available to one photon or in a grid in the optical field of a single mode. The qubits require no millikelvin stage, and every essential step, from preparing the qubits to reading the answer, works without dilution refrigeration. Detectors cooled to a few kelvin are compatible with this requirement. Aurora illustrates the distinction: its optical processor used photon counters housed in two dilution refrigerators at a base temperature of 12 mK.",
   "goal": {
-   "need": "PsiQuantum’s manufacturing argument concerns systems with millions of physical qubits and many near-identical components. Aurora’s photon-counting system used two dilution refrigerators at a 12 mK base temperature. The goal combines industrial chip production with universal error-corrected computation while removing dependence on dilution refrigeration.",
+   "need": "Ammonia production uses about 2% of global final energy. Chemists want to understand how nitrogenase makes ammonia at room temperature. Classical methods already give an accurate ground-state energy for one model of its active site. Quantum calculations could distinguish reaction pathways whose energies remain beyond classical reach. Long calculations require many qubits and low logical error rates. Foundries can make optical components in volume, and detectors operating a few degrees above absolute zero can use industrial helium plants with kilowatts of cooling power.",
    "need_refs": [
+    14,
+    15,
+    16,
+    2,
     1,
-    2
+    3
    ],
    "figures": {
     "caption": "Optical-loss gap reported for Aurora on 22 January 2025",
@@ -356,20 +360,36 @@
      "checked": true
     },
     {
-     "body": "PsiQuantum",
-     "year": "2023",
-     "quote": "Photonic quantum computing architectures therefore do not require dilution refrigerators – the “chandelier” often associated with quantum computing.",
-     "context": "The statement describes PsiQuantum’s superconducting-detector approach.",
-     "ref": 3,
-     "checked": null
-    },
-    {
      "body": "DARPA, Underexplored Systems for Utility-Scale Quantum Computing programme",
      "year": "2025",
      "quote": "validation and co-design of an industrially useful quantum computer.",
      "context": "The stated goal concerns US2QC’s final phase; DARPA selected PsiQuantum’s silicon-photonic approach for evaluation.",
      "ref": 4,
      "checked": true
+    },
+    {
+     "body": "PsiQuantum",
+     "year": "2023",
+     "quote": "to prove the viability of existing cryogenic cooling solutions to support building a large-scale, error-corrected quantum computer.",
+     "context": "The SLAC collaboration concerns PsiQuantum’s photonic modules, whose single-photon detectors operate a few degrees above absolute zero.",
+     "ref": 3,
+     "checked": null
+    },
+    {
+     "body": "Australian and Queensland governments",
+     "year": "2024",
+     "quote": "to build a groundbreaking utility-scale fault tolerant quantum computer (FTQC) in Australia.",
+     "context": "The joint investment established a manufacturing and production partnership with PsiQuantum.",
+     "ref": 17,
+     "checked": null
+    },
+    {
+     "body": "Académie des technologies, France",
+     "year": "2025",
+     "quote": "which seems rather optimistic.",
+     "context": "The academy was assessing PsiQuantum’s six-year timetable for addressing photon loss, generation, routing, coupling and detection. It also questioned the cryogenic power demand if it grew linearly with the number of logical qubits.",
+     "ref": 18,
+     "checked": false
     }
    ]
   },
@@ -402,7 +422,7 @@
    {
     "id": "m1",
     "title": "Foundry-made photonic modules generate, manipulate, detect and network qubits.",
-    "criterion": "Commercial-foundry modules demonstrate qubit generation, manipulation, detection and interconnection using the published module benchmarks. PsiQuantum reported this suite for dual-rail encoding, which carries one photon across two optical paths, using a 300-mm process on 26 February 2025; its fidelities excluded loss. For optical Gottesman–Kitaev–Preskill (GKP) encoding, which stores a qubit in an optical oscillator, Larsen and colleagues reported state preparation on a 300-mm silicon-nitride platform on 4 June 2025. That result covers the source function.",
+    "criterion": "Modules made in a commercial semiconductor foundry demonstrate qubit generation, manipulation, detection and chip-to-chip interconnection in the chosen encoding. For the dual-rail protocol, measure state preparation and readout, interference between independent photon sources, two-qubit fusion and transfer between chips. Report which measurements are conditioned on photon detection.",
     "set_by": "PsiQuantum’s published module-benchmark protocol in Nature; demonstrated with dual-rail photonic qubits.",
     "set_by_kind": "protocol",
     "threshold_quote": "demonstrating the crucial functionalities of qubit generation, manipulation, detection and networking",
@@ -418,7 +438,7 @@
    {
     "id": "m2",
     "title": "A photonic processor decodes error information and conditions its next computational operation.",
-    "criterion": "A photonic processor decodes measured error information during execution and uses the recovery to condition the next computational operation. Aurora demonstrated these functions in an optical GKP distance-2 repetition-code experiment on a 35-chip system, reported on 22 January 2025. The system was too noisy to show error suppression.",
+    "criterion": "During execution, decode the measured error information and use the inferred recovery to select the computational operation at the next time step.",
     "set_by": "Xanadu’s Aurora experimental protocol in Nature; written for optical GKP processing.",
     "set_by_kind": "protocol",
     "threshold_quote": "running a decoder in real time, and performing a conditional operation at the following time step based on the recovery.",
@@ -433,7 +453,7 @@
    {
     "id": "m3",
     "title": "An error-corrected photonic qubit has a memory-lifetime ratio greater than 1.",
-    "criterion": "The lifetime of an arbitrary encoded qubit under repeated error correction exceeds that of the best corresponding unencoded physical qubit: corrected-to-unencoded lifetime ratio >1. The comparison includes correction overhead and tests preservation of quantum information without postselection. Ofek and colleagues demonstrated this break-even benchmark in a superconducting resonator; their experiment does not establish its achievement for either photonic encoding.",
+    "criterion": "Under repeated error correction, the lifetime of an arbitrary encoded qubit exceeds that of the best corresponding unencoded physical qubit. The corrected-to-unencoded lifetime ratio must exceed 1 when the comparison includes correction overhead and tests preservation of quantum information without postselection.",
     "set_by": "Quantum-memory break-even convention, explicitly defined by Ofek and colleagues in Nature; originally demonstrated in superconducting circuits.",
     "set_by_kind": "community_convention",
     "threshold_quote": "at which the lifetime of a qubit exceeds the lifetime of the constituents of the system",
@@ -448,14 +468,13 @@
    {
     "id": "m4",
     "title": "A photonic memory’s logical-error suppression factor exceeds 1 as its error-correcting code grows.",
-    "criterion": "At a fixed physical operating regime, an extendable quantum-memory code shows logical error per correction cycle decreasing consistently with exponential suppression as code size increases; the fitted suppression factor exceeds 1. This tests code-size scaling beyond break-even at one size. Simulations in a preprint submitted on 26 June 2026 identify fusion-failure noise floors at fixed code size; that result is not peer reviewed.",
+    "criterion": "At fixed physical operating conditions, measure logical memory error per correction cycle at increasing code sizes. The decrease must be consistent with exponential suppression, with a fitted logical-error suppression factor greater than 1.",
     "set_by": "Below-threshold error-correction convention, demonstrated by Google Quantum AI; its reported experiment used superconducting surface-code memories.",
     "set_by_kind": "community_convention",
     "threshold_quote": "However, this exponential suppression only occurs if the physical error rate is below a critical threshold.",
     "threshold_ref": 11,
     "refs": [
-     11,
-     12
+     11
     ],
     "status": "active",
     "replaced_by": [],
@@ -476,13 +495,63 @@
     "status": "active",
     "replaced_by": [],
     "threshold_checked": true
+   },
+   {
+    "id": "m6",
+    "title": "An optical source prepares a qubit and measurements verify its encoding.",
+    "criterion": "Prepare a qubit in the chosen optical encoding and measure the output state. For dual rail, prepare and measure a heralded single photon in two optical paths. For an optical GKP source, measure both field quadratures and reconstruct the state to resolve its grid structure.",
+    "set_by": "The state-preparation and measurement protocols of the PsiQuantum dual-rail and Larsen optical GKP experiments.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "the synthesis and characterization of optical GKP qubit states",
+    "threshold_ref": 9,
+    "refs": [
+     1,
+     9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m7",
+    "title": "Single-photon detectors read out photonic qubits without dilution refrigeration.",
+    "criterion": "Demonstrate qubit readout with the required single-photon detectors operating on a cooling system that uses no dilution refrigerator. Identify the cooling system and the detector operating temperature. PsiQuantum’s detector design calls for operation a few degrees above absolute zero.",
+    "set_by": "PsiQuantum’s detector operating condition for its collaboration with SLAC.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "These single-photon detectors operate at temperatures a few degrees above absolute zero.",
+    "threshold_ref": 3,
+    "refs": [
+     3,
+     1,
+     2
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m8",
+    "title": "Measured photon loss falls within the budget for the chosen optical circuit and code.",
+    "criterion": "Measure optical loss and compare it with the loss allowance for the implemented circuit under the assumptions used to derive that allowance. For Aurora’s GKP design, compare the three principal path losses jointly at the specified combined tree depth. For the (2,2)-Shor-encoded six-ring fusion network with Bell-pair boosting and 25% fusion failure, the model requires less than 2.7% independent loss per photon. Use the corresponding budget when the circuit or noise assumptions differ.",
+    "set_by": "The Aurora path-loss analysis and the fusion-network loss model of Bartolucci and colleagues.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "With the 25% failure probability achieved with fusions boosted with a Bell pair, we have a loss tolerance of 2.7% per photon.",
+    "threshold_ref": 19,
+    "refs": [
+     2,
+     19
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
    }
   ],
   "measures": [],
   "not_found": [
    "No opened publication established the combined completion criterion for either photonic encoding.",
    "No opened photonic experiment established milestones m3–m5 together.",
-   "The full DOE 2024 applications-roadmap PDF exceeded the browser’s document-size limit; the full ISO/IEC 4879 text was not accessed."
+   "The full DOE 2024 applications-roadmap PDF exceeded the browser’s document-size limit; the full ISO/IEC 4879 text was not accessed.",
+   "No study located quantified ammonia-production energy savings attributable to a fault-tolerant calculation of nitrogen fixation."
   ],
   "references": [
    {
@@ -666,300 +735,765 @@
     "issue": "7911",
     "pages": "675-680",
     "citation_source": "crossref"
+   },
+   {
+    "id": 14,
+    "kind": "report",
+    "url": "https://www.iea.org/reports/ammonia-technology-roadmap/executive-summary",
+    "doi": null,
+    "title": "Ammonia Technology Roadmap",
+    "authors": "International Energy Agency",
+    "container": null,
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 15,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13685976/",
+    "doi": "10.1126/sciadv.aeg7106",
+    "title": "Classical quantum chemical solution of the FeMo-cofactor model to chemical accuracy and its implications",
+    "authors": "Zhai H, Li C, Zhang X, Li Z, Lee S, Chan GKL",
+    "container": "Sci. Adv.",
+    "year": "2026",
+    "volume": "12",
+    "issue": "43",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 16,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5530650/",
+    "doi": "10.1073/pnas.1619152114",
+    "title": "Elucidating reaction mechanisms on quantum computers",
+    "authors": "Reiher M, Wiebe N, Svore KM, Wecker D, Troyer M",
+    "container": "Proc. Natl. Acad. Sci. U.S.A.",
+    "year": "2017",
+    "volume": "114",
+    "issue": "29",
+    "pages": "7555-7560",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 17,
+    "kind": "web",
+    "url": "https://www.industry.gov.au/news/leading-quantum-company-chooses-australia-site-its-groundbreaking-utility-scale-quantum-computer",
+    "doi": null,
+    "title": "Leading quantum company chooses Australia as site for its groundbreaking utility scale quantum computer",
+    "authors": "Australian Government, Department of Industry, Science and Resources",
+    "container": null,
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 18,
+    "kind": "report",
+    "url": "https://www.academie-technologies.fr/wp-content/uploads/2025/07/202506_FTQP.pdf",
+    "doi": null,
+    "title": "State of the art in fault-tolerant quantum computing: Questions and issues",
+    "authors": "Académie des technologies, under the direction of Catherine Lambert, Thierry Bonhomme and Gérard Roucairol",
+    "container": null,
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 19,
+    "kind": "journal",
+    "url": "https://link.springer.com/article/10.1038/s41467-023-36493-1",
+    "doi": "10.1038/s41467-023-36493-1",
+    "title": "Fusion-based quantum computation",
+    "authors": "Bartolucci S, Birchall P, Bombín H, Cable H, Dawson C, Gimeno-Segovia M, et al.",
+    "container": "Nat Commun",
+    "year": "2023",
+    "volume": "14",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 20,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2510.15675",
+    "doi": null,
+    "title": "High-dimensional Path-Encoded Entanglement Distribution Between Photonic Chips Enabled by Multimode Phase Stabilisation",
+    "authors": "Thomas MA, Llewellyn D, Yard PW, Slater BA, Vigliar C, Paesani S, et al.",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 21,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41566-026-01962-8?error=cookies_not_supported",
+    "doi": "10.1038/s41566-026-01962-8",
+    "title": "Extensible universal photonic quantum computing with nonlinearity",
+    "authors": "Yu S, Sun J, Chen KC, Yang ZH, Li Z, Mer E, et al.",
+    "container": "Nat. Photon.",
+    "year": "2026",
+    "volume": "20",
+    "issue": "10",
+    "pages": "1166-1173",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 22,
+    "kind": "journal",
+    "url": "https://eprints.gla.ac.uk/149248/1/149248.pdf",
+    "doi": "10.1088/2040-8986/aa8d56",
+    "title": "Silicon photonic processor of two-qubit entangling quantum logic",
+    "authors": "Santagati R, Silverstone JW, Strain MJ, Sorel M, Miki S, Yamashita T, et al.",
+    "container": "J. Opt.",
+    "year": "2017",
+    "volume": "19",
+    "issue": "11",
+    "pages": "114006",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 23,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2606.26910",
+    "doi": null,
+    "title": "An ultralow-loss integrated photonic platform for discrete-variable quantum information processing",
+    "authors": "Chen R, Zhong Z, Huang S, Zeng S, Shang Z, Hu Y, et al.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
    }
   ],
   "milestone_order": [
+   "m6",
    "m1",
+   "m7",
    "m2",
+   "m8",
    "m3",
    "m4",
    "m5"
   ],
   "results": [
    {
-    "milestone": "m1",
+    "milestone": "m6",
     "case": "Optical GKP",
     "verdict": "partial",
-    "finding": "Aurora interconnected 35 photonic chips for state generation, manipulation and detection.",
-    "detail": "The system used commercially fabricated photonic chips and external photon-number-resolving detectors. Its non-Gaussian states only crudely approximated GKP sensor states, and the modules did not demonstrate the full benchmark suite.",
-    "quote": "Here we construct a (sub-performant) scale model of a quantum computer using 35 photonic chips to demonstrate its functionality and feasibility.",
+    "finding": "Aurora’s heralded squeezed-cat precursors accounted for 3.05% of the modes in the repetition-code experiment.",
+    "detail": "When heralding failed, the multiplexer selected a squeezed state. The separate two-quadrature entanglement benchmark used Gaussian states.",
+    "quote": "On failure to observe two photons, a squeezed state is selected by the multiplexer, so that the resulting cluster-state modes are in a combination of squeezed states and squeezed cat states—the latter make up 3.05% on average of the modes.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 2,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": "Optical GKP",
+    "verdict": "partial",
+    "finding": "Aurora’s 35-chip modular processor synthesized and measured a Gaussian cluster state spanning 86.4 billion modes.",
+    "detail": "The source chips were fabricated at X-Fab. The Gaussian benchmark bypassed photon-number detection. In the adaptive run, photon counts conditioned precursor selection, with squeezed states used when heralding failed.",
+    "quote": "Continuously acquired over 2 hours, this result represents the synthesis and measurement of a macronode cluster state consisting of 86.4 billion modes, or 86.4/12 = 7.2 billion temporal modes.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 2,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": "Optical GKP",
     "verdict": "met",
-    "finding": "Aurora used recovery confidence from a distance-2 repetition code to select the next measurement basis.",
-    "detail": "The 35-chip system used low-quality approximate GKP states; the experiment demonstrated decoding and feedforward, not error suppression.",
-    "quote": "We apply a thresholding function to the confidence value to decide which basis to measure at the following time step",
+    "finding": "Aurora used real-time repetition-code decoding to select the next measurement basis, with approximately 976 ns of signal-chain latency over 13.8 million decoding repetitions.",
+    "detail": "The cluster mixed squeezed states with low-quality GKP precursors. A randomized-basis control tested whether the observed correlations depended on decoder-driven feedforward.",
+    "quote": "The full signal chain latency from an optical pulse arriving at the homodyne detectors to the actuation of an updated local oscillator phase is approximately 976 ns.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 2,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m8",
+    "case": "Optical GKP",
+    "verdict": "partial",
+    "finding": "Aurora’s 35-chip prototype showed about 56% loss on its photon-heralding path.",
+    "detail": "The modeled joint allowance applies to the proposed full GKP state factory. Aurora’s refinery performed multiplexing and entanglement but lacked the breeding stage in that design.",
+    "quote": "Aurora shows losses of about 56% for the heralding paths",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 2,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Optical GKP",
+    "verdict": "met",
+    "finding": "A heralded optical GKP |1⟩ state reconstructed from about 1.9 million quadrature measurements showed a 3 × 3 grid of negative Wigner regions.",
+    "detail": "Tomography was conditioned on the (3, 3, 3) photon-count pattern after discarding the noisiest 20% of outcomes from each photon-number-resolving detector. State reconstruction used no loss compensation.",
+    "quote": "here we see our state achieves a 3 × 3 grid of negative Wigner regions.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": "Optical GKP",
     "verdict": "partial",
-    "finding": "One integrated photonic chip generated optical GKP qubit states on a 300-mm silicon-nitride platform.",
-    "detail": "The experiment demonstrates the source function, not the full generation, manipulation, detection and interconnection suite. Heralding used detectors in a dilution refrigerator.",
+    "finding": "One chip fabricated on a 300-mm silicon nitride wafer generated heralded optical GKP qubits verified by homodyne tomography.",
+    "detail": "Fibre carried the outputs to off-chip detectors. The heralded-state reconstructions were conditioned on photon-number patterns.",
     "quote": "Here we use an ultra-low-loss integrated photonic chip fabricated on a customized multilayer silicon nitride 300-mm wafer platform, coupled over fibre with high-efficiency photon number resolving detectors, to generate GKP qubit states.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Optical GKP",
+    "verdict": "partial",
+    "finding": "Three transition-edge photon-number-resolving detectors heralded optical GKP states while operating at 14 mK in a dilution refrigerator.",
+    "detail": null,
+    "quote": "The PNR detectors are based on a cryogenic transition edge sensor design operated in a dilution fridge at 14 mK",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m8",
+    "case": "Optical GKP",
+    "verdict": "partial",
+    "finding": "For one four-mode optical GKP source, estimated end-to-end optical loss was 18–22%.",
+    "detail": "The approximately 99.5% transmission requirement comes from a model varying transmission in the heralding and heralded paths. It refers to the quality of the source output under the modeled photon-count patterns.",
+    "quote": "Estimates for transmission in the optical paths to the PNR detectors and to the homodyne detectors in this experiment are in the 78–82% range",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m8",
+    "case": "Dual-rail photons",
+    "verdict": "partial",
+    "finding": "Simulations across multiple lattice sizes found a 2.7% photon-loss threshold for the singly boosted Shor(2,2)-encoded six-ring network.",
+    "detail": "The authors locate the threshold at the crossing of simulated logical-loss curves. The text gives no fixed Monte Carlo trial count.",
+    "quote": "2.7%\nfor the Shor(2,2)-encoded 6-ring architecture from [9] for\nrandom or static code orientation and singly boosted fu-\nsion",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m4",
     "case": "Dual-rail photons",
     "verdict": "partial",
-    "finding": "Simulations of two 6-ring architectures found a logical-loss floor with a fusion-failure probability of 1/4.",
-    "detail": "The simulations show that larger codes can reduce logical loss, but do not demonstrate an operating photonic memory or report a fitted suppression factor greater than 1.",
-    "quote": "The plateau is due to the finite\nfusion failure probability, although it is justpf = 1/4 due\nto boosting [20].",
+    "finding": "Across multiple simulated six-ring network sizes, the authors estimated the distance needed to reach a logical loss rate of 10⁻¹⁰.",
+    "detail": "The modeled failure event is a spanning cluster of erasures. The Monte Carlo sample count varies with the logical loss rate.",
+    "quote": "To obtain a quantitative comparison between the dif-\nferent architectures, we fix the physical loss rate 1−η\nto 0.5%,1%,2% and estimate the value ofdwhere the\nlogical loss rate drops below 10 −10 [2].",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Dual-rail photons",
+    "verdict": "met",
+    "finding": "Heralded dual-rail qubits averaged 99.98% state preparation and measurement fidelity across the six Pauli eigenstate targets.",
+    "detail": "The excerpt does not report the number of detection trials.",
+    "quote": "We observe an average SPAM fidelity of 99.98% ± 0.01% (Fig.\n3e\n), conditional on the photon being detected (",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 1,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": "Dual-rail photons",
     "verdict": "met",
-    "finding": "Foundry-made modules demonstrated dual-rail qubit functions; a two-module interconnect achieved 99.72% fidelity.",
-    "detail": "The 300-mm platform demonstrated generation, manipulation, detection and networking. The interconnect fidelity was conditional on photon arrival and excluded loss.",
-    "quote": "We determined the Pauli transfer matrix\n32\nfidelity between the physical channel and the identity operation, conditional on photon arrival, to be 99.72% ± 0.04% (Fig.\n3g\nand\nSupplementary Information\n).",
+    "finding": "Two GlobalFoundries modules achieved 99.72% chip-to-chip dual-rail qubit transfer fidelity conditional on photon arrival.",
+    "detail": "The transfer converted path encoding to polarization for a 42 m fibre link and back to path encoding at the receiver.",
+    "quote": "conditional on photon arrival, to be 99.72% ± 0.04%",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 1,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Dual-rail photons",
+    "verdict": "partial",
+    "finding": "On-chip single-photon detectors read out individual dual-rail qubits at approximately 2 K. The detector count for the readout benchmark is unspecified.",
+    "detail": "The supplied text does not explicitly establish that the custom benchmarking cryostat used no dilution refrigerator.",
+    "quote": "The transmission and receiving modules both use on-chip superconducting detectors and operate at liquid helium temperature.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 1,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m8",
+    "case": "Dual-rail photons",
+    "verdict": "partial",
+    "finding": "One high-numerical-aperture fibre coupler measured 52 mdB insertion loss in repeated transmission tests.",
+    "detail": "The best edge-coupler result came from a separate component test. The paper does not demonstrate the specified boosted six-ring network or establish that its measured per-photon loss is within budget.",
+    "quote": "coupling loss to high-numerical aperture fibre (UHNA4) of 52 ± 12 mdB.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 1,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": "Dual-rail photons",
+    "verdict": "partial",
+    "finding": "A dual-rail Bell state distributed across two silicon chips had 99.8 ± 0.02% coincidence-conditioned fidelity. The detected pair count is unreported.",
+    "detail": "The highest fidelity used 4 m of single-core fibre and 3 m of multicore fibre. The fidelity characterizes the detected pairs after preparation, transfer and readout.",
+    "quote": "In the third case, the fidelity of the measured state is 99.8\n±\n0.02\n%\n\\pm 0.02\\%",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Optical GKP",
+    "verdict": "met",
+    "finding": "Clavina resolved the grid of an approximate optical GKP codeword by Wigner reconstruction. Tomography sample size unreported. Central-peak variance product 0.0130 ± 0.0005.",
+    "detail": "The experiment filtered homodyne outcomes with excessive noise. The reconstructed grid was one-dimensional, and the authors report that practical error correction would require lower loss and higher squeezing.",
+    "quote": "This reconstructed Wigner function exhibits the characteristic grid pattern, consistent with an approximate GKP logical state.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Dual-rail photons",
+    "verdict": "partial",
+    "finding": "Superconducting nanowire single-photon detectors read out two dual-rail photonic qubits across eight tabulated configurations.",
+    "detail": null,
+    "quote": "demultiplexed and separated from the pump using\ndense wavelength-division multiplexers, detected using\nsuperconducting nanowire detectors [46], and ﬁnally con-\nverted into coincidence counts by a time-interval analyser.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 22,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m8",
+    "case": "Dual-rail photons",
+    "verdict": "partial",
+    "finding": "Dual-rail GHZ chip, four microresonator sources: 31.2% mean end-to-end single-photon efficiency at high pump power.",
+    "detail": "The efficiency includes photon extraction, on-chip transmission, fiber coupling, filtering, and detection. At high pump power it corresponds to 68.8% mean end-to-end loss.",
+    "quote": "Averaged over the four microresonators, we extract overall efficiencies of\nη\n¯\n=\n31.2\n%\n\\bar{\\eta}=31.2\\%\nat high pump power and\nη\n¯\n=\n30.9\n%\n\\bar{\\eta}=30.9\\%\nat low pump power.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 23,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://www.nature.com/articles/s41586-024-08406-9",
+    "milestone": "m6",
+    "hash": "bfb4af91b06e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-024-08406-9",
     "milestone": "m1",
-    "hash": "e9c2bf3a8137",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e6784ef8e27b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-024-08406-9",
+    "milestone": "m7",
+    "hash": "75aa20148985",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-08406-9",
     "milestone": "m2",
-    "hash": "683c41dfbd16",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bd0048600f0d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-024-08406-9",
+    "milestone": "m8",
+    "hash": "75a58ef61251",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-08406-9",
     "milestone": "m3",
-    "hash": "41808086dd12",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "17dbd01c7982",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-08406-9",
     "milestone": "m4",
-    "hash": "f02d51884037",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5795491661c8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-08406-9",
     "milestone": "m5",
     "hash": "cba5bf501f50",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-08406-9",
     "milestone": "completion",
     "hash": "05abd0fa7a7e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-025-08820-7.pdf",
+    "milestone": "m6",
+    "hash": "bfb4af91b06e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-08820-7.pdf",
     "milestone": "m1",
-    "hash": "e9c2bf3a8137",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e6784ef8e27b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-025-08820-7.pdf",
+    "milestone": "m7",
+    "hash": "75aa20148985",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-08820-7.pdf",
     "milestone": "m2",
-    "hash": "683c41dfbd16",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bd0048600f0d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-025-08820-7.pdf",
+    "milestone": "m8",
+    "hash": "75a58ef61251",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-08820-7.pdf",
     "milestone": "m3",
-    "hash": "41808086dd12",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "17dbd01c7982",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-08820-7.pdf",
     "milestone": "m4",
-    "hash": "f02d51884037",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5795491661c8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-08820-7.pdf",
     "milestone": "m5",
     "hash": "cba5bf501f50",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-08820-7.pdf",
     "milestone": "completion",
     "hash": "05abd0fa7a7e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-025-09044-5",
+    "milestone": "m6",
+    "hash": "bfb4af91b06e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-09044-5",
     "milestone": "m1",
-    "hash": "e9c2bf3a8137",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e6784ef8e27b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-025-09044-5",
+    "milestone": "m7",
+    "hash": "75aa20148985",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-09044-5",
     "milestone": "m2",
-    "hash": "683c41dfbd16",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bd0048600f0d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-025-09044-5",
+    "milestone": "m8",
+    "hash": "75a58ef61251",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-09044-5",
     "milestone": "m3",
-    "hash": "41808086dd12",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "17dbd01c7982",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-09044-5",
     "milestone": "m4",
-    "hash": "f02d51884037",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5795491661c8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-09044-5",
     "milestone": "m5",
     "hash": "cba5bf501f50",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-09044-5",
     "milestone": "completion",
     "hash": "05abd0fa7a7e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2606.28490",
+    "milestone": "m6",
+    "hash": "bfb4af91b06e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2606.28490",
     "milestone": "m1",
-    "hash": "e9c2bf3a8137",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e6784ef8e27b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2606.28490",
+    "milestone": "m7",
+    "hash": "75aa20148985",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2606.28490",
     "milestone": "m2",
-    "hash": "683c41dfbd16",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bd0048600f0d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2606.28490",
+    "milestone": "m8",
+    "hash": "75a58ef61251",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2606.28490",
     "milestone": "m3",
-    "hash": "41808086dd12",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "17dbd01c7982",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2606.28490",
     "milestone": "m4",
-    "hash": "f02d51884037",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5795491661c8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2606.28490",
     "milestone": "m5",
     "hash": "cba5bf501f50",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2606.28490",
     "milestone": "completion",
     "hash": "05abd0fa7a7e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-025-08820-7?code=1&error=cookies_not_supported",
+    "milestone": "m6",
+    "hash": "bfb4af91b06e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-08820-7?code=1&error=cookies_not_supported",
     "milestone": "m1",
-    "hash": "e9c2bf3a8137",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e6784ef8e27b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-025-08820-7?code=1&error=cookies_not_supported",
+    "milestone": "m7",
+    "hash": "75aa20148985",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-08820-7?code=1&error=cookies_not_supported",
     "milestone": "m2",
-    "hash": "683c41dfbd16",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "bd0048600f0d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-025-08820-7?code=1&error=cookies_not_supported",
+    "milestone": "m8",
+    "hash": "75a58ef61251",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-08820-7?code=1&error=cookies_not_supported",
     "milestone": "m3",
-    "hash": "41808086dd12",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "17dbd01c7982",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-08820-7?code=1&error=cookies_not_supported",
     "milestone": "m4",
-    "hash": "f02d51884037",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "5795491661c8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-08820-7?code=1&error=cookies_not_supported",
     "milestone": "m5",
     "hash": "cba5bf501f50",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-08820-7?code=1&error=cookies_not_supported",
     "milestone": "completion",
     "hash": "05abd0fa7a7e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2510.15675",
+    "milestone": "m1",
+    "hash": "e6784ef8e27b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2009.08339",
+    "milestone": "m4",
+    "hash": "5795491661c8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41566-026-01962-8?error=cookies_not_supported",
+    "milestone": "m6",
+    "hash": "bfb4af91b06e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprints.gla.ac.uk/149248/1/149248.pdf",
+    "milestone": "m7",
+    "hash": "75aa20148985",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2606.26910",
+    "milestone": "m8",
+    "hash": "75a58ef61251",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1026,8 +1560,128 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 1 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"A processor fabricated in a semiconductor foundry performs error-corrected operations sufficient to approximate any quantum circuit. Increasing the error correction suppresses logical errors. The photonic approaches encode a qubit in the two paths available to one photon or in a grid in the optical field of a single mode. The qubits require no millikelvin stage, and every essential step, from preparing the qubits to reading the answer, works without dilution refrigeration. Detectors cooled to a few kelvin are compatible with this requirement. Aurora illustrates the distinction: its optical processor used photon counters housed in two dilution refrigerators at a base temperature of 12 mK.\". Reason: The definition leaves the optical encodings unexplained and does not show why a processor with room-temperature optics can still depend on a dilution refrigerator."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Ammonia production uses about 2% of global final energy. Chemists want to understand how nitrogenase makes ammonia at room temperature. Classical methods already give an accurate ground-state energy for one model of its active site. Quantum calculations could distinguish reaction pathways whose energies remain beyond classical reach. Long calculations require many qubits and low logical error rates. Foundries can make optical components in volume, and detectors operating a few degrees above absolute zero can use industrial helium plants with kilowatts of cooling power.\". Reason: The current rationale describes two machines without explaining what a user could calculate, what classical methods already achieve or why the cooling temperature matters."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by PsiQuantum, 2023: \"to prove the viability of existing cryogenic cooling solutions to support building a large-scale, error-corrected quantum computer.\". Reason: The project’s own statement identifies the purpose of its cooling work and allows the claim to be attached to the detector design it describes."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Australian and Queensland governments, 2024: \"to build a groundbreaking utility-scale fault tolerant quantum computer (FTQC) in Australia.\". Reason: The Australian and Queensland governments committed to building a specific machine beyond the evaluation goal already attributed to DARPA."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Académie des technologies, France, 2025: \"which seems rather optimistic.\". Reason: The academy’s assessment supplies an independent judgment about the feasibility of the published schedule."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after None: \"An optical source prepares a qubit and measurements verify its encoding.\". Reason: A verified qubit source is an independently demonstrated laboratory step that precedes the four-function foundry benchmark."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Modules made in a commercial semiconductor foundry demonstrate qubit generation, manipulation, detection and chip-to-chip interconnection in the chosen encoding. For the dual-rail protocol, measure state preparation and readout, interference between independent photon sources, two-qubit fusion and transfer between chips. Report which measurements are conditioned on photon detection.\". Reason: The criterion mixes dated results with the test and leaves readers to infer which operations the dual-rail benchmark measures."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m1: \"Single-photon detectors read out photonic qubits without dilution refrigeration.\". Reason: The existing component benchmarks allow dilution-cooled detectors, so they leave the thermal requirement untested until completion."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"During execution, decode the measured error information and use the inferred recovery to select the computational operation at the next time step.\". Reason: The Aurora result belongs with the evidence, while the criterion needs only the real-time decision and its deadline."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m2: \"Measured photon loss falls within the budget for the chosen optical circuit and code.\". Reason: High fidelities conditioned on detecting a photon leave open whether the optical circuit loses too many photons for its error-correcting code."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Under repeated error correction, the lifetime of an arbitrary encoded qubit exceeds that of the best corresponding unencoded physical qubit. The corrected-to-unencoded lifetime ratio must exceed 1 when the comparison includes correction overhead and tests preservation of quantum information without postselection.\". Reason: The superconducting-resonator result is already identified in the attribution and does not belong in the photonic acceptance test."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"At fixed physical operating conditions, measure logical memory error per correction cycle at increasing code sizes. The decrease must be consistent with exponential suppression, with a fitted logical-error suppression factor greater than 1.\"; refs = [11]. Reason: The existing criterion includes a fixed-code-size simulation even though the test requires measured logical errors as code size increases."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No study located quantified ammonia-production energy savings attributable to a fault-tolerant calculation of nitrogen fixation.\". Reason: The industrial energy figure measures the scale of ammonia production and cannot serve as an estimate of the benefit of a quantum calculation."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove statement 1. Reason: The 2023 quotation generalizes a cooling claim about PsiQuantum’s detectors to photonic architectures that include Aurora’s dilution-cooled design."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 14 of 14 proposed operations from QUA-10-revise-20261125T110414195441Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m6, m1, m7, m2, m8, m3, m4."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 3 from Crossref, 0 from PubMed, 0 from arXiv, 3 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 2 found, 1 not found, 3 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "definition is 696 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 5 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 8 candidates returned, 0 dropped as sources already used, 8 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 5 of 8 new candidates, without search. Skipped: 3 no readable saved copy. Dropped rows: 1 not relevant. Replaced 9 earlier rows. Added 22 results: 18 from sources already used, 4 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 2 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 22 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-25"
  }
 }
