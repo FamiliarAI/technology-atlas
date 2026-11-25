@@ -297,15 +297,29 @@
   ],
   "prompt": "5e97d4b8dfc3"
  },
+ "review": {
+  "state": "published",
+  "note": null,
+  "into": null,
+  "at": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "state": "published"
+   }
+  ]
+ },
  "page": {
   "id": "CPE-05",
   "title": "Human-scale neuromorphic online learning at 20 W",
-  "definition": "A neuromorphic computer stores connection weights beside neural processing and runs at least 10¹¹ spiking units, which communicate by discrete events, and 10¹⁴ adaptive weighted connections. It learns from incoming data using signals available at each connection, in real time and at ≤20 W for the complete computing system.",
+  "definition": "One neuromorphic computer runs an active network of at least 100 billion neurons that communicate by spikes and at least 100 trillion adaptive synapses. It stores connection weights near the circuits that use them and learns from incoming data by updating weights with signals available at each connection. Each second of network activity takes at most one second, and the complete system averages at most 20 W during learning. For comparison, Darwin Monkey is rated at 2.25 billion neurons and about 2,000 W typical power.",
   "goal": {
-   "need": "Across six rodent and primate species, estimated glucose use per neuron varied by 40%; the human brain accounts for about 20% of whole-body energy use at 2% of body mass. NEUROTECH compares a 20 W brain with GPUs consuming several hundred watts and identifies power consumption as a constraint on embedded neural computing.",
+   "need": "A simulation of 86 billion spiking neurons used 14,012 graphics processors and took 65 seconds per second of brain activity at a mean firing rate of about 7 Hz. Neuroscientists could test how networks of that size learn from sensory input as it arrives, provided brain measurements constrain the model. Mobile robots face a related limit: efficient inference can save battery power, but a fixed model can lose accuracy as its surroundings change. Learning on board could let a robot recognize new objects without waiting for offline retraining.",
    "need_refs": [
-    1,
-    2
+    21,
+    3,
+    22,
+    17
    ],
    "figures": {
     "caption": "Intel’s reported Hala Point capacity and power",
@@ -328,7 +342,7 @@
      ]
     ],
     "note": "Intel announcement published on 17 April 2024; not peer reviewed. Capacity and maximum power do not establish power consumption during continuous learning.",
-    "ref": 3
+    "ref": 2
    },
    "statements": [
     {
@@ -336,7 +350,7 @@
      "year": "2022",
      "quote": "Neuromorphic computing aims at building systems where weights are self-modified through local rules.",
      "context": null,
-     "ref": 2,
+     "ref": 1,
      "checked": true
     },
     {
@@ -344,7 +358,7 @@
      "year": "2014",
      "quote": "perform difficult perception and control tasks while at the same time achieving significant energy savings.",
      "context": "The stated purpose of the brain-inspired chip developed through the SyNAPSE programme.",
-     "ref": 4,
+     "ref": 3,
      "checked": true
     },
     {
@@ -352,23 +366,40 @@
      "year": "2024",
      "quote": "One target for a biologically realistic scale is to target billions of neurons",
      "context": "Section 4.3.1.1 discusses spiking-network architectures; Table BC4.3 specifies approximately 100 billion neurons.",
-     "ref": 5,
+     "ref": 4,
      "checked": true
+    },
+    {
+     "body": "U.S. Department of Energy, Advanced Materials and Manufacturing Technologies Office",
+     "year": "2024",
+     "quote": "approach or exceed human brain efficiency",
+     "context": "Table 35 of the draft EES2 roadmap gives this 10–20-year target for energy per benchmark application in neuromorphic computing.",
+     "ref": 23,
+     "checked": false
+    },
+    {
+     "body": "Roadmap on Neuromorphic Photonics, chapter on brain-derived neuromorphic computing",
+     "year": "2025",
+     "quote": "Scaling to ~100 billion neurons, ~100 trillion synapses, within ~3 litre volume and ~20W power",
+     "context": "S. J. Ben Yoo gives these approximate targets for a three-dimensional electronic, photonic and ionic architecture capable of learning.",
+     "ref": 20,
+     "checked": null
     }
    ]
   },
   "completion": {
    "title": "A human-scale neuromorphic system learns locally in real time within 20 W.",
    "criterion": "One physical system operates an active network of at least 10¹¹ spiking neurons and 10¹⁴ adaptive synapses at 1 ms time resolution, advancing at least as fast as real time. Local updates from incoming data improve a prespecified task score relative to the same network with learning disabled, without separate offline retraining for that adaptation. Average electrical input is ≤20 W during learning, including memory, interconnects, hosts, power conversion and required cooling. Provisioned but unused capacity does not count.",
-   "set_by": "Technology Atlas; operational criterion assembled from separately published architectural and local-learning goals.",
+   "set_by": "Technology Atlas. The published roadmaps give design targets but do not define a joint pass/fail test.",
    "set_by_kind": "atlas",
    "threshold_quote": null,
    "threshold_ref": null,
-   "basis": "Searches of DARPA SyNAPSE, IEEE IRDS, NEUROTECH, DOE EES2 and neuromorphic benchmarking literature found no joint pass/fail protocol for human-scale local learning, real-time operation and whole-system watts. IRDS supplies approximate scale and timing targets; NEUROTECH supplies a 20 W brain comparison and a local-learning goal. The minimum counts, power cap, accounting boundary and task comparison are Atlas operational choices.",
+   "basis": "The Roadmap on Neuromorphic Photonics places approximately 100 billion neurons, 100 trillion synapses and 20 W together, with a separate volume goal of about 3 litres. IRDS gives a 1 kHz network time resolution and allows network time to differ from elapsed time. NEUROTECH specifies local weight updates. The Atlas sets the hard counts and power ceiling, requires real-time execution and improvement over frozen weights, and includes all supporting equipment in electrical input. Volume is outside the test.",
    "refs": [
-    2,
-    5,
-    6
+    20,
+    4,
+    1,
+    23
    ],
    "threshold_checked": null
   },
@@ -382,15 +413,15 @@
    {
     "id": "m1",
     "title": "An electronic synapse changes its connection strength in response to neural activity.",
-    "criterion": "An electronic synapse implements activity-dependent connection-strength changes. Analog/mixed-signal: Kuzum and colleagues’ 2012 paper demonstrated spike-timing-dependent conductance changes in phase-change devices with 75 nm bottom electrodes; the main text gives no device sample size. Digital: Imam and Cleland demonstrated spike-timing-dependent plasticity on Loihi in their paper published on 16 March 2020.",
+    "criterion": "An electronic synapse changes the strength of the connection between two neurons in response to neural activity.",
     "set_by": "DARPA SyNAPSE programme, initial component-development phase; its published criterion covers electronic synapses.",
     "set_by_kind": "government_programme",
     "threshold_quote": "capable of varying connection strength between two neurons",
-    "threshold_ref": 6,
+    "threshold_ref": 5,
     "refs": [
+     5,
      6,
-     7,
-     8
+     7
     ],
     "status": "active",
     "replaced_by": [],
@@ -399,15 +430,15 @@
    {
     "id": "m2",
     "title": "A single neuromorphic chip executes a connected neural network.",
-    "criterion": "One chip executes a connected neural network in hardware. Digital: the TrueNorth paper published on 8 August 2014 reports 1 million neurons and 256 million synapses on one chip, consuming 63 mW for 400 × 240-pixel video at 30 frames/s. Analog/mixed-signal: the BrainScaleS-2 prototype paper published on 26 March 2019 reports 32 neurons and 1,024 synapses on one chip.",
+    "criterion": "One neuromorphic chip executes a connected neural network in hardware.",
     "set_by": "DARPA SyNAPSE programme, published single-chip system-development stage; no minimum neuron count is specified on the programme page.",
     "set_by_kind": "government_programme",
     "threshold_quote": "single chip system development",
-    "threshold_ref": 6,
+    "threshold_ref": 5,
     "refs": [
-     6,
-     9,
-     10
+     5,
+     8,
+     9
     ],
     "status": "active",
     "replaced_by": [],
@@ -416,16 +447,16 @@
    {
     "id": "m3",
     "title": "A neuromorphic system learns through local synaptic updates during operation.",
-    "criterion": "Weights change through local learning rules during operation; NEUROTECH gives no accuracy, retention or duration threshold. Digital: Loihi learned 10 gas-sensor patterns sequentially from one training example each; a replication published on 16 December 2024 found limited generalization to separate recordings. Analog/mixed-signal: BrainScaleS-2 learned simplified Pong smooth pursuit in 10 experiments of 100,000 learning iterations each.",
+    "criterion": "During operation, the neuromorphic system modifies synaptic weights in response to incoming data using local learning rules.",
     "set_by": "NEUROTECH Horizon 2020 programme, Deliverable D2.6, section 2.5, published local-learning goal.",
     "set_by_kind": "government_programme",
     "threshold_quote": "weights are self-modified through local rules.",
-    "threshold_ref": 2,
+    "threshold_ref": 1,
     "refs": [
-     2,
-     8,
-     10,
-     11
+     1,
+     7,
+     9,
+     10
     ],
     "status": "active",
     "replaced_by": [],
@@ -434,16 +465,16 @@
    {
     "id": "m4",
     "title": "A neuromorphic system exchanges spikes between at least two chips.",
-    "criterion": "At least two neuromorphic chips exchange spikes as one system. Digital: Hala Point contains 1,152 Loihi 2 chips; on 26 August 2025, Zhejiang University reported Wukong with 960 Darwin-III chips, more than two billion neurons and 2,000 W typical power. These system specifications are announcements, not peer-reviewed measurements. Analog/mixed-signal: a preprint submitted on 3 December 2025 reports BrainScaleS-2 chip-to-chip spike latencies below 1.3 µs within a backplane.",
+    "criterion": "At least two neuromorphic chips operating as one network exchange spikes across a physical chip-to-chip link.",
     "set_by": "DARPA SyNAPSE programme, published multichip system-development stage for electronic neuromorphic hardware.",
     "set_by_kind": "government_programme",
     "threshold_quote": "multi-chip system development",
-    "threshold_ref": 6,
+    "threshold_ref": 5,
     "refs": [
-     6,
-     3,
-     12,
-     13
+     5,
+     2,
+     11,
+     12
     ],
     "status": "active",
     "replaced_by": [],
@@ -458,38 +489,54 @@
     "threshold_quote": null,
     "threshold_ref": null,
     "refs": [
-     2,
-     5
+     1,
+     4
     ],
     "status": "active",
     "replaced_by": [],
     "threshold_checked": null
+   },
+   {
+    "id": "m6",
+    "title": "A core neural microcircuit performs all its specified functions in hardware.",
+    "criterion": "Demonstrate all functions specified for the core neural microcircuit in hybrid CMOS electronic synapse hardware.",
+    "set_by": "DARPA SyNAPSE programme, FY 2011 plans in the FY 2012 Electronics Technology budget justification.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "Demonstrate all core microcircuit functions in hybrid CMOS electronic synapse hardware.",
+    "threshold_ref": 24,
+    "refs": [
+     24,
+     5
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m7",
+    "title": "A verified neural hardware design supports about one million neurons and ten billion synapses.",
+    "criterion": "Design a hardware neural system for approximately one million neurons and ten billion synapses and verify that design. Both counts apply to the same system.",
+    "set_by": "DARPA SyNAPSE programme, FY 2012 plans in the Electronics Technology budget justification.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "Design and verify a hardware neural system of ~10 billion synapses and ~1 million neurons.",
+    "threshold_ref": 24,
+    "refs": [
+     24
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
    }
   ],
   "measures": [],
   "not_found": [
    "Searches found no hardware demonstration combining the stated scale, local learning, real-time operation and complete-system power limit for either case.",
    "No common numerical threshold was found for learning quality, retention or operating duration at human scale.",
-   "The full DOE EES2 roadmap could not be opened because its download exceeded the browsing tool’s size limit.",
-   "The supplied Nature review’s main text was available only as a subscription preview, and its supplementary PDF could not be retrieved."
+   "No explicit rejection of human-scale local learning at 20 W was found in the DARPA, IEEE IRDS, NEUROTECH or DOE EES2 documents."
   ],
   "references": [
    {
     "id": 1,
-    "kind": "journal",
-    "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0017514",
-    "doi": "10.1371/journal.pone.0017514",
-    "title": "Scaling of Brain Metabolism with a Fixed Energy Budget per Neuron: Implications for Neuronal Activity, Plasticity and Evolution",
-    "authors": "Herculano-Houzel S",
-    "container": "PLoS ONE",
-    "year": "2011",
-    "volume": "6",
-    "issue": "3",
-    "pages": "e17514",
-    "citation_source": "crossref"
-   },
-   {
-    "id": 2,
     "kind": "report",
     "url": "https://neurotechai.eu/media/filer_public/4b/a4/4ba4b7ec-8c03-4420-b925-bbcd0e55271d/neurotech_roadmap_2022.pdf",
     "doi": null,
@@ -503,7 +550,7 @@
     "citation_source": "model"
    },
    {
-    "id": 3,
+    "id": 2,
     "kind": "press_release",
     "url": "https://www.intc.com/news-events/press-releases/detail/1691/intel-builds-worlds-largest-neuromorphic-system-to",
     "doi": null,
@@ -517,7 +564,7 @@
     "citation_source": "model"
    },
    {
-    "id": 4,
+    "id": 3,
     "kind": "press_release",
     "url": "https://www.darpa.mil/news/2014/synapse-program-brain-inspired-chip",
     "doi": null,
@@ -531,7 +578,7 @@
     "citation_source": "model"
    },
    {
-    "id": 5,
+    "id": 4,
     "kind": "report",
     "url": "https://irds.ieee.org/images/files/pdf/2024/2024IRDS_BC.pdf",
     "doi": null,
@@ -545,7 +592,7 @@
     "citation_source": "model"
    },
    {
-    "id": 6,
+    "id": 5,
     "kind": "web",
     "url": "https://www.darpa.mil/research/programs/systems-of-neuromorphic-adaptive-plastic-scalable-electronics",
     "doi": null,
@@ -559,7 +606,7 @@
     "citation_source": "model"
    },
    {
-    "id": 7,
+    "id": 6,
     "kind": "journal",
     "url": "https://datascienceassn.org/sites/default/files/Nanoelectronic%20Programmable%20Synapses%20Based%20on%20Phase%20Change%20Materials%20for%20Brain-Inspired%20Computing.pdf",
     "doi": "10.1021/nl201040y",
@@ -573,7 +620,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 8,
+    "id": 7,
     "kind": "journal",
     "url": "https://arxiv.org/pdf/1906.07067",
     "doi": "10.1038/s42256-020-0159-4",
@@ -587,7 +634,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 9,
+    "id": 8,
     "kind": "journal",
     "url": "https://research.ibm.com/publications/a-million-spiking-neuron-integrated-circuit-with-a-scalable-communication-network-and-interface",
     "doi": "10.1126/science.1254642",
@@ -601,7 +648,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 10,
+    "id": 9,
     "kind": "journal",
     "url": "https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2019.00260/full",
     "doi": "10.3389/fnins.2019.00260",
@@ -615,7 +662,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 11,
+    "id": 10,
     "kind": "journal",
     "url": "https://www.nature.com/articles/s42256-024-00952-1?error=cookies_not_supported",
     "doi": "10.1038/s42256-024-00952-1",
@@ -629,7 +676,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 12,
+    "id": 11,
     "kind": "press_release",
     "url": "https://www.zju.edu.cn/english/2025/0910/c19573a3079424/page.psp",
     "doi": null,
@@ -643,7 +690,7 @@
     "citation_source": "model"
    },
    {
-    "id": 13,
+    "id": 12,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2512.03781v1",
     "doi": "10.48550/arXiv.2512.03781",
@@ -657,7 +704,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 14,
+    "id": 13,
     "kind": "journal",
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6023896/",
     "doi": "10.1038/s41467-018-04933-y",
@@ -671,7 +718,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 15,
+    "id": 14,
     "kind": "journal",
     "url": "https://www.stratnews.com/docs/synapse_science_final.pdf",
     "doi": null,
@@ -685,7 +732,7 @@
     "citation_source": "model"
    },
    {
-    "id": 16,
+    "id": 15,
     "kind": "preprint",
     "url": "https://arxiv.org/pdf/2312.17582",
     "doi": null,
@@ -699,7 +746,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 17,
+    "id": 16,
     "kind": "journal",
     "url": "https://www.stanford.edu/group/brainsinsilicon/documents/BenjaminEtAlNeurogrid2014.pdf",
     "doi": "10.1109/JPROC.2014.2313565",
@@ -713,7 +760,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 18,
+    "id": 17,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2511.01553v3",
     "doi": null,
@@ -727,7 +774,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 19,
+    "id": 18,
     "kind": "journal",
     "url": "https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2015.00141/full",
     "doi": "10.3389/fnins.2015.00141",
@@ -741,7 +788,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 20,
+    "id": 19,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2509.16213v1",
     "doi": null,
@@ -755,11 +802,109 @@
     "citation_source": "arxiv"
    },
    {
+    "id": 20,
+    "kind": "preprint",
+    "url": "https://pureportal.strath.ac.uk/files/257554830/Brunner-etal-ArXiv-2025-Roadmap-on-neuromorphic-photonics-neuromorphic-photonics.pdf",
+    "doi": "10.48550/arXiv.2501.07917",
+    "title": "Neuromorphic Computing in 3D Electronic-Photonic-Ionic-Integrated Circuits: Roadmap for Brain-Derived Neuromorphic Computing",
+    "authors": "Brunner D, Shastri BJ, Qadasi MAA, Ballani H, Barbay S, Biasi S, et al.",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
     "id": 21,
-    "kind": "web",
-    "url": "https://ai.zju.edu.cn/aien/2026/0615/c91546a3178998/page.htm",
+    "kind": "journal",
+    "url": "https://www.oxcns.org/papers/691%20Lu%20et%20al%202024%20Simulation%20and%20assimilation%20of%20the%20digital%20human%20brain.pdf",
+    "doi": "10.1038/s43588-024-00731-3",
+    "title": "Simulation and assimilation of the digital human brain",
+    "authors": "Lu W, Du X, Wang J, Zeng L, Ye L, Xiang S, et al.",
+    "container": "Nat Comput Sci",
+    "year": "2024",
+    "volume": "4",
+    "issue": "12",
+    "pages": "890-898",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 22,
+    "kind": "journal",
+    "url": "https://static-content.springer.com/esm/art%3A10.1038%2Fs41586-024-08253-8/MediaObjects/41586_2024_8253_MOESM1_ESM.pdf",
+    "doi": "10.1038/s41586-024-08253-8",
+    "title": "Neuromorphic computing at scale",
+    "authors": "Kudithipudi D, Schuman C, Vineyard CM, Pandit T, Merkel C, Kubendran R, et al.",
+    "container": "Nature",
+    "year": "2025",
+    "volume": "637",
+    "issue": "8047",
+    "pages": "801-812",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 23,
+    "kind": "report",
+    "url": "https://www.energy.gov/sites/default/files/2024-08/Draft_EES2_Roadmap_AMMTO_August29_2024.pdf",
     "doi": null,
-    "title": "Redefining Computing: The Darwin Series",
+    "title": "Energy Efficiency Scaling for Two Decades Research and Development Roadmap—Version 1.0",
+    "authors": "Tina Kaarsberg, Sadasivan Shankar, I-Hsi Daniel Lu, Nick R. Johnson, Kenta Shimizu, Emmanuel Taylor, Russ Jones, Harper Alerion, and Ken Weaver",
+    "container": "U.S. Department of Energy, Office of Energy Efficiency & Renewable Energy, Advanced Materials & Manufacturing Technologies Office",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 24,
+    "kind": "report",
+    "url": "https://www.globalsecurity.org/military/library/budget/fy2012/dod-peds/0602716e_2_pb_2012.pdf",
+    "doi": null,
+    "title": "Exhibit R-2, RDT&E Budget Item Justification: PB 2012 Defense Advanced Research Projects Agency",
+    "authors": "Defense Advanced Research Projects Agency",
+    "container": "PE 0602716E: Electronics Technology",
+    "year": "2011",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 25,
+    "kind": "journal",
+    "url": "https://redwood.berkeley.edu/wp-content/uploads/2021/08/Akopyan2015.pdf",
+    "doi": "10.1109/TCAD.2015.2474396",
+    "title": "TrueNorth: Design and Tool Flow of a 65 mW 1 Million Neuron Programmable Neurosynaptic Chip",
+    "authors": "Akopyan F, Sawada J, Cassidy A, Alvarez-Icaza R, Arthur J, Merolla P, et al.",
+    "container": "IEEE Trans. Comput.-Aided Des. Integr. Circuits Syst.",
+    "year": "2015",
+    "volume": "34",
+    "issue": "10",
+    "pages": "1537-1557",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 26,
+    "kind": "journal",
+    "url": "https://www.kip.uni-heidelberg.de/Veroeffentlichungen/download.php/6924/temp/4628.pdf",
+    "doi": "10.1088/2634-4386/acf7e4",
+    "title": "From clean room to machine room: commissioning of the first-generation BrainScaleS wafer-scale neuromorphic system",
+    "authors": "Schmidt H, Montes J, Grübl A, Güttler M, Husmann D, Ilmberger J, et al.",
+    "container": "Neuromorph. Comput. Eng.",
+    "year": "2023",
+    "volume": "3",
+    "issue": "3",
+    "pages": "034013",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 27,
+    "kind": "press_release",
+    "url": "https://announcements.asx.com.au/asxpdf/20211109/pdf/452r99fcjxnnd6.pdf",
+    "doi": null,
+    "title": "BrainChip Completes Testing Production Version of the Akida Chip",
     "authors": "",
     "container": null,
     "year": "",
@@ -767,44 +912,46 @@
     "issue": null,
     "pages": null,
     "citation_source": "model"
+   },
+   {
+    "id": 28,
+    "kind": "journal",
+    "url": "https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2016.00420/full",
+    "doi": "10.3389/fnins.2016.00420",
+    "title": "Synapse-Centric Mapping of Cortical Models to the SpiNNaker Neuromorphic Architecture",
+    "authors": "Knight JC, Furber SB",
+    "container": "Front. Neurosci.",
+    "year": "2016",
+    "volume": "10",
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 29,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s44460-026-00067-7.pdf",
+    "doi": "10.1038/s44460-026-00067-7",
+    "title": "Self-powered analogue neuromorphic system for multimodal sensing, encoding and learning with diffusive and drift memristors",
+    "authors": "Kim SJ, Zhao R, Sud P, Xu Y, Zhao J, Liao HT, et al.",
+    "container": "Nat. Sens.",
+    "year": "2026",
+    "volume": "1",
+    "issue": "6",
+    "pages": "535-544",
+    "citation_source": "crossref"
    }
   ],
   "milestone_order": [
    "m1",
+   "m6",
    "m2",
    "m3",
    "m4",
+   "m7",
    "m5"
   ],
   "results": [
-   {
-    "milestone": "m4",
-    "case": "Digital electronic",
-    "verdict": "met",
-    "finding": "One Hala Point system runs spiking neural network models across 1,152 Loihi 2 processors.",
-    "detail": "Intel reports inter-chip communication and execution of spiking neural network models at the system’s full neuron capacity.",
-    "quote": "Applied to bio-inspired spiking neural network models, the system can execute its full capacity of 1.15 billion neurons 20 times faster than a human brain and up to 200 times faster rates at lower capacity.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 3,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
-   },
-   {
-    "milestone": "m5",
-    "case": "Digital electronic",
-    "verdict": "partial",
-    "finding": "One Hala Point system can execute spiking models using 1.15 billion neurons.",
-    "detail": "The reported neuron capacity is below 10¹¹. Intel reports support for up to 128 billion synapses, below 10¹⁴, and does not demonstrate the required local learning comparison.",
-    "quote": "Applied to bio-inspired spiking neural network models, the system can execute its full capacity of 1.15 billion neurons 20 times faster than a human brain and up to 200 times faster rates at lower capacity.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 3,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
-   },
    {
     "milestone": "m1",
     "case": "Digital electronic",
@@ -815,119 +962,7 @@
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
-    "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
-   },
-   {
-    "milestone": "m1",
-    "case": "Analog and mixed-signal",
-    "verdict": "met",
-    "finding": "In 144,000 PCM synapses, spike-timing-dependent weight changes enabled temporal correlation detection with approximately 0.1% misclassified inputs.",
-    "detail": "Seven PCM devices represented each synapse. The experiment used a software neuron and hardware synapses.",
-    "quote": "The synaptic weights are updated using an STDP rule; synapses that receive an input spike within a time window before (after) the neuronal spike get potentiated (depressed).",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
-   },
-   {
-    "milestone": "m2",
-    "case": "Digital electronic",
-    "verdict": "met",
-    "finding": "One TrueNorth digital chip ran a connected neural network at 63 mW.",
-    "detail": "The chip contained one million spiking neurons and 256 million non-plastic synapses. The network processed 400 × 240-pixel video at 30 frames per second; the power measurement was for the chip.",
-    "quote": "We ran the multi-object detection and classiﬁcation network on TrueNorth with a 400 ⇥ 240\npixel video stream (Fig. 3) in real-time— 30 frames per second, where one frame used 33 time\nsteps, 1ms each. The network used 3, 406 of 4, 096 cores, and we measured its total power\nconsumption at 63mW during operation.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
-   },
-   {
-    "milestone": "m2",
-    "case": "Digital electronic",
-    "verdict": "met",
-    "finding": "One digital Darwin3 chip executed a connected two-layer neural network.",
-    "detail": "The authors measured energy consumption while the first layer fired spikes and the second layer received and processed them.",
-    "quote": "We mea-\nsured the energy consumption of the Darwin3\nchip when running a two-layer neural network,\nwhere the neurons in the first layer can fire spikes\nwithout inputs, and the neurons in the second\nlayer receive spikes and perform calculations.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
-   },
-   {
-    "milestone": "m2",
-    "case": "Analog and mixed-signal",
-    "verdict": "met",
-    "finding": "Neurogrid ran a recurrent inhibitory network across 15 Neurocores, with each chip receiving its own spikes.",
-    "detail": "The network also connected neurons across chips; each Neurocore accepted its own spikes and inhibited nearby neurons through shared dendrites.",
-    "quote": "The recurrent synaptic\nconnections were realized by multicasting spikes from\neach Neurocore to all others (including itself).",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 17,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
-   },
-   {
-    "milestone": "m3",
-    "case": "Digital electronic",
-    "verdict": "met",
-    "finding": "Loihi 2 CLP-SNN learned 40 object-class tasks online, with one video clip per class.",
-    "detail": "On-chip local weight updates imprint each newly allocated prototype once; the deployed system does not subsequently adapt that prototype. Feature extraction and label comparison occur off-chip.",
-    "quote": "In the 1-shot setting, each method learned a sequence of 40 online learning tasks, each containing a single short video clip per object category, similar to class-incremental learning.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 18,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
-   },
-   {
-    "milestone": "m3",
-    "case": "Analog and mixed-signal",
-    "verdict": "met",
-    "finding": "BrainScaleS-2 learned simplified Pong smooth pursuit in 10 experiments of 100,000 learning iterations each.",
-    "detail": "The mixed-signal chip updated synaptic weights on-chip using locally measured spike correlations and a reward signal during the experiment.",
-    "quote": "By repeating the procedure with ten randomly initialized weight matrices, we show that learning is reproducible, with little variation in the overall progress and outcome.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
-   },
-   {
-    "milestone": "m3",
-    "case": "Analog and mixed-signal",
-    "verdict": "met",
-    "finding": "Mixed-signal ROLLS trained 128 output neurons to distinguish 2 image classes using local synaptic updates.",
-    "detail": "A supervised teacher signal guided training; after training, the system responded selectively to car and motorbike images. The source does not report a classification accuracy.",
-    "quote": "We trained 64 of the VLSI output neurons of the network to become selective to one of two image classes, and the other 64 to become selective to the other class, via supervised learning protocol.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 19,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
-   },
-   {
-    "milestone": "m4",
-    "case": "Digital electronic",
-    "verdict": "met",
-    "finding": "DarwinWafer simulated a mouse brain across 32 neuromorphic chiplets.",
-    "detail": "The system uses an inter-chip network that routes spike packets across the wafer. The result is reported in a preprint.",
-    "quote": "Application studies demonstrate whole-brain simulations: two zebrafish brains per chiplet with high connectivity fidelity (Spearman r = 0.896) and a mouse brain mapped across 32 chiplets (r = 0.645).",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 20,
+    "ref": 7,
     "judged_by": "gpt-6.1-terra",
     "judged_on": "2026-11-14"
    },
@@ -935,300 +970,1679 @@
     "milestone": "m4",
     "case": "Digital electronic",
     "verdict": "partial",
-    "finding": "Darwin Monkey is reported as a brain-like computer with 960 Darwin3 chips.",
-    "detail": "The source reports a multichip system but does not state that the chips exchange spikes.",
-    "quote": "Brain-like chip: 960 Darwin3",
+    "finding": "One Hala Point prototype provides 5 TB/s of aggregate inter-chip communication bandwidth.",
+    "detail": "Cross-chip spike exchange is consistent with the reported full-capacity spiking execution, but the release gives no direct observation of a spike crossing a chip boundary.",
+    "quote": "Hala Point integrates processing, memory, and communication channels in a massively parallelized fabric, providing a total of 16 petabytes per second (PB/s) of memory bandwidth, 3.5 PB/s of inter-core communication bandwidth, and 5 terabytes per second (TB/s) of inter-chip communication bandwidth.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 21,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "ref": 2,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
-    "milestone": "m4",
+    "milestone": "m7",
+    "case": "Digital electronic",
+    "verdict": "partial",
+    "finding": "One built Hala Point prototype supports up to 128 billion synapses.",
+    "detail": null,
+    "quote": "The system supports up to 1.15 billion neurons and 128 billion synapses distributed over 140,544 neuromorphic processing cores, consuming a maximum of 2,600 watts of power.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 2,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": "Digital electronic",
+    "verdict": "partial",
+    "finding": "One Hala Point prototype reportedly executes spiking models at its full capacity of 1.15 billion neurons.",
+    "detail": "The speed claim is relative to a human brain. The release gives no timing result at 1 ms resolution and no adaptation experiment that tests whether local updates improve a prespecified score without offline retraining.",
+    "quote": "Applied to bio-inspired spiking neural network models, the system can execute its full capacity of 1.15 billion neurons 20 times faster than a human brain and up to 200 times faster rates at lower capacity.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 2,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
     "case": "Analog and mixed-signal",
     "verdict": "met",
-    "finding": "Neurogrid used 15 Neurocores to exchange spikes in a recurrent neural simulation.",
-    "detail": "Each layer was mapped to a separate Neurocore; spikes were multicast to the others, with neighboring layers accepting them.",
-    "quote": "Neurogrid was programmed to simulate a recurrent\ninhibitory network with 15 l ayers (Fig. 19), each mapped\nonto a different Neurocore. The recurrent synaptic\nconnections were realized by multicasting spikes from\neach Neurocore to all others (including itself).",
+    "finding": "In a 1,000-synapse spiking experiment, using 7 PCM devices per synapse yielded gradual spike-triggered potentiation and depression.",
+    "detail": "The presynaptic inputs were generated spike streams, and the postsynaptic integrate-and-fire neuron ran in software.",
+    "quote": "With\nN\n= 7, a more gradual potentiation and depression behavior is observed.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
-    "ref": 17,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": "Analog and mixed-signal",
+    "verdict": "partial",
+    "finding": "The prototype PCM chip supplied 1,000 hardware synapses for a connected spiking network with a software output neuron.",
+    "detail": null,
+    "quote": "Our network consists of 1000 multi-PCM synapses (in hardware) connected to one integrate-and-fire (I&F) software neuron.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": "Analog and mixed-signal",
+    "verdict": "met",
+    "finding": "The PCM spiking network trained on 144,000 input streams with local synaptic updates and misclassified about 0.1% after training.",
+    "detail": "A shared counter selected which device within each synapse to program. Pre- and postsynaptic spike timing determined the direction of the weight update.",
+    "quote": "In both experiment and simulation, ∼0.1% of the inputs were misclassified after training.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": "Analog and mixed-signal",
+    "verdict": "partial",
+    "finding": "The correlation-detection experiment trained 144,000 adaptive PCM synapses using incoming spike streams.",
+    "detail": "Each adaptive synapse used seven PCM devices. The reported million-device count therefore represents 144,000 synapses.",
+    "quote": "For the large-scale experiment, 144,000 synapses are trained, of which 14,400 receive correlated inputs.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": "Digital electronic",
+    "verdict": "met",
+    "finding": "One TrueNorth chip ran a connected object detection and classification network across 3,406 cores.",
+    "detail": null,
+    "quote": "We ran the multi-object detection and classiﬁcation network on TrueNorth with a 400 ⇥ 240\npixel video stream (Fig. 3) in real-time— 30 frames per second, where one frame used 33 time\nsteps, 1ms each.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": "Digital electronic",
+    "verdict": "partial",
+    "finding": "Two adjacent TrueNorth chips transferred data across a physical link at 26 pJ per bit.",
+    "detail": "The two-chip measurement was at 1.8 V. The separate spike-bandwidth test connected opposite ports on the same chip.",
+    "quote": "The energy to send a bit between external periph-\neries of two adjacent chips is 26pJ at 1.8V .",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Digital electronic",
+    "verdict": "partial",
+    "finding": "The verified single-chip TrueNorth design provides 256 million synapses.",
+    "detail": null,
+    "quote": "To demonstrate, we built a 5.4 billion transistor chip with\n4, 096 neurosynaptic cores interconnected via an intra-chip network that in-\ntegrates one million programmable spiking neurons and 256 million conﬁg-\nurable synapses.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": "Digital electronic",
+    "verdict": "partial",
+    "finding": "One TrueNorth chip ran a recurrent benchmark with about one million active spiking neurons in real time.",
+    "detail": "The benchmark averaged 20 Hz per neuron and 128 active synapses per neuron. The paper describes offline learning for mapped applications.",
+    "quote": "For a typical network with an average ﬁring rate of 20Hz and and an average of 128\nactive synapses per neuron, TrueNorth delivers 46 billion SOPS per Watt at real-time (with 1ms\ntime steps)",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": "Digital electronic",
+    "verdict": "met",
+    "finding": "One Darwin3 chip strengthened excitatory synapses during maze solving, with five timing measurements per maze size.",
+    "detail": "The source describes the direction of the weight change. The five measurements per maze size are timing measurements, and the source gives no count of strengthened synapses or magnitude of weight change.",
+    "quote": "The interconnected excita-\ntory neurons can transmit spikes in sequence,\nand under the action of STDP rules, the synap-\ntic weights are continuously increased to form a\nstable synaptic strength.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": "Digital electronic",
+    "verdict": "met",
+    "finding": "One Darwin3 chip executed a connected two-layer spiking neural network.",
+    "detail": null,
+    "quote": "We mea-\nsured the energy consumption of the Darwin3\nchip when running a two-layer neural network,\nwhere the neurons in the first layer can fire spikes\nwithout inputs, and the neurons in the second\nlayer receive spikes and perform calculations.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": "Digital electronic",
+    "verdict": "met",
+    "finding": "One Darwin3 network trained on-chip with reward-modulated STDP and achieved 96.0% MNIST accuracy.",
+    "detail": "The supervision layer issued positive or negative rewards based on the network output and target. The source gives no evaluated image count.",
+    "quote": "was trained directly on Darwin3 with a weight\nprecision of 16-bit and we achieved a classifica-\ntion accuracy of 96.0%",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Digital electronic",
+    "verdict": "partial",
+    "finding": "One Darwin3 chip ran a spiking VGG-16 ensemble with approximately 1.05 million neurons.",
+    "detail": "The ensemble used five VGG-16 models and a voting layer. The source gives no total synapse count for the ensemble.",
+    "quote": "We ensembled outputs of five\nVGG-16 models obtained through ANN2SNN\n[51] using a voting mechanism [52], culminating\nin a composite model comprising approximately\n1.05 million neurons and employing 8-bit weight\nprecision.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": "Digital electronic",
+    "verdict": "partial",
+    "finding": "One Darwin3 chip used local STDP in a maze network of about 2.35 million neurons, with five timing measurements.",
+    "detail": "The neuron count uses the largest grid in Table 6 because the prose gives a conflicting dimension. The reported time measures maze solving. The 1 ms time step appears in a separate energy experiment.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Analog and mixed-signal",
+    "verdict": "partial",
+    "finding": "The Neurocore design used 180-nm CMOS and was tested through measured responses of its neuron and synapse circuits.",
+    "detail": "The paper reports circuit response traces and calibration measurements. It does not specify how many circuit instances were sampled in those tests.",
+    "quote": "Hardware realization of the synapse-population\nmodel behaves as expected [Fig. 9(a)–(d)].",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": "Analog and mixed-signal",
+    "verdict": "partial",
+    "finding": "Each Neurocore ran a recurrently connected layer of 65,536 neurons in the Neurogrid hardware experiment.",
+    "detail": "The paper reports synchrony for the multichip network and gives no separate single-chip network run.",
+    "quote": "Neurogrid was programmed to simulate a recurrent\ninhibitory network with 15 l ayers (Fig. 19), each mapped\nonto a different Neurocore.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m4",
     "case": "Analog and mixed-signal",
     "verdict": "met",
-    "finding": "BrainScaleS-2 mixed-signal prototype: 4 chips exchanged spikes.",
-    "detail": "The measurement used three senders and one receiver, with spikes routed through FPGAs.",
+    "finding": "On one Neurogrid board, 15 Neurocore chips exchanged spikes in a single recurrent network.",
+    "detail": "The board housed 16 Neurocores. The recurrent network used 15 of them.",
+    "quote": "The recurrent synaptic\nconnections were realized by multicasting spikes from\neach Neurocore to all others (including itself).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Analog and mixed-signal",
+    "verdict": "met",
+    "finding": "One Neurogrid system verified approximately 8 billion synaptic connections in a real-time million-neuron run.",
+    "detail": "The reported count uses 7,980 connections per neuron, the neighborhood that supplied half of each neuron's inhibition.",
+    "quote": "a million-neuron, eight-billion-synapse real-time\nsimulation",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": "Analog and mixed-signal",
+    "verdict": "partial",
+    "finding": "One Neurogrid system ran an active recurrent spiking network of 983,040 neurons in real time.",
+    "detail": "The shared-dendrite architecture used in this experiment precludes synaptic plasticity. The paper discusses how shared synapses could support plasticity in another configuration.",
+    "quote": "a million-neuron, eight-billion-synapse real-time\nsimulation",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": "Digital electronic",
+    "verdict": "met",
+    "finding": "On one Loihi 2 chip, each allocated prototype receives one activity-driven synaptic imprint.",
+    "detail": "A modulatory spike gates the update. The prototype’s weights remain fixed after imprinting.",
+    "quote": "After this single update the weights are frozen; no further learning occurs at that synapse regardless of subsequent predictions.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": "Digital electronic",
+    "verdict": "met",
+    "finding": "One Loihi 2 chip executes the connected CLP-SNN benchmark network across 41 neurocores.",
+    "detail": null,
+    "quote": "The prototype population occupies the majority of the allocated cores; at the network size used for benchmarking (1280 input dimensions, up to 300 prototypes), CLP-SNN fits within 41 of the 128 neurocores of a single chip.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": "Digital electronic",
+    "verdict": "met",
+    "finding": "Loihi 2 CLP-SNN used local online weight updates and achieved 90.0% mean final accuracy across three 25-shot OpenLORIS runs.",
+    "detail": "The host supplies correctness feedback. Hardware freezes each prototype after imprinting. Repeated corrective updates to existing prototypes ran in simulation.",
+    "quote": "A post-synaptic term gates what the rule computes, zeroing the weight change that would have followed",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": "Digital electronic",
+    "verdict": "partial",
+    "finding": "One Loihi 2 chip completed a prediction-and-local-update step in 0.33 ms per streamed sample.",
+    "detail": "The timing excludes feature extraction and host–device I/O. The network runs a learning phase once per sample, with each prototype’s weights written once at allocation.",
+    "quote": "CLP-SNN completes each prediction-and-update step on the Loihi 2 chip in 0.33 ms at 0.05 mJ.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": "Analog and mixed-signal",
+    "verdict": "partial",
+    "finding": "BrainScaleS 2 changed electronic synaptic weights across 10 Pong trials using 6-bit weights.",
+    "detail": "The on-chip processor wrote back weight changes computed from each synapse's causal spike-timing trace and the reward signal.",
+    "quote": "Note that also slightly off-diagonal synapses are also strengthened, as dictated by the graded reward scheme.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": "Analog and mixed-signal",
+    "verdict": "met",
+    "finding": "One BrainScaleS 2 prototype executed a feed-forward spiking network with 1,024 physical synapses.",
+    "detail": null,
+    "quote": "The chip performs the experiment completely autonomously: the environment simulation, spiking network emulation and synaptic plasticity via the PPU are all handled on-chip.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": "Analog and mixed-signal",
+    "verdict": "met",
+    "finding": "BrainScaleS 2 reproduced online Pong learning across 10 initializations, applying local-rule updates across 1,024 synapses.",
+    "detail": null,
+    "quote": "Using the reward, a stored running average of the reward and the STDP correlation traces computed locally at each synapse during SNN emulation, the weight updates of all synapses are computed (Equation 7) and applied.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": "Analog and mixed-signal",
+    "verdict": "partial",
+    "finding": "BrainScaleS 2 recovered a mean Pong performance of 0.81 through online synaptic adaptation across 100 neuron permutations.",
+    "detail": "The comparison used the same learned weight matrix after shuffling the mapping from logical action units to physical neurons. The chip then continued learning from that matrix.",
+    "quote": "Each of the 100 randomly shuffled systems was then subjected to 50, 000 learning iterations, starting from the maladapted weight matrix, leading to the distribution shown in the bottom panel, with mean expected reward and performance of\nand\nP\n= 0.81 ± 0.09.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": "Analog and mixed-signal",
+    "verdict": "met",
+    "finding": "One ROLLS synapse showed 2 highlighted spike-triggered weight changes, one downward and one upward.",
+    "detail": "The chip trace highlights the downward update at 273 s and the upward update at 405 s.",
+    "quote": "weight updates are triggered when the pre-synaptic spikes arrive, and when the post-synaptic neuron's Calcium concentration is in the appropriate range.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Analog and mixed-signal",
+    "verdict": "partial",
+    "finding": "One ROLLS attractor microcircuit with 222 neurons demonstrated persistent activity, switching, and reset.",
+    "detail": "The attractor experiment verified these behaviors in hardware. The text does not establish that they exhaust the milestone's specified functions.",
+    "quote": "If we inhibit an active pool of neurons directly, with an external stimulus the population is reset and becomes inactive.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": "Analog and mixed-signal",
+    "verdict": "met",
+    "finding": "One ROLLS chip executed a connected spiking classifier with 256 neurons.",
+    "detail": null,
+    "quote": "The network is composed of 128 VLSI hidden neurons and 128 VLSI output neurons on the ROLLS neuromorphic processor.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": "Analog and mixed-signal",
+    "verdict": "met",
+    "finding": "One ROLLS classifier learned online to distinguish 2 image classes through local output-layer weight updates.",
+    "detail": null,
+    "quote": "After training, our classification system was able to respond selectively to natural images of cars and motorbikes taken from the Caltech 101 database.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": "Analog and mixed-signal",
+    "verdict": "met",
+    "finding": "One image-classification system transferred spikes across a physical link between 2 neuromorphic chips.",
+    "detail": "The demonstrated spike flow was from the dynamic vision sensor to ROLLS.",
+    "quote": "In this experiment (see Figure\n12\n), we used a DVS, interfaced to our chip via a commercially available digital board, used to route signals from the vision sensor to the chip.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": "Analog and mixed-signal",
+    "verdict": "partial",
+    "finding": "One real-time ROLLS classifier performed local online learning with 16,384 adaptive connections.",
+    "detail": "The adaptive count follows from full connectivity between the hidden and output layers. Processing was continuous and asynchronous. Testing measured output firing without the teacher signal and supplied no frozen-weight baseline.",
+    "quote": "The output neurons in the last layer receive spikes from all the 128 hidden layer neurons, via plastic synapses.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": "Digital electronic",
+    "verdict": "met",
+    "finding": "One Darwin3 chip ran two connected zebrafish brain models with about 70,000 neurons per model.",
+    "detail": null,
+    "quote": "In the case of the zebrafish brain, with its 70,000 neurons and 640,000 synapses, the simulation is conducted on DarwinWafer (Fig. 4a).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": "Digital electronic",
+    "verdict": "met",
+    "finding": "One DarwinWafer mouse brain network ran across 32 spike-linked Darwin3 chiplets.",
+    "detail": null,
+    "quote": "On the other hand, simulating the more complex mouse brain—comprising approximately 9.5 million neurons and 500 million synapses—requires the computational power of 32 chips (Fig. 4d).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Digital electronic",
+    "verdict": "partial",
+    "finding": "One fabricated DarwinWafer system has a provisioned capacity of 6.4 billion synapses.",
+    "detail": "Neither the wafer nor an individual chiplet has both specified counts in the same design.",
+    "quote": "Each chiplet implements 2.35 M neurons and 0.1 B synapses, yielding 0.15 B neurons and 6.4 B synapses per wafer.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": "Digital electronic",
+    "verdict": "partial",
+    "finding": "One DarwinWafer mouse brain simulation ran a network of about 9.5 million neurons.",
+    "detail": "The synthetic throughput benchmark does not establish the wall-clock speed of the mouse simulation.",
+    "quote": "On the other hand, simulating the more complex mouse brain—comprising approximately 9.5 million neurons and 500 million synapses—requires the computational power of 32 chips (Fig. 4d).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": "Analog and mixed-signal",
+    "verdict": "met",
+    "finding": "A four-chip BrainScaleS-2 prototype transferred 32,768 spikes in a 3:1 fan-in test with chip-to-chip latency up to 1.3 µs.",
+    "detail": null,
     "quote": "The total spike latency is characterized using a range of regular rates with three senders and one receiver on the four-chip prototype setup (see\nFig.\n2\n, right side).",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": "Digital electronic",
+    "verdict": "met",
+    "finding": "In a 72-column Loihi network, excitatory synapses strengthened or weakened according to spike timing.",
+    "detail": null,
+    "quote": "During learning, the synaptic weights between MCs and GCs were systematically modified by experience.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": "Digital electronic",
+    "verdict": "met",
+    "finding": "A 72-column spiking olfactory network ran on a single Loihi chip.",
+    "detail": null,
+    "quote": "The OB EPL model therefore was instantiated with 72 columns, such that each column received afferent excitation proportional to the activation level of one sensor.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": "Digital electronic",
+    "verdict": "met",
+    "finding": "The Loihi network learned ten odourants sequentially using one sample per odourant.",
+    "detail": "The inputs were recorded wind-tunnel sensor vectors. Plasticity was enabled during learning and disabled during recognition tests.",
+    "quote": "We then trained the 72-column network sequentially with all ten odourants in the dataset\n4\n, using a one-shot training regimen for each odour.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": "Digital electronic",
+    "verdict": "partial",
+    "finding": "The 72-column Loihi network processed an odour sample in about 2 ms.",
+    "detail": "The timing measures hardware execution per recorded sample. The paper describes the mapping between model time and wall-clock time as arbitrary.",
+    "quote": "On Loihi, operating at 100 kHz, the 200 timesteps (5 gamma cycles) used for the processing of a single sniff require a total of around 2 ms.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": "Analog and mixed-signal",
+    "verdict": "met",
+    "finding": "BrainScaleS 2 Pong synapses strengthened connections associated with rewarded actions across 10 runs.",
+    "detail": "Presynaptic spikes came from virtual input units. An analog circuit at each synapse measured spike timing, and the embedded digital processor wrote the weight changes.",
+    "quote": "Note that also slightly off-diagonal synapses are also strengthened, as dictated by the graded reward scheme.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": "Analog and mixed-signal",
+    "verdict": "met",
+    "finding": "One BrainScaleS 2 chip ran a connected Pong network with 1,024 hardware synapses.",
+    "detail": "The embedded processor also ran the Pong environment. The external FPGA provided initial configuration.",
+    "quote": "The paddle is controlled by the neural network emulated on the neuromorphic chip.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": "Analog and mixed-signal",
+    "verdict": "met",
+    "finding": "BrainScaleS 2 recovered mean Pong performance to 81% with online synaptic updates across 100 shuffled neuron assignments.",
+    "detail": "The on-chip processor combined each synapse’s causal spike-timing trace with the difference between instantaneous and expected reward.",
+    "quote": "This demonstrates that our learning paradigm implicitly adapts synaptic weights to a specific pattern of neuronal variability and compensates for fixed-pattern noise.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": "Analog and mixed-signal",
+    "verdict": "partial",
+    "finding": "One BrainScaleS 2 Pong prototype completed an online learning iteration in 0.4 ms.",
+    "detail": "The analog network ran in continuous time. The measured iteration included network emulation, synaptic updates and environment processing.",
+    "quote": "In contrast, BSS2 takes 0.4 ms per iteration as measured using the time stamp register of the PPU.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": "Digital electronic",
+    "verdict": "met",
+    "finding": "One TrueNorth Grid Classifier B network routed spikes across physical links among 16 digital neuromorphic chips.",
+    "detail": "The chips formed a mesh on a single board. The paper reports cross-chip routes and port spike traffic for the classifier.",
+    "quote": "For grid\nclassiﬁer B, a 16-chip network mapped to the 4×4 board, opti-\nmizing core placement reduces average static hop distance\nby a factor of 24 × to only 6.7 hops (Fig. 19), and reduces",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 25,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": "Analog and mixed-signal",
+    "verdict": "met",
+    "finding": "One BrainScaleS-1 wafer module propagated spikes through a single synfire network using 230 HICANN ASICs.",
+    "detail": "Table 3 gives the ASIC count. Section 2.1 describes the physical links across chip boundaries, and Figure 15 shows network placement and spike propagation.",
+    "quote": "W e were able to successfully emulate a synfire chain with 190 chain links on the BrainScaleS-1 system.\nFigure 15(b) shows an example of a pulse package that travels along the full length of the chain.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 26,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Digital electronic",
+    "verdict": "partial",
+    "finding": "BrainChip tested production AKD1000 chips on several neural-network workloads. The chip sample size and both capacity counts are unreported.",
+    "detail": "The announcement reports application-level tests and provides no capacity verification at the milestone scale.",
+    "quote": "BrainChip tested a production version of its AKD1000 chip with several neural network \napplications, including object classification, keyword spotting and spiking neural networks.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 27,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": "Digital electronic",
+    "verdict": "met",
+    "finding": "In a 16-hypercolumn network, digital SpiNNaker updated AMPA and NMDA synaptic weights simultaneously in real time using local spiking BCPNN rules.",
+    "detail": "After training, stimulating the first element of the sequence triggered replay of the learned sequence with plasticity disabled.",
+    "quote": "Using our new approach we trained both the AMPA and NMDA plastic synapses simultaneously on separate synapse processors each with different BCPNN configurations.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 28,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": "Analog and mixed-signal",
+    "verdict": "met",
+    "finding": "One all-analogue sensor fusion unit demonstrated local synaptic weight updates across 6 pressure levels at fixed light intensity.",
+    "detail": "A microcontroller synchronized stimulus onset. The sensor-driven analogue circuit generated the spike-timing differences and updated the drift memristor’s non-volatile conductance.",
+    "quote": "These time-shifted signals were combined and \napplied to a drift memristor, allowing the device to store a fused \nrepresentation of the sensory inputs through hetero-synaptic \nplasticity learning.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 29,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/neuro.09.031.2009/full",
     "milestone": "m1",
-    "hash": "a82ec8aeb593",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "952831220bf0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/neuro.09.031.2009/full",
+    "milestone": "m6",
+    "hash": "95c07f5798e9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/neuro.09.031.2009/full",
     "milestone": "m2",
-    "hash": "8a983853b9cd",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "b1d92c6d48c9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/neuro.09.031.2009/full",
     "milestone": "m3",
-    "hash": "61838828dc31",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "6ee803d1e6da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/neuro.09.031.2009/full",
     "milestone": "m4",
-    "hash": "2d9a13394176",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "327ce33f3c32",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/neuro.09.031.2009/full",
+    "milestone": "m7",
+    "hash": "1e4f24bee565",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/neuro.09.031.2009/full",
     "milestone": "m5",
     "hash": "1c270e633cf1",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/neuro.09.031.2009/full",
     "milestone": "completion",
     "hash": "58cd48bfb868",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0017514",
     "milestone": "m1",
-    "hash": "a82ec8aeb593",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "952831220bf0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0017514",
+    "milestone": "m6",
+    "hash": "95c07f5798e9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0017514",
     "milestone": "m2",
-    "hash": "8a983853b9cd",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "b1d92c6d48c9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0017514",
     "milestone": "m3",
-    "hash": "61838828dc31",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "6ee803d1e6da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0017514",
     "milestone": "m4",
-    "hash": "2d9a13394176",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "327ce33f3c32",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0017514",
+    "milestone": "m7",
+    "hash": "1e4f24bee565",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0017514",
     "milestone": "m5",
     "hash": "1c270e633cf1",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0017514",
     "milestone": "completion",
     "hash": "58cd48bfb868",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.intc.com/news-events/press-releases/detail/1691/intel-builds-worlds-largest-neuromorphic-system-to",
     "milestone": "m1",
-    "hash": "a82ec8aeb593",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "952831220bf0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.intc.com/news-events/press-releases/detail/1691/intel-builds-worlds-largest-neuromorphic-system-to",
+    "milestone": "m6",
+    "hash": "95c07f5798e9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.intc.com/news-events/press-releases/detail/1691/intel-builds-worlds-largest-neuromorphic-system-to",
     "milestone": "m2",
-    "hash": "8a983853b9cd",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "b1d92c6d48c9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.intc.com/news-events/press-releases/detail/1691/intel-builds-worlds-largest-neuromorphic-system-to",
     "milestone": "m3",
-    "hash": "61838828dc31",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "6ee803d1e6da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.intc.com/news-events/press-releases/detail/1691/intel-builds-worlds-largest-neuromorphic-system-to",
     "milestone": "m4",
-    "hash": "2d9a13394176",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "327ce33f3c32",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.intc.com/news-events/press-releases/detail/1691/intel-builds-worlds-largest-neuromorphic-system-to",
+    "milestone": "m7",
+    "hash": "1e4f24bee565",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.intc.com/news-events/press-releases/detail/1691/intel-builds-worlds-largest-neuromorphic-system-to",
     "milestone": "m5",
     "hash": "1c270e633cf1",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.intc.com/news-events/press-releases/detail/1691/intel-builds-worlds-largest-neuromorphic-system-to",
     "milestone": "completion",
     "hash": "58cd48bfb868",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-08253-8",
     "milestone": "m1",
-    "hash": "a82ec8aeb593",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "952831220bf0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-024-08253-8",
+    "milestone": "m6",
+    "hash": "95c07f5798e9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-08253-8",
     "milestone": "m2",
-    "hash": "8a983853b9cd",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "b1d92c6d48c9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-08253-8",
     "milestone": "m3",
-    "hash": "61838828dc31",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "6ee803d1e6da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-08253-8",
     "milestone": "m4",
-    "hash": "2d9a13394176",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "327ce33f3c32",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-024-08253-8",
+    "milestone": "m7",
+    "hash": "1e4f24bee565",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-08253-8",
     "milestone": "m5",
     "hash": "1c270e633cf1",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-08253-8",
     "milestone": "completion",
     "hash": "58cd48bfb868",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11034913/",
-    "milestone": "m1",
-    "hash": "a82ec8aeb593",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6023896/",
     "milestone": "m1",
-    "hash": "a82ec8aeb593",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "952831220bf0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6023896/",
+    "milestone": "m6",
+    "hash": "95c07f5798e9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6023896/",
+    "milestone": "m2",
+    "hash": "b1d92c6d48c9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6023896/",
+    "milestone": "m3",
+    "hash": "6ee803d1e6da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6023896/",
+    "milestone": "m4",
+    "hash": "327ce33f3c32",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6023896/",
+    "milestone": "m7",
+    "hash": "1e4f24bee565",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6023896/",
+    "milestone": "m5",
+    "hash": "1c270e633cf1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6023896/",
+    "milestone": "completion",
+    "hash": "58cd48bfb868",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.stratnews.com/docs/synapse_science_final.pdf",
+    "milestone": "m1",
+    "hash": "952831220bf0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.stratnews.com/docs/synapse_science_final.pdf",
+    "milestone": "m6",
+    "hash": "95c07f5798e9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.stratnews.com/docs/synapse_science_final.pdf",
     "milestone": "m2",
-    "hash": "8a983853b9cd",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "b1d92c6d48c9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.stratnews.com/docs/synapse_science_final.pdf",
+    "milestone": "m3",
+    "hash": "6ee803d1e6da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.stratnews.com/docs/synapse_science_final.pdf",
+    "milestone": "m4",
+    "hash": "327ce33f3c32",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.stratnews.com/docs/synapse_science_final.pdf",
+    "milestone": "m7",
+    "hash": "1e4f24bee565",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.stratnews.com/docs/synapse_science_final.pdf",
+    "milestone": "m5",
+    "hash": "1c270e633cf1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.stratnews.com/docs/synapse_science_final.pdf",
+    "milestone": "completion",
+    "hash": "58cd48bfb868",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2312.17582",
+    "milestone": "m1",
+    "hash": "952831220bf0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2312.17582",
+    "milestone": "m6",
+    "hash": "95c07f5798e9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2312.17582",
     "milestone": "m2",
-    "hash": "8a983853b9cd",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "b1d92c6d48c9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2312.17582",
+    "milestone": "m3",
+    "hash": "6ee803d1e6da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2312.17582",
+    "milestone": "m4",
+    "hash": "327ce33f3c32",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2312.17582",
+    "milestone": "m7",
+    "hash": "1e4f24bee565",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2312.17582",
+    "milestone": "m5",
+    "hash": "1c270e633cf1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2312.17582",
+    "milestone": "completion",
+    "hash": "58cd48bfb868",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.stanford.edu/group/brainsinsilicon/documents/BenjaminEtAlNeurogrid2014.pdf",
+    "milestone": "m1",
+    "hash": "952831220bf0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.stanford.edu/group/brainsinsilicon/documents/BenjaminEtAlNeurogrid2014.pdf",
+    "milestone": "m6",
+    "hash": "95c07f5798e9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.stanford.edu/group/brainsinsilicon/documents/BenjaminEtAlNeurogrid2014.pdf",
     "milestone": "m2",
-    "hash": "8a983853b9cd",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "b1d92c6d48c9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
-    "url": "https://arxiv.org/html/2511.01553v3",
+    "url": "https://www.stanford.edu/group/brainsinsilicon/documents/BenjaminEtAlNeurogrid2014.pdf",
     "milestone": "m3",
-    "hash": "61838828dc31",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6444279/",
-    "milestone": "m3",
-    "hash": "61838828dc31",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2015.00141/full",
-    "milestone": "m3",
-    "hash": "61838828dc31",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2509.16213v1",
-    "milestone": "m4",
-    "hash": "2d9a13394176",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://ai.zju.edu.cn/aien/2026/0615/c91546a3178998/page.htm",
-    "milestone": "m4",
-    "hash": "2d9a13394176",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "6ee803d1e6da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.stanford.edu/group/brainsinsilicon/documents/BenjaminEtAlNeurogrid2014.pdf",
     "milestone": "m4",
-    "hash": "2d9a13394176",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "327ce33f3c32",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.stanford.edu/group/brainsinsilicon/documents/BenjaminEtAlNeurogrid2014.pdf",
+    "milestone": "m7",
+    "hash": "1e4f24bee565",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.stanford.edu/group/brainsinsilicon/documents/BenjaminEtAlNeurogrid2014.pdf",
+    "milestone": "m5",
+    "hash": "1c270e633cf1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.stanford.edu/group/brainsinsilicon/documents/BenjaminEtAlNeurogrid2014.pdf",
+    "milestone": "completion",
+    "hash": "58cd48bfb868",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2511.01553v3",
+    "milestone": "m1",
+    "hash": "952831220bf0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2511.01553v3",
+    "milestone": "m6",
+    "hash": "95c07f5798e9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2511.01553v3",
+    "milestone": "m2",
+    "hash": "b1d92c6d48c9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2511.01553v3",
+    "milestone": "m3",
+    "hash": "6ee803d1e6da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2511.01553v3",
+    "milestone": "m4",
+    "hash": "327ce33f3c32",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2511.01553v3",
+    "milestone": "m7",
+    "hash": "1e4f24bee565",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2511.01553v3",
+    "milestone": "m5",
+    "hash": "1c270e633cf1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2511.01553v3",
+    "milestone": "completion",
+    "hash": "58cd48bfb868",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2019.00260/full",
+    "milestone": "m1",
+    "hash": "952831220bf0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2019.00260/full",
+    "milestone": "m6",
+    "hash": "95c07f5798e9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2019.00260/full",
+    "milestone": "m2",
+    "hash": "b1d92c6d48c9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2019.00260/full",
+    "milestone": "m3",
+    "hash": "6ee803d1e6da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2019.00260/full",
+    "milestone": "m4",
+    "hash": "327ce33f3c32",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2019.00260/full",
+    "milestone": "m7",
+    "hash": "1e4f24bee565",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2019.00260/full",
+    "milestone": "m5",
+    "hash": "1c270e633cf1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2019.00260/full",
+    "milestone": "completion",
+    "hash": "58cd48bfb868",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2015.00141/full",
+    "milestone": "m1",
+    "hash": "952831220bf0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2015.00141/full",
+    "milestone": "m6",
+    "hash": "95c07f5798e9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2015.00141/full",
+    "milestone": "m2",
+    "hash": "b1d92c6d48c9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2015.00141/full",
+    "milestone": "m3",
+    "hash": "6ee803d1e6da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2015.00141/full",
+    "milestone": "m4",
+    "hash": "327ce33f3c32",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2015.00141/full",
+    "milestone": "m7",
+    "hash": "1e4f24bee565",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2015.00141/full",
+    "milestone": "m5",
+    "hash": "1c270e633cf1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2015.00141/full",
+    "milestone": "completion",
+    "hash": "58cd48bfb868",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2509.16213v1",
+    "milestone": "m1",
+    "hash": "952831220bf0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2509.16213v1",
+    "milestone": "m6",
+    "hash": "95c07f5798e9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2509.16213v1",
+    "milestone": "m2",
+    "hash": "b1d92c6d48c9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2509.16213v1",
+    "milestone": "m3",
+    "hash": "6ee803d1e6da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2509.16213v1",
+    "milestone": "m4",
+    "hash": "327ce33f3c32",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2509.16213v1",
+    "milestone": "m7",
+    "hash": "1e4f24bee565",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2509.16213v1",
+    "milestone": "m5",
+    "hash": "1c270e633cf1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2509.16213v1",
+    "milestone": "completion",
+    "hash": "58cd48bfb868",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ai.zju.edu.cn/aien/2026/0615/c91546a3178998/page.htm",
+    "milestone": "m1",
+    "hash": "952831220bf0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ai.zju.edu.cn/aien/2026/0615/c91546a3178998/page.htm",
+    "milestone": "m6",
+    "hash": "95c07f5798e9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ai.zju.edu.cn/aien/2026/0615/c91546a3178998/page.htm",
+    "milestone": "m2",
+    "hash": "b1d92c6d48c9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ai.zju.edu.cn/aien/2026/0615/c91546a3178998/page.htm",
+    "milestone": "m3",
+    "hash": "6ee803d1e6da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ai.zju.edu.cn/aien/2026/0615/c91546a3178998/page.htm",
+    "milestone": "m4",
+    "hash": "327ce33f3c32",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ai.zju.edu.cn/aien/2026/0615/c91546a3178998/page.htm",
+    "milestone": "m7",
+    "hash": "1e4f24bee565",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ai.zju.edu.cn/aien/2026/0615/c91546a3178998/page.htm",
+    "milestone": "m5",
+    "hash": "1c270e633cf1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ai.zju.edu.cn/aien/2026/0615/c91546a3178998/page.htm",
+    "milestone": "completion",
+    "hash": "58cd48bfb868",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.03781v1",
+    "milestone": "m1",
+    "hash": "952831220bf0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.03781v1",
+    "milestone": "m6",
+    "hash": "95c07f5798e9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.03781v1",
+    "milestone": "m2",
+    "hash": "b1d92c6d48c9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.03781v1",
+    "milestone": "m3",
+    "hash": "6ee803d1e6da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2512.03781v1",
     "milestone": "m4",
-    "hash": "2d9a13394176",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "327ce33f3c32",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.03781v1",
+    "milestone": "m7",
+    "hash": "1e4f24bee565",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.03781v1",
+    "milestone": "m5",
+    "hash": "1c270e633cf1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2512.03781v1",
+    "milestone": "completion",
+    "hash": "58cd48bfb868",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11034913/",
+    "milestone": "m1",
+    "hash": "952831220bf0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11034913/",
+    "milestone": "m6",
+    "hash": "95c07f5798e9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11034913/",
+    "milestone": "m2",
+    "hash": "b1d92c6d48c9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11034913/",
+    "milestone": "m3",
+    "hash": "6ee803d1e6da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11034913/",
+    "milestone": "m4",
+    "hash": "327ce33f3c32",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11034913/",
+    "milestone": "m7",
+    "hash": "1e4f24bee565",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11034913/",
+    "milestone": "m5",
+    "hash": "1c270e633cf1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11034913/",
+    "milestone": "completion",
+    "hash": "58cd48bfb868",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6444279/",
+    "milestone": "m1",
+    "hash": "952831220bf0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6444279/",
+    "milestone": "m6",
+    "hash": "95c07f5798e9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6444279/",
+    "milestone": "m2",
+    "hash": "b1d92c6d48c9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6444279/",
+    "milestone": "m3",
+    "hash": "6ee803d1e6da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6444279/",
+    "milestone": "m4",
+    "hash": "327ce33f3c32",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6444279/",
+    "milestone": "m7",
+    "hash": "1e4f24bee565",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6444279/",
+    "milestone": "m5",
+    "hash": "1c270e633cf1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6444279/",
+    "milestone": "completion",
+    "hash": "58cd48bfb868",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://redwood.berkeley.edu/wp-content/uploads/2021/08/Akopyan2015.pdf",
+    "milestone": "m4",
+    "hash": "327ce33f3c32",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.kip.uni-heidelberg.de/Veroeffentlichungen/download.php/6924/temp/4628.pdf",
+    "milestone": "m4",
+    "hash": "327ce33f3c32",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://announcements.asx.com.au/asxpdf/20211109/pdf/452r99fcjxnnd6.pdf",
+    "milestone": "m7",
+    "hash": "1e4f24bee565",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2016.00420/full",
+    "milestone": "m3",
+    "hash": "6ee803d1e6da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s44460-026-00067-7.pdf",
+    "milestone": "m3",
+    "hash": "6ee803d1e6da",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1270,20 +2684,138 @@
     "date": "2026-11-14",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 14 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"One neuromorphic computer runs an active network of at least 100 billion neurons that communicate by spikes and at least 100 trillion adaptive synapses. It stores connection weights near the circuits that use them and learns from incoming data by updating weights with signals available at each connection. Each second of network activity takes at most one second, and the complete system averages at most 20 W during learning. For comparison, Darwin Monkey is rated at 2.25 billion neurons and about 2,000 W typical power.\". Reason: The definition leaves the distinction between installed capacity and an active learning network implicit and gives readers no hardware comparison."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"A simulation of 86 billion spiking neurons used 14,012 graphics processors and took 65 seconds per second of brain activity at a mean firing rate of about 7 Hz. Neuroscientists could test how networks of that size learn from sensory input as it arrives, provided brain measurements constrain the model. Mobile robots face a related limit: efficient inference can save battery power, but a fixed model can lose accuracy as its surroundings change. Learning on board could let a robot recognize new objects without waiting for offline retraining.\". Reason: The metabolism figures do not quantify the computing limitation or explain what real-time adaptation would let people do."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by U.S. Department of Energy, Advanced Materials and Manufacturing Technologies Office, 2024: \"approach or exceed human brain efficiency\". Reason: The DOE roadmap supplies an explicit brain-efficiency goal and identifies the quantity to compare."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Roadmap on Neuromorphic Photonics, chapter on brain-derived neuromorphic computing, 2025: \"Scaling to ~100 billion neurons, ~100 trillion synapses, within ~3 litre volume and ~20W power\". Reason: The photonics roadmap puts the neuron count, synapse count and power budget together in one design goal."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit completion: set_by = \"Technology Atlas. The published roadmaps give design targets but do not define a joint pass/fail test.\"; basis = \"The Roadmap on Neuromorphic Photonics places approximately 100 billion neurons, 100 trillion synapses and 20 W together, with a separate volume goal of about 3 litres. IRDS gives a 1 kHz network time resolution and allows network time to differ from elapsed time. NEUROTECH specifies local weight updates. The Atlas sets the hard counts and power ceiling, requires real-time execution and improvement over frozen weights, and includes all supporting equipment in electrical input. Volume is outside the test.\"; refs = [22, 5, 2, 25]. Reason: The basis omits the roadmap that states scale and power together and does not distinguish network time resolution from elapsed time."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"An electronic synapse changes the strength of the connection between two neurons in response to neural activity.\". Reason: The device dimensions, sample-size comment and Loihi result belong to the evidence for m1 rather than its test."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m1: \"A core neural microcircuit performs all its specified functions in hardware.\". Reason: DARPA identifies a hardware microcircuit test between demonstrating one plastic synapse and operating a complete chip."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"One neuromorphic chip executes a connected neural network in hardware.\". Reason: The TrueNorth and BrainScaleS-2 specifications obscure the single-chip integration test and can be mistaken for minimum requirements."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"During operation, the neuromorphic system modifies synaptic weights in response to incoming data using local learning rules.\". Reason: The odour-recognition and Pong results introduce task-specific conditions into a milestone defined by the location and timing of learning."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"At least two neuromorphic chips operating as one network exchange spikes across a physical chip-to-chip link.\". Reason: The chip counts, power rating and latency reports mix evidence of different kinds into a test of interchip spike communication."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m4: \"A verified neural hardware design supports about one million neurons and ten billion synapses.\". Reason: The jump from a working chip-to-chip link to human scale omits DARPA’s intermediate hardware design-verification target for both neurons and synapses."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 3. Reason: The full text of Neuromorphic computing at scale and its eight-page supplementary information are accessible."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 2. Reason: The full August 2024 DOE draft roadmap is accessible, including its neuromorphic action plan in Table 35."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No explicit rejection of human-scale local learning at 20 W was found in the DARPA, IEEE IRDS, NEUROTECH or DOE EES2 documents.\". Reason: The goal statements leave open whether any programme or roadmap body expressly rejects the combined target."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 14 of 14 proposed operations from CPE-05-revise-20261125T084219102424Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m6, m2, m3, m4, m7."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 1 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 2 found, 1 not found, 1 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Structural problems after applying: references never cited: [1]"
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "definition is 523 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 16 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 7 candidates returned, 0 dropped as sources already used, 7 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 5 of 7 new candidates, without search. Skipped: 3 no readable saved copy. Dropped rows: none. Replaced 13 earlier rows. Added 53 results: 48 from sources already used, 5 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 4 from Crossref, 0 from PubMed, 0 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 52 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Removed 2 references no longer cited; renumbered."
    }
   ],
-  "results_run": "2026-11-14"
- },
- "review": {
-  "state": "published",
-  "note": null,
-  "into": null,
-  "at": "2026-11-14",
-  "log": [
-   {
-    "date": "2026-11-14",
-    "state": "published"
-   }
-  ]
+  "results_run": "2026-11-25"
  }
 }
