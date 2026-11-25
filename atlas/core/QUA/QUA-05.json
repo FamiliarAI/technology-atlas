@@ -319,12 +319,14 @@
  "page": {
   "id": "QUA-05",
   "title": "Universal quantum computation by braiding non-Abelian anyons",
-  "definition": "A gapped physical system stores quantum information in the shared fusion states of non-Abelian anyons, excitations whose exchanges act in an order-dependent way. Braiding supplies gates that approximate arbitrary quantum circuits, with storage and gates protected against local perturbations by the topological phase.",
+  "definition": "A gapped physical system stores quantum information in the possible ways the topological charges of several separated anyons can combine. Exchanging non-Abelian anyons acts on this shared state, and the order of exchanges matters. For an anyon type such as Fibonacci, braids alone can approximate arbitrary encoded quantum circuits. The topological phase protects storage and gates against local perturbations. Bringing anyons together to measure their combined charge provides readout.",
   "goal": {
-   "need": "Error correction can require many physical qubits for one encoded qubit: Google's distance-7 surface-code memory used 101 physical qubits and had a logical error probability of 0.143% ± 0.003% per correction cycle. Non-Abelian anyons offer a different encoding in which local perturbations are suppressed by the physical phase, and braiding performs gates on that encoding.",
+   "need": "Estimating the electronic energy of nitrogenase’s iron–molybdenum cofactor would take about four million physical qubits in one surface-code design with 1 µs correction cycles and physical gate error rates of at most 0.1%. A 101-qubit surface-code memory had a logical error probability of 0.143% ± 0.003% per cycle. Gates that tolerate small changes in the anyons’ paths could reduce the correction hardware needed for such calculations. Finite temperature and finite anyon separation leave residual errors.",
    "need_refs": [
+    17,
     1,
-    2
+    4,
+    18
    ],
    "figures": null,
    "statements": [
@@ -337,12 +339,12 @@
      "checked": true
     },
     {
-     "body": "Google Quantum AI",
-     "year": "2023",
-     "quote": "Non-Abelian anyons could open a new avenue for quantum computation",
-     "context": "The statement accompanies a programmable-processor demonstration of projective Ising anyons, whose braids alone are not computationally universal.",
-     "ref": 4,
-     "checked": true
+     "body": "European Quantum Flagship",
+     "year": "2024",
+     "quote": "non-Abelian anyons emerge already in exotic fractional quantum Hall states and could be used for universal topological quantum computation.",
+     "context": "The Strategic Research and Industry Agenda identifies fractional quantum Hall systems as a candidate platform.",
+     "ref": 19,
+     "checked": false
     }
    ]
   },
@@ -356,16 +358,17 @@
    "basis": "Searches of NIST and ISO material, DARPA targets, Microsoft roadmaps and experimental anyon papers found no integrated hardware acceptance test or common fidelity cutoff. This synthesis combines physical topological protection with mathematical braid universality. The 2026 S3 experiment obtains universality using fusion as an additional primitive, so it does not establish universality of braids alone.",
    "refs": [
     2,
-    5,
-    6
+    4,
+    5
    ],
    "threshold_checked": null
   },
   "case_label": "Platform",
   "cases": [
-   "Quantum Hall fluids",
+   "Electronic quantum Hall fluids",
    "Superconductor hybrids",
-   "Spin and qubit arrays"
+   "Spin and qubit arrays",
+   "Ultracold atomic gases"
   ],
   "milestone_structure": "parallel",
   "milestones": [
@@ -376,26 +379,28 @@
     "set_by": "Google Quantum AI and Collaborators, published experimental requirements (1) and (2) in Non-Abelian braiding of graph vertices in a superconducting processor.",
     "set_by_kind": "protocol",
     "threshold_quote": "verify the rules that govern the ‘collision’ of two anyons, known as the fusion rules",
-    "threshold_ref": 7,
+    "threshold_ref": 6,
     "refs": [
-     7,
-     8
+     6,
+     7
     ],
-    "status": "active",
-    "replaced_by": [],
+    "status": "retired",
+    "replaced_by": [
+     "m6",
+     "m7"
+    ],
     "threshold_checked": true
    },
    {
     "id": "m2",
-    "title": "An anyon encoding suppresses locally induced splitting and dephasing exponentially.",
-    "criterion": "Establish that local perturbations cannot resolve the encoded degeneracy except for the predicted finite-size corrections. The published Majorana protocol tests correlated scaling of the splitting frequency ω0 and dephasing rate 1/T2: both must fall exponentially with a protection parameter. For its 1/f-noise, overlap-dominated model, ω0 ∼ 1/T2 ∼ exp(−L/ξ), where L is mode separation and ξ is localization length; other noise models change the relation. The cited parity-readout result does not measure these linked scalings.",
-    "set_by": "Local protection is a field requirement reviewed by Nayak et al.; the explicit linked-scaling protocol is Aasen et al., Section IV, written for Majorana nanowires.",
+    "title": "Local perturbations lose the ability to distinguish the stored fusion states as anyons separate.",
+    "criterion": "Test the sensitivity of the encoded states to local perturbations as the anyon separation increases. In the Majorana-island protocol, measure both the residual splitting frequency ω₀ and the dephasing rate 1/T₂. They must scale with one another and both decrease exponentially with a protection parameter. For dominant mode overlap and 1/f noise, their characteristic scales vary as exp(−L/ξ), where L is the island length and ξ the induced correlation length. Oscillatory prefactors are allowed, and the relation between the rates depends on the noise spectrum.",
+    "set_by": "Local indistinguishability is a field requirement. Aasen et al., Section IV, specify the linked-scaling test for Majorana islands.",
     "set_by_kind": "community_convention",
     "threshold_quote": "must scale with one another, and they must both scale exponentially with some parameter.",
-    "threshold_ref": 9,
+    "threshold_ref": 8,
     "refs": [
      2,
-     9,
      8
     ],
     "status": "active",
@@ -405,15 +410,13 @@
    {
     "id": "m3",
     "title": "Braiding realizes noncommuting transformations of an anyon-encoded state.",
-    "criterion": "Execute braid operators A and B for which AB and BA act differently on the encoded fusion space. Aasen's Majorana protocol tests one generator using one braid (readout probabilities 1/2, 1/2), two braids (a certain flip in the ideal limit), and a no-braid control. For quantum Hall fluids, Alkalay et al.'s preprint of 13 August 2026 reports edge partition-noise signatures consistent with time-domain braiding at filling ν = 5/2. That result is not peer reviewed and does not implement an encoded computational gate.",
-    "set_by": "The field definition of non-Abelian statistics in Nayak et al., Section II.1.1; the specified Majorana control experiments are Aasen et al., Section V.",
+    "criterion": "Prepare the same encoded input for two experiments. Apply braid operations A and B in opposite orders and measure an encoded observable that distinguishes the resulting states. The difference must be observable on the fusion space after disregarding an overall phase.",
+    "set_by": "The definition of non-Abelian braiding statistics in Nayak et al., Section II.1.1.",
     "set_by_kind": "community_convention",
     "threshold_quote": "Unless they commute for any interchange of particles, in which case the particles’ braiding statistics is Abelian",
     "threshold_ref": 2,
     "refs": [
-     2,
-     9,
-     10
+     2
     ],
     "status": "active",
     "replaced_by": [],
@@ -422,14 +425,13 @@
    {
     "id": "m4",
     "title": "Braids approximate arbitrary single-qubit rotations.",
-    "criterion": "Realize elementary braids whose representation on one encoded qubit is dense in SU(2), up to overall phase, so sequences approximate any single-qubit rotation. A mathematical density result must be connected to the implemented anyon operations; finitely many measured rotations alone do not prove density. Xu et al.'s report of 29 March 2024, subsequently published in Nature Physics, created two pairs of Fibonacci excitations on 27 transmon qubits and implemented braiding sequences supporting universal single-qubit gates through digital quantum simulation.",
+    "criterion": "Identify the action of the implemented elementary braids on one encoded qubit and establish that their representation is dense in SU(2) up to overall phase. This requires connecting the measured generators to a representation whose braid sequences approximate any single-qubit rotation to arbitrary accuracy.",
     "set_by": "The field's single-qubit universality criterion, stated for Fibonacci encodings by Carnahan, Zeuch and Bonesteel, Section I.",
     "set_by_kind": "community_convention",
     "threshold_quote": "Braids which approximate any desired single-qubit gate",
-    "threshold_ref": 5,
+    "threshold_ref": 4,
     "refs": [
-     5,
-     11
+     4
     ],
     "status": "active",
     "replaced_by": [],
@@ -438,15 +440,60 @@
    {
     "id": "m5",
     "title": "Braiding implements an entangling gate on two anyon-encoded computational units.",
-    "criterion": "Implement an entangling braid between two encoded computational units, using an encoding compatible with single-unit gates. For Fibonacci qubits, the published constructions also suppress leakage out of the computational subspace as the braid is refined. As partial results in programmable arrays, Google entangled three logical qubits encoded in eight defects in 2023. Lo et al., published on 15 July 2026, prepared a 54-qubit S3 ground state and implemented entangling braids; universality in that experiment additionally uses fusion. Neither result establishes a protected universal braid-only processor.",
+    "criterion": "Implement a braid on two encoded computational units that takes at least one product input to an entangled state in the computational subspace. Use an encoding compatible with the single-unit gates. For approximate Fibonacci two-qubit constructions, establish that leakage out of the computational subspace tends to zero as the braid is refined.",
     "set_by": "The field's entangling-gate requirement; Carnahan, Zeuch and Bonesteel publish constructions specifically for Fibonacci qubits.",
     "set_by_kind": "community_convention",
     "threshold_quote": "to systematically construct entangling gates for two qubits encoded by Fibonacci anyons.",
-    "threshold_ref": 5,
+    "threshold_ref": 4,
     "refs": [
-     5,
-     7,
+     4
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m6",
+    "title": "A pair of non-Abelian anyons is created and separated.",
+    "criterion": "Prepare the host state, create a pair of the proposed anyon type from the vacuum sector, and demonstrate the presence of the two separated excitations or defects.",
+    "set_by": "Google Quantum AI and Collaborators, experimental requirement 1 and the pair-creation protocol in Fig. 2.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "create an anyon pair",
+    "threshold_ref": 6,
+    "refs": [
      6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m7",
+    "title": "Fusion measurements resolve the charge outcomes allowed by a non-Abelian fusion rule.",
+    "criterion": "Control which anyons are fused and measure their combined topological charge. Use preparations that distinguish the allowed fusion channels and verify the outcomes predicted for each preparation.",
+    "set_by": "Google Quantum AI and Collaborators, experimental requirement 2.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "verify the rules that govern the ‘collision’ of two anyons, known as the fusion rules",
+    "threshold_ref": 6,
+    "refs": [
+     6,
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m8",
+    "title": "Deforming a non-Abelian braid preserves its encoded gate up to an overall phase.",
+    "criterion": "Compare the transformations on the encoded fusion space for distinct exchange paths in the same braid class. Keep the anyons well separated and preserve the excitation gap. The transformations must agree up to an overall phase within experimental uncertainty. For adiabatic transport, use a braid time long compared with ℏ divided by the excitation gap and short compared with ℏ divided by the residual encoded-state splitting.",
+    "set_by": "The criterion for the topological part of an adiabatic exchange in Nayak et al., Section II.1.2.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "whose non-Abelian part is determined only by the topology of the braid",
+    "threshold_ref": 2,
+    "refs": [
+     2,
+     4
     ],
     "status": "active",
     "replaced_by": [],
@@ -503,20 +550,6 @@
    },
    {
     "id": 4,
-    "kind": "web",
-    "url": "https://research.google/blog/the-worlds-first-braiding-of-non-abelian-anyons/",
-    "doi": null,
-    "title": "The world’s first braiding of non-Abelian anyons",
-    "authors": "Andersen T, Lensky Y.",
-    "container": "Google Research",
-    "year": "2023",
-    "volume": null,
-    "issue": null,
-    "pages": null,
-    "citation_source": "model"
-   },
-   {
-    "id": 5,
     "kind": "journal",
     "url": "https://web2.physics.fsu.edu/~bonesteel/papers/pra16_2.pdf",
     "doi": "10.1103/PhysRevA.93.052328",
@@ -530,7 +563,7 @@
     "citation_source": "model"
    },
    {
-    "id": 6,
+    "id": 5,
     "kind": "journal",
     "url": "https://pubmed.ncbi.nlm.nih.gov/42457995/",
     "doi": "10.1038/s41586-026-10709-y",
@@ -544,7 +577,7 @@
     "citation_source": "model"
    },
    {
-    "id": 7,
+    "id": 6,
     "kind": "journal",
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10247379/",
     "doi": "10.1038/s41586-023-05954-4",
@@ -558,7 +591,7 @@
     "citation_source": "model"
    },
    {
-    "id": 8,
+    "id": 7,
     "kind": "journal",
     "url": "https://manfragroup.org/wp-content/uploads/2025/02/2025.02.19_s41586-024-08445-2.pdf",
     "doi": "10.1038/s41586-024-08445-2",
@@ -572,7 +605,7 @@
     "citation_source": "model"
    },
    {
-    "id": 9,
+    "id": 8,
     "kind": "journal",
     "url": "https://arxiv.org/html/1511.05153",
     "doi": "10.1103/PhysRevX.6.031016",
@@ -586,21 +619,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 10,
-    "kind": "preprint",
-    "url": "https://arxiv.org/abs/2608.12897",
-    "doi": "10.48550/arXiv.2608.12897",
-    "title": "Observation of Time-Domain Braiding of Non-Abelian Anyons at ν = 5/2 State",
-    "authors": "Alkalay T, Park J, Oh M, Hong C, Lee JYM, Tiwari P, et al.",
-    "container": "arXiv",
-    "year": "2026",
-    "volume": null,
-    "issue": null,
-    "pages": null,
-    "citation_source": "arxiv"
-   },
-   {
-    "id": 11,
+    "id": 9,
     "kind": "journal",
     "url": "https://arxiv.org/html/2404.00091v1",
     "doi": "10.1038/s41567-024-02529-6",
@@ -614,7 +633,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 12,
+    "id": 10,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2210.10255v2",
     "doi": null,
@@ -628,7 +647,7 @@
     "citation_source": "model"
    },
    {
-    "id": 13,
+    "id": 11,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2607.09511v1",
     "doi": null,
@@ -642,7 +661,7 @@
     "citation_source": "model"
    },
    {
-    "id": 14,
+    "id": 12,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2305.03766v2",
     "doi": null,
@@ -656,7 +675,7 @@
     "citation_source": "model"
    },
    {
-    "id": 15,
+    "id": 13,
     "kind": "preprint",
     "url": "https://arxiv.org/pdf/2608.12897",
     "doi": null,
@@ -670,7 +689,7 @@
     "citation_source": "model"
    },
    {
-    "id": 16,
+    "id": 14,
     "kind": "journal",
     "url": "https://www.nature.com/articles/s41467-025-61493-8?error=cookies_not_supported",
     "doi": "10.1038/s41467-025-61493-8",
@@ -684,7 +703,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 17,
+    "id": 15,
     "kind": "preprint",
     "url": "https://arxiv.org/pdf/2601.20956",
     "doi": null,
@@ -698,7 +717,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 18,
+    "id": 16,
     "kind": "preprint",
     "url": "https://arxiv.org/html/1603.03217v1",
     "doi": null,
@@ -710,14 +729,142 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 17,
+    "kind": "journal",
+    "url": "https://journals.aps.org/prxquantum/abstract/10.1103/PRXQuantum.2.030305",
+    "doi": "10.1103/PRXQuantum.2.030305",
+    "title": "Even More Efficient Quantum Computations of Chemistry Through Tensor Hypercontraction",
+    "authors": "Lee J, Berry DW, Gidney C, Huggins WJ, McClean JR, Wiebe N, et al.",
+    "container": "PRX Quantum",
+    "year": "2021",
+    "volume": "2",
+    "issue": "3",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 18,
+    "kind": "report",
+    "url": "https://irds.ieee.org/images/files/pdf/2023/2023_IRDS_CEQIP.pdf",
+    "doi": null,
+    "title": "The International Roadmap for Devices and Systems: 2023 Update, Cryogenic Electronics and Quantum Information Processing",
+    "authors": "IEEE",
+    "container": "International Roadmap for Devices and Systems",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 19,
+    "kind": "report",
+    "url": "https://qt.eu/media/pdf/Strategic-Reseach-and-Industry-Agenda-2030.pdf",
+    "doi": null,
+    "title": "Strategic Research and Industry Agenda",
+    "authors": "European Quantum Flagship",
+    "container": null,
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 20,
+    "kind": "journal",
+    "url": "https://www.researchgate.net/publication/372485276_Experimental_quantum_simulation_of_a_topologically_protected_Hadamard_gate_via_braiding_Fibonacci_anyons",
+    "doi": "10.1016/j.xinn.2023.100480",
+    "title": "Experimental quantum simulation of a topologically protected Hadamard gate via braiding Fibonacci anyons",
+    "authors": "Fan YA, Li Y, Hu Y, Li Y, Long X, Liu H, et al.",
+    "container": "The Innovation",
+    "year": "2023",
+    "volume": "4",
+    "issue": "5",
+    "pages": "100480",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 21,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2608.04103v1",
+    "doi": null,
+    "title": "Reconstructing non-Abelian braiding and fusion without anyon transport",
+    "authors": "Byles L, Horner MD, Varcoe BTH, Pachos JK",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 22,
+    "kind": "journal",
+    "url": "https://arxiv.org/html/2507.01606",
+    "doi": "10.1038/s41586-025-09927-7",
+    "title": "Single-shot parity readout of a minimal Kitaev chain",
+    "authors": "van Loo N, Zatelli F, Steffensen GO, Roovers B, Wang G, Van Caekenberghe T, et al.",
+    "container": "Nature",
+    "year": "2026",
+    "volume": "650",
+    "issue": "8101",
+    "pages": "334-339",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 23,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41565-025-01894-4?error=cookies_not_supported",
+    "doi": "10.1038/s41565-025-01894-4",
+    "title": "Enhanced Majorana stability in a three-site Kitaev chain",
+    "authors": "Bordin A, Liu CX, Dvir T, Zatelli F, ten Haaf SLD, van Driel D, et al.",
+    "container": "Nat. Nanotechnol.",
+    "year": "2025",
+    "volume": "20",
+    "issue": "6",
+    "pages": "726-731",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 24,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2608.27444v1",
+    "doi": null,
+    "title": "Trapping e/4 quasiparticles in bilayer graphene",
+    "authors": "Luca MD, Hajigeorgiou E, Ma N, Waldherr A, Watanabe K, Taniguchi T, et al.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 25,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2606.12409v1",
+    "doi": null,
+    "title": "A Pfaffian quantum Hall state of ultracold bosons",
+    "authors": "Kwan J, Segura P, Li Y, Blatz T, Zhi A, Bakkali-Hassani B, et al.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
    }
   ],
   "milestone_order": [
-   "m1",
+   "m6",
+   "m7",
    "m2",
    "m3",
    "m4",
-   "m5"
+   "m5",
+   "m8"
   ],
   "results": [
    {
@@ -730,7 +877,7 @@
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
-    "ref": 8,
+    "ref": 7,
     "judged_by": "gpt-6.1-terra",
     "judged_on": "2026-11-15"
    },
@@ -744,7 +891,7 @@
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 12,
+    "ref": 10,
     "judged_by": "gpt-6.1-terra",
     "judged_on": "2026-11-15"
    },
@@ -758,133 +905,7 @@
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": "Superconductor hybrids",
-    "verdict": "partial",
-    "finding": "In one InSb–Al device, even- and odd-parity oscillation frequencies typically agreed within about 5%.",
-    "detail": "The frequency agreement is consistent with small Majorana wavefunction overlap, and detuning tests probe partial protection. The two-site chains do not demonstrate exponential suppression of splitting and dephasing; the authors propose testing scaling in longer chains.",
-    "quote": "The extracted oscillation frequencies typically agree with those measured in the even manifold to about 5%",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": "Spin and qubit arrays",
-    "verdict": "partial",
-    "finding": "On a 27-qubit trapped-ion array, Borromean anyon braiding produced a measured phase of 1.02(2)π.",
-    "detail": "The experiment reports a fusion-channel flip and a non-Abelian braiding phase, but does not report a direct comparison of AB and BA acting on the same anyon-encoded fusion state.",
-    "quote": "By creating and moving anyons along Borromean rings in spacetime, anyon interferometry detects an intrinsically non-Abelian braiding process.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": "Quantum Hall fluids",
-    "verdict": "partial",
-    "finding": "Quantum Hall devices (3): representative neutral Fano factor was 2.37, consistent with time-domain braiding.",
-    "detail": "The measured edge noise agrees with predictions for non-Abelian time-domain braiding, but the experiment did not compare AB with BA on an encoded fusion state.",
-    "quote": "Together, these results provide evidence for the presence of non-Abelian anyons.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": "Spin and qubit arrays",
-    "verdict": "met",
-    "finding": "Fibonacci-anyon braids supporting universal single-qubit gates were digitally simulated on 27 superconducting transmon qubits.",
-    "detail": "The implemented braids act on a qubit encoded in four anyons. The experiment is a digital simulation without topological protection. The milestone text states that the report was subsequently published in Nature Physics.",
-    "quote": "In addition, we create two pairs of Fibonacci quasiparticle excitations by acting string operators on the prepared ground state and demonstrate their nontrivial mutual statistics by braiding them with sequences supporting universal single-qubit logic gates.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": false,
-    "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": "Spin and qubit arrays",
-    "verdict": "partial",
-    "finding": "Four Fibonacci anyons on a superconducting processor: one braid yielded a fusion ratio of 1.65 ± 0.14.",
-    "detail": "The experiment reports one elementary braid acting on an encoded qubit. The text does not establish a dense set of implemented braid operations or connect a density proof to them.",
-    "quote": "We find\n\\(\\left\\langle \\,| 1\\right\\rangle \\left\\langle 1| \\,\\right\\rangle /\\left\\langle \\,| 0\\right\\rangle \\left\\langle 0| \\,\\right\\rangle=1.65\\pm 0.14\\)\n, within 2% of the golden ratio\nϕ\n.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m5",
-    "case": "Spin and qubit arrays",
-    "verdict": "partial",
-    "finding": "Braiding entangled 3 logical qubits encoded in 8 anyons, with GHZ-state fidelity 0.623 ± 0.004.",
-    "detail": "The experiment created a three-qubit entangled state, but did not establish an entangling gate between two encoded units compatible with single-unit gates. Topological protection would require stabilizer measurements throughout braiding.",
-    "quote": "We have also shown that braiding can be used to create an entangled state of three logical qubits encoded in these anyons.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m5",
-    "case": "Spin and qubit arrays",
-    "verdict": "partial",
-    "finding": "Two anyon-encoded qutrits underwent an entangling braid; the measured Z-basis correlator reached 0.86(3).",
-    "detail": "The experiment used an absolute encoding with a local vulnerability. The reported correlator measures Z-basis correlations; universality in this system also requires fusion measurements.",
-    "quote": "We begin with the entangling primitive, implemented\nby braiding a constituentC 2 flux of one logical qutrit\naround the flux pair of another logical qutrit (see Fig. 3a).",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 17,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": "Spin and qubit arrays",
-    "verdict": "partial",
-    "finding": "On a 25-qubit processor, braiding anyons created an entangled state encoding 3 logical qubits.",
-    "detail": "The experiments demonstrate single and double braids and a distinguishable-anyon control, but do not compare the actions of two braid operators in opposite orders.",
-    "quote": "We then study the prospect of employing the anyons for quantum computation and utilize braiding to create an entangled state of anyons encoding three logical qubits.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": "Spin and qubit arrays",
-    "verdict": "partial",
-    "finding": "On a 27-qubit processor, Fibonacci-anyon braiding yielded a monodromy matrix element of −0.39.",
-    "detail": "The experiment used two pairs of anyons and several braid sequences, but did not report an AB-versus-BA comparison. The simulated braids lacked topological protection.",
-    "quote": "In addition, we create two pairs of Fibonacci anyons and demonstrate their fusion rule and non-Abelian braiding statistics by applying unitary gates on the underlying physical qubits.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 11,
+    "ref": 9,
     "judged_by": "gpt-6.1-terra",
     "judged_on": "2026-11-15"
    },
@@ -898,21 +919,7 @@
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": "Spin and qubit arrays",
-    "verdict": "partial",
-    "finding": "On 27 ions, a braid changed the fusion-channel state, acting as a Pauli-X operation.",
-    "detail": "The experiment reports an operation on the fusion-channel space, but does not establish a braid representation dense in SU(2).",
-    "quote": "essentially executing a Pauli-\nX\nX\n-gate on the fusion channel space.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 14,
+    "ref": 12,
     "judged_by": "gpt-6.1-terra",
     "judged_on": "2026-11-15"
    },
@@ -926,21 +933,7 @@
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
-    "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": "Spin and qubit arrays",
-    "verdict": "partial",
-    "finding": "A braid among four Fibonacci anyons produced a fusion-outcome ratio of 1.65 ± 0.14.",
-    "detail": "The experiment reports one braid on an encoded state, rather than comparing two braid operators in both orders.",
-    "quote": "We certify the predicted non-Clifford gate by fusing anyon 1 and anyon 3.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 16,
+    "ref": 14,
     "judged_by": "gpt-6.1-terra",
     "judged_on": "2026-11-15"
    },
@@ -954,37 +947,499 @@
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 17,
+    "ref": 15,
     "judged_by": "gpt-6.1-terra",
     "judged_on": "2026-11-15"
+   },
+   {
+    "milestone": "m6",
+    "case": "Superconductor hybrids",
+    "verdict": "partial",
+    "finding": "Across 2 InAs–Al devices, parity interferometry gave evidence of low-energy support at both wire ends. The primary segment was about 3 μm long.",
+    "detail": "The measurements also allow a finely tuned topologically trivial Andreev-state interpretation.",
+    "quote": "We have fit these data to a model in which the fermion parity is associated with two MZMs localized at the opposite ends of a 1DTS and find good agreement.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Superconductor hybrids",
+    "verdict": "partial",
+    "finding": "Single-shot parity readout reached 1% assignment error in 1 InAs–Al device, with qualitatively similar behavior in a second device.",
+    "detail": "The two levels appeared during spontaneous parity switching.",
+    "quote": "The large capacitance shift and long poisoning time enable a parity measurement with an assignment error probability of 1%.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Spin and qubit arrays",
+    "verdict": "met",
+    "finding": "Surface-code Ising defects were created and separated in a 25-qubit array, with 10,000 shots per step and a host-state mean stabilizer of 0.94 ± 0.04.",
+    "detail": "The vacuum preparation was also checked by reversing the separation and fusing the pair without inserting a fermion.",
+    "quote": ") and separate them through the application of two-qubit gates.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Spin and qubit arrays",
+    "verdict": "met",
+    "finding": "Ising defect fusion on 25 qubits resolved both channels, with a fermion-sensitive stabilizer of −0.86 after fusion of the fermion-loaded pair.",
+    "detail": "The two negative plaquette stabilizers detected the fermion after the pair was annihilated. Reversing the original separation without fermion insertion returned the vacuum.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": "Spin and qubit arrays",
+    "verdict": "partial",
+    "finding": "In a 25-qubit array, separated Ising fusion states shared local stabilizers, while the hidden-fermion state gave a charge-string value of −0.85 ± 0.01.",
+    "detail": "The reported Hahn-echo times characterize individual transmons. The study reports neither encoded splitting nor encoded dephasing as a function of defect separation.",
+    "quote": "despite the stabilizers being the same.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": "Spin and qubit arrays",
     "verdict": "partial",
-    "finding": "Braiding two encoded qutrit pairs produced a measured correlation of 0.86(3).",
-    "detail": "The pull-through braid provides evidence of an encoded entangling transformation, but the experiment does not compare two braid operators in both orders.",
-    "quote": "Its measured value is consistent with the predicted value of 1/3 att= 0 and increases to 0.86(3)\natt= 6, in good agreement with the theoretical value of 1 for the prepared Bell state.",
+    "finding": "A double braid of four bulk Ising defects produced the two-fermion fusion outcome with a mean stabilizer of −0.45 ± 0.06.",
+    "detail": "The control attached plaquette violations to the second pair, which changed the rotations used to move those defects.",
+    "quote": "This shows a clear change in local observables from the initial state where no fermions were present.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 17,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": "Spin and qubit arrays",
+    "verdict": "partial",
+    "finding": "A single braid of eight Ising defects generated three-logical-qubit entanglement with GHZ overlap 0.623 ± 0.004, estimated with 10,000 bootstrap resamples.",
+    "detail": "The 10,000 count is the number of bootstrap resamples. The supplied text gives no tomography shot count.",
+    "quote": "We have also shown that braiding can be used to create an entangled state of three logical qubits encoded in these anyons.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m8",
+    "case": "Spin and qubit arrays",
+    "verdict": "partial",
+    "finding": "An alternative braid of four bulk Ising defects gave a first-pair charge-string expectation of −0.71 ± 0.01.",
+    "detail": "The alternative protocol probed one pair's charge. The full protocol read out both pairs by fusion, so the measurements do not compare the encoded transformations up to phase.",
+    "quote": "Moreover, we also present an alternative braiding scheme in Extended Data Fig.\n9\n, which requires fewer (18) CZ-gates.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Spin and qubit arrays",
+    "verdict": "met",
+    "finding": "Two Fibonacci pairs were created from vacuum, with separated excitations yielding an inferred quantum dimension of 1.60.",
+    "detail": "The evidence for the separated endpoints comes from the exchange and fusion experiments.",
+    "quote": "To demonstrate the nontrivial braiding statistics of Fibonacci anyons, we create two pairs of them from the vacuum living on two plaquettes, as illustrated in Fig.\n4\na.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Spin and qubit arrays",
+    "verdict": "met",
+    "finding": "For two Fibonacci pairs, the probability that both fused to τ was 0.56 after one middle exchange.",
+    "detail": null,
+    "quote": "In our experiment, the measured probabilities of the two pairs after braiding fusing to\n𝟏\n\\bf{1}\nand\nτ\n\\tau\nare\n0.32\n0.32\nand\n0.56\n0.56\n, respectively.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": "Spin and qubit arrays",
+    "verdict": "partial",
+    "finding": "Across five sequences on one four-anyon qubit, one middle exchange gave joint τ probability 0.56.",
+    "detail": "For this input, the ideal opposite-order outputs have identical fusion populations. The relative phase would require a phase-sensitive encoded measurement.",
+    "quote": "In our experiment, the measured probabilities of the two pairs after braiding fusing to\n𝟏\n\\bf{1}\nand\nτ\n\\tau\nare\n0.32\n0.32\nand\n0.56\n0.56\n, respectively.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": "Spin and qubit arrays",
+    "verdict": "partial",
+    "finding": "On one four-anyon logical qubit, the middle braid gave joint vacuum probability 0.32.",
+    "detail": "The ideal generator matrices specify relative phases that the reported fusion-basis populations do not resolve.",
+    "quote": "In our experiment, the measured probabilities of the two pairs after braiding fusing to\n𝟏\n\\bf{1}\nand\nτ\n\\tau\nare\n0.32\n0.32\nand\n0.56\n0.56\n, respectively.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Superconductor hybrids",
+    "verdict": "partial",
+    "finding": "In one InSb/Al device, even- and odd-sector Rabi frequencies typically agreed to about 5%, consistent with weak Majorana overlap.",
+    "detail": "The frequency comparison alone probes a product of overlaps and cannot establish spatial separation. Site-specific detuning supplies the additional localization evidence.",
+    "quote": "The extracted oscillation frequencies typically agree with those measured in the even manifold to about 5% (Fig.\n3\nb).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Superconductor hybrids",
+    "verdict": "partial",
+    "finding": "Single-shot readout in one device resolved 2 global-even chain-parity configurations.",
+    "detail": "The coupler was detuned during readout to suppress inter-chain hopping. The measurement distinguished existing chain parities.",
+    "quote": "Single-shot parity readout is performed through quantum capacitance using an off-chip resonator",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": "Superconductor hybrids",
     "verdict": "partial",
-    "finding": "In five InAs/Al devices, splitting decreased exponentially with wire length, with a fitted characteristic length of 260 nm.",
-    "detail": "Coulomb-blockade spectroscopy measured splitting across devices, but the study did not measure dephasing or establish its correlated exponential scaling with splitting. The authors could not rule out other end-localized zero-energy states.",
-    "quote": "Splitting decreases by a factor of about ten for each half a micrometer of increased wire length.",
+    "finding": "In one Majorana parity-qubit device, a representative driven parity oscillation had a Rabi decay time of 26 ± 2 ns.",
+    "detail": "The measured decay is for driven oscillations under finite inter-chain coupling. The source leaves the separation-scaling test to future experiments.",
+    "quote": "We fit the data to a damped oscillation with an exponential envelope and extract a decay time of\nT\n2\nRabi\n=\n26\n±\n2\nn\nT_{2}^{\\mathrm{Rabi}}=$26\\pm 2\\text{\\,}\\mathrm{n}$",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 18,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Spin and qubit arrays",
+    "verdict": "met",
+    "finding": "On a 27-qubit kagome lattice, a vacuum-created blue non-Abelian flux pair was detected after one member moved two stars.",
+    "detail": "The separation is in the kagome geometry encoded by the trapped-ion qubits.",
+    "quote": "Fig.\n4\ncontains more examples, where we show experimental results for the creation, movement and annihilation of a non-Abelion pair.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Spin and qubit arrays",
+    "verdict": "partial",
+    "finding": "On a 27-qubit lattice, controlled fusion of blue non-Abelian fluxes resolved two channels: vacuum and e_R.",
+    "detail": "The green–blue braid changed the charge obtained when each pair was fused. The charge was read out through star operators after fusion.",
+    "quote": "There, negative values of the star operators indicate the presence of\n e\nR\ne_{R}\n-Abelions.",
+    "checked": false,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": "Spin and qubit arrays",
+    "verdict": "partial",
+    "finding": "Borromean braiding of three non-Abelian flux pairs on a 27-qubit lattice yielded an interferometric phase of 1.02(2)π.",
+    "detail": "The Hadamard test made the braid phase observable relative to an ancilla.",
+    "quote": "By creating and moving anyons along Borromean rings in spacetime, anyon interferometry detects an intrinsically non-Abelian braiding process.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Electronic quantum Hall fluids",
+    "verdict": "partial",
+    "finding": "Across 3 quantum Hall devices, shot noise supported propagation of neutral Ising anyons over 1.4 µm.",
+    "detail": "The distance is the injector-to-detector spacing. The experiment did not measure the separation between two identified partners.",
+    "quote": "Together, these results provide evidence for the presence of non-Abelian anyons.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": "Electronic quantum Hall fluids",
+    "verdict": "partial",
+    "finding": "Neutral Ising-anyon shot noise across 3 devices supported time-domain braiding, with a representative neutral Fano factor of 2.37.",
+    "detail": "The experiment measured ensemble shot noise. Zero monodromy was a theory input, and the data agreed with predictions for both candidate edge orders.",
+    "quote": "Similarly, the ‘experimental’ \nneutral Fano factor was ℱneutral = 2.37",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Spin and qubit arrays",
+    "verdict": "met",
+    "finding": "Doubled Fibonacci pairs on distinct plaquettes showed a mean discrepancy of −0.01 ± 0.06 from prediction across 28 open-string measurements.",
+    "detail": "The pair-certification experiment used 8.8 million realizations across 1,100 circuit instances with composite error mitigation.",
+    "quote": "Our certification of\nτ\n1\nand\n1\nτ\nanyon creation through 28 measurements of the open string show the average experimental discrepancy is  − 0.01 ± 0.06.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Spin and qubit arrays",
+    "verdict": "partial",
+    "finding": "One braided Fibonacci fusion preparation gave a charge-outcome ratio of 1.65 ± 0.14.",
+    "detail": "The excerpt gives no shot count for the fusion experiment.",
+    "quote": "We find\n\\(\\left\\langle \\,| 1\\right\\rangle \\left\\langle 1| \\,\\right\\rangle /\\left\\langle \\,| 0\\right\\rangle \\left\\langle 0| \\,\\right\\rangle=1.65\\pm 0.14\\)\n, within 2% of the golden ratio\nϕ\n.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": "Spin and qubit arrays",
+    "verdict": "partial",
+    "finding": "One elementary Fibonacci braid on one encoded input gave a fusion-outcome ratio of 1.65 ± 0.14.",
+    "detail": "The excerpt gives no shot count for the braiding experiment.",
+    "quote": "We find\n\\(\\left\\langle \\,| 1\\right\\rangle \\left\\langle 1| \\,\\right\\rangle /\\left\\langle \\,| 0\\right\\rangle \\left\\langle 0| \\,\\right\\rangle=1.65\\pm 0.14\\)\n, within 2% of the golden ratio\nϕ\n.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Spin and qubit arrays",
+    "verdict": "met",
+    "finding": "Vacuum-created C₂ pair on the 54-qubit H2 torus had endpoint projector values near 1/3. Shot count unreported.",
+    "detail": "In the X-basis measurement protocol, the vacuum-sector probe pair occupied plaquettes (1,2) and (3,3).",
+    "quote": "TheB Z3 projectors identify the lo-\ncations of logical qutrit endpoints, revealing local infor-\nmation but do not reveal information about the encoded\nlogical state.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Spin and qubit arrays",
+    "verdict": "partial",
+    "finding": "C₂ probe fusion was tested on two logical inputs. The fusion-site projector was 0.06(3) for the [2] charge input. Shot count unreported.",
+    "detail": "The [2]-pair comparison verified vacuum and [−] outcomes. Its full fusion rule also includes a [2] outcome.",
+    "quote": "For the  \f",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": "Spin and qubit arrays",
+    "verdict": "partial",
+    "finding": "Local endpoint projectors stayed near 1/3 for two encoded charge preparations. Shot count unreported.",
+    "detail": "The reported average standard error for the local endpoint measurements was 0.034.",
+    "quote": "Lo-cal stabilizers remain insensitive to the logical content of the\nqutrits, withB Z3 values near 1/3 at all flux endpoints (aver-\nage/maximum standard error 0.034/0.059).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": "Spin and qubit arrays",
+    "verdict": "partial",
+    "finding": "Pull-through braid on two encoded qutrits yielded a logical Z correlation of 0.86(3). Shot count unreported.",
+    "detail": "The reported two-qutrit measurement checks the Bell state's population correlations. Output coherence across the correlated basis states was unverified.",
+    "quote": "Its measured value is consistent with the predicted value of 1/3 att= 0 and increases to 0.86(3)\natt= 6, in good agreement with the theoretical value of 1 for the prepared Bell state.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Superconductor hybrids",
+    "verdict": "partial",
+    "finding": "In five InAs/Al islands, transport in the longest (1.5 μm) was consistent with a zero-energy state supported at both ends.",
+    "detail": "The transport signature also permits other end-localized zero-energy states.",
+    "quote": "The onset of uniform spacing with the reappearance of high peaks above\nB\n∗\n⁣\n∗\nB^{**}\nindicates the emergence of a state (or states) at zero energy with strong wave function support at both ends of the wire.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": "Superconductor hybrids",
+    "verdict": "partial",
+    "finding": "In five InAs/Al islands, the residual energy-splitting amplitude decayed exponentially with a characteristic length of 260 nm.",
+    "detail": null,
+    "quote": "Oscillating energy splittings, measured using Coulomb blockade spectroscopy, are exponentially suppressed with wire length, with a characteristic length\nξ\n=\n260\n​\nnm\n\\xi=260~\\mathrm{nm}\n.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": "Spin and qubit arrays",
+    "verdict": "partial",
+    "finding": "A simulated Fibonacci-braid Hadamard on two nuclear spin qubits reached 97.18% fidelity across 30 randomized benchmarking sequences per length.",
+    "detail": "The implemented pulse set uses squared exchanges and their inverses. The arbitrary-accuracy statement concerns the ideal elementary generators, while the experiment benchmarks one composite gate.",
+    "quote": "To showcase, we implement a topological Hadamard gate with two nuclear spin qubits, which reaches  97.18 %  fidelity by randomized benchmarking.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Spin and qubit arrays",
+    "verdict": "partial",
+    "finding": "Encoded G-anyon fusion on Quantinuum H2 yielded zero accepted G-to-G events in 11,000 overlap shots, consistent with the predicted zero overlap.",
+    "detail": "Only six G-sector normalisation events survived post-selection, limiting the precision of the reconstructed amplitudes involving G.",
+    "quote": "No accepted events were observed in the\nm\nG\n​\nG\nm_{GG}\nchannel, thus reproducing\nc\n=\n0\nc=0\nas is consistent with the theoretical value.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Superconductor hybrids",
+    "verdict": "partial",
+    "finding": "One InSb–Al minimal Kitaev-chain device resolved even and odd joint Majorana parity with 6% estimated single-shot readout error.",
+    "detail": "The parity signals came from spontaneous telegraph switching. A separate two-chain device demonstrated selective parity readout of either chain, with inter-chain tunneling suppressed.",
+    "quote": "Our method couples two Majoranas and resolves their parity in real time, visible as random telegraph switching with lifetimes exceeding a millisecond.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 22,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": "Superconductor hybrids",
+    "verdict": "partial",
+    "finding": "In one InSb/Al nanowire device, the three-site Kitaev chain’s zero-bias peak persisted over a coupling-gate sweep exceeding 40 mV.",
+    "detail": "The experimental comparison used two effective chain lengths without superconducting phase control. The dephasing estimate assumes fixed phase and quasi-static charge noise.",
+    "quote": "Here the zero-bias conductance peak persists over the entire\nV\nH1\nrange >40 mV.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 23,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Electronic quantum Hall fluids",
+    "verdict": "partial",
+    "finding": "One bilayer graphene antidot device showed localized charge increments consistent with e/4 across three even-denominator fractional quantum Hall states.",
+    "detail": "At stronger edge coupling, the gate-voltage period approximately doubled. Quasiparticle bunching and a change in the transport regime remain possible explanations.",
+    "quote": "the observed oscillations are consistent with sequential changes in the localized AD charge in units of the minimal excitation charge,\nq\n=\ne\n/\n4\nq=e/4.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 24,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Ultracold atomic gases",
+    "verdict": "partial",
+    "finding": "A three-atom Pfaffian host state showed suppressed short-range three-body coincidences in 2,241 post-selected images.",
+    "detail": "The authors identify direct control of non-Abelian anyonic excitations as future work.",
+    "quote": "Site-resolved measurements of multi-point density correlations reveal a pronounced suppression of short-range three-body coincidences, reflecting the underlying pairing structure.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 25,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
@@ -996,427 +1451,728 @@
     "by": "gpt-6.1-terra"
    },
    {
+    "url": "https://www.nature.com/articles/s41586-024-08445-2",
+    "milestone": "m1",
+    "hash": "70b73fe86bc7",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-026-10567-8",
+    "milestone": "m1",
+    "hash": "70b73fe86bc7",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://arxiv.org/html/2210.10255v2",
+    "milestone": "m1",
+    "hash": "70b73fe86bc7",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://arxiv.org/html/2404.00091v1",
+    "milestone": "m1",
+    "hash": "70b73fe86bc7",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://arxiv.org/html/2607.09511v1",
+    "milestone": "m1",
+    "hash": "70b73fe86bc7",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://arxiv.org/html/2305.03766v2",
+    "milestone": "m1",
+    "hash": "70b73fe86bc7",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2608.12897",
+    "milestone": "m1",
+    "hash": "70b73fe86bc7",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41467-025-61493-8?error=cookies_not_supported",
+    "milestone": "m1",
+    "hash": "70b73fe86bc7",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2601.20956",
+    "milestone": "m1",
+    "hash": "70b73fe86bc7",
+    "date": "2026-11-15",
+    "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://arxiv.org/html/0707.1889v2",
+    "milestone": "m6",
+    "hash": "5529b0d5e9d1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/0707.1889v2",
+    "milestone": "m7",
+    "hash": "1df3e3e061be",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
     "url": "https://arxiv.org/html/0707.1889v2",
     "milestone": "m2",
-    "hash": "314ed734356e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ca6473b34167",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/0707.1889v2",
     "milestone": "m3",
-    "hash": "020b9a198a77",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a43a29872ae0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/0707.1889v2",
     "milestone": "m4",
-    "hash": "1db6a80f813d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2dc3ee1f3345",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/0707.1889v2",
     "milestone": "m5",
-    "hash": "ea770f3b9536",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9786abbfb8e4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/0707.1889v2",
+    "milestone": "m8",
+    "hash": "ab234aede47c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/0707.1889v2",
     "milestone": "completion",
     "hash": "025bd27729e0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-08445-2",
-    "milestone": "m1",
-    "hash": "70b73fe86bc7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m6",
+    "hash": "5529b0d5e9d1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-024-08445-2",
+    "milestone": "m7",
+    "hash": "1df3e3e061be",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-08445-2",
     "milestone": "m2",
-    "hash": "314ed734356e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ca6473b34167",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-08445-2",
     "milestone": "m3",
-    "hash": "020b9a198a77",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a43a29872ae0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-08445-2",
     "milestone": "m4",
-    "hash": "1db6a80f813d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2dc3ee1f3345",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-08445-2",
     "milestone": "m5",
-    "hash": "ea770f3b9536",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9786abbfb8e4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-024-08445-2",
+    "milestone": "m8",
+    "hash": "ab234aede47c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-08445-2",
     "milestone": "completion",
     "hash": "025bd27729e0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-026-10567-8",
-    "milestone": "m1",
-    "hash": "70b73fe86bc7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m6",
+    "hash": "5529b0d5e9d1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-026-10567-8",
+    "milestone": "m7",
+    "hash": "1df3e3e061be",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-026-10567-8",
     "milestone": "m2",
-    "hash": "314ed734356e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ca6473b34167",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-026-10567-8",
     "milestone": "m3",
-    "hash": "020b9a198a77",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a43a29872ae0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-026-10567-8",
     "milestone": "m4",
-    "hash": "1db6a80f813d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2dc3ee1f3345",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-026-10567-8",
     "milestone": "m5",
-    "hash": "ea770f3b9536",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9786abbfb8e4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-026-10567-8",
+    "milestone": "m8",
+    "hash": "ab234aede47c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-026-10567-8",
     "milestone": "completion",
     "hash": "025bd27729e0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2210.10255v2",
-    "milestone": "m1",
-    "hash": "70b73fe86bc7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2404.00091v1",
-    "milestone": "m1",
-    "hash": "70b73fe86bc7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2607.09511v1",
-    "milestone": "m2",
-    "hash": "314ed734356e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2305.03766v2",
-    "milestone": "m3",
-    "hash": "020b9a198a77",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/pdf/2608.12897",
-    "milestone": "m3",
-    "hash": "020b9a198a77",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2404.00091v1",
-    "milestone": "m4",
-    "hash": "1db6a80f813d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.nature.com/articles/s41467-025-61493-8?error=cookies_not_supported",
-    "milestone": "m4",
-    "hash": "1db6a80f813d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m6",
+    "hash": "5529b0d5e9d1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2210.10255v2",
-    "milestone": "m5",
-    "hash": "ea770f3b9536",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/pdf/2601.20956",
-    "milestone": "m5",
-    "hash": "ea770f3b9536",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m7",
+    "hash": "1df3e3e061be",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2210.10255v2",
     "milestone": "m2",
-    "hash": "314ed734356e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ca6473b34167",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2210.10255v2",
     "milestone": "m3",
-    "hash": "020b9a198a77",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a43a29872ae0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2210.10255v2",
     "milestone": "m4",
-    "hash": "1db6a80f813d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2dc3ee1f3345",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2210.10255v2",
+    "milestone": "m5",
+    "hash": "9786abbfb8e4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2210.10255v2",
+    "milestone": "m8",
+    "hash": "ab234aede47c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2210.10255v2",
     "milestone": "completion",
     "hash": "025bd27729e0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2404.00091v1",
+    "milestone": "m6",
+    "hash": "5529b0d5e9d1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2404.00091v1",
+    "milestone": "m7",
+    "hash": "1df3e3e061be",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2404.00091v1",
     "milestone": "m2",
-    "hash": "314ed734356e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ca6473b34167",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2404.00091v1",
     "milestone": "m3",
-    "hash": "020b9a198a77",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a43a29872ae0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2404.00091v1",
+    "milestone": "m4",
+    "hash": "2dc3ee1f3345",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2404.00091v1",
     "milestone": "m5",
-    "hash": "ea770f3b9536",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9786abbfb8e4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2404.00091v1",
+    "milestone": "m8",
+    "hash": "ab234aede47c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2404.00091v1",
     "milestone": "completion",
     "hash": "025bd27729e0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2607.09511v1",
-    "milestone": "m1",
-    "hash": "70b73fe86bc7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m6",
+    "hash": "5529b0d5e9d1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2607.09511v1",
+    "milestone": "m7",
+    "hash": "1df3e3e061be",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2607.09511v1",
+    "milestone": "m2",
+    "hash": "ca6473b34167",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2607.09511v1",
     "milestone": "m3",
-    "hash": "020b9a198a77",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a43a29872ae0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2607.09511v1",
     "milestone": "m4",
-    "hash": "1db6a80f813d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2dc3ee1f3345",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2607.09511v1",
     "milestone": "m5",
-    "hash": "ea770f3b9536",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9786abbfb8e4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2607.09511v1",
+    "milestone": "m8",
+    "hash": "ab234aede47c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2607.09511v1",
     "milestone": "completion",
     "hash": "025bd27729e0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2305.03766v2",
-    "milestone": "m1",
-    "hash": "70b73fe86bc7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m6",
+    "hash": "5529b0d5e9d1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2305.03766v2",
+    "milestone": "m7",
+    "hash": "1df3e3e061be",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2305.03766v2",
     "milestone": "m2",
-    "hash": "314ed734356e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ca6473b34167",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2305.03766v2",
+    "milestone": "m3",
+    "hash": "a43a29872ae0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2305.03766v2",
     "milestone": "m4",
-    "hash": "1db6a80f813d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2dc3ee1f3345",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2305.03766v2",
     "milestone": "m5",
-    "hash": "ea770f3b9536",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9786abbfb8e4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2305.03766v2",
+    "milestone": "m8",
+    "hash": "ab234aede47c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2305.03766v2",
     "milestone": "completion",
     "hash": "025bd27729e0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2608.12897",
-    "milestone": "m1",
-    "hash": "70b73fe86bc7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m6",
+    "hash": "5529b0d5e9d1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2608.12897",
+    "milestone": "m7",
+    "hash": "1df3e3e061be",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2608.12897",
     "milestone": "m2",
-    "hash": "314ed734356e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ca6473b34167",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2608.12897",
+    "milestone": "m3",
+    "hash": "a43a29872ae0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2608.12897",
     "milestone": "m4",
-    "hash": "1db6a80f813d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2dc3ee1f3345",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2608.12897",
     "milestone": "m5",
-    "hash": "ea770f3b9536",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9786abbfb8e4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2608.12897",
+    "milestone": "m8",
+    "hash": "ab234aede47c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2608.12897",
     "milestone": "completion",
     "hash": "025bd27729e0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41467-025-61493-8?error=cookies_not_supported",
-    "milestone": "m1",
-    "hash": "70b73fe86bc7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m6",
+    "hash": "5529b0d5e9d1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41467-025-61493-8?error=cookies_not_supported",
+    "milestone": "m7",
+    "hash": "1df3e3e061be",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41467-025-61493-8?error=cookies_not_supported",
     "milestone": "m2",
-    "hash": "314ed734356e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ca6473b34167",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41467-025-61493-8?error=cookies_not_supported",
     "milestone": "m3",
-    "hash": "020b9a198a77",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a43a29872ae0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41467-025-61493-8?error=cookies_not_supported",
+    "milestone": "m4",
+    "hash": "2dc3ee1f3345",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41467-025-61493-8?error=cookies_not_supported",
     "milestone": "m5",
-    "hash": "ea770f3b9536",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9786abbfb8e4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41467-025-61493-8?error=cookies_not_supported",
+    "milestone": "m8",
+    "hash": "ab234aede47c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41467-025-61493-8?error=cookies_not_supported",
     "milestone": "completion",
     "hash": "025bd27729e0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2601.20956",
-    "milestone": "m1",
-    "hash": "70b73fe86bc7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m6",
+    "hash": "5529b0d5e9d1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2601.20956",
+    "milestone": "m7",
+    "hash": "1df3e3e061be",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2601.20956",
     "milestone": "m2",
-    "hash": "314ed734356e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ca6473b34167",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2601.20956",
     "milestone": "m3",
-    "hash": "020b9a198a77",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a43a29872ae0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2601.20956",
     "milestone": "m4",
-    "hash": "1db6a80f813d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2dc3ee1f3345",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2601.20956",
+    "milestone": "m5",
+    "hash": "9786abbfb8e4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2601.20956",
+    "milestone": "m8",
+    "hash": "ab234aede47c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2601.20956",
     "milestone": "completion",
     "hash": "025bd27729e0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/1603.03217v1",
+    "milestone": "m6",
+    "hash": "5529b0d5e9d1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/1603.03217v1",
+    "milestone": "m7",
+    "hash": "1df3e3e061be",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/1603.03217v1",
     "milestone": "m2",
-    "hash": "314ed734356e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ca6473b34167",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/1603.03217v1",
+    "milestone": "m3",
+    "hash": "a43a29872ae0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/1603.03217v1",
+    "milestone": "m4",
+    "hash": "2dc3ee1f3345",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/1603.03217v1",
+    "milestone": "m5",
+    "hash": "9786abbfb8e4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/1603.03217v1",
+    "milestone": "m8",
+    "hash": "ab234aede47c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/1603.03217v1",
+    "milestone": "completion",
+    "hash": "025bd27729e0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.researchgate.net/publication/372485276_Experimental_quantum_simulation_of_a_topologically_protected_Hadamard_gate_via_braiding_Fibonacci_anyons",
+    "milestone": "m4",
+    "hash": "2dc3ee1f3345",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2608.04103v1",
+    "milestone": "m7",
+    "hash": "1df3e3e061be",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2507.01606",
+    "milestone": "m7",
+    "hash": "1df3e3e061be",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41565-025-01894-4?error=cookies_not_supported",
+    "milestone": "m2",
+    "hash": "ca6473b34167",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2608.27444v1",
+    "milestone": "m6",
+    "hash": "5529b0d5e9d1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2606.12409v1",
+    "milestone": "m6",
+    "hash": "5529b0d5e9d1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1483,8 +2239,133 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 9 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"A gapped physical system stores quantum information in the possible ways the topological charges of several separated anyons can combine. Exchanging non-Abelian anyons acts on this shared state, and the order of exchanges matters. For an anyon type such as Fibonacci, braids alone can approximate arbitrary encoded quantum circuits. The topological phase protects storage and gates against local perturbations. Bringing anyons together to measure their combined charge provides readout.\". Reason: The definition uses fusion states without explaining what information they encode or which operations must supply universality."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Estimating the electronic energy of nitrogenase\\u2019s iron\\u2013molybdenum cofactor would take about four million physical qubits in one surface-code design with 1 \\u00b5s correction cycles and physical gate error rates of at most 0.1%. A 101-qubit surface-code memory had a logical error probability of 0.143% \\u00b1 0.003% per cycle. Gates that tolerate small changes in the anyons\\u2019 paths could reduce the correction hardware needed for such calculations. Finite temperature and finite anyon separation leave residual errors.\". Reason: The memory benchmark quantifies the cost of storing a qubit but leaves out the scale of a scientific calculation and the conditions that limit the savings."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by European Quantum Flagship, 2024: \"non-Abelian anyons emerge already in exotic fractional quantum Hall states and could be used for universal topological quantum computation.\". Reason: The European Quantum Flagship agenda explicitly connects fractional quantum Hall anyons to universal computation."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "rename case \"Quantum Hall fluids\" to \"Electronic quantum Hall fluids\". Reason: Specifying the electronic medium distinguishes the existing Hall-device results from quantum Hall states realized with neutral atoms."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add case \"Ultracold atomic gases\". Reason: Ultracold gases have distinct proposals for hosting Fibonacci anyons and a funded experimental programme for isolating, braiding and fusing excitations."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "split m1 into \"A pair of non-Abelian anyons is created and separated.\" | \"Fusion measurements resolve the charge outcomes allowed by a non-Abelian fusion rule.\". Reason: The experimental protocol lists pair creation and verification of fusion rules as separate requirements with different measurements."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: title = \"Local perturbations lose the ability to distinguish the stored fusion states as anyons separate.\"; criterion = \"Test the sensitivity of the encoded states to local perturbations as the anyon separation increases. In the Majorana-island protocol, measure both the residual splitting frequency \\u03c9\\u2080 and the dephasing rate 1/T\\u2082. They must scale with one another and both decrease exponentially with a protection parameter. For dominant mode overlap and 1/f noise, their characteristic scales vary as exp(\\u2212L/\\u03be), where L is the island length and \\u03be the induced correlation length. Oscillatory prefactors are allowed, and the relation between the rates depends on the noise spectrum.\"; set_by = \"Local indistinguishability is a field requirement. Aasen et al., Section IV, specify the linked-scaling test for Majorana islands.\"; threshold_quote = \"must scale with one another, and they must both scale exponentially with some parameter.\"; threshold_ref = 9; refs = [2, 9]. Reason: The linked exponential scalings belong to a specific Majorana protocol, and a parity-readout result does not form part of that test."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Prepare the same encoded input for two experiments. Apply braid operations A and B in opposite orders and measure an encoded observable that distinguishes the resulting states. The difference must be observable on the fusion space after disregarding an overall phase.\"; set_by = \"The definition of non-Abelian braiding statistics in Nayak et al., Section II.1.1.\"; refs = [2]. Reason: Reversing two braid operations tests their noncommutativity directly, whereas repeating one generator tests only its action."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"Identify the action of the implemented elementary braids on one encoded qubit and establish that their representation is dense in SU(2) up to overall phase. This requires connecting the measured generators to a representation whose braid sequences approximate any single-qubit rotation to arbitrary accuracy.\"; refs = [5]. Reason: The single-qubit criterion mixes the density test with the history of one digital simulation."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m5: criterion = \"Implement a braid on two encoded computational units that takes at least one product input to an entangled state in the computational subspace. Use an encoding compatible with the single-unit gates. For approximate Fibonacci two-qubit constructions, establish that leakage out of the computational subspace tends to zero as the braid is refined.\"; refs = [5]. Reason: The criterion includes two device reports and leaves the meaning of an entangling gate implicit."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m5: \"Deforming a non-Abelian braid preserves its encoded gate up to an overall phase.\". Reason: Protection of a stored state and correct execution of one braid leave the gate’s dependence on the exchange path untested."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove statement 1. Reason: The Google statement describes a possible use of projective Ising defects, whose braids supply a restricted gate set."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Skipped proposed operation 4 (remove statement 0): the entry needs at least 2 statements. Its reason: The DOE article explains a possible application of braiding in a report on Abelian exchange statistics and makes no claim about a universal braid gate set."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 12 of 13 proposed operations from QUA-05-revise-20261125T110116428230Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m6, m7, m2, m3, m4, m5, m8."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 0 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 4 found, 1 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Structural problems after applying: references never cited: [4, 10]"
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "definition is 486 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 11 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 8 candidates returned, 0 dropped as sources already used, 8 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 6 of 8 new candidates, without search. Skipped: 3 no readable saved copy. Dropped rows: none. Replaced 13 earlier rows. Added 35 results: 29 from sources already used, 6 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 3 from Crossref, 0 from PubMed, 3 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 33 found, 1 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Removed 2 references no longer cited; renumbered."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-25"
  }
 }
