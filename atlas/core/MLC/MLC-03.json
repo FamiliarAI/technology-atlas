@@ -321,10 +321,12 @@
   "title": "Continual learning without forgetting or loss of plasticity",
   "definition": "A pretrained model used across domains accumulates abilities through successive updates without replaying its full original training corpus. It retains earlier abilities and plasticity—the capacity to acquire new abilities—as learning continues.",
   "goal": {
-   "need": "In Dohare et al.'s Continual ImageNet experiments, networks reached up to 88% accuracy on early binary tasks but lost plasticity by task 2,000 at every tested learning rate. Continual backpropagation sustained new-task learning over 5,000 tasks; plotted results averaged 30 runs. Its authors explicitly leave forgetting untreated. DARPA's Lifelong Learning Machines programme seeks adaptation without forgetting previous learning.",
+   "need": "Search users ask about both current and past events. In one study, at least 10% of questions in each dataset had answers that depended on the date. Retraining an internet-scale language model can cost millions of dollars per run. Updating it on new data alone can erode earlier skills or teach the new material poorly. A service that learns from incoming reports could answer questions about new events while keeping historical answers accurate for their dates. For rarely mentioned facts, looking up a document would still help.",
    "need_refs": [
+    9,
     1,
-    2
+    11,
+    10
    ],
    "figures": null,
    "statements": [
@@ -364,12 +366,12 @@
   },
   "case_label": null,
   "cases": [],
-  "milestone_structure": "sequence",
+  "milestone_structure": "parallel",
   "milestones": [
    {
     "id": "m1",
-    "title": "A continual learner retains earlier performance with a performance-maintenance score of at least zero.",
-    "criterion": "Performance Maintenance (PM) ≥ 0 in the published L2M evaluation: mean later performance on learned tasks is no lower than initially. Baker et al. report 3 of 18 configurations meeting this boundary. Averaging can conceal individual task losses.",
+    "title": "A continual learner earns an average performance-maintenance score of at least zero.",
+    "criterion": "After each training block, evaluate each previously learned task other than the task just trained. Subtract its score immediately after its most recent training block from its current score. Average these differences within each task, then average across tasks. The resulting L2M performance-maintenance score (PM) must be at least zero.",
     "set_by": "DARPA L2M evaluation teams; Baker et al., Section 4.2.2.",
     "set_by_kind": "government_programme",
     "threshold_quote": "The LL threshold value for PM is zero",
@@ -384,10 +386,10 @@
    {
     "id": "m2",
     "title": "A continual learner reaches PM ≥ 0 and FT, BT, RP and SE ≥ 1 in the same environment.",
-    "criterion": "Meet PM ≥ 0 and FT, BT, RP and SE ≥ 1 together. These denote performance maintenance, forward/backward transfer, performance relative to single-task experts and sample efficiency. Baker et al. report Teledyne's AirSim agent meeting these boundaries, scoring 0.56±0.98, 11.69±0.47, 1.00±0.01, 1.03±0.04 and 2.74±1.70, respectively (mean±standard deviation). Aggregate success does not establish taskwise retention or unlimited plasticity.",
+    "criterion": "For the same learner configuration and environment, the mean performance-maintenance score (PM) must be at least 0. Mean forward transfer (FT) and backward transfer (BT) must each be at least 1, the boundary for unchanged performance on an unseen or previously learned task after training on another task. Mean relative performance (RP) and sample efficiency (SE) must each be at least 1 against the corresponding single-task experts.",
     "set_by": "DARPA L2M evaluation teams; Baker et al., Section 4, Tables 3–5.",
     "set_by_kind": "government_programme",
-    "threshold_quote": "any interference, forgetting, or performance not equal to or better than an STE",
+    "threshold_quote": "matched or exceeded the LL threshold value in all 5 metrics",
     "threshold_ref": 4,
     "refs": [
      4
@@ -399,8 +401,8 @@
    {
     "id": "m3",
     "title": "One general-purpose model shows taskwise retention and undiminished acquisition on a finite task stream.",
-    "criterion": "One experiment meets the completion test's taskwise retention and fresh-copy acquisition conditions, with bounded capacity and replay storage and no full original-corpus replay, before independent reproduction. Tiwari et al.'s preprint revised on 14 October 2026 reports Qwen3-8B adaptation over three tasks, 200 updates each. Its six-task Qwen3-4B experiment uses 3,200 training and 200 held-out problems per task, but evaluates only the current task. These results do not establish passage of the joint test; peer review is not established in the cited record.",
-    "set_by": "Atlas fallback for a single experimental demonstration of the joint completion conditions.",
+    "criterion": "In one finite task stream, evaluate a general-purpose pretrained model after each update stage. At every evaluation, each starting ability must score at least as well as before the stream, and each acquired task at least as well as immediately after it was learned. On each later task, the model must match or exceed a copy trained from the original pretrained checkpoint, using no more task examples under a matched update budget. Model capacity and replay storage have fixed bounds, and the full original pretraining corpus is unavailable.",
+    "set_by": "Atlas fallback for one experiment. No outside body was located that defines this joint taskwise test for a general-purpose pretrained model.",
     "set_by_kind": "atlas",
     "threshold_quote": null,
     "threshold_ref": null,
@@ -411,6 +413,21 @@
     "status": "active",
     "replaced_by": [],
     "threshold_checked": null
+   },
+   {
+    "id": "m4",
+    "title": "A network sustains new-task accuracy across 5,000 binary Continual ImageNet tasks.",
+    "criterion": "Train the same convolutional network on 5,000 successive pairs of image classes, resetting the output weights at each task change. For each pair, train for 250 passes over 1,200 images in batches of 100, then score accuracy on 200 held-out images. Plot new-task accuracy in bins of 50 tasks, averaged over 30 runs. The accuracy curve must show no downward trend as training proceeds.",
+    "set_by": "Dohare et al., Continual ImageNet protocol, Figure 1c and Methods",
+    "set_by_kind": "protocol",
+    "threshold_quote": "A drop in performance would mean the network is losing its learning ability",
+    "threshold_ref": 1,
+    "refs": [
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
    }
   ],
   "measures": [],
@@ -492,20 +509,6 @@
    },
    {
     "id": 6,
-    "kind": "journal",
-    "url": "https://www.nature.com/articles/s41586-024-07711-7",
-    "doi": null,
-    "title": "Not established in the research notes",
-    "authors": "",
-    "container": null,
-    "year": "",
-    "volume": null,
-    "issue": null,
-    "pages": null,
-    "citation_source": "model"
-   },
-   {
-    "id": 7,
     "kind": "preprint",
     "url": "https://arxiv.org/abs/2510.00304",
     "doi": null,
@@ -519,7 +522,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 8,
+    "id": 7,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2301.07799v1",
     "doi": null,
@@ -533,7 +536,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 9,
+    "id": 8,
     "kind": "web",
     "url": "https://learnerlabs.ai/demos/skills/ten-skills",
     "doi": null,
@@ -545,228 +548,355 @@
     "issue": null,
     "pages": null,
     "citation_source": "model"
+   },
+   {
+    "id": 9,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2109.06157",
+    "doi": "10.48550/arXiv.2109.06157",
+    "title": "SituatedQA: Incorporating Extra-Linguistic Contexts into QA",
+    "authors": "Zhang MJQ, Choi E",
+    "container": "arXiv",
+    "year": "2021",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 10,
+    "kind": "book",
+    "url": "https://proceedings.mlr.press/v162/liska22a/liska22a.pdf",
+    "doi": null,
+    "title": "StreamingQA: A Benchmark for Adaptation to New Knowledge over Time in Question Answering Models",
+    "authors": "Adam Liška, Tomáš Kočiský, Elena Gribovskaya, Tayfun Terzi, Eren Sezener, Devang Agrawal, Cyprien de Masson d’Autume, Tim Schöltes, Manzil Zaheer, Susannah Young, Ellen Gilsenan-McMahon, Sophia Austin, Phil Blunsom, Angeliki Lazaridou",
+    "container": "Proceedings of the 39th International Conference on Machine Learning",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 11,
+    "kind": "journal",
+    "url": "https://openreview.net/pdf?id=DimPeeCxKO",
+    "doi": null,
+    "title": "Simple and Scalable Strategies to Continually Pre-train Large Language Models",
+    "authors": "Adam Ibrahim, Benjamin Thérien, Kshitij Gupta, Mats L. Richter, Quentin Anthony, Timothée Lesort, Eugene Belilovsky, Irina Rish",
+    "container": "Transactions on Machine Learning Research",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 12,
+    "kind": "report",
+    "url": "https://proceedings.mlr.press/v199/daniels22a/daniels22a.pdf",
+    "doi": null,
+    "title": "Model-Free Generative Replay for Lifelong Reinforcement Learning: Application to Starcraft-2",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 13,
+    "kind": "web",
+    "url": "https://learnerlabs.ai/demos/skills/two-languages",
+    "doi": null,
+    "title": "Learning a second invented language preserves the first language’s loss",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
    }
   ],
   "milestone_order": [
    "m1",
+   "m4",
    "m2",
    "m3"
   ],
   "results": [
    {
-    "milestone": "m3",
+    "milestone": "m4",
     "case": null,
     "verdict": "partial",
-    "finding": "CIFAR-100 base system, 30 runs: incremental accuracy was 5% lower than retraining at 100 classes.",
-    "detail": "The experiment bears on plasticity but used a task-specific image classifier, not a general-purpose pretrained model. It trained on all available old classes and did not test taskwise retention against immediate post-learning scores.",
-    "quote": "By the end, when all 100 classes were available, the accuracy of the incrementally trained base system was 5% lower than the retrained network (a performance drop equivalent to that of removing a notable algorithmic advance, such as batch normalization).",
+    "finding": "An L2-regularized CNN improved held-out new-task accuracy across 5,000 binary Continual ImageNet tasks, averaged over 30 runs.",
+    "detail": null,
+    "quote": "L2 regularization adds a penalty for large weights; augmenting backpropagation with this enabled the network to continue improving its learning performance over at least 5,000 tasks.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
-    "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 1,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
-    "milestone": "m3",
+    "milestone": "m4",
     "case": null,
     "verdict": "partial",
-    "finding": "MLP, CNN, ResNet and ViT models showed declining training accuracy across 40 sequential Tiny ImageNet tasks.",
-    "detail": "The experiment addresses acquisition during continual learning, but does not establish taskwise retention or comparison with copies of an original pretrained checkpoint.",
+    "finding": "CNN and ResNet online training accuracy declined over 40 successive Tiny ImageNet tasks.",
+    "detail": "Figure 3.1 averages observations over 1,000-step windows. The arXiv manuscript is marked as published at ICLR 2026, a peer-reviewed conference.",
     "quote": "The\nplots illustrate (across different architectures like MLP, CNN, ResNet, and ViT from left to right)\nan increase in the fraction of dead or duplicate units during training, coincidental with a decrease in\ntraining accuracy.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
-    "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 6,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Teledyne UML agent, one configuration: mean PM was 0.56.",
-    "detail": "The AirSim evaluation used permutations of classification task variants. The number of runs is not stated. Mean PM can conceal losses on individual tasks.",
-    "quote": null,
-    "checked": null,
+    "finding": "STELLAR with reduced SCP++ stiffness achieved mean PM of 0.26 across 15 CARLA Dispersed lifetimes.",
+    "detail": "SCP++ stiffness was reduced to 10% of its nominal value. The criterion applies to the reported mean.",
+    "quote": "PM\n(from -2.73 to 0.26)",
+    "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "Teledyne’s AirSim UML agent met 5 of 5 metric thresholds across runs; sample size not stated.",
-    "detail": "Mean±SD: PM 0.56±0.98, FT 11.69±0.47, BT 1.00±0.01, RP 1.03±0.04, and SE 2.74±1.70. Results are aggregates across task-variant orderings; they do not establish taskwise retention or unlimited plasticity.",
+    "finding": "Reduced-stiffness STELLAR cleared all five mean thresholds across 15 CARLA Dispersed lifetimes.",
+    "detail": "CARLA used three driving tasks with two variants per task. The single-task experts used the same architecture and ready-to-deploy initialization as STELLAR.",
     "quote": null,
     "checked": null,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Learner 1.0: nine of ten skills retained within two correct answers on 225 held-out questions per skill.",
-    "detail": "The fixed-capacity model learned ten skills sequentially without replay. Oriel fell from 12 to 9 correct. The source reports no fresh-copy acquisition comparison, so it does not establish the joint test.",
-    "quote": "Nine of the ten finish within two correct answers of their own-end score on fixed 225-question panels, after a stream of 63,282 updates.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Teledyne’s AirSim system averaged 0.56 performance maintenance across two classification tasks; number of runs not reported.",
-    "detail": "The domain-specific system was evaluated across task variants. Aggregate performance maintenance does not establish taskwise retention, and the reported results do not establish the matched fresh-copy acquisition and fixed-resource conditions.",
-    "quote": null,
-    "checked": null,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
+    "verdict": "met",
+    "finding": "Learner 1.0 achieved PM ≈ +0.042 percentage points across 9 eligible skills, each evaluated on 225 held-out items.",
+    "detail": "PM is calculated from the checkpoint matrix. The tenth skill has no later evaluation and contributes no comparison.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
     "verdict": "partial",
-    "finding": "Learner 1.0 retained 1,525 of 2,250 correct answers after ten sequential skills, down from 1,528 at their own-end checkpoints.",
-    "detail": "The study reports retention on its own skill stream, not PM in the published L2M evaluation. Individual skills lost performance, including Oriel.",
-    "quote": "Summed over all 2,250 rows the model answered 1,528 correctly at own-end and 1,525 at the end, a net change of -3 rows.",
+    "finding": "Learner 1.0 lost 3 correct answers relative to Oriel’s immediate post-learning score on a fixed 225-item panel.",
+    "detail": "Oriel’s final exact-match decline was concentrated in its checksum. The full 16,481-item base battery also recorded a WinoGrande decline.",
+    "quote": "Oriel is the skill that moved: 12 of 225 at its own teach, 15 after Juniper, 9 after Bracken.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "The sequential replay agent achieved mean PM of 13.58 across 36 Minigrid pairwise lifetimes.",
+    "detail": "The result is specific to the pairwise scenario. The same agent’s mean PM was negative in the condensed Minigrid scenario.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "Learner 1.0 (one run, two tasks, two held-out Velenic windows) achieved an implied PM of +0.0009 nats using negative held-out loss.",
+    "detail": "The demo reports the raw loss change. The PM value is calculated from that change by reversing its sign so that higher scores indicate better performance.",
+    "quote": "After both languages, Velenic remained at 2.8871. That is a change of −0.0009 nats after Morvath was taught.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://www.nature.com/articles/s41586-024-07711-7",
     "milestone": "m1",
-    "hash": "9bf9a37deb09",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "58ea5ffa8a5b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-024-07711-7",
+    "milestone": "m4",
+    "hash": "521dc71f6ec0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-07711-7",
     "milestone": "m2",
-    "hash": "b610131f8c00",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "b6a0a32d88b2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-07711-7",
     "milestone": "m3",
-    "hash": "d68d1c224f19",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9265dd1cc809",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-07711-7",
     "milestone": "completion",
     "hash": "899cd89a0133",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2510.00304",
     "milestone": "m1",
-    "hash": "9bf9a37deb09",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "58ea5ffa8a5b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2510.00304",
+    "milestone": "m4",
+    "hash": "521dc71f6ec0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2510.00304",
     "milestone": "m2",
-    "hash": "b610131f8c00",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "b6a0a32d88b2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2510.00304",
     "milestone": "m3",
-    "hash": "d68d1c224f19",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9265dd1cc809",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/2510.00304",
     "milestone": "completion",
     "hash": "899cd89a0133",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2301.07799v1",
     "milestone": "m1",
-    "hash": "9bf9a37deb09",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "58ea5ffa8a5b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2301.07799v1",
+    "milestone": "m4",
+    "hash": "521dc71f6ec0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2301.07799v1",
     "milestone": "m2",
-    "hash": "b610131f8c00",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://learnerlabs.ai/demos/skills/ten-skills",
-    "milestone": "m3",
-    "hash": "d68d1c224f19",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "b6a0a32d88b2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2301.07799v1",
     "milestone": "m3",
-    "hash": "d68d1c224f19",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "9265dd1cc809",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2301.07799v1",
     "milestone": "completion",
     "hash": "899cd89a0133",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://learnerlabs.ai/demos/skills/ten-skills",
     "milestone": "m1",
-    "hash": "9bf9a37deb09",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "58ea5ffa8a5b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://learnerlabs.ai/demos/skills/ten-skills",
+    "milestone": "m4",
+    "hash": "521dc71f6ec0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://learnerlabs.ai/demos/skills/ten-skills",
     "milestone": "m2",
-    "hash": "b610131f8c00",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "b6a0a32d88b2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://learnerlabs.ai/demos/skills/ten-skills",
+    "milestone": "m3",
+    "hash": "9265dd1cc809",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://learnerlabs.ai/demos/skills/ten-skills",
     "milestone": "completion",
     "hash": "899cd89a0133",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.mlr.press/v199/daniels22a/daniels22a.pdf",
+    "milestone": "m1",
+    "hash": "58ea5ffa8a5b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://learnerlabs.ai/demos/skills/two-languages",
+    "milestone": "m1",
+    "hash": "58ea5ffa8a5b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -833,8 +963,88 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 1 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Search users ask about both current and past events. In one study, at least 10% of questions in each dataset had answers that depended on the date. Retraining an internet-scale language model can cost millions of dollars per run. Updating it on new data alone can erode earlier skills or teach the new material poorly. A service that learns from incoming reports could answer questions about new events while keeping historical answers accurate for their dates. For rarely mentioned facts, looking up a document would still help.\". Reason: The current paragraph reports experimental results and a programme goal but gives readers no account of the cost of updating a service or the questions its users need answered."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: title = \"A continual learner earns an average performance-maintenance score of at least zero.\"; criterion = \"After each training block, evaluate each previously learned task other than the task just trained. Subtract its score immediately after its most recent training block from its current score. Average these differences within each task, then average across tasks. The resulting L2M performance-maintenance score (PM) must be at least zero.\". Reason: Algorithm 5 compares each task with its most recent training block and averages the changes, a distinction the original wording obscures when a task recurs."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m1: \"A network sustains new-task accuracy across 5,000 binary Continual ImageNet tasks.\". Reason: Continual ImageNet supplies the missing laboratory test of whether learning earlier tasks diminishes the ability to learn later ones."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"For the same learner configuration and environment, the mean performance-maintenance score (PM) must be at least 0. Mean forward transfer (FT) and backward transfer (BT) must each be at least 1, the boundary for unchanged performance on an unseen or previously learned task after training on another task. Mean relative performance (RP) and sample efficiency (SE) must each be at least 1 against the corresponding single-task experts.\"; threshold_quote = \"matched or exceeded the LL threshold value in all 5 metrics\"; threshold_ref = 4. Reason: The AirSim scores belong with the results, and the programme’s simultaneous comparison makes clear that meeting a transfer boundary of one requires no positive transfer."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"In one finite task stream, evaluate a general-purpose pretrained model after each update stage. At every evaluation, each starting ability must score at least as well as before the stream, and each acquired task at least as well as immediately after it was learned. On each later task, the model must match or exceed a copy trained from the original pretrained checkpoint, using no more task examples under a matched update budget. Model capacity and replay storage have fixed bounds, and the full original pretraining corpus is unavailable.\"; set_by = \"Atlas fallback for one experiment. No outside body was located that defines this joint taskwise test for a general-purpose pretrained model.\". Reason: The current criterion devotes most of its text to one preprint and leaves the reader to look elsewhere for the baselines used to judge retention and acquisition."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "structure = parallel. Reason: The retention and plasticity experiments can be run in either order, and the five-metric L2M experiment can establish its retention component in the same run."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 6 of 6 proposed operations from MLC-03-revise-20261125T092359689380Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m4, m2, m3."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 1 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 2 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 4 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 2 candidates returned, 0 dropped as sources already used, 2 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 2 of 2 new candidates, without search. Skipped: 1 no readable saved copy. Dropped rows: none. Replaced 7 earlier rows. Added 8 results: 6 from sources already used, 2 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 5 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Removed 1 references no longer cited; renumbered."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-25"
  }
 }
