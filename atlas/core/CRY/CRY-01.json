@@ -271,14 +271,30 @@
   ],
   "prompt": "5e97d4b8dfc3"
  },
+ "review": {
+  "state": "published",
+  "note": null,
+  "into": null,
+  "at": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "state": "published"
+   }
+  ]
+ },
  "page": {
   "id": "CRY-01",
   "title": "Unconditional existence of one-way functions",
-  "definition": "An explicit function would have an unconditional proof that it is computable in polynomial time but hard to invert on outputs of uniformly random inputs. Every uniform classical probabilistic polynomial-time attacker would find any valid preimage with probability below n^(−c), for every fixed c>0 at sufficiently large input lengths n.",
+  "definition": "An explicit function on bit strings would be computable in polynomial time and provably hard to reverse without a hardness assumption. Given the output for a uniformly random n-bit input and the length n, any uniform classical randomized polynomial-time algorithm would have probability below n^(−c) of finding any input with that output, for every fixed c>0 and all sufficiently large n. Modular exponentiation illustrates the gap: computing the power is efficient, while the required hardness of recovering an exponent remains conjectural.",
   "goal": {
-   "need": "One-way functions are necessary and sufficient for at least five classes of cryptographic primitives: private-key encryption, digital signatures, pseudorandom generators, pseudorandom functions and commitments. An unconditional proof would replace their shared existence assumption with a theorem.",
+   "need": "People use shared keys to keep messages private and digital signatures to check who signed data and whether it was altered. Secure schemes for both tasks, along with pseudorandom generators, pseudorandom functions and commitments, depend on a common conjecture. A proof would establish that all five are possible against efficient classical attackers. If one-way functions do not exist, none of the five can meet its standard computational security definition. Public-key encryption lies outside this equivalence.",
    "need_refs": [
-    1
+    1,
+    2,
+    3,
+    8,
+    9
    ],
    "figures": null,
    "statements": [
@@ -320,13 +336,14 @@
    {
     "id": "m1",
     "title": "An explicit polynomial-time function is one-way if and only if any one-way function exists.",
-    "criterion": "A fully specified polynomial-time function is proved complete for one-wayness: it is one-way if any one-way function exists. Levin’s Theorem 1 establishes this for Tiling Expansion, which extends a top row using permitted tiles and outputs the bottom row and tile set. This supplies an explicit candidate without proving that inversion is hard.",
+    "criterion": "Specify a deterministic polynomial-time function f and prove that if any one-way function exists, then f is one-way. Here one-wayness requires negligible success for every uniform classical probabilistic polynomial-time inverter on outputs of uniformly random inputs. The reverse implication follows by taking f itself as the witness to existence.",
     "set_by": "The field’s completeness criterion for one-way functions, established for Tiling Expansion by Levin, Section 4.3, Theorem 1.",
     "set_by_kind": "community_convention",
     "threshold_quote": "Tiling Expansion is a owf if and only if owfs exist.",
     "threshold_ref": 4,
     "refs": [
-     4
+     4,
+     1
     ],
     "status": "active",
     "replaced_by": [],
@@ -335,7 +352,7 @@
    {
     "id": "m2",
     "title": "A random-language-model function distribution has negligible inversion below T^(2−ε), at evaluation cost T.",
-    "criterion": "In the random language model, a function distribution has negligible inversion probability in λ against attackers of cost T^(2−ε), for every fixed 0<ε<1, where T is evaluation cost and λ=2^n. The oracle assigns independent membership probability 1/2 to each n-bit word and a uniformly random n-bit witness to each member. Brzuska and Couteau establish this in Corollary 26. Probability includes the sampled function and input. This result uses an idealized oracle.",
+    "criterion": "For each fixed 0<ε<1, exhibit a function distribution D in the random language model with security parameter λ=2^n. At every sufficiently large input length m, consider any oracle circuit of size below T_f(m)^(2−ε) for every f in the support of D, where T_f(m) is the evaluation circuit’s wire count. Given f, f(z) and 1^m, the circuit must find a preimage with probability negligible in λ over the model’s random function and uniform m-bit input z. The model checks membership claims using hidden random witnesses.",
     "set_by": "Brzuska and Couteau’s published fine-grained one-way-function criterion, Definition 7 and Corollary 26, in the random language model.",
     "set_by_kind": "community_convention",
     "threshold_quote": "For any \\(\\varepsilon > 0\\), there exists a \\((\\textsf{negl}(\\lambda ), 1-\\varepsilon )\\)-fine-grained one-way function distribution in the random language model.",
@@ -350,10 +367,10 @@
    {
     "id": "m3",
     "title": "An explicit function has negligible inversion probability at infinitely many input lengths.",
-    "criterion": "An unconditional proof establishes an explicit deterministic polynomial-time function f such that, for every uniform classical probabilistic polynomial-time algorithm A, there are a negligible function μ_A and an infinite set S_A with Pr[f(A(1^n,f(x)))=f(x)]≤μ_A(n) for n∈S_A. Inputs x are uniform n-bit strings and probability includes A’s randomness. Liu and Pass define this target and prove a conditional characterization; they do not establish its unconditional existence. Completion strengthens the length condition to all sufficiently large n.",
+    "criterion": "Prove unconditionally that an explicit deterministic polynomial-time function f has the following property. For every uniform classical probabilistic polynomial-time algorithm A, there are a negligible function μ_A and an infinite set of lengths S_A such that Pr[f(A(1^n,f(x)))=f(x)]≤μ_A(n) for every n in S_A. The probability is over a uniform n-bit input x and the random choices of A. The set S_A may depend on A.",
     "set_by": "The field’s infinitely-often one-wayness convention, stated by Liu and Pass, CRYPTO 2021, Section 2.1, Definition 1.",
     "set_by_kind": "community_convention",
-    "threshold_quote": "which only requires that the success probability is bounded by µ(n) for infinitely many inputs lengths n.",
+    "threshold_quote": "holds for infinitely many n ∈ N (as opposed to all).",
     "threshold_ref": 6,
     "refs": [
      6
@@ -361,12 +378,30 @@
     "status": "active",
     "replaced_by": [],
     "threshold_checked": null
+   },
+   {
+    "id": "m4",
+    "title": "One-way function existence is equivalent to mild average-case hardness of computing Kᵗ.",
+    "criterion": "For every constant ε>0 and polynomial time bound t(n)≥(1+ε)n, prove the following equivalence. One-way functions exist if and only if some positive polynomial p satisfies this condition: for every uniform randomized polynomial-time algorithm A and all sufficiently large n, Pr[A(x)≠Kᵗ(x)]≥1/p(n). Here x is uniform on n-bit strings, probability includes A’s randomness, and Kᵗ(x) is the length of the shortest program that outputs x within t(n) steps on the fixed universal machine.",
+    "set_by": "Liu and Pass’s average-case characterization, Theorem 1.1 and its strengthened form, recognized by the NSA’s 2022 paper competition.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "mild average-case hardness of $K^{t}$ is equivalent to the existence of one-way functions.",
+    "threshold_ref": 8,
+    "refs": [
+     8,
+     2
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": false
    }
   ],
   "measures": [],
   "not_found": [
    "No externally prescribed sequence of milestones for an unconditional one-way-function proof was found.",
-   "No accepted unconditional existence proof was found, including for infinitely-often one-way functions."
+   "No accepted unconditional existence proof was found, including for infinitely-often one-way functions.",
+   "No academy, prize committee or research programme statement explicitly setting an unconditional existence proof as its goal was found.",
+   "No academy, prize committee or research programme statement disputing the value or feasibility of an unconditional proof was found."
   ],
   "references": [
    {
@@ -466,109 +501,257 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 8,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2009.11514",
+    "doi": "10.48550/arXiv.2009.11514",
+    "title": "On One-way Functions and Kolmogorov Complexity",
+    "authors": "Liu Y, Pass R",
+    "container": "arXiv",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 9,
+    "kind": "report",
+    "url": "https://csrc.nist.gov/pubs/fips/186-5/final",
+    "doi": "10.6028/NIST.FIPS.186-5",
+    "title": "Digital Signature Standard (DSS)",
+    "authors": "National Institute of Standards and Technology (US)",
+    "container": "FIPS 186-5",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 10,
+    "kind": "web",
+    "url": "https://en.wikipedia.org/wiki/One-way_function",
+    "doi": null,
+    "title": "One-way function",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 11,
+    "kind": "report",
+    "url": "https://par.nsf.gov/servlets/purl/10219728",
+    "doi": "10.1109/FOCS46700.2020.00118",
+    "title": "On One-way Functions and Kolmogorov Complexity",
+    "authors": "Liu Y, Pass R",
+    "container": "2020 IEEE 61st Annual Symposium on Foundations of Computer Science (FOCS)",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": "1243-1254",
+    "citation_source": "crossref"
    }
   ],
   "milestone_order": [
    "m1",
+   "m4",
    "m2",
    "m3"
   ],
   "results": [
    {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Levin’s theorem identifies one explicit universal function that is one-way whenever any one-way function exists.",
+    "detail": null,
+    "quote": "There is an explicit function\nf\nthat has been proved to be one-way, if and only if one-way functions exist.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The article reports both directions of the equivalence between one-way function existence and mild average-case hardness of time-bounded Kolmogorov complexity.",
+    "detail": "The supplied text cites an arXiv preprint for this result.",
+    "quote": "There also exists a function that is one-way if polynomial-time bounded\nKolmogorov complexity\nis mildly hard on average. Since the existence of one-way functions implies that polynomial-time bounded Kolmogorov complexity is mildly hard on average, the function is a universal one-way function.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "Random-language-model function distribution: negligible inversion probability against attackers with cost below T^(2−ε).",
-    "detail": "The result holds for every fixed 0<ε<1 and uses an idealized random-language oracle. The probability averages over the sampled function and input.",
-    "quote": "For any\n\\(\\varepsilon > 0\\)\n, there exists a\n\\((\\textsf{negl}(m), 1-\\varepsilon )\\)\n-fine-grained one-way function distribution in the random language model.",
+    "finding": "The amplified random-language function distribution has negligible inversion success below T^(2−ε) wires.",
+    "detail": "The construction uses log₂ λ parallel instances with independent prefix-defined random languages. The unamplified construction gives an inverse-polynomial bound.",
+    "quote": "For any\n\\(\\varepsilon > 0\\)\n, there exists a\n\\((\\textsf{negl}(\\lambda ), 1-\\varepsilon )\\)\n-fine-grained one-way function distribution in the random language model.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 5,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Tiling Expansion: Theorem 1 proves one-wayness is equivalent to the existence of any one-way function; sample size not applicable.",
-    "detail": "The result provides a complete candidate; it does not prove that one-way functions exist.",
+    "finding": "Tiling Expansion is one-way iff any one-way function exists. The proof uses an n²-step simulation cutoff. Sample size is inapplicable.",
+    "detail": "Section 3 measures randomized inversion on random inputs using Las Vegas algorithms. A polynomial-time inverter fits this framework by checking its answer and aborting on failure.",
     "quote": "Tiling Expansion is a owf if and only if owfs exist.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "met",
+    "finding": "One-way functions exist iff exact Kᵗ has error at least 1/p(n) for every PPT algorithm on uniform n-bit inputs, for every admissible t. Sample size is inapplicable.",
+    "detail": "The source is a peer-reviewed IEEE FOCS proceedings paper. The schema has no conference category, so it is coded as report, with peer_reviewed reserved for journal papers.",
+    "quote": "In fact, our main theorem is stronger than stated: we\nshow that for every polynomial t(n) ≥ (1+ ε)n, where\nε> 0 is a constant, mild average-case hardness of Kt\nis equivalent to the existence of one-way functions.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://en.wikipedia.org/wiki/One-way_function",
     "milestone": "m1",
-    "hash": "6f820bf48f56",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "879858e1606a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://en.wikipedia.org/wiki/One-way_function",
+    "milestone": "m4",
+    "hash": "672c52168188",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://en.wikipedia.org/wiki/One-way_function",
     "milestone": "m2",
-    "hash": "2d7d4fa79f8d",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "e60ff2007207",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://en.wikipedia.org/wiki/One-way_function",
     "milestone": "m3",
-    "hash": "5e182e25b14b",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "61291c46ebff",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://en.wikipedia.org/wiki/One-way_function",
     "milestone": "completion",
     "hash": "eb5e30a85b3c",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/article/10.1007/s00145-024-09518-1",
     "milestone": "m1",
-    "hash": "6f820bf48f56",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "879858e1606a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://link.springer.com/article/10.1007/s00145-024-09518-1",
+    "milestone": "m4",
+    "hash": "672c52168188",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/article/10.1007/s00145-024-09518-1",
     "milestone": "m2",
-    "hash": "2d7d4fa79f8d",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "e60ff2007207",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/article/10.1007/s00145-024-09518-1",
     "milestone": "m3",
-    "hash": "5e182e25b14b",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "61291c46ebff",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/article/10.1007/s00145-024-09518-1",
     "milestone": "completion",
     "hash": "eb5e30a85b3c",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/cs/0012023",
     "milestone": "m1",
-    "hash": "6f820bf48f56",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "879858e1606a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/cs/0012023",
+    "milestone": "m4",
+    "hash": "672c52168188",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/cs/0012023",
+    "milestone": "m2",
+    "hash": "e60ff2007207",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/cs/0012023",
+    "milestone": "m3",
+    "hash": "61291c46ebff",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/cs/0012023",
+    "milestone": "completion",
+    "hash": "eb5e30a85b3c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://par.nsf.gov/servlets/purl/10219728",
+    "milestone": "m4",
+    "hash": "672c52168188",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -610,20 +793,108 @@
     "date": "2026-11-14",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 2 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"An explicit function on bit strings would be computable in polynomial time and provably hard to reverse without a hardness assumption. Given the output for a uniformly random n-bit input and the length n, any uniform classical randomized polynomial-time algorithm would have probability below n^(\\u2212c) of finding any input with that output, for every fixed c>0 and all sufficiently large n. Modular exponentiation illustrates the gap: computing the power is efficient, while the required hardness of recovering an exponent remains conjectural.\". Reason: The definition uses “preimage” without explaining what recovery counts as success and gives no familiar example of the gap between a candidate and a proof."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"People use shared keys to keep messages private and digital signatures to check who signed data and whether it was altered. Secure schemes for both tasks, along with pseudorandom generators, pseudorandom functions and commitments, depend on a common conjecture. A proof would establish that all five are possible against efficient classical attackers. If one-way functions do not exist, none of the five can meet its standard computational security definition. Public-key encryption lies outside this equivalence.\". Reason: The existing paragraph counts primitives but omits what people use them for, what a negative answer would imply, and the limit for public-key encryption."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No academy, prize committee or research programme statement explicitly setting an unconditional existence proof as its goal was found.\". Reason: The institutional sources identify related research objectives but leave the attribution of this specific goal unresolved."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No academy, prize committee or research programme statement disputing the value or feasibility of an unconditional proof was found.\". Reason: The search for an institutional assessment disputing the value or feasibility of the goal yielded no attributable statement."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Specify a deterministic polynomial-time function f and prove that if any one-way function exists, then f is one-way. Here one-wayness requires negligible success for every uniform classical probabilistic polynomial-time inverter on outputs of uniformly random inputs. The reverse implication follows by taking f itself as the witness to existence.\"; threshold_quote = \"Tiling Expansion is a owf if and only if owfs exist.\"; threshold_ref = 4; refs = [4, 1]. Reason: The current criterion includes Levin’s result and its construction details, which obscure the general completeness test."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m1: \"One-way function existence is equivalent to mild average-case hardness of computing Kᵗ.\". Reason: The milestones omit the ordinary-model equivalence that identifies a specific average-case hardness statement sufficient and necessary for existence."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"For each fixed 0<\\u03b5<1, exhibit a function distribution D in the random language model with security parameter \\u03bb=2^n. At every sufficiently large input length m, consider any oracle circuit of size below T_f(m)^(2\\u2212\\u03b5) for every f in the support of D, where T_f(m) is the evaluation circuit\\u2019s wire count. Given f, f(z) and 1^m, the circuit must find a preimage with probability negligible in \\u03bb over the model\\u2019s random function and uniform m-bit input z. The model checks membership claims using hidden random witnesses.\"; threshold_quote = \"For any \\\\(\\\\varepsilon > 0\\\\), there exists a \\\\((\\\\textsf{negl}(\\\\lambda ), 1-\\\\varepsilon )\\\\)-fine-grained one-way function distribution in the random language model.\"; threshold_ref = 5; refs = [5]. Reason: The criterion reports the published result but leaves “cost” unspecified and omits the sampled function from the inverter’s inputs."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Prove unconditionally that an explicit deterministic polynomial-time function f has the following property. For every uniform classical probabilistic polynomial-time algorithm A, there are a negligible function \\u03bc_A and an infinite set of lengths S_A such that Pr[f(A(1^n,f(x)))=f(x)]\\u2264\\u03bc_A(n) for every n in S_A. The probability is over a uniform n-bit input x and the random choices of A. The set S_A may depend on A.\"; threshold_quote = \"holds for infinitely many n \\u2208 N (as opposed to all).\"; threshold_ref = 6; refs = [6]. Reason: The infinitely-often criterion mixes the test with a conditional result and a status assessment."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Skipped proposed operation 3 (remove statement 1): the entry needs at least 2 statements. Its reason: The ERC project objective is to develop new hardness assumptions, so its description of Internet security does not establish an institutional goal of proving hardness unconditionally."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Skipped proposed operation 4 (remove statement 0): the entry needs at least 2 statements. Its reason: The NSA award recognized a theorem characterizing existence, while the quoted sentence describes uses and sets no goal of an unconditional proof."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 8 of 10 proposed operations from CRY-01-revise-20261125T102612752368Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m4, m2, m3."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 1 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 2 found, 1 not found, 1 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "definition is 541 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 3 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 1 candidates returned, 0 dropped as sources already used, 1 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 1 of 1 new candidates, without search. Skipped: none. Dropped rows: none. Replaced 2 earlier rows. Added 5 results: 4 from sources already used, 1 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 0 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 5 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-14"
- },
- "review": {
-  "state": "published",
-  "note": null,
-  "into": null,
-  "at": "2026-11-14",
-  "log": [
-   {
-    "date": "2026-11-14",
-    "state": "published"
-   }
-  ]
+  "results_run": "2026-11-25"
  }
 }
