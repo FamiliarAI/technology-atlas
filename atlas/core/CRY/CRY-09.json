@@ -246,16 +246,30 @@
   ],
   "prompt": "5e97d4b8dfc3"
  },
+ "review": {
+  "state": "published",
+  "note": null,
+  "into": null,
+  "at": "2026-11-15",
+  "log": [
+   {
+    "date": "2026-11-15",
+    "state": "published"
+   }
+  ]
+ },
  "page": {
   "id": "CRY-09",
   "title": "Post-quantum verifiable delay functions",
-  "definition": "A verifiable delay function (VDF) requires sequential computation and produces one output per input that anyone can check much faster. A concrete implementation has a security theorem bounding quantum shortcuts under a named hardness assumption, including preprocessing and parallel resources.",
+  "definition": "A verifiable delay function maps each input to one correct output that anyone can check much faster than recomputing it. A post-quantum implementation has a theorem, under a named hardness assumption, bounding the chance that a parallel quantum computation learns the output early, even without producing a proof. The bound accounts for work done on the public parameters before the input is known.",
   "goal": {
-   "need": "Papercraft's 2025 measurements distinguish evaluation, proof generation and verification costs, shown below. Quantum order-finding breaks both group-based VDFs surveyed in 2018. In 2024, cryptanalysis also falsified the original lattice-based proof-of-sequential-work assumption. Timing measurements therefore need a separate quantum sequentiality argument.",
+   "need": "Ethereum uses shared randomness to choose who may propose a block. The last contributor can bias the draw by withholding its contribution. In one model, a participant with 10% of the stake can thereby propose 10.19% of rounds. If contributions close before anyone can predict the draw, validators cannot choose between outcomes to favor themselves. This requires a source of randomness and a delay that holds even for a quantum computer. The usual delay based on repeated squaring loses that guarantee against quantum order-finding.",
    "need_refs": [
-    1,
+    8,
+    3,
+    9,
     2,
-    3
+    4
    ],
    "figures": {
     "caption": "Papercraft timings reported in its 2025 developer poster",
@@ -286,41 +300,51 @@
      "year": "2021",
      "quote": "a proof of a delay statement, should be post-quantum secure.",
      "context": null,
-     "ref": 4,
+     "ref": 3,
      "checked": true
     },
     {
-     "body": "Lai–Malavolta lattice timed-cryptography developers",
-     "year": "2024",
-     "quote": "This is a single point of failure in the classical setting and is even false against quantum adversaries.",
-     "context": "The antecedent is the assumption that repeated squaring in groups of unknown order cannot be parallelised.",
-     "ref": 5,
+     "body": "Dan Boneh, Benedikt Bünz and Ben Fisch",
+     "year": "2018",
+     "quote": "open problem to find a simple VDF that is post-quantum secure.",
+     "context": "Section 7 of A Survey of Two Verifiable Delay Functions distinguishes this goal from earlier generic constructions.",
+     "ref": 2,
      "checked": true
     },
     {
-     "body": "Papercraft developers: Osadnik, Kaviani, Cini, Lai and Malavolta",
-     "year": "2026",
+     "body": "Ethereum Foundation, Cryptography Research Team",
+     "year": "2023",
+     "quote": "At present we do not recommend using VDFs within Ethereum.",
+     "context": "The team issued this recommendation after reviewing MinRoot and identified further research as grounds for reconsidering it.",
+     "ref": 10,
+     "checked": true
+    },
+    {
+     "body": "Michał Osadnik, Darya Kaviani, Valerio Cini, Russell W. F. Lai and Giulio Malavolta",
+     "year": "2025",
      "quote": "In this work, we investigate the practicality of VDFs with plausible post-quantum security.",
-     "context": null,
-     "ref": 6,
+     "context": "Papercraft appeared at the 2025 IEEE Symposium on Security and Privacy.",
+     "ref": 5,
      "checked": true
     }
    ]
   },
   "completion": {
    "title": "An implemented VDF has a peer-reviewed quantum sequentiality reduction and fast public verification.",
-   "criterion": "A concrete VDF has correctness, quantum soundness and quantum sequentiality theorems. After poly(λ,T) quantum preprocessing, an online quantum circuit of polynomial total size and depth below an explicit σ(T)<T computes the correct output only with negligible probability in security parameter λ. A reduction connects higher success to breaking a named quantum hardness assumption and quantifies its depth loss. The theorem specifies T, σ, gate set, width, memory and preprocessing. Public verification takes poly(λ,log T) time; measured verification is faster than evaluation. Security remains conditional on the assumptions.",
+   "criterion": "An implemented VDF has correctness, quantum soundness and quantum sequentiality theorems. After poly(λ,T) quantum preprocessing of the public parameters, a polynomial-size quantum circuit given a fresh random input computes its correct output at depth below an explicit σ(T)<T only with probability negligible in λ. A peer-reviewed reduction to a named quantum hardness assumption quantifies the depth loss and specifies T, σ, gate set, width, memory and preprocessing. Public verification takes poly(λ,log T) time and is measurably faster than evaluation at the same parameters.",
    "set_by": "Atlas synthesis; no outside body was found to have published this combined implementation-and-quantum-sequentiality test.",
    "set_by_kind": "atlas",
    "threshold_quote": null,
    "threshold_ref": null,
-   "basis": "Searches of IACR VDF definitions, Ethereum's RootPack requirements, lattice timed-cryptography papers, quantum PoSW theorems, and standards/prize targets found no joint test. This criterion combines published VDF properties with a quantum reduction for the implemented function. The 2023 Lai–Malavolta manuscript leaves its quantum proof open. Whether later implementations satisfy the combined test remains unresolved because their full papers could not be opened.",
+   "basis": "The standard sequentiality game tests the output alone after preprocessing. RootPack specifies quantum soundness for a delay proof. ZKBdf includes proof generation in its sequentiality test. The revised Lai–Malavolta paper leaves quantum security of its proof of sequential work open, and Papercraft reports fast verification with plausible post-quantum security. These results establish different parts of the Atlas test.",
    "refs": [
+    9,
     2,
+    3,
+    7,
     4,
-    6,
     5,
-    7
+    6
    ],
    "threshold_checked": null
   },
@@ -331,13 +355,13 @@
    {
     "id": "m1",
     "title": "A length-N hash sequence resists N−1 rounds of quantum queries to an ideal hash function.",
-    "criterion": "For random H:{0,1}*→{0,1}^λ and δ≥1, a quantum adversary making at most q total oracle queries over N−1 rounds outputs a sequence x0,…,xN, with |xi|≤δλ and H(xi−1) a substring of xi, with probability p≤(64q³δλ+2N)/2^λ. Blocki, Lee and Zhou prove this bound in Theorem 3. The oracle is ideal; the result does not establish security of a particular hash implementation or a full VDF.",
+    "criterion": "Let H map bit strings to λ-bit strings uniformly at random and let δ≥1. A quantum algorithm makes at most q oracle queries in total over N−1 parallel rounds. Its probability of returning (x₀,y₀), …, (xₙ₋₁,yₙ₋₁) and xₙ, with n=N, every |xᵢ|≤δλ and, for each 0≤i<N, yᵢ=H(xᵢ) occurring as a substring of xᵢ₊₁, is at most (64q³δλ+2N)/2^λ.",
     "set_by": "Blocki, Lee and Zhou, ITC 2021, Theorem 3; a peer-reviewed lower bound in the parallel quantum random oracle model.",
     "set_by_kind": "community_convention",
     "threshold_quote": "any quantum attacker running in sequential time T-1 will fail to produce an ℋ-sequence except with negligible probability",
-    "threshold_ref": 7,
+    "threshold_ref": 6,
     "refs": [
-     7
+     6
     ],
     "status": "active",
     "replaced_by": [],
@@ -346,7 +370,7 @@
    {
     "id": "m2",
     "title": "A VDF implementation verifies its output faster than recomputing it.",
-    "criterion": "At a fixed parameter setting, an implemented candidate has public verification time below its evaluation time. Papercraft is a reported lattice-based example. This establishes a measured verification advantage; producing the proof is a separate operation, and the timing comparison does not establish resistance to quantum shortcuts.",
+    "criterion": "For the same input and parameter setting, measure the time to compute the output and the time for a public verifier to check it using the proof. Verification must take less time than computing the output. Account for proof generation separately.",
     "set_by": "VDF research community, fast public verification requirement stated by Boneh, Bünz and Fisch in Section 1 of A Survey of Two Verifiable Delay Functions.",
     "set_by_kind": "community_convention",
     "threshold_quote": "However once computed, the output can be quickly verified by anyone.",
@@ -354,7 +378,8 @@
     "refs": [
      2,
      1,
-     6
+     5,
+     11
     ],
     "status": "active",
     "replaced_by": [],
@@ -367,20 +392,35 @@
     "set_by": "RootPack developers at the Ethereum Foundation, Supranational and Johns Hopkins University, Not So Slowth, Section 2.3, requirement 2; published for Ethereum 2.0.",
     "set_by_kind": "protocol",
     "threshold_quote": "at least 80 bits of provable soundness in a quantum random oracle model",
-    "threshold_ref": 4,
+    "threshold_ref": 3,
     "refs": [
-     4
+     3
     ],
     "status": "active",
     "replaced_by": [],
     "threshold_checked": true
+   },
+   {
+    "id": "m4",
+    "title": "A VDF preserves its classical online delay after polynomial-time quantum preprocessing.",
+    "criterion": "In the quantum-annoyance game, the adversary first spends poly(T,λ) quantum time on the public parameters. After receiving a uniformly sampled challenge, its classical online algorithm has parallel time less than T. The probability that it returns the correct function output must be negligible in λ.",
+    "set_by": "De Feo, Masson, Petit and Sanso, ASIACRYPT 2019, Definition 2, sequentiality and quantum annoyance.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "if A0 is allowed a quantum computation in poly(T, λ), we say that\n the VDFs are quantum annoying.",
+    "threshold_ref": 12,
+    "refs": [
+     12
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
    }
   ],
   "measures": [],
   "not_found": [
-   "Papercraft's full paper and the revised 2024 Lai–Malavolta PDF could not be opened; the 2023 Lai–Malavolta accepted manuscript was accessible.",
    "The accessible Papercraft poster and abstract do not specify complete benchmark hardware, security parameters or repetition counts.",
-   "No independent reproduction or complete quantum security assessment of the Papercraft implementation was found."
+   "No independent reproduction or complete quantum security assessment of the Papercraft implementation was found.",
+   "The full Papercraft paper could not be verified through ePrint, the IEEE publication link or the available mirrors."
   ],
   "references": [
    {
@@ -413,20 +453,6 @@
    },
    {
     "id": 3,
-    "kind": "book",
-    "url": "https://link.springer.com/chapter/10.1007/978-3-031-68388-6_6",
-    "doi": "10.1007/978-3-031-68388-6_6",
-    "title": "Cryptanalysis of Lattice-Based Sequentiality Assumptions and Proofs of Sequential Work",
-    "authors": "Peikert C, Tang Y",
-    "container": "Lecture Notes in Computer Science",
-    "year": "2024",
-    "volume": null,
-    "issue": null,
-    "pages": "129-157",
-    "citation_source": "crossref"
-   },
-   {
-    "id": 4,
     "kind": "report",
     "url": "https://www.pratyush.site/publication/invertiblevdf/invertiblevdf.pdf",
     "doi": null,
@@ -440,7 +466,7 @@
     "citation_source": "model"
    },
    {
-    "id": 5,
+    "id": 4,
     "kind": "preprint",
     "url": "https://eprint.iacr.org/2024/540",
     "doi": "10.1007/978-3-031-38554-4_25",
@@ -454,7 +480,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 6,
+    "id": 5,
     "kind": "preprint",
     "url": "https://eprint.iacr.org/2025/879",
     "doi": "10.1109/SP61157.2025.00159",
@@ -468,7 +494,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 7,
+    "id": 6,
     "kind": "book",
     "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ITC.2021.22",
     "doi": "10.4230/LIPIcs.ITC.2021.22",
@@ -480,109 +506,390 @@
     "issue": null,
     "pages": null,
     "citation_source": "model"
+   },
+   {
+    "id": 7,
+    "kind": "preprint",
+    "url": "https://pure.qub.ac.uk/files/462920247/2022_1373.pdf",
+    "doi": "10.1007/978-3-031-41181-6_29",
+    "title": "ZKBdf: A ZKBoo-based Quantum-Secure Verifiable Delay Function with Prover-secret",
+    "authors": "Tan TG, Sharma V, Li ZP, Szalachowski P, Zhou J",
+    "container": "Lecture Notes in Computer Science",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": "530-550",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 8,
+    "kind": "book",
+    "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.AFT.2024.10",
+    "doi": "10.4230/LIPIcs.AFT.2024.10",
+    "title": "Optimal RANDAO Manipulation in Ethereum",
+    "authors": "Kaya Alpturer, S. Matthew Weinberg",
+    "container": "6th Conference on Advances in Financial Technologies (AFT 2024)",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 9,
+    "kind": "preprint",
+    "url": "https://eprint.iacr.org/2018/601.pdf",
+    "doi": "10.1007/978-3-319-96884-1_25",
+    "title": "Verifiable Delay Functions",
+    "authors": "Boneh D, Bonneau J, Bünz B, Fisch B",
+    "container": "Lecture Notes in Computer Science",
+    "year": "2018",
+    "volume": null,
+    "issue": null,
+    "pages": "757-788",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 10,
+    "kind": "web",
+    "url": "https://ethresear.ch/t/statement-regarding-the-public-report-on-the-analysis-of-minroot/16670",
+    "doi": null,
+    "title": "Statement regarding the public report on the analysis of MinRoot",
+    "authors": "Ethereum Foundation, Cryptography Research Team: Gottfried Herold, George Kadianakis, Dmitry Khovratovich, Mary Maller, Mark Simkin, Antonio Sanso, Arantxa Zapico, Zhenfei Zhang",
+    "container": "Ethereum Research",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 11,
+    "kind": "web",
+    "url": "https://vitalik.eth.limo/general/2018/07/21/starks_part_3.html",
+    "doi": null,
+    "title": "STARKs, Part 3: Into the Weeds",
+    "authors": "Vitalik Buterin",
+    "container": null,
+    "year": "2018",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 12,
+    "kind": "preprint",
+    "url": "https://eprint.iacr.org/2019/166.pdf",
+    "doi": "10.1007/978-3-030-34578-5_10",
+    "title": "Verifiable Delay Functions from Supersingular Isogenies and Pairings",
+    "authors": "De Feo L, Masson S, Petit C, Sanso A",
+    "container": "Lecture Notes in Computer Science",
+    "year": "2019",
+    "volume": null,
+    "issue": null,
+    "pages": "248-277",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 13,
+    "kind": "book",
+    "url": "https://drops.dagstuhl.de/storage/01oasics/oasics-vol082-tokenomics2020/OASIcs.Tokenomics.2020.9/OASIcs.Tokenomics.2020.9.pdf",
+    "doi": "10.4230/OASIcs.Tokenomics.2020.9",
+    "title": "Implementation Study of Two Verifiable Delay Functions",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 14,
+    "kind": "web",
+    "url": "https://cips.cardano.org/cip/CIP-0161",
+    "doi": null,
+    "title": "Ouroboros Phalanx - Breaking Grinding Incentives",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 15,
+    "kind": "book",
+    "url": "https://link.springer.com/chapter/10.1007/978-3-032-26740-5_16",
+    "doi": "10.1007/978-3-032-26740-5_16",
+    "title": "On Verifiable Delay Functions from Time-Lock Puzzles",
+    "authors": "Abusalah H, Azari K, Fiore D, Kamath C, Tairi E",
+    "container": "Lecture Notes in Computer Science",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": "494-526",
+    "citation_source": "crossref"
    }
   ],
   "milestone_order": [
-   "m1",
    "m2",
-   "m3"
+   "m1",
+   "m3",
+   "m4"
   ],
   "results": [
    {
     "milestone": "m2",
     "case": null,
-    "verdict": "met",
-    "finding": "One Papercraft implementation verified a nearly 6-minute computation in 7 seconds.",
-    "detail": "The reported comparison establishes a verification advantage. The excerpt does not report proof-production time or establish quantum sequentiality.",
+    "verdict": "partial",
+    "finding": "Papercraft verified one reported computation in 7 seconds.",
+    "detail": "The supplied source is the ePrint record, which lists publication at S&P 2025.",
     "quote": "As an example, our Papercraft implementation can verify a computation of almost 6 minutes in just 7 seconds.",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
-    "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "For length-N hash sequences, the quantum adversary’s success probability is at most (64q³δλ + 2N)/2^λ; sample size: not applicable.",
-    "detail": "Theorem 3 covers at most q total quantum queries over N−1 rounds in the ideal random-oracle model. It does not establish security for a particular hash implementation or a full VDF.",
-    "quote": "p≤ 64q3δλ2λ + 2N2λ .",
+    "finding": "For a length-N hash sequence, q total quantum queries over N−1 rounds give success probability at most (64q³δλ+2N)/2^λ.",
+    "detail": "This is a theorem with no empirical sample. The paper appeared in peer-reviewed ITC 2021 conference proceedings.",
+    "quote": "Letp be the probability that a quantum adversary making at mostq queries over\nN− 1 rounds outputs (x0,y 0),..., (xN−1,yN−1) and xN s.t. |xi|≤ δλ, yi =H(xi) and\nSubstring(yi−1,xi) = 1 for eachi, i.e.,x0,...,x N is anH-sequence. Then\np≤ 64q3δλ2λ + 2N2λ .",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
-    "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 6,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "For an N-link H-sequence (N+1 strings), the quantum adversary’s success probability is at most (64q³δλ+2N)/2^λ.",
+    "detail": "The result is a theorem published in the reviewed ITC 2021 conference proceedings. The peer_reviewed field uses the requested journal-specific definition.",
+    "quote": "parameter. Letp be the probability that a quantum adversary making at mostq queries over\nN− 1 rounds outputs (x0,y 0),..., (xN−1,yN−1) and xN s.t. |xi|≤ δλ, yi =H(xi) and\nSubstring(yi−1,xi) = 1 for eachi, i.e.,x0,...,x N is anH-sequence. Then\np≤ 64q3δλ2λ + 2N2λ .",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 6,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Pietrzak’s C++ VDF verified in under 1 ms with a 2048-bit RSA modulus. The number of timed inputs or trials is unreported.",
+    "detail": "Figures 1–3 report the three timing stages separately. The RSA modulus size and delay settings overlap between the evaluation and verification plots, but the text does not establish input-level pairing.",
+    "quote": "We can see that the\nPietrzak construction achieves timing under 1 ms even with 2048 bits RSA groups.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Wesolowski’s chiavdf benchmark reports proof verification about 1,577× faster than output computation at the matched setting. Trial count unreported.",
+    "detail": "The speedup is calculated from the separate evaluation and verification tables. The protocol specification uses the same challenge for evaluation and verification, but the benchmark description leaves input reuse unstated.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One one-time VDF construction achieves zero soundness error.",
+    "detail": "The excerpt does not state whether the perfect-soundness proof covers superposition hash queries or whether the construction is oracle-free.",
+    "quote": "For instance, we achieve perfectly sound and short proofs of\n\\(O(\\lambda )\\)\nbits, where\n\\(\\lambda \\)\nis the security parameter.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://eprint.iacr.org/2024/540",
-    "milestone": "m1",
-    "hash": "b3ea4aa90e21",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m2",
+    "hash": "f16a57a8712b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2024/540",
-    "milestone": "m2",
-    "hash": "57c15378d08b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m1",
+    "hash": "73ed03e3e4cc",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2024/540",
     "milestone": "m3",
     "hash": "65f584e9fc4e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2024/540",
+    "milestone": "m4",
+    "hash": "46191ecfc0b4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2024/540",
     "milestone": "completion",
-    "hash": "43916f17d7f0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://eprint.iacr.org/2025/879",
-    "milestone": "m1",
-    "hash": "b3ea4aa90e21",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "36335bc0e9e2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2025/879",
     "milestone": "m2",
-    "hash": "57c15378d08b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "f16a57a8712b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2025/879",
+    "milestone": "m1",
+    "hash": "73ed03e3e4cc",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2025/879",
     "milestone": "m3",
     "hash": "65f584e9fc4e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2025/879",
+    "milestone": "m4",
+    "hash": "46191ecfc0b4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2025/879",
     "milestone": "completion",
-    "hash": "43916f17d7f0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "36335bc0e9e2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ITC.2021.22",
+    "milestone": "m2",
+    "hash": "f16a57a8712b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ITC.2021.22",
+    "milestone": "m1",
+    "hash": "73ed03e3e4cc",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ITC.2021.22",
+    "milestone": "m3",
+    "hash": "65f584e9fc4e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ITC.2021.22",
+    "milestone": "m4",
+    "hash": "46191ecfc0b4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ITC.2021.22",
+    "milestone": "completion",
+    "hash": "36335bc0e9e2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol199-itc2021/LIPIcs.ITC.2021.22/LIPIcs.ITC.2021.22.pdf",
+    "milestone": "m2",
+    "hash": "f16a57a8712b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol199-itc2021/LIPIcs.ITC.2021.22/LIPIcs.ITC.2021.22.pdf",
     "milestone": "m1",
-    "hash": "b3ea4aa90e21",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "73ed03e3e4cc",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol199-itc2021/LIPIcs.ITC.2021.22/LIPIcs.ITC.2021.22.pdf",
+    "milestone": "m3",
+    "hash": "65f584e9fc4e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol199-itc2021/LIPIcs.ITC.2021.22/LIPIcs.ITC.2021.22.pdf",
+    "milestone": "m4",
+    "hash": "46191ecfc0b4",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol199-itc2021/LIPIcs.ITC.2021.22/LIPIcs.ITC.2021.22.pdf",
+    "milestone": "completion",
+    "hash": "36335bc0e9e2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/storage/01oasics/oasics-vol082-tokenomics2020/OASIcs.Tokenomics.2020.9/OASIcs.Tokenomics.2020.9.pdf",
+    "milestone": "m2",
+    "hash": "f16a57a8712b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cips.cardano.org/cip/CIP-0161",
+    "milestone": "m2",
+    "hash": "f16a57a8712b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://link.springer.com/chapter/10.1007/978-3-032-26740-5_16",
+    "milestone": "m3",
+    "hash": "65f584e9fc4e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -629,20 +936,133 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 2 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"A verifiable delay function maps each input to one correct output that anyone can check much faster than recomputing it. A post-quantum implementation has a theorem, under a named hardness assumption, bounding the chance that a parallel quantum computation learns the output early, even without producing a proof. The bound accounts for work done on the public parameters before the input is known.\". Reason: The definition leaves unclear whether the delay protects the output or the accompanying proof and when preprocessing takes place."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Ethereum uses shared randomness to choose who may propose a block. The last contributor can bias the draw by withholding its contribution. In one model, a participant with 10% of the stake can thereby propose 10.19% of rounds. If contributions close before anyone can predict the draw, validators cannot choose between outcomes to favor themselves. This requires a source of randomness and a delay that holds even for a quantum computer. The usual delay based on repeated squaring loses that guarantee against quantum order-finding.\". Reason: The existing text describes research results without identifying who benefits, the size of the bias or the condition under which a delay would help."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Dan Boneh, Benedikt Bünz and Ben Fisch, 2018: \"open problem to find a simple VDF that is post-quantum secure.\". Reason: The 2018 survey explicitly names the open problem and qualifies it by asking for a simple construction."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Ethereum Foundation, Cryptography Research Team, 2023: \"At present we do not recommend using VDFs within Ethereum.\". Reason: The Ethereum Foundation team’s subsequent deployment assessment qualifies the earlier RootPack proposal."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Michał Osadnik, Darya Kaviani, Valerio Cini, Russell W. F. Lai and Giulio Malavolta, 2025: \"In this work, we investigate the practicality of VDFs with plausible post-quantum security.\". Reason: Dating the Papercraft statement to its original publication preserves the authors’ qualification about plausible security."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit completion: criterion = \"An implemented VDF has correctness, quantum soundness and quantum sequentiality theorems. After poly(\\u03bb,T) quantum preprocessing of the public parameters, a polynomial-size quantum circuit given a fresh random input computes its correct output at depth below an explicit \\u03c3(T)<T only with probability negligible in \\u03bb. A peer-reviewed reduction to a named quantum hardness assumption quantifies the depth loss and specifies T, \\u03c3, gate set, width, memory and preprocessing. Public verification takes poly(\\u03bb,log T) time and is measurably faster than evaluation at the same parameters.\"; basis = \"The standard sequentiality game tests the output alone after preprocessing. RootPack specifies quantum soundness for a delay proof. ZKBdf includes proof generation in its sequentiality test. The revised Lai\\u2013Malavolta paper leaves quantum security of its proof of sequential work open, and Papercraft reports fast verification with plausible post-quantum security. These results establish different parts of the Atlas test.\"; refs = [10, 2, 4, 8, 5, 6, 7]. Reason: The criterion omits the fresh random challenge, and the basis overlooks an implemented candidate whose published theorem times the response together with its proof."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Let H map bit strings to \\u03bb-bit strings uniformly at random and let \\u03b4\\u22651. A quantum algorithm makes at most q oracle queries in total over N\\u22121 parallel rounds. Its probability of returning (x\\u2080,y\\u2080), \\u2026, (x\\u2099\\u208b\\u2081,y\\u2099\\u208b\\u2081) and x\\u2099, with n=N, every |x\\u1d62|\\u2264\\u03b4\\u03bb and, for each 0\\u2264i<N, y\\u1d62=H(x\\u1d62) occurring as a substring of x\\u1d62\\u208a\\u2081, is at most (64q\\u00b3\\u03b4\\u03bb+2N)/2^\\u03bb.\"; threshold_quote = \"any quantum attacker running in sequential time T-1 will fail to produce an \\u210b-sequence except with negligible probability\"; threshold_ref = 7; refs = [7]. Reason: Theorem 3 requires the adversary to output the intermediate hash values as well as the strings containing them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"For the same input and parameter setting, measure the time to compute the output and the time for a public verifier to check it using the proof. Verification must take less time than computing the output. Account for proof generation separately.\"; refs = [2, 1, 6, 12]. Reason: The current criterion includes a candidate result and leaves room to count proof generation as part of the measured delay."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "reorder to ['m2', 'm1', 'm3']. Reason: The measured implementation milestone covers prototypes demonstrated by 2018 and gives readers a concrete starting point for the parallel security milestones."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m3: \"A VDF preserves its classical online delay after polynomial-time quantum preprocessing.\". Reason: Quantum annoyance supplies a published intermediate test for a concrete delay function that distinguishes preprocessing from computation after the challenge arrives."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 0. Reason: The April 2024 Lai–Malavolta revision is accessible, and Appendix B states the remaining quantum proof problem."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"The full Papercraft paper could not be verified through ePrint, the IEEE publication link or the available mirrors.\". Reason: Papercraft’s abstract and poster leave the full scope of its security theorem unverified."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove statement 2. Reason: The 2026 date is the ePrint revision date, while the quoted Papercraft goal appeared in the 2025 conference paper."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove statement 1. Reason: The Lai–Malavolta quotation identifies a failure of repeated squaring without stating a goal for a verifiable delay function."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 14 of 14 proposed operations from CRY-09-revise-20261125T104351140463Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: completion, m1, m2, m4."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 3 from Crossref, 0 from PubMed, 0 from arXiv, 3 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 3 found, 1 not found, 1 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Structural problems after applying: references never cited: [3]"
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 4 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 3 candidates returned, 0 dropped as sources already used, 3 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 3 of 3 new candidates, without search. Skipped: none. Dropped rows: none. Replaced 2 earlier rows. Added 6 results: 3 from sources already used, 3 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 0 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 5 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Removed 1 references no longer cited; renumbered."
    }
   ],
-  "results_run": "2026-11-15"
- },
- "review": {
-  "state": "published",
-  "note": null,
-  "into": null,
-  "at": "2026-11-15",
-  "log": [
-   {
-    "date": "2026-11-15",
-    "state": "published"
-   }
-  ]
+  "results_run": "2026-11-25"
  }
 }
