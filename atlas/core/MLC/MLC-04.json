@@ -307,12 +307,13 @@
  "page": {
   "id": "MLC-04",
   "title": "Causal world models for unseen interventions",
-  "definition": "A model learns causal variables and mechanisms from sensory observations under a fixed experimental budget. It predicts mean outcomes of held-out interventions—deliberate changes to variables or mechanisms—within a specified class.",
+  "definition": "A model learns causal variables and the rules connecting them from sensory observations under a fixed experimental budget. Within a specified class of interventions, it predicts the average measured outcome of a change whose value or combination of settings was absent from training. In a light tunnel, for example, it would predict the average sensor reading if a polarizer were turned to an untried angle.",
   "goal": {
-   "need": "Predicting observations does not determine intervention effects. In an optical benchmark with five causal inputs and 60,000 images, three evaluated method families failed to recover the inputs. The table shows one method's sensitivity to replacing a deterministic simulator with physical observations.",
+   "need": "At one X-ray free-electron laser, a 2018 estimate put tuning at about 400 hours of beam time a year. Operators use past scans and beam physics to choose magnet settings. Hundreds of scans left some relationships between magnets unresolved. If the mechanisms learned from beam measurements still apply at untried settings, operators could compare the expected pulse energy of several magnet combinations before testing one, leaving more beam time for experiments.",
    "need_refs": [
-    1,
-    2
+    13,
+    14,
+    1
    ],
    "figures": {
     "caption": "Factor recovery by contrastive causal representation learning.",
@@ -343,11 +344,11 @@
      "checked": null
     },
     {
-     "body": "Google DeepMind",
-     "year": "2024",
-     "quote": "It has long been hypothesised that causal reasoning plays a fundamental role in robust and general intelligence.",
-     "context": null,
-     "ref": 4,
+     "body": "NeurIPS Workshop on Causal Representation Learning",
+     "year": "2023",
+     "quote": "high-level causal variables along with their causal relations directly from raw, unstructured data",
+     "context": "The workshop's About page names this as an objective for representations that support reasoning about interventions and planning.",
+     "ref": 15,
      "checked": true
     }
    ]
@@ -375,7 +376,7 @@
    {
     "id": "m1",
     "title": "A model recovers a simulator's causal graph with zero structural Hamming distance.",
-    "criterion": "Match learned variables to the simulator's variables, then recover its directed causal graph exactly: structural Hamming distance, the number of graph edits, equals 0. Brehmer et al. reported 0 for the four-variable CausalCircuit simulator, using 512 × 512-pixel RGB images compressed through a learned encoder. Three random seeds were trained; the run with median validation loss was retained.",
+    "criterion": "Match learned variables to simulator variables using the feature-importance matrix for the disentanglement score. Compare the learned directed graph with the simulator graph after matching. Exact recovery requires zero edge additions, deletions or reversals. For the CausalCircuit protocol, train three random initializations on encodings of 512 × 512 RGB images and score the run with median validation loss.",
     "set_by": "Exact graph-recovery convention, operationalized by Brehmer et al. in Appendix D.1; the reported demonstration concerns the CausalCircuit simulator.",
     "set_by_kind": "community_convention",
     "threshold_quote": "We then compute the structural Hamming distance (or graph edit distance) between the learned graph and the true graph.",
@@ -390,14 +391,15 @@
    },
    {
     "id": "m2",
-    "title": "A model recovers shared causal factors and excludes unshared factors in a physical optical experiment.",
-    "criterion": "On the light-tunnel benchmark's 60,000 observations and four views, recover shared causal factors while excluding unshared factors. The published test requires R² near 1 for shared factors and significantly lower R² for unshared factors; it specifies neither a numerical tolerance nor a significance level. Five random initializations failed to separate the two polarizer-angle factors.",
-    "set_by": "Gamella, Bing and Runge, Section 3.2 and Figure 5 of their multiview causal-representation benchmark; this criterion was written for the optical system.",
+    "title": "Shared optical inputs have R² near one and unshared inputs score lower for each tested view pair.",
+    "criterion": "Use the light tunnel's 60,000 observations and the supplied selection of shared encoding coordinates. Pair the camera separately with the light and current measurements, the first angle sensor, and the second angle sensor. For each pair, fit nonlinear predictors of each true input from each view's shared encoding and average the two R² scores. Across five random initializations, shared inputs must score near one and unshared inputs significantly lower. The protocol gives no numerical tolerance or significance level.",
+    "set_by": "Gamella, Bing and Runge, Section 3.2, Figure 5 and Appendix A.2.3 of the light-tunnel benchmark.",
     "set_by_kind": "protocol",
     "threshold_quote": "a score near one for the factors in the content block and a significantly lower score for those in the style block.",
-    "threshold_ref": 2,
+    "threshold_ref": 16,
     "refs": [
-     2
+     2,
+     16
     ],
     "status": "active",
     "replaced_by": [],
@@ -406,7 +408,7 @@
    {
     "id": "m3",
     "title": "A learned model matches a validated physical model's error on unseen interventions in one laboratory.",
-    "criterion": "In one physical system, learn variables and mechanisms from sensory observations under a fixed intervention budget. Predict a prespecified measured outcome for intervention values or combinations absent from training. For each held-out family, mean squared error must not exceed that of an independently validated physical model supplied the causal variables. This Atlas extension adds forward intervention prediction to the published representation and physical-system tests; those tests do not establish this combined result.",
+    "criterion": "In one laboratory, learn causal variables and mechanisms from images of one physical system under a predeclared finite intervention budget, without causal-variable value labels as training inputs. Predict the mean of a prespecified measured outcome at intervention values or combinations absent from training. For each held-out family, the learned model's mean squared error on new experiments must be no greater than that of an independently validated physical model given the causal variables.",
     "set_by": "Atlas fallback after searching causal-representation and causal-chamber protocols; no published acceptance threshold for this combined physical demonstration was located.",
     "set_by_kind": "atlas",
     "threshold_quote": null,
@@ -414,18 +416,33 @@
     "refs": [
      1,
      2,
-     5
+     5,
+     12
     ],
     "status": "active",
     "replaced_by": [],
     "threshold_checked": null
+   },
+   {
+    "id": "m4",
+    "title": "A model predicts mean outcomes for 100 simulated interventions outside the training range.",
+    "criterion": "Learn from 10,000 simulated observations with 10 measured features and d action coordinates, for d = 2, 4 and 10. Draw training actions uniformly from [−1, 1]ᵈ. Predict the mean outcome at 100 test actions drawn uniformly from [−3, −1]ᵈ. Report mean squared error against the simulator's true mean over 10 repetitions, alongside an action-only regression and a model given the true latent predictors. The protocol specifies no numerical error cutoff.",
+    "set_by": "Saengkyongam and colleagues, Rep4Ex multidimensional extrapolation protocol, Appendix H.1 and Figure 7.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "we generate 100 test points of A from a uniform distribution",
+    "threshold_ref": 11,
+    "refs": [
+     11
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
    }
   ],
   "measures": [],
   "not_found": [
    "No independent laboratory replication combining sensory causal-variable learning and held-out physical intervention prediction was located.",
-   "The optical benchmark's publisher-hosted full PDF was inaccessible; its arXiv version 2 was opened.",
-   "The Nature Machine Intelligence page for the causal-chamber study could not be opened; its author preprint was available."
+   "No workshop or research-programme statement disputing the feasibility or value of the bounded physical prediction goal was located."
   ],
   "references": [
    {
@@ -567,10 +584,109 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 11,
+    "kind": "journal",
+    "url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/aa9508b2577e0d9c824da9e2e27fe9d6-Paper-Conference.pdf",
+    "doi": null,
+    "title": "Identifying Representations for Intervention Extrapolation",
+    "authors": "Sorawit Saengkyongam, Elan Rosenfeld, Pradeep Ravikumar, Niklas Pfister, Jonas Peters",
+    "container": "International Conference on Learning Representations 2024",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 12,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s42256-024-00964-x?code=0&error=cookies_not_supported",
+    "doi": "10.1038/s42256-024-00964-x",
+    "title": "Causal chambers as a real-world physical testbed for AI methodology",
+    "authors": "Gamella JL, Peters J, Bühlmann P",
+    "container": "Nat Mach Intell",
+    "year": "2025",
+    "volume": "7",
+    "issue": "1",
+    "pages": "107-118",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 13,
+    "kind": "report",
+    "url": "https://proceedings.jacow.org/hb2018/talks/tha2we01_talk.pdf",
+    "doi": null,
+    "title": "Bayesian optimization at LCLS using Gaussian processes",
+    "authors": "Joseph Duris, Dylan Kennedy, Daniel Ratner",
+    "container": "ICFA Advanced Beam Dynamics Workshop on High-Intensity and High-Brightness Hadron Beams (HB2018)",
+    "year": "2018",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 14,
+    "kind": "web",
+    "url": "https://science.osti.gov/bes/Highlights/2020/BES-2020-12-f",
+    "doi": null,
+    "title": "Machine Learning Trims Tuning Time for Electron Beam by 65 Percent",
+    "authors": "U.S. Department of Energy, Office of Science",
+    "container": "Basic Energy Sciences",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 15,
+    "kind": "web",
+    "url": "https://crl-workshop.github.io/about/",
+    "doi": null,
+    "title": "About",
+    "authors": "NeurIPS 2023 Workshop on Causal Representation Learning",
+    "container": "NeurIPS 2023 Workshop on Causal Representation Learning",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 16,
+    "kind": "journal",
+    "url": "https://raw.githubusercontent.com/mlresearch/v267/main/assets/gamella25a/gamella25a.pdf",
+    "doi": null,
+    "title": "Sanity Checking Causal Representation Learning on a Simple Real-World System",
+    "authors": "Juan L. Gamella, Simon Bing, Jakob Runge",
+    "container": "Proceedings of the 42nd International Conference on Machine Learning",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 17,
+    "kind": "report",
+    "url": "https://proceedings.mlr.press/v216/lippe23a/lippe23a-supp.pdf",
+    "doi": null,
+    "title": "https://proceedings.mlr.press/v216/lippe23a/lippe23a-supp.pdf",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
    }
   ],
   "milestone_order": [
    "m1",
+   "m4",
    "m2",
    "m3"
   ],
@@ -578,280 +694,399 @@
    {
     "milestone": "m1",
     "case": null,
-    "verdict": "met",
-    "finding": "CausalCircuit, four causal variables: structural Hamming distance 0.00.",
-    "detail": "Both ENCO and the heuristic graph extraction method achieved zero SHD. The source reports difficulty disentangling variables when the lights have discrete states.",
-    "quote": null,
-    "checked": null,
+    "verdict": "partial",
+    "finding": "CausalCircuit ILCM recovered the four-variable simulator graph at SHD 0.00. The number of image pairs is unreported.",
+    "detail": "The source is a peer-reviewed NeurIPS conference paper, classified as a report because the available kinds have no conference-paper category.",
+    "quote": "ILCMs also correctly learn the causal graph shown in Fig. 6, both when extracted\nwith ENCO and with our heuristic algorithm.",
+    "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Contrastive CRL on 60,000 simulated light-tunnel images yielded a mean structural Hamming distance of 2.000.",
+    "detail": "The authors thresholded the learned adjacency matrix to match the ground-truth edge count. A reversed edge counted as two errors.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
-    "finding": "On 60,000 light-tunnel observations, multiview CRL recovered shared factors for one pair of views but failed for the polarizer-angle views.",
-    "detail": "Content variables were consistently predicted better than style variables, but the model failed to recover the shared polarizer-angle factors across five random initializations. No numerical R² values for this result are given in the text.",
-    "quote": "The method consistently recovers the content variables at the intersection of views 1 and 2 (\nFigure\n5\nA), despite view 2 violating the injectivity assumption central to the theoretical framework of the method.",
+    "finding": "Multiview CRL on 60,000 light-tunnel observations failed to recover the shared input in two of the three camera pairings.",
+    "detail": "The angle-sensor encoders learned the identity map, but the camera encoder failed to capture the polarizer angles.",
+    "quote": "While content variables are consistently predicted better than style variables, the model fails to disentangle",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "On 60,000 synthetic light-tunnel images, contrastive CRL had mean graph SHD 2.000 over five initializations.",
-    "detail": "The simulated graph was not recovered exactly; the reported SHD is an average over runs.",
-    "quote": null,
-    "checked": null,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "On 60,000 real light-tunnel images, contrastive CRL had mean graph SHD 7.600 over five initializations.",
-    "detail": "The model failed to recover the latent variables consistently. The study did not report held-out intervention outcome prediction or an error comparison with a validated physical model.",
-    "quote": null,
-    "checked": null,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "partial",
-    "finding": "iCITRIS-ENCO on seven-variable Instantaneous Temporal Causal3DIdent, over three seeds: instantaneous graph SHD 1.67.",
-    "detail": "The temporal graph SHD was 5.67, so the reported result does not establish exact recovery of the full causal graph. The source states that the paper was published at ICLR 2023; the supplied document is an arXiv version.",
+    "finding": "On the nine-variable Voronoi chain across five seeds, iCITRIS-ENCO achieved mean instantaneous SHD of 0.0.",
+    "detail": "Figure 2 reports the result. The arXiv copy identifies the paper as published at ICLR 2023, a conference.",
     "quote": null,
     "checked": null,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "BISCUIT recovered a nine-variable Voronoi simulator graph with SHD 0 using 150,000 training samples.",
+    "detail": "The main paper was accepted at UAI 2023. This source is its conference supplement.",
+    "quote": "BISCUIT identifies the graph up to an SHD\nerror of 1 for the 6 variables and 0 for 9 variables.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "ILCM-E achieved zero structural Hamming distance on all six Causal3DIdent simulator datasets.",
+    "detail": "Each Causal3DIdent dataset had 100,000 training, 10,000 validation and 10,000 evaluation samples. The reported run for each dataset was selected by median validation loss across three random seeds.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "met",
+    "finding": "Rep4Ex-CF trained on 10,000 simulated observations and achieved lower MSE than action-only regression on 100 out-of-range interventions.",
+    "detail": "Figure 7 presents MSE distributions as box plots. The publication is an ICLR 2024 conference paper, represented by the report category because the schema has no conference category.",
+    "quote": "Across all settings, our pro-\nposed method, Rep4Ex-CF, consistently achieves markedly lower mean squared error compared\nto the baseline MLP.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://proceedingsoftheieee.ieee.org/toward-causal-representation-learning/",
     "milestone": "m1",
-    "hash": "7f5b204f40e3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a890ff709bab",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedingsoftheieee.ieee.org/toward-causal-representation-learning/",
+    "milestone": "m4",
+    "hash": "16b388c83cd2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedingsoftheieee.ieee.org/toward-causal-representation-learning/",
     "milestone": "m2",
-    "hash": "32f8e6fcedcb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "330440af47b7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedingsoftheieee.ieee.org/toward-causal-representation-learning/",
     "milestone": "m3",
-    "hash": "89bc4245a20e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e96ae407348b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://proceedingsoftheieee.ieee.org/toward-causal-representation-learning/",
     "milestone": "completion",
     "hash": "5c00a8dd2116",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2102.11107",
     "milestone": "m1",
-    "hash": "7f5b204f40e3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a890ff709bab",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2102.11107",
+    "milestone": "m4",
+    "hash": "16b388c83cd2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2102.11107",
     "milestone": "m2",
-    "hash": "32f8e6fcedcb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "330440af47b7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2102.11107",
     "milestone": "m3",
-    "hash": "89bc4245a20e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e96ae407348b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2102.11107",
     "milestone": "completion",
     "hash": "5c00a8dd2116",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pubmed.ncbi.nlm.nih.gov/40175544/",
     "milestone": "m1",
-    "hash": "7f5b204f40e3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a890ff709bab",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pubmed.ncbi.nlm.nih.gov/40175544/",
+    "milestone": "m4",
+    "hash": "16b388c83cd2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pubmed.ncbi.nlm.nih.gov/40175544/",
     "milestone": "m2",
-    "hash": "32f8e6fcedcb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "330440af47b7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pubmed.ncbi.nlm.nih.gov/40175544/",
     "milestone": "m3",
-    "hash": "89bc4245a20e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e96ae407348b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pubmed.ncbi.nlm.nih.gov/40175544/",
     "milestone": "completion",
     "hash": "5c00a8dd2116",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2505.00337v1",
     "milestone": "m1",
-    "hash": "7f5b204f40e3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a890ff709bab",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2505.00337v1",
+    "milestone": "m4",
+    "hash": "16b388c83cd2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2505.00337v1",
     "milestone": "m2",
-    "hash": "32f8e6fcedcb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "330440af47b7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2505.00337v1",
     "milestone": "m3",
-    "hash": "89bc4245a20e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e96ae407348b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2505.00337v1",
     "milestone": "completion",
     "hash": "5c00a8dd2116",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://papers.neurips.cc/paper_files/paper/2022/file/fa567e2b2c870f8f09a87b6e73370869-Paper-Conference.pdf",
     "milestone": "m1",
-    "hash": "7f5b204f40e3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a890ff709bab",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
-    "url": "https://proceedings.mlr.press/v216/lippe23a/lippe23a-supp.pdf",
-    "milestone": "m1",
-    "hash": "7f5b204f40e3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2502.20099v3",
-    "milestone": "m2",
-    "hash": "32f8e6fcedcb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "url": "https://papers.neurips.cc/paper_files/paper/2022/file/fa567e2b2c870f8f09a87b6e73370869-Paper-Conference.pdf",
+    "milestone": "m4",
+    "hash": "16b388c83cd2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://papers.neurips.cc/paper_files/paper/2022/file/fa567e2b2c870f8f09a87b6e73370869-Paper-Conference.pdf",
     "milestone": "m2",
-    "hash": "32f8e6fcedcb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "330440af47b7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://papers.neurips.cc/paper_files/paper/2022/file/fa567e2b2c870f8f09a87b6e73370869-Paper-Conference.pdf",
     "milestone": "m3",
-    "hash": "89bc4245a20e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e96ae407348b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://papers.neurips.cc/paper_files/paper/2022/file/fa567e2b2c870f8f09a87b6e73370869-Paper-Conference.pdf",
     "milestone": "completion",
     "hash": "5c00a8dd2116",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2502.20099v3",
     "milestone": "m1",
-    "hash": "7f5b204f40e3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a890ff709bab",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2502.20099v3",
-    "milestone": "m3",
-    "hash": "89bc4245a20e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "milestone": "m4",
+    "hash": "16b388c83cd2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2502.20099v3",
-    "milestone": "completion",
-    "hash": "5c00a8dd2116",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://proceedings.mlr.press/v216/lippe23a/lippe23a-supp.pdf",
     "milestone": "m2",
-    "hash": "32f8e6fcedcb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "330440af47b7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
-    "url": "https://proceedings.mlr.press/v216/lippe23a/lippe23a-supp.pdf",
+    "url": "https://arxiv.org/html/2502.20099v3",
     "milestone": "m3",
-    "hash": "89bc4245a20e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e96ae407348b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
-    "url": "https://proceedings.mlr.press/v216/lippe23a/lippe23a-supp.pdf",
+    "url": "https://arxiv.org/html/2502.20099v3",
     "milestone": "completion",
     "hash": "5c00a8dd2116",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2206.06169v2",
     "milestone": "m1",
-    "hash": "7f5b204f40e3",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a890ff709bab",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2206.06169v2",
+    "milestone": "m4",
+    "hash": "16b388c83cd2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2206.06169v2",
+    "milestone": "m2",
+    "hash": "330440af47b7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2206.06169v2",
+    "milestone": "m3",
+    "hash": "e96ae407348b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2206.06169v2",
+    "milestone": "completion",
+    "hash": "5c00a8dd2116",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.mlr.press/v216/lippe23a/lippe23a-supp.pdf",
+    "milestone": "m1",
+    "hash": "a890ff709bab",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.mlr.press/v216/lippe23a/lippe23a-supp.pdf",
+    "milestone": "m4",
+    "hash": "16b388c83cd2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.mlr.press/v216/lippe23a/lippe23a-supp.pdf",
+    "milestone": "m2",
+    "hash": "330440af47b7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.mlr.press/v216/lippe23a/lippe23a-supp.pdf",
+    "milestone": "m3",
+    "hash": "e96ae407348b",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.mlr.press/v216/lippe23a/lippe23a-supp.pdf",
+    "milestone": "completion",
+    "hash": "5c00a8dd2116",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.neurips.cc/paper_files/paper/2022/file/fa567e2b2c870f8f09a87b6e73370869-Supplemental-Conference.pdf",
+    "milestone": "m1",
+    "hash": "a890ff709bab",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://proceedings.iclr.cc/paper_files/paper/2024/file/aa9508b2577e0d9c824da9e2e27fe9d6-Paper-Conference.pdf",
+    "milestone": "m4",
+    "hash": "16b388c83cd2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -918,8 +1153,108 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 0 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"A model learns causal variables and the rules connecting them from sensory observations under a fixed experimental budget. Within a specified class of interventions, it predicts the average measured outcome of a change whose value or combination of settings was absent from training. In a light tunnel, for example, it would predict the average sensor reading if a polarizer were turned to an untried angle.\". Reason: The light-tunnel example makes clear what is held out, what is measured, and what the predicted mean represents."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"At one X-ray free-electron laser, a 2018 estimate put tuning at about 400 hours of beam time a year. Operators use past scans and beam physics to choose magnet settings. Hundreds of scans left some relationships between magnets unresolved. If the mechanisms learned from beam measurements still apply at untried settings, operators could compare the expected pulse energy of several magnet combinations before testing one, leaving more beam time for experiments.\". Reason: The beam-time example quantifies a cost to scientific users and explains the decision that predictions for untried settings could support."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by NeurIPS Workshop on Causal Representation Learning, 2023: \"high-level causal variables along with their causal relations directly from raw, unstructured data\". Reason: The workshop organizers explicitly identify the representation-learning goal and connect it to reasoning about interventions."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Match learned variables to simulator variables using the feature-importance matrix for the disentanglement score. Compare the learned directed graph with the simulator graph after matching. Exact recovery requires zero edge additions, deletions or reversals. For the CausalCircuit protocol, train three random initializations on encodings of 512 \\u00d7 512 RGB images and score the run with median validation loss.\". Reason: The criterion currently reports a successful run alongside the test and omits how the learned variables are matched before scoring the graph."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m1: \"A model predicts mean outcomes for 100 simulated interventions outside the training range.\". Reason: Rep4Ex supplies the missing simulation test of forward intervention prediction between graph recovery and prediction on a physical system."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: title = \"Shared optical inputs have R\\u00b2 near one and unshared inputs score lower for each tested view pair.\"; criterion = \"Use the light tunnel's 60,000 observations and the supplied selection of shared encoding coordinates. Pair the camera separately with the light and current measurements, the first angle sensor, and the second angle sensor. For each pair, fit nonlinear predictors of each true input from each view's shared encoding and average the two R\\u00b2 scores. Across five random initializations, shared inputs must score near one and unshared inputs significantly lower. The protocol gives no numerical tolerance or significance level.\"; set_by = \"Gamella, Bing and Runge, Section 3.2, Figure 5 and Appendix A.2.3 of the light-tunnel benchmark.\"; threshold_quote = \"a score near one for the factors in the content block and a significantly lower score for those in the style block.\"; threshold_ref = 16; refs = [2, 16]. Reason: The published optical test compares scores for three distinct pairs of views and permits residual information about unshared inputs, whereas the current title requires their exclusion."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"In one laboratory, learn causal variables and mechanisms from images of one physical system under a predeclared finite intervention budget, without causal-variable value labels as training inputs. Predict the mean of a prespecified measured outcome at intervention values or combinations absent from training. For each held-out family, the learned model's mean squared error on new experiments must be no greater than that of an independently validated physical model given the causal variables.\"; refs = [1, 2, 5, 12]. Reason: The one-laboratory test omits the mean outcome and the restriction on training labels that define the procedure the second laboratory must repeat."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 2. Reason: The published Nature Machine Intelligence article is accessible and gives the chamber manipulations and measurements in full."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 1. Reason: The conference proceedings link directly to the full optical-benchmark PDF, including its evaluation protocol."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No workshop or research-programme statement disputing the feasibility or value of the bounded physical prediction goal was located.\". Reason: Published failures of individual methods leave open whether a body with standing disputes the goal itself."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove statement 1. Reason: The DeepMind quotation describes a hypothesis about intelligence, while the cited paper tests a theoretical implication of bounded regret and sets no goal for learning from sensory experiments."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 11 of 11 proposed operations from MLC-04-revise-20261125T090401472470Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m4, m2, m3."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 0 from arXiv, 5 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 3 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 8 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 2 candidates returned, 0 dropped as sources already used, 2 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 2 of 2 new candidates, without search. Skipped: none. Dropped rows: none. Replaced 5 earlier rows. Added 7 results: 5 from sources already used, 2 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 4 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-25"
  }
 }
