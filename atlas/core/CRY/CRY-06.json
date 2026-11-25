@@ -287,14 +287,30 @@
   ],
   "prompt": "5e97d4b8dfc3"
  },
+ "review": {
+  "state": "published",
+  "note": null,
+  "into": null,
+  "at": "2026-11-15",
+  "log": [
+   {
+    "date": "2026-11-15",
+    "state": "published"
+   }
+  ]
+ },
  "page": {
   "id": "CRY-06",
-  "title": "Classical verification of quantum computation",
+  "title": "Classical verification of a quantum decision result while preserving a runtime advantage",
   "definition": "A classical client verifies one untrusted quantum server’s answer to a yes-or-no computation while preserving a measured runtime advantage over the best known classical solution. Cryptographic soundness bounds false acceptance against efficient dishonest quantum servers under explicit computational hardness assumptions.",
   "goal": {
-   "need": "A client with only classical hardware needs to check a delegated quantum answer without reproducing the calculation. The laboratory illustration below used fixed two-bit functions without the full protocol’s cryptographic security; its register counts therefore do not establish the cost at secure parameters.",
+   "need": "By May 2024, more than 600,000 registered users had run quantum circuits with one provider. Gate benchmarks need detailed knowledge of the hardware, which a cloud user may lack. Reproducing an answer can also be costly. One full-state simulator uses about 16 GB for 30 qubits and twice as much memory for each additional qubit. A user could check a remote server’s yes-or-no answer without repeating the calculation and still save time, provided the cryptographic assumption holds and the checks take less time than delegation saves.",
    "need_refs": [
-    1
+    10,
+    1,
+    11,
+    5,
+    3
    ],
    "figures": {
     "caption": "Registers in the protocol illustration reported on 14 March 2022",
@@ -363,15 +379,15 @@
   "milestones": [
    {
     "id": "m1",
-    "title": "A classical protocol verifies quantum decisions with completeness approaching 1 and soundness approaching 3/4.",
-    "criterion": "Prove a classical-verifier, single-quantum-prover protocol for every BQP language, with completeness 1−negl(λ) and soundness at most 3/4+negl(λ), under quantum-hard Learning with Errors (LWE) with superpolynomial noise ratio. Completeness is honest acceptance; soundness bounds false acceptance. Here λ is the security parameter and negl decreases faster than every inverse polynomial. Mahadev established this theorem. A preprint of 29 September 2026 gives O(g·poly(λ,log g)) total resources for g gates; quasilinear scaling additionally assumes subexponential LWE hardness. That result is not peer reviewed.",
+    "title": "A classical verifier checks BQP with completeness ≥1−negl(λ) and soundness ≤3/4+negl(λ).",
+    "criterion": "Prove a protocol for every BQP language with a polynomial-time classical verifier and one quantum prover, assuming Learning with Errors with superpolynomial noise ratio is hard for efficient quantum algorithms. On a yes instance, the verifier must accept the honest prover with probability at least 1−negl(λ). On a no instance, it must accept any polynomial-time quantum prover with probability at most 3/4+negl(λ). Here λ is the security parameter and a negligible term decreases faster than every inverse polynomial in λ.",
     "set_by": "Mahadev, Protocol 7.5 and Theorem 7.6, in the manuscript revised on 8 December 2023.",
     "set_by_kind": "protocol",
     "threshold_quote": "with completeness negligibly close to $1$ and soundness negligibly close to $\\frac{3}{4}$.",
     "threshold_ref": 4,
     "refs": [
      4,
-     5
+     8
     ],
     "status": "active",
     "replaced_by": [],
@@ -379,23 +395,24 @@
    },
    {
     "id": "m2",
-    "title": "A classical verifier estimates energy below 0.4 for a one-qubit decision computation.",
-    "criterion": "Run the eight-qubit illustration for U(α)=cos(α)Z+sin(α)X, where X and Z are Pauli operators. Its promise is p₀>3/5 (“yes”) or p₀<1/10 (“no”), with p₀ the output-0 probability. The classical verifier must estimate the dimensionless Hamiltonian energy below 0.4 for a correct “yes”; a false “yes” has minimum energy above 0.5. The 14 March 2022 preprint reports success for α≤0.12π/2 using 2,000 repetitions per measurement. Its fixed two-bit functions lack full cryptographic security.",
-    "set_by": "Stricker et al., experimental protocol, Figure 2 and Appendix AIII; this threshold applies only to their chosen one-qubit promise problem.",
+    "title": "A classical verifier checks a one-qubit “yes” claim by estimating a Hamiltonian energy below 0.4.",
+    "criterion": "Run the simplified eight-qubit protocol for U(α)=cos(α)Z+sin(α)X, where X and Z are Pauli operators. On input |0⟩, the probability p₀ of output 0 is cos²(α). The promise is p₀>3/5 for “yes” or p₀<1/10 for “no”. For a claimed “yes”, the classical verifier must obtain an energy estimate below 0.4 from the measurement rounds. On a promised “no” instance, every state has energy above 0.5 for this Hamiltonian. The two-bit functions serve only to demonstrate the measurement protocol.",
+    "set_by": "Stricker et al., Quantum Science and Technology, Figure 2(b) and Appendices C–E, for the specified one-qubit promise problem.",
     "set_by_kind": "protocol",
-    "threshold_quote": "Points below $0.4$ (dark grey) allow one to verify that $\\sf B$’s claim was indeed correct.",
-    "threshold_ref": 1,
+    "threshold_quote": "verifies the prover’s answer whenever the energy is below 0.4.",
+    "threshold_ref": 9,
     "refs": [
+     9,
      1
     ],
     "status": "active",
     "replaced_by": [],
-    "threshold_checked": false
+    "threshold_checked": null
    },
    {
     "id": "m3",
     "title": "Quantum hardware implements a complete classical-verifier protocol with a proven acceptance gap.",
-    "criterion": "Execute a complete single-server BQP verification protocol at explicit cryptographic parameters on a classically tractable workload. A security analysis covering the implementation must place honest acceptance strictly above the adversarial false-acceptance bound, without trusted server operations or a trusted preparation-noise model. The 14 October 2025 on-chip experiment used 20 qubits and measurement patterns of up to 52 vertices, but assumes preparation noise independent of the secret; it does not establish this stronger milestone.",
+    "criterion": "Execute a complete BQP verification protocol on quantum hardware for a classically tractable decision workload, using a classical client, one server and explicit cryptographic parameters. At those parameters, prove a lower bound on honest acceptance for yes instances that accounts for implementation noise and exceeds the upper bound on false acceptance for no instances. The false-acceptance bound must hold against an efficient dishonest quantum server without trusting server operations or a model of its state-preparation noise.",
     "set_by": "Atlas fallback: searches of CVQC protocols and experiments found no published hardware acceptance test with these conditions; the acceptance gap follows the protocol definition.",
     "set_by_kind": "atlas",
     "threshold_quote": null,
@@ -411,7 +428,7 @@
    {
     "id": "m4",
     "title": "Secure classical verification completes a workload whose bare quantum execution beats classical solvers.",
-    "criterion": "Meet m3 for a specified decision workload whose unverified quantum execution has an independently supported runtime advantage over the best known classical solver at matched answer-error probability on declared hardware. Complete the cryptographic verification, including secure function evaluation and repetitions. Verification overhead may erase the underlying runtime advantage at this stage; preserving it is the completion test.",
+    "criterion": "For a specified decision workload, establish with independent support that unverified quantum execution is faster than the best known classical solver at matched answer-error probability on declared hardware. Complete the single-server protocol for that workload, including its cryptographic operations and repetitions, with the implementation-level acceptance gap required by m3. The runtime comparison at this stage uses the unverified execution time.",
     "set_by": "Atlas fallback: no reviewed roadmap or protocol defined an intermediate hardware test separating a workload’s runtime advantage from verification overhead.",
     "set_by_kind": "atlas",
     "threshold_quote": null,
@@ -429,7 +446,7 @@
   "not_found": [
    "No outside body’s finite-resource completion test or universal security and overhead cutoffs were found for this capability.",
    "Searches did not locate a hardware demonstration meeting the combined completion test.",
-   "The publisher blocked the Stricker journal full text; changes from the 14 March 2022 preprint remain unchecked."
+   "No estimate was found of how many quantum cloud users have needed to check a decision they could not independently verify."
   ],
   "references": [
    {
@@ -543,6 +560,62 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 9,
+    "kind": "journal",
+    "url": "https://www.quantumoptics.at/images/publications/dissertation/Thesis_Stricker.pdf",
+    "doi": "10.1088/2058-9565/ad2986",
+    "title": "Towards experimental classical verification of quantum computation",
+    "authors": "Stricker R, Carrasco J, Ringbauer M, Postler L, Meth M, Edmunds C, et al.",
+    "container": "Quantum Sci. Technol.",
+    "year": "2024",
+    "volume": "9",
+    "issue": "2",
+    "pages": "02LT01",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 10,
+    "kind": "web",
+    "url": "https://www.ibm.com/quantum/blog/quantum-software-vision",
+    "doi": null,
+    "title": "Qiskit: The software for quantum performance",
+    "authors": "Ryan Mandelbaum, Blake Johnson, Jerry Chow",
+    "container": "IBM Quantum Computing Blog",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 11,
+    "kind": "web",
+    "url": "https://quantumai.google/qsim/overview",
+    "doi": null,
+    "title": "qsim overview",
+    "authors": "Google Quantum AI",
+    "container": "Quantum Simulator",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 12,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/1912.00990",
+    "doi": null,
+    "title": "Classical Verification of Quantum Computations with Efficient Verifier",
+    "authors": "Chia NH, Chung KM, Yamakawa T",
+    "container": "arXiv",
+    "year": "2019",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
    }
   ],
   "milestone_order": [
@@ -556,160 +629,237 @@
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "A classical verifier protocol covers all BQP decision problems with a single quantum prover; sample size not applicable.",
-    "detail": "The paper states the protocol and its quantum-hard LWE assumption with superpolynomial noise ratio. The supplied text does not state the required 1−negl(λ) completeness and 3/4+negl(λ) soundness bounds for the verification protocol.",
-    "quote": "We present the first protocol allowing a classical computer to interactively verify the result of an efficient quantum computation.",
+    "finding": "Classical verification covers all BQP languages with one quantum prover and a constant acceptance gap.",
+    "detail": "The supplied excerpt leaves the full protocol’s ≥1−negl(λ) honest acceptance and ≤3/4+negl(λ) adversarial acceptance bounds unverified.",
+    "quote": "all decision problems which can be efficiently computed in quantum polynomial time (the class\nBQP\n) can be verified by an efficient classical machine through interaction",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 4,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "The eight-qubit experiment estimated energy below 0.4 for correct yes instances, with 2,000 repetitions per measurement.",
-    "detail": "The reported successful range was α ≤ 0.12π/2. The fixed two-bit functions did not provide full cryptographic security.",
-    "quote": "Results on the total\nη\n\\eta\n-state energy are depicted in Fig.\n2\nb, where we successfully certify a “yes\" outcome for\nα\n≤\n0.12\n​\nπ\n/\n2\n\\alpha\\leq 0.12\\pi/2\n.",
+    "finding": "The trapped-ion verifier estimated a one-qubit yes-claim energy below 0.4 with 2,000 runs per data point.",
+    "detail": "The reported threshold crossing covers tested angles up to α = 0.12π/2. Experimental noise raised the estimates above the ideal clock-state energy.",
+    "quote": "b, where we successfully certify a “yes\" outcome for\nα\n≤\n0.12\n​\nπ\n/\n2\n\\alpha\\leq 0.12\\pi/2\n.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "An eight-qubit trapped-ion processor demonstrated a simplified classical-verifier protocol, with 2,000 repetitions per measurement.",
-    "detail": "The fixed two-bit functions are not post-quantum secure, and the experiment does not establish an implementation-level honest-versus-adversarial acceptance gap.",
-    "quote": "We implement the protocol experimentally on an eight-qubit trapped-ion quantum processor, see Fig.\n1\n.",
+    "finding": "In the trapped-ion demonstration, all-Z measurement-round rejection was zero by construction, with 2,000 runs per data point.",
+    "detail": "The all-Z check accepts every commitment value because both functions are one-to-one. The reported single-copy rejection statistics describe the implemented checks and supply no protocol-level acceptance gap.",
+    "quote": "By construction, this rejection probability is exactly zero for\n(\nk\n1\n,\nk\n2\n)\n=\n(\n0\n,\n0\n)\n(k_{1},k_{2})=(0,0)\n.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "met",
-    "finding": "BQP verification with one quantum prover: negligible soundness error; theoretical result, no sample.",
-    "detail": "The authors’ parallel-repetition protocol has negligible completeness and soundness errors under quantum-hard LWE, with offline setup. The supplied text does not specify the LWE noise ratio.",
-    "quote": "Taken together with the first transformation, the result is a three-round\nQPIA\n\\mathrm{QPIA}\n(with offline setup) for verifying\n𝖡𝖰𝖯\n\\mathsf{BQP}\n, with negligible completeness and soundness errors.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "Single-prover BQP verification: completeness 2/3 after repetition; sample size not applicable.",
-    "detail": "The preprint reports soundness 1/3, but does not establish completeness 1−negl(λ). It identifies near-perfect completeness as an open protocol improvement.",
+    "finding": "Classical BQP verification with k parallel copies bounds false acceptance by 2⁻ᵏ+negl(n).",
+    "detail": "The parallel repetition result inherits the LWE assumption from Mahadev’s protocol and cites the underlying trapdoor-function construction for its parameters.",
+    "quote": "Under the\n𝖫𝖶𝖤\n\\mathsf{LWE}\nassumption, the soundness error of\n𝔐\nk\n\\mathfrak{M}^{k}\nis at most\n2\n−\nk\n+\nnegl\n⁡\n(\nn\n)\n2^{-k}+\\negl(n)\n.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Single-prover classical verification for every BQP language achieves completeness of at least 2/3 after a constant number of sequential repetitions.",
+    "detail": "This is a theorem covering every BQP language, so there is no experimental sample size. The excerpt reports constant-round-count amplification to the stated acceptance bounds.",
     "quote": "A constant number of sequential repetitions then yields the standard completeness and soundness bounds of\n2\n/\n3\n2/3\nand\n1\n/\n3\n1/3",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 5,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "Classical verification of every BQP language has soundness ≤negl(λ) with ⌈log² λ⌉ parallel repetitions.",
+    "detail": "The verifier accepts only if every repetition accepts. The result is a theorem with no empirical sample.",
+    "quote": "We show that parallel repetition of Mahadev’s protocol has negligible soundness error.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://arxiv.org/html/1804.01082v3",
     "milestone": "m1",
-    "hash": "a551eba30281",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e87e6bd05ffb",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/1804.01082v3",
     "milestone": "m2",
-    "hash": "ea8da5634ce6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a746b72c8291",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/1804.01082v3",
     "milestone": "m3",
-    "hash": "606c0ec8a6c7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2329801e3cf5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/1804.01082v3",
     "milestone": "m4",
-    "hash": "caee708639cb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7006868ff6ce",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/1804.01082v3",
     "milestone": "completion",
     "hash": "a878ea0a6b58",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2203.07395",
     "milestone": "m1",
-    "hash": "a551eba30281",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e87e6bd05ffb",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2203.07395",
     "milestone": "m2",
-    "hash": "ea8da5634ce6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a746b72c8291",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2203.07395",
     "milestone": "m3",
-    "hash": "606c0ec8a6c7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "2329801e3cf5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2203.07395",
     "milestone": "m4",
-    "hash": "caee708639cb",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "7006868ff6ce",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2203.07395",
     "milestone": "completion",
     "hash": "a878ea0a6b58",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/1911.08101",
     "milestone": "m1",
-    "hash": "a551eba30281",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e87e6bd05ffb",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/1911.08101",
+    "milestone": "m2",
+    "hash": "a746b72c8291",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/1911.08101",
+    "milestone": "m3",
+    "hash": "2329801e3cf5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/1911.08101",
+    "milestone": "m4",
+    "hash": "7006868ff6ce",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/1911.08101",
+    "milestone": "completion",
+    "hash": "a878ea0a6b58",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2609.38060v1",
     "milestone": "m1",
-    "hash": "a551eba30281",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "e87e6bd05ffb",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2609.38060v1",
+    "milestone": "m2",
+    "hash": "a746b72c8291",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2609.38060v1",
+    "milestone": "m3",
+    "hash": "2329801e3cf5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2609.38060v1",
+    "milestone": "m4",
+    "hash": "7006868ff6ce",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2609.38060v1",
+    "milestone": "completion",
+    "hash": "a878ea0a6b58",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/1912.00990",
+    "milestone": "m1",
+    "hash": "e87e6bd05ffb",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -751,20 +901,98 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 5 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "title = \"Classical verification of a quantum decision result while preserving a runtime advantage\". Reason: The current title also describes an established theorem and omits the runtime advantage that distinguishes the breakthrough."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"By May 2024, more than 600,000 registered users had run quantum circuits with one provider. Gate benchmarks need detailed knowledge of the hardware, which a cloud user may lack. Reproducing an answer can also be costly. One full-state simulator uses about 16 GB for 30 qubits and twice as much memory for each additional qubit. A user could check a remote server\\u2019s yes-or-no answer without repeating the calculation and still save time, provided the cryptographic assumption holds and the checks take less time than delegation saves.\". Reason: The current paragraph describes a laboratory limitation but omits the scale of remote use, the cost of checking by simulation, and the benefit to the user."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: title = \"A classical verifier checks BQP with completeness \\u22651\\u2212negl(\\u03bb) and soundness \\u22643/4+negl(\\u03bb).\"; criterion = \"Prove a protocol for every BQP language with a polynomial-time classical verifier and one quantum prover, assuming Learning with Errors with superpolynomial noise ratio is hard for efficient quantum algorithms. On a yes instance, the verifier must accept the honest prover with probability at least 1\\u2212negl(\\u03bb). On a no instance, it must accept any polynomial-time quantum prover with probability at most 3/4+negl(\\u03bb). Here \\u03bb is the security parameter and a negligible term decreases faster than every inverse polynomial in \\u03bb.\"; threshold_quote = \"with completeness negligibly close to $1$ and soundness negligibly close to $\\\\frac{3}{4}$.\"; threshold_ref = 4; refs = [4, 8]. Reason: The title presents an upper bound as an attained false-acceptance rate, and the criterion mixes the theorem’s test with a later result about resource use."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: title = \"A classical verifier checks a one-qubit \\u201cyes\\u201d claim by estimating a Hamiltonian energy below 0.4.\"; criterion = \"Run the simplified eight-qubit protocol for U(\\u03b1)=cos(\\u03b1)Z+sin(\\u03b1)X, where X and Z are Pauli operators. On input |0\\u27e9, the probability p\\u2080 of output 0 is cos\\u00b2(\\u03b1). The promise is p\\u2080>3/5 for \\u201cyes\\u201d or p\\u2080<1/10 for \\u201cno\\u201d. For a claimed \\u201cyes\\u201d, the classical verifier must obtain an energy estimate below 0.4 from the measurement rounds. On a promised \\u201cno\\u201d instance, every state has energy above 0.5 for this Hamiltonian. The two-bit functions serve only to demonstrate the measurement protocol.\"; set_by = \"Stricker et al., Quantum Science and Technology, Figure 2(b) and Appendices C\\u2013E, for the specified one-qubit promise problem.\"; threshold_quote = \"verifies the prover\\u2019s answer whenever the energy is below 0.4.\"; threshold_ref = 9; refs = [9, 1]. Reason: The published Figure 2 confirms the energy threshold and distinguishes it from the angles at which the experiment crossed it."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Execute a complete BQP verification protocol on quantum hardware for a classically tractable decision workload, using a classical client, one server and explicit cryptographic parameters. At those parameters, prove a lower bound on honest acceptance for yes instances that accounts for implementation noise and exceeds the upper bound on false acceptance for no instances. The false-acceptance bound must hold against an efficient dishonest quantum server without trusting server operations or a model of its state-preparation noise.\". Reason: The on-chip experiment’s qubit count and secret-independent noise assumption describe a result being judged and obscure the acceptance test."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"For a specified decision workload, establish with independent support that unverified quantum execution is faster than the best known classical solver at matched answer-error probability on declared hardware. Complete the single-server protocol for that workload, including its cryptographic operations and repetitions, with the implementation-level acceptance gap required by m3. The runtime comparison at this stage uses the unverified execution time.\". Reason: The instruction to meet m3 imports its tractable-workload condition and leaves unclear which runtime must beat the classical solver."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 2. Reason: Section 4.3 of Stricker’s dissertation reproduces the published article, including the experimental criteria and appendices."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No estimate was found of how many quantum cloud users have needed to check a decision they could not independently verify.\". Reason: Published platform usage measures the population with access but does not quantify the unmet need for verification."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 8 of 8 proposed operations from CRY-06-revise-20261125T103431966969Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m3, m4."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 0 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 0 found, 1 not found, 1 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "title is 88 characters, over its limit of 70; kept."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 4 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 1 candidates returned, 0 dropped as sources already used, 1 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 1 of 1 new candidates, without search. Skipped: none. Dropped rows: none. Replaced 5 earlier rows. Added 6 results: 5 from sources already used, 1 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 1 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 6 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-15"
- },
- "review": {
-  "state": "published",
-  "note": null,
-  "into": null,
-  "at": "2026-11-15",
-  "log": [
-   {
-    "date": "2026-11-15",
-    "state": "published"
-   }
-  ]
+  "results_run": "2026-11-25"
  }
 }
