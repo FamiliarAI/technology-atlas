@@ -281,13 +281,15 @@
  "page": {
   "id": "HCI-01",
   "title": "Predictive models of human–computer interaction",
-  "definition": "One computational model predicts task times, errors, learning and responses to design changes across unfamiliar interfaces from the design, task and user characteristics. It derives interaction strategies, meaning sequences of user actions, without new hand-written strategy rules for each interface.",
+  "definition": "One computational model predicts task times, errors, changes with practice and responses to redesign across unfamiliar interface families. Given the design, task and user characteristics, it derives an interaction strategy, the sequence of actions the user takes, without new hand-written rules for each interface. CRTypist illustrates a narrower capability: it simulates practiced typing on previously unseen touchscreen keyboards.",
   "goal": {
-   "need": "The keystroke-level model's 1980 evaluation used 28 experts and reported root-mean-square error equal to 21% of average predicted execution time under a specified action method. In 2025, measuring visual search across the interface classes below involved 84 participants and 10,282 trials. Predicting designs before user testing requires extending models beyond practiced, error-free execution to learning, mistakes and changed designs.",
+   "need": "At one telephone company, cutting one second from an operator’s average time per call was worth an estimated $3 million a year. Designers can time users or estimate how long a practiced sequence takes. Timing that sequence more precisely cannot tell them when a new layout will lead people to choose different actions or make mistakes. Predicting those changes would let designers compare alternatives before building them, provided the predictions hold for the users and tasks the design must serve.",
    "need_refs": [
+    10,
     1,
-    2,
-    3
+    3,
+    5,
+    6
    ],
    "figures": {
     "caption": "Interface screenshots in the 2025 visual-search study.",
@@ -353,19 +355,18 @@
   },
   "case_label": null,
   "cases": [],
-  "milestone_structure": "sequence",
+  "milestone_structure": "parallel",
   "milestones": [
    {
     "id": "m1",
     "title": "A user model improves keystroke-level prediction accuracy or relaxes the model's restrictions.",
-    "criterion": "A proposed model improves on the keystroke-level model’s accuracy for comparable tasks or relaxes its restrictions: expert users, routine tasks, a method specified in detail and error-free execution. This is a comparative criterion, not a universal percentage-error threshold. The 2022 synthesis documents models that derive interaction strategies for typing, menus and task interleaving rather than requiring those strategies to be supplied.",
+    "criterion": "For comparable tasks, improve on the keystroke-level model's prediction accuracy or relax at least one of its restrictions. The model assumes an expert user, a routine task, a method specified down to individual actions and error-free execution.",
     "set_by": "Card, Moran and Newell, the keystroke-level model’s developers, in the conclusion of their 1980 paper.",
     "set_by_kind": "protocol",
     "threshold_quote": "Any new proposal must do better than the Keystroke-Level Model (improve on its accuracy or lessen its restrictions) to merit serious consideration.",
     "threshold_ref": 1,
     "refs": [
-     1,
-     6
+     1
     ],
     "status": "active",
     "replaced_by": [],
@@ -374,7 +375,7 @@
    {
     "id": "m2",
     "title": "A typing simulator runs on 10 keyboard applications excluded from training.",
-    "criterion": "In MobileTyping Task 3.1, train on 28 keyboard applications represented by 816 screenshots and run the simulator on 10 excluded applications represented by 212 screenshots. Assess simulated typing speed, proofreading and error correction. CRTypist reported test-set speed of 27.4 words per minute, SD 4.4. This demonstrates simulator transfer within touchscreen typing; the split itself does not establish prediction accuracy against humans on every excluded keyboard. The protocol sets no numerical acceptance tolerance.",
+    "criterion": "For the screenshot evaluation in MobileTyping Task 3.1, train on 816 screenshots from 28 keyboard applications and simulate typing on 212 screenshots from 10 other applications. Compare simulated typing speed in words per minute, gaze shifts for proofreading and backspace counts for error correction between the training and test sets.",
     "set_by": "Shi and colleagues, MobileTyping benchmark and CRTypist evaluation, Section 5.3.1, 2024; this protocol concerns touchscreen keyboards.",
     "set_by_kind": "protocol",
     "threshold_quote": "a training set (28 keyboards, 816 screenshots) and a testing one (10 keyboards, 212 screenshots).",
@@ -388,8 +389,8 @@
    },
    {
     "id": "m3",
-    "title": "One user model predicts learning, errors and task times in an unfamiliar interface family.",
-    "criterion": "One model prospectively predicts task times, error probabilities, practice trajectories and post-redesign action choices in an interface family excluded from development. No new strategy rules or fitting to that family's behavioral data are allowed. It beats the best published task-specific comparator selected on development data, using mean squared error for times and practice trajectories and log loss for errors and choices. No result meeting this combined test was located. Centaur's 2025 transfer tests concern psychological experiments, not unfamiliar interfaces; its training corpus comprised 160 experiments and 60,092 participants.",
+    "title": "One model beats task-specific comparators on time, errors, learning and choices in a new interface family.",
+    "criterion": "Prospectively predict task times, error probabilities, performance over practice and action choices after redesign in an interface family excluded from development. Use the same model throughout, without new strategy rules or fitting to behavioral data from that family. For each outcome, outperform the best published task-specific comparator selected on development data. Use lower mean squared error for task times and practice trajectories and lower log loss for errors and action choices.",
     "set_by": "Atlas provisional definition; searches of the Artificial User objectives, HCI modeling guidance and cognitive prediction benchmarks found no equivalent cross-interface acceptance test.",
     "set_by_kind": "atlas",
     "threshold_quote": null,
@@ -397,12 +398,41 @@
     "refs": [
      4,
      5,
-     6,
-     8
+     6
     ],
     "status": "active",
     "replaced_by": [],
     "threshold_checked": null
+   },
+   {
+    "id": "m4",
+    "title": "A model predicts expert execution time for a specified, error-free sequence of actions.",
+    "criterion": "Given a routine task, the system's commands and response times, the user's motor skill parameters and the method to be used, predict the time an expert takes to execute that method without error. Compare predicted and observed execution times by task and system, and report root-mean-square error relative to mean predicted execution time.",
+    "set_by": "Card, Moran and Newell, keystroke-level model prediction problem and laboratory evaluation, sections 2 and 4.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "Predict the time given the method.",
+    "threshold_ref": 1,
+    "refs": [
+     1
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "A model predicts menu selection time across five practice blocks for each of four designs.",
+    "criterion": "Compare predicted mean selection times with times measured from menu opening to target selection. Test 18 participants on traditional menus, menus that resize items by frequency, and split menus that repeat recent or frequent items at the top. Each participant makes 45 selections from 14 items in each of five blocks per design. Report percentage differences and regressions of observed on predicted times across blocks.",
+    "set_by": "Cockburn, Gutwin and Greenberg, menu performance evaluation protocol, CHI 2007.",
+    "set_by_kind": "protocol",
+    "threshold_quote": "Each participant completed five blocks of tasks with each menu type before proceeding to the next.",
+    "threshold_ref": 11,
+    "refs": [
+     11
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
    }
   ],
   "measures": [],
@@ -512,20 +542,6 @@
    },
    {
     "id": 8,
-    "kind": "journal",
-    "url": "https://cocosci.princeton.edu/papers/BinzCognition2025.pdf",
-    "doi": "10.1038/s41586-025-09215-4",
-    "title": "A foundation model to predict and capture human cognition",
-    "authors": "Binz M, Akata E, Bethge M, Brändle F, Callaway F, Coda-Forno J, et al.",
-    "container": "Nature",
-    "year": "2025",
-    "volume": "644",
-    "issue": "8078",
-    "pages": "1002-1009",
-    "citation_source": "crossref"
-   },
-   {
-    "id": 9,
     "kind": "report",
     "url": "https://acris.aalto.fi/ws/portalfiles/portal/34076579/ELEC_Leino_RL_KLM_HCI.pdf",
     "doi": "10.1145/3301275.3302285",
@@ -539,7 +555,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 10,
+    "id": 9,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2602.06489v2",
     "doi": null,
@@ -551,10 +567,68 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 10,
+    "kind": "journal",
+    "url": "https://www.lri.fr/~mbl/ENS/FundHCI/2013/papers/Gray-HCI93.pdf",
+    "doi": "10.1207/s15327051hci0803_3",
+    "title": "Project Ernestine: Validating a GOMS Analysis for Predicting and Explaining Real-World Task Performance",
+    "authors": "Gray W, John B, Atwood M",
+    "container": "Human-Comp. Interaction",
+    "year": "1993",
+    "volume": "8",
+    "issue": "3",
+    "pages": "237-309",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 11,
+    "kind": "report",
+    "url": "https://www.csse.canterbury.ac.nz/andrew.cockburn/papers/paper191-cockburn.pdf",
+    "doi": "10.1145/1240624.1240723",
+    "title": "A Predictive Model of Menu Performance",
+    "authors": "Cockburn A, Gutwin C, Greenberg S",
+    "container": "Proceedings of the SIGCHI Conference on Human Factors in Computing Systems",
+    "year": "2007",
+    "volume": null,
+    "issue": null,
+    "pages": "627-636",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 12,
+    "kind": "journal",
+    "url": "https://www.cs.cmu.edu/~cga/behavior/card1980.pdf",
+    "doi": null,
+    "title": "The Keystroke-Level Model for User Performance Time with Interactive Systems",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 13,
+    "kind": "journal",
+    "url": "https://acs.ist.psu.edu/papers/paikKRR15.pdf",
+    "doi": "10.1145/2776891",
+    "title": "Predicting User Performance and Learning in Human–Computer Interaction with the Herbal Compiler",
+    "authors": "Paik J, Kim JW, Ritter FE, Reitter D",
+    "container": "ACM Trans. Comput.-Hum. Interact.",
+    "year": "2015",
+    "volume": "22",
+    "issue": "5",
+    "pages": "1-26",
+    "citation_source": "crossref"
    }
   ],
   "milestone_order": [
+   "m4",
    "m1",
+   "m5",
    "m2",
    "m3"
   ],
@@ -563,125 +637,342 @@
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "RL-KLM learned interaction strategies across 3 simulated interface cases without a prespecified action sequence.",
-    "detail": "The model relaxes KLM’s requirement for a specified method. It also simulated recognition errors. The authors did not test its policies against empirical user data; the source identifies a conference paper but does not state its review status.",
-    "quote": "We report results from RL-KLM across three simple but rep-\nresentative interface problems using a plain vanilla RL method\ncalled Q-learning.",
+    "finding": "RL-KLM derived a button-press policy averaging 0.38 seconds across 90 simulated TV remote tasks.",
+    "detail": "The source is an ACM conference proceedings paper. The reported times come from simulation using KLM operator costs.",
+    "quote": "With this policy,\naverage task completion time is 0.38 seconds.",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
-    "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "WSTypist, evaluated with 8 agents, simulated an average uncorrected error rate of 0.05 versus 0.04 for humans.",
-    "detail": "The model simulates typing errors and corrective actions, relaxing the keystroke-level model’s error-free execution restriction. Agents were fitted to human behavioral metrics and evaluated on 100 words each; no comparison with a keystroke-level model is reported.",
+    "finding": "WSTypist agents, eight per typing condition, selected suggestions for 19% of words without a prescribed action sequence.",
+    "detail": "The authors fitted cognitive parameters to aggregate human behavior before evaluating the agents.",
     "quote": null,
     "checked": null,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "WSTypist’s inline suggestion redesign with a shortcut yielded about 0.7 gaze shifts per word across four agents.",
+    "detail": "The inline redesign kept the action and state spaces unchanged, with continued policy training in simulation. The authors left human validation of the redesign to future work.",
+    "quote": "Agents in the new designs required fewer gaze shifts per word (decreasing from about 1.2 to 0.7), used suggestions more frequently (about 25% on average), and allocated more gaze to the input field (about 64%), resulting in higher typing speed.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "CRTypist averaged 2.4 corrective backspaces across 30 simulated single-finger transcription episodes.",
+    "detail": "The human benchmark comprised 30 participants who each transcribed 20 Finnish sentences. The paper appeared in the peer-reviewed CHI proceedings.",
+    "quote": "3) Error correction: Correcting typing errors takes place through\nbackspacing.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "CRTypist simulated typing on 10 excluded keyboard applications: 27.4 words per minute.",
-    "detail": "Training used 28 applications (816 screenshots); testing used 10 (212 screenshots). The study also assessed proofreading and error correction. The split alone does not establish accuracy against humans on every excluded keyboard.",
-    "quote": "CRTypist performs comparably with the training\nand testing set for typing speed (WPM: 𝑀 = 27.6,𝑆𝐷 = 4.5 for\ntraining vs. 𝑀 = 27.4,𝑆𝐷 = 4.4 for testing), proofreading (gaze\nshifts:𝑀 = 4.8,𝑆𝐷 = 1.8 vs.𝑀 = 4.6,𝑆𝐷 = 1.9), and error correc-\ntion (backspaces: 𝑀 = 2.9,𝑆𝐷 = 2.7 vs.𝑀 = 3.1,𝑆𝐷 = 2.4).",
+    "finding": "CRTypist averaged 27.4 WPM on 212 screenshots from 10 held-out keyboard apps.",
+    "detail": null,
+    "quote": "CRTypist performs comparably with the training\nand testing set for typing speed (WPM: 𝑀 = 27.6,𝑆𝐷 = 4.5 for\ntraining vs. 𝑀 = 27.4,𝑆𝐷 = 4.4 for testing)",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Across two novel layouts tested after retraining, CRTypist predicted 39.2 WPM for two-thumb typing on KALQ.",
+    "detail": "KALQ has two space keys. The authors removed spaces from the target sentences to accommodate the model’s one-to-one character–key mapping.",
+    "quote": "In con-\nsequence, the average typing speed on KALQ is 39.2 WPM, which\nis about 2.6 WPM faster than QWERTY’s 36.6 WPM.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "met",
+    "finding": "The Keystroke-Level Model had an RMS execution-time error of 21% of mean predicted time across 855 retained trials with 28 experts.",
+    "detail": "The authors fitted the mental preparation time to the same experimental data used to assess accuracy.",
+    "quote": "The\nroot-mean-square (aMs) error is 21 percent of the average\npredicted execution time.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "Herbal-generated ACT-R models tracked spreadsheet practice for 30 initially inexperienced users, with a mean best-fit correlation of r = 0.970.",
+    "detail": "The correlation averages the best fit selected for each participant. Human observations ended after four sessions. Recorded completion times included time spent correcting mistakes.",
+    "quote": "ﬁts are high, with the lowest best ﬁt of r = 0.569, lowest worst ﬁt of r = 0.551, and an\naverage best ﬁt of 0.970.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://acris.aalto.fi/ws/portalfiles/portal/85706590/Oulasvirta_Computational_rationality_as_theory_of_interaction_CHI.pdf",
+    "milestone": "m4",
+    "hash": "e3d36150d601",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://acris.aalto.fi/ws/portalfiles/portal/85706590/Oulasvirta_Computational_rationality_as_theory_of_interaction_CHI.pdf",
     "milestone": "m1",
-    "hash": "907b6dfc6902",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "6988adb07f90",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://acris.aalto.fi/ws/portalfiles/portal/85706590/Oulasvirta_Computational_rationality_as_theory_of_interaction_CHI.pdf",
+    "milestone": "m5",
+    "hash": "c91a70553007",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://acris.aalto.fi/ws/portalfiles/portal/85706590/Oulasvirta_Computational_rationality_as_theory_of_interaction_CHI.pdf",
     "milestone": "m2",
-    "hash": "7433a19e4c52",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "d2d690518d20",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://acris.aalto.fi/ws/portalfiles/portal/85706590/Oulasvirta_Computational_rationality_as_theory_of_interaction_CHI.pdf",
     "milestone": "m3",
-    "hash": "cc3d291d7bf9",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "6388c97d9262",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://acris.aalto.fi/ws/portalfiles/portal/85706590/Oulasvirta_Computational_rationality_as_theory_of_interaction_CHI.pdf",
     "milestone": "completion",
     "hash": "46c59bb706b9",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://acris.aalto.fi/ws/portalfiles/portal/177471983/Understanding_visual_search_in_graphical_user_interfaces.pdf",
+    "milestone": "m4",
+    "hash": "e3d36150d601",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://acris.aalto.fi/ws/portalfiles/portal/177471983/Understanding_visual_search_in_graphical_user_interfaces.pdf",
     "milestone": "m1",
-    "hash": "907b6dfc6902",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "6988adb07f90",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://acris.aalto.fi/ws/portalfiles/portal/177471983/Understanding_visual_search_in_graphical_user_interfaces.pdf",
+    "milestone": "m5",
+    "hash": "c91a70553007",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://acris.aalto.fi/ws/portalfiles/portal/177471983/Understanding_visual_search_in_graphical_user_interfaces.pdf",
     "milestone": "m2",
-    "hash": "7433a19e4c52",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "d2d690518d20",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://acris.aalto.fi/ws/portalfiles/portal/177471983/Understanding_visual_search_in_graphical_user_interfaces.pdf",
     "milestone": "m3",
-    "hash": "cc3d291d7bf9",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "6388c97d9262",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://acris.aalto.fi/ws/portalfiles/portal/177471983/Understanding_visual_search_in_graphical_user_interfaces.pdf",
     "milestone": "completion",
     "hash": "46c59bb706b9",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://acris.aalto.fi/ws/portalfiles/portal/34076579/ELEC_Leino_RL_KLM_HCI.pdf",
+    "milestone": "m4",
+    "hash": "e3d36150d601",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://acris.aalto.fi/ws/portalfiles/portal/34076579/ELEC_Leino_RL_KLM_HCI.pdf",
     "milestone": "m1",
-    "hash": "907b6dfc6902",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "6988adb07f90",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://acris.aalto.fi/ws/portalfiles/portal/34076579/ELEC_Leino_RL_KLM_HCI.pdf",
+    "milestone": "m5",
+    "hash": "c91a70553007",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://acris.aalto.fi/ws/portalfiles/portal/34076579/ELEC_Leino_RL_KLM_HCI.pdf",
+    "milestone": "m2",
+    "hash": "d2d690518d20",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://acris.aalto.fi/ws/portalfiles/portal/34076579/ELEC_Leino_RL_KLM_HCI.pdf",
+    "milestone": "m3",
+    "hash": "6388c97d9262",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://acris.aalto.fi/ws/portalfiles/portal/34076579/ELEC_Leino_RL_KLM_HCI.pdf",
+    "milestone": "completion",
+    "hash": "46c59bb706b9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2602.06489v2",
+    "milestone": "m4",
+    "hash": "e3d36150d601",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2602.06489v2",
     "milestone": "m1",
-    "hash": "907b6dfc6902",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "6988adb07f90",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2602.06489v2",
+    "milestone": "m5",
+    "hash": "c91a70553007",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2602.06489v2",
+    "milestone": "m2",
+    "hash": "d2d690518d20",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2602.06489v2",
+    "milestone": "m3",
+    "hash": "6388c97d9262",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2602.06489v2",
+    "milestone": "completion",
+    "hash": "46c59bb706b9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://crtypist.github.io/material/crtypist.pdf",
+    "milestone": "m4",
+    "hash": "e3d36150d601",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://crtypist.github.io/material/crtypist.pdf",
+    "milestone": "m1",
+    "hash": "6988adb07f90",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://crtypist.github.io/material/crtypist.pdf",
+    "milestone": "m5",
+    "hash": "c91a70553007",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://crtypist.github.io/material/crtypist.pdf",
     "milestone": "m2",
-    "hash": "7433a19e4c52",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "d2d690518d20",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://crtypist.github.io/material/crtypist.pdf",
+    "milestone": "m3",
+    "hash": "6388c97d9262",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://crtypist.github.io/material/crtypist.pdf",
+    "milestone": "completion",
+    "hash": "46c59bb706b9",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.cmu.edu/~cga/behavior/card1980.pdf",
+    "milestone": "m4",
+    "hash": "e3d36150d601",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://acs.ist.psu.edu/papers/paikKRR15.pdf",
+    "milestone": "m1",
+    "hash": "6988adb07f90",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -743,8 +1034,108 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 0 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"One computational model predicts task times, errors, changes with practice and responses to redesign across unfamiliar interface families. Given the design, task and user characteristics, it derives an interaction strategy, the sequence of actions the user takes, without new hand-written rules for each interface. CRTypist illustrates a narrower capability: it simulates practiced typing on previously unseen touchscreen keyboards.\". Reason: The keyboard example distinguishes transfer to another design from transfer to another interface family and clarifies what learning adds."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"At one telephone company, cutting one second from an operator\\u2019s average time per call was worth an estimated $3 million a year. Designers can time users or estimate how long a practiced sequence takes. Timing that sequence more precisely cannot tell them when a new layout will lead people to choose different actions or make mistakes. Predicting those changes would let designers compare alternatives before building them, provided the predictions hold for the users and tasks the design must serve.\". Reason: The cost of a one-second delay shows what interface choices mean for users and employers, where the existing paragraph gives study sizes and a model's error rate."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after None: \"A model predicts expert execution time for a specified, error-free sequence of actions.\". Reason: The first existing milestone asks a model to improve on a laboratory demonstration whose own test is missing."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"For comparable tasks, improve on the keystroke-level model's prediction accuracy or relax at least one of its restrictions. The model assumes an expert user, a routine task, a method specified down to individual actions and error-free execution.\"; refs = [1]. Reason: The existing criterion mixes the authors' comparative test with a later review of models that might meet it."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m1: \"A model predicts menu selection time across five practice blocks for each of four designs.\". Reason: The menu protocol supplies a missing test of learning within one interface family before the combined cross-family test."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"For the screenshot evaluation in MobileTyping Task 3.1, train on 816 screenshots from 28 keyboard applications and simulate typing on 212 screenshots from 10 other applications. Compare simulated typing speed in words per minute, gaze shifts for proofreading and backspace counts for error correction between the training and test sets.\". Reason: The revision removes CRTypist's achieved speed from the test and identifies the observable measures of proofreading and correction."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: title = \"One model beats task-specific comparators on time, errors, learning and choices in a new interface family.\"; criterion = \"Prospectively predict task times, error probabilities, performance over practice and action choices after redesign in an interface family excluded from development. Use the same model throughout, without new strategy rules or fitting to behavioral data from that family. For each outcome, outperform the best published task-specific comparator selected on development data. Use lower mean squared error for task times and practice trajectories and lower log loss for errors and action choices.\"; refs = [4, 5, 6]. Reason: The title omits action choices and the comparator, while the criterion includes a search verdict and results from psychological experiments."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "structure = parallel. Reason: The menu study tests learning within designs and the keyboard study tests transfer after practice, so either capability can be demonstrated first."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 8 of 8 proposed operations from HCI-01-revise-20261125T094404861589Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m4, m1, m5, m2, m3."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 0 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 2 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Structural problems after applying: references never cited: [8]"
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "definition is 432 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 5 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 3 candidates returned, 0 dropped as sources already used, 3 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 2 of 3 new candidates, without search. Skipped: 1 no readable saved copy. Dropped rows: none. Replaced 3 earlier rows. Added 8 results: 6 from sources already used, 2 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 0 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 7 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Removed 1 references no longer cited; renumbered."
    }
   ],
-  "results_run": "2026-11-14"
+  "results_run": "2026-11-25"
  }
 }
