@@ -250,12 +250,14 @@
  "page": {
   "id": "HCI-09",
   "title": "Interoperable privacy controls",
-  "definition": "People can express and revise understandable rules for collecting, using and sharing their personal data. Participating services exchange and enforce those rules and provide evidence that people and independent auditors can check.",
+  "definition": "People can set and revise understandable rules for collecting, using and sharing their personal data. Global Privacy Control already lets a browser ask websites to stop selling or sharing that data. The broader goal is for participating services to exchange and enforce current choices. A consent receipt lets a person check what they agreed to. Records of processing and disclosure let people and independent auditors check what recipients did.",
   "goal": {
-   "need": "Across three website crawls, fewer than half of sites with evidence of sale/sharing and at least one measured privacy indicator satisfied the study's opt-out criterion. A 2022 traffic study found undeclared transmissions in 276 of 1,687 tested iOS apps. These measurements concern privacy indicators and observable transmissions, respectively; they do not establish compliance for recipients' later uses.",
+   "need": "Opting out site by site makes people repeat the same decision. App privacy labels can also mislead: at least 276 of 1,687 tested iOS apps transmitted data they had not declared. A choice that carries across services can spare people repeated prompts, provided recipients act on it. In an April 2024 California web crawl, only 1,620 of 3,566 sites with evidence of sale or sharing and a measured privacy indicator reflected the opt-out in every indicator they used. Checking whether transfers stopped requires evidence of what recipients did.",
    "need_refs": [
     1,
-    2
+    2,
+    8,
+    26
    ],
    "figures": {
     "caption": "Websites meeting the study's privacy-indicator opt-out criterion",
@@ -312,6 +314,22 @@
      "context": "PII is personally identifiable information; a PII principal is the person to whom it relates.",
      "ref": 5,
      "checked": true
+    },
+    {
+     "body": "European Union Horizon 2020, SPECIAL project",
+     "year": "2016",
+     "quote": "privacy-aware, secure workflows that include usage/access control, transparency and compliance verification",
+     "context": "The grant agreement was signed on 4 November 2016. Its objective also specifies recording consent at collection and giving people a dashboard to understand and control processing.",
+     "ref": 27,
+     "checked": true
+    },
+    {
+     "body": "Article 29 Data Protection Working Party",
+     "year": "1998",
+     "quote": "a minimum and non-negotiable level of privacy protection for all individuals",
+     "context": "Opinion 1/98 called for enforceable data protection rules alongside the proposed Platform for Privacy Preferences and Open Profiling Standard. It placed responsibility for compliance on the controller.",
+     "ref": 28,
+     "checked": true
     }
    ]
   },
@@ -340,20 +358,18 @@
   "milestones": [
    {
     "id": "m1",
-    "title": "A system supports authorizing, maintaining and revoking data-processing permissions.",
-    "criterion": "Implement authorization, maintenance and revocation of processing permissions under CT.PO-P1. Liu et al. (2016) deployed a permission assistant to 72 Android users; 78.7% of recommendations were adopted. Wijesekera et al. (2018) tested contextual permission enforcement for one week in 37 users; validation covered 31 users and 640 prompts, with median preference agreement of 90.24% versus 80.00% for asking permission on first use. Most classifier errors incorrectly granted access. These results concern device permissions.",
+    "title": "An organization has procedures in place to grant, maintain and revoke processing permissions.",
+    "criterion": "Establish and put into practice policies, processes and procedures for authorizing data processing, maintaining those authorizations and revoking them. Authorization may come from an organizational decision or an individual's consent.",
     "set_by": "NIST, Privacy Framework Version 1.0, Appendix A, CT.PO-P1, printed page 23. The outcome appears in a table and is voluntary, not a certification test.",
     "set_by_kind": "standards_body",
-    "threshold_quote": null,
-    "threshold_ref": null,
+    "threshold_quote": "revoking authorizations, and maintaining authorizations",
+    "threshold_ref": 3,
     "refs": [
-     3,
-     10,
-     11
+     3
     ],
     "status": "active",
     "replaced_by": [],
-    "threshold_checked": null
+    "threshold_checked": true
    },
    {
     "id": "m2",
@@ -368,21 +384,23 @@
      10,
      11
     ],
-    "status": "active",
-    "replaced_by": [],
+    "status": "retired",
+    "replaced_by": [
+     "m7",
+     "m8"
+    ],
     "threshold_checked": true
    },
    {
     "id": "m3",
     "title": "A browser communicates its enabled opt-out through Sec-GPC: 1 and a matching JavaScript value.",
-    "criterion": "Under GPC draft sections 3.2–3.4, cache the preference at each top-level navigation. A cached true value produces Sec-GPC: 1 and navigator.globalPrivacyControl equal to true; false produces no header and a false property. Generate at most one header per request. The 2025 website study used GPC across a crawl set of 11,708 sites, demonstrating earlier deployed signaling rather than conformance to the 2026 draft.",
+    "criterion": "Cache the preference when the active document begins loading on each top-level navigation. If enabled, send exactly one Sec-GPC request header with the value 1. If disabled or unset, omit the header. Set navigator.globalPrivacyControl to the cached Boolean value in both cases. Never send Sec-GPC in an HTTP trailer.",
     "set_by": "W3C Privacy Working Group, Global Privacy Control Working Draft of 24 September 2026, sections 3.2–3.4; a draft protocol for web sale/sharing opt-outs.",
     "set_by_kind": "standards_body",
-    "threshold_quote": "If set, this preference is expressed as a single value of 1 or equivalently true according to context.",
+    "threshold_quote": "exactly the numeric character \"1\"",
     "threshold_ref": 7,
     "refs": [
-     7,
-     1
+     7
     ],
     "status": "active",
     "replaced_by": [],
@@ -400,22 +418,145 @@
      3,
      12
     ],
-    "status": "active",
-    "replaced_by": [],
+    "status": "retired",
+    "replaced_by": [
+     "m11",
+     "m12"
+    ],
     "threshold_checked": null
    },
    {
     "id": "m5",
     "title": "A business ends sale/sharing within 15 business days and propagates opt-outs to interim recipients.",
-    "criterion": "For an applicable, nonfraudulent California opt-out request, stop sale/sharing as soon as feasibly possible and within 15 business days of receipt. Notify third parties receiving data between request and compliance; direct them to comply and forward the request to onward recipients from that interval. Let the consumer confirm processing of the request. The cited browser measurements do not establish compliance throughout this recipient chain.",
+    "criterion": "For a valid California opt-out request, stop selling or sharing the consumer's personal information as soon as feasible and within 15 business days of receipt. Notify every third party to whom the business sold or shared that information between submission and compliance. Direct each to comply and forward the request to anyone to whom it made that information available during that interval. Give the consumer a way to confirm that the business processed the request.",
     "set_by": "California Privacy Protection Agency, CCPA Regulations effective 1 January 2026, sections 7026(f)(1)–(2) and 7026(g); applies to CCPA sale/sharing opt-outs.",
     "set_by_kind": "regulator",
     "threshold_quote": "as soon as feasibly possible, but no later than 15 business days",
     "threshold_ref": 8,
     "refs": [
-     8,
-     1,
-     12
+     8
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": false
+   },
+   {
+    "id": "m6",
+    "title": "A prototype detects a mismatch between a person's privacy preferences and a site's stated practices.",
+    "criterion": "Let a person set preferences for collection and use of personal data and compare them with a site's declared practices. A match permits access without interruption. A mismatch alerts the person and offers other ways to proceed.",
+    "set_by": "World Wide Web Consortium, Platform for Privacy Preferences project launch, 11 June 1997, description of the prototype's behavior.",
+    "set_by_kind": "standards_body",
+    "threshold_quote": "the user is notified of the difference and is offered other access options to proceed.",
+    "threshold_ref": 29,
+    "refs": [
+     29
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m7",
+    "title": "People can identify who seeks their consent and understand each purpose for which it is sought.",
+    "criterion": "Present the request distinctly, accessibly and in plain language suited to the audience. Identify the controllers relying on consent, each processing purpose, the types of data and the right to withdraw. Where relevant, explain consent-based automated decision-making and the risks of transfers without an adequacy decision or appropriate safeguards.",
+    "set_by": "European Data Protection Board, Guidelines 05/2020, version 1.1, paragraphs 64–70.",
+    "set_by_kind": "regulator",
+    "threshold_quote": "easily identify who the controller is and to understand what they are agreeing to.",
+    "threshold_ref": 6,
+    "refs": [
+     6,
+     31
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m8",
+    "title": "A person can withdraw consent at any time as easily as they gave it.",
+    "criterion": "Inform the person of the right to withdraw before consent is given. Make withdrawal available at any time and as easy as giving consent, without detriment. When consent is obtained through a service-specific electronic interface, allow withdrawal through that same interface.",
+    "set_by": "General Data Protection Regulation, Article 7(3), as interpreted by the European Data Protection Board in Guidelines 05/2020, paragraphs 113–116.",
+    "set_by_kind": "regulator",
+    "threshold_quote": "It shall be as easy to withdraw as to give consent.",
+    "threshold_ref": 31,
+    "refs": [
+     31,
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m9",
+    "title": "A service can transmit data elements together with their processing permissions.",
+    "criterion": "Put in place a mechanism that transmits each covered data element with the permissions governing its processing and the related data values.",
+    "set_by": "NIST Privacy Framework version 1.0, Appendix A, CT.DM-P7, printed page 24.",
+    "set_by_kind": "standards_body",
+    "threshold_quote": "processing permissions and related data values with data elements",
+    "threshold_ref": 3,
+    "refs": [
+     3
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m10",
+    "title": "A person receives a verifiable consent receipt that identifies the underlying decision.",
+    "criterion": "Provide a consent receipt whose information is accurate, traceable and verifiable. Supply the information the person needs to interpret and use it. The receipt must identify the related record and its context well enough for the person to raise an inquiry or complaint with the controller or a regulator.",
+    "set_by": "ISO/IEC TS 27560:2023, clauses 6.2.3.6, 6.2.3.7 and 6.2.4, for implementations providing consent receipts.",
+    "set_by_kind": "standards_body",
+    "threshold_quote": "information provided in the consent receipt is accurate, traceable, and verifiable.",
+    "threshold_ref": 25,
+    "refs": [
+     25
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m11",
+    "title": "A service makes disclosure records and the origin and history of data available for review.",
+    "criterion": "Maintain records of data disclosures and sharing, together with information about where the data originated and how they moved or changed. Make both available for review or transmission.",
+    "set_by": "NIST Privacy Framework version 1.0, Appendix A, CM.AW-P4 and CM.AW-P6, printed page 25.",
+    "set_by_kind": "standards_body",
+    "threshold_quote": "Data provenance and lineage",
+    "threshold_ref": 3,
+    "refs": [
+     3
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m12",
+    "title": "A service tests and assesses the technical controls it uses to manage data processing.",
+    "criterion": "Test the technical measures implemented to manage data processing and assess how they perform.",
+    "set_by": "NIST Privacy Framework version 1.0, Appendix A, CT.DM-P9, printed page 24.",
+    "set_by_kind": "standards_body",
+    "threshold_quote": "are tested and assessed.",
+    "threshold_ref": 3,
+    "refs": [
+     3
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m13",
+    "title": "Withdrawal through a data recipient revokes the tokens for the affected data-sharing arrangement.",
+    "criterion": "When a consumer withdraws consent through an Australian Consumer Data Right recipient's software, the software calls the data holder's arrangement revocation endpoint with the valid identifier for that arrangement. Revocation invalidates the associated access tokens, refresh tokens, or both, as applicable.",
+    "set_by": "Australian Data Standards Chair, Consumer Data Standards version 1.36.0, CDR Arrangement Revocation and Revoking consent.",
+    "set_by_kind": "standards_body",
+    "threshold_quote": "Consent revocation MUST also revoke associated refresh and/or access tokens.",
+    "threshold_ref": 30,
+    "refs": [
+     30
     ],
     "status": "active",
     "replaced_by": [],
@@ -425,9 +566,7 @@
   "measures": [],
   "not_found": [
    "No published end-to-end success test or common comprehension, duration and error thresholds was located in the named standards and regulatory documents.",
-   "No study among the cited results independently verifies user understanding and subsequent recipient processing together across participating services.",
-   "ISO/IEC TS 27560's full conformance clauses were not accessed; its public scope supports the stated interoperability goal.",
-   "The EUR-Lex GDPR text links redirected to the daily Official Journal; consent conditions are sourced to the EDPB's own guidelines."
+   "No study among the cited results independently verifies user understanding and subsequent recipient processing together across participating services."
   ],
   "references": [
    {
@@ -765,72 +904,274 @@
     "issue": null,
     "pages": "e57165",
     "citation_source": "crossref"
+   },
+   {
+    "id": 25,
+    "kind": "report",
+    "url": "https://cdn.standards.iteh.ai/samples/80392/9102635615bf4b88803e1dc61ba5944b/ISO-IEC-TS-27560-2023.pdf",
+    "doi": null,
+    "title": "Privacy technologies — Consent record information structure",
+    "authors": "ISO/IEC",
+    "container": "ISO/IEC TS 27560:2023, first edition, published preview",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 26,
+    "kind": "journal",
+    "url": "https://www.petsymposium.org/popets/2024/popets-2024-0015.php",
+    "doi": "10.56553/popets-2024-0015",
+    "title": "Generalizable Active Privacy Choice: Designing a Graphical User Interface for Global Privacy Control",
+    "authors": "Zimmeck S, Kuller E, Ma C, Tassone B, Champeau J",
+    "container": "PoPETs",
+    "year": "2024",
+    "volume": "2024",
+    "issue": "1",
+    "pages": "258-279",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 27,
+    "kind": "registry",
+    "url": "https://cordis.europa.eu/project/id/731601",
+    "doi": "10.3030/731601",
+    "title": "Scalable Policy-awarE linked data arChitecture for prIvacy, trAnsparency and compLiance",
+    "authors": "European Commission",
+    "container": "CORDIS, Horizon 2020, grant agreement 731601",
+    "year": "2017",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 28,
+    "kind": "report",
+    "url": "https://ec.europa.eu/justice/article-29/documentation/opinion-recommendation/files/1998/wp11_en.pdf",
+    "doi": null,
+    "title": "Opinion 1/98: Platform for Privacy Preferences (P3P) and the Open Profiling Standard (OPS)",
+    "authors": "Working Party on the Protection of Individuals with regard to the processing of Personal Data",
+    "container": "WP 11",
+    "year": "1998",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 29,
+    "kind": "press_release",
+    "url": "https://www.w3.org/press-releases/1997/p3p-project/",
+    "doi": null,
+    "title": "The World Wide Web Consortium (W3C) Announces the Platform for Privacy Preferences (P3) Project at FTC Workshop",
+    "authors": "World Wide Web Consortium",
+    "container": null,
+    "year": "1997",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 30,
+    "kind": "web",
+    "url": "https://consumerdatastandardsaustralia.github.io/standards/",
+    "doi": null,
+    "title": "Consumer Data Standards",
+    "authors": "Data Standards Chair",
+    "container": "Consumer Data Standards, version 1.36.0",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 31,
+    "kind": "filing",
+    "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?device=c&uri=CELEX%3A32016R0679",
+    "doi": null,
+    "title": "Regulation (EU) 2016/679 of the European Parliament and of the Council of 27 April 2016 on the protection of natural persons with regard to the processing of personal data and on the free movement of such data, and repealing Directive 95/46/EC (General Data Protection Regulation)",
+    "authors": "European Parliament and Council of the European Union",
+    "container": "Official Journal of the European Union, L 119",
+    "year": "2016",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 32,
+    "kind": "preprint",
+    "url": "https://lorrie.cranor.org/pubs/privacy-bird-20050714.pdf",
+    "doi": null,
+    "title": "User Interfaces for Privacy Agents",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 33,
+    "kind": "journal",
+    "url": "https://publications.aston.ac.uk/id/document/85529",
+    "doi": null,
+    "title": "Consent Receipts for a Usable and Auditable Web of Personal Data",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 34,
+    "kind": "journal",
+    "url": "https://www.mdpi.com/2227-9032/11/4/496",
+    "doi": "10.3390/healthcare11040496",
+    "title": "A GDPR-Compliant Dynamic Consent Mobile Application for the Australasian Type-1 Diabetes Data Network",
+    "authors": "Wang Z, Stell A, Sinnott RO, the ADDN Study Group",
+    "container": "Healthcare",
+    "year": "2023",
+    "volume": "11",
+    "issue": "4",
+    "pages": "496",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 35,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2605.15056",
+    "doi": null,
+    "title": "Deceptive Cookies: Consent by Design – A Mixed Methods Study",
+    "authors": "Sjøflot LH, Opsahl TA",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 36,
+    "kind": "web",
+    "url": "https://www.clearcotelabs.com/audit/checks/gpc-header-vs-navigator",
+    "doi": null,
+    "title": "Global Privacy Control reads the same in the page, in a worker and on the wire",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 37,
+    "kind": "web",
+    "url": "https://github.com/brave/brave-browser/issues/49730",
+    "doi": null,
+    "title": "Add policy for GPC",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 38,
+    "kind": "report",
+    "url": "https://blough.ece.gatech.edu/research/papers/css15.pdf",
+    "doi": "10.1109/HPCC-CSS-ICESS.2015.235",
+    "title": "Distributed Enforcement of Sticky Policies with Flexible Trust",
+    "authors": "Brown J, Blough DM",
+    "container": "2015 IEEE 17th International Conference on High Performance Computing and Communications, 2015 IEEE 7th International Symposium on Cyberspace Safety and Security, and 2015 IEEE 12th International Conference on Embedded Software and Systems",
+    "year": "2015",
+    "volume": null,
+    "issue": null,
+    "pages": "1202-1209",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 39,
+    "kind": "report",
+    "url": "https://sancy.iut.uca.fr/~lafourcade/PAPERS/TWE10.pdf",
+    "doi": "10.1109/IIHMSP.2010.130",
+    "title": "Privacy by Data Provenance with Digital Watermarking - A Proof-of-Concept Implementation for Medical Services with Electronic Health Records",
+    "authors": "Tharaud J, Wohlgemuth S, Echizen I, Sonehara N, Muller G, Lafourcade P",
+    "container": "2010 Sixth International Conference on Intelligent Information Hiding and Multimedia Signal Processing",
+    "year": "2010",
+    "volume": null,
+    "issue": null,
+    "pages": "510-513",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 40,
+    "kind": "report",
+    "url": "https://innovation.consumerreports.org/CR_AuthorizedAgentCCPA_022021_VF_.pdf",
+    "doi": null,
+    "title": "The State of Authorized Agent Opt Outs Under the California Consumer Privacy Act",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 41,
+    "kind": "web",
+    "url": "https://support.maxmind.com/knowledge-base/articles/ccpa-consumer-requests-metrics",
+    "doi": null,
+    "title": "CCPA Consumer Requests Metrics",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 42,
+    "kind": "web",
+    "url": "https://redbark.com/compliance",
+    "doi": null,
+    "title": "Compliance",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
    }
   ],
   "milestone_order": [
+   "m6",
    "m1",
-   "m2",
+   "m10",
+   "m7",
+   "m8",
    "m3",
-   "m4",
-   "m5"
+   "m9",
+   "m11",
+   "m12",
+   "m5",
+   "m13"
   ],
   "results": [
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "partial",
-    "finding": "In a field study of 72 Android users, 78.7% of the privacy assistant’s recommendations were adopted.",
-    "detail": "Participants could review and modify permission settings, but the excerpt does not establish authorization, maintenance and revocation of processing permissions under CT.PO-P1.",
-    "quote": "We report on a field study (n=72) in which we implemented and evaluated a Personalized Privacy Assistant (PPA) with participants using their own Android devices. The results of our study are encouraging. We find that 78.7% of the recommendations made by the PPA were adopted by users.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": false,
-    "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "A crawler sent GPC signals to a set of 11,708 websites.",
-    "detail": "The study demonstrates earlier deployed signaling but does not test the 2026 draft’s caching, header, JavaScript property, or duplicate-header requirements.",
-    "quote": "We constructed a crawl set of 11,708 sites (§3.1) and evaluated\nthe applicability of the CCPA opt out right for each site (§3.2).\nOur evaluation methodology is based on detecting changes\nin privacy strings that sites send to integrated third parties\nafter receiving a GPC signal (§3.3).",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m5",
-    "case": null,
-    "verdict": "partial",
-    "finding": "In December 2023, 44% of 3,226 qualifying sites indicated opt-out through all implemented privacy strings.",
-    "detail": "The study observed privacy-string values from outside the sites. It did not establish when sales or sharing stopped, notification and onward propagation through the recipient chain, or consumer confirmation.",
-    "quote": "In December 2023,\n44% (1,411/3,226) of sites that sell or share personal infor-\nmation per the CCPA and that implement at least one of the\nfour privacy strings opted users out via all implemented pri-\nvacy strings.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "partial",
-    "finding": "ConsentChk analyzed 1,312 websites; 43.12% of cookies ignored rejection.",
-    "detail": "The study tested recorded cookie rejection and subsequent cookie behavior, but did not establish authorization, maintenance, and revocation of processing permissions as a complete system.",
-    "quote": "43.12% of cookies on websites\nignored users’ cookie consent rejection.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
    {
     "milestone": "m4",
     "case": null,
@@ -870,20 +1211,6 @@
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 2,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "met",
-    "finding": "A consent framework implemented permission granting and withdrawal and was evaluated using 5 use cases.",
-    "detail": "The tool checks consent histories as policies evolve. The paper describes integration with a runtime access-control architecture, but does not report such a deployment.",
-    "quote": "The framework was evaluated using the five use cases and a simulation to measure the \nframework scalability.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 14,
     "judged_by": "gpt-6.1-terra",
     "judged_on": "2026-11-15"
    },
@@ -944,20 +1271,6 @@
     "judged_on": "2026-11-15"
    },
    {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "partial",
-    "finding": "All 12 Proximus pilot participants remembered which personal-data categories they had consented to.",
-    "detail": "The pilot supported consent, but the report does not establish authorization, maintenance and revocation of processing permissions under CT.PO-P1. Dynamic consent was not implemented.",
-    "quote": "All data subjects remembered after the test for which personal data categories they had given consent.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
     "milestone": "m4",
     "case": null,
     "verdict": "partial",
@@ -972,20 +1285,6 @@
     "judged_on": "2026-11-15"
    },
    {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "partial",
-    "finding": "After revocation, 17 of 136 TCF websites returned positive consent through the consent API.",
-    "detail": "The study tests consent registration after acceptance and revocation, but does not establish a complete system satisfying CT.PO-P1.",
-    "quote": "In the websites with the TCF, 17 (12.5%) out of 136\nwebsites provide positive consent in the __tcfapi, 12 (11.9%) out\nof 101 websites store a positive consent in a cookie, and 8 (25%)\nout of 32 websites store a positive consent in a localStorage.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
     "milestone": "m4",
     "case": null,
     "verdict": "partial",
@@ -996,62 +1295,6 @@
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m5",
-    "case": null,
-    "verdict": "partial",
-    "finding": "On 101 of 136 websites, third parties sent acceptance were not observed receiving revocation in HTTP requests.",
-    "detail": "The study concerns EU consent revocation, not California sale or sharing opt-outs. Its network observations do not establish the 15-business-day deadline, consumer confirmation or onward recipient compliance; server-side notification may produce false positives.",
-    "quote": "Surprisingly, we\nfound that on 101 websites, third parties that have received consent\nupon user’s acceptance, are not informed of revocation, leading to\nthe illegal processing of users’ data by such third parties according\nto EU laws.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Among 142 parents in ungated consent conditions, 97.3% who fell below the comprehension threshold consented.",
-    "detail": "Participants made a consent decision in a hypothetical app-use task. The experiment did not establish maintenance or revocation of processing permissions.",
-    "quote": "In these conditions, consent was nearly identical among participants who met the comprehension threshold (96.9%) and those who did not (97.3%)",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 17,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "partial",
-    "finding": "The SPLog model represents consent assertion and revocation with 2 subclasses; no user sample is reported.",
-    "detail": "The vocabulary can record consent and its revocation, and the platform checks logged processing against policies. The reported synthetic benchmark does not establish authorization, maintenance and revocation of processing permissions under CT.PO-P1.",
-    "quote": "We currently con-\nsider two subclasses, splog:ConsentAssertion specifying a consent provided by a data subject\nto a splog:Controller (which in turn can be reachable via the splog:controller property), and\nsplog:ConsentRevocation, denoting the revocation of a given consent.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 18,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "met",
-    "finding": "Sieve’s permission-control prototype re-keyed a 100 KB data block in 0.66 seconds, averaged over 50 runs.",
-    "detail": "The prototype supports granting access, changing permissions and revoking keys. Revocation cannot prevent a service from retaining or sharing data it already received.",
-    "quote": null,
-    "checked": null,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 19,
     "judged_by": "gpt-6.1-terra",
     "judged_on": "2026-11-15"
    },
@@ -1084,34 +1327,6 @@
     "judged_on": "2026-11-15"
    },
    {
-    "milestone": "m5",
-    "case": null,
-    "verdict": "partial",
-    "finding": "LexisNexis Risk Solutions reported a mean response time of 1 day for 34,102 sale/share opt-out requests.",
-    "detail": "The company reports all requests fulfilled, but the mean response time does not establish that each was processed within 15 business days. The report does not establish notification and propagation through the recipient chain or consumer confirmation.",
-    "quote": "Mean Number of Days to Respond to Requests to Opt-Out: 1",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 22,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "met",
-    "finding": "IoT2Wallets consent verification/revocation: 200 tests across two scenarios, 0/200 failures.",
-    "detail": "Testbed pilot; consent verification and revocation correct across patient- and institution-controlled scenarios; contracts had internal review only, no independent audit.",
-    "quote": "All 200 consent-verification transactions returned the correct result across both deployment scenarios. (0/200 failures; Wilson 95% CI upper bound ≈ 1.8%.)",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 23,
-    "judged_by": "deepseek/deepseek-v4.1-flash-1017",
-    "judged_on": "2026-11-15"
-   },
-   {
     "milestone": "m4",
     "case": null,
     "verdict": "partial",
@@ -1122,20 +1337,6 @@
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 23,
-    "judged_by": "deepseek/deepseek-v4.1-flash-1017",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "partial",
-    "finding": "44 participants logged on; 25 (57%) authorized contact release; no participants actively refused consent.",
-    "detail": "Withdrawal and revision are described as platform features, but the reported use shows only authorization (25 consents) and zero active refusals; no revocation or maintenance test is reported.",
-    "quote": "A total of 44 (75%) logged onto the platform (indicating use), and 25 (57%) of these expressed interest in the new research study and gave consent for their contact details to be released to the OZ-Genetics study team. No participants actively refused consent.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 24,
     "judged_by": "deepseek/deepseek-v4.1-flash-1017",
     "judged_on": "2026-11-15"
    },
@@ -1152,18 +1353,767 @@
     "ref": 24,
     "judged_by": "deepseek/deepseek-v4.1-flash-1017",
     "judged_on": "2026-11-15"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "In a field study of 72 Android users, participants adopted 78.7% of the privacy assistant's app permission recommendations.",
+    "detail": null,
+    "quote": "We find that 78.7% of the recommendations made by the PPA were adopted by users.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m12",
+    "case": null,
+    "verdict": "met",
+    "finding": "In a field study of 72 Android users, participants adopted 78.7% of the privacy assistant's app permission recommendations.",
+    "detail": "The evaluation measured how participants used the permission-management tool. It did not measure whether apps adhered to the resulting settings.",
+    "quote": "We find that 78.7% of the recommendations made by the PPA were adopted by users.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "In April 2024, 45% of 3,566 sites with evidence of sale or sharing indicated opt-out across every implemented privacy string.",
+    "detail": "The study counted a public GPC support declaration among the privacy strings. Its measurements did not establish what recipients did with personal information.",
+    "quote": "In Febru-\nary 2024, this percentage decreased to 43% (1,473/3,402)\nbefore increasing to 45% (1,620/3,566) in April 2024.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m9",
+    "case": null,
+    "verdict": "partial",
+    "finding": "In the December crawl, 9% of 468 sites with California-relevant GPP sections encoded a sale opt-out after GPC.",
+    "detail": "The GPP field conveys a user's sale opt-out status. The crawler did not trace the field alongside individual personal data values.",
+    "quote": "In December 2023,\nafter a GPC signal was sent, 9% (44/468) of sites opted the\nuser out of selling.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m12",
+    "case": null,
+    "verdict": "partial",
+    "finding": "In April 2024, 10% of 3,402 sites assessed had inconsistent GPC opt-out indications across their implemented privacy strings.",
+    "detail": "The inconsistency analysis covered the US Privacy String, Global Privacy Platform String, and OptanonConsent cookie. It excluded the public GPC support declaration.",
+    "quote": "This\npercentage increased to 12% (400/3,246) in February 2024\nbefore decreasing to 10% (338/3,402) in April 2024.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Across 40 validation sites, manual checks reproduced 92.1% of ConsentChk’s ignored-rejection cookie detections.",
+    "detail": "The researchers selected sites where the crawler had already detected ignored rejections. The percentage measures reproduction of flagged cookies in that sample.",
+    "quote": "We manually reproduced and verified that\n92.1% of cookies with Ignored Cookie Rejection, 91.2% with\nUndeclared Cookies, and 87% with Wrong Cookie Category\nwere detected by ConsentChk.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "In a 1,793-site study, 47.35% of cookies classified as likely containing personal information were undeclared.",
+    "detail": "The 1,793 sites are the overall study sample. The percentage is calculated over cookies classified as likely containing personal information.",
+    "quote": "We found that undeclared cookies constituted 47.35% of per-\nsonal information cookies on websites.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m12",
+    "case": null,
+    "verdict": "partial",
+    "finding": "In a 1,793-site audit, 96.18% of websites accessed from Ireland showed at least one cookie consent violation.",
+    "detail": "The audit measured cookie behavior under the study’s definitions. The 1,793-site sample spans all eight regions, while the reported percentage is specific to Ireland.",
+    "quote": "Specifically, we found that 96.18% of websites ac-\ncessed in the EU contain at least one cookie consent violation.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Among 1,687 iOS apps tested at launch, 192 displayed a consent dialogue, privacy policy, or privacy notice.",
+    "detail": "The screen check counted privacy notices and policies alongside consent dialogues. A single screenshot could miss a request that appeared only after interaction.",
+    "quote": "Overall, 192 apps displayed\na message ﬁtting our criteria.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 2,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m12",
+    "case": null,
+    "verdict": "partial",
+    "finding": "With tracking permission withheld, 282 of 1,687 iOS apps transmitted the all-zero advertising identifier.",
+    "detail": "Each app ran for one minute without interaction. The all-zero value shows the identifier returned under the tested setting. Other tracking mechanisms fall outside that result.",
+    "quote": "We searched the collected traﬃc records and found\n282 apps transmitting this all-0 IDFA value",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 2,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Across five policy-evolution use cases, the consent framework modeled how processing permissions are granted, maintained and revoked.",
+    "detail": "The overlapping-consent example also shows that retroactive withdrawal can end access to previously collected data when no other applicable consent remains.",
+    "quote": "the act to collect or access may be attributed to any of the overlapping \nconsents that authorize the event.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m12",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The consent verifier took 6.7 seconds to query collection and access after a simulated year for one data subject, averaged over five runs.",
+    "detail": "The realistic scenario assumed daily checks, weekly changes to data types and recipients, and consent changes every 90 days.",
+    "quote": "the time to query the knowledge base for collection and access based on the realistic scenario at \n90 days is 2.7 seconds for one data subject, and after one year is 6.7 seconds.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The CNE pilot offered 3 places to grant or withdraw consent. The internal participant count was unreported.",
+    "detail": "The three places were during installation, before a speed test and in settings.",
+    "quote": "The app had three places to give/withdraw consent: during installation, before speed test \nexecution and in the settings menu.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "In the Events Nearby walkthrough, 11 of 12 participants recalled the purpose for which they gave consent.",
+    "detail": "Participants separately reported that controller and processor labels in the Privacy Dashboard were too technical.",
+    "quote": "Only one data subject did not remember any longer for which purpose consent was given.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m8",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The CNE pilot offered 3 in-app locations to give or withdraw consent. The internal participant count was unreported.",
+    "detail": "The pilot also offered withdrawal through the linked Privacy Dashboard.",
+    "quote": "The app had three places to give/withdraw consent: during installation, before speed test \nexecution and in the settings menu.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m9",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The CNE pilot sent 3 data fields for additional use and linked the payload to its consent policy at the SPECIAL server. The transfer count was unreported.",
+    "detail": "The report describes sticky policies at the SPECIAL server and states that an end-to-end implementation was still unavailable.",
+    "quote": "Thus only there three fields of the data set are transferred to the SPECIAL \nserver (for analysis by Motionlogic).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m11",
+    "case": null,
+    "verdict": "met",
+    "finding": "CNE pilot users could review collection and trace sharing and use in the dashboard. The internal participant count was unreported.",
+    "detail": "The report describes a small internal pilot. Some users found the dashboard confusing or overly detailed.",
+    "quote": "Being able to review the data col lection \nand even trace the share and use of one’s data was most interesting for our users",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m12",
+    "case": null,
+    "verdict": "met",
+    "finding": "All 4 compliance-checking techniques tested in Refinitiv's Know-Your-Customer pilot worked.",
+    "detail": "The report gives qualitative performance comparisons. Some legal judgments still required attestations from the Privacy Office.",
+    "quote": "All worked. The first opti on, as exemplified by TenForce's compliance engine, has the performance \nprofile that makes it the preferred option to check consent compliance in real-time.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Of 136 TCF websites supporting withdrawal, 17 still returned positive consent through the API afterward.",
+    "detail": "The result concerns the permission exposed by the API. Other stores and network messages could carry different values.",
+    "quote": "In the websites with the TCF, 17 (12.5%) out of 136\nwebsites provide positive consent in the __tcfapi,",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m8",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Of 158 reachable Tranco websites, 35 required extra steps to reach withdrawal within the same interface.",
+    "detail": "The step count measures how users reach the withdrawal option. The headline uses the counts in Section 5.1.2 and Table 4. Table 1 gives a different count.",
+    "quote": "35 (22.1%)\nwebsites out of 158 allow users to access the revocation option\nwithin the same interface , but with additional obstruction, requir-\ning them 2 or more steps to revoke consent.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m12",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Advertising or analytics cookies were present after withdrawal on 69 of 120 websites offering same-interface withdrawal.",
+    "detail": "The researchers classified cookies with CookieBlock and identified a possible source of classification error. The result concerns browser cookies observed after withdrawal.",
+    "quote": "Out of the 120 websites where revocation\nwas possible within the same interface, we find AA cookies after\nrevocation on 69 (57.5%) websites.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "KidsZone timed slide recap (n=48): 41.7% of parents met the first-attempt comprehension threshold.",
+    "detail": "The recap combined repeated exposure, simplified explanations, illustrations, and pacing. Its first-attempt pass rate did not reliably exceed the plain-text control after correction for multiple comparisons.",
+    "quote": "The slide recap condition had the highest first-attempt passing rate (41.7%), and 66.4% of retakers improved.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m11",
+    "case": null,
+    "verdict": "partial",
+    "finding": "SPECIAL-K’s third release supported listing and exporting disclosure records in one platform implementation.",
+    "detail": "The provenance vocabulary describes log metadata. The BeFit example illustrates how data lineage could be reviewed, but the report gives no measured sample for the listing or export functions.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m12",
+    "case": null,
+    "verdict": "met",
+    "finding": "SPECIAL-K’s compliance checker reached 3,489 events/s on a batch of 10 million synthetic events.",
+    "detail": "The evaluation measured a compliance checker on synthetic workloads. At the highest streaming rate, events queued and maximum latency reached 17 minutes.",
+    "quote": "maximum of 3,489 events/s in the case of 10M events.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Sieve implemented access grants, updates and revocation in a proof of concept with two web services.",
+    "detail": "After a service decrypts data, it can retain or share its own copy even after Sieve revokes access to the stored copy.",
+    "quote": "As a proof of concept, we integrated\nSieve with two open-source web services, demonstrating\nthat Sieve is a practical approach for restricting access to\nsensitive user data.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m9",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Sieve's Piwigo test uploaded one photo with three tags used for attribute-based access.",
+    "detail": "Object tags describe the data. The separately issued key encodes the service's access policy.",
+    "quote": "To test the end-to-end performance, we uploaded a\n375 KB photo which had three tags (location, date, and\nusername).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m12",
+    "case": null,
+    "verdict": "met",
+    "finding": "Sieve access queries over one million metadata blocks averaged 0.13 ms.",
+    "detail": "Each query used five random attributes combined with ANDs and ORs. Tests ran on one machine with servers on the loopback interface.",
+    "quote": "Each query\ntook 0.13 ms to complete on average.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Across 35 CURE participants, the average score on questions about what processing they had agreed to was 86%.",
+    "detail": "The questionnaire checked answers against each participant’s recorded choices. It did not directly test whether participants could identify every controller relying on consent.",
+    "quote": "More than a half of the participants answered\nall the questions correctly, and on average users got 86% of the questions correct.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m8",
+    "case": null,
+    "verdict": "partial",
+    "finding": "In a 35-person CURE study, scripted tasks that included withdrawing consent averaged 1 second each.",
+    "detail": "The average pools grant, withdrawal and overview tasks. It does not isolate withdrawal time or compare it directly with grant time.",
+    "quote": "The participants required, on\naverage, 1 second to complete each of the tasks.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m10",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Among 16 moderated interview participants shown a CDR receipt, just under half expected a confirmation or record of the sharing arrangement.",
+    "detail": "The study used a fictional data recipient. Some participants wanted more specific account information, recipient contact details or accreditation information.",
+    "quote": "The majority of round 2-3 moderated interview participants valued receiving the CDR receipt, with just under half stating that they expected to receive a confirmation or record of the sharing arrangement.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "In the simplified banking-data consent prototype, 83.0% of 47 participants correctly recalled the purpose.",
+    "detail": "The purpose result covers a simulated personal finance service. Recollection was measured directly after the prototype task.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m8",
+    "case": null,
+    "verdict": "partial",
+    "finding": "In the simplified CDR consent prototype, 46.8% of 47 participants correctly recalled how to withdraw.",
+    "detail": "The report identified withdrawal methods as one of two criteria contributing to the statistically significant decrease in subjective comprehension.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "LexisNexis Risk Solutions reported a median response time of 1 day for 34,102 CCPA sale or sharing opt-out requests in 2025.",
+    "detail": "The report gives aggregate response times. It provides no per-request cessation times and does not specify whether the reported days are business days.",
+    "quote": "Median Number of Days to Respond to Requests to Opt-Out: 1",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 22,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "IoT2Wallets made correct authorization decisions in all 200 consent-verification transactions.",
+    "detail": "The result covers clinician access through the pilot gateway. Administrative access was governed by host defaults.",
+    "quote": "All 200 consent-verification transactions returned the correct result across both deployment scenarios.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 23,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m8",
+    "case": null,
+    "verdict": "partial",
+    "finding": "In 200 IoT2Wallets verification and revocation tests, gateway revocation took at most one block confirmation in each revocation case.",
+    "detail": "The paper gives a combined test count and does not isolate the number of revocation cases.",
+    "quote": "Consent revocation propagated to the gateway within one block confirmation time in every test case, and no FHIR resource was released after revocation",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 23,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m11",
+    "case": null,
+    "verdict": "partial",
+    "finding": "IoT2Wallets access logs matched 100% of gateway access events across 216 patient-nights and 60 role-based cases.",
+    "detail": "Fidelity was measured against the gateway request log. That comparison covers gateway-recorded access and leaves downstream disclosures and data lineage unverified.",
+    "quote": "On-chain access logs showed 100% event-capture fidelity against the independently maintained gateway request log across both deployment scenarios",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 23,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m12",
+    "case": null,
+    "verdict": "met",
+    "finding": "IoT2Wallets credential verification averaged 95 ms across 200 test transactions.",
+    "detail": "The measurements apply to the institutional testbed. The study did not perform concurrency or load testing or an independent smart-contract audit.",
+    "quote": "Table 3  reports latency across 200 test transactions per operation. All figures below were measured on the four-node Besu testbed described in  Section 2.9 , using data volumes and access patterns drawn from the clinical pilot; they are testbed measurements, not production latencies from a live hospital deployment.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 23,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Of 44 ATHENA platform users, 25 authorized release of their contact details to the COVID OZ-Genetics study team.",
+    "detail": "The 25 refers to users who authorized contact-detail release. The abstract's count of trial registrations describes a different outcome.",
+    "quote": "A total of 44 (75%) logged onto the platform (indicating use), and 25 (57%) of these expressed interest in the new research study and gave consent for their contact details to be released to the OZ-Genetics study team.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 24,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m10",
+    "case": null,
+    "verdict": "partial",
+    "finding": "In the 44-user ATHENA pilot, 25 authorized release of contact details through a workflow that provided a digital consent receipt.",
+    "detail": "The 25 counts consent decisions. The paper gives no separate count of receipts delivered, opened or verified.",
+    "quote": "Consent is submitted via a digital signature ( Figure 3 ), and participants are provided a digital receipt, which can be viewed within the dynamic consent platform.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 24,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Of 17 ATHENA survey respondents, 82% agreed that the information presented during the consent process was clear.",
+    "detail": "The survey measured perceived clarity. It did not test whether respondents could correctly identify the controller or explain the purpose.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 24,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m8",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The 44-user ATHENA pilot offered withdrawal in the same web platform used to give consent.",
+    "detail": "The paper describes the implemented feature and gives no withdrawal test or comparison of the effort required for the two actions.",
+    "quote": "In our platform, this was realized through a flexible consent model that enables digital consent, withdrawal, and revision of consent in response to new data requests.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 24,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m11",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The ATHENA platform piloted with 44 users made data changes viewable in audit logs.",
+    "detail": "The study gives no audit-log sample size or example tracing an actual disclosure.",
+    "quote": "All data were stored in Queensland Health, and all data changes were audited and can be viewed via comprehensive audit logs.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 24,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m12",
+    "case": null,
+    "verdict": "partial",
+    "finding": "In ATHENA's live test, 25 of 44 platform users used the consent workflow to authorize release of their contact details.",
+    "detail": "The measured outcome was submission of authorization. The study gives no test result for whether the subsequent release followed the recorded choice.",
+    "quote": "A total of 44 (75%) logged onto the platform (indicating use), and 25 (57%) of these expressed interest in the new research study and gave consent for their contact details to be released to the OZ-Genetics study team.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 24,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "met",
+    "finding": "Privacy Bird flagged 50% of 588 P3P-enabled websites as mismatches at the medium privacy setting.",
+    "detail": "The July 2005 draft was under review. The 50% measures how often the medium setting flagged a site, rather than the accuracy of mismatch detection.",
+    "quote": "This study found that 25% of sites received red \nbirds on the low setting, 50% of sites received red birds on the medium setting, and 82% \nof sites received red birds on the high setting [9].",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 32,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m10",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The website-form prototype generated a 1-kilobyte signed consent receipt and stored the user's copy in a browser extension. Sample size unreported.",
+    "detail": "The evaluation focused on receipt generation and performance. It did not establish whether a recipient could interpret the receipt and use it to identify the controller's record in an inquiry or complaint.",
+    "quote": "After this step, the actual receipts are generated,\nand for the user, stored locally by the browser extension (as\nshown in Figure 3).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 33,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m8",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The ADDN Consent prototype offers 1-click subproject withdrawal in the same mobile app used to opt in. No participants were tested.",
+    "detail": "The authors describe withdrawal as available at any time, but their mock subproject workflow only explicitly permits changes before the data-load cutoff.",
+    "quote": "Patients can withdraw their consent at any time by simply clicking a button, and the withdrawal action is as easy as the consent action.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 34,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m8",
+    "case": null,
+    "verdict": "partial",
+    "finding": "In a 20-person website usability study, withdrawing cookie consent took 21 times as long as giving it, on average.",
+    "detail": "Participants who gave consent were asked to withdraw it on one to three sites, depending on session time. The study used convenience sampling.",
+    "quote": "On average, it took 21 times longer to withdraw consent than to give it.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 35,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Firefox 144 showed no true navigator.globalPrivacyControl value without the Sec-GPC header across 8 preference combinations.",
+    "detail": "The source separately reports a mismatch in Camoufox on Windows. Its fingerprint configuration produced a false page value, a true worker value, and no Sec-GPC header.",
+    "quote": "Measured on Firefox 144: default is false, false and no header; with GPC enabled it is true, true and Sec-GPC: 1; a sweep of all eight combinations of Firefox's GPC and Do-Not-Track preferences could not produce a true property without the header.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 36,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "On one site across three Brave policy configurations, enabled GPC sent Sec-GPC: 1 and returned true in JavaScript.",
+    "detail": "The unconfigured enterprise policy left GPC enabled by default, so that case did not test an unset browser preference.",
+    "quote": "confirmed\nSec-GPC: 1\nheader is sent with network requests\nconfirmed that\nnavigator.globalPrivacyControl\njavascript call on a page returns true",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 37,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m9",
+    "case": null,
+    "verdict": "met",
+    "finding": "One Excel prototype demonstrated remote transfer of labeled spreadsheet values with their governing processing permissions.",
+    "detail": "The paper demonstrates a proof of concept in a spreadsheet-sharing workflow using a TPM simulator. It gives no sample size for successful transfers. The source is an IEEE conference proceedings paper, represented as report because the schema has no conference category.",
+    "quote": "Data transfer is represented by the encrypted policy-data\npackage and accompanying key in Figure 1. The system is\ncapable of transferring subsets of data to match the security\non the receiving end of the transfer.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 38,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m11",
+    "case": null,
+    "verdict": "met",
+    "finding": "DETECTIVE reconstructed and displayed 3 disclosures in an audit of 1 X-ray image.",
+    "detail": "The simulated audit exposed a stale watermark. Broader testing of watermark robustness and extractability was left for future work. The supplied text identifies the paper as conference proceedings and gives no peer-review status.",
+    "quote": "The results of auditing an image found in the\npharmaceutical company reveal that data consumer and\nprovider commitments and identities are the same in the\nlast two disclosures (disclosure 3 and disclosure 2),\nwhich prove that the foreign clinic had violated the\nprotocol.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 39,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Companies sent processing confirmations for 121 of 210 California opt-out requests submitted by Consumer Reports as an authorized agent.",
+    "detail": "The 7-business-day average measures response time. The pilot did not verify when sale or sharing stopped or track notices and forwarding to downstream recipients.",
+    "quote": "In 121 cases, the company sent a confirmation that the opt out had been processed.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 40,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "MaxMind’s 173,682 CCPA sale or sharing opt-out requests in 2025 had a median closure time of 4.0 days.",
+    "detail": "The table reports aggregate closure times in unspecified days and groups full and partial compliance together. It provides neither the time to cessation nor the number of requests that exceeded 15 business days.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 41,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m13",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Redbark reports real-time bank data access revocation after withdrawal through Fiskil’s dashboard. Sample size and measured latency are unspecified.",
+    "detail": "The page describes production behavior. Queued token deletion does not establish that the data holder invalidated the arrangement’s tokens.",
+    "quote": "Withdrawal is real-time: it revokes data access at the bank, disables every sync that depends on that consent, and queues deletion of the associated connection data, tokens, and any data derived from it, such as rule suggestions.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 42,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://pure.au.dk/portal/en/publications/follow-my-recommendations-a-personalized-privacy-assistant-for-mo/",
-    "milestone": "m1",
-    "hash": "6b6ce90e858d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pure.au.dk/portal/en/publications/follow-my-recommendations-a-personalized-privacy-assistant-for-mo/",
     "milestone": "m2",
     "hash": "c13bc2073101",
     "date": "2026-11-15",
@@ -1171,36 +2121,8 @@
    },
    {
     "url": "https://pure.au.dk/portal/en/publications/follow-my-recommendations-a-personalized-privacy-assistant-for-mo/",
-    "milestone": "m3",
-    "hash": "4ea4207e358b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pure.au.dk/portal/en/publications/follow-my-recommendations-a-personalized-privacy-assistant-for-mo/",
     "milestone": "m4",
     "hash": "6cb7950521a7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pure.au.dk/portal/en/publications/follow-my-recommendations-a-personalized-privacy-assistant-for-mo/",
-    "milestone": "m5",
-    "hash": "239c036be84d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pure.au.dk/portal/en/publications/follow-my-recommendations-a-personalized-privacy-assistant-for-mo/",
-    "milestone": "completion",
-    "hash": "915b33b141ca",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.usenix.org/conference/usenixsecurity25/presentation/hausladen",
-    "milestone": "m1",
-    "hash": "6b6ce90e858d",
     "date": "2026-11-15",
     "by": "gpt-6.1-terra"
    },
@@ -1213,36 +2135,8 @@
    },
    {
     "url": "https://www.usenix.org/conference/usenixsecurity25/presentation/hausladen",
-    "milestone": "m3",
-    "hash": "4ea4207e358b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.usenix.org/conference/usenixsecurity25/presentation/hausladen",
     "milestone": "m4",
     "hash": "6cb7950521a7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.usenix.org/conference/usenixsecurity25/presentation/hausladen",
-    "milestone": "m5",
-    "hash": "239c036be84d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.usenix.org/conference/usenixsecurity25/presentation/hausladen",
-    "milestone": "completion",
-    "hash": "915b33b141ca",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://rtcl.eecs.umich.edu/rtclweb/assets/publications/2025/usenix25-tang.pdf",
-    "milestone": "m1",
-    "hash": "6b6ce90e858d",
     "date": "2026-11-15",
     "by": "gpt-6.1-terra"
    },
@@ -1255,36 +2149,8 @@
    },
    {
     "url": "https://rtcl.eecs.umich.edu/rtclweb/assets/publications/2025/usenix25-tang.pdf",
-    "milestone": "m3",
-    "hash": "4ea4207e358b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://rtcl.eecs.umich.edu/rtclweb/assets/publications/2025/usenix25-tang.pdf",
     "milestone": "m4",
     "hash": "6cb7950521a7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://rtcl.eecs.umich.edu/rtclweb/assets/publications/2025/usenix25-tang.pdf",
-    "milestone": "m5",
-    "hash": "239c036be84d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://rtcl.eecs.umich.edu/rtclweb/assets/publications/2025/usenix25-tang.pdf",
-    "milestone": "completion",
-    "hash": "915b33b141ca",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://crysp.petsymposium.org/popets/2022/popets-2022-0119.php",
-    "milestone": "m1",
-    "hash": "6b6ce90e858d",
     "date": "2026-11-15",
     "by": "gpt-6.1-terra"
    },
@@ -1297,36 +2163,8 @@
    },
    {
     "url": "https://crysp.petsymposium.org/popets/2022/popets-2022-0119.php",
-    "milestone": "m3",
-    "hash": "4ea4207e358b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://crysp.petsymposium.org/popets/2022/popets-2022-0119.php",
     "milestone": "m4",
     "hash": "6cb7950521a7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://crysp.petsymposium.org/popets/2022/popets-2022-0119.php",
-    "milestone": "m5",
-    "hash": "239c036be84d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://crysp.petsymposium.org/popets/2022/popets-2022-0119.php",
-    "milestone": "completion",
-    "hash": "915b33b141ca",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/pdf/2206.06406",
-    "milestone": "m1",
-    "hash": "6b6ce90e858d",
     "date": "2026-11-15",
     "by": "gpt-6.1-terra"
    },
@@ -1367,43 +2205,8 @@
    },
    {
     "url": "https://arxiv.org/pdf/2206.06406",
-    "milestone": "m3",
-    "hash": "4ea4207e358b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/pdf/2206.06406",
     "milestone": "m4",
     "hash": "6cb7950521a7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/pdf/2206.06406",
-    "milestone": "m5",
-    "hash": "239c036be84d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/pdf/2206.06406",
-    "milestone": "completion",
-    "hash": "915b33b141ca",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL_D55_M34_V10.pdf",
-    "milestone": "m1",
-    "hash": "6b6ce90e858d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL_D55_M34_V10.pdf",
-    "milestone": "m3",
-    "hash": "4ea4207e358b",
     "date": "2026-11-15",
     "by": "gpt-6.1-terra"
    },
@@ -1415,34 +2218,6 @@
     "by": "gpt-6.1-terra"
    },
    {
-    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL_D55_M34_V10.pdf",
-    "milestone": "m5",
-    "hash": "239c036be84d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL_D55_M34_V10.pdf",
-    "milestone": "completion",
-    "hash": "915b33b141ca",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.petsymposium.org/popets/2025/popets-2025-0133.pdf",
-    "milestone": "m1",
-    "hash": "6b6ce90e858d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.petsymposium.org/popets/2025/popets-2025-0133.pdf",
-    "milestone": "m3",
-    "hash": "4ea4207e358b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
     "url": "https://www.petsymposium.org/popets/2025/popets-2025-0133.pdf",
     "milestone": "m4",
     "hash": "6cb7950521a7",
@@ -1450,58 +2225,9 @@
     "by": "gpt-6.1-terra"
    },
    {
-    "url": "https://www.petsymposium.org/popets/2025/popets-2025-0133.pdf",
-    "milestone": "m5",
-    "hash": "239c036be84d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.petsymposium.org/popets/2025/popets-2025-0133.pdf",
-    "milestone": "completion",
-    "hash": "915b33b141ca",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2604.09518",
-    "milestone": "m1",
-    "hash": "6b6ce90e858d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2604.09518",
-    "milestone": "m3",
-    "hash": "4ea4207e358b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
     "url": "https://arxiv.org/html/2604.09518",
     "milestone": "m4",
     "hash": "6cb7950521a7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2604.09518",
-    "milestone": "m5",
-    "hash": "239c036be84d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2604.09518",
-    "milestone": "completion",
-    "hash": "915b33b141ca",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL-resources-technical-report.pdf",
-    "milestone": "m1",
-    "hash": "6b6ce90e858d",
     "date": "2026-11-15",
     "by": "gpt-6.1-terra"
    },
@@ -1509,34 +2235,6 @@
     "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL-resources-technical-report.pdf",
     "milestone": "m2",
     "hash": "c13bc2073101",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL-resources-technical-report.pdf",
-    "milestone": "m3",
-    "hash": "4ea4207e358b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL-resources-technical-report.pdf",
-    "milestone": "m5",
-    "hash": "239c036be84d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL-resources-technical-report.pdf",
-    "milestone": "completion",
-    "hash": "915b33b141ca",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pdos.csail.mit.edu/papers/sieve:nsdi16.pdf",
-    "milestone": "m1",
-    "hash": "6b6ce90e858d",
     "date": "2026-11-15",
     "by": "gpt-6.1-terra"
    },
@@ -1555,98 +2253,1386 @@
     "by": "gpt-6.1-terra"
    },
    {
+    "url": "https://www.mdpi.com/1424-8220/26/20/6658",
+    "milestone": "m2",
+    "hash": "c13bc2073101",
+    "date": "2026-11-15",
+    "by": "deepseek/deepseek-v4.1-flash-1017"
+   },
+   {
+    "url": "https://www.mdpi.com/1424-8220/26/20/6658",
+    "milestone": "m4",
+    "hash": "6cb7950521a7",
+    "date": "2026-11-15",
+    "by": "deepseek/deepseek-v4.1-flash-1017"
+   },
+   {
+    "url": "https://formative.jmir.org/2024/1/e57165/",
+    "milestone": "m2",
+    "hash": "c13bc2073101",
+    "date": "2026-11-15",
+    "by": "deepseek/deepseek-v4.1-flash-1017"
+   },
+   {
+    "url": "https://formative.jmir.org/2024/1/e57165/",
+    "milestone": "m4",
+    "hash": "6cb7950521a7",
+    "date": "2026-11-15",
+    "by": "deepseek/deepseek-v4.1-flash-1017"
+   },
+   {
+    "url": "https://pure.au.dk/portal/en/publications/follow-my-recommendations-a-personalized-privacy-assistant-for-mo/",
+    "milestone": "m6",
+    "hash": "146a9863abd1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pure.au.dk/portal/en/publications/follow-my-recommendations-a-personalized-privacy-assistant-for-mo/",
+    "milestone": "m1",
+    "hash": "ee4a8e565780",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pure.au.dk/portal/en/publications/follow-my-recommendations-a-personalized-privacy-assistant-for-mo/",
+    "milestone": "m10",
+    "hash": "4525c5140d55",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pure.au.dk/portal/en/publications/follow-my-recommendations-a-personalized-privacy-assistant-for-mo/",
+    "milestone": "m7",
+    "hash": "ae74f59f7744",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pure.au.dk/portal/en/publications/follow-my-recommendations-a-personalized-privacy-assistant-for-mo/",
+    "milestone": "m8",
+    "hash": "803c641b7cd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pure.au.dk/portal/en/publications/follow-my-recommendations-a-personalized-privacy-assistant-for-mo/",
+    "milestone": "m3",
+    "hash": "e5299e5b6ea1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pure.au.dk/portal/en/publications/follow-my-recommendations-a-personalized-privacy-assistant-for-mo/",
+    "milestone": "m9",
+    "hash": "6f227b009dad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pure.au.dk/portal/en/publications/follow-my-recommendations-a-personalized-privacy-assistant-for-mo/",
+    "milestone": "m11",
+    "hash": "f1e17ca40bc2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pure.au.dk/portal/en/publications/follow-my-recommendations-a-personalized-privacy-assistant-for-mo/",
+    "milestone": "m12",
+    "hash": "45d3a1a7682a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pure.au.dk/portal/en/publications/follow-my-recommendations-a-personalized-privacy-assistant-for-mo/",
+    "milestone": "m5",
+    "hash": "ecf3609afe59",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pure.au.dk/portal/en/publications/follow-my-recommendations-a-personalized-privacy-assistant-for-mo/",
+    "milestone": "m13",
+    "hash": "b05dbd2ecd4c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pure.au.dk/portal/en/publications/follow-my-recommendations-a-personalized-privacy-assistant-for-mo/",
+    "milestone": "completion",
+    "hash": "915b33b141ca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/conference/usenixsecurity25/presentation/hausladen",
+    "milestone": "m6",
+    "hash": "146a9863abd1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/conference/usenixsecurity25/presentation/hausladen",
+    "milestone": "m1",
+    "hash": "ee4a8e565780",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/conference/usenixsecurity25/presentation/hausladen",
+    "milestone": "m10",
+    "hash": "4525c5140d55",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/conference/usenixsecurity25/presentation/hausladen",
+    "milestone": "m7",
+    "hash": "ae74f59f7744",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/conference/usenixsecurity25/presentation/hausladen",
+    "milestone": "m8",
+    "hash": "803c641b7cd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/conference/usenixsecurity25/presentation/hausladen",
+    "milestone": "m3",
+    "hash": "e5299e5b6ea1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/conference/usenixsecurity25/presentation/hausladen",
+    "milestone": "m9",
+    "hash": "6f227b009dad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/conference/usenixsecurity25/presentation/hausladen",
+    "milestone": "m11",
+    "hash": "f1e17ca40bc2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/conference/usenixsecurity25/presentation/hausladen",
+    "milestone": "m12",
+    "hash": "45d3a1a7682a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/conference/usenixsecurity25/presentation/hausladen",
+    "milestone": "m5",
+    "hash": "ecf3609afe59",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/conference/usenixsecurity25/presentation/hausladen",
+    "milestone": "m13",
+    "hash": "b05dbd2ecd4c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.usenix.org/conference/usenixsecurity25/presentation/hausladen",
+    "milestone": "completion",
+    "hash": "915b33b141ca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://rtcl.eecs.umich.edu/rtclweb/assets/publications/2025/usenix25-tang.pdf",
+    "milestone": "m6",
+    "hash": "146a9863abd1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://rtcl.eecs.umich.edu/rtclweb/assets/publications/2025/usenix25-tang.pdf",
+    "milestone": "m1",
+    "hash": "ee4a8e565780",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://rtcl.eecs.umich.edu/rtclweb/assets/publications/2025/usenix25-tang.pdf",
+    "milestone": "m10",
+    "hash": "4525c5140d55",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://rtcl.eecs.umich.edu/rtclweb/assets/publications/2025/usenix25-tang.pdf",
+    "milestone": "m7",
+    "hash": "ae74f59f7744",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://rtcl.eecs.umich.edu/rtclweb/assets/publications/2025/usenix25-tang.pdf",
+    "milestone": "m8",
+    "hash": "803c641b7cd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://rtcl.eecs.umich.edu/rtclweb/assets/publications/2025/usenix25-tang.pdf",
+    "milestone": "m3",
+    "hash": "e5299e5b6ea1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://rtcl.eecs.umich.edu/rtclweb/assets/publications/2025/usenix25-tang.pdf",
+    "milestone": "m9",
+    "hash": "6f227b009dad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://rtcl.eecs.umich.edu/rtclweb/assets/publications/2025/usenix25-tang.pdf",
+    "milestone": "m11",
+    "hash": "f1e17ca40bc2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://rtcl.eecs.umich.edu/rtclweb/assets/publications/2025/usenix25-tang.pdf",
+    "milestone": "m12",
+    "hash": "45d3a1a7682a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://rtcl.eecs.umich.edu/rtclweb/assets/publications/2025/usenix25-tang.pdf",
+    "milestone": "m5",
+    "hash": "ecf3609afe59",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://rtcl.eecs.umich.edu/rtclweb/assets/publications/2025/usenix25-tang.pdf",
+    "milestone": "m13",
+    "hash": "b05dbd2ecd4c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://rtcl.eecs.umich.edu/rtclweb/assets/publications/2025/usenix25-tang.pdf",
+    "milestone": "completion",
+    "hash": "915b33b141ca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://crysp.petsymposium.org/popets/2022/popets-2022-0119.php",
+    "milestone": "m6",
+    "hash": "146a9863abd1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://crysp.petsymposium.org/popets/2022/popets-2022-0119.php",
+    "milestone": "m1",
+    "hash": "ee4a8e565780",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://crysp.petsymposium.org/popets/2022/popets-2022-0119.php",
+    "milestone": "m10",
+    "hash": "4525c5140d55",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://crysp.petsymposium.org/popets/2022/popets-2022-0119.php",
+    "milestone": "m7",
+    "hash": "ae74f59f7744",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://crysp.petsymposium.org/popets/2022/popets-2022-0119.php",
+    "milestone": "m8",
+    "hash": "803c641b7cd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://crysp.petsymposium.org/popets/2022/popets-2022-0119.php",
+    "milestone": "m3",
+    "hash": "e5299e5b6ea1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://crysp.petsymposium.org/popets/2022/popets-2022-0119.php",
+    "milestone": "m9",
+    "hash": "6f227b009dad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://crysp.petsymposium.org/popets/2022/popets-2022-0119.php",
+    "milestone": "m11",
+    "hash": "f1e17ca40bc2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://crysp.petsymposium.org/popets/2022/popets-2022-0119.php",
+    "milestone": "m12",
+    "hash": "45d3a1a7682a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://crysp.petsymposium.org/popets/2022/popets-2022-0119.php",
+    "milestone": "m5",
+    "hash": "ecf3609afe59",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://crysp.petsymposium.org/popets/2022/popets-2022-0119.php",
+    "milestone": "m13",
+    "hash": "b05dbd2ecd4c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://crysp.petsymposium.org/popets/2022/popets-2022-0119.php",
+    "milestone": "completion",
+    "hash": "915b33b141ca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2206.06406",
+    "milestone": "m6",
+    "hash": "146a9863abd1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2206.06406",
+    "milestone": "m1",
+    "hash": "ee4a8e565780",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2206.06406",
+    "milestone": "m10",
+    "hash": "4525c5140d55",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2206.06406",
+    "milestone": "m7",
+    "hash": "ae74f59f7744",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2206.06406",
+    "milestone": "m8",
+    "hash": "803c641b7cd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2206.06406",
+    "milestone": "m3",
+    "hash": "e5299e5b6ea1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2206.06406",
+    "milestone": "m9",
+    "hash": "6f227b009dad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2206.06406",
+    "milestone": "m11",
+    "hash": "f1e17ca40bc2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2206.06406",
+    "milestone": "m12",
+    "hash": "45d3a1a7682a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2206.06406",
+    "milestone": "m5",
+    "hash": "ecf3609afe59",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2206.06406",
+    "milestone": "m13",
+    "hash": "b05dbd2ecd4c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2206.06406",
+    "milestone": "completion",
+    "hash": "915b33b141ca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL_D55_M34_V10.pdf",
+    "milestone": "m6",
+    "hash": "146a9863abd1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL_D55_M34_V10.pdf",
+    "milestone": "m1",
+    "hash": "ee4a8e565780",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL_D55_M34_V10.pdf",
+    "milestone": "m10",
+    "hash": "4525c5140d55",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL_D55_M34_V10.pdf",
+    "milestone": "m7",
+    "hash": "ae74f59f7744",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL_D55_M34_V10.pdf",
+    "milestone": "m8",
+    "hash": "803c641b7cd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL_D55_M34_V10.pdf",
+    "milestone": "m3",
+    "hash": "e5299e5b6ea1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL_D55_M34_V10.pdf",
+    "milestone": "m9",
+    "hash": "6f227b009dad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL_D55_M34_V10.pdf",
+    "milestone": "m11",
+    "hash": "f1e17ca40bc2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL_D55_M34_V10.pdf",
+    "milestone": "m12",
+    "hash": "45d3a1a7682a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL_D55_M34_V10.pdf",
+    "milestone": "m5",
+    "hash": "ecf3609afe59",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL_D55_M34_V10.pdf",
+    "milestone": "m13",
+    "hash": "b05dbd2ecd4c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL_D55_M34_V10.pdf",
+    "milestone": "completion",
+    "hash": "915b33b141ca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.petsymposium.org/popets/2025/popets-2025-0133.pdf",
+    "milestone": "m6",
+    "hash": "146a9863abd1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.petsymposium.org/popets/2025/popets-2025-0133.pdf",
+    "milestone": "m1",
+    "hash": "ee4a8e565780",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.petsymposium.org/popets/2025/popets-2025-0133.pdf",
+    "milestone": "m10",
+    "hash": "4525c5140d55",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.petsymposium.org/popets/2025/popets-2025-0133.pdf",
+    "milestone": "m7",
+    "hash": "ae74f59f7744",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.petsymposium.org/popets/2025/popets-2025-0133.pdf",
+    "milestone": "m8",
+    "hash": "803c641b7cd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.petsymposium.org/popets/2025/popets-2025-0133.pdf",
+    "milestone": "m3",
+    "hash": "e5299e5b6ea1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.petsymposium.org/popets/2025/popets-2025-0133.pdf",
+    "milestone": "m9",
+    "hash": "6f227b009dad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.petsymposium.org/popets/2025/popets-2025-0133.pdf",
+    "milestone": "m11",
+    "hash": "f1e17ca40bc2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.petsymposium.org/popets/2025/popets-2025-0133.pdf",
+    "milestone": "m12",
+    "hash": "45d3a1a7682a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.petsymposium.org/popets/2025/popets-2025-0133.pdf",
+    "milestone": "m5",
+    "hash": "ecf3609afe59",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.petsymposium.org/popets/2025/popets-2025-0133.pdf",
+    "milestone": "m13",
+    "hash": "b05dbd2ecd4c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.petsymposium.org/popets/2025/popets-2025-0133.pdf",
+    "milestone": "completion",
+    "hash": "915b33b141ca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2604.09518",
+    "milestone": "m6",
+    "hash": "146a9863abd1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2604.09518",
+    "milestone": "m1",
+    "hash": "ee4a8e565780",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2604.09518",
+    "milestone": "m10",
+    "hash": "4525c5140d55",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2604.09518",
+    "milestone": "m7",
+    "hash": "ae74f59f7744",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2604.09518",
+    "milestone": "m8",
+    "hash": "803c641b7cd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2604.09518",
+    "milestone": "m3",
+    "hash": "e5299e5b6ea1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2604.09518",
+    "milestone": "m9",
+    "hash": "6f227b009dad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2604.09518",
+    "milestone": "m11",
+    "hash": "f1e17ca40bc2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2604.09518",
+    "milestone": "m12",
+    "hash": "45d3a1a7682a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2604.09518",
+    "milestone": "m5",
+    "hash": "ecf3609afe59",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2604.09518",
+    "milestone": "m13",
+    "hash": "b05dbd2ecd4c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2604.09518",
+    "milestone": "completion",
+    "hash": "915b33b141ca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL-resources-technical-report.pdf",
+    "milestone": "m6",
+    "hash": "146a9863abd1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL-resources-technical-report.pdf",
+    "milestone": "m1",
+    "hash": "ee4a8e565780",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL-resources-technical-report.pdf",
+    "milestone": "m10",
+    "hash": "4525c5140d55",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL-resources-technical-report.pdf",
+    "milestone": "m7",
+    "hash": "ae74f59f7744",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL-resources-technical-report.pdf",
+    "milestone": "m8",
+    "hash": "803c641b7cd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL-resources-technical-report.pdf",
+    "milestone": "m3",
+    "hash": "e5299e5b6ea1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL-resources-technical-report.pdf",
+    "milestone": "m9",
+    "hash": "6f227b009dad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL-resources-technical-report.pdf",
+    "milestone": "m11",
+    "hash": "f1e17ca40bc2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL-resources-technical-report.pdf",
+    "milestone": "m12",
+    "hash": "45d3a1a7682a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL-resources-technical-report.pdf",
+    "milestone": "m5",
+    "hash": "ecf3609afe59",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL-resources-technical-report.pdf",
+    "milestone": "m13",
+    "hash": "b05dbd2ecd4c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/SPECIAL-resources-technical-report.pdf",
+    "milestone": "completion",
+    "hash": "915b33b141ca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pdos.csail.mit.edu/papers/sieve:nsdi16.pdf",
+    "milestone": "m6",
+    "hash": "146a9863abd1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pdos.csail.mit.edu/papers/sieve:nsdi16.pdf",
+    "milestone": "m1",
+    "hash": "ee4a8e565780",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pdos.csail.mit.edu/papers/sieve:nsdi16.pdf",
+    "milestone": "m10",
+    "hash": "4525c5140d55",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pdos.csail.mit.edu/papers/sieve:nsdi16.pdf",
+    "milestone": "m7",
+    "hash": "ae74f59f7744",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pdos.csail.mit.edu/papers/sieve:nsdi16.pdf",
+    "milestone": "m8",
+    "hash": "803c641b7cd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pdos.csail.mit.edu/papers/sieve:nsdi16.pdf",
+    "milestone": "m3",
+    "hash": "e5299e5b6ea1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pdos.csail.mit.edu/papers/sieve:nsdi16.pdf",
+    "milestone": "m9",
+    "hash": "6f227b009dad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pdos.csail.mit.edu/papers/sieve:nsdi16.pdf",
+    "milestone": "m11",
+    "hash": "f1e17ca40bc2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pdos.csail.mit.edu/papers/sieve:nsdi16.pdf",
+    "milestone": "m12",
+    "hash": "45d3a1a7682a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pdos.csail.mit.edu/papers/sieve:nsdi16.pdf",
+    "milestone": "m5",
+    "hash": "ecf3609afe59",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pdos.csail.mit.edu/papers/sieve:nsdi16.pdf",
+    "milestone": "m13",
+    "hash": "b05dbd2ecd4c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pdos.csail.mit.edu/papers/sieve:nsdi16.pdf",
+    "milestone": "completion",
+    "hash": "915b33b141ca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/IFIP_SEC_2020.pdf",
+    "milestone": "m6",
+    "hash": "146a9863abd1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/IFIP_SEC_2020.pdf",
+    "milestone": "m1",
+    "hash": "ee4a8e565780",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/IFIP_SEC_2020.pdf",
+    "milestone": "m10",
+    "hash": "4525c5140d55",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/IFIP_SEC_2020.pdf",
+    "milestone": "m7",
+    "hash": "ae74f59f7744",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/IFIP_SEC_2020.pdf",
+    "milestone": "m8",
+    "hash": "803c641b7cd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/IFIP_SEC_2020.pdf",
+    "milestone": "m3",
+    "hash": "e5299e5b6ea1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/IFIP_SEC_2020.pdf",
+    "milestone": "m9",
+    "hash": "6f227b009dad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/IFIP_SEC_2020.pdf",
+    "milestone": "m11",
+    "hash": "f1e17ca40bc2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/IFIP_SEC_2020.pdf",
+    "milestone": "m12",
+    "hash": "45d3a1a7682a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/IFIP_SEC_2020.pdf",
+    "milestone": "m5",
+    "hash": "ecf3609afe59",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/IFIP_SEC_2020.pdf",
+    "milestone": "m13",
+    "hash": "b05dbd2ecd4c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://specialprivacy.ercim.eu/images/documents/IFIP_SEC_2020.pdf",
+    "milestone": "completion",
+    "hash": "915b33b141ca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cx.dsb.gov.au/overview/cx-reports/reports/consent-review-research-report-q3-2022-r1-3",
+    "milestone": "m6",
+    "hash": "146a9863abd1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cx.dsb.gov.au/overview/cx-reports/reports/consent-review-research-report-q3-2022-r1-3",
+    "milestone": "m1",
+    "hash": "ee4a8e565780",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cx.dsb.gov.au/overview/cx-reports/reports/consent-review-research-report-q3-2022-r1-3",
+    "milestone": "m10",
+    "hash": "4525c5140d55",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cx.dsb.gov.au/overview/cx-reports/reports/consent-review-research-report-q3-2022-r1-3",
+    "milestone": "m7",
+    "hash": "ae74f59f7744",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cx.dsb.gov.au/overview/cx-reports/reports/consent-review-research-report-q3-2022-r1-3",
+    "milestone": "m8",
+    "hash": "803c641b7cd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cx.dsb.gov.au/overview/cx-reports/reports/consent-review-research-report-q3-2022-r1-3",
+    "milestone": "m3",
+    "hash": "e5299e5b6ea1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cx.dsb.gov.au/overview/cx-reports/reports/consent-review-research-report-q3-2022-r1-3",
+    "milestone": "m9",
+    "hash": "6f227b009dad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cx.dsb.gov.au/overview/cx-reports/reports/consent-review-research-report-q3-2022-r1-3",
+    "milestone": "m11",
+    "hash": "f1e17ca40bc2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cx.dsb.gov.au/overview/cx-reports/reports/consent-review-research-report-q3-2022-r1-3",
+    "milestone": "m12",
+    "hash": "45d3a1a7682a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cx.dsb.gov.au/overview/cx-reports/reports/consent-review-research-report-q3-2022-r1-3",
+    "milestone": "m5",
+    "hash": "ecf3609afe59",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cx.dsb.gov.au/overview/cx-reports/reports/consent-review-research-report-q3-2022-r1-3",
+    "milestone": "m13",
+    "hash": "b05dbd2ecd4c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cx.dsb.gov.au/overview/cx-reports/reports/consent-review-research-report-q3-2022-r1-3",
+    "milestone": "completion",
+    "hash": "915b33b141ca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://risk.lexisnexis.com/-/media/files/corporate/processing-notices/ccpa-metrics.pdf",
+    "milestone": "m6",
+    "hash": "146a9863abd1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://risk.lexisnexis.com/-/media/files/corporate/processing-notices/ccpa-metrics.pdf",
+    "milestone": "m1",
+    "hash": "ee4a8e565780",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://risk.lexisnexis.com/-/media/files/corporate/processing-notices/ccpa-metrics.pdf",
+    "milestone": "m10",
+    "hash": "4525c5140d55",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://risk.lexisnexis.com/-/media/files/corporate/processing-notices/ccpa-metrics.pdf",
+    "milestone": "m7",
+    "hash": "ae74f59f7744",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://risk.lexisnexis.com/-/media/files/corporate/processing-notices/ccpa-metrics.pdf",
+    "milestone": "m8",
+    "hash": "803c641b7cd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://risk.lexisnexis.com/-/media/files/corporate/processing-notices/ccpa-metrics.pdf",
+    "milestone": "m3",
+    "hash": "e5299e5b6ea1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://risk.lexisnexis.com/-/media/files/corporate/processing-notices/ccpa-metrics.pdf",
+    "milestone": "m9",
+    "hash": "6f227b009dad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://risk.lexisnexis.com/-/media/files/corporate/processing-notices/ccpa-metrics.pdf",
+    "milestone": "m11",
+    "hash": "f1e17ca40bc2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://risk.lexisnexis.com/-/media/files/corporate/processing-notices/ccpa-metrics.pdf",
+    "milestone": "m12",
+    "hash": "45d3a1a7682a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
     "url": "https://risk.lexisnexis.com/-/media/files/corporate/processing-notices/ccpa-metrics.pdf",
     "milestone": "m5",
-    "hash": "239c036be84d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "ecf3609afe59",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://risk.lexisnexis.com/-/media/files/corporate/processing-notices/ccpa-metrics.pdf",
+    "milestone": "m13",
+    "hash": "b05dbd2ecd4c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://risk.lexisnexis.com/-/media/files/corporate/processing-notices/ccpa-metrics.pdf",
+    "milestone": "completion",
+    "hash": "915b33b141ca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.mdpi.com/1424-8220/26/20/6658",
+    "milestone": "m6",
+    "hash": "146a9863abd1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.mdpi.com/1424-8220/26/20/6658",
     "milestone": "m1",
-    "hash": "6b6ce90e858d",
-    "date": "2026-11-15",
-    "by": "deepseek/deepseek-v4.1-flash-1017"
+    "hash": "ee4a8e565780",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.mdpi.com/1424-8220/26/20/6658",
-    "milestone": "m2",
-    "hash": "c13bc2073101",
-    "date": "2026-11-15",
-    "by": "deepseek/deepseek-v4.1-flash-1017"
+    "milestone": "m10",
+    "hash": "4525c5140d55",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.mdpi.com/1424-8220/26/20/6658",
+    "milestone": "m7",
+    "hash": "ae74f59f7744",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.mdpi.com/1424-8220/26/20/6658",
+    "milestone": "m8",
+    "hash": "803c641b7cd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.mdpi.com/1424-8220/26/20/6658",
     "milestone": "m3",
-    "hash": "4ea4207e358b",
-    "date": "2026-11-15",
-    "by": "deepseek/deepseek-v4.1-flash-1017"
+    "hash": "e5299e5b6ea1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.mdpi.com/1424-8220/26/20/6658",
-    "milestone": "m4",
-    "hash": "6cb7950521a7",
-    "date": "2026-11-15",
-    "by": "deepseek/deepseek-v4.1-flash-1017"
+    "milestone": "m9",
+    "hash": "6f227b009dad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.mdpi.com/1424-8220/26/20/6658",
+    "milestone": "m11",
+    "hash": "f1e17ca40bc2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.mdpi.com/1424-8220/26/20/6658",
+    "milestone": "m12",
+    "hash": "45d3a1a7682a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.mdpi.com/1424-8220/26/20/6658",
     "milestone": "m5",
-    "hash": "239c036be84d",
-    "date": "2026-11-15",
-    "by": "deepseek/deepseek-v4.1-flash-1017"
+    "hash": "ecf3609afe59",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.mdpi.com/1424-8220/26/20/6658",
+    "milestone": "m13",
+    "hash": "b05dbd2ecd4c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.mdpi.com/1424-8220/26/20/6658",
     "milestone": "completion",
     "hash": "915b33b141ca",
-    "date": "2026-11-15",
-    "by": "deepseek/deepseek-v4.1-flash-1017"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://formative.jmir.org/2024/1/e57165/",
+    "milestone": "m6",
+    "hash": "146a9863abd1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://formative.jmir.org/2024/1/e57165/",
     "milestone": "m1",
-    "hash": "6b6ce90e858d",
-    "date": "2026-11-15",
-    "by": "deepseek/deepseek-v4.1-flash-1017"
+    "hash": "ee4a8e565780",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://formative.jmir.org/2024/1/e57165/",
-    "milestone": "m2",
-    "hash": "c13bc2073101",
-    "date": "2026-11-15",
-    "by": "deepseek/deepseek-v4.1-flash-1017"
+    "milestone": "m10",
+    "hash": "4525c5140d55",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://formative.jmir.org/2024/1/e57165/",
+    "milestone": "m7",
+    "hash": "ae74f59f7744",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://formative.jmir.org/2024/1/e57165/",
+    "milestone": "m8",
+    "hash": "803c641b7cd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://formative.jmir.org/2024/1/e57165/",
     "milestone": "m3",
-    "hash": "4ea4207e358b",
-    "date": "2026-11-15",
-    "by": "deepseek/deepseek-v4.1-flash-1017"
+    "hash": "e5299e5b6ea1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://formative.jmir.org/2024/1/e57165/",
-    "milestone": "m4",
-    "hash": "6cb7950521a7",
-    "date": "2026-11-15",
-    "by": "deepseek/deepseek-v4.1-flash-1017"
+    "milestone": "m9",
+    "hash": "6f227b009dad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://formative.jmir.org/2024/1/e57165/",
+    "milestone": "m11",
+    "hash": "f1e17ca40bc2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://formative.jmir.org/2024/1/e57165/",
+    "milestone": "m12",
+    "hash": "45d3a1a7682a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://formative.jmir.org/2024/1/e57165/",
     "milestone": "m5",
-    "hash": "239c036be84d",
-    "date": "2026-11-15",
-    "by": "deepseek/deepseek-v4.1-flash-1017"
+    "hash": "ecf3609afe59",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://formative.jmir.org/2024/1/e57165/",
+    "milestone": "m13",
+    "hash": "b05dbd2ecd4c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://formative.jmir.org/2024/1/e57165/",
     "milestone": "completion",
     "hash": "915b33b141ca",
-    "date": "2026-11-15",
-    "by": "deepseek/deepseek-v4.1-flash-1017"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://lorrie.cranor.org/pubs/privacy-bird-20050714.pdf",
+    "milestone": "m6",
+    "hash": "146a9863abd1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://publications.aston.ac.uk/id/document/85529",
+    "milestone": "m10",
+    "hash": "4525c5140d55",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.mdpi.com/2227-9032/11/4/496",
+    "milestone": "m8",
+    "hash": "803c641b7cd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2605.15056",
+    "milestone": "m8",
+    "hash": "803c641b7cd0",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.clearcotelabs.com/audit/checks/gpc-header-vs-navigator",
+    "milestone": "m3",
+    "hash": "e5299e5b6ea1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/brave/brave-browser/issues/49730",
+    "milestone": "m3",
+    "hash": "e5299e5b6ea1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://blough.ece.gatech.edu/research/papers/css15.pdf",
+    "milestone": "m9",
+    "hash": "6f227b009dad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sancy.iut.uca.fr/~lafourcade/PAPERS/TWE10.pdf",
+    "milestone": "m11",
+    "hash": "f1e17ca40bc2",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://innovation.consumerreports.org/CR_AuthorizedAgentCCPA_022021_VF_.pdf",
+    "milestone": "m5",
+    "hash": "ecf3609afe59",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://support.maxmind.com/knowledge-base/articles/ccpa-consumer-requests-metrics",
+    "milestone": "m5",
+    "hash": "ecf3609afe59",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://redbark.com/compliance",
+    "milestone": "m13",
+    "hash": "b05dbd2ecd4c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.oaic.gov.au/consumer-data-right/consumer-data-right-assessments/summary-report-of-consumer-data-right-assessment-4",
+    "milestone": "completion",
+    "hash": "915b33b141ca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2611.02014v1",
+    "milestone": "completion",
+    "hash": "915b33b141ca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1733,8 +3719,133 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 4 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"People can set and revise understandable rules for collecting, using and sharing their personal data. Global Privacy Control already lets a browser ask websites to stop selling or sharing that data. The broader goal is for participating services to exchange and enforce current choices. A consent receipt lets a person check what they agreed to. Records of processing and disclosure let people and independent auditors check what recipients did.\". Reason: The definition gains a deployed example and explains what a consent receipt lets a person check."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Opting out site by site makes people repeat the same decision. App privacy labels can also mislead: at least 276 of 1,687 tested iOS apps transmitted data they had not declared. A choice that carries across services can spare people repeated prompts, provided recipients act on it. In an April 2024 California web crawl, only 1,620 of 3,566 sites with evidence of sale or sharing and a measured privacy indicator reflected the opt-out in every indicator they used. Checking whether transfers stopped requires evidence of what recipients did.\". Reason: The current paragraph reports two measurements but omits the benefit of carrying one choice across services and the condition for that choice to protect anyone."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by European Union Horizon 2020, SPECIAL project, 2016: \"privacy-aware, secure workflows that include usage/access control, transparency and compliance verification\". Reason: The SPECIAL grant objective connects user choices to verification of subsequent processing, which the existing statements address separately."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Article 29 Data Protection Working Party, 1998: \"a minimum and non-negotiable level of privacy protection for all individuals\". Reason: The Working Party identifies a limit on what negotiated privacy preferences can achieve without enforceable baseline protections."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after None: \"A prototype detects a mismatch between a person's privacy preferences and a site's stated practices.\". Reason: The earliest milestone currently misses the prototype-level ability to compare a person's rules with a service's declared practices."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: title = \"An organization has procedures in place to grant, maintain and revoke processing permissions.\"; criterion = \"Establish and put into practice policies, processes and procedures for authorizing data processing, maintaining those authorizations and revoking them. Authorization may come from an organizational decision or an individual's consent.\"; threshold_quote = \"revoking authorizations, and maintaining authorizations\"; threshold_ref = 3; refs = [3]. Reason: The current criterion embeds two device-permission studies and describes software functionality where NIST specifies organizational policies, processes and procedures."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "split m2 into \"People can identify who seeks their consent and understand each purpose for which it is sought.\" | \"A person can withdraw consent at any time as easily as they gave it.\". Reason: Understanding a request before agreeing and withdrawing consent afterward are distinct results with separate requirements and evidence."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Cache the preference when the active document begins loading on each top-level navigation. If enabled, send exactly one Sec-GPC request header with the value 1. If disabled or unset, omit the header. Set navigator.globalPrivacyControl to the cached Boolean value in both cases. Never send Sec-GPC in an HTTP trailer.\"; threshold_quote = \"exactly the numeric character \\\"1\\\"\"; threshold_ref = 7; refs = [7]. Reason: The browser test omits the draft's trailer prohibition and includes a website crawl that measured a different result."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m3: \"A service can transmit data elements together with their processing permissions.\". Reason: The browser signal covers one general preference, while NIST separately identifies transmission of permissions with the particular data they govern."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m1: \"A person receives a verifiable consent receipt that identifies the underlying decision.\". Reason: The definition promises evidence people can inspect, but no milestone tests whether a person can use a receipt to identify and question their consent record."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "split m4 into \"A service makes disclosure records and the origin and history of data available for review.\" | \"A service tests and assesses the technical controls it uses to manage data processing.\". Reason: Maintaining reviewable records and testing a technical control are independently assessable NIST outcomes, and the cookie-crawl figures define neither."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m5: criterion = \"For a valid California opt-out request, stop selling or sharing the consumer's personal information as soon as feasible and within 15 business days of receipt. Notify every third party to whom the business sold or shared that information between submission and compliance. Direct each to comply and forward the request to anyone to whom it made that information available during that interval. Give the consumer a way to confirm that the business processed the request.\"; refs = [8]. Reason: California's notice duty covers third parties to whom information was sold or shared in the interim, and the observation about browser measurements is evidence commentary."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m5: \"Withdrawal through a data recipient revokes the tokens for the affected data-sharing arrangement.\". Reason: Australia's Consumer Data Standards supply a cross-service withdrawal test with an observable consequence for continued access."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 3. Reason: The EUR-Lex copy of the regulation supplies the text of Article 7(3) directly."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 2. Reason: The published ISO/IEC preview includes the operative receipt controls cited in the new milestone, beyond the public scope statement."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 15 of 15 proposed operations from HCI-09-revise-20261125T100402966314Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m6, m1, m7, m8, m3, m9, m10, m11, m12, m5, m13."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 0 from arXiv, 5 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 10 found, 1 not found, 1 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "definition is 445 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 15 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 14 candidates returned, 0 dropped as sources already used, 14 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 13 of 14 new candidates, without search. Skipped: 2 no readable saved copy. Dropped rows: 2 partial on completion. Replaced 14 earlier rows. Added 54 results: 43 from sources already used, 11 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 3 from Crossref, 0 from PubMed, 1 from arXiv, 7 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 49 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-25"
  }
 }
