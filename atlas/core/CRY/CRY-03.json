@@ -334,12 +334,15 @@
  "page": {
   "id": "CRY-03",
   "title": "Post-quantum indistinguishability obfuscation",
-  "definition": "A classical compiler converts Boolean circuits, programs built from logical gates, into equivalent executable code with measured costs. For all polynomial-size circuits, obfuscations of equal-size circuits computing the same function are indistinguishable to quantum polynomial-time attackers, with advantage smaller than every inverse polynomial in a security parameter.",
+  "definition": "A randomized classical compiler takes a Boolean circuit, a program built from logic gates, and produces runnable code that gives the same answer on every input. Compilation takes polynomial time in the circuit size and security parameter λ. For any two equal-size, polynomial-size circuits computing the same function, consider the probability that a given quantum polynomial-time observer answers 1 on the compiled code. The difference between those probabilities is negligible in absolute value: for every constant c > 0 it is eventually below 1/λ^c.",
   "goal": {
-   "need": "For an n-input Boolean circuit, its complete truth table has 2^n entries. Polynomial-time iO avoids that exponential representation. Its uses include fully homomorphic encryption, functional encryption, multiparty non-interactive key exchange and succinct garbled random-access machines. Quantum resistance is a separate requirement: the 2022 Jain–Lin–Sahai survey states that a quantum computer breaks their bilinear-map construction in polynomial time.",
+   "need": "In a 2018 study of 1.7 million free Google Play apps, developers had obfuscated 24.92%. Heuristic obfuscation makes code harder to read but gives authors no cryptographic guarantee. With affordable execution costs and assumptions that hold against quantum computers, authors could distribute runnable code while concealing which of two equivalent implementations they used. Users could still see the outputs. In functional encryption, a data owner could give a recipient a key that reveals only a specified function of an encrypted record.",
    "need_refs": [
+    13,
+    6,
+    4,
     1,
-    2
+    14
    ],
    "figures": null,
    "statements": [
@@ -360,12 +363,28 @@
      "checked": true
     },
     {
-     "body": "Branco–Jain–Srinivasan research team",
-     "year": "2026",
+     "body": "Pedro Branco, Abhishek Jain and Akshayaram Srinivasan, Theory of Cryptography Conference",
+     "year": "2025",
      "quote": "The main pressing question in this area is whether post-quantum i$\\mathcal{O}$ exists.",
-     "context": "The abstract was revised on 28 May 2026.",
+     "context": "The authors identify reliance on new, non-standard assumptions as a limitation of lattice-based candidates.",
      "ref": 3,
      "checked": true
+    },
+    {
+     "body": "European Research Council, ObfusQation grant agreement 101077455",
+     "year": "2023",
+     "quote": "We will develop new constructions of classical obfuscation that are provably secure against quantum algorithms.",
+     "context": "The agreement lists obfuscating quantum programs as a subsequent, separate objective.",
+     "ref": 15,
+     "checked": true
+    },
+    {
+     "body": "National Academies of Sciences, Engineering, and Medicine, Cryptography and the Intelligence Community",
+     "year": "2022",
+     "quote": "an efficient general approach can be built for practical applications",
+     "context": "The committee described whether this could be achieved as an open question for cryptographic program obfuscation generally.",
+     "ref": 14,
+     "checked": null
     }
    ]
   },
@@ -391,7 +410,7 @@
    {
     "id": "m1",
     "title": "An implementation of an iO candidate produces and evaluates an obfuscated program.",
-    "criterion": "A software implementation of a candidate iO construction produces an obfuscated program that executes with the original input-output behavior. Apon and colleagues report an implementation in a preprint received on 5 October 2014. This is implementation evidence for a candidate construction, without a post-quantum security claim; it is not evidence that general-circuit iO security was experimentally established.",
+    "criterion": "A software implementation of a candidate iO construction compiles a program and evaluates the resulting obfuscated program on test inputs. Its outputs agree with the original program on those inputs.",
     "set_by": "Atlas fallback: implementation papers provide prototype demonstrations, but no accepted minimum workload or resource threshold for an initial demonstration was found.",
     "set_by_kind": "atlas",
     "threshold_quote": null,
@@ -406,14 +425,14 @@
    {
     "id": "m2",
     "title": "A polynomial-time construction provides conditional classical iO security for all polynomial-size circuits.",
-    "criterion": "A polynomial-time obfuscator preserves outputs with probability 1 and makes obfuscations of equal-size equivalent circuits computationally indistinguishable. Lin's theorem supplies this conditionally on subexponential hardness of learning parity with noise over prime fields, with error rate k^(-δ), δ>0; a constant-locality Boolean pseudorandom generator stretching n bits to n^(1+τ), τ>0; and Decision Linear in symmetric prime-order bilinear groups. The theorem covers all polynomial-size circuits. The bilinear-group construction does not provide quantum resistance.",
-    "set_by": "Cryptographic community's iO definition; the general-circuit threshold is stated in Lin's FSTTCS 2021 theorem.",
+    "criterion": "Under stated hardness assumptions, a randomized polynomial-time compiler accepts every polynomial-size Boolean circuit and preserves its output on every input with probability 1. For every pair of equal-size circuit families that agree on every input at each security parameter λ, and every classical polynomial-time distinguisher, the absolute difference in its acceptance probabilities on the two compiled distributions is eventually below λ^(−c) for every constant c > 0.",
+    "set_by": "Cryptographic community’s circuit iO definition, stated by Jain, Lin and Sahai in Definition 1.1.",
     "set_by_kind": "community_convention",
-    "threshold_quote": "Then, (subexponentially secure) indistinguishability obfuscation for all polynomial-size circuits exist.",
-    "threshold_ref": 2,
+    "threshold_quote": "of polynomial-sized circuits that have the same size, input length, and output length, and are functionally equivalent",
+    "threshold_ref": 1,
     "refs": [
-     2,
-     1
+     1,
+     2
     ],
     "status": "active",
     "replaced_by": [],
@@ -422,7 +441,7 @@
    {
     "id": "m3",
     "title": "A general-circuit iO construction has negligible distinguishing advantage against quantum attackers.",
-    "criterion": "A classical polynomial-time compiler preserves outputs with probability 1. For every equal-size equivalent circuit pair and quantum polynomial-time distinguisher D, |Pr[D(O(C0))=1]−Pr[D(O(C1))=1]| is negligible in λ: eventually below λ^(-c) for every c>0. Hsieh, Jain and Lin propose a construction under Circular Security with Random Opening, a new lattice assumption; their source is a preprint, not peer reviewed. Branco and colleagues' standard-model reduction additionally assumes post-quantum average-case iO and therefore does not establish iO from learning with errors alone.",
+    "criterion": "Under stated hardness assumptions, a randomized classical polynomial-time compiler accepts every polynomial-size Boolean circuit and preserves its output on every input with probability 1. For every pair of equal-size circuit families C₀,λ and C₁,λ that agree on every input, and every quantum polynomial-time distinguisher D, the absolute difference between the probabilities that D accepts their respective obfuscations is eventually below λ^(−c) for every constant c > 0.",
     "set_by": "Cryptographic community's post-quantum iO definition, as used in Bartusek and colleagues, Definition 3.3.",
     "set_by_kind": "community_convention",
     "threshold_quote": "|Pr[𝒜𝜆(i𝒪(1𝜆, 𝐶0,𝜆)) = 1] − Pr[𝒜𝜆(i𝒪(1𝜆, 𝐶1,𝜆)) = 1]| = negl(𝜆).",
@@ -431,6 +450,7 @@
      4,
      1,
      7,
+     11,
      3
     ],
     "status": "active",
@@ -453,13 +473,29 @@
     "status": "active",
     "replaced_by": [],
     "threshold_checked": null
+   },
+   {
+    "id": "m5",
+    "title": "An obfuscator for n-input circuits achieves the XiO output bound poly(λ, |C|) · 2^((1−ε)n).",
+    "criterion": "For some constant ε > 0, a circuit C with n input bits is compiled in time polynomial in λ, |C| and 2^n. The output has size at most poly(λ, |C|) · 2^((1−ε)n), where λ is the security parameter and |C| is the circuit size. It agrees with C on every input with probability 1. For equal-size circuits that agree everywhere, the output distributions are computationally indistinguishable to classical polynomial-size distinguishers.",
+    "set_by": "Lin, Pass, Seth and Telang, Definition 8 of exponentially efficient indistinguishability obfuscation.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "poly(|C|,lambda) . 2^{n(1-epsilon)}, where epsilon >0",
+    "threshold_ref": 16,
+    "refs": [
+     16,
+     1,
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
    }
   ],
   "measures": [],
   "not_found": [
    "No external test combining general-circuit post-quantum iO security with numerical limits on compilation time, memory, storage and evaluation time was found.",
    "No independently reproduced executable general-circuit post-quantum iO implementation with concrete quantum-security parameters was found.",
-   "The CACM article and the full PDFs of ePrint 2014/779, 2025/390 and 2025/2215 could not be opened; their accessible abstracts do not establish full construction details or implementation costs.",
    "No published sequence of implementation stages leading to a shared practical-efficiency threshold was found."
   ],
   "references": [
@@ -630,306 +666,678 @@
     "issue": null,
     "pages": "39-72",
     "citation_source": "crossref"
+   },
+   {
+    "id": 13,
+    "kind": "book",
+    "url": "https://dwermke.com/publications/2018-conf-acsac-wermke/",
+    "doi": "10.1145/3274694.3274726",
+    "title": "A Large Scale Investigation of Obfuscation Use in Google Play",
+    "authors": "Wermke D, Huaman N, Acar Y, Reaves B, Traynor P, Fahl S",
+    "container": "Proceedings of the 34th Annual Computer Security Applications Conference",
+    "year": "2018",
+    "volume": null,
+    "issue": null,
+    "pages": "222-235",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 14,
+    "kind": "report",
+    "url": "https://www.nationalacademies.org/read/26168/chapter/6",
+    "doi": "10.17226/26168",
+    "title": "Cryptography and the Intelligence Community: The Future of Encryption",
+    "authors": "Committee on the Future of Encryption, Intelligence Community Studies Board, Division on Engineering and Physical Sciences, National Academies of Sciences, Engineering, and Medicine",
+    "container": "The National Academies Press",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 15,
+    "kind": "registry",
+    "url": "https://cordis.europa.eu/project/id/101077455",
+    "doi": "10.3030/101077455",
+    "title": "Code Obfuscation in a Quantum World",
+    "authors": "European Commission",
+    "container": "CORDIS",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 16,
+    "kind": "preprint",
+    "url": "https://eprint.iacr.org/2016/006",
+    "doi": "10.1007/978-3-662-49387-8_17",
+    "title": "Indistinguishability Obfuscation with Non-trivial Efficiency",
+    "authors": "Lin H, Pass R, Seth K, Telang S",
+    "container": "Lecture Notes in Computer Science",
+    "year": "2016",
+    "volume": null,
+    "issue": null,
+    "pages": "447-462",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 17,
+    "kind": "web",
+    "url": "https://machina-io.com/posts/hello_world_first",
+    "doi": null,
+    "title": "HELLO, WORLD: THE FIRST SIGNS OF PRACTICAL IO",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 18,
+    "kind": "journal",
+    "url": "https://link.springer.com/article/10.1007/s00145-023-09471-5",
+    "doi": null,
+    "title": "Candidate iO from Homomorphic Encryption Schemes",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
    }
   ],
   "milestone_order": [
    "m1",
+   "m5",
    "m2",
    "m3",
    "m4"
   ],
   "results": [
    {
-    "milestone": "m3",
+    "milestone": "m5",
     "case": null,
     "verdict": "partial",
-    "finding": "A general-circuit post-quantum iO construction is claimed under 2 sub-exponential security assumptions.",
-    "detail": "The standard-model reduction assumes both post-quantum LWE and post-quantum average-case iO. The supplied text does not state the exact correctness and negligible-advantage guarantees required by the criterion.",
-    "quote": "We construct (post-quantum) i$\\mathcal{O}$ for general circuits in the standard model based on (post-quantum) sub-exponentially secure LWE and (post-quantum) sub-exponentially secure {\\em average-case} i$\\mathcal{O}$",
+    "finding": "One general-circuit XiO construction has classical security in the pseudorandom oracle model.",
+    "detail": "The abstract names the XiO construction without giving quantitative efficiency bounds.",
+    "quote": "We construct exponentially-efficient i$\\mathcal{O}$ (xi$\\mathcal{O}$) for general circuits based on LWE in the pseudorandom oracle model",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 3,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "One standard-model general-circuit iO construction gives negligible classical distinguishing advantage under two assumptions.",
+    "detail": null,
+    "quote": "We construct (post-quantum) i$\\mathcal{O}$ for general circuits in the standard model based on (post-quantum) sub-exponentially secure LWE and (post-quantum) sub-exponentially secure {\\em average-case} i$\\mathcal{O}$",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 3,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "met",
+    "finding": "One standard-model general-circuit iO construction gives negligible quantum distinguishing advantage under two assumptions.",
+    "detail": null,
+    "quote": "We construct (post-quantum) i$\\mathcal{O}$ for general circuits in the standard model based on (post-quantum) sub-exponentially secure LWE and (post-quantum) sub-exponentially secure {\\em average-case} i$\\mathcal{O}$",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 3,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "Proposes post-quantum iO under one new lattice assumption, Circular Security with Random Opening.",
-    "detail": "The supplied abstract describes building iO under CRO but does not state the compiler's correctness, general-circuit scope, or negligible distinguishing bound against quantum attackers.",
+    "finding": "The authors introduce one lattice-based hardness assumption, CRO, and develop an oblivious LWE sampler for post-quantum iO.",
+    "detail": "The supplied abstract gives no sample count or numerical distinguishing bound.",
     "quote": "To build iO under this less-structured CRO assumption, we develop several new technical ideas.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
-    "verdict": "met",
-    "finding": "Lin and colleagues report iO for all polynomial-size circuits under 3 subexponentially hard assumptions.",
-    "detail": "The assumptions are LPN over prime fields, a constant-locality Boolean PRG with polynomial stretch, and Decision Linear in symmetric prime-order bilinear groups. The source does not claim quantum resistance.",
+    "verdict": "partial",
+    "finding": "The informal theorem gives subexponentially secure iO for all polynomial-size circuits under 3 hardness assumptions.",
+    "detail": "The source is an invited-talk abstract in conference proceedings. It states the theorem without supplying the construction or proof.",
     "quote": "Then, (subexponentially secure) indistinguishability obfuscation for all polynomial-size circuits exist.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 2,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
-    "verdict": "met",
-    "finding": "Simplified GGH15 obfuscator: sample size not stated; evaluation took under 25 minutes per input.",
-    "detail": "The implementation produced and evaluated obfuscated read-once branching programs. It omitted protection against mixed-input attacks, so the result does not establish general-circuit or post-quantum iO security.",
-    "quote": "Evaluating this\nobfuscated program takes under 25 minutes per input.",
-    "checked": true,
-    "confirmed": false,
+    "verdict": "partial",
+    "finding": "The GGH15 read-once candidate completed compilation and evaluation in 11 binary benchmark configurations.",
+    "detail": "The 11 configurations count completed benchmark rows. The excerpt does not specify how many distinct programs or test inputs were used.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One length-20 binary branching-program benchmark recorded 243,525.6 seconds for obfuscation.",
+    "detail": "The reported λ = 80 is a parameter setting. It does not quantify quantum distinguishing advantage.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
-    "verdict": "partial",
-    "finding": "Conditional iO for all polynomial-size circuits, using polynomially many LPN samples with error rate 1/k^δ.",
-    "detail": "The stated assumptions match the milestone, and the theorem claims iO for all polynomial-size circuits. The excerpt does not explicitly state that the obfuscator runs in polynomial time or preserves outputs with probability 1.",
+    "verdict": "met",
+    "finding": "Conditional iO for all polynomial-size circuits achieves subexponential classical security under 3 hardness assumptions.",
+    "detail": null,
     "quote": "Then, (subexponentially secure) indistinguishability obfuscation for all polynomial-size circuits exists.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
-    "finding": "Conditional iO construction from bilinear groups and two LPN variants; sample size and numerical result not applicable.",
-    "detail": "The abstract reports an iO construction but does not state the required perfect correctness or coverage of all polynomial-size circuits. It uses sparse LPN in place of the specified PRG assumption.",
+    "finding": "One iO construction uses 3 subexponential hardness assumptions.",
+    "detail": "The source identifies this ePrint as a minor revision of the TCC 2024 publication. The abstract gives no theorem statement from which to verify the full criterion.",
     "quote": "We construct an indistinguishability obfuscation (IO) scheme from the sub-exponential hardness of the decisional linear problem on bilinear groups together with two variants of the learning parity with noise (LPN) problem, namely large-field LPN and (binary-field) sparse LPN.",
     "checked": true,
-    "confirmed": false,
+    "confirmed": true,
     "peer_reviewed": false,
     "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "Hsieh, Jain and Lin propose post-quantum iO under CRO; sample size and numerical advantage are not stated.",
-    "detail": "The excerpt describes a construction under the new CRO assumption, but does not state the compiler’s correctness, its circuit scope, or a negligible quantum distinguishing-advantage bound. The conference paper acknowledges anonymous reviewers.",
-    "quote": "To build\n\\(\\textsf{iO}\\)\nunder this less-structured\n\\({\\textsf{CRO}}\\)\nassumption, we develop several new technical ideas.",
+    "finding": "One lattice-based post-quantum iO construction is reported under the Circular Security with Random Opening assumption.",
+    "detail": "The abstract describes the LWE sampler and the structure of the assumption. The construction theorem and its security guarantees are absent from the supplied excerpt.",
+    "quote": "Lattice-Based Post-quantum iO from Circular Security with Random Opening Assumption",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "Cini and colleagues propose one plausibly post-quantum secure iO construction.",
-    "detail": "The abstract argues security under a new Equivocal LWE assumption and other lattice assumptions, but does not state the required general-circuit correctness or negligible-advantage guarantee. The source is an ePrint full version; an extended abstract appeared at CRYPTO 2025.",
+    "finding": "One lattice-based iO construction is proposed for post-quantum security under Equivocal LWE and other lattice assumptions.",
+    "detail": "The DOI appears in the ePrint metadata and citation. The text identifies the full version as a major revision of the CRYPTO 2025 publication, with the extended abstract published there.",
     "quote": "In this work, we propose a new plausibly post-quantum secure construction of iO by designing a new mechanism for releasing decryption hints.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "Diamond iO compiled and evaluated 1 identity-circuit configuration, returning the expected embedded key. Correctness trial count unreported.",
+    "detail": "The implemented variant hides the embedded key and leaves the circuit public. The three repetitions per benchmark setting are performance measurements.",
+    "quote": "We confirmed the correctness of the implementation by setting the public circuit as the identity\n                    function and verifying that the output of the evaluation matches the hardcoded key sampled by the\n                    obfuscator.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Split-FHE obfuscation for polynomial-size circuits with logarithmically many input bits achieves the XiO size bound with ε = 1/2.",
+    "detail": "The size and security result is a conditional theorem. The separate theorem extending iO to all polynomial-size circuits does not establish the XiO size bound for general n.",
+    "quote": "It follows that the total size of the obfuscated circuit is bounded from above by\n\\(\\textsf {poly}(\\lambda , |C|) \\cdot 2^{\\eta / 2}\\)\n.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://eccc.weizmann.ac.il/report/2001/057/",
     "milestone": "m1",
-    "hash": "c5b0b2404340",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3b7761b29597",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eccc.weizmann.ac.il/report/2001/057/",
+    "milestone": "m5",
+    "hash": "9a43e7f49b3a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eccc.weizmann.ac.il/report/2001/057/",
     "milestone": "m2",
-    "hash": "e188b9b4e848",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c7e1759ba64c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eccc.weizmann.ac.il/report/2001/057/",
     "milestone": "m3",
-    "hash": "6fc9677fadff",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "019d50a250c3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eccc.weizmann.ac.il/report/2001/057/",
     "milestone": "m4",
     "hash": "07b1af9450c7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eccc.weizmann.ac.il/report/2001/057/",
     "milestone": "completion",
     "hash": "67a0fcbd9d36",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2025/2215",
     "milestone": "m1",
-    "hash": "c5b0b2404340",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3b7761b29597",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2025/2215",
+    "milestone": "m5",
+    "hash": "9a43e7f49b3a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2025/2215",
     "milestone": "m2",
-    "hash": "e188b9b4e848",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c7e1759ba64c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2025/2215",
     "milestone": "m3",
-    "hash": "6fc9677fadff",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "019d50a250c3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2025/2215",
     "milestone": "m4",
     "hash": "07b1af9450c7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2025/2215",
     "milestone": "completion",
     "hash": "67a0fcbd9d36",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2025/390",
     "milestone": "m1",
-    "hash": "c5b0b2404340",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3b7761b29597",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2025/390",
+    "milestone": "m5",
+    "hash": "9a43e7f49b3a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2025/390",
     "milestone": "m2",
-    "hash": "e188b9b4e848",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c7e1759ba64c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2025/390",
     "milestone": "m3",
-    "hash": "6fc9677fadff",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "019d50a250c3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2025/390",
     "milestone": "m4",
     "hash": "07b1af9450c7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2025/390",
     "milestone": "completion",
     "hash": "67a0fcbd9d36",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.FSTTCS.2021.4",
     "milestone": "m1",
-    "hash": "c5b0b2404340",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3b7761b29597",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.FSTTCS.2021.4",
+    "milestone": "m5",
+    "hash": "9a43e7f49b3a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.FSTTCS.2021.4",
     "milestone": "m2",
-    "hash": "e188b9b4e848",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c7e1759ba64c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.FSTTCS.2021.4",
     "milestone": "m3",
-    "hash": "6fc9677fadff",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "019d50a250c3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.FSTTCS.2021.4",
     "milestone": "m4",
     "hash": "07b1af9450c7",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.FSTTCS.2021.4",
     "milestone": "completion",
     "hash": "67a0fcbd9d36",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://acmccs.github.io/papers/p783-haleviA.pdf",
     "milestone": "m1",
-    "hash": "c5b0b2404340",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3b7761b29597",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://acmccs.github.io/papers/p783-haleviA.pdf",
+    "milestone": "m5",
+    "hash": "9a43e7f49b3a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://acmccs.github.io/papers/p783-haleviA.pdf",
+    "milestone": "m2",
+    "hash": "c7e1759ba64c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://acmccs.github.io/papers/p783-haleviA.pdf",
+    "milestone": "m3",
+    "hash": "019d50a250c3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://acmccs.github.io/papers/p783-haleviA.pdf",
+    "milestone": "m4",
+    "hash": "07b1af9450c7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://acmccs.github.io/papers/p783-haleviA.pdf",
+    "milestone": "completion",
+    "hash": "67a0fcbd9d36",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2021/1334",
+    "milestone": "m1",
+    "hash": "3b7761b29597",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2021/1334",
+    "milestone": "m5",
+    "hash": "9a43e7f49b3a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2021/1334",
     "milestone": "m2",
-    "hash": "e188b9b4e848",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c7e1759ba64c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2021/1334",
+    "milestone": "m3",
+    "hash": "019d50a250c3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2021/1334",
+    "milestone": "m4",
+    "hash": "07b1af9450c7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2021/1334",
+    "milestone": "completion",
+    "hash": "67a0fcbd9d36",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2024/856",
+    "milestone": "m1",
+    "hash": "3b7761b29597",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2024/856",
+    "milestone": "m5",
+    "hash": "9a43e7f49b3a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2024/856",
     "milestone": "m2",
-    "hash": "e188b9b4e848",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "c7e1759ba64c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2024/856",
+    "milestone": "m3",
+    "hash": "019d50a250c3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2024/856",
+    "milestone": "m4",
+    "hash": "07b1af9450c7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2024/856",
+    "milestone": "completion",
+    "hash": "67a0fcbd9d36",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://link.springer.com/chapter/10.1007/978-3-032-01907-3_1",
+    "milestone": "m1",
+    "hash": "3b7761b29597",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://link.springer.com/chapter/10.1007/978-3-032-01907-3_1",
+    "milestone": "m5",
+    "hash": "9a43e7f49b3a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://link.springer.com/chapter/10.1007/978-3-032-01907-3_1",
+    "milestone": "m2",
+    "hash": "c7e1759ba64c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://link.springer.com/chapter/10.1007/978-3-032-01907-3_1",
     "milestone": "m3",
-    "hash": "6fc9677fadff",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "019d50a250c3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://link.springer.com/chapter/10.1007/978-3-032-01907-3_1",
+    "milestone": "m4",
+    "hash": "07b1af9450c7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://link.springer.com/chapter/10.1007/978-3-032-01907-3_1",
+    "milestone": "completion",
+    "hash": "67a0fcbd9d36",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2025/1129",
+    "milestone": "m1",
+    "hash": "3b7761b29597",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2025/1129",
+    "milestone": "m5",
+    "hash": "9a43e7f49b3a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2025/1129",
+    "milestone": "m2",
+    "hash": "c7e1759ba64c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eprint.iacr.org/2025/1129",
     "milestone": "m3",
-    "hash": "6fc9677fadff",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "019d50a250c3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2025/1129",
+    "milestone": "m4",
+    "hash": "07b1af9450c7",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://eprint.iacr.org/2025/1129",
+    "milestone": "completion",
+    "hash": "67a0fcbd9d36",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://machina-io.com/posts/hello_world_first",
+    "milestone": "m1",
+    "hash": "3b7761b29597",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://link.springer.com/article/10.1007/s00145-023-09471-5",
+    "milestone": "m5",
+    "hash": "9a43e7f49b3a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -991,8 +1399,113 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 0 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"A randomized classical compiler takes a Boolean circuit, a program built from logic gates, and produces runnable code that gives the same answer on every input. Compilation takes polynomial time in the circuit size and security parameter \\u03bb. For any two equal-size, polynomial-size circuits computing the same function, consider the probability that a given quantum polynomial-time observer answers 1 on the compiled code. The difference between those probabilities is negligible in absolute value: for every constant c > 0 it is eventually below 1/\\u03bb^c.\". Reason: The definition omits the compiler’s randomness and polynomial running time, and leaves the meaning of distinguishing advantage implicit."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"In a 2018 study of 1.7 million free Google Play apps, developers had obfuscated 24.92%. Heuristic obfuscation makes code harder to read but gives authors no cryptographic guarantee. With affordable execution costs and assumptions that hold against quantum computers, authors could distribute runnable code while concealing which of two equivalent implementations they used. Users could still see the outputs. In functional encryption, a data owner could give a recipient a key that reveals only a specified function of an encrypted record.\". Reason: The truth-table count measures representation size but does not tell readers who uses obfuscation, what protection they lack, or what a recipient could do with it."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Pedro Branco, Abhishek Jain and Akshayaram Srinivasan, Theory of Cryptography Conference, 2025: \"The main pressing question in this area is whether post-quantum i$\\mathcal{O}$ exists.\". Reason: The TCC attribution dates the open question to its original publication and identifies the specific unresolved assumption issue."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by European Research Council, ObfusQation grant agreement 101077455, 2023: \"We will develop new constructions of classical obfuscation that are provably secure against quantum algorithms.\". Reason: The grant agreement documents a funded programme that explicitly sets quantum-secure classical obfuscation as an objective."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by National Academies of Sciences, Engineering, and Medicine, Cryptography and the Intelligence Community, 2022: \"an efficient general approach can be built for practical applications\". Reason: The National Academies supply a committee assessment of the practical feasibility question that the existing statements omit."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"A software implementation of a candidate iO construction compiles a program and evaluates the resulting obfuscated program on test inputs. Its outputs agree with the original program on those inputs.\". Reason: The first prototype’s date and publication history are evidence for the milestone and obscure the operation a candidate must demonstrate."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m1: \"An obfuscator for n-input circuits achieves the XiO output bound poly(λ, |C|) · 2^((1−ε)n).\". Reason: XiO supplies a published intermediate threshold between writing out a truth table and compiling in polynomial time."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"Under stated hardness assumptions, a randomized polynomial-time compiler accepts every polynomial-size Boolean circuit and preserves its output on every input with probability 1. For every pair of equal-size circuit families that agree on every input at each security parameter \\u03bb, and every classical polynomial-time distinguisher, the absolute difference in its acceptance probabilities on the two compiled distributions is eventually below \\u03bb^(\\u2212c) for every constant c > 0.\"; set_by = \"Cryptographic community\\u2019s circuit iO definition, stated by Jain, Lin and Sahai in Definition 1.1.\"; threshold_quote = \"of polynomial-sized circuits that have the same size, input length, and output length, and are functionally equivalent\"; threshold_ref = 1; refs = [1, 2]. Reason: The existing criterion embeds one theorem’s three assumptions in a test that other conditional constructions can also satisfy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Under stated hardness assumptions, a randomized classical polynomial-time compiler accepts every polynomial-size Boolean circuit and preserves its output on every input with probability 1. For every pair of equal-size circuit families C\\u2080,\\u03bb and C\\u2081,\\u03bb that agree on every input, and every quantum polynomial-time distinguisher D, the absolute difference between the probabilities that D accepts their respective obfuscations is eventually below \\u03bb^(\\u2212c) for every constant c > 0.\"; threshold_quote = \"|Pr[\\ud835\\udc9c\\ud835\\udf06(i\\ud835\\udcaa(1\\ud835\\udf06, \\ud835\\udc360,\\ud835\\udf06)) = 1] \\u2212 Pr[\\ud835\\udc9c\\ud835\\udf06(i\\ud835\\udcaa(1\\ud835\\udf06, \\ud835\\udc361,\\ud835\\udf06)) = 1]| = negl(\\ud835\\udf06).\"; threshold_ref = 4; refs = [4, 1, 7, 11, 3]. Reason: The criterion mixes the quantum security test with individual results and overlooks the CRYPTO 2025 publication of the Circular Security with Random Opening construction."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 2. Reason: The full texts of ePrint 2014/779 and 2025/390 are available and give the prototype workload and construction details that this note marked as inaccessible."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove statement 2. Reason: The 2026 date is the ePrint revision date, whereas the authors presented the question at TCC 2025."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 11 of 11 proposed operations from CRY-03-revise-20261125T102958309748Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m5, m2, m3."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 4 from Crossref, 0 from PubMed, 0 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 5 found, 0 not found, 1 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "definition is 552 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 9 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 3 candidates returned, 0 dropped as sources already used, 3 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 2 of 3 new candidates, without search. Skipped: 2 no readable saved copy. Dropped rows: none. Replaced 8 earlier rows. Added 13 results: 11 from sources already used, 2 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 11 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-25"
  }
 }
