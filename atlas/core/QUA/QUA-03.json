@@ -346,11 +346,14 @@
  "page": {
   "id": "QUA-03",
   "title": "Experimentally validated quantum advantage in simulation",
-  "definition": "A quantum simulator predicts a measurable property of matter in a regime with a Monte Carlo sign problem, where cancelling sampling weights amplify statistical error. It uses fewer resources than the best available classical calculations at the same accuracy, and a later independent experiment confirms its prediction.",
+  "definition": "A controllable quantum system predicts a measurable property of a molecule, material or quantum field. In a classical Monte Carlo calculation of that property, positive and negative contributions nearly cancel, making the average hard to estimate by sampling. The quantum simulation uses fewer computational resources than the best available classical method at the same accuracy. An independent laboratory subsequently measures the same property and confirms the prediction within the stated uncertainty.",
   "goal": {
-   "need": "In sign-reweighted Monte Carlo, decreasing the mean sign from 0.01 to 0.001 increases the independent samples needed to estimate that sign to 1% relative precision from about 10^8 to 10^10. Quantum simulation targets physical observables in regimes where such cancellations obstruct classical sampling. This sampling cost does not establish an advantage over other classical algorithms.",
+   "need": "In a model of interacting electrons on an 8 × 8 lattice, estimating spin correlations took up to 4,000 Monte Carlo runs of 200,000 measurement sweeps each at densities with severe cancellations. Cooling the model raises the sampling cost exponentially, while cheaper approximations can bias the correlations. If the model captures the material and other classical methods also fall short, quantum predictions could help physicists test which interactions cause electrons to pair in high-temperature superconductors.",
    "need_refs": [
-    1
+    16,
+    1,
+    17,
+    3
    ],
    "figures": {
     "caption": "Sampling burden from sign cancellations",
@@ -398,6 +401,22 @@
      "context": "Version 6.0 permits theoretical submissions; winning does not require execution on quantum hardware.",
      "ref": 4,
      "checked": true
+    },
+    {
+     "body": "US Department of Energy, Quantum Genesis Priority Applications",
+     "year": "2026",
+     "quote": "on lattice sizes beyond what is currently possible with classical computers.",
+     "context": "The target is the ground-state energy and energy gap of the doped Fermi–Hubbard model. The programme also includes half filling for models with multiple interacting orbitals.",
+     "ref": 17,
+     "checked": true
+    },
+    {
+     "body": "National Academies of Sciences, Engineering, and Medicine, Advancing Chemistry and Quantum Information Science",
+     "year": "2023",
+     "quote": "how quantum-accelerated calculations could solve chemistry problems (that otherwise cannot be solved using classical systems)",
+     "context": "The committee calls for standards for assessing advantage in specific chemistry applications. It identifies useful computation without error correction as an open question.",
+     "ref": 18,
+     "checked": null
     }
    ]
   },
@@ -420,12 +439,12 @@
   },
   "case_label": null,
   "cases": [],
-  "milestone_structure": "sequence",
+  "milestone_structure": "parallel",
   "milestones": [
    {
     "id": "m1",
-    "title": "A quantum simulator reproduces analytically calculable quantum dynamics.",
-    "criterion": "A controllable quantum system reproduces the model's analytically or numerically calculable dynamics in a classically tractable regime. Classical cross-checking is an established validation convention, without a universal error tolerance. A preprint submitted on 13 May 1999 demonstrated truncated harmonic and anharmonic oscillator dynamics; its harmonic-oscillator implementation encoded four levels in two proton spins.",
+    "title": "A quantum simulator reproduces dynamics that can be calculated analytically or numerically.",
+    "criterion": "Compare the measured evolution of a controllable quantum system with an analytical or numerical solution of the target model in a regime where that solution can be computed. Assess agreement at the accuracy reported for the comparison.",
     "set_by": "Classical cross-checking convention, documented by Shaffer and colleagues in the introduction to their verification study.",
     "set_by_kind": "community_convention",
     "threshold_quote": "validation of simulation results is typically performed by comparison to results calculated analytically or numerically",
@@ -440,8 +459,8 @@
    },
    {
     "id": "m2",
-    "title": "A quantum simulation infers a molecular property that agrees with independent spectroscopy within its errors.",
-    "criterion": "Infer a molecular property using quantum simulation and obtain agreement with an independent spectroscopic reference within experimental error. A preprint submitted on 22 October 2025 studied two molecules with 9 and 15 qubits. Its quantum-derived toluene ortho–meta C–C separation was 2.44 ± 0.04 Å, versus a reference 2.46 ± 0.01 Å; each NMR dataset averaged 10 independent measurements. This was not beyond classical capabilities. The result is not peer reviewed.",
+    "title": "A molecular parameter inferred from quantum spin echoes agrees with spectroscopy within experimental error.",
+    "criterion": "Fit a molecular structural parameter by comparing quantum simulations of nuclear spin echoes with measured nuclear magnetic resonance data. Compare the fitted parameter with an independent spectroscopic determination of the same quantity and obtain agreement within experimental error.",
     "set_by": "Google Quantum AI and collaborators, molecular-geometry learning protocol; this comparison was published for molecular nuclear-spin simulations.",
     "set_by_kind": "protocol",
     "threshold_quote": "continues to agree with the reference data within experimental error.",
@@ -456,11 +475,11 @@
    },
    {
     "id": "m3",
-    "title": "A quantum simulation resolves an observable at SNR above 1 beyond competitive classical simulation.",
-    "criterion": "Resolve an observable with signal-to-noise ratio (SNR) above 1, beyond competitive exact and accuracy-matched heuristic classical simulation. These are the Nature protocol's first two criteria. On 22 October 2025, Google reported 65-qubit, 23-cycle echo circuits with projected SNR 2–3 and 2.1 hours of acquisition per circuit, versus an estimated 3.2 years on Frontier. The accuracy projection depends on an empirical error model; the runtime comparison concerns the classical algorithms assessed.",
+    "title": "A quantum echo resolves an observable at SNR above 1 beyond competitive classical simulation.",
+    "criterion": "Estimate the echo observable across circuit instances with a signal-to-noise ratio above 1. The protocol defines this ratio as 1/√[2(1−ρ)], where ρ is the Pearson correlation between measured and ideal observable values across the instances. Compare the cost with exact classical simulation and with approximate classical algorithms at the achieved accuracy. Distinguish a ratio obtained by direct comparison from one projected using an error model.",
     "set_by": "Google Quantum AI and collaborators, Nature conclusion, criteria (1) and (2); SNR above 1 is their observable-protocol threshold.",
     "set_by_kind": "protocol",
-    "threshold_quote": "with an SNR above unity.",
+    "threshold_quote": "in our case with an SNR above unity.",
     "threshold_ref": 10,
     "refs": [
      10
@@ -471,15 +490,16 @@
    },
    {
     "id": "m4",
-    "title": "A quantum simulation predicts a physical property while passing the observable quantum-advantage test.",
-    "criterion": "Resolve an observable at SNR above 1, beyond competitive exact and accuracy-matched heuristic classical simulation, and use that same observable to infer a physical property of a specified molecule, material or quantum field. The Nature protocol adds physical information to m3; it gives no universal relevance threshold. Its learning demonstration used 20 classically generated 34-qubit circuit instances. A preprint submitted on 28 July 2026 reports internally validated 56-qubit heterogeneous-model dynamics, without a later independent material measurement; it is not peer reviewed.",
-    "set_by": "Google Quantum AI and collaborators, Nature conclusion, criteria (1)–(3), applied to a physical target.",
+    "title": "A quantum simulation predicts a measurable physical property beyond accuracy-matched classical methods.",
+    "criterion": "For a specified molecule, material or quantum field with a documented Monte Carlo sign problem in the calculation at issue, use a quantum simulation to predict a measurable property and give its uncertainty before the confirming measurement. Show that the best available exact and approximate classical methods cannot predict that property at the same accuracy within the quantum calculation's resource cost.",
+    "set_by": "Google Quantum AI and collaborators, observable criteria (1)–(3), applied here to a prediction for a physical target with a documented sign problem.",
     "set_by_kind": "protocol",
     "threshold_quote": "The observable should yield practically relevant information about the quantum system.",
     "threshold_ref": 10,
     "refs": [
      10,
-     11
+     3,
+     1
     ],
     "status": "active",
     "replaced_by": [],
@@ -488,8 +508,7 @@
   ],
   "measures": [],
   "not_found": [
-   "No located report established the complete conjunction of a sign-problem target, computational advantage and subsequent independent experimental confirmation.",
-   "The Nature publisher page could not be opened; the published main article was available through a PDF mirror."
+   "No located report established the complete conjunction of a sign-problem target, computational advantage and subsequent independent experimental confirmation."
   ],
   "references": [
    {
@@ -635,34 +654,6 @@
    {
     "id": 11,
     "kind": "preprint",
-    "url": "https://arxiv.org/html/2607.25998v1",
-    "doi": "10.48550/arXiv.2607.25998",
-    "title": "Observable Estimation in the Absence of Classical Verification",
-    "authors": "Barron SV, Mitchell B, Tripathi V, Grieco F, Rosen I, Pietracaprina F, et al.",
-    "container": "arXiv",
-    "year": "2026",
-    "volume": null,
-    "issue": null,
-    "pages": null,
-    "citation_source": "arxiv"
-   },
-   {
-    "id": 12,
-    "kind": "journal",
-    "url": "https://www.nature.com/articles/s41586-025-09526-6",
-    "doi": null,
-    "title": "https://www.nature.com/articles/s41586-025-09526-6",
-    "authors": "",
-    "container": null,
-    "year": "",
-    "volume": null,
-    "issue": null,
-    "pages": null,
-    "citation_source": "model"
-   },
-   {
-    "id": 13,
-    "kind": "preprint",
     "url": "https://arxiv.org/html/2411.00765",
     "doi": null,
     "title": "Dynamical simulations of many-body quantum chaos on a quantum computer",
@@ -675,7 +666,7 @@
     "citation_source": "model"
    },
    {
-    "id": 14,
+    "id": 12,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2510.19550",
     "doi": null,
@@ -689,7 +680,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 15,
+    "id": 13,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2607.24937",
     "doi": null,
@@ -703,7 +694,7 @@
     "citation_source": "model"
    },
    {
-    "id": 16,
+    "id": 14,
     "kind": "journal",
     "url": "https://iontrap.duke.edu/files/2025/03/sciadv.adh2594.pdf",
     "doi": "10.1126/sciadv.adh2594",
@@ -717,12 +708,82 @@
     "citation_source": "crossref"
    },
    {
-    "id": 17,
+    "id": 15,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2603.20372",
     "doi": null,
     "title": "One-to-one quantum simulation of a frustrated magnet with 256 qubits",
     "authors": "Leclerc L, Julià-Farré S, Freitas GS, Villaret G, Albrecht B, Béguin L, et al.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 16,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41586-025-09112-w.pdf",
+    "doi": "10.1038/s41586-025-09112-w",
+    "title": "A neutral-atom Hubbard quantum simulator in the cryogenic regime",
+    "authors": "Xu M, Kendrick LH, Kale A, Gang Y, Feng C, Zhang S, et al.",
+    "container": "Nature",
+    "year": "2025",
+    "volume": "642",
+    "issue": "8069",
+    "pages": "909-915",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 17,
+    "kind": "report",
+    "url": "https://www.energy.gov/documents/quantum-genesis-priority-applications",
+    "doi": null,
+    "title": "Quantum Genesis Priority Applications",
+    "authors": "U.S. Department of Energy",
+    "container": null,
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 18,
+    "kind": "report",
+    "url": "https://www.nationalacademies.org/read/26850/chapter/3",
+    "doi": "10.17226/26850",
+    "title": "Advancing Chemistry and Quantum Information Science: An Assessment of Research Opportunities at the Interface of Chemistry and Quantum Information Science in the United States",
+    "authors": "Committee on Identifying Opportunities at the Interface of Chemistry and Quantum Information Science, Board on Chemical Sciences and Technology, Board on Life Sciences, Division on Earth and Life Studies, National Academies of Sciences, Engineering, and Medicine",
+    "container": "The National Academies Press",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 19,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2605.04025",
+    "doi": null,
+    "title": "Fast, accurate, high-resolution simulation of large-scale Fermi-Hubbard models on a digital quantum processor",
+    "authors": "Hartnett GS, Najafi KS, Khindanov A, Liao H, Schutzman M, Hush MR, et al.",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 20,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2604.15427",
+    "doi": null,
+    "title": "Tensor Networks with Belief Propagation Cannot Feasibly Simulate Google’s Quantum Echoes Experiment",
+    "authors": "Bermejo P, Villalonga B, Ware B, Vidal G, Szasz A",
     "container": "arXiv",
     "year": "2026",
     "volume": null,
@@ -742,517 +803,545 @@
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
-    "finding": "Quantum simulations improved molecular-structure models for 2 organic molecules.",
-    "detail": "The source does not report a molecular property value or agreement with an independent spectroscopic reference within experimental error. The underlying work is described as a preprint.",
-    "quote": "This experiment was then simulated on our Willow chip, resulting in improved models of the molecular structure.",
+    "finding": "Willow simulations of measured NMR spin echoes refined structural models for 2 organic molecules.",
+    "detail": null,
+    "quote": "In this pre-print, which will be submitted for peer review, we measured OTOCs on two organic molecules dissolved in liquid crystal at the\nPines Magnetic Resonance Center\nat UC Berkeley. This experiment was then simulated on our Willow chip, resulting in improved models of the molecular structure.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "A 65-qubit experiment measured second-order OTOCs estimated to require 3.2 years per point on Frontier.",
-    "detail": "The source reports a classical comparison but does not state an SNR or establish that the compared heuristic methods were accuracy-matched. It describes the underlying result as published in Nature.",
-    "quote": "A total of 65 qubits out of the 105 available qubits are used in this experiment.",
+    "finding": "For 65-qubit Willow echo circuits, the authors estimated a 13,000-fold classical runtime penalty. The circuit count is unspecified.",
+    "detail": "The blog attributes the benchmark to a Nature paper. The classical runtime is an estimate.",
+    "quote": "Our experiments on Willow took approximately 2 hours, a task estimated to require 13,000 times longer on a classical supercomputer.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": false,
     "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Quantum simulations improved molecular-structure models for 2 organic molecules.",
-    "detail": "The molecular demonstration was not beyond classical capabilities, and the source does not report an SNR above 1 for it. The beyond-classical OTOC benchmark was a separate experiment.",
-    "quote": "This experiment was then simulated on our Willow chip, resulting in improved models of the molecular structure.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "A 40-qubit quantum processor reproduced classically simulated OTOC dynamics with SNR 5.4.",
-    "detail": "The experimental values were compared with exact simulations of the same circuits.",
+    "finding": "First-order OTOC in 40-qubit random circuits, with the instance count unspecified for this comparison, agreed with exact simulation at SNR 5.4.",
+    "detail": "The reported SNR uses centered, rescaled values across circuit instances and measures agreement in circuit-to-circuit variation.",
     "quote": "The SNR achieved by CMC (5.3) is close to the experimental SNR of 5.4.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "met",
-    "finding": "Off-diagonal OTOC measurements on 65-qubit circuits had a projected SNR of 2 to 3.",
-    "detail": "SNR was projected using an empirical error model. The authors estimated 3.2 years on Frontier versus 2.1 hours of acquisition per circuit and assessed classical heuristics as unable to match the accuracy.",
+    "finding": "The off-diagonal second-order OTOC in 65-qubit circuits had a projected SNR of 2–3. The instance count is unspecified in the supplied text.",
+    "detail": "The 65-qubit SNR and Frontier runtime are estimates. The main text labels the timed quantity as the diagonal component, while the Fig. 4c caption identifies it as the off-diagonal component.",
     "quote": "Based on the same error model, the SNR of the 65-qubit dataset is projected to range from 2 to 3.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": null,
-    "verdict": "partial",
-    "finding": "A Hamiltonian-learning demonstration used 20 classically simulated circuit instances to infer a gate phase.",
-    "detail": "The 34-qubit demonstration used a toy model and classically generated reference data. It did not infer a property of a specified molecule, material or quantum field in the beyond-classical regime.",
-    "quote": "A set of\n\\({{\\mathcal{C}}}_{\\text{off-diag}}^{(4)}\\)\nvalues from 20 random circuit instances, produced by a classical simulation to mimic the role of the ‘physical system’ in Fig.\n5a\n, are provided.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "A superconducting quantum processor with 91 qubits reproduced analytically calculable autocorrelation dynamics.",
-    "detail": "Tensor-network error mitigation recovered the predicted decay at dual-unitary points; the authors report small deviations at larger system sizes.",
-    "quote": "With advances in noise learning and the implementation of novel error mitigation methods, we show that a superconducting quantum processor with 91 qubits is able to accurately simulate these correlators.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "met",
-    "finding": "Toluene, 10 independent measurements per NMR dataset: quantum-derived ortho–meta separation was 2.44 ± 0.04 Å.",
-    "detail": "The reference was 2.46 ± 0.01 Å. The analysis also used classical simulations; the result was not beyond classical capabilities.",
-    "quote": "We observe that the dip remains, and obtain an estimate\nz\nom\n,\nq\n=\n2.44\n±\n0.04\nz_{\\mathrm{om,\\,q}}=2.44\\pm 0.04\nÅ, which suffers a small loss of precision, but continues to agree with the reference data within experimental error.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Floquet magnetization dynamics resolved with percent-level precision in systems of up to 74 qubits.",
-    "detail": "The authors report that tested classical methods fail to converge for late-cycle dynamics, but the text gives no numerical SNR for an individual observable in that regime. The later-cycle quantum estimates also rely on a heuristic extrapolation that can introduce bias.",
-    "quote": "Using the advanced error mitigation software QESEM on an IBM Heron r3 superconducting quantum processor, we measure magnetization dynamics with percent-level precision and resolve long-lived subharmonic prethermal oscillations in systems of up to 74 qubits.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Kicked Ising circuit simulations used up to 91 qubits and were compared with classical tensor networks.",
-    "detail": "The non-dual-unitary circuits exceeded brute-force simulation, but the Heisenberg-picture approximation showed convergence and agreed strongly with the data. The text does not report an SNR above 1.",
-    "quote": "With advances in noise learning and the implementation of novel error mitigation methods, we show that a superconducting quantum processor with 91 qubits is able to accurately simulate these correlators.\nWe then probe dynamics beyond exact verification, by perturbing the circuits away from the dual unitary point, and compare our results to classical approximations with tensor networks.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Simulations at up to 91 qubits recovered the autocorrelation decay rate of a kicked Ising model.",
-    "detail": "The decay rate was analytically predictable and classically verifiable; the text does not establish the observable quantum-advantage test or infer a property of a specified molecule, material or quantum field.",
+    "finding": "Dual-unitary kicked Ising autocorrelation decay closely matched exact theory through 91 qubits, with 262,144 shots per data point.",
+    "detail": "The Clifford-point data were used to calibrate the noise model. The non-Clifford data provided a separate test, with small residual deviations at larger circuit volumes.",
     "quote": "We demonstrate that with error mitigation we can accurately recover the exact prediction of this decay constant for all system sizes studied.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Kicked Ising local Pauli-X estimates from 262,144 shots per point generally agreed with Heisenberg tensor networks at bond dimension 500.",
+    "detail": "Away from dual unitarity, the measured quantity is a local expectation value. The Heisenberg-picture calculations also showed convergence at smaller bond dimensions.",
+    "quote": "Across the different parameters, the experimental data show strong agreement with the Heisenberg simulations with some deviations arising at larger circuit volumes, but large disagreements with the Schrödinger-picture simulations.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Willow simulations of 9 DMBP candidate models reproduced exact OTOCs with RMSE 0.05.",
-    "detail": "The authors compared the quantum results with exact classical simulations across the candidate models.",
-    "quote": "The quantum computer achieves an RMSE of\n0.05\n0.05\nto exact simulation of the input circuits across the entire range of data, matching the performance of the toluene example.",
+    "finding": "Willow reproduced spin-echo dynamics for 2 molecular models, with an RMSE of 0.058 against the toluene benchmark.",
+    "detail": "The toluene benchmark includes Trotter error and residual hardware bias. Each NMR dataset was averaged over 10 independent measurements.",
+    "quote": "Comparing our hardware to the classical simulation of Fig.\n2\n(c), we find a root-mean-square error between the quantum and classical datasets of\nϵ\ntot\n=\n0.058\n\\epsilon_{\\mathrm{tot}}=0.058\n.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "Willow spin-echo fits for 2 molecules agreed with independent spectroscopy, including a toluene H–H distance of 2.44 Å.",
+    "detail": "The toluene hardware fit used the first five echo time points. The dimethylbiphenyl spectroscopy comparison used peak positions from two coherence orders.",
+    "quote": "Å, which suffers a small loss of precision, but continues to agree with the reference data within experimental error.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "Floquet Ising magnetization on 51 qubits (38 million shots) agreed with converged classical dynamics through about 11 cycles.",
+    "detail": null,
+    "quote": "The unbiased results agree with the classical data throughout their converged range, approximately up to\n11\n11\nFloquet cycles, and remain statistically feasible through cycle\n16\n16\n(Fig.\n3a\n), thereby providing a quantitatively trusted reference window for the dynamics.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Driven heavy-hex Ising ladders (five sizes, up to 74 qubits) yielded a fitted thermodynamic-limit magnetization oscillation amplitude of 0.0096.",
+    "detail": "The interval depends on the finite-size fit and does not bound residual zero-noise extrapolation bias. The Quantinuum comparison checked magnetization at selected finite-system cycles.",
+    "quote": "By contrast, when the larger error-mitigated points are included, the fit gives\nc\n=\n9.6\n×\n10\n−\n3\nc=9.6\\times 10^{-3}\nwith a central\n68\n%\n68\\%\ninterval of\n(\n8.1\n×\n10\n−\n3\n,\n1.1\n×\n10\n−\n2\n)\n(8.1\\times 10^{-3},1.1\\times 10^{-2})\n.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "Four-qubit acetonitrile dynamics sampled at 102 time points reproduced both exact resonance frequencies within 0.09 Hz.",
+    "detail": "The authors took half the frequency-grid spacing as the reported uncertainty.",
+    "quote": "the corresponding resonance frequencies extracted from the\nquantum simulation are 136.20 ± 0.09 and 272.41 ± 0.09 Hz, which\nare within 1σ of the exact frequencies of 136.2 and 272.4 Hz.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
     "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "In a 256-qubit simulation of TmMgGaO₄, post-quench nearest-neighbour correlations agreed with converged numerics through tJ₁ = 1.",
+    "detail": "Figure 4C reports shot-noise error bars. The converged comparison covers the early-time window.",
+    "quote": "and observe good quantitative agreement at early times (\nt\n​\nJ\n1\n≤\n1\ntJ_{1}\\leq 1\n), where the MPS results are converged",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "A 256-qubit simulation predicted TmMgGaO₄ post-quench spin correlations in about one day.",
+    "detail": "The dynamical prediction awaits a material measurement. The reported error bars represent QPU shot noise. Equilibrium QMC benchmarks the late-time thermal values, while the time-dependent classical trajectory loses convergence.",
+    "quote": "For the parameters considered here, the corresponding MPS simulations require roughly two weeks of wall-clock time, compared to about one day on the QPU.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "Measured occupation dynamics in a 60-site Fermi–Hubbard chain (20,000 shots per circuit) agreed with classical TDVP to about 1% RMSE.",
+    "detail": "The preprint reports that Rausch et al. independently validated the hardware data with a converged classical calculation through t = 6. The quoted RMSE comes from the authors’ own TDVP comparison.",
+    "quote": "As shown in Fig.\n4\n(c), the RMSE remains within\n∼\n1\n%\n\\sim 1\\%\nto increasing evolution times up to\nt\n≈\n5.2\n​\n(\n1\n/\nt\nh\n)\nt\\approx 5.2\\,(1/t_{h})\nas\nχ\n\\chi\nincreases up to\n4096\n4096\n.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "Willow simulated OTOCs for 9 DMBP candidate models with RMSE 0.05 against exact simulation.",
-    "detail": "The reported experiment used classically calculated data for circuit optimization and verification. It does not establish an SNR above 1 beyond competitive classical simulation.",
-    "quote": "The quantum computer achieves an RMSE of\n0.05\n0.05\nto exact simulation of the input circuits across the entire range of data, matching the performance of the toluene example.",
+    "finding": "Willow’s deeper 23-qubit first-order echo reached a directly benchmarked SNR of 5.26 across 50 circuit instances.",
+    "detail": "The deeper layout had 164 two-qubit gates. Tensor network Monte Carlo achieved higher SNR on its 25-instance subset. The 65-qubit belief-propagation cost is extrapolated from smaller simulations and a scaling argument.",
+    "quote": "On the deeper circuit, TNBP with the largest\nD\nD\nand\nχ\n\\chi\ngives an SNR of just 1.31, in comparison with 6.73 for TNMC and 5.26 for the experiment.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": null,
-    "verdict": "partial",
-    "finding": "OTOCs for 9 DMBP candidate models yielded a quantum estimate of the dihedral-angle PMF minimum of 40° ± 3°.",
-    "detail": "The learning experiment inferred a molecular property, but its circuits were optimized against a complete classically precomputed OTOC dataset; the observable quantum-advantage test was not demonstrated.",
-    "quote": "The minima of the two cost functions agree within error bars,\nϕ\nQC\n=\n40\n∘\n±\n3\n∘\n\\phi_{\\mathrm{QC}}=40^{\\circ}\\pm 3^{\\circ}\n, whilst\nϕ\nsim\n=\n41.5\n∘\n±\n0.2\n∘\n\\phi_{\\mathrm{sim}}=41.5^{\\circ}\\pm 0.2^{\\circ}\n.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "met",
-    "finding": "A 51-qubit Floquet Ising simulation agreed with classical dynamics through approximately 11 cycles.",
-    "detail": "The comparison used exact or converged classical calculations in their available range.",
-    "quote": "The unbiased results agree with the classical data throughout their converged range, approximately up to\n11\n11\nFloquet cycles, and remain statistically feasible through cycle\n16\n16\n(Fig.\n3a\n), thereby providing a quantitatively trusted reference window for the dynamics.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Simulations of up to 74 qubits resolved prethermal magnetization oscillations in a Floquet Ising model.",
-    "detail": "The authors infer a thermodynamic-limit property and compare against several classical methods. The text does not establish the full observable quantum-advantage test or identify a specified material, molecule or quantum field whose property is inferred.",
-    "quote": "Using the advanced error mitigation software QESEM on an IBM Heron r3 superconducting quantum processor, we measure magnetization dynamics with percent-level precision and resolve long-lived subharmonic prethermal oscillations in systems of up to 74 qubits.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "partial",
-    "finding": "A four-qubit simulation of acetonitrile produced an NMR resonance at 136.20 ± 0.09 Hz.",
-    "detail": "The simulated resonance matched a reference spectrum within resolution, but the coupling value was supplied as an input. The text does not report inferring a molecular property from the simulation.",
-    "quote": "Specif-\nically, the corresponding resonance frequencies extracted from the\nquantum simulation are 136.20 ± 0.09 and 272.41 ± 0.09 Hz, which\nare within 1σ of the exact frequencies of 136.2 and 272.4 Hz.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": null,
-    "verdict": "partial",
-    "finding": "A 256-qubit simulator predicted post-quench dynamics of the magnet TmMgGaO4.",
-    "detail": "The study compares short-time dynamics with one MPS method and long-time correlations with thermal QMC, but does not establish SNR above 1 or superiority over competitive accuracy-matched classical methods. The material’s post-quench response was not measured.",
-    "quote": "Having established this quantitative correspondence, we exploit the ultrafast coherent dynamics accessible in the Rydberg quantum simulator to predict the non-equilibrium response of TmMgGaO\n4\nfollowing a sudden quench of its longitudinal magnetic field.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 17,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://arxiv.org/html/2511.09124v3",
     "milestone": "m1",
-    "hash": "2fa761a0281e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a43d2da8e6b1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2511.09124v3",
     "milestone": "m2",
-    "hash": "735cefbe7136",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "006559663c01",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2511.09124v3",
     "milestone": "m3",
-    "hash": "d7cfc2b7db7b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "af26d6e95c4d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2511.09124v3",
     "milestone": "m4",
-    "hash": "e5524f46efa1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "505d0404c422",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2511.09124v3",
     "milestone": "completion",
     "hash": "e5304b7e6030",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pubmed.ncbi.nlm.nih.gov/38109339/",
     "milestone": "m1",
-    "hash": "2fa761a0281e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a43d2da8e6b1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pubmed.ncbi.nlm.nih.gov/38109339/",
     "milestone": "m2",
-    "hash": "735cefbe7136",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "006559663c01",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pubmed.ncbi.nlm.nih.gov/38109339/",
     "milestone": "m3",
-    "hash": "d7cfc2b7db7b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "af26d6e95c4d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pubmed.ncbi.nlm.nih.gov/38109339/",
     "milestone": "m4",
-    "hash": "e5524f46efa1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "505d0404c422",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pubmed.ncbi.nlm.nih.gov/38109339/",
     "milestone": "completion",
     "hash": "e5304b7e6030",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://research.google/blog/a-verifiable-quantum-advantage/",
     "milestone": "m1",
-    "hash": "2fa761a0281e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a43d2da8e6b1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://research.google/blog/a-verifiable-quantum-advantage/",
     "milestone": "m2",
-    "hash": "735cefbe7136",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "006559663c01",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://research.google/blog/a-verifiable-quantum-advantage/",
     "milestone": "m3",
-    "hash": "d7cfc2b7db7b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "af26d6e95c4d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://research.google/blog/a-verifiable-quantum-advantage/",
     "milestone": "m4",
-    "hash": "e5524f46efa1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "505d0404c422",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://research.google/blog/a-verifiable-quantum-advantage/",
     "milestone": "completion",
     "hash": "e5304b7e6030",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-09526-6",
     "milestone": "m1",
-    "hash": "2fa761a0281e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a43d2da8e6b1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-09526-6",
     "milestone": "m2",
-    "hash": "735cefbe7136",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "006559663c01",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-09526-6",
     "milestone": "m3",
-    "hash": "d7cfc2b7db7b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "af26d6e95c4d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-09526-6",
     "milestone": "m4",
-    "hash": "e5524f46efa1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "505d0404c422",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-025-09526-6",
     "milestone": "completion",
     "hash": "e5304b7e6030",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2411.00765",
     "milestone": "m1",
-    "hash": "2fa761a0281e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2510.19550",
-    "milestone": "m2",
-    "hash": "735cefbe7136",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2607.24937",
-    "milestone": "m3",
-    "hash": "d7cfc2b7db7b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a43d2da8e6b1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2411.00765",
     "milestone": "m2",
-    "hash": "735cefbe7136",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "006559663c01",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2411.00765",
     "milestone": "m3",
-    "hash": "d7cfc2b7db7b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "af26d6e95c4d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2411.00765",
     "milestone": "m4",
-    "hash": "e5524f46efa1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "505d0404c422",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2411.00765",
     "milestone": "completion",
     "hash": "e5304b7e6030",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2510.19550",
     "milestone": "m1",
-    "hash": "2fa761a0281e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a43d2da8e6b1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2510.19550",
+    "milestone": "m2",
+    "hash": "006559663c01",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2510.19550",
     "milestone": "m3",
-    "hash": "d7cfc2b7db7b",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "af26d6e95c4d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2510.19550",
     "milestone": "m4",
-    "hash": "e5524f46efa1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "505d0404c422",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2510.19550",
     "milestone": "completion",
     "hash": "e5304b7e6030",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2607.24937",
     "milestone": "m1",
-    "hash": "2fa761a0281e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "a43d2da8e6b1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2607.24937",
     "milestone": "m2",
-    "hash": "735cefbe7136",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "006559663c01",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2607.24937",
+    "milestone": "m3",
+    "hash": "af26d6e95c4d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2607.24937",
     "milestone": "m4",
-    "hash": "e5524f46efa1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "505d0404c422",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2607.24937",
     "milestone": "completion",
     "hash": "e5304b7e6030",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://iontrap.duke.edu/files/2025/03/sciadv.adh2594.pdf",
+    "milestone": "m1",
+    "hash": "a43d2da8e6b1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://iontrap.duke.edu/files/2025/03/sciadv.adh2594.pdf",
     "milestone": "m2",
-    "hash": "735cefbe7136",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "006559663c01",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://iontrap.duke.edu/files/2025/03/sciadv.adh2594.pdf",
+    "milestone": "m3",
+    "hash": "af26d6e95c4d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://iontrap.duke.edu/files/2025/03/sciadv.adh2594.pdf",
+    "milestone": "m4",
+    "hash": "505d0404c422",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://iontrap.duke.edu/files/2025/03/sciadv.adh2594.pdf",
+    "milestone": "completion",
+    "hash": "e5304b7e6030",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2603.20372",
+    "milestone": "m1",
+    "hash": "a43d2da8e6b1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2603.20372",
+    "milestone": "m2",
+    "hash": "006559663c01",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2603.20372",
+    "milestone": "m3",
+    "hash": "af26d6e95c4d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2603.20372",
     "milestone": "m4",
-    "hash": "e5524f46efa1",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "505d0404c422",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2603.20372",
+    "milestone": "completion",
+    "hash": "e5304b7e6030",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2605.04025",
+    "milestone": "m1",
+    "hash": "a43d2da8e6b1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2604.15427",
+    "milestone": "m3",
+    "hash": "af26d6e95c4d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1324,8 +1413,118 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "result on m3 from reference 13: quote is 388 characters, over its limit of 320; kept."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"A controllable quantum system predicts a measurable property of a molecule, material or quantum field. In a classical Monte Carlo calculation of that property, positive and negative contributions nearly cancel, making the average hard to estimate by sampling. The quantum simulation uses fewer computational resources than the best available classical method at the same accuracy. An independent laboratory subsequently measures the same property and confirms the prediction within the stated uncertainty.\". Reason: The definition needs to locate the sign problem in a classical representation and make clear that the resource comparison and the independent measurement concern the same observable."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"In a model of interacting electrons on an 8 \\u00d7 8 lattice, estimating spin correlations took up to 4,000 Monte Carlo runs of 200,000 measurement sweeps each at densities with severe cancellations. Cooling the model raises the sampling cost exponentially, while cheaper approximations can bias the correlations. If the model captures the material and other classical methods also fall short, quantum predictions could help physicists test which interactions cause electrons to pair in high-temperature superconductors.\". Reason: The example calculation for the mean sign leaves out the cost of estimating a physical observable and the question that a reliable prediction would help answer."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by US Department of Energy, Quantum Genesis Priority Applications, 2026: \"on lattice sizes beyond what is currently possible with classical computers.\". Reason: The Department of Energy's application document identifies a specific materials calculation and the classical limit it seeks to exceed."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by National Academies of Sciences, Engineering, and Medicine, Advancing Chemistry and Quantum Information Science, 2023: \"how quantum-accelerated calculations could solve chemistry problems (that otherwise cannot be solved using classical systems)\". Reason: The National Academies identifies the chemistry goal and qualifies what noisy devices can achieve without error correction."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: title = \"A quantum simulator reproduces dynamics that can be calculated analytically or numerically.\"; criterion = \"Compare the measured evolution of a controllable quantum system with an analytical or numerical solution of the target model in a regime where that solution can be computed. Assess agreement at the accuracy reported for the comparison.\". Reason: The title excludes numerical cross-checks accepted by the cited convention, and the criterion includes the outcome of an oscillator experiment."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: title = \"A molecular parameter inferred from quantum spin echoes agrees with spectroscopy within experimental error.\"; criterion = \"Fit a molecular structural parameter by comparing quantum simulations of nuclear spin echoes with measured nuclear magnetic resonance data. Compare the fitted parameter with an independent spectroscopic determination of the same quantity and obtain agreement within experimental error.\". Reason: The criterion mixes one molecule's measured distance with the test and obscures which data are used for fitting and which provide the independent check."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: title = \"A quantum echo resolves an observable at SNR above 1 beyond competitive classical simulation.\"; criterion = \"Estimate the echo observable across circuit instances with a signal-to-noise ratio above 1. The protocol defines this ratio as 1/\\u221a[2(1\\u2212\\u03c1)], where \\u03c1 is the Pearson correlation between measured and ideal observable values across the instances. Compare the cost with exact classical simulation and with approximate classical algorithms at the achieved accuracy. Distinguish a ratio obtained by direct comparison from one projected using an error model.\"; threshold_quote = \"in our case with an SNR above unity.\"; threshold_ref = 10. Reason: The echo benchmark uses a specific correlation across circuit instances, which the existing criterion leaves undefined while reporting projected runtimes and accuracy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: title = \"A quantum simulation predicts a measurable physical property beyond accuracy-matched classical methods.\"; criterion = \"For a specified molecule, material or quantum field with a documented Monte Carlo sign problem in the calculation at issue, use a quantum simulation to predict a measurable property and give its uncertainty before the confirming measurement. Show that the best available exact and approximate classical methods cannot predict that property at the same accuracy within the quantum calculation's resource cost.\"; set_by = \"Google Quantum AI and collaborators, observable criteria (1)\\u2013(3), applied here to a prediction for a physical target with a documented sign problem.\"; set_by_kind = \"protocol\"; threshold_quote = \"The observable should yield practically relevant information about the quantum system.\"; threshold_ref = 10; refs = [10, 3, 1]. Reason: The last milestone applies the echo-specific accuracy cutoff to every physical property and includes results on model circuits in the criterion."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "structure = parallel. Reason: Agreement with molecular spectroscopy and an advantage on an echo benchmark test different claims, and neither requires the other to occur first."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 1. Reason: The publisher provides the article and its Methods as a PDF, so the access note no longer identifies missing evidence."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 10 of 10 proposed operations from QUA-03-revise-20261125T105114540353Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m3, m4."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 0 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 3 found, 0 not found, 1 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Structural problems after applying: references never cited: [11]"
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "definition is 505 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 9 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 3 candidates returned, 0 dropped as sources already used, 3 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 2 of 3 new candidates, without search. Skipped: 1 no readable saved copy. Dropped rows: none. Replaced 18 earlier rows. Added 15 results: 13 from sources already used, 2 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 2 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 15 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Removed 2 references no longer cited; renumbered."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-25"
  }
 }
