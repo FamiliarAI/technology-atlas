@@ -326,10 +326,11 @@
   "title": "End-to-end superpolynomial quantum speedup on classical data",
   "definition": "A quantum hardware workflow processes a specified family of classical datasets with a runtime advantage growing faster than every fixed power of the stated classical problem-size parameter. The comparison includes data loading, control, error management and answer extraction, against the best available classical algorithms with comparable access and hardware resources.",
   "goal": {
-   "need": "For an m×n matrix and rank-k approximation, Tang obtained classical time O(poly(k) log(mn)), only polynomially slower than the quantum recommendation algorithm under the stated sampling-access assumptions. The QRAM survey relates N active memory bits to Θ(N) parallel processors. These results motivate an advantage that survives input-access costs and comparably resourced classical parallelism.",
+   "need": "A mouse-brain dataset records the activity of about 30,000 genes across 1.3 million cells. Biologists use patterns of variation in these measurements to distinguish cell types. Classical methods can process cells as they arrive, but merging genes to fit memory can obscure those patterns. On some changing data streams, a quantum method needs fewer observations than any classical method within a stated memory budget to locate a cell along a stable pattern. Whether this saves time on real cell data, including loading the observations and reading the answer, remains open.",
    "need_refs": [
-    1,
-    2
+    20,
+    10,
+    6
    ],
    "figures": null,
    "statements": [
@@ -342,11 +343,19 @@
      "checked": true
     },
     {
-     "body": "DARPA",
-     "year": "2021",
-     "quote": "make those metrics testable, and estimate the required quantum and classical resources needed to reach critical performance thresholds.",
-     "context": "The Quantum Benchmarking programme covers several application areas, including machine learning.",
-     "ref": 4,
+     "body": "Institute for Pure and Applied Mathematics, Mathematical and Computational Challenges in Quantum Computing programme",
+     "year": "2024",
+     "quote": "Rigorous proof of asymptotic quantum advantage over the best-possible classical algorithm, ideally superpolynomial, is a gold standard",
+     "context": "The Fall 2023 programme white paper distinguishes this theoretical ideal from a comparison with the best known classical algorithm, which later algorithmic advances can overturn.",
+     "ref": 21,
+     "checked": true
+    },
+    {
+     "body": "Society for Industrial and Applied Mathematics, Quantum Intersections Convening",
+     "year": "2024",
+     "quote": "Although exponential or superpolynomial speedups may not be expected",
+     "context": "The report discusses machine learning on classical data. It asks whether end-to-end gains greater than quadratic are achievable and valuable enough for practical use.",
+     "ref": 22,
      "checked": true
     }
    ]
@@ -358,14 +367,15 @@
    "set_by_kind": "atlas",
    "threshold_quote": null,
    "threshold_ref": null,
-   "basis": "Published speedup definitions, end-to-end algorithm surveys, Google's application-maturity framework, DARPA's benchmarking goals and IBM's classical-input learning goals were searched. None supplies this combined hardware threshold. The fallback combines their narrower criteria. The size parameter matters: N/polylog(N) is polynomial in N, although exponential in log N. Here n^{ω(1)} means growth faster than every fixed power of n.",
+   "basis": "The IPAM programme describes a proof against the best possible classical algorithm as an ideal. The hardware test uses the best available classical algorithm, so a faster classical method can change the verdict. The ratio must grow faster than every fixed power of the stated classical input size. For example, N/polylog(N) is at most polynomial in N even though it grows exponentially in log N.",
    "refs": [
     5,
     6,
     7,
     4,
     3,
-    2
+    2,
+    21
    ],
    "threshold_checked": null
   },
@@ -376,7 +386,7 @@
    {
     "id": "m1",
     "title": "A quantum processor solves 2×2 linear systems using four qubits and four controlled gates.",
-    "criterion": "Implement every subroutine of the published four-photon linear-system experiment and reconstruct its solution states. Cai et al. reported three input vectors in 2013, with output-state fidelities 0.993±0.003, 0.825±0.013 and 0.836±0.016; uncertainties are one standard deviation. This is a laboratory implementation without a demonstrated speed advantage.",
+    "criterion": "Use four photonic qubits and four controlled gates to implement every subroutine of the published 2×2 linear-system circuit. For each of the protocol’s three input vectors, reconstruct the output density matrix from Pauli measurements and calculate its fidelity with the ideal solution state.",
     "set_by": "Cai et al., published experimental protocol; this benchmark concerns the linear-system case.",
     "set_by_kind": "protocol",
     "threshold_quote": "We use four quantum bits and four controlled logic gates to implement every subroutine required",
@@ -390,17 +400,15 @@
    },
    {
     "id": "m2",
-    "title": "A classical-data task has efficiently generated instances with verifiable quantum advantage.",
-    "criterion": "Construct an efficiently sampled ensemble with verifiable advantage over the best-known classical algorithms and instantiate input access. Relevant results include Liu et al.'s polynomial-time classifier with accuracy ≥0.99 and success probability ≥2/3; its classical separation assumes discrete-log hardness. Zhao et al.'s preprint revised on 1 October 2026 gives dynamic linear-system tasks using Õ(N) samples and poly(log N) quantum memory versus superpoly(N) samples with O(N^0.99) classical memory. The latter reports classical simulations, is not peer reviewed, and is not a hardware demonstration.",
+    "title": "A classical-data task has efficiently generated instances with an expected, verifiable quantum advantage.",
+    "criterion": "Give an efficient procedure for generating instances and specify how each algorithm accesses their classical data. Show why the quantum algorithm is expected to outperform the best known classical methods on the generated instances. Specify how a classical or quantum verifier can efficiently check the answer.",
     "set_by": "Google Quantum AI authors' proposed application-maturity framework, Stage II; a published framework, not a consensus standard.",
     "set_by_kind": "community_convention",
-    "threshold_quote": "Identification of problem instances exhibiting quantum advantage.",
+    "threshold_quote": "expected to exhibit verifiable quantum advantage",
     "threshold_ref": 7,
     "refs": [
      7,
-     6,
-     9,
-     10
+     6
     ],
     "status": "active",
     "replaced_by": [],
@@ -434,6 +442,37 @@
      5,
      6,
      2
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "A classical-data algorithm compiles to fault-tolerant operations for a specified architecture.",
+    "criterion": "Map the algorithm’s logical gate circuit to fault-tolerant operations for a specified error-correcting architecture. Use that architecture’s cost model, including code distances and cycle times, to estimate the physical qubits and runtime for the chosen instance.",
+    "set_by": "Google Quantum AI authors’ proposed application-maturity framework, Stage IV(c).",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "Compilation to logical Quantum Error Correction (QEC) primitives.",
+    "threshold_ref": 7,
+    "refs": [
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m6",
+    "title": "A specific real-world task retains an expected quantum speedup after its overheads are included.",
+    "criterion": "Identify a practical problem whose classical inputs and requested output match instances with an expected quantum advantage. Account for the application’s accuracy requirements, data access, output extraction and other overheads, and show why the remaining speedup would matter for that use.",
+    "set_by": "Google Quantum AI authors’ proposed application-maturity framework, Stage III.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "a meaningful speedup, after accounting for all real-world constraints and overheads",
+    "threshold_ref": 7,
+    "refs": [
+     7,
+     6
     ],
     "status": "active",
     "replaced_by": [],
@@ -712,11 +751,111 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 20,
+    "kind": "web",
+    "url": "https://eurobioc2023.bioconductor.org/abstracts/paper33/",
+    "doi": null,
+    "title": "ScalablePCA: Benchmarking principal component analysis for large-scale single-cell RNA-sequencing data",
+    "authors": "Ilaria Billato, Chiara Romualdi, Gabriele Sales, Davide Risso",
+    "container": "EuroBioC 2023",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 21,
+    "kind": "report",
+    "url": "https://www.ipam.ucla.edu/wp-content/uploads/2024/01/IPAM_CQC2023_Whitepaper.pdf",
+    "doi": null,
+    "title": "White Paper: “Mathematical and Computational Challenges in Quantum Computing”",
+    "authors": "Ahmad M. Alkadri, Abhinav Anand, Andrew Baczewski, Brandon Barton, Joao Basso, M. Gabriela Boada G., Wendy Billings, Paul Cazeaux, Zhiyan Ding, Aviva Englander, Di Fang, Katerina Gratsea, Jakob Huhn, Michael A. Jones, Marius Junge, Tyler Kharazi, Spencer Lee, Jiaqi Leng, Lin Lin, Divi Liu, Agnieszka Miedlar, Jose Morales E., Scott Nie, Ojas Parekh, Soo-Jong Rey, Rahul Sarkar, Philipp Schleich, Lucas Tecot, Ruizhe Zhang, Shuchen Zhu",
+    "container": "Institute for Pure and Applied Mathematics",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 22,
+    "kind": "report",
+    "url": "https://www.siam.org/media/orydkrzd/quantum-convening-report.pdf",
+    "doi": "10.1137/25M1741017",
+    "title": "Report of the SIAM Quantum Intersections Convening: Integrating Mathematical Scientists into Quantum Research",
+    "authors": "Di Fang, Lior Horesh, David Hyde, Annie Imperatrice, Jeffrey Larson, Bashir Mohammed, Giacomo Nannicini, Alex Pothen, Suzanne Weekes",
+    "container": "Society for Industrial and Applied Mathematics",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 23,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/quant-ph/9508027",
+    "doi": null,
+    "title": "Polynomial-Time Algorithms for Prime Factorization and Discrete Logarithms on a Quantum Computer",
+    "authors": "Shor PW",
+    "container": "arXiv",
+    "year": "1995",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 24,
+    "kind": "journal",
+    "url": "https://link.springer.com/article/10.1007/s10732-024-09530-5",
+    "doi": "10.1007/s10732-024-09530-5",
+    "title": "On the emerging potential of quantum annealing hardware for combinatorial optimization",
+    "authors": "Tasseff B, Albash T, Morrell Z, Vuffray M, Lokhov AY, Misra S, et al.",
+    "container": "J Heuristics",
+    "year": "2024",
+    "volume": "30",
+    "issue": "5-6",
+    "pages": "325-358",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 25,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2504.01897",
+    "doi": null,
+    "title": "Threshold for Fault-tolerant Quantum Advantage with the Quantum Approximate Optimization Algorithm",
+    "authors": "Omanakuttan S, He Z, Zhang Z, Hao T, Babakhani A, Boulebnane S, et al.",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 26,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2505.15917",
+    "doi": null,
+    "title": "How to factor 2048 bit RSA integers with less than a million noisy qubits",
+    "authors": "Gidney C",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
    }
   ],
   "milestone_order": [
    "m1",
    "m2",
+   "m6",
+   "m5",
    "m3",
    "m4"
   ],
@@ -725,594 +864,1112 @@
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
-    "finding": "For an m × n recommendation matrix, a classical algorithm matches the quantum task up to polynomial slowdown; no empirical sample size is reported.",
-    "detail": "The classical result removes a proposed exponential quantum advantage under comparable input assumptions. It does not construct an efficiently sampled ensemble with a verifiable quantum advantage.",
-    "quote": "Thus, we can say that our\nalgorithm performs just as well, up to polynomial slowdown a nd ε approximation factors.",
+    "finding": "Sparse polynomial eigenvalue transforms on N×N matrices with at most d nonzeros per row have a potential Õ(√(Nd)) speedup in the medium-scale model.",
+    "detail": "The comparison assumes a two-dimensional nearest-neighbour classical mesh and ignores signal latency. It uses a modeled cost comparison between QRAM access and classical matrix-vector multiplication.",
+    "quote": "Thus, we have a square-root time advantage for the QRAM in this case.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 2,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For m × n matrices, classical low-rank row sampling incurs at most a polynomial slowdown in the stated comparison.",
+    "detail": "The comparison assumes the matrix is already stored in the shared data structure. The classical runtime has polynomial dependence on inverse sampling error, while the cited quantum runtime has logarithmic dependence.",
+    "quote": "As a\nconsequence, Kerenidis and Prakash’s algorithm does not in fact give an exponential\nspeedup over classical algorithms.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 1,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For m users and n products, classical recommendation sampling runs in O(poly(k, 1/ε) polylog(mn)) time.",
+    "detail": "The guarantee assumes a nearly low-rank preference matrix and access to a constant fraction of its entries through a prebuilt data structure. The paper describes that data coverage requirement as impractical.",
+    "quote": "with probability 1 − (mn)−Θ(1) in O(poly(k, 1/ε) polylog(mn)) time.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 1,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Four-photon linear-system experiment: 3 input vectors; one reconstructed output-state fidelity was 0.993±0.003.",
-    "detail": "The other fidelities were 0.825±0.013 and 0.836±0.016; uncertainties are one standard deviation. The experiment implemented every subroutine using four qubits and four controlled gates. It was a proof-of-principle demonstration with no demonstrated speed advantage.",
-    "quote": "We use four quantum bits and four controlled logic gates to implement every subroutine required, demonstrating the working principle of this algorithm.",
+    "finding": "A four-photon 2×2 linear solver tested three input vectors and achieved a lowest output-state fidelity of 0.825(13).",
+    "detail": "The experiment conditioned the output on ancilla success and fourfold coincidence. The authors attributed the lower fidelities for the second and third inputs to higher-order photon emissions and CNOT postselection.",
+    "quote": "The output states are measured with a fidelity of 0.993(3), 0.825(13), and 0.836(16) for\n|\nb\n1\n⟩\n|b_{1}\\rangle\n,\n|\nb\n2\n⟩\n|b_{2}\\rangle\n, and\n|\nb\n3\n⟩\n|b_{3}\\rangle\n, respectively.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "Discrete-log classification with polynomially many training samples achieves at least 0.99 test accuracy.",
-    "detail": "The quantum classifier succeeds with probability at least 2/3. Labeled instances are efficiently generated and classically verifiable; the classical separation assumes discrete-log hardness. The result is theoretical.",
-    "quote": "algorithm returns a classifier with test accuracy at least 0.99 in polynomial time, with probability at least\n2\n/\n3\n2/3\nover the choice of random training samples and over noise in",
+    "finding": "The quantum-kernel SVM achieves at least 99% test accuracy on discrete-log classification with polynomially many training examples.",
+    "detail": "The classical verifier accepts when more than 99% of returned test labels are correct. The classification guarantee and the verification protocol are theoretical results.",
+    "quote": "algorithm returns a classifier with test accuracy at least 0.99 in polynomial time, with probability at least",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
-    "verdict": "met",
-    "finding": "Dynamic linear-system task: Õ(N) quantum samples versus superpoly(N) classical samples.",
-    "detail": "The classical lower bound applies to machines with O(N^0.99) memory; the quantum algorithm uses poly(log N) memory. Input is sampled from a changing linear system. The reported experiments are classical simulations, not a hardware demonstration.",
+    "verdict": "partial",
+    "finding": "For dynamic N-dimensional linear systems, the quantum solver uses Õ(N) streamed classical samples under the stated refresh conditions.",
+    "detail": "The sample and time separation applies under a classical memory cap. The source reports asymptotically comparable classical runtime when enough memory is available to retain the data.",
     "quote": "Beyond space advantages, we also establish superpolynomial advantage in sample and time complexity for dynamic tasks, showing that classical algorithms with insufficient memory are fundamentally unable to track evolving data distributions.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
-    "milestone": "m2",
+    "milestone": "m6",
     "case": null,
     "verdict": "partial",
-    "finding": "OPI circuit resource estimate; sample size not reported; approximately 5.72 million Toffoli gates.",
-    "detail": "The authors analyze classical attacks and propose verifiable quantum advantage, but the supplied text does not establish an efficiently sampled ensemble with instantiated input access. The result is a resource estimate, not a hardware demonstration.",
-    "quote": "Our resource estimates show that classically intractable OPI instances (requiring\n>\n10\n23\n>10^{23}\nclassical trials) can be solved with approximately 5.72 million Toffoli gates.",
+    "finding": "Across four real-world datasets, converged classification and PCA benchmarks estimate four to six orders of magnitude of memory savings.",
+    "detail": "The authors infer quantum terminal performance by solving the corresponding LS-SVM and PCA problems directly. They leave dataset-specific classical heuristics and circuit-level runtime evaluation to future work.",
+    "quote": "This provides evidence for quantum advantages of four to six orders of magnitude using fewer than\n60\n60\nlogical qubits.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "Hermite OPI on N classical stream entries: a one-pass quantum algorithm satisfies 93% of constraints.",
-    "detail": "Uniformly random instances are presented as a classical stream, and the output polynomial’s score is verifiable. The claimed separation concerns streaming memory and passes, with unlimited classical computation; it is a theoretical result, not a hardware demonstration.",
-    "quote": "Our results establish unconditional streaming space–pass separations\nfor explicitly presented optimization instances, even with unlimited classical computation.",
+    "finding": "For one Twisted Bent Target OPI instance with 4,095 constraints, the estimated classical cost exceeds 10²³ trials.",
+    "detail": "The comparison uses modeled classical trial counts at DQI’s expected solution quality. Verification checks the achieved score of an approximate solution.",
+    "quote": "Our results demonstrate that classically intractable instances of OPI (requiring\n>\n10\n23\n>10^{23}\nclassical trials) can be solved with modest quantum resources.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
-    "milestone": "m3",
+    "milestone": "m5",
     "case": null,
     "verdict": "partial",
-    "finding": "Shor’s ECDLP algorithm, one 256-bit curve: estimated footprint of 19,397 physical qubits.",
-    "detail": "The authors compiled high-level components into architecture-legal measurement schedules with routing and describe error correction and magic-state resources. The text does not establish that the complete algorithm was compiled into executable physical machine instructions.",
-    "quote": "We implement a compiler to provide accurate depth estimates and physical qubit counts by compiling all high-level algorithmic components to executable programs for our architecture, replacing all naive Clifford decompositions with integrated logical routing and getting exact depth counts.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "A 2×2 linear-system circuit was compiled into an optical network with four photonic qubits.",
-    "detail": "The experiment implements a small, specialized circuit, but does not report error correction, fault-tolerant non-Clifford resources, or Stage IV(d) physical resource counts.",
-    "quote": "The quantum circuit is optimized and compiled into a linear optical network with four photonic quantum bits (qubits) and four controlled logic gates, which is used to coherently implement every subroutine for this algorithm.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": null,
-    "verdict": "partial",
-    "finding": "For static linear systems of dimension N, the authors claim a superpolynomial time advantage against classical algorithms limited to O(N^0.99) memory.",
-    "detail": "This is a theoretical comparison, not a measured total wall-clock result on physical hardware. The source says classical algorithms with Ω(N) memory have asymptotically comparable runtime, and leaves circuit-level end-to-end characterization to future work.",
-    "quote": "When compared to the best known classical algorithm with memory size at most\nO\n⁡\n(\nN\n0.99\n)\nO(N^{0.99})\n, quantum oracle sketching is superpolynomially faster, even for the static tasks.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "One OPI instance has an estimated physical cost of 800,000 qubits.",
-    "detail": "The authors construct end-to-end quantum circuits and estimate physical resources, but the supplied text does not report compilation into a complete set of executable physical instructions.",
+    "finding": "The surface-code estimate for one DQI OPI instance with 4,095 constraints is 800,000 physical qubits.",
+    "detail": "The supplied excerpt ends before Section V.2, where the paper lists its physical cost analysis.",
     "quote": "OPI instance can be solved using eight hundred thousand physical qubits and\n1\n1\nhour of runtime under standard assumptions for superconducting architectures",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
-    "milestone": "m4",
+    "milestone": "m2",
     "case": null,
-    "verdict": "partial",
-    "finding": "One OPI instance has an estimated quantum runtime of 1 hour.",
-    "detail": "This is a physical resource estimate, not a measured hardware workflow or a matched end-to-end wall-clock comparison with the best applicable classical algorithms.",
-    "quote": "OPI instance can be solved using eight hundred thousand physical qubits and\n1\n1\nhour of runtime under standard assumptions for superconducting architectures",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": null,
-    "verdict": "partial",
-    "finding": "For Hermite OPI streams of N entries, a theoretical quantum algorithm achieves 93% approximation with polylogarithmic time per entry.",
-    "detail": "The paper reports an algorithmic time bound and comparisons with known classical algorithms, but no physical execution or total wall-clock benchmark. Its unconditional classical lower bound concerns space and passes, not unrestricted runtime.",
+    "verdict": "met",
+    "finding": "For Hermite OPI streams of N = (q−1)q^ℓ entries, quantum DQI attains a verifiable 93% approximation with polylogarithmic memory.",
+    "detail": "The unconditional separation concerns streaming memory and passes. The source also reports a runtime advantage relative to known classical algorithms. N is the input length for the theorem.",
     "quote": "An adaptation of the DQI algorithm produces a polynomial satisfying\n93\n%\n93\\%\nof the constraints; moreover, it only reads the input stream in one pass, uses polylogarithmic space, and has polylogarithmic computation time per stream entry.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
-    "milestone": "m4",
+    "milestone": "m5",
     "case": null,
-    "verdict": "partial",
-    "finding": "A proposed quantum architecture estimates 26 days to solve a 256-bit elliptic-curve discrete logarithm.",
-    "detail": "This is a resource estimate for a proposed device, not a measured physical workflow. The text does not provide a matched total wall-clock comparison with the best applicable classical algorithms.",
-    "quote": "in 26 days using approximately 20,000 qubits",
+    "verdict": "met",
+    "finding": "For one 256-bit secp256k1 discrete-log computation, the trapped-ion design requires an estimated 19,397 physical qubits.",
+    "detail": "The model uses Q102, Q66 and C6 codes with distances 9, 10 and 2, respectively, and budgets 29.50 ms per measurement layer.",
+    "quote": "The device contains 69 Q102 memory blocks, 24 cat-state bundle\npairs, 12 Bell-state bundles for LM2 measurements, four logical CliNR blocks,\nand four magic factories, each with two local six-qubit C6 Bell-state sources. Including local and global reloading reservoirs, these components\n give the",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Schedules for one 256-bit secp256k1 computation yield an estimated footprint of 19,397 physical qubits.",
+    "detail": "The compiler generates schedules component by component. Native lowering uses a runtime library, and the aggregate depth includes estimated stochastic penalties.",
+    "quote": "Lowering to native operations\non the system graph (transport, physical gates, and readout) happens below\nthe compiler, at runtime, using the library of ISA primitives.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One attempt at a 256-bit secp256k1 discrete logarithm is projected to take 25.7 days.",
+    "detail": "The runtime is a hardware-model projection per attempt. The 63.3% success estimate depends on heuristic postprocessing assumptions and modeled logical errors.",
+    "quote": "This allows us to conclude that our proposed architecture, with around 20,000 physical qubits, can solve the ECDLP on\n𝚜𝚎𝚌𝚙𝟸𝟻𝟼𝚔𝟷\n\\mathtt{secp256k1}\nin approximately\n25.7\n25.7\ndays per attempt.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "Encoded-LWE sampling task, no empirical sample size: classical acceptance is at most 3/4 plus negligible error.",
-    "detail": "The theoretical construction uses efficiently sampled classical challenges and trapdoor verification. The separation assumes subexponential lattice-knowledge and carry-predicate hardness; the latter is not known to follow from standard LWE.",
+    "finding": "Encoded LWE sampling, one response per generated challenge and no empirical sample: conditional classical acceptance is at most 3/4 plus a negligible term.",
+    "detail": "Classical soundness depends on the subexponential knowledge-of-lattice-point and adaptive-hardcore-bit assumptions. The paper gives partial evidence for the carry-predicate assumption.",
     "quote": "We give a sampling problem that is solvable by shallow quantum circuits,\nhard for polynomial-time classical algorithms under lattice-based assumptions,\nand efficiently verifiable by a classical computer.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
-    "verdict": "met",
-    "finding": "Random-order OPI streams of n(n+1) entries have a quantum space bound of O(log³ n) versus Ω(n) classical bits.",
-    "detail": "For degree d = Θ(log² n), the ensemble is sampled using independent random bits and presented in one pass. The result is an asymptotic space separation in the streaming model; the classical lower bound does not apply to unrestricted OPI.",
+    "verdict": "partial",
+    "finding": "Across two asymptotic random-order streaming task families, the paper proves an exponential quantum memory advantage in suitable regimes.",
+    "detail": "The sampled streams and success probabilities are theoretical. The space-bounded DQI implementation can take exponential time to erase a sparse error from its syndrome.",
     "quote": "We show two unconditional quantum space advantages in the random-order streaming model.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
-    "finding": "Worst-case OPI algorithm on n constraints finds a perfect solution when R > 0.75.",
-    "detail": "The result assumes quantum membership-oracle access and growing field characteristic. It improves the quantum algorithm’s parameter regime, but the text does not construct an efficiently sampled ensemble or establish an advantage over the best-known classical algorithms for that regime.",
-    "quote": "In particular, when each subset contains\nroughly half of the field elements, our algorithm finds a solution with satisfaction rates= 1\nwhenever the rate satisfiesR >0.75.",
+    "finding": "Worst-case quantum Optimal Polynomial Intersection satisfies all n balanced constraints in polynomial time at fixed code rates above 0.75.",
+    "detail": "The classical-heuristic comparison in the introduction concerns prior DQI work. The query-complexity separation discussed later is attributed to subsequent work by Sun and Wootters.",
+    "quote": "Equivalently, whenρ= 1/2,\nour algorithm finds a perfect solution for everyR >0.75.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
-    "milestone": "m3",
+    "milestone": "m5",
     "case": null,
-    "verdict": "partial",
-    "finding": "One RSA-2048 modular exponentiation circuit compiled to Pinnacle instructions; one estimate uses 48,000 physical qubits.",
-    "detail": "The source counts operations and physical modules, with error-correction and magic-state simulations. It does not establish compilation of the complete factoring algorithm into physical machine instructions or state an allowance for uncertainty from decoding feedback.",
+    "verdict": "met",
+    "finding": "For one RSA-2048 factoring configuration, the compiled Pinnacle 1 circuit requires an estimated 48,000 physical qubits.",
+    "detail": "The best listed estimate uses code distance 10, a physical error rate of 10⁻⁴ and a 1 µs code cycle. Runtime is modeled using compiled instruction timings and simulated logical error rates.",
     "quote": null,
     "checked": null,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 17,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "Shor’s algorithm for one RSA-2048 instance: an estimated 22,593 physical cat qubits.",
-    "detail": "The authors report physical layouts, schedules, error correction and magic-state factories, with a 10 µs decoder reaction time. However, phaseups receive a coarser estimate, and the supplied text does not establish a complete set of executable physical instructions.",
+    "finding": "For one RSA-2048 factoring task, Pinnacle 1.2 streamed the complete fault-tolerant instruction sequence for model validation.",
+    "detail": "The source gives no instruction count for the streamed sequence. It describes checks against architecture models and derives physical resource counts from modeled modules and operation timings.",
+    "quote": "We validate the compiled circuit against models of the relevant Pinnacle 1 instantiations by streaming the complete sequence of instructions required for factoring and verifying that each satisfies the architecture’s constraints.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "One proposed finite-field discrete-log benchmark uses an 80-bit exponent.",
+    "detail": "The benchmark fixes input sizes. The quantum runtime estimate reuses operations compiled for RSA-2048.",
+    "quote": "FFDLP-512, defined as an in-\nstance of the FFDLP problem for a 512-bit prime group\nand an 80-bit exponent.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For one RSA-2048 challenge modulus, the projected quantum runtime is 3.14 days.",
+    "detail": "The projected duration assumes a 1 µs error-correction cycle, 10 µs decoder reaction time, phase-flip probability of 5×10⁻⁴ and negligible bit flips.",
     "quote": "factoring a 2048-bit RSA modulus requires 22593\ncat qubits and 3.14 days;",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 18,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "met",
+    "finding": "The balanced LDPC-cat design for one RSA-2048 instance requires an estimated 22,593 physical qubits.",
+    "detail": "The balanced estimate uses a 1 µs correction cycle, a 10 µs decoder reaction time, phase-flip probability of 5×10⁻⁴ and negligible bit flips.",
+    "quote": "factoring a 2048-bit RSA modulus requires 22593\ncat qubits and 3.14 days;",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Physical scheduling for one RSA-2048 instance yields an estimate of 22,593 cat qubits.",
+    "detail": "The authors call RSA-2048 fully compiled at the physical level. The supplied text describes a coarser phaseup estimate within that compilation.",
+    "quote": "factoring a 2048-bit RSA modulus requires 22593\ncat qubits and 3.14 days;",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Across four industrial models, simulated Iterative-QAOA partitions cut LS-DYNA runtime by up to 14.6% versus LS-GPart.",
+    "detail": "The Drill benchmark ran two transient timesteps. The production estimate assumes that one ordering can be reused across many solves and that the measured saving persists.",
+    "quote": "Further benchmarks using the NVIDIA CUDA-Q/cuTensorNet MPS simulator yielded a maximum WCT reduction of about 14.6% for the Drill model, 13.8% for the JetEngine model, 9.7% for the Impeller model, and 5.9% for the SedanCar model.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "partial",
-    "finding": "Three finite-element models used 36-qubit hardware; the Drill model’s best downstream wall-clock time fell by about 12%.",
-    "detail": "The reported reduction is for downstream simulation using a selected partition; the text does not establish that total time includes quantum execution and all workflow overheads. It compares against LS-GPart without testing a classical solver in the same coarse-graph slot, and does not establish matched success probability.",
+    "finding": "Across three Forte-tested models, the best hardware-derived Drill partition cut LS-DYNA wall-clock time by about 12% versus LS-GPart.",
+    "detail": "The reported gain selects the best of 20 shortlisted partitions. At the smallest coarse graph sizes, median partitions offered little or no gain. The study leaves a same-pipeline comparison with a classical coarse-graph solver for future work.",
     "quote": "In hardware executions on the IonQ Forte QPU utilizing 36-node coarse graphs, we observed a WCT reduction of about 12% for the Drill model, with more modest improvements for the Impeller and SedanCar.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 19,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For L-bit integer inputs, Shor derives O(L² log L log log L) quantum steps for factoring with polynomial-time classical post-processing.",
+    "detail": "The runtime result is theoretical and has no empirical sample. Choosing a random base modulo an already supplied integer is a step inside the factoring algorithm.",
+    "quote": "These algorithms take a number of\nsteps polynomial in the input size, e.g., the number of digits of the\ninteger to be factored.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 23,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "D-Wave Advantage showed an estimated 15× wall-clock advantage over tested classical heuristics on 50 hardware-native CBFM-P Ising instances with 5,387 variables each.",
+    "detail": "The comparison used observed objective values and interpolated classical runtimes where needed. Hardware-native inputs bypassed encoding and embedding. Most classical solvers in the main comparison ran single-threaded.",
+    "quote": "In particular, the estimated\n\\(15 \\times \\)\nrun time ratio for the largest problem size is encouraging, as this suggests that the solutions identified by the QPU, even when accessed via a cloud computing service, can be obtained quickly enough to accelerate the performance of classical heuristic methods.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 24,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "met",
+    "finding": "For random 8-SAT with 179 variables, surface-code QAOA with amplitude amplification is estimated to require 73.91 million physical qubits.",
+    "detail": "The runtime is an ensemble estimate at 176 clauses per variable. Each logical cycle comprises 28 syndrome cycles. The resource model excludes qubit-routing overhead.",
+    "quote": "Even when accounting for the benefits of classical parallelization, our analysis finds, for example, that QAOA+AA is capable of outperforming state-of-the-art classical solvers on 8-SAT instances with\nn\n=\n179\nn=179{}\nwith a few hours of runtime using 73.91 million physical qubits.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 25,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "met",
+    "finding": "Factoring one 2048-bit RSA integer is estimated to require fewer than one million physical qubits on a fault-tolerant surface-code architecture.",
+    "detail": "The author budgets about 100,000 extra qubits for layout and scheduling slack. Detailed simulation of how cold-storage parity checks interact with lookup traffic remains pending.",
+    "quote": "I estimate that a 2048 bit RSA integer could be factored in less than a week by a quantum computer with less than a million noisy qubits.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 26,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://arxiv.org/html/2305.10310v2",
     "milestone": "m1",
-    "hash": "49f44e1701f9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "491d2c249fa8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2305.10310v2",
     "milestone": "m2",
-    "hash": "217206ffd20a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3a6b9053ae2e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2305.10310v2",
+    "milestone": "m6",
+    "hash": "d7803fbfb89e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2305.10310v2",
+    "milestone": "m5",
+    "hash": "c3b9a301b38a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2305.10310v2",
     "milestone": "m3",
     "hash": "867de3b77a9c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2305.10310v2",
     "milestone": "m4",
     "hash": "a3481d4da5ee",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2305.10310v2",
     "milestone": "completion",
     "hash": "213b5de23075",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1807.04271",
     "milestone": "m1",
-    "hash": "49f44e1701f9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "491d2c249fa8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1807.04271",
     "milestone": "m2",
-    "hash": "217206ffd20a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3a6b9053ae2e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/1807.04271",
+    "milestone": "m6",
+    "hash": "d7803fbfb89e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/1807.04271",
+    "milestone": "m5",
+    "hash": "c3b9a301b38a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1807.04271",
     "milestone": "m3",
     "hash": "867de3b77a9c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1807.04271",
     "milestone": "m4",
     "hash": "a3481d4da5ee",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1807.04271",
     "milestone": "completion",
     "hash": "213b5de23075",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/1302.4310",
     "milestone": "m1",
-    "hash": "49f44e1701f9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2010.02174",
-    "milestone": "m2",
-    "hash": "217206ffd20a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2604.07639v2",
-    "milestone": "m2",
-    "hash": "217206ffd20a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2510.10967",
-    "milestone": "m2",
-    "hash": "217206ffd20a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2610.01902",
-    "milestone": "m2",
-    "hash": "217206ffd20a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2609.05625",
-    "milestone": "m3",
-    "hash": "867de3b77a9c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "491d2c249fa8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/1302.4310",
     "milestone": "m2",
-    "hash": "217206ffd20a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3a6b9053ae2e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/1302.4310",
+    "milestone": "m6",
+    "hash": "d7803fbfb89e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/1302.4310",
+    "milestone": "m5",
+    "hash": "c3b9a301b38a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/1302.4310",
     "milestone": "m3",
     "hash": "867de3b77a9c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/1302.4310",
     "milestone": "m4",
     "hash": "a3481d4da5ee",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/1302.4310",
     "milestone": "completion",
     "hash": "213b5de23075",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2010.02174",
     "milestone": "m1",
-    "hash": "49f44e1701f9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "491d2c249fa8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2010.02174",
+    "milestone": "m2",
+    "hash": "3a6b9053ae2e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2010.02174",
+    "milestone": "m6",
+    "hash": "d7803fbfb89e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2010.02174",
+    "milestone": "m5",
+    "hash": "c3b9a301b38a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2010.02174",
     "milestone": "m3",
     "hash": "867de3b77a9c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2010.02174",
     "milestone": "m4",
     "hash": "a3481d4da5ee",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2010.02174",
     "milestone": "completion",
     "hash": "213b5de23075",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2604.07639v2",
     "milestone": "m1",
-    "hash": "49f44e1701f9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "491d2c249fa8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2604.07639v2",
+    "milestone": "m2",
+    "hash": "3a6b9053ae2e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2604.07639v2",
+    "milestone": "m6",
+    "hash": "d7803fbfb89e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2604.07639v2",
+    "milestone": "m5",
+    "hash": "c3b9a301b38a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2604.07639v2",
     "milestone": "m3",
     "hash": "867de3b77a9c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2604.07639v2",
     "milestone": "m4",
     "hash": "a3481d4da5ee",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2604.07639v2",
     "milestone": "completion",
     "hash": "213b5de23075",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2510.10967",
     "milestone": "m1",
-    "hash": "49f44e1701f9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "491d2c249fa8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2510.10967",
+    "milestone": "m2",
+    "hash": "3a6b9053ae2e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2510.10967",
+    "milestone": "m6",
+    "hash": "d7803fbfb89e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2510.10967",
+    "milestone": "m5",
+    "hash": "c3b9a301b38a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2510.10967",
     "milestone": "m3",
     "hash": "867de3b77a9c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2510.10967",
     "milestone": "m4",
     "hash": "a3481d4da5ee",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2510.10967",
     "milestone": "completion",
     "hash": "213b5de23075",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.01902",
     "milestone": "m1",
-    "hash": "49f44e1701f9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "491d2c249fa8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.01902",
+    "milestone": "m2",
+    "hash": "3a6b9053ae2e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.01902",
+    "milestone": "m6",
+    "hash": "d7803fbfb89e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.01902",
+    "milestone": "m5",
+    "hash": "c3b9a301b38a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.01902",
     "milestone": "m3",
     "hash": "867de3b77a9c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.01902",
     "milestone": "m4",
     "hash": "a3481d4da5ee",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.01902",
     "milestone": "completion",
     "hash": "213b5de23075",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2609.05625",
     "milestone": "m1",
-    "hash": "49f44e1701f9",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "491d2c249fa8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2609.05625",
     "milestone": "m2",
-    "hash": "217206ffd20a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3a6b9053ae2e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2609.05625",
+    "milestone": "m6",
+    "hash": "d7803fbfb89e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2609.05625",
+    "milestone": "m5",
+    "hash": "c3b9a301b38a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2609.05625",
+    "milestone": "m3",
+    "hash": "867de3b77a9c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2609.05625",
     "milestone": "m4",
     "hash": "a3481d4da5ee",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2609.05625",
     "milestone": "completion",
     "hash": "213b5de23075",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2609.01448",
+    "milestone": "m1",
+    "hash": "491d2c249fa8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2609.01448",
     "milestone": "m2",
-    "hash": "217206ffd20a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3a6b9053ae2e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2609.01448",
+    "milestone": "m6",
+    "hash": "d7803fbfb89e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2609.01448",
+    "milestone": "m5",
+    "hash": "c3b9a301b38a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2609.01448",
+    "milestone": "m3",
+    "hash": "867de3b77a9c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2609.01448",
+    "milestone": "m4",
+    "hash": "a3481d4da5ee",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2609.01448",
+    "milestone": "completion",
+    "hash": "213b5de23075",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.03645",
+    "milestone": "m1",
+    "hash": "491d2c249fa8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2610.03645",
     "milestone": "m2",
-    "hash": "217206ffd20a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3a6b9053ae2e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.03645",
+    "milestone": "m6",
+    "hash": "d7803fbfb89e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.03645",
+    "milestone": "m5",
+    "hash": "c3b9a301b38a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.03645",
+    "milestone": "m3",
+    "hash": "867de3b77a9c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.03645",
+    "milestone": "m4",
+    "hash": "a3481d4da5ee",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2610.03645",
+    "milestone": "completion",
+    "hash": "213b5de23075",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2607.14650",
+    "milestone": "m1",
+    "hash": "491d2c249fa8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2607.14650",
     "milestone": "m2",
-    "hash": "217206ffd20a",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3a6b9053ae2e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2607.14650",
+    "milestone": "m6",
+    "hash": "d7803fbfb89e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2607.14650",
+    "milestone": "m5",
+    "hash": "c3b9a301b38a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2607.14650",
+    "milestone": "m3",
+    "hash": "867de3b77a9c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2607.14650",
+    "milestone": "m4",
+    "hash": "a3481d4da5ee",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2607.14650",
+    "milestone": "completion",
+    "hash": "213b5de23075",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.iceberg-quantum.com/blog/releases/pinnacle-1-2/",
+    "milestone": "m1",
+    "hash": "491d2c249fa8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.iceberg-quantum.com/blog/releases/pinnacle-1-2/",
+    "milestone": "m2",
+    "hash": "3a6b9053ae2e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.iceberg-quantum.com/blog/releases/pinnacle-1-2/",
+    "milestone": "m6",
+    "hash": "d7803fbfb89e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.iceberg-quantum.com/blog/releases/pinnacle-1-2/",
+    "milestone": "m5",
+    "hash": "c3b9a301b38a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.iceberg-quantum.com/blog/releases/pinnacle-1-2/",
     "milestone": "m3",
     "hash": "867de3b77a9c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.iceberg-quantum.com/blog/releases/pinnacle-1-2/",
+    "milestone": "m4",
+    "hash": "a3481d4da5ee",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.iceberg-quantum.com/blog/releases/pinnacle-1-2/",
+    "milestone": "completion",
+    "hash": "213b5de23075",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2610.37839",
+    "milestone": "m1",
+    "hash": "491d2c249fa8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2610.37839",
+    "milestone": "m2",
+    "hash": "3a6b9053ae2e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2610.37839",
+    "milestone": "m6",
+    "hash": "d7803fbfb89e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2610.37839",
+    "milestone": "m5",
+    "hash": "c3b9a301b38a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2610.37839",
     "milestone": "m3",
     "hash": "867de3b77a9c",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2610.37839",
+    "milestone": "m4",
+    "hash": "a3481d4da5ee",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2610.37839",
+    "milestone": "completion",
+    "hash": "213b5de23075",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2603.15515",
+    "milestone": "m1",
+    "hash": "491d2c249fa8",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2603.15515",
+    "milestone": "m2",
+    "hash": "3a6b9053ae2e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2603.15515",
+    "milestone": "m6",
+    "hash": "d7803fbfb89e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2603.15515",
+    "milestone": "m5",
+    "hash": "c3b9a301b38a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2603.15515",
+    "milestone": "m3",
+    "hash": "867de3b77a9c",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2603.15515",
     "milestone": "m4",
     "hash": "a3481d4da5ee",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2603.15515",
+    "milestone": "completion",
+    "hash": "213b5de23075",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/quant-ph/9508027",
+    "milestone": "m2",
+    "hash": "3a6b9053ae2e",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://link.springer.com/article/10.1007/s10732-024-09530-5",
+    "milestone": "m4",
+    "hash": "a3481d4da5ee",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2504.01897",
+    "milestone": "m5",
+    "hash": "c3b9a301b38a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2505.15917",
+    "milestone": "m5",
+    "hash": "c3b9a301b38a",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1379,8 +2036,98 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 11 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"A mouse-brain dataset records the activity of about 30,000 genes across 1.3 million cells. Biologists use patterns of variation in these measurements to distinguish cell types. Classical methods can process cells as they arrive, but merging genes to fit memory can obscure those patterns. On some changing data streams, a quantum method needs fewer observations than any classical method within a stated memory budget to locate a cell along a stable pattern. Whether this saves time on real cell data, including loading the observations and reading the answer, remains open.\". Reason: The current rationale gives algorithm comparisons without showing who needs the computation, what they could learn, or why a memory advantage may fail to save time."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Institute for Pure and Applied Mathematics, Mathematical and Computational Challenges in Quantum Computing programme, 2024: \"Rigorous proof of asymptotic quantum advantage over the best-possible classical algorithm, ideally superpolynomial, is a gold standard\". Reason: The IPAM programme white paper explicitly names the desired scale of advantage and identifies the classical comparator for its theoretical ideal."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Society for Industrial and Applied Mathematics, Quantum Intersections Convening, 2024: \"Although exponential or superpolynomial speedups may not be expected\". Reason: The SIAM convening records a professional assessment of the limits of this goal specifically for machine learning on classical data."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit completion: basis = \"The IPAM programme describes a proof against the best possible classical algorithm as an ideal. The hardware test uses the best available classical algorithm, so a faster classical method can change the verdict. The ratio must grow faster than every fixed power of the stated classical input size. For example, N/polylog(N) is at most polynomial in N even though it grows exponentially in log N.\"; refs = [5, 6, 7, 4, 3, 2, 21]. Reason: The basis omits the distinction between the programme’s theoretical ideal and the entry’s revisable comparison against the best available classical algorithm."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Use four photonic qubits and four controlled gates to implement every subroutine of the published 2\\u00d72 linear-system circuit. For each of the protocol\\u2019s three input vectors, reconstruct the output density matrix from Pauli measurements and calculate its fidelity with the ideal solution state.\"; threshold_quote = \"We use four quantum bits and four controlled logic gates to implement every subroutine required\"; threshold_ref = 8; refs = [8]. Reason: The current test includes the observed fidelities, which are experimental results rather than requirements of the protocol."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: title = \"A classical-data task has efficiently generated instances with an expected, verifiable quantum advantage.\"; criterion = \"Give an efficient procedure for generating instances and specify how each algorithm accesses their classical data. Show why the quantum algorithm is expected to outperform the best known classical methods on the generated instances. Specify how a classical or quantum verifier can efficiently check the answer.\"; threshold_quote = \"expected to exhibit verifiable quantum advantage\"; threshold_ref = 7; refs = [7, 6]. Reason: The current criterion mixes the instance-generation test with results about classification accuracy and memory-bounded sample complexity, and its title overstates the stage as a demonstrated advantage."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m2: \"A classical-data algorithm compiles to fault-tolerant operations for a specified architecture.\". Reason: Stage IV(c) gives architecture-specific resource estimates a test of their own before the executable physical instructions required by m3."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m2: \"A specific real-world task retains an expected quantum speedup after its overheads are included.\". Reason: Stage III addresses a gap between generating hard instances and identifying an actual use for which the expected speedup survives the costs of the task."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove statement 1. Reason: DARPA’s 2021 announcement sets a goal of developing useful benchmarking metrics without naming a superpolynomial speedup on classical data as its objective."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 9 of 9 proposed operations from QUA-09-revise-20261125T110335196074Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m5, m6."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 0 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 6 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 14 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 7 candidates returned, 0 dropped as sources already used, 7 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 4 of 7 new candidates, without search. Skipped: 3 no readable saved copy. Dropped rows: none. Replaced 19 earlier rows. Added 28 results: 24 from sources already used, 4 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 3 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 27 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-25"
  }
 }
