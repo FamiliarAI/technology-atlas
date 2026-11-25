@@ -286,11 +286,15 @@
  "page": {
   "id": "HCI-05",
   "title": "End-user software engineering",
-  "definition": "People without prior experience writing code in conventional programming languages can create software for their own tasks, explain and predict its behavior, repair faults, and adapt it during continued use. They can do this without reading source code or receiving programming assistance from another person.",
+  "definition": "End-user software engineering concerns the quality of software people build for their own tasks, from a spreadsheet formula to an application. The goal here is for people with no prior experience writing code in a conventional programming language to create that software, explain and predict its behavior, repair faults and adapt it during continued use. They can do so without reading source code or receiving programming help from another person.",
   "goal": {
-   "need": "In a 2001 laboratory study, 36 business students had 15 minutes to change a cash-flow spreadsheet. Errors remained in 63% of spreadsheets with testing feedback and 71% without it; 18 participants reported programming experience. Feedback increased recorded testing, but the overall modification-score difference was not statistically significant (p = 0.1681).",
+   "need": "In September 2001, 62.3% of U.S. workers who used a computer on the job worked with spreadsheets or databases. Spreadsheets inform budget, investment and tax decisions. In an audit of 25 working spreadsheets at five organizations, 70 confirmed errors affected calculated results. Staff who know the work could check those calculations and adapt local tools when procedures change, even after the original developer leaves. Faster code generation still leaves users to judge whether a rule that fits their examples also handles a new case correctly.",
    "need_refs": [
-    1
+    21,
+    1,
+    22,
+    10,
+    6
    ],
    "figures": {
     "caption": "Spreadsheet maintenance after a 15-minute modification task",
@@ -354,12 +358,12 @@
   },
   "case_label": null,
   "cases": [],
-  "milestone_structure": "sequence",
+  "milestone_structure": "parallel",
   "milestones": [
    {
     "id": "m1",
     "title": "A user's description produces code passing every provided task test.",
-    "criterion": "Code generated from a user's description passes every provided input-output test. Nguyen et al. (2024) applied this criterion to 120 students who had completed introductory programming; their mean eventual success was 57% of assigned problems. This tests bounded task success, not competence without prior coding. Pickering et al. (2025) found missing definitions in 25/100 sampled Study 2 descriptions; correct outputs alone cannot establish a complete specification.",
+    "criterion": "The user describes a programming task from the supplied input-output examples. Code generated from that description must produce the expected output for every provided test case.",
     "set_by": "Nguyen et al., CHI 2024, section 3.2: published experimental protocol for students who had completed introductory programming; a task-level criterion rather than a population-wide target.",
     "set_by_kind": "protocol",
     "threshold_quote": "if the generated code passed the provided tests, it was deemed correct",
@@ -385,14 +389,17 @@
      8,
      9
     ],
-    "status": "active",
-    "replaced_by": [],
+    "status": "retired",
+    "replaced_by": [
+     "m6",
+     "m7"
+    ],
     "threshold_checked": null
    },
    {
     "id": "m3",
     "title": "Users implement specified application changes without help from its original developer.",
-    "criterion": "Users who did not develop an application successfully make assigned modifications without assistance from its original developer. Wang et al., published on 9 September 2026, report three testers with minimal coding experience completing four modifications to one radioactive-seed inventory application using Claude Code, without reading source code. Each task took under 10 minutes; this was an observed result, not an imposed time threshold. The study did not test repeated maintenance or behavioral comprehension.",
+    "criterion": "A user who took no part in developing the application implements an assigned change without assistance from its original developer. In the inventory application protocol, team members use Claude Code for changes to data entry, window behavior, error reporting or a calculation. Each task is judged by whether the requested change works.",
     "set_by": "Wang et al., Journal of Applied Clinical Medical Physics, section 3.3 and Table 3: published evaluation protocol for one radioactive-seed inventory application; a task-level criterion rather than a field-wide standard.",
     "set_by_kind": "protocol",
     "threshold_quote": "independently modify the application using Claude Code, without any assistance from the original developer.",
@@ -407,7 +414,7 @@
    {
     "id": "m4",
     "title": "Nonprogrammers maintain a deployed application through changes arising during actual use.",
-    "criterion": "A nonprogrammer changes a deployed application as requirements change, with acceptance and regression tests confirming intended and preserved behavior. No shared field-study duration or pass threshold was found. Partial evidence: Ekananda's preprint, posted on 20 October 2026 and not peer reviewed, follows one author's application from 6 July 2026 to 17 October 2026 (104 calendar days). A rollback discarded 302 commits. The study did not evaluate output quality or test behavioral understanding.",
+    "criterion": "A nonprogrammer changes a deployed application in response to a requirement that arises during actual use. Acceptance tests confirm that the change meets the new requirement, and regression tests confirm that behavior meant to stay the same still works.",
     "set_by": "Atlas provisional criterion extending the NSF and EUSES maintenance goal to software in use; searches found no published longitudinal acceptance threshold.",
     "set_by_kind": "atlas",
     "threshold_quote": null,
@@ -420,6 +427,52 @@
     "status": "active",
     "replaced_by": [],
     "threshold_checked": null
+   },
+   {
+    "id": "m5",
+    "title": "A user tests every executable link between a spreadsheet value and a formula that uses it.",
+    "criterion": "For each executable link from an expression that defines a cell's value to a formula expression that uses it, at least one test must exercise that link. The link must contribute, directly or indirectly, to a displayed value that the user checks and marks correct. This measures coverage of the spreadsheet's calculations.",
+    "set_by": "What You See Is What You Test methodology, definition-use adequacy criterion for spreadsheets",
+    "set_by_kind": "protocol",
+    "threshold_quote": "each executable du-association in the spreadsheet be exercised by test data",
+    "threshold_ref": 1,
+    "refs": [
+     1,
+     23
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m6",
+    "title": "A user correctly predicts the outcome of a scenario governed by trigger-action rules.",
+    "criterion": "Given prewritten if-then rules and a description of events, the user selects the outcome the rules produce and explains the choice in their own words. Each scenario scores 1 for the correct prediction and 0 otherwise. Explanations are assessed separately for recognition of the bug and assumptions about the rules.",
+    "set_by": "Brackenbury et al., CHI 2019, trigger-action scenario protocol and analysis",
+    "set_by_kind": "protocol",
+    "threshold_quote": "whether each participant answered each scenario correctly (1) or incorrectly (0).",
+    "threshold_ref": 15,
+    "refs": [
+     15
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m7",
+    "title": "A user corrects a seeded error in a working copy of a spreadsheet.",
+    "criterion": "Given a workbook with deliberately inserted errors and written rules for its data, the user locates an error and edits the workbook to correct it. Each seeded error counts as corrected only if the workbook contains the repair. The protocol reports the proportion corrected across the seeded errors.",
+    "set_by": "Bishop and McDaid, spreadsheet error-correction protocol, sections 3.2 and 4.1",
+    "set_by_kind": "protocol",
+    "threshold_quote": "Subjects were asked to correct any errors found directly on the spreadsheet itself.",
+    "threshold_ref": 9,
+    "refs": [
+     9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
    }
   ],
   "measures": [],
@@ -707,11 +760,111 @@
     "issue": null,
     "pages": null,
     "citation_source": "model"
+   },
+   {
+    "id": 21,
+    "kind": "web",
+    "url": "https://www.bls.gov/opub/ted/2002/oct/wk4/art03.htm",
+    "doi": null,
+    "title": "Reasons for computer use at work",
+    "authors": "Bureau of Labor Statistics, U.S. Department of Labor",
+    "container": "The Economics Daily",
+    "year": "2002",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 22,
+    "kind": "journal",
+    "url": "https://mba.tuck.dartmouth.edu/spreadsheet/product_pubs_files/impact.pdf",
+    "doi": "10.1016/j.dss.2009.02.002",
+    "title": "Impact of errors in operational spreadsheets",
+    "authors": "Powell SG, Baker KR, Lawson B",
+    "container": "Decision Support Systems",
+    "year": "2009",
+    "volume": "47",
+    "issue": "2",
+    "pages": "126-132",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 23,
+    "kind": "report",
+    "url": "https://web.engr.oregonstate.edu/~burnett/Reprints/icse98.testing.pdf",
+    "doi": "10.1109/ICSE.1998.671118",
+    "title": "What You See Is What You Test: A Methodology for Testing Form-Based Visual Programs",
+    "authors": "Gregg Rothermel, Lixin Li, Christopher DuPuis, Margaret Burnett",
+    "container": "1998 International Conference on Software Engineering",
+    "year": "1998",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 24,
+    "kind": "preprint",
+    "url": "https://arxiv.org/abs/2401.15232",
+    "doi": null,
+    "title": "How Beginning Programmers and Code LLMs (Mis)read Each Other",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 25,
+    "kind": "report",
+    "url": "https://web.engr.oregonstate.edu/~burnett/Reprints/icse00.empirical.pdf",
+    "doi": null,
+    "title": "WYSIWYT Testing in the Spreadsheet Paradigm: An Empirical Evaluation",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 26,
+    "kind": "report",
+    "url": "https://web.engr.oregonstate.edu/~burnett/Reprints/chi10-stratcel.pdf",
+    "doi": null,
+    "title": "A Strategy-Centric Approach to the Design of End-User Debugging Tools",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 27,
+    "kind": "journal",
+    "url": "https://web.engr.oregonstate.edu/~burnett/Reprints/interactingComputers-gender-2011-aspublished.pdf",
+    "doi": "10.1016/j.intcom.2011.06.004",
+    "title": "Gender pluralism in problem-solving software",
+    "authors": "Burnett MM, Beckwith L, Wiedenbeck S, Fleming SD, Cao J, Park TH, et al.",
+    "container": "Interacting with Computers",
+    "year": "2011",
+    "volume": "23",
+    "issue": "5",
+    "pages": "450-460",
+    "citation_source": "crossref"
    }
   ],
   "milestone_order": [
+   "m5",
    "m1",
-   "m2",
+   "m6",
+   "m7",
    "m3",
    "m4"
   ],
@@ -723,20 +876,6 @@
     "finding": "Three of 19 WYSIWYT users found and corrected errors during testing.",
     "detail": "The study did not report a withheld-input prediction test or explanations of the controlling rules.",
     "quote": "During their\ntesting after completing the modifications, three of the\nWYSIWYT subjects found and corrected errors; no Ad\nHoc subject who executed tests found an error after\ncompleting the modifications.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 1,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Among 36 business students, 63% of WYSIWYT users' spreadsheets contained errors after modification.",
-    "detail": "Students modified an existing spreadsheet in a controlled laboratory task. The text does not establish whether the original developer assisted them; participants had varying programming experience.",
-    "quote": "Two-thirds of our subjects' spreadsheets contained\nerrors after the modification was completed (71% for Ad\nHoc, 63% for WYSIWYT).",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
@@ -787,20 +926,6 @@
     "judged_on": "2026-11-15"
    },
    {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "met",
-    "finding": "67 non-programmers solved an average of 1.4 of 4 assigned problems.",
-    "detail": "Participants described tasks in natural language and could retry after seeing automated test results. A problem counted as solved if generated code passed all tests. Some participants had limited prior exposure to programming.",
-    "quote": "Overall, participants found\nthe task difficult and were only moderately successful, solving, on\naverage, 1.4 of 4 total problems.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
@@ -829,48 +954,6 @@
     "judged_on": "2026-11-15"
    },
    {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "met",
-    "finding": "Three independent testers completed four modifications to a seed inventory application.",
-    "detail": "Testers had minimal coding experience and used Claude Code without developer assistance or reading source code. Each task took under 10 minutes. Repeated maintenance and behavioral comprehension were not tested.",
-    "quote": "All testers had minimal coding experience and no prior involvement in the development of the application. All tasks were completed successfully in under 10 min each, without any intervention or guidance from the original developer, and without the testers needing to read or understand the underlying source code.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "met",
-    "finding": "Among 120 beginning programmers, mean eventual success was 57% of assigned problems.",
-    "detail": "Generated code passed all provided tests on successful problems. Participants had completed an introductory programming course; correctness was assessed automatically.",
-    "quote": "The mean eventual success rate (57%) is not high, and the mean success rate (24%) is even lower, since it decreases with every failed attempt.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "partial",
-    "finding": "One physicist developed an application that met all 8 predefined functional requirements.",
-    "detail": "Functional testing confirmed feature completeness, but the paper does not report a defined set of input-output tests or whether every such test passed.",
-    "quote": "All eight requirements defined in Table\n1\nwere fully implemented in the final application, as confirmed by functional testing.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
@@ -881,62 +964,6 @@
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m4",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Three independent testers completed bug fixes and feature modifications in under 10 minutes each.",
-    "detail": "The application was operational, but this was a short-term modification demonstration by testers with minimal coding experience. The study did not establish maintenance through changing requirements during actual use or report acceptance and regression tests for these changes.",
-    "quote": "In the maintainability evaluation, three independent testers completed bug fixes and feature modifications in one to two prompts each, all in under 10 min, without guidance from the original developer.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "met",
-    "finding": "Among 26 AI-assisted non-programmers, some solutions passed all acceptance tests; the success count is not reported in the supplied text.",
-    "detail": "Each participant was assigned one bounded, self-contained challenge with explicit rules and acceptance tests. The result does not establish broader end-user software engineering competence.",
-    "quote": "En eficacia, no se detectaron diferencias\nestadísticamente significativas entre grupos, aunque el patrón descriptivo favorece a\nNP-AI.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "met",
-    "finding": "GPT-4-Turbo with cAST achieved 39.0% mean pass@1 on 150 novice-authored tasks.",
-    "detail": "Generated programs were evaluated against expert-crafted functional test suites using a simulated API. The score estimates success for a single generated sample.",
-    "quote": null,
-    "checked": null,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 17,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "met",
-    "finding": "Of 920 students who attempted at least one B1 problem, 887 succeeded on all three.",
-    "detail": "Students used iterative natural-language dialogue with GPT-4o mini and could run generated code against predefined tests. They were enrolled in an introductory C programming course.",
-    "quote": "In B1,\n920\n920\nstudents attempted at least one problem, with\n887\n887\nsucceeding on all three (required to obtain marks).",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 18,
     "judged_by": "gpt-6.1-terra",
     "judged_on": "2026-11-15"
    },
@@ -967,48 +994,349 @@
     "ref": 20,
     "judged_by": "gpt-6.1-terra",
     "judged_on": "2026-11-15"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "GPT-4 code generated from descriptions by 121 Study 1 senders passed every task test in 36.0% of attempts.",
+    "detail": null,
+    "quote": "Furthermore, GPT-\n4 produced code that passed all test cases 36.0% of the time.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "17 of 19 business students using WYSIWYT recorded at least one spreadsheet test.",
+    "detail": "The researchers omitted definition-use coverage from the analysis because participants' edits produced spreadsheets with different numbers of links.",
+    "quote": "17 of the 19\nWYSIWYT subjects executed at least one test case",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 1,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "3 of 19 business students using WYSIWYT found and corrected spreadsheet errors after making assigned changes.",
+    "detail": null,
+    "quote": "During their\ntesting after completing the modifications, three of the\nWYSIWYT subjects found and corrected errors",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 1,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "19 WYSIWYT participants averaged 16.2 out of 18 on assigned changes to a supplied spreadsheet model.",
+    "detail": "The 18-point rubric allowed partial credit. The difference in total scores between the groups was not statistically significant with all participants included.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 1,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "All 24 participants completed all three spreadsheet analysis tasks using natural-language queries that Codex translated into Python.",
+    "detail": "The study counted some misread tasks as successes. In the separate round-trip experiment, output equivalence measured agreement between two generated outputs.",
+    "quote": "All participants completed every task successfully.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 8,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "Among 120 beginning programmers, the mean eventual rate of generating code that passed every provided task test was 57%.",
+    "detail": "Participants had prior coding experience through introductory computer science and could revise prompts after automated feedback. The supplied arXiv manuscript identifies 10.1145/3613904.3642706 as the DOI of the peer-reviewed CHI proceedings version.",
+    "quote": "The average\nparticipant solves 57% of the assigned problems, but only after\nseveral repeated attempts and with automatic feedback on code\ncorrectness.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 24,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "met",
+    "finding": "In a workbook with 42 seeded errors, 34 accounting and finance students corrected 58% of the errors.",
+    "detail": "The study scored correct repairs in the workbook. For one cross-sheet formula, 46% of professionals detected the error but edited the formula incorrectly.",
+    "quote": "Industry-based professional subjects corrected 72% of all seeded errors and student \nsubjects corrected 58% of all seeded errors.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "The 67 nonprogrammers generated code passing every supplied test on an average of 1.4 of 4 Python tasks.",
+    "detail": "The success measure allowed retries. The supplied copy is the author version of the published CHIWORK ’24 conference proceedings paper.",
+    "quote": "Overall, participants found\nthe task difficult and were only moderately successful, solving, on\naverage, 1.4 of 4 total problems.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Among 77 EluciDebug participants, those given classifier explanations scored 52% higher on reasoning than controls.",
+    "detail": "A researcher blinded to condition awarded up to two points per explanation. The source is the accepted manuscript of an ACM conference paper.",
+    "quote": "treatment participants scored 52% higher on the mental model\nassessment than control participants ( W = 259, p < .001).",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "met",
+    "finding": "Among 153 participants predicting outcomes from prewritten trigger-action rules, 8 of the 10 bug types tested impaired prediction accuracy.",
+    "detail": "The sample included participants with prior programming experience. The source is a peer-reviewed CHI 2019 conference proceedings paper.",
+    "quote": "Eight of these bugs impaired\nparticipants’ ability to correctly predict scenario outcomes.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "met",
+    "finding": "Three team members with minimal coding experience successfully implemented all 4 assigned inventory application changes.",
+    "detail": null,
+    "quote": "All tasks were completed successfully in under 10 min each, without any intervention or guidance from the original developer, and without the testers needing to read or understand the underlying source code.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Three team members with minimal coding experience completed 4 assigned changes in an inventory application maintainability exercise.",
+    "detail": "The maintainability exercise evaluated assigned changes. The reported clinical-use testing provides no acceptance or regression results specific to those revisions.",
+    "quote": "In the maintainability evaluation, three independent testers completed bug fixes and feature modifications in one to two prompts each, all in under 10 min, without guidance from the original developer.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "Among 120 introductory programming students, the mean share of assigned tasks whose final generated code passed every supplied test was 57%.",
+    "detail": "Students could revise their descriptions after automated test feedback. They had prior conventional coding experience, and the interface displayed the generated code.",
+    "quote": "The average participant solves 57% of the assigned problems, but only after several repeated attempts and with automatic feedback on code correctness.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 6,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Of 26 nonprogrammers using GPT-4o, 15 submitted code that passed every acceptance test for their assigned challenge.",
+    "detail": "The source is a doctoral thesis. It identifies the underlying Study 1 article as published but does not establish its peer-review status in the supplied text.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "GPT-4-Turbo achieved 39.0% mean pass@1 across 150 tasks described by nonprogrammers.",
+    "detail": "Test authors wrote the unit tests after collecting the descriptions. The model received API specifications and few-shot examples during generation.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "Of 920 introductory C students who attempted the first batch, 887 generated code that passed every provided test on all three tasks.",
+    "detail": "The tool displayed generated code and test feedback during refinement. Students could revise their prompts but could not edit the generated code directly.",
+    "quote": "In B1,\n920\n920\nstudents attempted at least one problem, with\n887\n887\nsucceeding on all three (required to obtain marks).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "In a 753-participant study, the clear-understanding, no-hint subgroup scored 12.9 percentage points higher on combined prediction and debugging questions with text than with Python.",
+    "detail": "The reported difference combines Q2–Q4. The source gives neither a separate prediction accuracy for this comparison nor the subgroup size.",
+    "quote": "Text-based program representations improve accuracy for users with clear understanding of the algorithmic task.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "In the unaided smart-home task, 8 of 20 participants recognized the rule conflict and correctly explained the needed changes.",
+    "detail": "The conflict occurred where the two respiration-rate triggers overlapped and prescribed opposite actions for the same light.",
+    "quote": "Only 8 users out of 20 realised that there were conflicts in the rules and correctly explained \nthe modifications to do to specify the expected behaviour.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "In the tool-assisted smart-home task, 8 of 20 participants correctly edited the rules to implement the requested blind-closing behavior.",
+    "detail": "Participants used a trigger-action rule editor and simulator in a lab. Task correctness was assessed from the saved rules.",
+    "quote": "Using the tool, 8 users successfully edited the rules to express the desired behaviour.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "met",
+    "finding": "Three independent testers successfully completed all four assigned changes to the seed inventory application.",
+    "detail": "The testers completed the changes without needing to read or understand the source code.",
+    "quote": "All tasks were completed successfully in under 10 min each, without any intervention or guidance from the original developer, and without the testers needing to read or understand the underlying source code.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Three testers with minimal coding experience completed four assigned changes to an operational seed inventory application.",
+    "detail": "The paper reports manual functional testing during development and clinical use. It gives no acceptance or regression test results for the assigned maintenance changes.",
+    "quote": "In the maintainability evaluation, three independent testers completed bug fixes and feature modifications in one to two prompts each, all in under 10 min, without guidance from the original developer.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "met",
+    "finding": "Among 69 advanced computer science students, 21.7% exercised every executable definition-use link contributing to a validated output on the Clock spreadsheet.",
+    "detail": "The completion rates pool both study groups. Participants tested supplied, fault-free spreadsheets with fixed formulas. The sample was drawn from advanced computer science courses, so completion by users with no prior conventional programming experience remains untested here. The source is an ICSE 2000 conference paper.",
+    "quote": "giv en the limited testing time of the exp erimen t/,\nfew sub jects ac hiev ed /1/0/0/% du/-adequacy /(Clo c k/: /2/1/./7/%/;;\nGrades/: /1/./4/%/)/.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 25,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "All five StratCel users located and fixed all six formula inconsistency errors in an Excel gradebook.",
+    "detail": "The task describes bugs originating in earlier spreadsheet use. The results also describe four other bugs as researcher-inserted and identify two previously overlooked bugs. The reported fix counts do not isolate the researcher-inserted subset.",
+    "quote": "all five participants \nfound and fixed all six inconsistency errors",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 26,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Undergraduates (n = 132) fixed a mean of 56% of seeded bugs in the Forms/3 payroll spreadsheet.",
+    "detail": "The 56% is calculated from the reported mean of 3.36 fixes out of six seeded bugs.",
+    "quote": "bugs ﬁxed:\nM = 3.36, SD = 1.65",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 27,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://hewj.info/papers/chi25.pdf",
-    "milestone": "m1",
-    "hash": "f5de177adbf5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://hewj.info/papers/chi25.pdf",
     "milestone": "m2",
     "hash": "87fb41ed8821",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://hewj.info/papers/chi25.pdf",
-    "milestone": "m3",
-    "hash": "4a2ab309f3a6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://hewj.info/papers/chi25.pdf",
-    "milestone": "m4",
-    "hash": "826e92cbecfc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://hewj.info/papers/chi25.pdf",
-    "milestone": "completion",
-    "hash": "69a237a80eef",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://web.engr.oregonstate.edu/~burnett/Reprints/icsm2001.empirical.pdf",
-    "milestone": "m1",
-    "hash": "f5de177adbf5",
     "date": "2026-11-15",
     "by": "gpt-6.1-terra"
    },
@@ -1020,65 +1348,9 @@
     "by": "gpt-6.1-terra"
    },
    {
-    "url": "https://web.engr.oregonstate.edu/~burnett/Reprints/icsm2001.empirical.pdf",
-    "milestone": "m3",
-    "hash": "4a2ab309f3a6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://web.engr.oregonstate.edu/~burnett/Reprints/icsm2001.empirical.pdf",
-    "milestone": "m4",
-    "hash": "826e92cbecfc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://web.engr.oregonstate.edu/~burnett/Reprints/icsm2001.empirical.pdf",
-    "milestone": "completion",
-    "hash": "69a237a80eef",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.microsoft.com/en-us/research/publication/what-it-wants-me-to-say-bridging-the-abstraction-gap-between-end-user-programmers-and-code-generating-large-language-models/?lang=ja",
-    "milestone": "m1",
-    "hash": "f5de177adbf5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
     "url": "https://www.microsoft.com/en-us/research/publication/what-it-wants-me-to-say-bridging-the-abstraction-gap-between-end-user-programmers-and-code-generating-large-language-models/?lang=ja",
     "milestone": "m2",
     "hash": "87fb41ed8821",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.microsoft.com/en-us/research/publication/what-it-wants-me-to-say-bridging-the-abstraction-gap-between-end-user-programmers-and-code-generating-large-language-models/?lang=ja",
-    "milestone": "m3",
-    "hash": "4a2ab309f3a6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.microsoft.com/en-us/research/publication/what-it-wants-me-to-say-bridging-the-abstraction-gap-between-end-user-programmers-and-code-generating-large-language-models/?lang=ja",
-    "milestone": "m4",
-    "hash": "826e92cbecfc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.microsoft.com/en-us/research/publication/what-it-wants-me-to-say-bridging-the-abstraction-gap-between-end-user-programmers-and-code-generating-large-language-models/?lang=ja",
-    "milestone": "completion",
-    "hash": "69a237a80eef",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/abs/2401.15232",
-    "milestone": "m1",
-    "hash": "f5de177adbf5",
     "date": "2026-11-15",
     "by": "gpt-6.1-terra"
    },
@@ -1090,65 +1362,9 @@
     "by": "gpt-6.1-terra"
    },
    {
-    "url": "https://arxiv.org/abs/2401.15232",
-    "milestone": "m3",
-    "hash": "4a2ab309f3a6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/abs/2401.15232",
-    "milestone": "m4",
-    "hash": "826e92cbecfc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/abs/2401.15232",
-    "milestone": "completion",
-    "hash": "69a237a80eef",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/abs/0802.3479",
-    "milestone": "m1",
-    "hash": "f5de177adbf5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
     "url": "https://arxiv.org/abs/0802.3479",
     "milestone": "m2",
     "hash": "87fb41ed8821",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/abs/0802.3479",
-    "milestone": "m3",
-    "hash": "4a2ab309f3a6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/abs/0802.3479",
-    "milestone": "m4",
-    "hash": "826e92cbecfc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/abs/0802.3479",
-    "milestone": "completion",
-    "hash": "69a237a80eef",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.feldmanmolly.com/chiwork2024-author-version.pdf",
-    "milestone": "m1",
-    "hash": "f5de177adbf5",
     "date": "2026-11-15",
     "by": "gpt-6.1-terra"
    },
@@ -1167,44 +1383,9 @@
     "by": "gpt-6.1-terra"
    },
    {
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13556308/",
-    "milestone": "m3",
-    "hash": "4a2ab309f3a6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2401.15232v2",
-    "milestone": "m1",
-    "hash": "f5de177adbf5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
     "url": "https://arxiv.org/html/2401.15232v2",
     "milestone": "m2",
     "hash": "87fb41ed8821",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2401.15232v2",
-    "milestone": "m3",
-    "hash": "4a2ab309f3a6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2401.15232v2",
-    "milestone": "m4",
-    "hash": "826e92cbecfc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2401.15232v2",
-    "milestone": "completion",
-    "hash": "69a237a80eef",
     "date": "2026-11-15",
     "by": "gpt-6.1-terra"
    },
@@ -1216,128 +1397,9 @@
     "by": "gpt-6.1-terra"
    },
    {
-    "url": "https://www.feldmanmolly.com/chiwork2024-author-version.pdf",
-    "milestone": "m3",
-    "hash": "4a2ab309f3a6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.feldmanmolly.com/chiwork2024-author-version.pdf",
-    "milestone": "m4",
-    "hash": "826e92cbecfc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.feldmanmolly.com/chiwork2024-author-version.pdf",
-    "milestone": "completion",
-    "hash": "69a237a80eef",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://openaccess.city.ac.uk/id/eprint/13819/1/paper326.pdf",
-    "milestone": "m1",
-    "hash": "f5de177adbf5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://openaccess.city.ac.uk/id/eprint/13819/1/paper326.pdf",
-    "milestone": "m3",
-    "hash": "4a2ab309f3a6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://openaccess.city.ac.uk/id/eprint/13819/1/paper326.pdf",
-    "milestone": "m4",
-    "hash": "826e92cbecfc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://openaccess.city.ac.uk/id/eprint/13819/1/paper326.pdf",
-    "milestone": "completion",
-    "hash": "69a237a80eef",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://hewj.info/papers/chi19-ifttt-cameraready.pdf",
-    "milestone": "m1",
-    "hash": "f5de177adbf5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://hewj.info/papers/chi19-ifttt-cameraready.pdf",
-    "milestone": "m3",
-    "hash": "4a2ab309f3a6",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://hewj.info/papers/chi19-ifttt-cameraready.pdf",
-    "milestone": "m4",
-    "hash": "826e92cbecfc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://hewj.info/papers/chi19-ifttt-cameraready.pdf",
-    "milestone": "completion",
-    "hash": "69a237a80eef",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13556308/",
-    "milestone": "m1",
-    "hash": "f5de177adbf5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13556308/",
     "milestone": "m2",
     "hash": "87fb41ed8821",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13556308/",
-    "milestone": "m4",
-    "hash": "826e92cbecfc",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13556308/",
-    "milestone": "completion",
-    "hash": "69a237a80eef",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://sedici.unlp.edu.ar/bitstream/handle/10915/197781/Documento_completo.pdf-PDFA.pdf?isAllowed=y&sequence=1",
-    "milestone": "m1",
-    "hash": "f5de177adbf5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://aclanthology.org/2024.tacl-1.73.pdf",
-    "milestone": "m1",
-    "hash": "f5de177adbf5",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2607.05034v1",
-    "milestone": "m1",
-    "hash": "f5de177adbf5",
     "date": "2026-11-15",
     "by": "gpt-6.1-terra"
    },
@@ -1354,9 +1416,814 @@
     "hash": "87fb41ed8821",
     "date": "2026-11-15",
     "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://hewj.info/papers/chi25.pdf",
+    "milestone": "m5",
+    "hash": "97b4902675ad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://hewj.info/papers/chi25.pdf",
+    "milestone": "m1",
+    "hash": "93613537f8d6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://hewj.info/papers/chi25.pdf",
+    "milestone": "m6",
+    "hash": "44faa17cb9de",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://hewj.info/papers/chi25.pdf",
+    "milestone": "m7",
+    "hash": "98cf94b1df1d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://hewj.info/papers/chi25.pdf",
+    "milestone": "m3",
+    "hash": "1cd75a366d95",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://hewj.info/papers/chi25.pdf",
+    "milestone": "m4",
+    "hash": "72f07b3fb889",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://hewj.info/papers/chi25.pdf",
+    "milestone": "completion",
+    "hash": "69a237a80eef",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://web.engr.oregonstate.edu/~burnett/Reprints/icsm2001.empirical.pdf",
+    "milestone": "m5",
+    "hash": "97b4902675ad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://web.engr.oregonstate.edu/~burnett/Reprints/icsm2001.empirical.pdf",
+    "milestone": "m1",
+    "hash": "93613537f8d6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://web.engr.oregonstate.edu/~burnett/Reprints/icsm2001.empirical.pdf",
+    "milestone": "m6",
+    "hash": "44faa17cb9de",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://web.engr.oregonstate.edu/~burnett/Reprints/icsm2001.empirical.pdf",
+    "milestone": "m7",
+    "hash": "98cf94b1df1d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://web.engr.oregonstate.edu/~burnett/Reprints/icsm2001.empirical.pdf",
+    "milestone": "m3",
+    "hash": "1cd75a366d95",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://web.engr.oregonstate.edu/~burnett/Reprints/icsm2001.empirical.pdf",
+    "milestone": "m4",
+    "hash": "72f07b3fb889",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://web.engr.oregonstate.edu/~burnett/Reprints/icsm2001.empirical.pdf",
+    "milestone": "completion",
+    "hash": "69a237a80eef",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.microsoft.com/en-us/research/publication/what-it-wants-me-to-say-bridging-the-abstraction-gap-between-end-user-programmers-and-code-generating-large-language-models/?lang=ja",
+    "milestone": "m5",
+    "hash": "97b4902675ad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.microsoft.com/en-us/research/publication/what-it-wants-me-to-say-bridging-the-abstraction-gap-between-end-user-programmers-and-code-generating-large-language-models/?lang=ja",
+    "milestone": "m1",
+    "hash": "93613537f8d6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.microsoft.com/en-us/research/publication/what-it-wants-me-to-say-bridging-the-abstraction-gap-between-end-user-programmers-and-code-generating-large-language-models/?lang=ja",
+    "milestone": "m6",
+    "hash": "44faa17cb9de",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.microsoft.com/en-us/research/publication/what-it-wants-me-to-say-bridging-the-abstraction-gap-between-end-user-programmers-and-code-generating-large-language-models/?lang=ja",
+    "milestone": "m7",
+    "hash": "98cf94b1df1d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.microsoft.com/en-us/research/publication/what-it-wants-me-to-say-bridging-the-abstraction-gap-between-end-user-programmers-and-code-generating-large-language-models/?lang=ja",
+    "milestone": "m3",
+    "hash": "1cd75a366d95",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.microsoft.com/en-us/research/publication/what-it-wants-me-to-say-bridging-the-abstraction-gap-between-end-user-programmers-and-code-generating-large-language-models/?lang=ja",
+    "milestone": "m4",
+    "hash": "72f07b3fb889",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.microsoft.com/en-us/research/publication/what-it-wants-me-to-say-bridging-the-abstraction-gap-between-end-user-programmers-and-code-generating-large-language-models/?lang=ja",
+    "milestone": "completion",
+    "hash": "69a237a80eef",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2401.15232",
+    "milestone": "m5",
+    "hash": "97b4902675ad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2401.15232",
+    "milestone": "m1",
+    "hash": "93613537f8d6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2401.15232",
+    "milestone": "m6",
+    "hash": "44faa17cb9de",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2401.15232",
+    "milestone": "m7",
+    "hash": "98cf94b1df1d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2401.15232",
+    "milestone": "m3",
+    "hash": "1cd75a366d95",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2401.15232",
+    "milestone": "m4",
+    "hash": "72f07b3fb889",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2401.15232",
+    "milestone": "completion",
+    "hash": "69a237a80eef",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/0802.3479",
+    "milestone": "m5",
+    "hash": "97b4902675ad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/0802.3479",
+    "milestone": "m1",
+    "hash": "93613537f8d6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/0802.3479",
+    "milestone": "m6",
+    "hash": "44faa17cb9de",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/0802.3479",
+    "milestone": "m7",
+    "hash": "98cf94b1df1d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/0802.3479",
+    "milestone": "m3",
+    "hash": "1cd75a366d95",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/0802.3479",
+    "milestone": "m4",
+    "hash": "72f07b3fb889",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/0802.3479",
+    "milestone": "completion",
+    "hash": "69a237a80eef",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.feldmanmolly.com/chiwork2024-author-version.pdf",
+    "milestone": "m5",
+    "hash": "97b4902675ad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.feldmanmolly.com/chiwork2024-author-version.pdf",
+    "milestone": "m1",
+    "hash": "93613537f8d6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.feldmanmolly.com/chiwork2024-author-version.pdf",
+    "milestone": "m6",
+    "hash": "44faa17cb9de",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.feldmanmolly.com/chiwork2024-author-version.pdf",
+    "milestone": "m7",
+    "hash": "98cf94b1df1d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.feldmanmolly.com/chiwork2024-author-version.pdf",
+    "milestone": "m3",
+    "hash": "1cd75a366d95",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.feldmanmolly.com/chiwork2024-author-version.pdf",
+    "milestone": "m4",
+    "hash": "72f07b3fb889",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.feldmanmolly.com/chiwork2024-author-version.pdf",
+    "milestone": "completion",
+    "hash": "69a237a80eef",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://openaccess.city.ac.uk/id/eprint/13819/1/paper326.pdf",
+    "milestone": "m5",
+    "hash": "97b4902675ad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://openaccess.city.ac.uk/id/eprint/13819/1/paper326.pdf",
+    "milestone": "m1",
+    "hash": "93613537f8d6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://openaccess.city.ac.uk/id/eprint/13819/1/paper326.pdf",
+    "milestone": "m6",
+    "hash": "44faa17cb9de",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://openaccess.city.ac.uk/id/eprint/13819/1/paper326.pdf",
+    "milestone": "m7",
+    "hash": "98cf94b1df1d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://openaccess.city.ac.uk/id/eprint/13819/1/paper326.pdf",
+    "milestone": "m3",
+    "hash": "1cd75a366d95",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://openaccess.city.ac.uk/id/eprint/13819/1/paper326.pdf",
+    "milestone": "m4",
+    "hash": "72f07b3fb889",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://openaccess.city.ac.uk/id/eprint/13819/1/paper326.pdf",
+    "milestone": "completion",
+    "hash": "69a237a80eef",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://hewj.info/papers/chi19-ifttt-cameraready.pdf",
+    "milestone": "m5",
+    "hash": "97b4902675ad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://hewj.info/papers/chi19-ifttt-cameraready.pdf",
+    "milestone": "m1",
+    "hash": "93613537f8d6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://hewj.info/papers/chi19-ifttt-cameraready.pdf",
+    "milestone": "m6",
+    "hash": "44faa17cb9de",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://hewj.info/papers/chi19-ifttt-cameraready.pdf",
+    "milestone": "m7",
+    "hash": "98cf94b1df1d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://hewj.info/papers/chi19-ifttt-cameraready.pdf",
+    "milestone": "m3",
+    "hash": "1cd75a366d95",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://hewj.info/papers/chi19-ifttt-cameraready.pdf",
+    "milestone": "m4",
+    "hash": "72f07b3fb889",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://hewj.info/papers/chi19-ifttt-cameraready.pdf",
+    "milestone": "completion",
+    "hash": "69a237a80eef",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aapm.onlinelibrary.wiley.com/doi/10.1002/acm2.70795",
+    "milestone": "m5",
+    "hash": "97b4902675ad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aapm.onlinelibrary.wiley.com/doi/10.1002/acm2.70795",
+    "milestone": "m1",
+    "hash": "93613537f8d6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aapm.onlinelibrary.wiley.com/doi/10.1002/acm2.70795",
+    "milestone": "m6",
+    "hash": "44faa17cb9de",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aapm.onlinelibrary.wiley.com/doi/10.1002/acm2.70795",
+    "milestone": "m7",
+    "hash": "98cf94b1df1d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aapm.onlinelibrary.wiley.com/doi/10.1002/acm2.70795",
+    "milestone": "m3",
+    "hash": "1cd75a366d95",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aapm.onlinelibrary.wiley.com/doi/10.1002/acm2.70795",
+    "milestone": "m4",
+    "hash": "72f07b3fb889",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aapm.onlinelibrary.wiley.com/doi/10.1002/acm2.70795",
+    "milestone": "completion",
+    "hash": "69a237a80eef",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2401.15232v2",
+    "milestone": "m5",
+    "hash": "97b4902675ad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2401.15232v2",
+    "milestone": "m1",
+    "hash": "93613537f8d6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2401.15232v2",
+    "milestone": "m6",
+    "hash": "44faa17cb9de",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2401.15232v2",
+    "milestone": "m7",
+    "hash": "98cf94b1df1d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2401.15232v2",
+    "milestone": "m3",
+    "hash": "1cd75a366d95",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2401.15232v2",
+    "milestone": "m4",
+    "hash": "72f07b3fb889",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2401.15232v2",
+    "milestone": "completion",
+    "hash": "69a237a80eef",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sedici.unlp.edu.ar/bitstream/handle/10915/197781/Documento_completo.pdf-PDFA.pdf?isAllowed=y&sequence=1",
+    "milestone": "m5",
+    "hash": "97b4902675ad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sedici.unlp.edu.ar/bitstream/handle/10915/197781/Documento_completo.pdf-PDFA.pdf?isAllowed=y&sequence=1",
+    "milestone": "m1",
+    "hash": "93613537f8d6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sedici.unlp.edu.ar/bitstream/handle/10915/197781/Documento_completo.pdf-PDFA.pdf?isAllowed=y&sequence=1",
+    "milestone": "m6",
+    "hash": "44faa17cb9de",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sedici.unlp.edu.ar/bitstream/handle/10915/197781/Documento_completo.pdf-PDFA.pdf?isAllowed=y&sequence=1",
+    "milestone": "m7",
+    "hash": "98cf94b1df1d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sedici.unlp.edu.ar/bitstream/handle/10915/197781/Documento_completo.pdf-PDFA.pdf?isAllowed=y&sequence=1",
+    "milestone": "m3",
+    "hash": "1cd75a366d95",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sedici.unlp.edu.ar/bitstream/handle/10915/197781/Documento_completo.pdf-PDFA.pdf?isAllowed=y&sequence=1",
+    "milestone": "m4",
+    "hash": "72f07b3fb889",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://sedici.unlp.edu.ar/bitstream/handle/10915/197781/Documento_completo.pdf-PDFA.pdf?isAllowed=y&sequence=1",
+    "milestone": "completion",
+    "hash": "69a237a80eef",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aclanthology.org/2024.tacl-1.73.pdf",
+    "milestone": "m5",
+    "hash": "97b4902675ad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aclanthology.org/2024.tacl-1.73.pdf",
+    "milestone": "m1",
+    "hash": "93613537f8d6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aclanthology.org/2024.tacl-1.73.pdf",
+    "milestone": "m6",
+    "hash": "44faa17cb9de",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aclanthology.org/2024.tacl-1.73.pdf",
+    "milestone": "m7",
+    "hash": "98cf94b1df1d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aclanthology.org/2024.tacl-1.73.pdf",
+    "milestone": "m3",
+    "hash": "1cd75a366d95",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aclanthology.org/2024.tacl-1.73.pdf",
+    "milestone": "m4",
+    "hash": "72f07b3fb889",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aclanthology.org/2024.tacl-1.73.pdf",
+    "milestone": "completion",
+    "hash": "69a237a80eef",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2607.05034v1",
+    "milestone": "m5",
+    "hash": "97b4902675ad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2607.05034v1",
+    "milestone": "m1",
+    "hash": "93613537f8d6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2607.05034v1",
+    "milestone": "m6",
+    "hash": "44faa17cb9de",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2607.05034v1",
+    "milestone": "m7",
+    "hash": "98cf94b1df1d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2607.05034v1",
+    "milestone": "m3",
+    "hash": "1cd75a366d95",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2607.05034v1",
+    "milestone": "m4",
+    "hash": "72f07b3fb889",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2607.05034v1",
+    "milestone": "completion",
+    "hash": "69a237a80eef",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2412.12471v1",
+    "milestone": "m5",
+    "hash": "97b4902675ad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2412.12471v1",
+    "milestone": "m1",
+    "hash": "93613537f8d6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2412.12471v1",
+    "milestone": "m6",
+    "hash": "44faa17cb9de",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2412.12471v1",
+    "milestone": "m7",
+    "hash": "98cf94b1df1d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2412.12471v1",
+    "milestone": "m3",
+    "hash": "1cd75a366d95",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2412.12471v1",
+    "milestone": "m4",
+    "hash": "72f07b3fb889",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2412.12471v1",
+    "milestone": "completion",
+    "hash": "69a237a80eef",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://openportal.isti.cnr.it/data/2019/404663/2019_404663.postprint.pdf?id=people______::a5e3db2c0020a773b72f987f72da45c6",
+    "milestone": "m5",
+    "hash": "97b4902675ad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://openportal.isti.cnr.it/data/2019/404663/2019_404663.postprint.pdf?id=people______::a5e3db2c0020a773b72f987f72da45c6",
+    "milestone": "m1",
+    "hash": "93613537f8d6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://openportal.isti.cnr.it/data/2019/404663/2019_404663.postprint.pdf?id=people______::a5e3db2c0020a773b72f987f72da45c6",
+    "milestone": "m6",
+    "hash": "44faa17cb9de",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://openportal.isti.cnr.it/data/2019/404663/2019_404663.postprint.pdf?id=people______::a5e3db2c0020a773b72f987f72da45c6",
+    "milestone": "m7",
+    "hash": "98cf94b1df1d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://openportal.isti.cnr.it/data/2019/404663/2019_404663.postprint.pdf?id=people______::a5e3db2c0020a773b72f987f72da45c6",
+    "milestone": "m3",
+    "hash": "1cd75a366d95",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://openportal.isti.cnr.it/data/2019/404663/2019_404663.postprint.pdf?id=people______::a5e3db2c0020a773b72f987f72da45c6",
+    "milestone": "m4",
+    "hash": "72f07b3fb889",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://openportal.isti.cnr.it/data/2019/404663/2019_404663.postprint.pdf?id=people______::a5e3db2c0020a773b72f987f72da45c6",
+    "milestone": "completion",
+    "hash": "69a237a80eef",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13556308/",
+    "milestone": "m5",
+    "hash": "97b4902675ad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13556308/",
+    "milestone": "m1",
+    "hash": "93613537f8d6",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13556308/",
+    "milestone": "m6",
+    "hash": "44faa17cb9de",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13556308/",
+    "milestone": "m7",
+    "hash": "98cf94b1df1d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13556308/",
+    "milestone": "m3",
+    "hash": "1cd75a366d95",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13556308/",
+    "milestone": "m4",
+    "hash": "72f07b3fb889",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13556308/",
+    "milestone": "completion",
+    "hash": "69a237a80eef",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://web.engr.oregonstate.edu/~burnett/Reprints/icse00.empirical.pdf",
+    "milestone": "m5",
+    "hash": "97b4902675ad",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://web.engr.oregonstate.edu/~burnett/Reprints/chi10-stratcel.pdf",
+    "milestone": "m7",
+    "hash": "98cf94b1df1d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://web.engr.oregonstate.edu/~burnett/Reprints/interactingComputers-gender-2011-aspublished.pdf",
+    "milestone": "m7",
+    "hash": "98cf94b1df1d",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1423,8 +2290,98 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 8 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"End-user software engineering concerns the quality of software people build for their own tasks, from a spreadsheet formula to an application. The goal here is for people with no prior experience writing code in a conventional programming language to create that software, explain and predict its behavior, repair faults and adapt it during continued use. They can do so without reading source code or receiving programming help from another person.\". Reason: The definition currently makes lack of coding experience sound like a defining feature of the whole field."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"In September 2001, 62.3% of U.S. workers who used a computer on the job worked with spreadsheets or databases. Spreadsheets inform budget, investment and tax decisions. In an audit of 25 working spreadsheets at five organizations, 70 confirmed errors affected calculated results. Staff who know the work could check those calculations and adapt local tools when procedures change, even after the original developer leaves. Faster code generation still leaves users to judge whether a rule that fits their examples also handles a new case correctly.\". Reason: The student experiment reports performance on an assigned task but gives readers no measure of workplace use or of errors in software that people actually depend on."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after None: \"A user tests every executable link between a spreadsheet value and a formula that uses it.\". Reason: The existing milestones omit a published laboratory test of whether users systematically check the calculations on which a spreadsheet output depends."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"The user describes a programming task from the supplied input-output examples. Code generated from that description must produce the expected output for every provided test case.\". Reason: The current criterion mixes the task's pass condition with participant success rates and observations about the completeness of descriptions."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "split m2 into \"A user correctly predicts the outcome of a scenario governed by trigger-action rules.\" | \"A user corrects a seeded error in a working copy of a spreadsheet.\". Reason: Predicting what a faulty rule will do and changing a program to correct a fault are independently scored results."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"A user who took no part in developing the application implements an assigned change without assistance from its original developer. In the inventory application protocol, team members use Claude Code for changes to data entry, window behavior, error reporting or a calculation. Each task is judged by whether the requested change works.\". Reason: The protocol judges completion of an assigned modification, while the current criterion also reports tester counts and elapsed times."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"A nonprogrammer changes a deployed application in response to a requirement that arises during actual use. Acceptance tests confirm that the change meets the new requirement, and regression tests confirm that behavior meant to stay the same still works.\". Reason: The observation period and rollback in one repository are evidence about maintenance and do not define a passing result."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "structure = parallel. Reason: Users can test, predict, repair or modify an existing program without first having generated it from a description."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 8 of 8 proposed operations from HCI-05-revise-20261125T095401012060Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m5, m1, m6, m7, m3, m4."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 0 from arXiv, 2 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 3 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "definition is 449 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 16 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 5 candidates returned, 0 dropped as sources already used, 5 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 3 of 5 new candidates, without search. Skipped: 3 no readable saved copy. Dropped rows: none. Replaced 9 earlier rows. Added 24 results: 21 from sources already used, 3 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 0 from arXiv, 3 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 21 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-25"
  }
 }
