@@ -317,12 +317,16 @@
  "page": {
   "id": "CPE-06",
   "title": "Superconducting classical computing with lower wall-plug energy",
-  "definition": "A superconducting classical computer completes the same workload as a CMOS (complementary metal–oxide–semiconductor) computer at equal throughput and numerical accuracy, using less total electricity, including refrigeration, memory and interfaces. Single-flux-quantum (SFQ) logic uses quantized voltage pulses; adiabatic quantum-flux-parametron (AQFP) logic uses currents.",
+  "definition": "A superconducting classical computer completes the same workload as a CMOS (complementary metal–oxide–semiconductor) computer in the same or less time, to the same numerical tolerance, using less electricity. Both totals include memory, interfaces, power conversion and cooling. Single-flux-quantum logic transmits voltage pulses whose time integral is one magnetic flux quantum. Adiabatic quantum-flux-parametron logic encodes a bit in the direction of a current. An 8-bit single-flux-quantum processor has operated at 57.2 GHz and 11.2 mW, measured at the processor.",
   "goal": {
-   "need": "Data centres used an estimated 415 TWh in 2024, about 1.5% of global electricity. IARPA cites a study estimate of 100 PFLOP/s at about 200 kW including refrigeration. That is a system projection; electricity savings require the logic’s energy advantage to survive the complete machine’s supporting loads.",
+   "need": "Data centres used about 485 TWh of electricity worldwide in 2025. In conventional processors, moving data between logic and memory consumes power alongside arithmetic. A supercomputing site at its power limit could run more jobs, including model training, if each job used less electricity. Superconducting switches and wires can reduce both costs, but the savings must cover memory, interfaces and refrigeration. One large-system design requires 395 W of electrical input to remove 1 W of heat at 4.4 K.",
    "need_refs": [
+    16,
+    3,
+    17,
+    4,
     1,
-    2
+    7
    ],
    "figures": null,
    "statements": [
@@ -331,7 +335,7 @@
      "year": "2016",
      "quote": "Can we build a superconducting computer that is capable of solving important problems?",
      "context": null,
-     "ref": 3,
+     "ref": 2,
      "checked": null
     },
     {
@@ -339,7 +343,7 @@
      "year": "2024",
      "quote": "For the first generation, the road map envisions the stacking of about 100 boards to obtain the target performance of 20 exaflops.",
      "context": "Anna Herr and Quentin Herr describe a modeled system using BF16, a 16-bit floating-point format, with projected total power of 500 kW.",
-     "ref": 4,
+     "ref": 3,
      "checked": true
     },
     {
@@ -347,49 +351,54 @@
      "year": "2023",
      "quote": "a necessary first step is to develop small-scale systems and markets.",
      "context": "Section 2.2.1.1 discusses superconducting digital computing for high-performance computers and data centres.",
-     "ref": 5,
+     "ref": 4,
+     "checked": true
+    },
+    {
+     "body": "Japan Society for the Promotion of Science, Grant-in-Aid for Scientific Research (S), project 26220904",
+     "year": "2014",
+     "quote": "power reduction of high-end computing systems including cryocoolers.",
+     "context": "The FY2014–2018 project set a processor target of 16 bits at 5 GHz and identified reduced system power as the intended application.",
+     "ref": 18,
      "checked": true
     }
    ]
   },
   "completion": {
    "title": "A superconducting computer uses less total electricity than CMOS on the same validated HPL problem.",
-   "criterion": "An integrated superconducting computer meeting the C3 prototype targets in m3 solves the same High Performance LINPACK (HPL) dense linear system as a contemporary CMOS comparator, in 64-bit floating-point arithmetic, passing HPL numerical validation, with equal or shorter elapsed time and measured energy ratio E_superconducting/E_CMOS < 1. Measure both systems over the full benchmark run, including refrigeration, memory, communication, interfaces, host/control equipment and power conversion. This qualifies a steady-operation advantage for that problem and configuration.",
-   "set_by": "Technology Atlas fallback; HPL supplies the workload convention and IARPA C3 supplies the prototype scope.",
+   "criterion": "An integrated superconducting computer and an identified contemporary CMOS computer solve the same HPL dense linear system in 64-bit floating-point arithmetic. Report both configurations and the matrix order. Both solutions must pass the HPL scaled-residual check with the threshold set to 16. The superconducting run must finish in equal or less time and use fewer joules. Measure electricity over each full run with both machines at operating temperature, including memory, communication, interfaces, host and control equipment, power conversion and cooling on each side. The result applies to that problem and those configurations.",
+   "set_by": "Technology Atlas fallback. No outside body defines the combined comparison. HPL defines the numerical validation test.",
    "set_by_kind": "atlas",
-   "threshold_quote": null,
-   "threshold_ref": null,
-   "basis": "Searches of IARPA C3, IEEE IRDS CEQIP, Green500/EE HPC WG methodology and imec roadmaps found no acceptance test defining the CMOS comparator, workload and refrigeration-inclusive energy advantage together. HPL supplies a published numerical test; C3 supplies a system scope. An energy ratio below 1 expresses superiority without an unsupported improvement multiplier.",
+   "threshold_quote": "A solution is considered numerically correct when this quantity is less than a threshold value of\n16.",
+   "threshold_ref": 19,
+   "basis": "HPL defines the double-precision problem and scaled residual. The HPC power-measurement methodology provides a precedent for full-run, whole-system measurements. The matched CMOS comparison, elapsed-time condition and strict inequality in total joules are Atlas criteria. C3's notional prototype is one route to an integrated machine.",
    "refs": [
-    2,
-    3,
-    4,
     5,
+    19,
     6,
-    7
+    2
    ],
-   "threshold_checked": null
+   "threshold_checked": true
   },
   "case_label": "Logic approach",
   "cases": [
    "Single-flux-quantum logic",
-   "Adiabatic quantum-flux-parametron logic"
+   "Adiabatic quantum-flux-parametron logic",
+   "Half-flux-quantum logic"
   ],
-  "milestone_structure": "sequence",
+  "milestone_structure": "parallel",
   "milestones": [
    {
     "id": "m1",
     "title": "Superconducting subcircuits deliver 10^9 bit-operations/s and 10^16 bit-operations/J at 4 K.",
-    "criterion": "C3 base-period circuit targets: 10^4 junctions, 10^5 junctions/cm², 10^9 bit-operations/s and 10^16 bit-operations/J at 4 K. AQFP evidence: the 2021 MANA study ran two four-instruction programs at 100 kHz and 4.2 K on five of six processor chips from two wafers. Seven of 12 execution-unit chips from four wafers worked, with maximum frequencies of 1.2–2.5 GHz. For the SFQ development path, imec reported circuit design density of 3.8 million junctions/cm² on 7 September 2026 in a press release, not peer reviewed. These results do not establish the combined target.",
-    "set_by": "IARPA C3, slide 22: base-period SFQ targets; thresholds tabulated.",
+    "criterion": "Demonstrate a superconducting subcircuit with 10⁴ Josephson junctions at a density of 10⁵ junctions/cm², throughput of 10⁹ bit-operations/s and efficiency of 10¹⁶ bit-operations/J at 4 K. The efficiency refers to energy dissipated at the cold stage.",
+    "set_by": "IARPA C3 base-period targets for the SFQ logic track, slide 22.",
     "set_by_kind": "government_programme",
-    "threshold_quote": null,
-    "threshold_ref": null,
+    "threshold_quote": "Throughput (bit-op/s) 10 9 5×10 10 10 11",
+    "threshold_ref": 2,
     "refs": [
-     3,
-     8,
-     9,
-     4
+     2,
+     17
     ],
     "status": "active",
     "replaced_by": [],
@@ -404,26 +413,157 @@
     "threshold_quote": null,
     "threshold_ref": null,
     "refs": [
-     3,
-     8,
-     9
+     2,
+     7,
+     8
+    ],
+    "status": "retired",
+    "replaced_by": [
+     "m9",
+     "m10",
+     "m11"
+    ],
+    "threshold_checked": null
+   },
+   {
+    "id": "m3",
+    "title": "A superconducting computer integrates a 64-bit CPU, two accelerators and 256 MiB of main memory.",
+    "criterion": "Integrate one 64-bit CPU, two parallel accelerators and 2²⁸ bytes (256 MiB) of main memory in a superconducting computer. The C3 prototype targets are a 10 GHz logic clock, throughput of 10¹³ bit-operations/s, efficiency of 10¹⁵ bit-operations/J at 4 K and input/output at 10⁹ bit/s. The efficiency is evaluated at the cold stage, before refrigeration power is counted.",
+    "set_by": "IARPA C3, slide 21: notional SFQ prototype; thresholds tabulated.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "Word size (bit) 64",
+    "threshold_ref": 2,
+    "refs": [
+     2,
+     17
     ],
     "status": "active",
     "replaced_by": [],
     "threshold_checked": null
    },
    {
-    "id": "m3",
-    "title": "A superconducting computer integrates a 64-bit CPU, two accelerators and 256 MiB of main memory.",
-    "criterion": "C3 prototype targets: 10 GHz logic; 10^13 bit-operations/s; 10^15 bit-operations/J at 4 K; one 64-bit CPU; two parallel accelerators; 2^28 bytes (256 MiB) main memory; 10^9 bit/s input/output. The efficiency is measured at 4 K, excluding refrigeration. AQFP: the MANA paper estimates a 2 MW refrigerated system. SFQ: Kundu et al., submitted on 13 November 2024, model 64 processing units and 2 TB of cryogenic DRAM per blade using pulse-conserving logic. Both system results are estimates, not integrated-machine measurements.",
-    "set_by": "IARPA C3, slide 21: notional SFQ prototype; thresholds tabulated.",
-    "set_by_kind": "government_programme",
-    "threshold_quote": null,
-    "threshold_ref": null,
+    "id": "m4",
+    "title": "A superconducting 8-bit adder produces correct sums and has its operating power measured.",
+    "criterion": "Operate a fabricated superconducting adder on pairs of 8-bit inputs and verify the sum outputs against the expected bits. Measure active circuit dissipation and report the clock frequency and operating temperature for that measurement.",
+    "set_by": "Experimental 8-bit adder benchmark used in reciprocal quantum logic and AQFP studies.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "RQL 8-bit carry-look-ahead (CLA) adder as a bench-\nmark",
+    "threshold_ref": 10,
     "refs": [
-     3,
-     8,
-     10
+     10,
+     12
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "A 64-bit cryogenic array meets the C3 main-memory or cache targets.",
+    "criterion": "Demonstrate a functional 64-bit cryogenic array and identify its role. For main memory, the targets are 5 × 10⁶ bits/cm², 5 Gbit/s burst rate, 5,000 ps mean access time and 5 × 10⁻¹⁶ J/bit mean access energy. For cache, the corresponding targets are 5 × 10⁵ bits/cm², 30 Gbit/s, 400 ps and 5 × 10⁻¹⁷ J/bit.",
+    "set_by": "IARPA C3 option-period-1 cryogenic-memory targets, slide 22.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "Functional capacity (bit)* 1 2 6 ; 2 6 2 10 ; 2 10",
+    "threshold_ref": 2,
+    "refs": [
+     2,
+     17
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m6",
+    "title": "A superconducting circuit reaches 5 × 10¹⁰ bit-operations/s and 5 × 10¹⁶ bit-operations/J at 4 K.",
+    "criterion": "Demonstrate a superconducting circuit with 5 × 10⁴ Josephson junctions at a density of 5 × 10⁵ junctions/cm², throughput of 5 × 10¹⁰ bit-operations/s and efficiency of 5 × 10¹⁶ bit-operations/J at 4 K.",
+    "set_by": "IARPA C3 option-period-1 targets for the SFQ logic track, slide 22.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "Efficiency @ 4 K (bit-op/J) 10 16 5×10 16 10 17",
+    "threshold_ref": 2,
+    "refs": [
+     2,
+     17
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m7",
+    "title": "A cryogenic memory cell stores one bit and meets the C3 targets for main memory or cache.",
+    "criterion": "Demonstrate a functional 1-bit cryogenic cell with a 1 Gbit/s burst rate and identify its role. The main-memory targets are 10⁶ bits/cm², 10,000 ps mean access time and 5 × 10⁻¹⁶ J/bit mean access energy. The cache targets are 10⁵ bits/cm², 1,000 ps and 5 × 10⁻¹⁷ J/bit.",
+    "set_by": "IARPA C3 base-period cryogenic-memory targets, slide 22.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "Data rate, burst mode (Gbit/s)* 1 5; 30 5; 30",
+    "threshold_ref": 2,
+    "refs": [
+     2,
+     17
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m8",
+    "title": "A 16-bit adiabatic quantum-flux-parametron processor operates at 5 GHz.",
+    "criterion": "Demonstrate instruction execution by a fabricated 16-bit AQFP processor clocked at 5 GHz. The word size and operating frequency apply to the processor executing instructions.",
+    "set_by": "Japan Society for the Promotion of Science, Grant-in-Aid for Scientific Research (S), project 26220904.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "high-speed operation of 16b AQFP processors at 5 GHz.",
+    "threshold_ref": 18,
+    "refs": [
+     18,
+     7
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m9",
+    "title": "A superconducting processor reaches 10¹¹ bit-operations/s and 10¹⁷ bit-operations/J at 4 K.",
+    "criterion": "Demonstrate a superconducting processor with 10⁵ Josephson junctions at a density of 10⁶ junctions/cm², throughput of 10¹¹ bit-operations/s and efficiency of 10¹⁷ bit-operations/J at 4 K.",
+    "set_by": "IARPA C3 option-period-2 targets for the SFQ logic track, slide 22.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "Throughput (bit-op/s) 10 9 5×10 10 10 11",
+    "threshold_ref": 2,
+    "refs": [
+     2,
+     17
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m10",
+    "title": "A 1,024-bit cryogenic main-memory chip delivers 5 Gbit/s in burst mode.",
+    "criterion": "Demonstrate a cryogenic main-memory chip with 1,024 functional bits at 10⁷ bits/cm², a 5 Gbit/s burst rate, 5,000 ps mean access time and 10⁻¹⁶ J/bit mean access energy.",
+    "set_by": "IARPA C3 option-period-2 main-memory targets, slide 22, first value of each pair.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "Data rate, burst mode (Gbit/s)* 1 5; 30 5; 30",
+    "threshold_ref": 2,
+    "refs": [
+     2,
+     17
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m11",
+    "title": "A 1,024-bit cryogenic cache chip delivers 30 Gbit/s in burst mode.",
+    "criterion": "Demonstrate a cryogenic cache chip with 1,024 functional bits at 10⁶ bits/cm², a 30 Gbit/s burst rate, 400 ps mean access time and 10⁻¹⁷ J/bit mean access energy.",
+    "set_by": "IARPA C3 option-period-2 cache targets, slide 22, second value of each pair.",
+    "set_by_kind": "government_programme",
+    "threshold_quote": "Access time, ave. (ps)* 10,000; 1,000 5,000; 400 5,000; 400",
+    "threshold_ref": 2,
+    "refs": [
+     2,
+     17
     ],
     "status": "active",
     "replaced_by": [],
@@ -433,26 +573,12 @@
   "measures": [],
   "not_found": [
    "No externally published acceptance test combining a complete superconducting computer, a matched CMOS workload and measured refrigeration-inclusive energy superiority was found.",
-   "No experimental report establishing the combined C3 prototype targets or the completion test was found through 14 November 2026.",
-   "The supplied EurekAlert page and the original C3 solicitation attachments and programme-presentation URLs could not be opened."
+   "No experimental report located through 25 November 2026 demonstrates the combined C3 prototype targets or a matched HPL run using less refrigeration-inclusive electricity than CMOS.",
+   "No academy or roadmap committee statement was found concluding that a refrigeration-inclusive energy advantage for classical superconducting computing is unattainable or unworthy of pursuit."
   ],
   "references": [
    {
     "id": 1,
-    "kind": "report",
-    "url": "https://www.iea.org/reports/energy-and-ai/executive-summary",
-    "doi": null,
-    "title": "Energy and AI",
-    "authors": "International Energy Agency",
-    "container": "IEA",
-    "year": "2025",
-    "volume": null,
-    "issue": null,
-    "pages": null,
-    "citation_source": "model"
-   },
-   {
-    "id": 2,
     "kind": "web",
     "url": "https://www.iarpa.gov/index.php/research-programs/c3",
     "doi": null,
@@ -466,7 +592,7 @@
     "citation_source": "model"
    },
    {
-    "id": 3,
+    "id": 2,
     "kind": "report",
     "url": "https://www.yumpu.com/en/document/view/55973711/superconducting-computing-and-the-iarpa-c3-program",
     "doi": null,
@@ -480,7 +606,7 @@
     "citation_source": "model"
    },
    {
-    "id": 4,
+    "id": 3,
     "kind": "web",
     "url": "https://spectrum.ieee.org/superconducting-computer",
     "doi": null,
@@ -494,7 +620,7 @@
     "citation_source": "model"
    },
    {
-    "id": 5,
+    "id": 4,
     "kind": "report",
     "url": "https://irds.ieee.org/images/files/pdf/2023/2023_IRDS_CEQIP.pdf",
     "doi": null,
@@ -508,7 +634,7 @@
     "citation_source": "model"
    },
    {
-    "id": 6,
+    "id": 5,
     "kind": "web",
     "url": "https://netlib.org/benchmark/hpl/",
     "doi": null,
@@ -522,7 +648,7 @@
     "citation_source": "model"
    },
    {
-    "id": 7,
+    "id": 6,
     "kind": "report",
     "url": "https://research.spec.org/icpe_proceedings/2014/proceedings/p149.pdf",
     "doi": "10.1145/2568088.2576795",
@@ -536,7 +662,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 8,
+    "id": 7,
     "kind": "journal",
     "url": "https://upload.wikimedia.org/wikipedia/commons/5/5c/MANA_A_Monolithic_Adiabatic_iNtegration_Architecture_Microprocessor_Using_1.4-zJ_op_Unshunted_Superconductor_Josephson_Junction_Devices.pdf",
     "doi": "10.1109/JSSC.2020.3041338",
@@ -550,7 +676,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 9,
+    "id": 8,
     "kind": "press_release",
     "url": "https://www.imec-int.com/en/press/imec-advances-scalable-superconducting-technology-world-first-nbtin-circuits-and-30nm",
     "doi": null,
@@ -564,21 +690,7 @@
     "citation_source": "model"
    },
    {
-    "id": 10,
-    "kind": "preprint",
-    "url": "https://arxiv.org/html/2411.08645v1",
-    "doi": "10.48550/arXiv.2411.08645",
-    "title": "A System Level Performance Evaluation for Superconducting Digital Systems",
-    "authors": "Kundu J, Bhattacharjee D, Josephsen N, Pokhrel A, Silva UD, Guo W, et al.",
-    "container": "arXiv",
-    "year": "2024",
-    "volume": null,
-    "issue": null,
-    "pages": null,
-    "citation_source": "arxiv"
-   },
-   {
-    "id": 11,
+    "id": 9,
     "kind": "press_release",
     "url": "https://www.eurekalert.org/news-releases/919197",
     "doi": null,
@@ -592,7 +704,7 @@
     "citation_source": "model"
    },
    {
-    "id": 12,
+    "id": 10,
     "kind": "preprint",
     "url": "https://arxiv.org/pdf/1212.2994",
     "doi": null,
@@ -606,7 +718,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 13,
+    "id": 11,
     "kind": "journal",
     "url": "https://researchconnect.stonybrook.edu/en/publications/increasing-integration-scale-of-superconductor-electronics-beyond/",
     "doi": "10.1088/1742-6596/1559/1/012002",
@@ -620,7 +732,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 14,
+    "id": 12,
     "kind": "journal",
     "url": "https://ndlsearch.ndl.go.jp/books/R100000136-I1050863727634578816",
     "doi": "10.1063/1.5080753",
@@ -634,7 +746,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 15,
+    "id": 13,
     "kind": "book",
     "url": "https://kyushu-u.elsevierpure.com/en/publications/a-572ghz-112mw-8-bit-general-purpose-superconductor-microprocesso/",
     "doi": "10.1109/A-SSCC56115.2022.9980802",
@@ -648,7 +760,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 16,
+    "id": 14,
     "kind": "journal",
     "url": "https://supercond.org/all-issues/list.aspx?lcid=20&pid=9",
     "doi": null,
@@ -662,7 +774,7 @@
     "citation_source": "model"
    },
    {
-    "id": 17,
+    "id": 15,
     "kind": "journal",
     "url": "https://cba.mit.edu/docs/papers/02.25.blackburn.SRMem.pdf",
     "doi": "10.1109/TASC.2025.3540048",
@@ -674,28 +786,189 @@
     "issue": "5",
     "pages": "1-5",
     "citation_source": "crossref"
+   },
+   {
+    "id": 16,
+    "kind": "report",
+    "url": "https://www.iea.org/reports/key-questions-on-energy-and-ai/executive-summary",
+    "doi": null,
+    "title": "Key Questions on Energy and AI",
+    "authors": "IEA",
+    "container": "Executive summary",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 17,
+    "kind": "report",
+    "url": "https://rebootingcomputing.ieee.org/images/files/pdf/RCS4ManheimerThu1015.pdf",
+    "doi": null,
+    "title": "Cryogenic Computing Complexity (C3)",
+    "authors": "Marc Manheimer",
+    "container": "IEEE Rebooting Computing Summit 4",
+    "year": "2015",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 18,
+    "kind": "report",
+    "url": "https://www.jsps.go.jp/file/storage/grants/j-grantsinaid/12_kiban/ichiran_26/e-data/h26_e3404_yoshikawa.pdf",
+    "doi": null,
+    "title": "Study on Adiabatic Single-Flux-Quantum Circuits Operating in the Thermodynamic Energy Limit",
+    "authors": "Nobuyuki Yoshikawa",
+    "container": "Grant-in-Aid for Scientific Research (S)",
+    "year": "2014",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 19,
+    "kind": "report",
+    "url": "https://www.netlib.org/lapack/lawnspdf/lawn206.pdf",
+    "doi": null,
+    "title": "The Problem with the Linpack Benchmark 1.0 Matrix Generator",
+    "authors": "Jack Dongarra and Julien Langou",
+    "container": "LAPACK Working Note 206",
+    "year": "2008",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 20,
+    "kind": "preprint",
+    "url": "https://snf.ieeecsc.org/files/ieeecsc/slides/ST461_Narama.pdf",
+    "doi": null,
+    "title": "Demonstration of 10k gate-scale adiabatic-quantum-flux-parametron circuits",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 21,
+    "kind": "journal",
+    "url": "https://research.ibm.com/publications/experimental-single-flux-quantum-ndro-josephson-memory-cell",
+    "doi": null,
+    "title": "Experimental Single Flux Quantum NDRO Josephson Memory Cell",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 22,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/2501.03343",
+    "doi": null,
+    "title": "Characterization of Flux Trapping in and Fabrication of Large-Scale Superconductor Circuits Using AC-Biased Shift Registers With 108500 Josephson Junctions",
+    "authors": "Golden EB, Parmar NA, Semenov VK, Tolpygo SK",
+    "container": "arXiv",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 23,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/1510.01220",
+    "doi": null,
+    "title": "Reproducible Operating Margins on a 72,800-Device Digital Superconducting Chip",
+    "authors": "Herr QP, Osborne J, Stoutimore MJA, Hearne H, Selig R, Vogel J, et al.",
+    "container": "arXiv",
+    "year": "2015",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 24,
+    "kind": "journal",
+    "url": "https://ynu.repo.nii.ac.jp/record/12142/files/FINAL_VERSION.pdf",
+    "doi": null,
+    "title": "Demonstration of Single-Flux-Quantum 64-bit Lookup Table with Cryo-CMOS Decoders for Reconfiguration",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 25,
+    "kind": "journal",
+    "url": "https://kyushu-u.elsevierpure.com/en/publications/demonstration-of-a-478-ghz-high-speed-fft-processor-using-single-/",
+    "doi": "10.1109/TASC.2021.3059984",
+    "title": "Demonstration of a 47.8 GHz High-Speed FFT Processor Using Single-Flux-Quantum Technology",
+    "authors": "Ke F, Chen O, Wang Y, Yoshikawa N",
+    "container": "IEEE Trans. Appl. Supercond.",
+    "year": "2021",
+    "volume": "31",
+    "issue": "5",
+    "pages": "1-5",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 26,
+    "kind": "journal",
+    "url": "https://www.jstage.jst.go.jp/article/elex/13/6/13_13.20160074/_pdf/-char/en",
+    "doi": "10.1587/elex.13.20160074",
+    "title": "High-speed demonstration of low-power 1 k-bit shift-register memories using LR-biasing SFQ circuits",
+    "authors": "Takahashi T, Numaguchi R, Yamanashi Y, Yoshikawa N",
+    "container": "IEICE Electron. Express",
+    "year": "2016",
+    "volume": "13",
+    "issue": "6",
+    "pages": "20160074-20160074",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 27,
+    "kind": "web",
+    "url": "https://indico-tdli.sjtu.edu.cn/event/4677/",
+    "doi": null,
+    "title": "Development of Rapid Single Flux Quantum (RSFQ) Integrated Circuit for Superconducting Computer",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
    }
   ],
   "milestone_order": [
+   "m4",
    "m1",
-   "m2",
+   "m7",
+   "m6",
+   "m5",
+   "m9",
+   "m10",
+   "m11",
+   "m8",
    "m3"
   ],
   "results": [
-   {
-    "milestone": "m1",
-    "case": "Adiabatic quantum-flux-parametron logic",
-    "verdict": "partial",
-    "finding": "Seven of 12 AQFP execution-unit chips worked, with maximum frequencies of 1.2–2.5 GHz.",
-    "detail": "The separate execution-unit chips operated at 4.2 K. The study does not establish the combined bit-operation throughput, energy-efficiency and density targets.",
-    "quote": "In total, we tested 12 EX\nchips (three chips across four different wafers) and reproduced\ncorrect functionality on seven chips, as shown in Table III.\nFor the high-speed test, the maximum operating frequency\nranged from 1.2 to 2.5 GHz across all working chips.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
-   },
    {
     "milestone": "m2",
     "case": "Adiabatic quantum-flux-parametron logic",
@@ -706,91 +979,7 @@
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
-    "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
-   },
-   {
-    "milestone": "m3",
-    "case": "Adiabatic quantum-flux-parametron logic",
-    "verdict": "partial",
-    "finding": "One modeled AQFP-based GA100 supercomputer was estimated to reach 1.6 EFLOPS in double precision.",
-    "detail": "The estimate scales a hypothetical refrigerated system to a 20 MW power budget. It is not a measurement of an integrated machine meeting the CPU, accelerator, memory and I/O targets.",
-    "quote": "The results indicate that\na conservative estimation (B) of an AQFP-based GA100 GPU\nwould exceed the 1-EFLOPS goa l for both single-precision\n(3.3 EFLOPS) and double-precision (1 .6 EFLOPS).",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
-   },
-   {
-    "milestone": "m1",
-    "case": "Adiabatic quantum-flux-parametron logic",
-    "verdict": "partial",
-    "finding": "A separate AQFP data-processing chip operated at up to 2.5 GHz; sample size not stated.",
-    "detail": "The clock frequency is not a bit-operation rate. The release does not establish the combined junction count, density, throughput and energy-efficiency targets at 4 K.",
-    "quote": "We also show on a separate chip that the data processing part of the microprocessor can operate up to a clock frequency of 2.5 GHz making this on par with today's computing technologies.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": false,
-    "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
-   },
-   {
-    "milestone": "m3",
-    "case": "Single-flux-quantum logic",
-    "verdict": "partial",
-    "finding": "Imec modeled a stack of 100 superconducting boards with projected performance of 20 exaflops.",
-    "detail": "The modeled AI system uses BF16 arithmetic. It is not an integrated-machine measurement and does not establish the specified CPU, accelerators, memory capacity or other prototype targets.",
-    "quote": "We modeled a stack of 100 such boards, all operating within the same cooling environment and contained in a 20- by 20- by 12-centimeter volume, roughly the size of a shoebox.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 4,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
-   },
-   {
-    "milestone": "m1",
-    "case": "Single-flux-quantum logic",
-    "verdict": "partial",
-    "finding": "One 8-bit SFQ-based RQL adder dissipated an estimated 510 nW in its core.",
-    "detail": "The adder was tested at 4.2 K; the power estimate was made at 6.2 GHz and excludes input and output circuits. The source does not establish all four targets together, including 10^16 bit-operations/J and 10^4 junctions.",
-    "quote": "Measured power dissipation in the 8-bit CLA\nadder was only 510 nW at 6.2 GHz.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
-   },
-   {
-    "milestone": "m1",
-    "case": "Single-flux-quantum logic",
-    "verdict": "partial",
-    "finding": "SFQ shift-register designs, sample size not stated, reached a circuit density of 7.4 million junctions/cm².",
-    "detail": "The reported density exceeds the density target, but the text does not establish junction count, throughput, energy efficiency and operation at 4 K together.",
-    "quote": "Using self-shunted JJs with J cof 600 μA/μm2, we increased this record circuit density to 7.4•106 JJs per cm2.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
-   },
-   {
-    "milestone": "m1",
-    "case": "Adiabatic quantum-flux-parametron logic",
-    "verdict": "partial",
-    "finding": "AQFP 8-bit adder, sample size not stated: correct operation at a 1-GHz clock frequency.",
-    "detail": "The demonstrated operation used one critical carry-propagation test vector. Clock frequency alone does not establish bit-operations per second, and the text does not establish the combined junction count, density, throughput and energy targets at 4 K.",
-    "quote": "The correct operation of the 8-bit CLA was demonstrated at a 1-GHz clock frequency for a critical carry propagation test vector.",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
-    "ref": 14,
+    "ref": 7,
     "judged_by": "gpt-6.1-terra",
     "judged_on": "2026-11-14"
    },
@@ -804,7 +993,7 @@
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 15,
+    "ref": 13,
     "judged_by": "gpt-6.1-terra",
     "judged_on": "2026-11-14"
    },
@@ -818,7 +1007,7 @@
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
-    "ref": 16,
+    "ref": 14,
     "judged_by": "gpt-6.1-terra",
     "judged_on": "2026-11-14"
    },
@@ -832,44 +1021,310 @@
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
-    "ref": 17,
+    "ref": 15,
     "judged_by": "gpt-6.1-terra",
     "judged_on": "2026-11-14"
+   },
+   {
+    "milestone": "m8",
+    "case": "Adiabatic quantum-flux-parametron logic",
+    "verdict": "partial",
+    "finding": "One AQFP microprocessor prototype, MANA, was demonstrated with a 4-bit word size.",
+    "detail": "The release gives no operating clock for the full processor. It cites a peer-reviewed paper for the prototype demonstration.",
+    "quote": "we did this by developing and successfully demonstrating a prototype 4-bit AQFP microprocessor called MANA (Monolithic Adiabatic iNtegration Architecture), the world's first adiabatic superconductor microprocessor",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": "Adiabatic quantum-flux-parametron logic",
+    "verdict": "partial",
+    "finding": "The AQFP execution-stage chip produced correct sums on 7 of 12 chips, with the best sample passing the carry test at 2.5 GHz.",
+    "detail": "The high-speed test toggled only the least significant bit of one operand while holding the other input bits fixed.",
+    "quote": "For our best sample, we conﬁrmed functional operation at\n1, 2, and 2.5 GHz and measured excitation margins of AC1\nand AC2 to be 2.6 and 2.4 dB, respectively, at 2.5 GHz,\nas seen in Fig. 12.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": "Adiabatic quantum-flux-parametron logic",
+    "verdict": "partial",
+    "finding": "MANA demonstrated access to a 64-bit-organized cryogenic register file in processor tests that succeeded on 5 of 6 chips.",
+    "detail": "The register file occupied 4.7 × 6.6 mm. The reported 100 kHz was the processor clock used in testing.",
+    "quote": "The RFX stage is a two-read/one-write 16 × 4 b RF with\nregisters $14 and $15 to hold I/O data, and $0 as a constant\nzero register.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m8",
+    "case": "Adiabatic quantum-flux-parametron logic",
+    "verdict": "partial",
+    "finding": "The fabricated MANA AQFP processor executed test programs at 100 kHz on 5 of 6 chips.",
+    "detail": "The 2.5 GHz result applies to a separate ALU and shifter breakout chip. The 5 GHz value applies to a junction switching-energy result cited from prior work.",
+    "quote": "We demonstrate\nregister ﬁle R/W access, ALU execution, hardware stalling, and\nprogram branching performed at 100 kHz under the cryogenic\ntemperature of 4.2 K.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": "Single-flux-quantum logic",
+    "verdict": "met",
+    "finding": "One fabricated 8-bit superconducting adder design produced correct sums and dissipated an estimated 510 nW in its active core.",
+    "detail": "The core estimate uses a correction for phase modulation and allocates a share of measured chip dissipation to the adder core, excluding the input shift register and output amplifiers.",
+    "quote": "Measured power dissipation of the fully active circuit is only 510 nW at\n6.2 GHz.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": "Single-flux-quantum logic",
+    "verdict": "partial",
+    "finding": "AC-clocked SFQ shift registers with self-shunted junctions reached 7.4 × 10⁶ junctions/cm² (sample size unstated).",
+    "detail": null,
+    "quote": "Using self-shunted JJs with J\nc\nof 600 μA/μm\n2\n, we increased this record circuit density to 7.4•10\n6\nJJs per cm\n2\n.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Single-flux-quantum logic",
+    "verdict": "partial",
+    "finding": "AC-clocked SFQ shift registers with self-shunted junctions reached 7.4 × 10⁶ junctions/cm² (sample size unstated).",
+    "detail": null,
+    "quote": "Using self-shunted JJs with J\nc\nof 600 μA/μm\n2\n, we increased this record circuit density to 7.4•10\n6\nJJs per cm\n2\n.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": "Adiabatic quantum-flux-parametron logic",
+    "verdict": "partial",
+    "finding": "One fabricated AQFP 8-bit carry look-ahead adder dissipated an estimated 1.5 aJ per operation.",
+    "detail": "The reported 24k(B)T per junction expresses energy in thermal units without giving a numerical operating temperature.",
+    "quote": "Our results showed that the energy dissipation per operation of the 8-bit CLA can be estimated to be approximately 1.5 aJ, or 24k(B)T per junction, where k(B) is the Boltzmann constant and T is the operating temperature.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m9",
+    "case": "Single-flux-quantum logic",
+    "verdict": "partial",
+    "finding": "One 8-bit SFQ microprocessor operated at up to 57.2 GHz.",
+    "detail": "The clock rate and measured power alone cannot establish bit-operation throughput or energy efficiency. The supplied text identifies a conference proceedings contribution and gives no evidence of peer review or independent replication.",
+    "quote": "A superconductor single-flux-quantum (SFQ) logic 8-bit microprocessor is demonstrated up to 57.2 GHz with a measured power consumption of 11.2 mW.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Single-flux-quantum logic",
+    "verdict": "partial",
+    "finding": "One fabricated 32-bit SFQ string-matching processor achieved up to 251 GOPS/W.",
+    "detail": "The criterion requires 50,000 junctions at 500,000 junctions/cm² and bit-operation performance at 4 K. The abstract does not specify the energy measurement boundary.",
+    "quote": "Our chip has been fabricated and tested, revealing not only its capability for 32-bit bit-parallel processing at a high speed of 12 GHz but also its achievement of an energy efficiency ratio of up to 251 GOPS/W.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m9",
+    "case": "Single-flux-quantum logic",
+    "verdict": "partial",
+    "finding": "One fabricated 32-bit SFQ string-matching processor achieved up to 251 GOPS/W.",
+    "detail": "The criterion requires 100,000 junctions at 1,000,000 junctions/cm² and bit-operation performance at 4 K. The abstract does not specify the energy measurement boundary.",
+    "quote": "Our chip has been fabricated and tested, revealing not only its capability for 32-bit bit-parallel processing at a high speed of 12 GHz but also its achievement of an energy efficiency ratio of up to 251 GOPS/W.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Adiabatic quantum-flux-parametron logic",
+    "verdict": "partial",
+    "finding": "One fabricated AQFP SR-Loop register-file cell demonstrated 3-bit storage.",
+    "detail": "The prototype occupied 240 µm × 100 µm and used 34 Josephson junctions. The test equipment limited operation to kHz frequencies.",
+    "quote": "Fig. 2(a) demonstrates the SR-loop writing every possible\n3-bit sequence and storing it for two complete passes around the\nloop.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": "Adiabatic quantum-flux-parametron logic",
+    "verdict": "partial",
+    "finding": "One simulated AQFP register-file array had a designed capacity of 72 bits.",
+    "detail": "The paper reports hardware testing of the 3-bit cell. Addressed operation of the 72-bit array was verified in simulation.",
+    "quote": "A schematic diagram\nfor a 72-bit SR-Loop register ﬁle is shown in Fig. 3.I nt h i s\ndesign, we have a 3 × 3 array of the 8-bit SR-Loop.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": "Adiabatic quantum-flux-parametron logic",
+    "verdict": "partial",
+    "finding": "Across 11 tested AQFP chips, functioning full circuits contained approximately 20,000 Josephson junctions each.",
+    "detail": "The reported 100 kHz is the excitation frequency. One example produced the correct logical AND output after 31 excitation cycles.",
+    "quote": "Fig. 2.  Schematic of 10,000-gate circuits with 20,000 junctions.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m7",
+    "case": "Single-flux-quantum logic",
+    "verdict": "partial",
+    "finding": "Functional 1-bit SFQ Josephson memory cells were demonstrated for a proposed cache with <1 ns access time. The cell count is unspecified.",
+    "detail": null,
+    "quote": "Margin enhancement due to quantization, and low operating currents render this cell an attractive basis for a < 1 ns access-time Josephson cache memory designed with a 2.5 µm technology.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Single-flux-quantum logic",
+    "verdict": "partial",
+    "finding": "All 12 FLXTRP1 single-flux-quantum shift-register chips operated with about 108,500 Josephson junctions per chip.",
+    "detail": "The approximately 10 kHz test frequency was used to characterize operating margins and flux trapping. The reported device density uses a smaller area than the full die, which averages about 4.34 × 10⁵ junctions/cm².",
+    "quote": "Out  of 12 FLXTRP1 \ncircuits, i.e., twelve 5  mm x 5  mm chips  containing 72 shift \nregisters with more than 1.3M JJs, all circuits were found to be \nfully operational.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 22,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m6",
+    "case": "Single-flux-quantum logic",
+    "verdict": "partial",
+    "finding": "The largest individual RQL shift register on Chip F contained 40,400 Josephson junctions.",
+    "detail": "The density uses both registers and the shared active area. Averaged over the entire die, the density was about 2.9 × 10⁵ junctions/cm².",
+    "quote": "Test eﬀort was directed to the chips\ncontaining the two largest circuits, with 32,400 and\n40,400 Josephson junctions, which together ﬁlled the\n3 mm×3 mm active area of the chip.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 23,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m5",
+    "case": "Single-flux-quantum logic",
+    "verdict": "partial",
+    "finding": "In a 64-cell cryogenic SFQ lookup table, 63 cells operated correctly at 4.2 K.",
+    "detail": "One cell could not be written to ‘1’, even with the SFQ chip tested alone. The supplied journal manuscript does not establish its peer-review status.",
+    "quote": "We tested the functionality of all 64 memory cells and \nconfirmed that 63 memory cells operate d correctly.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 24,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m9",
+    "case": "Single-flux-quantum logic",
+    "verdict": "partial",
+    "finding": "One single-flux-quantum FFT processor test chip contained 17,455 Josephson junctions.",
+    "detail": "The reported clock rate, word rate, and power do not establish bit-operation throughput or efficiency without a count of bit-operations performed per cycle or per word.",
+    "quote": "The test chip fabricated using a 1.0 $\\mu$m 9-layer process consists of 17 455 Nb/AlOx/Nb Josephson junctions (JJs)",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 25,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m11",
+    "case": "Single-flux-quantum logic",
+    "verdict": "partial",
+    "finding": "One 1,024-bit LR-biased SFQ shift-register memory chip operated at 30 GHz across all addresses.",
+    "detail": "The high-speed test shifted data in with 16-pulse bursts and read it out at low speed. The static power estimate does not establish mean access energy.",
+    "quote": "We\nimplemented a low-power 1 k-bit SFQ shift-register memory and con ﬁrmed\nits 30 GHz operation for all addresses.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 26,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": "Single-flux-quantum logic",
+    "verdict": "partial",
+    "finding": "The seminar abstract reports a demonstration of one 64-bit RSFQ CPU.",
+    "detail": "The abstract gives no capacity for the CMOS SRAM and no accelerator count for the demonstrated system.",
+    "quote": "the talk will then present the demonstration of an 8-bit RSFQ CPU, followed by that of a more complex 64-bit CPU.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 27,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://doi.org/10.1109/JSSC.2020.3041338",
-    "milestone": "m1",
-    "hash": "ca40743be188",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://doi.org/10.1109/JSSC.2020.3041338",
     "milestone": "m2",
     "hash": "6e4bde0b8a77",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://doi.org/10.1109/JSSC.2020.3041338",
-    "milestone": "m3",
-    "hash": "456cdc7915cb",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://doi.org/10.1109/JSSC.2020.3041338",
-    "milestone": "completion",
-    "hash": "03d658e660ef",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.eurekalert.org/news-releases/919197",
-    "milestone": "m1",
-    "hash": "ca40743be188",
     "date": "2026-11-14",
     "by": "gpt-6.1-terra"
    },
@@ -881,65 +1336,9 @@
     "by": "gpt-6.1-terra"
    },
    {
-    "url": "https://www.eurekalert.org/news-releases/919197",
-    "milestone": "m3",
-    "hash": "456cdc7915cb",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.eurekalert.org/news-releases/919197",
-    "milestone": "completion",
-    "hash": "03d658e660ef",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://spectrum.ieee.org/superconducting-computer",
-    "milestone": "m1",
-    "hash": "ca40743be188",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
     "url": "https://spectrum.ieee.org/superconducting-computer",
     "milestone": "m2",
     "hash": "6e4bde0b8a77",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://spectrum.ieee.org/superconducting-computer",
-    "milestone": "m3",
-    "hash": "456cdc7915cb",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://spectrum.ieee.org/superconducting-computer",
-    "milestone": "completion",
-    "hash": "03d658e660ef",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/pdf/1212.2994",
-    "milestone": "m1",
-    "hash": "ca40743be188",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://researchconnect.stonybrook.edu/en/publications/increasing-integration-scale-of-superconductor-electronics-beyond/",
-    "milestone": "m1",
-    "hash": "ca40743be188",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://ndlsearch.ndl.go.jp/books/R100000136-I1050863727634578816",
-    "milestone": "m1",
-    "hash": "ca40743be188",
     "date": "2026-11-14",
     "by": "gpt-6.1-terra"
    },
@@ -963,9 +1362,849 @@
     "hash": "6e4bde0b8a77",
     "date": "2026-11-14",
     "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://doi.org/10.1109/JSSC.2020.3041338",
+    "milestone": "m4",
+    "hash": "18fb22ab1896",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doi.org/10.1109/JSSC.2020.3041338",
+    "milestone": "m1",
+    "hash": "b728ba29dc5f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doi.org/10.1109/JSSC.2020.3041338",
+    "milestone": "m7",
+    "hash": "8e928f410a66",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doi.org/10.1109/JSSC.2020.3041338",
+    "milestone": "m6",
+    "hash": "d75dae541a0f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doi.org/10.1109/JSSC.2020.3041338",
+    "milestone": "m5",
+    "hash": "c4861b075f30",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doi.org/10.1109/JSSC.2020.3041338",
+    "milestone": "m9",
+    "hash": "dcca18917495",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doi.org/10.1109/JSSC.2020.3041338",
+    "milestone": "m10",
+    "hash": "b71c2dbb8382",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doi.org/10.1109/JSSC.2020.3041338",
+    "milestone": "m11",
+    "hash": "8b6789ff4855",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doi.org/10.1109/JSSC.2020.3041338",
+    "milestone": "m8",
+    "hash": "d4462d4525f1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doi.org/10.1109/JSSC.2020.3041338",
+    "milestone": "m3",
+    "hash": "caf5425fce62",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://doi.org/10.1109/JSSC.2020.3041338",
+    "milestone": "completion",
+    "hash": "45c82840b487",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.eurekalert.org/news-releases/919197",
+    "milestone": "m4",
+    "hash": "18fb22ab1896",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.eurekalert.org/news-releases/919197",
+    "milestone": "m1",
+    "hash": "b728ba29dc5f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.eurekalert.org/news-releases/919197",
+    "milestone": "m7",
+    "hash": "8e928f410a66",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.eurekalert.org/news-releases/919197",
+    "milestone": "m6",
+    "hash": "d75dae541a0f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.eurekalert.org/news-releases/919197",
+    "milestone": "m5",
+    "hash": "c4861b075f30",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.eurekalert.org/news-releases/919197",
+    "milestone": "m9",
+    "hash": "dcca18917495",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.eurekalert.org/news-releases/919197",
+    "milestone": "m10",
+    "hash": "b71c2dbb8382",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.eurekalert.org/news-releases/919197",
+    "milestone": "m11",
+    "hash": "8b6789ff4855",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.eurekalert.org/news-releases/919197",
+    "milestone": "m8",
+    "hash": "d4462d4525f1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.eurekalert.org/news-releases/919197",
+    "milestone": "m3",
+    "hash": "caf5425fce62",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.eurekalert.org/news-releases/919197",
+    "milestone": "completion",
+    "hash": "45c82840b487",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://spectrum.ieee.org/superconducting-computer",
+    "milestone": "m4",
+    "hash": "18fb22ab1896",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://spectrum.ieee.org/superconducting-computer",
+    "milestone": "m1",
+    "hash": "b728ba29dc5f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://spectrum.ieee.org/superconducting-computer",
+    "milestone": "m7",
+    "hash": "8e928f410a66",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://spectrum.ieee.org/superconducting-computer",
+    "milestone": "m6",
+    "hash": "d75dae541a0f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://spectrum.ieee.org/superconducting-computer",
+    "milestone": "m5",
+    "hash": "c4861b075f30",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://spectrum.ieee.org/superconducting-computer",
+    "milestone": "m9",
+    "hash": "dcca18917495",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://spectrum.ieee.org/superconducting-computer",
+    "milestone": "m10",
+    "hash": "b71c2dbb8382",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://spectrum.ieee.org/superconducting-computer",
+    "milestone": "m11",
+    "hash": "8b6789ff4855",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://spectrum.ieee.org/superconducting-computer",
+    "milestone": "m8",
+    "hash": "d4462d4525f1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://spectrum.ieee.org/superconducting-computer",
+    "milestone": "m3",
+    "hash": "caf5425fce62",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://spectrum.ieee.org/superconducting-computer",
+    "milestone": "completion",
+    "hash": "45c82840b487",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/5/5c/MANA_A_Monolithic_Adiabatic_iNtegration_Architecture_Microprocessor_Using_1.4-zJ_op_Unshunted_Superconductor_Josephson_Junction_Devices.pdf",
+    "milestone": "m4",
+    "hash": "18fb22ab1896",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/5/5c/MANA_A_Monolithic_Adiabatic_iNtegration_Architecture_Microprocessor_Using_1.4-zJ_op_Unshunted_Superconductor_Josephson_Junction_Devices.pdf",
+    "milestone": "m1",
+    "hash": "b728ba29dc5f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/5/5c/MANA_A_Monolithic_Adiabatic_iNtegration_Architecture_Microprocessor_Using_1.4-zJ_op_Unshunted_Superconductor_Josephson_Junction_Devices.pdf",
+    "milestone": "m7",
+    "hash": "8e928f410a66",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/5/5c/MANA_A_Monolithic_Adiabatic_iNtegration_Architecture_Microprocessor_Using_1.4-zJ_op_Unshunted_Superconductor_Josephson_Junction_Devices.pdf",
+    "milestone": "m6",
+    "hash": "d75dae541a0f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/5/5c/MANA_A_Monolithic_Adiabatic_iNtegration_Architecture_Microprocessor_Using_1.4-zJ_op_Unshunted_Superconductor_Josephson_Junction_Devices.pdf",
+    "milestone": "m5",
+    "hash": "c4861b075f30",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/5/5c/MANA_A_Monolithic_Adiabatic_iNtegration_Architecture_Microprocessor_Using_1.4-zJ_op_Unshunted_Superconductor_Josephson_Junction_Devices.pdf",
+    "milestone": "m9",
+    "hash": "dcca18917495",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/5/5c/MANA_A_Monolithic_Adiabatic_iNtegration_Architecture_Microprocessor_Using_1.4-zJ_op_Unshunted_Superconductor_Josephson_Junction_Devices.pdf",
+    "milestone": "m10",
+    "hash": "b71c2dbb8382",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/5/5c/MANA_A_Monolithic_Adiabatic_iNtegration_Architecture_Microprocessor_Using_1.4-zJ_op_Unshunted_Superconductor_Josephson_Junction_Devices.pdf",
+    "milestone": "m11",
+    "hash": "8b6789ff4855",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/5/5c/MANA_A_Monolithic_Adiabatic_iNtegration_Architecture_Microprocessor_Using_1.4-zJ_op_Unshunted_Superconductor_Josephson_Junction_Devices.pdf",
+    "milestone": "m8",
+    "hash": "d4462d4525f1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/5/5c/MANA_A_Monolithic_Adiabatic_iNtegration_Architecture_Microprocessor_Using_1.4-zJ_op_Unshunted_Superconductor_Josephson_Junction_Devices.pdf",
+    "milestone": "m3",
+    "hash": "caf5425fce62",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://upload.wikimedia.org/wikipedia/commons/5/5c/MANA_A_Monolithic_Adiabatic_iNtegration_Architecture_Microprocessor_Using_1.4-zJ_op_Unshunted_Superconductor_Josephson_Junction_Devices.pdf",
+    "milestone": "completion",
+    "hash": "45c82840b487",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1212.2994",
+    "milestone": "m4",
+    "hash": "18fb22ab1896",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1212.2994",
+    "milestone": "m1",
+    "hash": "b728ba29dc5f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1212.2994",
+    "milestone": "m7",
+    "hash": "8e928f410a66",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1212.2994",
+    "milestone": "m6",
+    "hash": "d75dae541a0f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1212.2994",
+    "milestone": "m5",
+    "hash": "c4861b075f30",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1212.2994",
+    "milestone": "m9",
+    "hash": "dcca18917495",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1212.2994",
+    "milestone": "m10",
+    "hash": "b71c2dbb8382",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1212.2994",
+    "milestone": "m11",
+    "hash": "8b6789ff4855",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1212.2994",
+    "milestone": "m8",
+    "hash": "d4462d4525f1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1212.2994",
+    "milestone": "m3",
+    "hash": "caf5425fce62",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1212.2994",
+    "milestone": "completion",
+    "hash": "45c82840b487",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://researchconnect.stonybrook.edu/en/publications/increasing-integration-scale-of-superconductor-electronics-beyond/",
+    "milestone": "m4",
+    "hash": "18fb22ab1896",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://researchconnect.stonybrook.edu/en/publications/increasing-integration-scale-of-superconductor-electronics-beyond/",
+    "milestone": "m1",
+    "hash": "b728ba29dc5f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://researchconnect.stonybrook.edu/en/publications/increasing-integration-scale-of-superconductor-electronics-beyond/",
+    "milestone": "m7",
+    "hash": "8e928f410a66",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://researchconnect.stonybrook.edu/en/publications/increasing-integration-scale-of-superconductor-electronics-beyond/",
+    "milestone": "m6",
+    "hash": "d75dae541a0f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://researchconnect.stonybrook.edu/en/publications/increasing-integration-scale-of-superconductor-electronics-beyond/",
+    "milestone": "m5",
+    "hash": "c4861b075f30",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://researchconnect.stonybrook.edu/en/publications/increasing-integration-scale-of-superconductor-electronics-beyond/",
+    "milestone": "m9",
+    "hash": "dcca18917495",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://researchconnect.stonybrook.edu/en/publications/increasing-integration-scale-of-superconductor-electronics-beyond/",
+    "milestone": "m10",
+    "hash": "b71c2dbb8382",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://researchconnect.stonybrook.edu/en/publications/increasing-integration-scale-of-superconductor-electronics-beyond/",
+    "milestone": "m11",
+    "hash": "8b6789ff4855",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://researchconnect.stonybrook.edu/en/publications/increasing-integration-scale-of-superconductor-electronics-beyond/",
+    "milestone": "m8",
+    "hash": "d4462d4525f1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://researchconnect.stonybrook.edu/en/publications/increasing-integration-scale-of-superconductor-electronics-beyond/",
+    "milestone": "m3",
+    "hash": "caf5425fce62",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://researchconnect.stonybrook.edu/en/publications/increasing-integration-scale-of-superconductor-electronics-beyond/",
+    "milestone": "completion",
+    "hash": "45c82840b487",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ndlsearch.ndl.go.jp/books/R100000136-I1050863727634578816",
+    "milestone": "m4",
+    "hash": "18fb22ab1896",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ndlsearch.ndl.go.jp/books/R100000136-I1050863727634578816",
+    "milestone": "m1",
+    "hash": "b728ba29dc5f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ndlsearch.ndl.go.jp/books/R100000136-I1050863727634578816",
+    "milestone": "m7",
+    "hash": "8e928f410a66",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ndlsearch.ndl.go.jp/books/R100000136-I1050863727634578816",
+    "milestone": "m6",
+    "hash": "d75dae541a0f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ndlsearch.ndl.go.jp/books/R100000136-I1050863727634578816",
+    "milestone": "m5",
+    "hash": "c4861b075f30",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ndlsearch.ndl.go.jp/books/R100000136-I1050863727634578816",
+    "milestone": "m9",
+    "hash": "dcca18917495",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ndlsearch.ndl.go.jp/books/R100000136-I1050863727634578816",
+    "milestone": "m10",
+    "hash": "b71c2dbb8382",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ndlsearch.ndl.go.jp/books/R100000136-I1050863727634578816",
+    "milestone": "m11",
+    "hash": "8b6789ff4855",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ndlsearch.ndl.go.jp/books/R100000136-I1050863727634578816",
+    "milestone": "m8",
+    "hash": "d4462d4525f1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ndlsearch.ndl.go.jp/books/R100000136-I1050863727634578816",
+    "milestone": "m3",
+    "hash": "caf5425fce62",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ndlsearch.ndl.go.jp/books/R100000136-I1050863727634578816",
+    "milestone": "completion",
+    "hash": "45c82840b487",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://kyushu-u.elsevierpure.com/en/publications/a-572ghz-112mw-8-bit-general-purpose-superconductor-microprocesso/",
+    "milestone": "m4",
+    "hash": "18fb22ab1896",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://kyushu-u.elsevierpure.com/en/publications/a-572ghz-112mw-8-bit-general-purpose-superconductor-microprocesso/",
+    "milestone": "m1",
+    "hash": "b728ba29dc5f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://kyushu-u.elsevierpure.com/en/publications/a-572ghz-112mw-8-bit-general-purpose-superconductor-microprocesso/",
+    "milestone": "m7",
+    "hash": "8e928f410a66",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://kyushu-u.elsevierpure.com/en/publications/a-572ghz-112mw-8-bit-general-purpose-superconductor-microprocesso/",
+    "milestone": "m6",
+    "hash": "d75dae541a0f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://kyushu-u.elsevierpure.com/en/publications/a-572ghz-112mw-8-bit-general-purpose-superconductor-microprocesso/",
+    "milestone": "m5",
+    "hash": "c4861b075f30",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://kyushu-u.elsevierpure.com/en/publications/a-572ghz-112mw-8-bit-general-purpose-superconductor-microprocesso/",
+    "milestone": "m9",
+    "hash": "dcca18917495",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://kyushu-u.elsevierpure.com/en/publications/a-572ghz-112mw-8-bit-general-purpose-superconductor-microprocesso/",
+    "milestone": "m10",
+    "hash": "b71c2dbb8382",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://kyushu-u.elsevierpure.com/en/publications/a-572ghz-112mw-8-bit-general-purpose-superconductor-microprocesso/",
+    "milestone": "m11",
+    "hash": "8b6789ff4855",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://kyushu-u.elsevierpure.com/en/publications/a-572ghz-112mw-8-bit-general-purpose-superconductor-microprocesso/",
+    "milestone": "m8",
+    "hash": "d4462d4525f1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://kyushu-u.elsevierpure.com/en/publications/a-572ghz-112mw-8-bit-general-purpose-superconductor-microprocesso/",
+    "milestone": "m3",
+    "hash": "caf5425fce62",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://kyushu-u.elsevierpure.com/en/publications/a-572ghz-112mw-8-bit-general-purpose-superconductor-microprocesso/",
+    "milestone": "completion",
+    "hash": "45c82840b487",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://supercond.org/all-issues/list.aspx?lcid=20&pid=9",
+    "milestone": "m4",
+    "hash": "18fb22ab1896",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://supercond.org/all-issues/list.aspx?lcid=20&pid=9",
+    "milestone": "m1",
+    "hash": "b728ba29dc5f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://supercond.org/all-issues/list.aspx?lcid=20&pid=9",
+    "milestone": "m7",
+    "hash": "8e928f410a66",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://supercond.org/all-issues/list.aspx?lcid=20&pid=9",
+    "milestone": "m6",
+    "hash": "d75dae541a0f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://supercond.org/all-issues/list.aspx?lcid=20&pid=9",
+    "milestone": "m5",
+    "hash": "c4861b075f30",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://supercond.org/all-issues/list.aspx?lcid=20&pid=9",
+    "milestone": "m9",
+    "hash": "dcca18917495",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://supercond.org/all-issues/list.aspx?lcid=20&pid=9",
+    "milestone": "m10",
+    "hash": "b71c2dbb8382",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://supercond.org/all-issues/list.aspx?lcid=20&pid=9",
+    "milestone": "m11",
+    "hash": "8b6789ff4855",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://supercond.org/all-issues/list.aspx?lcid=20&pid=9",
+    "milestone": "m8",
+    "hash": "d4462d4525f1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://supercond.org/all-issues/list.aspx?lcid=20&pid=9",
+    "milestone": "m3",
+    "hash": "caf5425fce62",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://supercond.org/all-issues/list.aspx?lcid=20&pid=9",
+    "milestone": "completion",
+    "hash": "45c82840b487",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cba.mit.edu/docs/papers/02.25.blackburn.SRMem.pdf",
+    "milestone": "m4",
+    "hash": "18fb22ab1896",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cba.mit.edu/docs/papers/02.25.blackburn.SRMem.pdf",
+    "milestone": "m1",
+    "hash": "b728ba29dc5f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cba.mit.edu/docs/papers/02.25.blackburn.SRMem.pdf",
+    "milestone": "m7",
+    "hash": "8e928f410a66",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cba.mit.edu/docs/papers/02.25.blackburn.SRMem.pdf",
+    "milestone": "m6",
+    "hash": "d75dae541a0f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cba.mit.edu/docs/papers/02.25.blackburn.SRMem.pdf",
+    "milestone": "m5",
+    "hash": "c4861b075f30",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cba.mit.edu/docs/papers/02.25.blackburn.SRMem.pdf",
+    "milestone": "m9",
+    "hash": "dcca18917495",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cba.mit.edu/docs/papers/02.25.blackburn.SRMem.pdf",
+    "milestone": "m10",
+    "hash": "b71c2dbb8382",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cba.mit.edu/docs/papers/02.25.blackburn.SRMem.pdf",
+    "milestone": "m11",
+    "hash": "8b6789ff4855",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cba.mit.edu/docs/papers/02.25.blackburn.SRMem.pdf",
+    "milestone": "m8",
+    "hash": "d4462d4525f1",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cba.mit.edu/docs/papers/02.25.blackburn.SRMem.pdf",
+    "milestone": "m3",
+    "hash": "caf5425fce62",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://cba.mit.edu/docs/papers/02.25.blackburn.SRMem.pdf",
+    "milestone": "completion",
+    "hash": "45c82840b487",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.scribd.com/document/761785977/An-Adiabatic-Quantum-Flux-Parametron-8-bit-Ripple-Carry-Adder-Using-Delay-Line-Clocking",
+    "milestone": "m4",
+    "hash": "18fb22ab1896",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://snf.ieeecsc.org/files/ieeecsc/slides/ST461_Narama.pdf",
+    "milestone": "m1",
+    "hash": "b728ba29dc5f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://research.ibm.com/publications/experimental-single-flux-quantum-ndro-josephson-memory-cell",
+    "milestone": "m7",
+    "hash": "8e928f410a66",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2501.03343",
+    "milestone": "m6",
+    "hash": "d75dae541a0f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1510.01220",
+    "milestone": "m6",
+    "hash": "d75dae541a0f",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://ynu.repo.nii.ac.jp/record/12142/files/FINAL_VERSION.pdf",
+    "milestone": "m5",
+    "hash": "c4861b075f30",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://kyushu-u.elsevierpure.com/en/publications/demonstration-of-a-478-ghz-high-speed-fft-processor-using-single-/",
+    "milestone": "m9",
+    "hash": "dcca18917495",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://snf.ieeecsc.org/files/ieeecsc/slides/ST320.pdf",
+    "milestone": "m10",
+    "hash": "b71c2dbb8382",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.jstage.jst.go.jp/article/elex/13/6/13_13.20160074/_pdf/-char/en",
+    "milestone": "m11",
+    "hash": "8b6789ff4855",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://indico-tdli.sjtu.edu.cn/event/4677/",
+    "milestone": "m3",
+    "hash": "caf5425fce62",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1027,8 +2266,158 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 0 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"A superconducting classical computer completes the same workload as a CMOS (complementary metal\\u2013oxide\\u2013semiconductor) computer in the same or less time, to the same numerical tolerance, using less electricity. Both totals include memory, interfaces, power conversion and cooling. Single-flux-quantum logic transmits voltage pulses whose time integral is one magnetic flux quantum. Adiabatic quantum-flux-parametron logic encodes a bit in the direction of a current. An 8-bit single-flux-quantum processor has operated at 57.2 GHz and 11.2 mW, measured at the processor.\". Reason: The definition now explains what the signals encode, identifies a measured processor for comparison and aligns the throughput condition with the completion test."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Data centres used about 485 TWh of electricity worldwide in 2025. In conventional processors, moving data between logic and memory consumes power alongside arithmetic. A supercomputing site at its power limit could run more jobs, including model training, if each job used less electricity. Superconducting switches and wires can reduce both costs, but the savings must cover memory, interfaces and refrigeration. One large-system design requires 395 W of electrical input to remove 1 W of heat at 4.4 K.\". Reason: The revised need uses the 2025 electricity estimate and explains the benefit to power-limited sites and the refrigeration cost that determines whether they obtain it."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Japan Society for the Promotion of Science, Grant-in-Aid for Scientific Research (S), project 26220904, 2014: \"power reduction of high-end computing systems including cryocoolers.\". Reason: The Japanese grant documents a refrigeration-inclusive goal for the adiabatic logic approach, which the existing statements do not identify."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit completion: criterion = \"An integrated superconducting computer and an identified contemporary CMOS computer solve the same HPL dense linear system in 64-bit floating-point arithmetic. Report both configurations and the matrix order. Both solutions must pass the HPL scaled-residual check with the threshold set to 16. The superconducting run must finish in equal or less time and use fewer joules. Measure electricity over each full run with both machines at operating temperature, including memory, communication, interfaces, host and control equipment, power conversion and cooling on each side. The result applies to that problem and those configurations.\"; set_by = \"Technology Atlas fallback. No outside body defines the combined comparison. HPL defines the numerical validation test.\"; set_by_kind = \"atlas\"; threshold_quote = \"A solution is considered numerically correct when this quantity is less than a threshold value of\\n16.\"; threshold_ref = 21; basis = \"HPL defines the double-precision problem and scaled residual. The HPC power-measurement methodology provides a precedent for full-run, whole-system measurements. The matched CMOS comparison, elapsed-time condition and strict inequality in total joules are Atlas criteria. C3's notional prototype is one route to an integrated machine.\"; refs = [6, 21, 7, 3]. Reason: The C3 processor count is a notional design choice, while identical HPL inputs, a common residual threshold and full-run electricity measurements directly test the claimed advantage."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add case \"Half-flux-quantum logic\". Reason: The IEEE roadmap identifies half-flux-quantum circuits as a distinct digital logic family with demonstrated interfaces to single-flux-quantum circuits."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after None: \"A superconducting 8-bit adder produces correct sums and has its operating power measured.\". Reason: The 8-bit adder is a published circuit benchmark with laboratory power measurements in both pulse-based and adiabatic logic before the C3 integration targets."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Demonstrate a superconducting subcircuit with 10\\u2074 Josephson junctions at a density of 10\\u2075 junctions/cm\\u00b2, throughput of 10\\u2079 bit-operations/s and efficiency of 10\\u00b9\\u2076 bit-operations/J at 4 K. The efficiency refers to energy dissipated at the cold stage.\"; set_by = \"IARPA C3 base-period targets for the SFQ logic track, slide 22.\"; threshold_quote = \"Throughput (bit-op/s) 10 9 5\\u00d710 10 10 11\"; threshold_ref = 3; refs = [3, 19]. Reason: The base-period criterion now contains only the four programme targets and identifies the source row for throughput."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m1: \"A 64-bit cryogenic array meets the C3 main-memory or cache targets.\". Reason: C3 specified a 64-bit cryogenic array between the single-cell demonstration and the 1,024-bit memory chip."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m1: \"A superconducting circuit reaches 5 × 10¹⁰ bit-operations/s and 5 × 10¹⁶ bit-operations/J at 4 K.\". Reason: The original logic sequence skipped C3's option-period-1 circuit targets between subcircuits and processors."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m1: \"A cryogenic memory cell stores one bit and meets the C3 targets for main memory or cache.\". Reason: C3 defined a single-cell test with role-specific density, access-time and access-energy targets before array integration."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m2: \"A 16-bit adiabatic quantum-flux-parametron processor operates at 5 GHz.\". Reason: The AQFP programme set its own whole-processor target, which distinguishes processor operation from a clock rate measured on an execution unit alone."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "split m2 into \"A superconducting processor reaches 10¹¹ bit-operations/s and 10¹⁷ bit-operations/J at 4 K.\" | \"A 1,024-bit cryogenic main-memory chip delivers 5 Gbit/s in burst mode.\" | \"A 1,024-bit cryogenic cache chip delivers 30 Gbit/s in burst mode.\". Reason: C3 specified independent processor, main-memory and cache results, with different access-time and energy targets for the two memory roles."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Integrate one 64-bit CPU, two parallel accelerators and 2\\u00b2\\u2078 bytes (256 MiB) of main memory in a superconducting computer. The C3 prototype targets are a 10 GHz logic clock, throughput of 10\\u00b9\\u00b3 bit-operations/s, efficiency of 10\\u00b9\\u2075 bit-operations/J at 4 K and input/output at 10\\u2079 bit/s. The efficiency is evaluated at the cold stage, before refrigeration power is counted.\"; threshold_quote = \"Word size (bit) 64\"; threshold_ref = 3; refs = [3, 19]. Reason: The integration criterion now states the notional prototype targets without mixing them with estimates for other architectures."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "structure = parallel. Reason: Logic and memory have an internal order within each C3 track, but either track can progress independently before system integration, and the AQFP programme has a separate processor target."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 2. Reason: The access note describes unavailable links, while the programme manager's published presentation supplies the prototype and subsystem tables."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 1. Reason: The previous search date is superseded by the November 25 check of integrated prototypes and measured HPL comparisons."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No experimental report located through 25 November 2026 demonstrates the combined C3 prototype targets or a matched HPL run using less refrigeration-inclusive electricity than CMOS.\". Reason: Published processor measurements and system models leave the integrated prototype and matched wall-plug measurements unverified."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No academy or roadmap committee statement was found concluding that a refrigeration-inclusive energy advantage for classical superconducting computing is unattainable or unworthy of pursuit.\". Reason: The roadmaps identify technical obstacles, but those cautions do not establish institutional opposition to the goal."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 18 of 18 proposed operations from CPE-06-revise-20261125T084224964732Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: completion, m4, m1, m5, m6, m7, m8, m9, m10, m11, m3."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 4 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 4 found, 0 not found, 8 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Structural problems after applying: references never cited: [1, 10]"
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "definition is 568 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 10 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 13 candidates returned, 0 dropped as sources already used, 13 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 10 of 13 new candidates, without search. Skipped: 3 no readable saved copy. Dropped rows: 2 not relevant. Replaced 11 earlier rows. Added 25 results: 17 from sources already used, 8 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 2 from arXiv, 4 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 25 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Removed 2 references no longer cited; renumbered."
    }
   ],
-  "results_run": "2026-11-14"
+  "results_run": "2026-11-25"
  }
 }
