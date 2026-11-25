@@ -293,12 +293,14 @@
  "page": {
   "id": "QUA-07",
   "title": "Unconditional separation of BQP from BPP",
-  "definition": "An explicit decision problem, with a yes-or-no answer for every input, has a quantum algorithm whose running time is polynomial in input length and whose success probability is at least 2/3, but no randomized classical algorithm with both guarantees. The proof uses neither an oracle, an externally supplied black box, nor unproved computational assumptions.",
+  "definition": "BQP consists of yes-or-no problems that a quantum algorithm can solve in polynomial time with probability at least 2/3 of giving the correct answer on every input. BPP uses the same guarantees for randomized classical algorithms. An unconditional separation would prove that an explicit problem belongs to BQP and lies outside BPP, without giving the algorithms an external black box or assuming an unproved conjecture. The decision version of factoring meets the quantum requirement. Its classical complexity remains open.",
   "goal": {
-   "need": "Forrelation has a 1-query quantum algorithm and an Ω(√N/log N) randomized classical query lower bound, where each queried function has N entries. This establishes a difference in input access. A BQP–BPP separation would establish a difference in total running time for ordinary decision problems, ruling out every randomized classical polynomial-time algorithm with success probability at least 2/3.",
+   "need": "Factoring has a polynomial-time quantum algorithm. An efficient classical algorithm could still be discovered. If BPP equals BQP, every efficient quantum decision algorithm has an efficient randomized classical counterpart. A separation would expose a limit to classical simulation and settle a question open since the 1960s by proving that some problems solvable with polynomial memory lie beyond deterministic polynomial time. A speedup on inputs of practical interest would still depend on their size and the cost of running the quantum hardware.",
    "need_refs": [
-    1,
-    2
+    4,
+    5,
+    9,
+    22
    ],
    "figures": null,
    "statements": [
@@ -307,7 +309,7 @@
      "year": "2024",
      "quote": "Establish mathematical understandings of quantum algorithm performance for tasks that achieve substantial (e.g., superpolynomial) improvements over all classical methods.",
      "context": "The report's theoretical quantum advantage goal covers computational tasks generally; it does not restrict the goal to decision problems.",
-     "ref": 3,
+     "ref": 2,
      "checked": true
     },
     {
@@ -315,7 +317,7 @@
      "year": "2019",
      "quote": "the uncertain nature of the hardness results (i.e., the reliance on nonstandard hardness conjectures)",
      "context": "The committee identifies this dependence, together with restrictive noise models, as remaining work in arguments for experimentally implementable quantum supremacy.",
-     "ref": 4,
+     "ref": 3,
      "checked": true
     }
    ]
@@ -326,12 +328,12 @@
    "set_by": "Quantum complexity theory convention: Bernstein and Vazirani's class definitions and containment theorem; the separation is stated explicitly in de Wolf's Quantum Computing: Lecture Notes, section 12.2.",
    "set_by_kind": "community_convention",
    "threshold_quote": "BQP contains problems that aren’t in BPP",
-   "threshold_ref": 5,
+   "threshold_ref": 4,
    "basis": "BPP ⊆ BQP is proved, so a language in BQP outside BPP establishes strict containment. The 2/3 success convention is the published bounded-error definition. Marshall, Aaronson and Dunjko, published on 29 July 2025, report no formal BQP–BPP separation; their conditional sampling and function results do not establish it.",
    "refs": [
-    2,
-    5,
-    6
+    1,
+    4,
+    5
    ],
    "threshold_checked": false
   },
@@ -342,13 +344,13 @@
    {
     "id": "m1",
     "title": "A decision problem has a superpolynomial quantum advantage relative to an oracle.",
-    "criterion": "Construct an oracle O and a language L decidable by a quantum algorithm in polynomial time with success probability at least 2/3, but by no randomized classical polynomial-time algorithm with that guarantee, when both algorithms access O. Bernstein and Vazirani proved this through recursive Fourier sampling in Quantum complexity theory, published in 1997. The oracle restriction remains part of the theorem.",
+    "criterion": "Construct an oracle O and a language L. With access to O, a uniform quantum algorithm must decide L in polynomial time with success probability at least 2/3 on every input. Prove that no randomized classical polynomial-time algorithm with access to the same O decides L with that guarantee.",
     "set_by": "Quantum complexity theory's relativized class-separation convention; Bernstein and Vazirani, Quantum complexity theory, section 8.4.",
     "set_by_kind": "community_convention",
     "threshold_quote": "but requires super-polynomial time on a bounded-error probabilistic Turing Machine",
-    "threshold_ref": 2,
+    "threshold_ref": 1,
     "refs": [
-     2
+     1
     ],
     "status": "active",
     "replaced_by": [],
@@ -357,10 +359,25 @@
    {
     "id": "m2",
     "title": "A total Boolean function has a superquadratic quantum advantage in input queries.",
-    "criterion": "For a family of Boolean functions defined on every input string of each length, prove a greater-than-quadratic separation between randomized query complexity R(f) and quantum query complexity Q(f), both with success probability at least 2/3 on every input. Aaronson, Ben-David and Kothari proved R(f) = Ω̃(Q(f)^2.5), where Ω̃ suppresses logarithmic factors. Their result appeared at STOC in 2016. Query complexity counts input accesses rather than all computational steps.",
+    "criterion": "Give a family of total Boolean functions for which the bounded-error randomized query complexity grows more than quadratically in the bounded-error quantum query complexity. Each complexity is the minimum worst-case number of input queries needed to return the correct bit with probability at least 2/3 on every input string.",
     "set_by": "Quantum query-complexity convention; Aaronson, Ben-David and Kothari, Separations in query complexity using cheat sheets, Theorem 1, resolving the conjectured quadratic limit for total Boolean functions.",
     "set_by_kind": "community_convention",
     "threshold_quote": "We show a power 2.5 separation between bounded-error randomized and quantum query complexity for a total Boolean function",
+    "threshold_ref": 6,
+    "refs": [
+     6
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m3",
+    "title": "An oracle makes BQP contain a language outside the classical polynomial hierarchy.",
+    "criterion": "Construct an oracle O and a language in BQP relative to O that lies outside every level of the polynomial hierarchy relative to the same O. A level allows a fixed number of alternating blocks of existential and universal quantifiers over polynomial-length strings, followed by a deterministic polynomial-time check.",
+    "set_by": "Relativized complexity-class separation convention; Raz and Tal, Oracle Separation of BQP and PH, introduction and main result.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "an oracle O relative to which BQP is not contained in PH.",
     "threshold_ref": 7,
     "refs": [
      7
@@ -370,31 +387,16 @@
     "threshold_checked": true
    },
    {
-    "id": "m3",
-    "title": "An oracle makes BQP contain a language outside the classical polynomial hierarchy.",
-    "criterion": "Construct an oracle O such that BQP^O is not contained in PH^O. PH is the polynomial hierarchy, formed by allowing any fixed number of alternating existential and universal polynomial-time verification stages. Raz and Tal's report, released on 31 May 2018, proves this separation through a black-box promise problem. The result concerns computation with oracle access.",
-    "set_by": "Relativized complexity-class separation convention; Raz and Tal, Oracle Separation of BQP and PH, introduction and main result.",
-    "set_by_kind": "community_convention",
-    "threshold_quote": "polynomial-time quantum algorithm with only one query, but cannot be solved by a classical algorithm in the polynomial-time hierarchy.",
-    "threshold_ref": 8,
-    "refs": [
-     8
-    ],
-    "status": "active",
-    "replaced_by": [],
-    "threshold_checked": true
-   },
-   {
     "id": "m4",
     "title": "A decision problem equivalent to integer factoring belongs to BQP.",
-    "criterion": "On binary-encoded positive integers N and k, decide whether N has a prime factor p in {k,…,N−1}, using quantum time polynomial in the input length and success probability at least 2/3. Efficient solutions to this decision problem permit efficient recovery of the prime factors. Shor's quantum factoring algorithm supplies the quantum upper bound; de Wolf states the decision formulation and recovery reduction. The classical randomized polynomial-time lower bound remains unproved.",
+    "criterion": "For positive integers N and k encoded in binary, give a uniform quantum algorithm that decides whether N has a prime factor p with k ≤ p < N. Require polynomial time in the input length and success probability at least 2/3 on every input. Give a polynomial-time reduction that recovers the full prime factorization of N using answers to this decision problem.",
     "set_by": "BQP membership and polynomial-time decision/search equivalence conventions; Shor's factoring algorithm and de Wolf's lecture notes, section 5.1 and Chapter 12, Exercise 1.",
     "set_by_kind": "community_convention",
     "threshold_quote": "is provably in BQP but is not known to be in BPP.",
-    "threshold_ref": 5,
+    "threshold_ref": 4,
     "refs": [
-     9,
-     5
+     8,
+     4
     ],
     "status": "active",
     "replaced_by": [],
@@ -403,13 +405,13 @@
    {
     "id": "m5",
     "title": "A non-oracle theorem derives BQP ≠ BPP from P ≠ NP.",
-    "criterion": "Prove P ≠ NP ⇒ BQP ≠ BPP for ordinary decision problems, without an oracle or additional unproved assumptions. P comprises deterministic polynomial-time decision problems; NP comprises decision problems whose yes answers have certificates verifiable in polynomial time. This is Preskill's published conditional target. The conclusion would still depend on the unproved assumption P ≠ NP.",
+    "criterion": "Assume P ≠ NP and prove that BQP contains a language outside BPP, using ordinary computation and no additional unproved assumption. P is the class of decision problems solvable in deterministic polynomial time. NP is the class whose yes instances have polynomial-length certificates verifiable in deterministic polynomial time.",
     "set_by": "John Preskill, California Institute of Technology, Lecture Notes for Ph219/CS219: Quantum Information, Chapter 5, page 26; a proposed conditional theorem within quantum complexity theory.",
     "set_by_kind": "community_convention",
     "threshold_quote": "a proof that BPP ≠ BQP follows from another standard conjecture of complexity theory such as P ≠ NP,",
-    "threshold_ref": 10,
+    "threshold_ref": 9,
     "refs": [
-     10
+     9
     ],
     "status": "active",
     "replaced_by": [],
@@ -421,25 +423,13 @@
    "No peer-reviewed unconditional BQP–BPP separation was located in searches covering work through 14 November 2026.",
    "No published proof of P ≠ NP ⇒ BQP ≠ BPP was located.",
    "No agency, society, standards-body or prize document prescribing an ordered milestone sequence for this separation was found.",
-   "The Journal of the ACM page for Raz and Tal's paper could not be opened; the authors' ECCC report was accessible."
+   "The Journal of the ACM page for Raz and Tal's paper could not be opened; the authors' ECCC report was accessible.",
+   "No academy, society or programme statement disputing the value or achievability of the unconditional BQP–BPP separation was found.",
+   "No estimate of the number of people affected or the economic cost attributable to the absence of this proof was found."
   ],
   "references": [
    {
     "id": 1,
-    "kind": "journal",
-    "url": "https://epubs.siam.org/doi/10.1137/15M1050902",
-    "doi": "10.1137/15M1050902",
-    "title": "Forrelation: A Problem That Optimally Separates Quantum from Classical Computing",
-    "authors": "Aaronson S, Ambainis A",
-    "container": "SIAM J. Comput.",
-    "year": "2018",
-    "volume": "47",
-    "issue": "3",
-    "pages": "982-1038",
-    "citation_source": "crossref"
-   },
-   {
-    "id": 2,
     "kind": "journal",
     "url": "https://people.eecs.berkeley.edu/~vazirani/pubs/bv.pdf",
     "doi": "10.1137/S0097539796300921",
@@ -453,7 +443,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 3,
+    "id": 2,
     "kind": "report",
     "url": "https://www.siam.org/media/orydkrzd/quantum-convening-report.pdf",
     "doi": "10.1137/25M1741017",
@@ -467,7 +457,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 4,
+    "id": 3,
     "kind": "report",
     "url": "https://www.nationalacademies.org/read/25196/chapter/5",
     "doi": "10.17226/25196",
@@ -481,7 +471,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 5,
+    "id": 4,
     "kind": "preprint",
     "url": "https://ir.cwi.nl/pub/29271/1907.09415.pdf",
     "doi": "10.48550/arXiv.1907.09415",
@@ -495,7 +485,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 6,
+    "id": 5,
     "kind": "journal",
     "url": "https://drops.dagstuhl.de/storage/00lipics/lipics-vol339-ccc2025/html/LIPIcs.CCC.2025.5/LIPIcs.CCC.2025.5.html",
     "doi": "10.4230/LIPIcs.CCC.2025.5",
@@ -509,7 +499,7 @@
     "citation_source": "model"
    },
    {
-    "id": 7,
+    "id": 6,
     "kind": "journal",
     "url": "https://arxiv.org/abs/1511.01937",
     "doi": "10.1145/2897518.2897644",
@@ -523,7 +513,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 8,
+    "id": 7,
     "kind": "preprint",
     "url": "https://eccc.weizmann.ac.il/report/2018/107/download",
     "doi": null,
@@ -537,7 +527,7 @@
     "citation_source": "model"
    },
    {
-    "id": 9,
+    "id": 8,
     "kind": "journal",
     "url": "https://arxiv.org/html/quant-ph/9508027v2",
     "doi": "10.1137/S0097539795293172",
@@ -551,7 +541,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 10,
+    "id": 9,
     "kind": "report",
     "url": "https://www.preskill.caltech.edu/ph219/chap5_15.pdf",
     "doi": null,
@@ -565,7 +555,7 @@
     "citation_source": "model"
    },
    {
-    "id": 11,
+    "id": 10,
     "kind": "preprint",
     "url": "https://arxiv.org/abs/quant-ph/9508027",
     "doi": null,
@@ -579,7 +569,7 @@
     "citation_source": "model"
    },
    {
-    "id": 12,
+    "id": 11,
     "kind": "report",
     "url": "https://eccc.weizmann.ac.il/report/2018/107/",
     "doi": null,
@@ -593,7 +583,7 @@
     "citation_source": "model"
    },
    {
-    "id": 13,
+    "id": 12,
     "kind": "preprint",
     "url": "https://arxiv.org/abs/1411.5729",
     "doi": null,
@@ -607,7 +597,7 @@
     "citation_source": "model"
    },
    {
-    "id": 14,
+    "id": 13,
     "kind": "preprint",
     "url": "https://arxiv.org/pdf/quant-ph/9704027",
     "doi": null,
@@ -621,7 +611,7 @@
     "citation_source": "model"
    },
    {
-    "id": 15,
+    "id": 14,
     "kind": "preprint",
     "url": "https://arxiv.org/pdf/2008.07003",
     "doi": null,
@@ -635,7 +625,7 @@
     "citation_source": "model"
    },
    {
-    "id": 16,
+    "id": 15,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2611.12746",
     "doi": null,
@@ -649,7 +639,7 @@
     "citation_source": "model"
    },
    {
-    "id": 17,
+    "id": 16,
     "kind": "preprint",
     "url": "https://arxiv.org/pdf/2604.15248",
     "doi": null,
@@ -663,7 +653,7 @@
     "citation_source": "model"
    },
    {
-    "id": 18,
+    "id": 17,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2502.09279v3",
     "doi": null,
@@ -677,7 +667,7 @@
     "citation_source": "model"
    },
    {
-    "id": 19,
+    "id": 18,
     "kind": "journal",
     "url": "https://www.cambridge.org/core/journals/forum-of-mathematics-pi/article/unconditional-correctness-of-recent-quantum-algorithms-for-factoring-and-computing-discrete-logarithms/3077F5BD48D1F62000B1ED800EB86308",
     "doi": "10.1017/fmp.2025.10023",
@@ -691,7 +681,7 @@
     "citation_source": "crossref"
    },
    {
-    "id": 20,
+    "id": 19,
     "kind": "journal",
     "url": "https://www.cs.miami.edu/home/burt/learning/csc595.251/s0097539796298637.pdf",
     "doi": null,
@@ -705,7 +695,7 @@
     "citation_source": "model"
    },
    {
-    "id": 21,
+    "id": 20,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2111.10409v4",
     "doi": null,
@@ -719,7 +709,7 @@
     "citation_source": "arxiv"
    },
    {
-    "id": 22,
+    "id": 21,
     "kind": "preprint",
     "url": "https://arxiv.org/html/2611.05303v1",
     "doi": null,
@@ -731,6 +721,104 @@
     "issue": null,
     "pages": null,
     "citation_source": "arxiv"
+   },
+   {
+    "id": 22,
+    "kind": "report",
+    "url": "https://www.academie-technologies.fr/wp-content/uploads/2025/07/202506_FTQP.pdf",
+    "doi": null,
+    "title": "State of the art in fault-tolerant quantum computing - Questions and issues",
+    "authors": "National Academy of Technologies of France",
+    "container": null,
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 23,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/1907.09415",
+    "doi": null,
+    "title": "https://arxiv.org/pdf/1907.09415",
+    "authors": "Wolf RD",
+    "container": "arXiv",
+    "year": "2019",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 24,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2008.10223",
+    "doi": null,
+    "title": "An Optimal Separation of Randomized and Quantum Query Complexity",
+    "authors": "Sherstov AA, Storozhenko AA, Wu P",
+    "container": "arXiv",
+    "year": "2020",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 25,
+    "kind": "preprint",
+    "url": "https://arxiv.org/pdf/2610.37635",
+    "doi": null,
+    "title": "Classical Verification of Quantum Computation Beyond the Polynomial Hierarchy",
+    "authors": "Mantri A",
+    "container": "arXiv",
+    "year": "2026",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 26,
+    "kind": "journal",
+    "url": "https://theoryofcomputing.org/articles/v018a017/v018a017.pdf",
+    "doi": "10.4086/toc.2022.v018a017",
+    "title": "A Stochastic Calculus Approach to the Oracle Separation of BQP and PH",
+    "authors": "Wu X",
+    "container": "Theory of Comput.",
+    "year": "2022",
+    "volume": "18",
+    "issue": "1",
+    "pages": "1-11",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 27,
+    "kind": "preprint",
+    "url": "https://arxiv.org/html/2201.07791",
+    "doi": null,
+    "title": "On the success probability of quantum order finding",
+    "authors": "Ekerå M",
+    "container": "arXiv",
+    "year": "2022",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "arxiv"
+   },
+   {
+    "id": 28,
+    "kind": "web",
+    "url": "https://people.csail.mit.edu/rrw/6.1400-2025/lec20-before-class.pdf",
+    "doi": null,
+    "title": "Lecture 20: More Friends of NP, Oracles in Complexity Theory",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
    }
   ],
   "milestone_order": [
@@ -745,860 +833,1161 @@
     "milestone": "m4",
     "case": null,
     "verdict": "partial",
-    "finding": "Quantum integer factorization runs in polynomial time in the input length; no sample size applies.",
-    "detail": "The paper gives the quantum factoring algorithm, but the supplied text does not state the specified decision formulation or its recovery reduction.",
-    "quote": "Eﬃcient randomized alg orithms are given for\nthese two problems on a hypothetical quantum computer.",
+    "finding": "Quantum prime factorization uses O(ℓ² log ℓ log log ℓ) quantum steps for ℓ-bit integers. This is a theoretical result with no experimental sample.",
+    "detail": "The reduction in §5 uses order finding to obtain factors. The criterion also requires a reduction that recovers every prime factor and its multiplicity using answers to the specified decision problem.",
+    "quote": "Our quantum factoring algorithm takes asymptot ically O((log n)2(log log n)\n(log log log n)) steps on a quantum computer, along with a polynomial (in lo g n) amount\nof post-processing time on a classical computer that is used to convert the output of\nthe quantum computer to factors of n.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "One oracle supports a unary language with polynomial-time quantum success of at least 0.8 after hardwiring and no bounded-error randomized polynomial-time decider.",
+    "detail": "The BPP exclusion follows from the paper’s stronger PH exclusion. Non-unary strings can be rejected deterministically.",
+    "quote": "There exists an oracle O relative to which BQPO ⊈ PHO.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "An amplified Forrelation promise problem on N₂-bit strings uses one quantum query.",
+    "detail": "The distributional error bounds yield a promise by keeping inputs on which the quantum acceptance probability is at least 2/3 or at most 1/3.",
+    "quote": "The algorithm makes one query to the input.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "met",
-    "finding": "Oracle separation: one oracle makes BQP not contained in PH.",
-    "detail": "The proof uses a black-box promise problem to obtain a separation for decision problems relative to an oracle.",
-    "quote": "Corollary 1.5. There exists an oracle O relative to which BQPO ⊈ PHO.",
+    "finding": "One oracle makes a unary BQP language lie outside every level of the classical polynomial hierarchy.",
+    "detail": "The randomized construction proves existence by showing that the quantum guarantee and the simultaneous exclusion of all PH machines hold together with positive probability.",
+    "quote": "There exists an oracle O relative to which BQPO ⊈ PHO.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 11,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Forrelation on two N-entry truth tables requires Ω(√N/log N) randomized queries.",
+    "detail": "The query bounds supply ingredients for a relativized language separation. The excerpt gives no proof against polynomial-time randomized machines accessing a single shared oracle across all input lengths.",
+    "quote": "Theorem 1 Any classical randomized algorithm for Forrelation must make Ω(\n√\nN\nlog N ) queries.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Forrelation on N input elements has a 1-query quantum algorithm and an Ω(√N/log N) randomized query lower bound.",
-    "detail": "The result is a black-box query separation for a promise problem. The source does not construct an oracle and a language witnessing BQP^O ≠ BPP^O.",
-    "quote": "This problem can be solved using 1 quantum que ry, yet we show that\nany randomized algorithm needs Ω(\n√\nN/ logN ) queries (improving an Ω( N 1/4) lower bound of\nAaronson).",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
-    "finding": "Forrelation on N input elements has a 1-query quantum algorithm and an Ω(√N/log N) randomized query lower bound.",
-    "detail": "Forrelation is a promise problem, so the separation does not establish the criterion for a total Boolean function. The one-query algorithm has error 0.4; amplification reduces the error using a constant number of queries.",
-    "quote": "This problem can be solved using 1 quantum que ry, yet we show that\nany randomized algorithm needs Ω(\n√\nN/ logN ) queries (improving an Ω( N 1/4) lower bound of\nAaronson).",
+    "finding": "Forrelation on two N-entry truth tables has O(1) quantum query complexity after amplification.",
+    "detail": "The quantum guarantee applies when the absolute correlation is at most 0.01 or the correlation is at least 0.6.",
+    "quote": "Of course, one can make the error probability as small as on e likes using ampliﬁcation, but\ndoing so increases the query complexity by a constant factor .",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "A total Boolean function has R(f) = Ω̃(Q(f)^2.5); sample size not applicable.",
-    "detail": "Both randomized and quantum query complexities use a success probability of at least 2/3. The result measures input queries, not running time.",
+    "finding": "One asymptotic family of total Boolean functions achieves a 2.5-power separation between randomized and quantum query complexity up to polylogarithmic factors.",
+    "detail": null,
     "quote": "Theorem 1. There exists a total function f such that R(f ) = ~Ω(Q(f )2.5).",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 6,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "One oracle and decision problem exhibit exact polynomial-time quantum computation versus exponential-time bounded-error classical computation.",
-    "detail": "The separation is relative to an oracle. The quantum algorithm succeeds with certainty, exceeding the 2/3 threshold.",
-    "quote": "This allows for the construction of an oracle under which\nthere is a decision problem in QP that would not only lie\noutside of the classical class BPP —which was known al-\nready [5]—but that would require exponential time on any\nclassical bounded-error probabilistic computer.",
+    "finding": "A Simon-based oracle language has an exact polynomial-time quantum algorithm and a classical lower bound of 2^(n/3) steps on infinitely many inputs.",
+    "detail": "The quantum algorithm rejects inputs outside the designated unary lengths and computes the hidden-shift bit at those lengths. The lower bound holds against each classical algorithm relative to the single constructed oracle.",
+    "quote": "Corollary 10 There exists an oracle O relative to which\nthere is a decision problem L ∈ QP O so that, for any\nclassical probabilistic algorithm whose running time is\nbounded by 2n/3 on all inputs of size n, there are inﬁnitely\nmany inputs about which the algorithm decides membership\ninL with probability no better than",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For k-Forrelation on kN oracle bits, bounded-error randomized query complexity is Ω((N/log(kN))^(1−1/k)) for fixed k.",
+    "detail": null,
+    "quote": "This gives us that\nthere exists an explicit partial boolean function on M =kN bits that can be computed with error at most\n1/3 by quantum circuits of O(2O(k) logM) size, making 2 O(k) queries, but requires M 1−1/k randomized\nqueries.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "Explicit total Boolean function family; no sample size; R(f) ≥ Q(f)^(3−o(1)).",
-    "detail": "Both query complexities use success probability at least 2/3. The result is reported in an arXiv preprint.",
+    "finding": "An explicit family of total Boolean functions has bounded-error randomized query complexity at least Q(f)^(3−o(1)).",
+    "detail": null,
     "quote": "Corollary 1.5. There exists an explicit total boolean function f for which R(f)≥Q(f)3−o(1).",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
-    "milestone": "m3",
+    "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "One recursive oracle yields a unary language outside PH solvable exactly in quantum polynomial time with at most 3 oracle queries.",
-    "detail": "The claimed separation is relative to an oracle and uses an exact Forrelation promise. The source is an arXiv preprint.",
-    "quote": "Our language lies outside both\n𝖨𝖯\nO\n\\mathsf{IP}^{O}\nand\n𝖯𝖧\nO\n\\mathsf{PH}^{O}\n, yet admits an exact algorithm making only three queries.",
+    "finding": "For one unary oracle language outside BPP^O, an exact quantum algorithm uses at most 3 queries per input.",
+    "detail": "The oracle encodes pairs of truth tables with Forrelation exactly ±1/2 at eligible lengths. The language rejects all other lengths.",
+    "quote": "The quantum algorithm makes at most three phase queries on each input and has a uniform, exact implementation over a fixed finite gate basis.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "met",
-    "finding": "IQP oracle separation: one oracle O satisfies IQP^O ⊄ PH^O; sample size not applicable.",
-    "detail": "IQP is a subclass of BQP, so the reported separation also implies BQP^O ⊄ PH^O. The proof uses oracle access and the Raz–Tal hardness result.",
+    "finding": "For one unary oracle language outside PH^O, an exact quantum algorithm uses at most 3 queries per input.",
+    "detail": "The construction fixes oracle blocks to make each polynomial-hierarchy candidate fail while preserving failures established at earlier stages.",
+    "quote": "L\\in\\mathsf{EQP}^{O},\\qquad L\\notin\\mathsf{IP}^{O},\\qquad L\\notin\\mathsf{PH}^{O}.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "For Θ(n²) Raz–Tal function pairs, PH requires 2^{Ω(n)} queries, yielding an oracle separation from BPP.",
+    "detail": "The BPP separation follows from Theorem 4 and the inclusion BPP^O ⊆ PH^O.",
     "quote": "Theorem 4.There exists an oracleOrelative to whichIQP O ̸⊆PH O.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 17,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "met",
-    "finding": "One oracle separates BQP from the real polynomial hierarchy, and hence from PH; sample size not applicable.",
-    "detail": "The source claims the stronger oracle separation BQP^O ⊄ ℝPH^O. Classical PH is included in the real hierarchy by restricting real witnesses to binary values.",
+    "finding": "IQP distinguishes Θ(n²) Raz–Tal function pairs with constant advantage, yielding an oracle separation from every PH level.",
+    "detail": null,
+    "quote": "Theorem 4.There exists an oracleOrelative to whichIQP O ̸⊆PH O.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 16,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "For 1 binary oracle, a decision language has bounded-error quantum polynomial time and no bounded-error randomized classical polynomial-time algorithm.",
+    "detail": "The BPP exclusion follows from the theorem’s stronger exclusion of the entire real polynomial hierarchy.",
     "quote": "There exists an oracle\nO\nO\nsuch that\nBQP\nO\n⊈\nℝ\n​\nPH\nO\n\\textsc{BQP}^{O}\\nsubseteq\\mathbb{R}\\textsc{PH}^{O}\n.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 18,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "met",
+    "finding": "For 1 binary oracle, a BQP language lies outside every level of the classical polynomial hierarchy.",
+    "detail": "The preprint extends the oracle separation to the real polynomial hierarchy, which contains the classical hierarchy relative to the same oracle.",
+    "quote": "There exists an oracle\nO\nO\nsuch that\nBQP\nO\n⊈\nℝ\n​\nPH\nO\n\\textsc{BQP}^{O}\\nsubseteq\\mathbb{R}\\textsc{PH}^{O}\n.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 17,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m4",
     "case": null,
     "verdict": "partial",
-    "finding": "An unconditional quantum factoring algorithm finds a nontrivial divisor of any composite N with success probability Θ(1); no sample size applies.",
-    "detail": "The result gives a polynomial-time quantum factoring upper bound. The source does not state the specified decision problem or the reduction from efficient decision to prime-factor recovery.",
-    "quote": "In this paper, we prove a version of Regev’s conjecture. This allows us to unconditionally prove the correctness of (slightly modified versions of) the algorithms of Regev",
+    "finding": "For every composite N ≤ 2^n, the quantum procedure finds a nontrivial divisor with Θ(1) success probability.",
+    "detail": null,
+    "quote": "There is a classical randomised polynomial-time algorithm that solves the factoring problem\n$$ \\begin{align*} & \\mathbf{Input: }\\text{ a composite integer } N \\leq 2^n \\\\ & \\mathbf{Output: }\\text{ a nontrivial divisor of } N \\end{align*} $$\nusing\n$O(\\sqrt {n})$\ncalls to this quantum circuit, and succeeds with probability\n$\\Theta (1)$\n.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 18,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "Simon's unary oracle language separates quantum and randomized polynomial time, with a classical lower bound of 2^(n/4) queries at sufficiently large lengths.",
+    "detail": "The query estimate averages over random oracles. The fixed-oracle conclusion follows by taking a countable union over classical machines.",
+    "quote": "Theorem 3.4. There exist an oracle O and constant ϵ relative to which BQP ⁄⊆\nPTIME (2ϵn)( with two-sided error ).",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 19,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m2",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Simon’s promised problem: O(n) quantum oracle evaluations versus an exponential classical lower bound.",
-    "detail": "The separation uses a promise on the supplied function; the paper does not establish the required separation for a total Boolean function.",
-    "quote": "We will show that just O(n) evaluations of ρ sufﬁces.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "An oracle gives an exact quantum polynomial-time decision problem with an exponential classical randomized lower bound.",
-    "detail": "The result separates quantum computation from bounded-error probabilistic classical computation relative to an oracle. It does not show that the language lies outside the polynomial hierarchy.",
-    "quote": "This exhibits an exponen-\ntial gap between the power of exact quantum computation\nand that of classical bounded-error probabilistic computa -\ntion, even for decision problems.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 14,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "partial",
-    "finding": "Explicit partial function: Oϵ(1) quantum queries versus Ω(N 1−ϵ) randomized queries.",
-    "detail": "The result establishes a black-box query-complexity separation for a partial function; the text does not construct an oracle and a language satisfying the milestone.",
-    "quote": "By standard ampliﬁcation arguments, this gives an explicit partial function that exhibits an Oϵ(1) vs Ω(N 1−ϵ) separation between bounded-error quantum and randomized query complexities, where ϵ> 0 can be made arbitrarily small.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 15,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "A recursive oracle and unary language separate exact quantum polynomial time from classical randomized polynomial time; the quantum algorithm uses at most 3 queries.",
-    "detail": "The claimed language lies outside both IP relative to the oracle and the polynomial hierarchy, which include randomized polynomial-time computation. The separation is oracle-relative; no sample size applies.",
-    "quote": "The quantum algorithm makes at most three phase queries on each input and has a uniform, exact implementation over a fixed finite gate basis.",
+    "finding": "Unary oracle parity is in BQP^O and outside BPP^O with probability 1 over the constructed oracle distribution.",
+    "detail": "The probability is over the oracle construction. Once a qualifying oracle is fixed, the quantum success guarantee holds on every input.",
+    "quote": "There exists an oracle relative to which\n𝖯\n=\n𝖭𝖯\n≠\n𝖡𝖰𝖯\n=\n𝖯\n#\n​\n𝖯\n\\mathsf{P}=\\mathsf{NP}\\neq\\mathsf{BQP}=\\mathsf{P}^{\\mathsf{\\#P}}\n.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 16,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "met",
-    "finding": "An oracle separates IQP from PH; the quantum construction uses Θ(n²) queries. No sample size applies.",
-    "detail": "IQP is a restricted subclass of BQP, and BPP is contained in PH. The separation therefore also establishes BQP ≠ BPP relative to the oracle.",
-    "quote": "Combining this with the hardness result of Raz and Tal yields an oracle\nO such that IQPO ̸⊆PH O.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 17,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "partial",
-    "finding": "An oracle separates BQP from the real polynomial hierarchy; sample size not applicable.",
-    "detail": "The source reports an oracle relative to which BQP is not contained in the real polynomial hierarchy, but the supplied text does not establish that BPP is contained in that hierarchy.",
-    "quote": "There exists an oracle\nO\nO\nsuch that\nBQP\nO\n⊈\nℝ\n​\nPH\nO\n\\textsc{BQP}^{O}\\nsubseteq\\mathbb{R}\\textsc{PH}^{O}\n.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 18,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
-   },
-   {
-    "milestone": "m1",
-    "case": null,
-    "verdict": "met",
-    "finding": "Simon constructs one oracle relative to which BQP has an exponential advantage over classical probabilistic computation.",
-    "detail": "The oracle encodes a unary language. The separation remains relative to that oracle; it does not establish an unconditional BQP–BPP separation.",
-    "quote": "We can also use Theorem 3.3 to prove the existence of a speciﬁc oracle relative\nto which there is an exponential gap (in terms of classical computing time) between\nBPP and its quantum analogue, BQP (deﬁned in the natural way; see [BV93]).",
-    "checked": true,
-    "confirmed": true,
-    "peer_reviewed": true,
     "ref": 20,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "met",
-    "finding": "An oracle separates BQP from PH; the paper constructs a stronger oracle with P = NP ≠ BQP. Sample size: not applicable.",
-    "detail": "The authors’ Theorem 10 gives an oracle where P = NP ≠ BQP. The text explains that P = NP collapses PH to P in this oracle world, so BQP is not contained in PH.",
-    "quote": "Theorem\n10\nsays, in effect, that there is no relativizing obstruction to\n𝖡𝖰𝖯\n\\mathsf{BQP}\nbeing inordinately powerful even while\n𝖭𝖯\n\\mathsf{NP}\nis inordinately weak.",
+    "finding": "Unary oracle parity is in BQP^O and outside all levels of PH^O with probability 1 over the oracle construction.",
+    "detail": "Theorem 32 proves the separation for the authors’ own oracle, which encodes answers to counting computations and collapses the classical hierarchy to P^O.",
+    "quote": "any oracle\n𝒪\n\\mathcal{O}\nthat satisfies\nTheorem\n32\nmust also have\n𝖡𝖰𝖯\n𝒪\n⊄\n𝖯𝖧\n𝒪\n\\mathsf{BQP}^{\\mathcal{O}}\\not\\subset\\mathsf{PH}^{\\mathcal{O}}\n.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "For salted majority on 2^n inputs per length, one classical oracle gives quantum success of at least 2/3 on every input and rules out BPP under the same oracle.",
+    "detail": null,
+    "quote": "We construct a proof of quantumness by giving an efficient prover interactive proof for a decision problem that is hard for\n𝖡𝖯𝖯\n\\mathsf{BPP}\nrelative to our oracle.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 21,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "met",
-    "finding": "One classical oracle yields a language in BQP outside the polynomial hierarchy.",
-    "detail": "The authors construct an oracle relative to which the language has an efficient quantum prover and is hard for classical polynomial-size circuits; they state that the polynomial hierarchy is contained in that circuit class relative to the oracle.",
+    "finding": "For salted majority on 2^n inputs per length, the constructed oracle puts the language in BQP and outside every level of PH with probability 1 over the oracle draw.",
+    "detail": null,
     "quote": "this gives an oracle relative to which there is a problem outside of\n𝖯𝖧\n\\mathsf{PH}\nwhich can be decided with classical verification of quantum computation.",
     "checked": true,
     "confirmed": false,
     "peer_reviewed": false,
-    "ref": 22,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-15"
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Simon’s promised decision problem on 2^n oracle entries requires Ω(2^(n/2)) randomized queries.",
+    "detail": "The classical lower bound uses a balanced distribution over injective tables and tables with a randomly chosen nonzero mask. A worst-case success guarantee of 2/3 would also hold on that distribution.",
+    "quote": "We want to show thatT= Ω(\n√\n2n).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 23,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For composite N of bit length n, Shor’s algorithm finds a factor in roughly n² steps, up to logarithmic factors.",
+    "detail": "The stated gate count is an expectation for finding one factor. The factoring-to-period-finding reduction goes in a different direction from the required reduction from full factorization to the threshold decision problem.",
+    "quote": "It can\nfind a factor of a composite numberNin roughly (logN) 2 steps, which is polynomial in the length\nlogNof the input.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 23,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "For a family of total Boolean functions on n bits, randomized query complexity is at least quantum query complexity raised to 3−o(1).",
+    "detail": "Theorem 1.5 applies the cheat-sheet construction to the partial-function separation in Corollary 1.4. The supplied arXiv text mentions a STOC extended abstract and does not establish journal peer review of this version.",
+    "quote": "Theorem 1.5\n.\nThere is a function\nf\n:\n{\n−\n1\n,\n1\n}\nn\n→\n{\n0\n,\n1\n}\nf\\colon\\{-1,1\\}^{n}\\to\\{0,1\\}\nwith\nR\n1\n/\n3\n​\n(\nf\n)\n⩾\nQ\n1\n/\n3\n​\n(\nf\n)\n3\n−\no\n⁡\n(\n1\n)\n.\nR_{1/3}(f)\\geqslant Q_{1/3}(f)^{3-o(1)}.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 24,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "met",
+    "finding": "One classical Boolean oracle and one total unary language separate BQP from every level of PH relative to the same oracle, with zero quantum decision error.",
+    "detail": "The result is a theorem with no empirical sample size. The excerpt identifies the source as an arXiv preprint and reports no proof-assistant verification.",
+    "quote": "The exclusion is from every fixed level of the hierarchy, and whether a matching lower\nbound on the number of alternations holds is open.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 25,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Forrelation on 2N bits achieves an Ω(1/log N) quantum distinguishing gap.",
+    "detail": "This is an asymptotic proof with no empirical sample size. The note supplies a new distribution and analysis for the two bounds and cites the earlier paper for the oracle construction.",
+    "quote": "The resulting analysis gives the same bounds as Raz and Tal, up to constant\nfactors.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 26,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Complete prime factorization in one quantum order-finding run has success probability tending to 1 as N grows. The result is theoretical.",
+    "detail": "The reduction analyzed in the source uses the order of a random modular unit to recover the factorization. It does not use answers to the prime-factor threshold predicate.",
+    "quote": "the overall probability of successfully recovering the complete factorization of\nN\nN\nin a single order-finding run may be seen to tend to one in the limit as\nN\nN\ntends to infinity",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 27,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "For a binary composite integer N, the lecture’s binary search finds one prime factor in O(log N) FACTORING queries.",
+    "detail": "The query bound is asymptotic, and no empirical sample applies. The argument ends once a single prime factor is found.",
+    "quote": "Takes O(log n) calls to FACTORING!",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 28,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-25"
    }
   ],
   "judged": [
    {
     "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.CCC.2025.5",
     "milestone": "m1",
-    "hash": "0d17850ecb60",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3a0702949759",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.CCC.2025.5",
     "milestone": "m2",
-    "hash": "0c31ef8c79a0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "214d25c257e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.CCC.2025.5",
     "milestone": "m3",
-    "hash": "0e912c2ed45d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1f63e645f3c5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.CCC.2025.5",
     "milestone": "m4",
-    "hash": "25a19c89f814",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d6f3186cdfb5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.CCC.2025.5",
     "milestone": "m5",
-    "hash": "e0d21ab6e05e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fcf209860fca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.CCC.2025.5",
     "milestone": "completion",
     "hash": "b5be97faed70",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/quant-ph/9508027",
     "milestone": "m1",
-    "hash": "0d17850ecb60",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3a0702949759",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/quant-ph/9508027",
     "milestone": "m2",
-    "hash": "0c31ef8c79a0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "214d25c257e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/quant-ph/9508027",
     "milestone": "m3",
-    "hash": "0e912c2ed45d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1f63e645f3c5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/quant-ph/9508027",
     "milestone": "m4",
-    "hash": "25a19c89f814",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d6f3186cdfb5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/quant-ph/9508027",
     "milestone": "m5",
-    "hash": "e0d21ab6e05e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fcf209860fca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/quant-ph/9508027",
     "milestone": "completion",
     "hash": "b5be97faed70",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eccc.weizmann.ac.il/report/2018/107/",
     "milestone": "m1",
-    "hash": "0d17850ecb60",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3a0702949759",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eccc.weizmann.ac.il/report/2018/107/",
     "milestone": "m2",
-    "hash": "0c31ef8c79a0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "214d25c257e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eccc.weizmann.ac.il/report/2018/107/",
     "milestone": "m3",
-    "hash": "0e912c2ed45d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1f63e645f3c5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eccc.weizmann.ac.il/report/2018/107/",
     "milestone": "m4",
-    "hash": "25a19c89f814",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d6f3186cdfb5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eccc.weizmann.ac.il/report/2018/107/",
     "milestone": "m5",
-    "hash": "e0d21ab6e05e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fcf209860fca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://eccc.weizmann.ac.il/report/2018/107/",
     "milestone": "completion",
     "hash": "b5be97faed70",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1411.5729",
     "milestone": "m1",
-    "hash": "0d17850ecb60",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3a0702949759",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1411.5729",
     "milestone": "m2",
-    "hash": "0c31ef8c79a0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "214d25c257e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1411.5729",
     "milestone": "m3",
-    "hash": "0e912c2ed45d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1f63e645f3c5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1411.5729",
     "milestone": "m4",
-    "hash": "25a19c89f814",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d6f3186cdfb5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1411.5729",
     "milestone": "m5",
-    "hash": "e0d21ab6e05e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fcf209860fca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1411.5729",
     "milestone": "completion",
     "hash": "b5be97faed70",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1511.01937",
     "milestone": "m1",
-    "hash": "0d17850ecb60",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3a0702949759",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1511.01937",
     "milestone": "m2",
-    "hash": "0c31ef8c79a0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "214d25c257e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1511.01937",
     "milestone": "m3",
-    "hash": "0e912c2ed45d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1f63e645f3c5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1511.01937",
     "milestone": "m4",
-    "hash": "25a19c89f814",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d6f3186cdfb5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1511.01937",
     "milestone": "m5",
-    "hash": "e0d21ab6e05e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fcf209860fca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/abs/1511.01937",
     "milestone": "completion",
     "hash": "b5be97faed70",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/quant-ph/9704027",
     "milestone": "m1",
-    "hash": "0d17850ecb60",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/pdf/2008.07003",
-    "milestone": "m2",
-    "hash": "0c31ef8c79a0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://github.com/openai/math/blob/main/preprints/A-Nearly-Quartic-Separation-Between-Randomized-and-Quantum-Query-Complexity-October-5-2026/quartic-query-separation.pdf",
-    "milestone": "m2",
-    "hash": "0c31ef8c79a0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2611.12746",
-    "milestone": "m3",
-    "hash": "0e912c2ed45d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/pdf/2604.15248",
-    "milestone": "m3",
-    "hash": "0e912c2ed45d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/html/2502.09279v3",
-    "milestone": "m3",
-    "hash": "0e912c2ed45d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/pdf/1907.09415",
-    "milestone": "m4",
-    "hash": "25a19c89f814",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.cambridge.org/core/journals/forum-of-mathematics-pi/article/unconditional-correctness-of-recent-quantum-algorithms-for-factoring-and-computing-discrete-logarithms/3077F5BD48D1F62000B1ED800EB86308",
-    "milestone": "m4",
-    "hash": "25a19c89f814",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3a0702949759",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/quant-ph/9704027",
     "milestone": "m2",
-    "hash": "0c31ef8c79a0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "214d25c257e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/quant-ph/9704027",
     "milestone": "m3",
-    "hash": "0e912c2ed45d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1f63e645f3c5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/quant-ph/9704027",
     "milestone": "m4",
-    "hash": "25a19c89f814",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d6f3186cdfb5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/quant-ph/9704027",
     "milestone": "m5",
-    "hash": "e0d21ab6e05e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fcf209860fca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/quant-ph/9704027",
     "milestone": "completion",
     "hash": "b5be97faed70",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2008.07003",
     "milestone": "m1",
-    "hash": "0d17850ecb60",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3a0702949759",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2008.07003",
+    "milestone": "m2",
+    "hash": "214d25c257e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2008.07003",
     "milestone": "m3",
-    "hash": "0e912c2ed45d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1f63e645f3c5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2008.07003",
     "milestone": "m4",
-    "hash": "25a19c89f814",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d6f3186cdfb5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2008.07003",
     "milestone": "m5",
-    "hash": "e0d21ab6e05e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fcf209860fca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2008.07003",
     "milestone": "completion",
     "hash": "b5be97faed70",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2611.12746",
     "milestone": "m1",
-    "hash": "0d17850ecb60",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3a0702949759",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2611.12746",
     "milestone": "m2",
-    "hash": "0c31ef8c79a0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "214d25c257e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2611.12746",
+    "milestone": "m3",
+    "hash": "1f63e645f3c5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2611.12746",
     "milestone": "m4",
-    "hash": "25a19c89f814",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d6f3186cdfb5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2611.12746",
     "milestone": "m5",
-    "hash": "e0d21ab6e05e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fcf209860fca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2611.12746",
     "milestone": "completion",
     "hash": "b5be97faed70",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2604.15248",
     "milestone": "m1",
-    "hash": "0d17850ecb60",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3a0702949759",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2604.15248",
     "milestone": "m2",
-    "hash": "0c31ef8c79a0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "214d25c257e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2604.15248",
+    "milestone": "m3",
+    "hash": "1f63e645f3c5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2604.15248",
     "milestone": "m4",
-    "hash": "25a19c89f814",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d6f3186cdfb5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2604.15248",
     "milestone": "m5",
-    "hash": "e0d21ab6e05e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fcf209860fca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/pdf/2604.15248",
     "milestone": "completion",
     "hash": "b5be97faed70",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2502.09279v3",
     "milestone": "m1",
-    "hash": "0d17850ecb60",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3a0702949759",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2502.09279v3",
     "milestone": "m2",
-    "hash": "0c31ef8c79a0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "214d25c257e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2502.09279v3",
+    "milestone": "m3",
+    "hash": "1f63e645f3c5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2502.09279v3",
     "milestone": "m4",
-    "hash": "25a19c89f814",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d6f3186cdfb5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2502.09279v3",
     "milestone": "m5",
-    "hash": "e0d21ab6e05e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fcf209860fca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2502.09279v3",
     "milestone": "completion",
     "hash": "b5be97faed70",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cambridge.org/core/journals/forum-of-mathematics-pi/article/unconditional-correctness-of-recent-quantum-algorithms-for-factoring-and-computing-discrete-logarithms/3077F5BD48D1F62000B1ED800EB86308",
     "milestone": "m1",
-    "hash": "0d17850ecb60",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3a0702949759",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cambridge.org/core/journals/forum-of-mathematics-pi/article/unconditional-correctness-of-recent-quantum-algorithms-for-factoring-and-computing-discrete-logarithms/3077F5BD48D1F62000B1ED800EB86308",
     "milestone": "m2",
-    "hash": "0c31ef8c79a0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "214d25c257e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cambridge.org/core/journals/forum-of-mathematics-pi/article/unconditional-correctness-of-recent-quantum-algorithms-for-factoring-and-computing-discrete-logarithms/3077F5BD48D1F62000B1ED800EB86308",
     "milestone": "m3",
-    "hash": "0e912c2ed45d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1f63e645f3c5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cambridge.org/core/journals/forum-of-mathematics-pi/article/unconditional-correctness-of-recent-quantum-algorithms-for-factoring-and-computing-discrete-logarithms/3077F5BD48D1F62000B1ED800EB86308",
-    "milestone": "m5",
-    "hash": "e0d21ab6e05e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.cambridge.org/core/journals/forum-of-mathematics-pi/article/unconditional-correctness-of-recent-quantum-algorithms-for-factoring-and-computing-discrete-logarithms/3077F5BD48D1F62000B1ED800EB86308",
-    "milestone": "completion",
-    "hash": "b5be97faed70",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://github.com/openai/math/blob/main/preprints/A-Nearly-Quartic-Separation-Between-Randomized-and-Quantum-Query-Complexity-October-5-2026/quartic-query-separation.pdf",
-    "milestone": "m1",
-    "hash": "0d17850ecb60",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://github.com/openai/math/blob/main/preprints/A-Nearly-Quartic-Separation-Between-Randomized-and-Quantum-Query-Complexity-October-5-2026/quartic-query-separation.pdf",
-    "milestone": "m3",
-    "hash": "0e912c2ed45d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://github.com/openai/math/blob/main/preprints/A-Nearly-Quartic-Separation-Between-Randomized-and-Quantum-Query-Complexity-October-5-2026/quartic-query-separation.pdf",
     "milestone": "m4",
-    "hash": "25a19c89f814",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d6f3186cdfb5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
-    "url": "https://github.com/openai/math/blob/main/preprints/A-Nearly-Quartic-Separation-Between-Randomized-and-Quantum-Query-Complexity-October-5-2026/quartic-query-separation.pdf",
+    "url": "https://www.cambridge.org/core/journals/forum-of-mathematics-pi/article/unconditional-correctness-of-recent-quantum-algorithms-for-factoring-and-computing-discrete-logarithms/3077F5BD48D1F62000B1ED800EB86308",
     "milestone": "m5",
-    "hash": "e0d21ab6e05e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "fcf209860fca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
-    "url": "https://github.com/openai/math/blob/main/preprints/A-Nearly-Quartic-Separation-Between-Randomized-and-Quantum-Query-Complexity-October-5-2026/quartic-query-separation.pdf",
+    "url": "https://www.cambridge.org/core/journals/forum-of-mathematics-pi/article/unconditional-correctness-of-recent-quantum-algorithms-for-factoring-and-computing-discrete-logarithms/3077F5BD48D1F62000B1ED800EB86308",
     "milestone": "completion",
     "hash": "b5be97faed70",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/pdf/1907.09415",
-    "milestone": "m1",
-    "hash": "0d17850ecb60",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/pdf/1907.09415",
-    "milestone": "m2",
-    "hash": "0c31ef8c79a0",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/pdf/1907.09415",
-    "milestone": "m3",
-    "hash": "0e912c2ed45d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/pdf/1907.09415",
-    "milestone": "m5",
-    "hash": "e0d21ab6e05e",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/pdf/1907.09415",
-    "milestone": "completion",
-    "hash": "b5be97faed70",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cs.miami.edu/home/burt/learning/csc595.251/s0097539796298637.pdf",
     "milestone": "m1",
-    "hash": "0d17850ecb60",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "3a0702949759",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.miami.edu/home/burt/learning/csc595.251/s0097539796298637.pdf",
+    "milestone": "m2",
+    "hash": "214d25c257e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.miami.edu/home/burt/learning/csc595.251/s0097539796298637.pdf",
+    "milestone": "m3",
+    "hash": "1f63e645f3c5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.miami.edu/home/burt/learning/csc595.251/s0097539796298637.pdf",
+    "milestone": "m4",
+    "hash": "d6f3186cdfb5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.miami.edu/home/burt/learning/csc595.251/s0097539796298637.pdf",
+    "milestone": "m5",
+    "hash": "fcf209860fca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cs.miami.edu/home/burt/learning/csc595.251/s0097539796298637.pdf",
+    "milestone": "completion",
+    "hash": "b5be97faed70",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2111.10409v4",
+    "milestone": "m1",
+    "hash": "3a0702949759",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2111.10409v4",
+    "milestone": "m2",
+    "hash": "214d25c257e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2111.10409v4",
     "milestone": "m3",
-    "hash": "0e912c2ed45d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1f63e645f3c5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2111.10409v4",
+    "milestone": "m4",
+    "hash": "d6f3186cdfb5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2111.10409v4",
+    "milestone": "m5",
+    "hash": "fcf209860fca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2111.10409v4",
+    "milestone": "completion",
+    "hash": "b5be97faed70",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2611.05303v1",
+    "milestone": "m1",
+    "hash": "3a0702949759",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2611.05303v1",
+    "milestone": "m2",
+    "hash": "214d25c257e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2611.05303v1",
     "milestone": "m3",
-    "hash": "0e912c2ed45d",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "1f63e645f3c5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2611.05303v1",
+    "milestone": "m4",
+    "hash": "d6f3186cdfb5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2611.05303v1",
+    "milestone": "m5",
+    "hash": "fcf209860fca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2611.05303v1",
+    "milestone": "completion",
+    "hash": "b5be97faed70",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/openai/math/blob/main/preprints/A-Nearly-Quartic-Separation-Between-Randomized-and-Quantum-Query-Complexity-October-5-2026/quartic-query-separation.pdf",
+    "milestone": "m1",
+    "hash": "3a0702949759",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/openai/math/blob/main/preprints/A-Nearly-Quartic-Separation-Between-Randomized-and-Quantum-Query-Complexity-October-5-2026/quartic-query-separation.pdf",
+    "milestone": "m2",
+    "hash": "214d25c257e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/openai/math/blob/main/preprints/A-Nearly-Quartic-Separation-Between-Randomized-and-Quantum-Query-Complexity-October-5-2026/quartic-query-separation.pdf",
+    "milestone": "m3",
+    "hash": "1f63e645f3c5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/openai/math/blob/main/preprints/A-Nearly-Quartic-Separation-Between-Randomized-and-Quantum-Query-Complexity-October-5-2026/quartic-query-separation.pdf",
+    "milestone": "m4",
+    "hash": "d6f3186cdfb5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/openai/math/blob/main/preprints/A-Nearly-Quartic-Separation-Between-Randomized-and-Quantum-Query-Complexity-October-5-2026/quartic-query-separation.pdf",
+    "milestone": "m5",
+    "hash": "fcf209860fca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/openai/math/blob/main/preprints/A-Nearly-Quartic-Separation-Between-Randomized-and-Quantum-Query-Complexity-October-5-2026/quartic-query-separation.pdf",
+    "milestone": "completion",
+    "hash": "b5be97faed70",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1907.09415",
+    "milestone": "m1",
+    "hash": "3a0702949759",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1907.09415",
+    "milestone": "m2",
+    "hash": "214d25c257e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1907.09415",
+    "milestone": "m3",
+    "hash": "1f63e645f3c5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1907.09415",
+    "milestone": "m4",
+    "hash": "d6f3186cdfb5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1907.09415",
+    "milestone": "m5",
+    "hash": "fcf209860fca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/1907.09415",
+    "milestone": "completion",
+    "hash": "b5be97faed70",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/openai/math/blob/main/preprints/Exact-quantum-factoring-over-a-fixed-finite-gate-set-September-25-2026/main.pdf",
+    "milestone": "m1",
+    "hash": "3a0702949759",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/openai/math/blob/main/preprints/Exact-quantum-factoring-over-a-fixed-finite-gate-set-September-25-2026/main.pdf",
+    "milestone": "m2",
+    "hash": "214d25c257e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/openai/math/blob/main/preprints/Exact-quantum-factoring-over-a-fixed-finite-gate-set-September-25-2026/main.pdf",
+    "milestone": "m3",
+    "hash": "1f63e645f3c5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://github.com/openai/math/blob/main/preprints/Exact-quantum-factoring-over-a-fixed-finite-gate-set-September-25-2026/main.pdf",
     "milestone": "m4",
-    "hash": "25a19c89f814",
-    "date": "2026-11-15",
-    "by": "gpt-6.1-terra"
+    "hash": "d6f3186cdfb5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/openai/math/blob/main/preprints/Exact-quantum-factoring-over-a-fixed-finite-gate-set-September-25-2026/main.pdf",
+    "milestone": "m5",
+    "hash": "fcf209860fca",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://github.com/openai/math/blob/main/preprints/Exact-quantum-factoring-over-a-fixed-finite-gate-set-September-25-2026/main.pdf",
+    "milestone": "completion",
+    "hash": "b5be97faed70",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2008.10223",
+    "milestone": "m2",
+    "hash": "214d25c257e3",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/pdf/2610.37635",
+    "milestone": "m3",
+    "hash": "1f63e645f3c5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://theoryofcomputing.org/articles/v018a017/v018a017.pdf",
+    "milestone": "m3",
+    "hash": "1f63e645f3c5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2201.07791",
+    "milestone": "m4",
+    "hash": "d6f3186cdfb5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://people.csail.mit.edu/rrw/6.1400-2025/lec20-before-class.pdf",
+    "milestone": "m4",
+    "hash": "d6f3186cdfb5",
+    "date": "2026-11-25",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -1665,8 +2054,123 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 9 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"BQP consists of yes-or-no problems that a quantum algorithm can solve in polynomial time with probability at least 2/3 of giving the correct answer on every input. BPP uses the same guarantees for randomized classical algorithms. An unconditional separation would prove that an explicit problem belongs to BQP and lies outside BPP, without giving the algorithms an external black box or assuming an unproved conjecture. The decision version of factoring meets the quantum requirement. Its classical complexity remains open.\". Reason: The definition describes both classes without telling readers which abbreviation denotes which model."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Factoring has a polynomial-time quantum algorithm. An efficient classical algorithm could still be discovered. If BPP equals BQP, every efficient quantum decision algorithm has an efficient randomized classical counterpart. A separation would expose a limit to classical simulation and settle a question open since the 1960s by proving that some problems solvable with polynomial memory lie beyond deterministic polynomial time. A speedup on inputs of practical interest would still depend on their size and the cost of running the quantum hardware.\". Reason: The current rationale gives a query bound but omits what either answer would mean for classical simulation and what the theorem could establish about practical performance."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Construct an oracle O and a language L. With access to O, a uniform quantum algorithm must decide L in polynomial time with success probability at least 2/3 on every input. Prove that no randomized classical polynomial-time algorithm with access to the same O decides L with that guarantee.\". Reason: The criterion includes a published result and its date after already stating the oracle test."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"Give a family of total Boolean functions for which the bounded-error randomized query complexity grows more than quadratically in the bounded-error quantum query complexity. Each complexity is the minimum worst-case number of input queries needed to return the correct bit with probability at least 2/3 on every input string.\". Reason: The criterion mixes the superquadratic threshold with the exponent and publication history of one construction that meets it."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Construct an oracle O and a language in BQP relative to O that lies outside every level of the polynomial hierarchy relative to the same O. A level allows a fixed number of alternating blocks of existential and universal quantifiers over polynomial-length strings, followed by a deterministic polynomial-time check.\"; threshold_quote = \"an oracle O relative to which BQP is not contained in PH.\"; threshold_ref = 8. Reason: The cited paper states the oracle-language test directly, whereas the current quotation describes the black-box promise problem used to prove it."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"For positive integers N and k encoded in binary, give a uniform quantum algorithm that decides whether N has a prime factor p with k \\u2264 p < N. Require polynomial time in the input length and success probability at least 2/3 on every input. Give a polynomial-time reduction that recovers the full prime factorization of N using answers to this decision problem.\". Reason: The revised test makes recovery of the full factorization an explicit requirement and removes the report of Shor’s result."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m5: criterion = \"Assume P \\u2260 NP and prove that BQP contains a language outside BPP, using ordinary computation and no additional unproved assumption. P is the class of decision problems solvable in deterministic polynomial time. NP is the class whose yes instances have polynomial-length certificates verifiable in deterministic polynomial time.\". Reason: Stating the hypothesis once makes clear which implication must be proved and removes the attribution already given under the test."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No academy, society or programme statement disputing the value or achievability of the unconditional BQP–BPP separation was found.\". Reason: The institutional sources distinguish reservations about experimental benchmarks from objections to the mathematical goal."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"No estimate of the number of people affected or the economic cost attributable to the absence of this proof was found.\". Reason: Estimates for running particular quantum algorithms do not measure the cost of lacking a class-separation proof."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Skipped proposed operation 3 (remove statement 1): the entry needs at least 2 statements. Its reason: The National Academies passage concerns hardness assumptions and noise models for experimental quantum supremacy, so it supplies neither an endorsement of this theorem nor an objection to it."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Applied 9 of 10 proposed operations from QUA-07-revise-20261125T110204371724Z; now version 2."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m3, m4, m5."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 0 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 1 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Structural problems after applying: references never cited: [1]"
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "definition is 523 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 17 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 5 candidates returned, 0 dropped as sources already used, 5 to judge."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 5 of 5 new candidates, without search. Skipped: none. Dropped rows: none. Replaced 20 earlier rows. Added 29 results: 24 from sources already used, 5 from newly found sources."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 4 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 29 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "Removed 1 references no longer cited; renumbered."
+   },
+   {
+    "date": "2026-11-25",
+    "actor": "atlas.page",
+    "action": "result on m4 from reference 18: quote is 337 characters, over its limit of 320; kept."
    }
   ],
-  "results_run": "2026-11-15"
+  "results_run": "2026-11-25"
  }
 }
