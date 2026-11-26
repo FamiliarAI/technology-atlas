@@ -317,12 +317,15 @@
  "page": {
   "id": "ACT-05",
   "title": "Economic scenario generation under model uncertainty",
-  "definition": "Joint simulations of inflation, interest rates and asset returns improve decisions about long-duration insurance or pension liabilities, with independently confirmed gains after accounting for uncertainty about model structure and estimated parameters. Real-world outcome probabilities and market-price-consistent valuation receive separate validation.",
+  "definition": "An economic scenario generator simulates joint paths for inflation, interest rates and asset returns. An insurer or pension plan uses those paths to compare choices such as how to invest against promised benefits. The goal is a decision gain that an independent team can reproduce when both the relationships among economic variables and their estimated parameters are allowed to vary. Real-world scenarios estimate outcome probabilities. Risk-neutral scenarios used to value cash flows are checked against market prices.",
   "goal": {
-   "need": "OECD pension-provider assets were USD 59.7 trillion on 31 December 2021, USD 51.0 trillion on 31 December 2022 and USD 56.5 trillion on 31 December 2023. Economic parameter uncertainty can also affect liability assessments: in Bégin's modelled annuity portfolio, incorporating that uncertainty increased the reported loss-risk measures by at least 12% relative to fixed-parameter calculations.",
+   "need": "Pension providers in OECD countries held USD 56.5 trillion at the end of 2023. Trustees choosing investments need to know how much extra employers might have to contribute after a downturn. More scenarios from one fitted model leave its assumptions fixed. In one annuity portfolio, allowing for uncertainty in estimated economic parameters raised loss-risk measures by at least 12%. Comparing policies across plausible models and parameter values would show which choices hold up for the assets held and benefits promised.",
    "need_refs": [
     1,
-    2
+    2,
+    12,
+    13,
+    14
    ],
    "figures": {
     "caption": "OECD pension-provider assets",
@@ -363,6 +366,14 @@
      "context": "ASOP No. 56, section 3.6, directs actuaries to evaluate model risk and, if appropriate, take this action. The standard became effective on 1 October 2020.",
      "ref": 4,
      "checked": true
+    },
+    {
+     "body": "American Academy of Actuaries, Economic Scenario Generator Subcommittee",
+     "year": "2023",
+     "quote": "the strengths and limitations of available models based on the intended purpose of the scenario generator",
+     "context": "In its November 21 comment letter, the subcommittee asked the NAIC to evaluate these features when selecting a generator for statutory reserves and capital on long-duration life and annuity products.",
+     "ref": 15,
+     "checked": true
     }
    ]
   },
@@ -389,7 +400,7 @@
    {
     "id": "m1",
     "title": "Risk-neutral economic scenarios reproduce initial asset prices in martingale tests.",
-    "criterion": "For traded assets, expected discounted terminal value plus intermediate cash flows equals the initial price; normalising by the initial price gives 1. Monte Carlo sampling error must be considered. The guide illustrates the test with 10,000 scenarios over 30 years, including passing, failing and inconclusive examples. It supplies no universal numerical tolerance. This tests a necessary pricing-consistency condition.",
+    "criterion": "Choose a traded asset with a positive initial price and a test horizon. Reinvest its intermediate payouts in the asset. On each risk-neutral path, discount the terminal value of the resulting holding using that path’s money-market account. The expected discounted value divided by the initial price equals 1. Assess the simulated mean against 1 allowing for Monte Carlo sampling error.",
     "set_by": "Martingale-test convention documented by Pedersen et al., Economic Scenario Generators: A Practical Guide, sections 9.4 and 10.2. The SOA-published guide disclaims an official SOA position.",
     "set_by_kind": "community_convention",
     "threshold_quote": "The martingale test is often set up as a 1 = 1 test.",
@@ -404,14 +415,15 @@
    {
     "id": "m2",
     "title": "A real-world economic scenario model reasonably represents observations withheld from its development.",
-    "criterion": "For a predictive real-world model, validation against observations withheld from development supports the ASOP's qualitative requirement that output reasonably represent the modeled system. ASOP No. 56 gives no numerical error cutoff or minimum horizon; its validation methods depend on intended purpose. The SOA guide's municipal-bond backtest, June 2012 to March 2014, exposes an omitted credit-risk component, illustrating how observed experience can reveal model inadequacy.",
+    "criterion": "For a stated economic variable and forecast horizon, compare real-world projections with observations withheld from model development. For a prediction interval, compare its stated probability with the fraction of withheld outcomes that fall inside it. Judge whether the output reasonably represents the variable for the intended use. ASOP No. 56 sets no universal error cutoff or minimum horizon.",
     "set_by": "Actuarial Standards Board, ASOP No. 56, sections 2.4 and 3.6.2. Hold-out validation is a purpose-dependent method rather than a universal numerical certification.",
     "set_by_kind": "standards_body",
     "threshold_quote": "The actuary should validate that the model output reasonably represents that which is being modeled.",
     "threshold_ref": 4,
     "refs": [
      4,
-     5
+     5,
+     12
     ],
     "status": "active",
     "replaced_by": [],
@@ -420,18 +432,66 @@
    {
     "id": "m3",
     "title": "An economic-scenario method improves a liability decision in an out-of-sample comparison.",
-    "criterion": "A scenario-driven liability decision outperforms named existing methods on a stated out-of-sample metric while allowing for model or parameter uncertainty. Partial evidence: the 2014 USS discussion paper reports superiority to 3 benchmarks over four 36-month holdouts, April 1999 to March 2011. The CPP preprint submitted on 9 February 2026 reports gains in funding ratios and returns; it generated 1,000 scenarios per asset and regime using 10 indexes, November 2012 to November 2022. Both cited versions are preliminary manuscripts, not independent confirmation of empirically validated uncertainty bounds.",
+    "criterion": "For a specified liability decision, compare the policy selected using the candidate scenario method with the policy selected using a named existing method. Use the same liabilities, feasible actions and out-of-sample period. The candidate must improve on the comparator on a stated decision measure, such as the ratio of assets to liabilities, while allowing for uncertainty about the model or its parameters.",
     "set_by": "Atlas fallback. Searches found comparative studies but no common externally published minimum decision gain under model uncertainty; the cited studies concern pension investment decisions.",
     "set_by_kind": "atlas",
     "threshold_quote": null,
     "threshold_ref": null,
     "refs": [
      7,
-     8
+     8,
+     13
     ],
     "status": "active",
     "replaced_by": [],
     "threshold_checked": null
+   },
+   {
+    "id": "m4",
+    "title": "A generator produces joint paths for inflation, interest rates and asset returns.",
+    "criterion": "Generate multiple time paths in which inflation, interest rates and asset returns evolve together under specified relationships. Each path must supply a common economic history for projecting assets and benefit payments.",
+    "set_by": "Economic scenario generator convention documented in Economic Scenario Generators: A Practical Guide, section 1, and exemplified by Wilkie’s stochastic investment model.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "produce simulations of the joint behavior of financial market values and economic variables.",
+    "threshold_ref": 5,
+    "refs": [
+     5,
+     16
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m5",
+    "title": "A valuation generator produces asset prices consistent with observed market prices.",
+    "criterion": "For financial-market projections used to value insurance technical provisions under Solvency II, compare model-implied asset prices with observed market prices. The model must assume no arbitrage and its parameters and scenarios must be calibrated consistently with the risk-free interest-rate term structure used for the best estimate.",
+    "set_by": "European Commission, Delegated Regulation (EU) 2015/35, Article 22(3).",
+    "set_by_kind": "regulator",
+    "threshold_quote": "it generates asset prices that are consistent with asset prices observed in financial markets",
+    "threshold_ref": 18,
+    "refs": [
+     18
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
+   },
+   {
+    "id": "m6",
+    "title": "A liability assessment shows its sensitivity to material model and parameter choices.",
+    "criterion": "For the same liabilities and policy, identify credible alternatives to material judgments about the economic model or its parameters. Explain how the alternatives affect a liability measure such as the projected employer contribution. Address judgments that are material individually or together, using quantitative or qualitative analysis as appropriate.",
+    "set_by": "Financial Reporting Council, Technical Actuarial Standard 100 v2.0, P2.2, P2.4 and A7.3, for technical actuarial work within its scope.",
+    "set_by_kind": "standards_body",
+    "threshold_quote": "sensitivity of results to judgements that are material either individually or in\ncombination.",
+    "threshold_ref": 17,
+    "refs": [
+     14,
+     17
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
    }
   ],
   "measures": [],
@@ -621,42 +681,143 @@
     "issue": "4",
     "pages": "324-352",
     "citation_source": "crossref"
+   },
+   {
+    "id": 14,
+    "kind": "report",
+    "url": "https://www.soa.org/globalassets/assets/files/resources/research-report/2025/2025-12-ar170-rockefeller-college.pdf",
+    "doi": null,
+    "title": "Model Risk Management for Pension Funds Investment Practitioners",
+    "authors": "Don Boyd and Gang Chen",
+    "container": "Society of Actuaries Research Institute",
+    "year": "2025",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 15,
+    "kind": "report",
+    "url": "https://content.naic.org/sites/default/files/national_meeting/LATF%20Fall%20National%20Meeting%20Supplement.pdf",
+    "doi": null,
+    "title": "American Academy of Actuaries Comment Letter",
+    "authors": "American Academy of Actuaries, Economic Scenario Generator Subcommittee",
+    "container": "Life Actuarial (A) Task Force, NAIC Fall National Meeting, Supplemental Packet, Attachment Six-A",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 16,
+    "kind": "journal",
+    "url": "https://www.actuaries.org.uk/system/files/documents/pdf/0025-0051.pdf",
+    "doi": "10.1017/S0020269X00009932",
+    "title": "Some Applications of Stochastic Investment Models",
+    "authors": "Wilkie AD",
+    "container": "JIS",
+    "year": "1986",
+    "volume": "29",
+    "issue": null,
+    "pages": "25-51",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 17,
+    "kind": "report",
+    "url": "https://media.frc.org.uk/documents/TAS_100_General_Actuarial_Standards_Version_2.0.pdf",
+    "doi": null,
+    "title": "Technical Actuarial Standard 100: General Actuarial Standards, Version 2.0",
+    "authors": "Financial Reporting Council",
+    "container": null,
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 18,
+    "kind": "web",
+    "url": "https://www.eiopa.europa.eu/rulebook/solvency-ii-single-rulebook/article-2435_en?prefLang=mt",
+    "doi": null,
+    "title": "General provisions",
+    "authors": "European Commission",
+    "container": "EIOPA Solvency II Single Rulebook, Delegated Regulation (EU) 2015/35, Article 22",
+    "year": "2024",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 19,
+    "kind": "report",
+    "url": "https://www.ressources-actuarielles.net/EXT/ISFA/1226-02.nsf/0/2f98408872dda4d3c125851400513ada/%24FILE/BENADJAL.002.pdf/BENADJAL.pdf",
+    "doi": null,
+    "title": "Optimisation de la qualité des tables de scénarios économiques",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 20,
+    "kind": "preprint",
+    "url": "https://www.ressources-actuarielles.net/EXT/ISFA/1226.nsf/0/709de72db6128dbdc12582700071015b/%24FILE/Article_GSE_FR_v1_6.pdf",
+    "doi": null,
+    "title": "COMMENT CONSTRUIRE UN GÉNÉRATEUR DE SCÉNARIOS ÉCONOMIQUES RISQUE NEUTRE DESTINÉ À L’ÉVALUATION ÉCONOMIQUE DES CONTRATS D’ÉPARGNE ?",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 21,
+    "kind": "preprint",
+    "url": "https://www.ressources-actuarielles.net/EXT/ISFA/1226.nsf/0/a2b3f50b4905dbf2c12582700070d49d/%24FILE/Article_BE_US_v1.7.pdf",
+    "doi": null,
+    "title": "HOW TO DEFINE THE QUALITY OF AN ECONOMIC SCENARIO GENERATOR TO ASSESS THE BEST-ESTIMATE OF A FRENCH SAVINGS CONTRACT IN €?",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 22,
+    "kind": "report",
+    "url": "https://www.taysidepensionfund.org/media/p3kdx03y/tays-march-2020-valuation-report.pdf",
+    "doi": null,
+    "title": "Actuarial valuation as at 31 March 2020",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
    }
   ],
   "milestone_order": [
+   "m4",
    "m1",
+   "m5",
    "m2",
+   "m6",
    "m3"
   ],
   "results": [
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "USS robust optimization achieved a 0.0768 Sharpe ratio over 144 out-of-sample months, exceeding three benchmarks.",
-    "detail": "Four 36-month holdouts were used, with parameter uncertainty sets. The authors selected confidence levels using out-of-sample performance; the preliminary paper does not establish independently confirmed uncertainty bounds.",
-    "quote": "The first row of Table 7 shows the average ou t-of-sample annualized average Sharpe ratios \nacross the 144 months, with robust optimization having the highest Sharpe ratio at 0.0768, and \nSharpe and Tint the lowest at −0.0223.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
-   },
-   {
-    "milestone": "m3",
-    "case": null,
-    "verdict": "partial",
-    "finding": "CPP simulation: 1,000 test scenarios; Wasserstein model mean funding ratio was 1.0480.",
-    "detail": "The stochastic-programming benchmark averaged 0.8661. Testing used simulated returns rather than withheld observed outcomes; the preprint does not establish empirically validated uncertainty bounds.",
-    "quote": "WMhas the highest mean funding ratio among the models at 1.0480, suggesting a relatively\nhigher average ratio of assets to liabilities.",
-    "checked": true,
-    "confirmed": false,
-    "peer_reviewed": false,
-    "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
-   },
    {
     "milestone": "m1",
     "case": null,
@@ -672,119 +833,203 @@
     "judged_on": "2026-11-14"
    },
    {
-    "milestone": "m2",
+    "milestone": "m4",
     "case": null,
     "verdict": "partial",
-    "finding": "US economic scenario models: sample size not reported; forecasts tested over horizons up to 5 years.",
-    "detail": "The paper reports that more sophisticated interest-rate and stock-return models benefit forecasting and coverage, using an expanding-window out-of-sample exercise. The supplied text does not report the corresponding observed forecast errors or coverage results, so it does not establish whether the model reasonably represents withheld observations.",
-    "quote": "Models for interest rates and stock index returns beneﬁt\nfrom more sophisticated dynamics.",
+    "finding": "C3 Phase II used 10,000 ESG-generated scenarios with interest-rate and equity models for variable annuities.",
+    "detail": "Page 38 describes the scenario set used in the regulatory capital exercise.",
+    "quote": "C3 Phase II involved the use of 10,000 ESG-generated scenarios and added equity market models in \naddition to the C3 Phase I interest rate model.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "partial",
+    "finding": "USS robust asset allocation raised the mean funding ratio by 0.39 percentage points versus the deterministic model over 144 test months.",
+    "detail": "The optimizer used uncertainty sets for mean returns, factor loadings, and disturbance variances. The reported performance comparison reused the months used to guide the choice of uncertainty settings.",
+    "quote": "Over a 144 month out-of-sample period we find that robust optimization is superior \nto the three benchmarks on all the performance criteria.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "USS's mean scheme contribution rate was 0.12 percentage points lower with robust than deterministic allocation over 144 test months.",
+    "detail": "The contribution-rate calculation used a ten-year spread period. The difference reflects a change in asset allocation induced by the treatment of parameter uncertainty.",
+    "quote": "Row 10 of Table 7 shows that robust \noptimization gives the lowest mean contribution  rate (33.97%), while Sharpe and Tint has the \nhighest (35.49%).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Canada Pension Plan exercise generated 1,000 asset-return scenarios per asset and period.",
+    "detail": null,
+    "quote": "We generated 1000 scenarios\nfor each asset in each period, corresponding to the 4 market regimes.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Across four Canada Pension Plan models, box ambiguity raises the optimized contribution rate by 3.0 percentage points versus stochastic programming at the same funding target.",
+    "detail": "Table 2 reports the contribution rates. The 3.0 percentage-point difference compares separately optimized policies.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "met",
+    "finding": "Across 1,000 simulated Canada Pension Plan test scenarios, Wasserstein improved the mean funding ratio by 0.1819 over stochastic programming.",
+    "detail": "The gain is the difference between the reported mean funding ratios. The test used separately simulated asset returns drawn from distributions reported in an earlier study.",
+    "quote": "WMhas the highest mean funding ratio among the models at 1.0480, suggesting a relatively\nhigher average ratio of assets to liabilities.SPhas the lowest mean funding ratio of 0.8661,",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 10,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "met",
+    "finding": "The U.S. economic scenario generator produced 100,000 joint paths for inflation, interest rates, and stock index returns.",
+    "detail": null,
+    "quote": "We rely on Monte Carlo simulation to obtain a sample of 100,000 paths of YYY over the\nnext 30 years (i.e., τ = 360).",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "met",
+    "finding": "Full-model five-year cumulative U.S. stock index returns had a 1.3 percentage-point coverage error. The number of forecast–outcome pairs is unstated.",
+    "detail": "Table 6 reports the absolute coverage error, leaving the direction of the gap unspecified for this result.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "partial",
+    "finding": "USS, 144 months: robust optimization retained the top projected contribution-rate rank when the factor set changed.",
+    "detail": "Table 8 gives rankings for the sensitivity checks. It does not give the contribution-rate levels under the alternative factor sets or confidence level.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 13,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "USS pension asset allocation: over 144 out-of-sample months, robust optimization outperformed four benchmarks across 20 performance criteria.",
-    "detail": "The model accounts for parameter uncertainty and incorporates liabilities, but uses robust optimization rather than a scenario-driven method.",
-    "quote": "Over a 144 \nmonth out -of-sample period robust optimization is superior to the four benchmarks across 2 0 \nperformance criteria",
-    "checked": true,
+    "finding": "USS, 144 out-of-sample months: robust optimization raised mean funding by 5.12 percentage points over modified Sharpe and Tint.",
+    "detail": "The gain is calculated from Table 7. The authors fitted the model on rolling 72-month windows and tested each selected allocation over the following 36 months.",
+    "quote": null,
+    "checked": null,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 13,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "met",
+    "finding": "Zero-coupon bond martingale tests across 10 scenario tables: 100% of tested maturities passed in the illustrated capped run.",
+    "detail": "The 100% pass rate refers to the illustrated run. The thesis reports that capping rates slightly raised estimated prices after about 15 years while preserving the test result.",
+    "quote": "Comme indiqu´ e, le test est valid´ e pour 100% des maturit´ es.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "G2++ fit to at-the-money cap prices repriced on the EIOPA curve had a 0.005% relative squared pricing error. The cap count is unstated.",
+    "detail": "The study uses Bloomberg implied volatilities from 2 January 2018. Repricing with the EIOPA curve and a nonzero shift changes the benchmark relative to the original market prices.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "met",
+    "finding": "For one French euro savings portfolio, the best-estimate liability spread across market-consistent model and calibration choices was 4.3% of the mean.",
+    "detail": "The market-consistent LIBOR Market Model calibration diverged. A convergent adjustment lost market consistency, so the reported market-consistent comparison uses Hull–White and G2++.",
+    "quote": "The difference between the minimum and maximum value is 4.30%.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "met",
+    "finding": "Tayside Pension Fund (51,857 membership records): the lower discount-rate assumption raised past-service liabilities by £56m.",
+    "detail": "The record count sums active, deferred, and pensioner or dependant records. Members can have more than one record. The statutory certificate sets payable contributions on the agreed basis. The sensitivity estimates appear in the actuary’s analysis.",
+    "quote": null,
+    "checked": null,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 22,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
    }
   ],
   "judged": [
-   {
-    "url": "https://www.soa.org/globalassets/assets/files/research/projects/research-2016-economic-scenario-generators.pdf",
-    "milestone": "m1",
-    "hash": "db6d618a5277",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.soa.org/globalassets/assets/files/research/projects/research-2016-economic-scenario-generators.pdf",
-    "milestone": "m2",
-    "hash": "2d103c01ccd4",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.soa.org/globalassets/assets/files/research/projects/research-2016-economic-scenario-generators.pdf",
-    "milestone": "m3",
-    "hash": "cd836dc04576",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://www.soa.org/globalassets/assets/files/research/projects/research-2016-economic-scenario-generators.pdf",
-    "milestone": "completion",
-    "hash": "b19cf2f69706",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://assets.henley.ac.uk/v3/fileUploads/research/ICM-2014-02-mtime20170511091452_2020-10-14-084953.pdf",
-    "milestone": "m1",
-    "hash": "db6d618a5277",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://assets.henley.ac.uk/v3/fileUploads/research/ICM-2014-02-mtime20170511091452_2020-10-14-084953.pdf",
-    "milestone": "m2",
-    "hash": "2d103c01ccd4",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://assets.henley.ac.uk/v3/fileUploads/research/ICM-2014-02-mtime20170511091452_2020-10-14-084953.pdf",
-    "milestone": "m3",
-    "hash": "cd836dc04576",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://assets.henley.ac.uk/v3/fileUploads/research/ICM-2014-02-mtime20170511091452_2020-10-14-084953.pdf",
-    "milestone": "completion",
-    "hash": "b19cf2f69706",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/abs/2602.08228",
-    "milestone": "m1",
-    "hash": "db6d618a5277",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/abs/2602.08228",
-    "milestone": "m2",
-    "hash": "2d103c01ccd4",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/abs/2602.08228",
-    "milestone": "m3",
-    "hash": "cd836dc04576",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://arxiv.org/abs/2602.08228",
-    "milestone": "completion",
-    "hash": "b19cf2f69706",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
    {
     "url": "https://www.conning.com/-/media/marketingsite/documents/risk-solutions/validating-rn-scenarios---martingale.pdf",
     "milestone": "m1",
@@ -793,21 +1038,280 @@
     "by": "gpt-6.1-terra"
    },
    {
+    "url": "https://www.soa.org/globalassets/assets/files/research/projects/research-2016-economic-scenario-generators.pdf",
+    "milestone": "m4",
+    "hash": "ea0e14db4474",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.soa.org/globalassets/assets/files/research/projects/research-2016-economic-scenario-generators.pdf",
+    "milestone": "m1",
+    "hash": "924979c1b116",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.soa.org/globalassets/assets/files/research/projects/research-2016-economic-scenario-generators.pdf",
+    "milestone": "m5",
+    "hash": "b0850e3b42b2",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.soa.org/globalassets/assets/files/research/projects/research-2016-economic-scenario-generators.pdf",
+    "milestone": "m2",
+    "hash": "78ac847cd544",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.soa.org/globalassets/assets/files/research/projects/research-2016-economic-scenario-generators.pdf",
+    "milestone": "m6",
+    "hash": "a20c719f36e2",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.soa.org/globalassets/assets/files/research/projects/research-2016-economic-scenario-generators.pdf",
+    "milestone": "m3",
+    "hash": "facce25bd892",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.soa.org/globalassets/assets/files/research/projects/research-2016-economic-scenario-generators.pdf",
+    "milestone": "completion",
+    "hash": "b19cf2f69706",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://assets.henley.ac.uk/v3/fileUploads/research/ICM-2014-02-mtime20170511091452_2020-10-14-084953.pdf",
+    "milestone": "m4",
+    "hash": "ea0e14db4474",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://assets.henley.ac.uk/v3/fileUploads/research/ICM-2014-02-mtime20170511091452_2020-10-14-084953.pdf",
+    "milestone": "m1",
+    "hash": "924979c1b116",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://assets.henley.ac.uk/v3/fileUploads/research/ICM-2014-02-mtime20170511091452_2020-10-14-084953.pdf",
+    "milestone": "m5",
+    "hash": "b0850e3b42b2",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://assets.henley.ac.uk/v3/fileUploads/research/ICM-2014-02-mtime20170511091452_2020-10-14-084953.pdf",
+    "milestone": "m2",
+    "hash": "78ac847cd544",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://assets.henley.ac.uk/v3/fileUploads/research/ICM-2014-02-mtime20170511091452_2020-10-14-084953.pdf",
+    "milestone": "m6",
+    "hash": "a20c719f36e2",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://assets.henley.ac.uk/v3/fileUploads/research/ICM-2014-02-mtime20170511091452_2020-10-14-084953.pdf",
+    "milestone": "m3",
+    "hash": "facce25bd892",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://assets.henley.ac.uk/v3/fileUploads/research/ICM-2014-02-mtime20170511091452_2020-10-14-084953.pdf",
+    "milestone": "completion",
+    "hash": "b19cf2f69706",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2602.08228",
+    "milestone": "m4",
+    "hash": "ea0e14db4474",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2602.08228",
+    "milestone": "m1",
+    "hash": "924979c1b116",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2602.08228",
+    "milestone": "m5",
+    "hash": "b0850e3b42b2",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2602.08228",
+    "milestone": "m2",
+    "hash": "78ac847cd544",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2602.08228",
+    "milestone": "m6",
+    "hash": "a20c719f36e2",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2602.08228",
+    "milestone": "m3",
+    "hash": "facce25bd892",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/abs/2602.08228",
+    "milestone": "completion",
+    "hash": "b19cf2f69706",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E2C5F1AC813302DBD548ABD301C2B0DF/S0515036121000210a.pdf/on_complex_economic_scenario_generators_is_less_more.pdf",
+    "milestone": "m4",
+    "hash": "ea0e14db4474",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E2C5F1AC813302DBD548ABD301C2B0DF/S0515036121000210a.pdf/on_complex_economic_scenario_generators_is_less_more.pdf",
+    "milestone": "m1",
+    "hash": "924979c1b116",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E2C5F1AC813302DBD548ABD301C2B0DF/S0515036121000210a.pdf/on_complex_economic_scenario_generators_is_less_more.pdf",
+    "milestone": "m5",
+    "hash": "b0850e3b42b2",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
     "url": "https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E2C5F1AC813302DBD548ABD301C2B0DF/S0515036121000210a.pdf/on_complex_economic_scenario_generators_is_less_more.pdf",
     "milestone": "m2",
-    "hash": "2d103c01ccd4",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "78ac847cd544",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E2C5F1AC813302DBD548ABD301C2B0DF/S0515036121000210a.pdf/on_complex_economic_scenario_generators_is_less_more.pdf",
+    "milestone": "m6",
+    "hash": "a20c719f36e2",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E2C5F1AC813302DBD548ABD301C2B0DF/S0515036121000210a.pdf/on_complex_economic_scenario_generators_is_less_more.pdf",
+    "milestone": "m3",
+    "hash": "facce25bd892",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cambridge.org/core/services/aop-cambridge-core/content/view/E2C5F1AC813302DBD548ABD301C2B0DF/S0515036121000210a.pdf/on_complex_economic_scenario_generators_is_less_more.pdf",
+    "milestone": "completion",
+    "hash": "b19cf2f69706",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://purehost.bath.ac.uk/ws/portalfiles/portal/158122676/ROBO_50_PLATANAKIS_Bath_Pure.pdf",
+    "milestone": "m4",
+    "hash": "ea0e14db4474",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://purehost.bath.ac.uk/ws/portalfiles/portal/158122676/ROBO_50_PLATANAKIS_Bath_Pure.pdf",
+    "milestone": "m1",
+    "hash": "924979c1b116",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://purehost.bath.ac.uk/ws/portalfiles/portal/158122676/ROBO_50_PLATANAKIS_Bath_Pure.pdf",
+    "milestone": "m5",
+    "hash": "b0850e3b42b2",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://purehost.bath.ac.uk/ws/portalfiles/portal/158122676/ROBO_50_PLATANAKIS_Bath_Pure.pdf",
+    "milestone": "m2",
+    "hash": "78ac847cd544",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://purehost.bath.ac.uk/ws/portalfiles/portal/158122676/ROBO_50_PLATANAKIS_Bath_Pure.pdf",
+    "milestone": "m6",
+    "hash": "a20c719f36e2",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://purehost.bath.ac.uk/ws/portalfiles/portal/158122676/ROBO_50_PLATANAKIS_Bath_Pure.pdf",
     "milestone": "m3",
-    "hash": "cd836dc04576",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "facce25bd892",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://purehost.bath.ac.uk/ws/portalfiles/portal/158122676/ROBO_50_PLATANAKIS_Bath_Pure.pdf",
+    "milestone": "completion",
+    "hash": "b19cf2f69706",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.ressources-actuarielles.net/EXT/ISFA/1226-02.nsf/0/2f98408872dda4d3c125851400513ada/%24FILE/BENADJAL.002.pdf/BENADJAL.pdf",
+    "milestone": "m1",
+    "hash": "924979c1b116",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.ressources-actuarielles.net/EXT/ISFA/1226.nsf/0/709de72db6128dbdc12582700071015b/%24FILE/Article_GSE_FR_v1_6.pdf",
+    "milestone": "m5",
+    "hash": "b0850e3b42b2",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.ressources-actuarielles.net/EXT/ISFA/1226.nsf/0/a2b3f50b4905dbf2c12582700070d49d/%24FILE/Article_BE_US_v1.7.pdf",
+    "milestone": "m6",
+    "hash": "a20c719f36e2",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.taysidepensionfund.org/media/p3kdx03y/tays-march-2020-valuation-report.pdf",
+    "milestone": "m6",
+    "hash": "a20c719f36e2",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -869,8 +1373,103 @@
     "date": "2026-11-15",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 0 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"An economic scenario generator simulates joint paths for inflation, interest rates and asset returns. An insurer or pension plan uses those paths to compare choices such as how to invest against promised benefits. The goal is a decision gain that an independent team can reproduce when both the relationships among economic variables and their estimated parameters are allowed to vary. Real-world scenarios estimate outcome probabilities. Risk-neutral scenarios used to value cash flows are checked against market prices.\". Reason: The definition uses independent confirmation as a test but leaves readers to infer what varies in a simulation and which decision it informs."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Pension providers in OECD countries held USD 56.5 trillion at the end of 2023. Trustees choosing investments need to know how much extra employers might have to contribute after a downturn. More scenarios from one fitted model leave its assumptions fixed. In one annuity portfolio, allowing for uncertainty in estimated economic parameters raised loss-risk measures by at least 12%. Comparing policies across plausible models and parameter values would show which choices hold up for the assets held and benefits promised.\". Reason: The asset totals establish scale but leave out the choices facing trustees and sponsors and why more simulations from one fitted model can leave those choices exposed."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by American Academy of Actuaries, Economic Scenario Generator Subcommittee, 2023: \"the strengths and limitations of available models based on the intended purpose of the scenario generator\". Reason: The Academy’s letter identifies a specific goal for model selection and explains its objection to relying on the proposed acceptance criteria alone."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after None: \"A generator produces joint paths for inflation, interest rates and asset returns.\". Reason: The milestones begin with a pricing test and omit the earlier computational demonstration that economic variables and asset returns can be simulated together."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Choose a traded asset with a positive initial price and a test horizon. Reinvest its intermediate payouts in the asset. On each risk-neutral path, discount the terminal value of the resulting holding using that path\\u2019s money-market account. The expected discounted value divided by the initial price equals 1. Assess the simulated mean against 1 allowing for Monte Carlo sampling error.\"; threshold_quote = \"The martingale test is often set up as a 1 = 1 test.\"; threshold_ref = 5. Reason: The original criterion leaves the discounting of intermediate payments ambiguous and gives the path count and horizon of an illustration alongside the test."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m1: \"A valuation generator produces asset prices consistent with observed market prices.\". Reason: The valuation component also needs a comparison with observed market prices, which a martingale test alone cannot supply."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"For a stated economic variable and forecast horizon, compare real-world projections with observations withheld from model development. For a prediction interval, compare its stated probability with the fraction of withheld outcomes that fall inside it. Judge whether the output reasonably represents the variable for the intended use. ASOP No. 56 sets no universal error cutoff or minimum horizon.\"; threshold_quote = \"The actuary should validate that the model output reasonably represents that which is being modeled.\"; threshold_ref = 4; refs = [4, 5, 12]. Reason: The municipal-bond result belongs with the evidence, while interval coverage gives readers a concrete way to test a scenario distribution on withheld observations."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m2: \"A liability assessment shows its sensitivity to material model and parameter choices.\". Reason: The existing tests do not show how much a liability assessment depends on the chosen economic model and its parameter assumptions."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"For a specified liability decision, compare the policy selected using the candidate scenario method with the policy selected using a named existing method. Use the same liabilities, feasible actions and out-of-sample period. The candidate must improve on the comparator on a stated decision measure, such as the ratio of assets to liabilities, while allowing for uncertainty about the model or its parameters.\"; refs = [7, 8, 13]. Reason: The criterion mixes two studies’ results with the test and cites only the preliminary version of the USS comparison."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "atlas.page",
+    "action": "Applied 9 of 9 proposed operations from ACT-05-revise-20261126T121036572368Z; now version 2."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m4, m1, m5, m2, m6, m3."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 0 from arXiv, 4 as the model gave them."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 5 found, 0 not found, 1 with no readable copy."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "atlas.page",
+    "action": "definition is 521 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 5 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 5 candidates returned, 0 dropped as sources already used, 5 to judge."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 4 of 5 new candidates, without search. Skipped: 2 no readable saved copy. Dropped rows: none. Replaced 4 earlier rows. Added 14 results: 10 from sources already used, 4 from newly found sources."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 4 as the model gave them."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 8 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-14"
+  "results_run": "2026-11-26"
  }
 }
