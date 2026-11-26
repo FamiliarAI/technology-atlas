@@ -246,14 +246,29 @@
   ],
   "prompt": "5e97d4b8dfc3"
  },
+ "review": {
+  "state": "published",
+  "note": null,
+  "into": null,
+  "at": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "state": "published"
+   }
+  ]
+ },
  "page": {
   "id": "BCH-10",
   "title": "Post-translational modification network prediction",
-  "definition": "A model predicts how combinations of post-translational modifications—chemical changes to proteins after synthesis—and changes to their modifying enzymes alter biochemical network responses. It predicts response direction, magnitude and time course for previously untested interventions in specified cellular contexts.",
+  "definition": "Post-translational modifications are chemical changes to proteins after synthesis. They can interact: phosphorylation at one site can promote attachment of the small protein SUMO at another. Existing network maps group modifications that change together after a measured treatment. A predictive model goes further by specifying the direction, magnitude and time course of a cellular network’s response to an untested combination of modifications or a change in the enzymes that control them.",
   "goal": {
-   "need": "The A2058 melanoma study below illustrates the measurements collected for one cellular context. Its predicted drug combinations received partial experimental confirmation. Predicting untested responses connects molecular measurements to intervention selection, while exposing which effects remain experimentally unconfirmed.",
+   "need": "Testing more than 5,000 pairs of approved cancer drugs across 60 cancer cell lines took 300,000 experiments. A screen at one time point can miss a transient response, and measuring modifications separately can miss cases where one enables another. Knowing how those interactions affect signalling over time could help drug developers choose which untested combinations to examine for effects on tumour cell growth or death. Benefit to patients still requires clinical testing.",
    "need_refs": [
-    1
+    11,
+    1,
+    12,
+    10
    ],
    "figures": {
     "caption": "Measurements in one A2058 melanoma perturbation study",
@@ -322,7 +337,7 @@
    {
     "id": "m1",
     "title": "A model predicts withheld phosphoprotein trajectories with lower error than random predictions.",
-    "criterion": "Withhold an experimental intervention and predict its phosphoprotein time courses; root-mean-square error (RMSE) must be lower than the study's random-prediction baseline. Zhu and Guan's report of 11 June 2014 used 20 protein readouts, eight time points and three replicates in MDA-MB-468 breast cancer cells. Holding out the intermediate EGF stimulus gave RMSE 0.06 versus 0.91 for random predictions averaged over 100 runs. This tests stimulus interpolation within phosphorylation signalling.",
+    "criterion": "In the MDA-MB-468 breast cancer cell dataset, train on the 0 and 10 ng epidermal growth factor conditions and withhold the 5 ng condition. Predict the phosphorylation time courses for 20 protein readouts at eight time points, treating the three replicates as separate time courses. The mean root-mean-square error across time points must be lower than the random-prediction baseline averaged over 100 runs.",
     "set_by": "Held-out predictive validation against a random baseline, as applied by Zhu and Guan in their experimental validation; the published test concerns phosphorylation.",
     "set_by_kind": "community_convention",
     "threshold_quote": "The predicted time course trajectory (red line) has a much lower RMSE across all the time points compared with random prediction (blue line).",
@@ -336,11 +351,11 @@
    },
    {
     "id": "m2",
-    "title": "A predicted signalling path produces both the expected phosphopeptide change and cellular response.",
-    "criterion": "A predicted signalling path produces the expected substrate-phosphorylation and cellular responses after targeted inhibition. On 10 September 2015, Terfve et al. reported that Akt or mTORC1/2 inhibition reduced a CCNL1 phosphopeptide 2–5-fold; after 24 hours, MCF7 cells' G1 fractions rose about 1.7- and 2-fold, respectively. P70S6K inhibition did not produce the phosphopeptide decrease. Flow cytometry used 5,000 cells per injection and three technical injections per sample. These results support the proposed mTOR–Akt–CDK2 path.",
+    "title": "Targeted inhibition changes both a substrate phosphopeptide and a cellular response as predicted.",
+    "criterion": "Test both predictions of a signalling path against vehicle-treated cells. In the PHONEMeS test of the proposed mTOR–Akt–CDK2 path, inhibiting Akt or mTORC1/2 must reduce the abundance of the cyclin-L1 phosphopeptide spanning serines 335 and 338. After 24 hours, each inhibitor must also increase the fraction of MCF7 cells in G1 relative to vehicle, as measured by flow cytometry.",
     "set_by": "Experimental testing of model predictions, used by the PHONEMeS developers in Figure 5 and by the perturbation-biology developers for drug-combination validation; the PHONEMeS test concerns phosphorylation.",
     "set_by_kind": "community_convention",
-    "threshold_quote": "verify the unexpected prediction that mTOR inhibition affects the function of the cyclin-dependent kinase CDK2.",
+    "threshold_quote": "verify both the plausibility of this predicted path to CCNL1, and the hypothesis that mTORC1/2 inhibition leads to a perturbation of the activity of CDK2.",
     "threshold_ref": 9,
     "refs": [
      9,
@@ -354,7 +369,7 @@
    {
     "id": "m3",
     "title": "A model earns DREAM top-performer status for blind phosphoprotein time-course prediction.",
-    "criterion": "Receive organizer-designated top-performer status in DREAM SC2A: predict withheld mTOR-inhibition phosphoprotein trajectories in four breast cancer cell lines under eight stimuli, from 0 to 4 hours. Predictions are ranked by log-scale RMSE. Robust superiority requires outranking another team in at least 75 of 100 subsamples, retaining 50% of data. The organizers' 22 February 2016 report named Team42 and Team10 as top performers; the nominal first-ranked submission was incomplete.",
+    "criterion": "Earn an HPN-DREAM SC2A top-performer designation. Submit seven-point phosphoprotein trajectories from 0 to 4 hours for five test kinase inhibitors across four breast cancer cell lines and eight stimuli, excluding each inhibitor’s direct targets. For withheld mTOR-inhibition data, the organizers ranked submissions by root-mean-square error on log-transformed, replicate-averaged data within each scored block, then averaged the ranks. A robust lead required outranking the other team in at least 75 of 100 iterations under each of two schemes: retaining half the blocks or half the observations within each block.",
     "set_by": "HPN-DREAM Breast Cancer Network Inference Challenge organizers, time-course prediction scoring and ranking-robustness methods; this challenge concerns phosphorylation.",
     "set_by_kind": "prize",
     "threshold_quote": "Team A was considered to be robustly ranked above team B if the former outranked the latter in at least 75% of iterations.",
@@ -369,7 +384,7 @@
    {
     "id": "m4",
     "title": "Untested combinations of two PTM classes produce the predicted network responses in one cellular context.",
-    "criterion": "In one specified cellular context, a fixed model prospectively predicts correct response directions for a prespecified panel of untested combinations involving at least two PTM classes and perturbations of their modifying enzymes. Its root-mean-square trajectory error is lower than both a no-change predictor and a version omitting PTM interactions. Targeted site perturbations support the predicted causal dependencies. ProteinNexus's 11 May 2026 report used computational knockouts on two sequences involving phosphorylation/SUMOylation or glycosylation/phosphorylation; these do not establish this cellular result.",
+    "criterion": "In one specified cellular context, a fixed model prospectively predicts correct response directions for a prespecified panel of untested combinations involving at least two PTM classes and perturbations of their modifying enzymes. Its root-mean-square trajectory error is lower than both a no-change predictor and a version omitting PTM interactions. Targeted site perturbations support the predicted causal dependencies.",
     "set_by": "Technology Atlas fallback; searches of NIH priorities, PTM pathway reviews and subsequent crosstalk benchmarks found no external prospective multi-PTM network threshold. The class minimum and comparators are Atlas choices.",
     "set_by_kind": "atlas",
     "threshold_quote": null,
@@ -382,6 +397,21 @@
     "status": "active",
     "replaced_by": [],
     "threshold_checked": null
+   },
+   {
+    "id": "m5",
+    "title": "Blocking a predicted phosphorylation site reduces SUMO attachment at a neighbouring site.",
+    "criterion": "Use a phosphorylation-dependent SUMO modification motif to predict that phosphorylation of its serine promotes SUMO attachment to its lysine. In cells, verify phosphorylation at the predicted serine and SUMO attachment at the predicted lysine. Compare the wild-type protein with a serine-to-alanine variant under the same conditions. The variant must show less SUMO attachment.",
+    "set_by": "Site-substitution test used by Hietakangas and colleagues for the phosphorylation-dependent SUMO modification motif.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "sumoylation of GATA-1 and MEF2A was efficiently prevented by mutating the phosphoacceptor sites to alanine",
+    "threshold_ref": 12,
+    "refs": [
+     12
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
    }
   ],
   "measures": [],
@@ -516,9 +546,52 @@
     "issue": "1",
     "pages": null,
     "citation_source": "crossref"
+   },
+   {
+    "id": 10,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10089347/",
+    "doi": "10.1371/journal.pcbi.1010690",
+    "title": "Network models of protein phosphorylation, acetylation, and ubiquitination connect metabolic and cell signaling pathways in lung cancer",
+    "authors": "Ross KE, Zhang G, Akcora C, Lin Y, Fang B, Koomen J, et al.",
+    "container": "PLoS Comput Biol",
+    "year": "2023",
+    "volume": "19",
+    "issue": "3",
+    "pages": "e1010690",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 11,
+    "kind": "web",
+    "url": "https://www.cancer.gov/news-events/cancer-currents-blog/2017/nci-almanac-drug-combinations",
+    "doi": null,
+    "title": "NCI ALMANAC: A New Tool for Research on Cancer Drug Combinations",
+    "authors": "James H. Doroshow, M.D., and Jerry Collins, Ph.D.",
+    "container": "Cancer Currents Blog, National Cancer Institute",
+    "year": "2017",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 12,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC1324973/",
+    "doi": "10.1073/pnas.0503698102",
+    "title": "PDSM, a motif for phosphorylation-dependent SUMO modification",
+    "authors": "Hietakangas V, Anckar J, Blomster HA, Fujimoto M, Palvimo JJ, Nakai A, et al.",
+    "container": "Proc. Natl. Acad. Sci. U.S.A.",
+    "year": "2006",
+    "volume": "103",
+    "issue": "1",
+    "pages": "45-50",
+    "citation_source": "crossref"
    }
   ],
   "milestone_order": [
+   "m5",
    "m1",
    "m2",
    "m3",
@@ -529,237 +602,328 @@
     "milestone": "m1",
     "case": null,
     "verdict": "partial",
-    "finding": "A2058 models predicted withheld molecular and phenotype data across 10 models, with mean error 0.181.",
-    "detail": "The test included protein and phosphoprotein trajectories for held-out drug combinations, but the reported error combines molecular and phenotypic nodes. No random-prediction baseline is reported.",
-    "quote": "The resulting generalization error for optimal λ* on left-out data had a mean of 0.181 across the 10 models and of 0.118 for phenotypic data alone, and the corresponding Pearson correlation coefficient between model prediction and the experimentally measured data was 0.54 (molecular and phenotypic) and 0.79 for the phenotypic data alone.",
+    "finding": "Across 10 A2058 models, held-out drug-pair predictions had a mean residual sum of squares of 0.181 across molecular and phenotypic readouts.",
+    "detail": null,
+    "quote": "The resulting generalization error for optimal λ* on left-out data had a mean of 0.181 across the 10 models",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 1,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
    },
    {
-    "milestone": "m2",
+    "milestone": "m4",
     "case": null,
     "verdict": "partial",
-    "finding": "Predicted NT157–gefitinib treatment reduced A2058 cell growth in three replicates.",
-    "detail": "The predicted cellular response was observed, but the study did not establish the predicted phosphorylation change: the authors state that NT157's effect on IRS1-pS636/639 was unknown.",
-    "quote": "The drug pair with the strongest predicted effect, NT157 and gefitinib, reduced cell growth substantially relative to no-drug control, and the combination is more effective than the effect of either drug alone",
+    "finding": "In three A2058 replicates, the top predicted inhibitor pair, NT157 plus gefitinib, reduced growth at 10 µM of each drug.",
+    "detail": "The drugs were proxies for modeled EGFR and IRS1 phosphosites. The authors did not establish whether NT157 reduced IRS1-pS636/639 in A2058 cells.",
+    "quote": "Inhibition of proteins EGFR and IRS1, which was predicted to be the most effective combination, resulted in a reduced number of cells only at high doses (10\nμ\nM) of the selected drugs.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 1,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "For 20 protein readouts, the withheld EGF trajectory prediction had RMSE 0.06 versus 0.91 for random predictions.",
-    "detail": "MDA-MB-468 cells; eight time points and three replicates. The model trained on 0 and 10 ng EGF and predicted the withheld 5 ng condition.",
+    "finding": "MDA-MB-468 trajectories for 20 protein readouts across three replicates had a mean RMSE of 0.06, below the random baseline.",
+    "detail": null,
     "quote": "The average RMSE for the eight time points is 0.06, while random prediction baseline (for 100 runs) is 0.91, indicating 15-fold reductions in error.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "The model achieved top performance in a 2013 DREAM 8 breast cancer time-course challenge; sample size is not stated.",
-    "detail": "The paper reports challenge performance but does not establish the specified SC2A conditions, organizer-designated Team42 or Team10 status, or the 75-of-100 subsample criterion.",
+    "finding": "The model ranked first on experimental DREAM 8 breast cancer time-course data. The number of scored trajectories is unspecified.",
+    "detail": "The article refers readers to supplementary material for challenge evaluation details. The supplied text gives no iteration counts for either resampling scheme.",
     "quote": "This algorithm achieved the top performance in the 2013 8th Dialogue for Reverse Engineering Assessments and Methods (DREAM 8) subchallenge: time course prediction in breast cancer cell lines.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 8,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "In MCF7 cells, Akt and mTORC1/2 inhibition increased G1 fractions about 1.7- and 2-fold; flow cytometry analyzed 5,000 cells per injection.",
-    "detail": "The CCNL1 phosphopeptide decreased 2–5-fold after Akt or mTORC1/2 inhibition, but not P70S6K inhibition. Cell-cycle analysis followed 24 hours of treatment, with three technical injections per sample.",
-    "quote": "As we can see in\nFig. 5d\n, on pharmacological inhibition of either Akt or mTORC1/2, the proportion of cells present in G1 phase increased approximately 1.7- and 2-fold, respectively, relative to DMSO control, and the proportion of cells present in S and G2/M phase was concomitantly reduced.",
+    "finding": "In MCF7 cells, the cyclin-L1 Ser335/Ser338 phosphopeptide fell 2–5 fold after Akt or mTORC1/2 inhibition, with six measurements per treatment.",
+    "detail": "Phosphopeptide measurements used biological duplicates and technical triplicates. Each flow-cytometry sample was run in triplicate with 5,000 cells per injection.",
+    "quote": "this phosphopeptide was decreased 2–5 fold in abundance following Akt and mTORC1/2 inhibition",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "met",
-    "finding": "DREAM SC2A: 2 top performers across 32 cell-line and stimulus contexts.",
-    "detail": "Team42 ranked second and Team10 ranked third. The first-ranked submission, Team44, was incomplete and ineligible for top-performer status.",
-    "quote": "Testing the robustness of team ranks gave two top performers  \nfor the experimental data task and a single top performer for the \nin silico data task (Online Methods).",
+    "finding": "Across 32 cell line–stimulus contexts, HPN-DREAM SC2A named two top performers, Team42 and Team10.",
+    "detail": "Team44 ranked first but was ineligible because its submission was incomplete. Team42 outranked Team10 in 60 and 70 of 100 iterations across the two schemes, below the threshold for a robust lead.",
+    "quote": "the teams ranked second and third (Team42 and Team10, respectively) were named as top performers.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 5,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "met",
+    "finding": "HSF4b S299A reduced SUMO attachment versus wild type in Cos-7 cells. The SUMO blots give no replicate count or fold reduction.",
+    "detail": "The three independent experiments reported in Fig. 2A apply to phosphorylation quantification. The SUMO comparison in Fig. 2D–E is qualitative.",
+    "quote": "Indeed, the S299A mutation strongly inhibited HSF4b sumoylation",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 12,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
    }
   ],
   "judged": [
-   {
-    "url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/pmic.70055",
-    "milestone": "m1",
-    "hash": "6f7c62f8b653",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/pmic.70055",
-    "milestone": "m2",
-    "hash": "ce9a92a67c19",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/pmic.70055",
-    "milestone": "m3",
-    "hash": "cf338ce16809",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/pmic.70055",
-    "milestone": "m4",
-    "hash": "73adf73cd179",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/pmic.70055",
-    "milestone": "completion",
-    "hash": "7eddcb0dc72b",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7384681/",
-    "milestone": "m1",
-    "hash": "6f7c62f8b653",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7384681/",
-    "milestone": "m2",
-    "hash": "ce9a92a67c19",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7384681/",
-    "milestone": "m3",
-    "hash": "cf338ce16809",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7384681/",
-    "milestone": "m4",
-    "hash": "73adf73cd179",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7384681/",
-    "milestone": "completion",
-    "hash": "7eddcb0dc72b",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4173019/",
-    "milestone": "m1",
-    "hash": "6f7c62f8b653",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4173019/",
-    "milestone": "m2",
-    "hash": "ce9a92a67c19",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4173019/",
-    "milestone": "m3",
-    "hash": "cf338ce16809",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4173019/",
-    "milestone": "m4",
-    "hash": "73adf73cd179",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4173019/",
-    "milestone": "completion",
-    "hash": "7eddcb0dc72b",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4579397/",
-    "milestone": "m1",
-    "hash": "6f7c62f8b653",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4579397/",
-    "milestone": "m2",
-    "hash": "ce9a92a67c19",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4579397/",
-    "milestone": "m3",
-    "hash": "cf338ce16809",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4579397/",
-    "milestone": "m4",
-    "hash": "73adf73cd179",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
-   {
-    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4579397/",
-    "milestone": "completion",
-    "hash": "7eddcb0dc72b",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
-   },
    {
     "url": "https://api.repository.cam.ac.uk/server/api/core/bitstreams/86805607-bfe6-441b-8217-99743634e801/content",
     "milestone": "m3",
     "hash": "cf338ce16809",
     "date": "2026-11-14",
     "by": "gpt-6.1-terra"
+   },
+   {
+    "url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/pmic.70055",
+    "milestone": "m5",
+    "hash": "e21977c755f3",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/pmic.70055",
+    "milestone": "m1",
+    "hash": "40a1b66548db",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/pmic.70055",
+    "milestone": "m2",
+    "hash": "f4d5ef1b8924",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/pmic.70055",
+    "milestone": "m3",
+    "hash": "edc7d6d41908",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/pmic.70055",
+    "milestone": "m4",
+    "hash": "693fb39c3bd5",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/pmic.70055",
+    "milestone": "completion",
+    "hash": "7eddcb0dc72b",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7384681/",
+    "milestone": "m5",
+    "hash": "e21977c755f3",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7384681/",
+    "milestone": "m1",
+    "hash": "40a1b66548db",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7384681/",
+    "milestone": "m2",
+    "hash": "f4d5ef1b8924",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7384681/",
+    "milestone": "m3",
+    "hash": "edc7d6d41908",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7384681/",
+    "milestone": "m4",
+    "hash": "693fb39c3bd5",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7384681/",
+    "milestone": "completion",
+    "hash": "7eddcb0dc72b",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4173019/",
+    "milestone": "m5",
+    "hash": "e21977c755f3",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4173019/",
+    "milestone": "m1",
+    "hash": "40a1b66548db",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4173019/",
+    "milestone": "m2",
+    "hash": "f4d5ef1b8924",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4173019/",
+    "milestone": "m3",
+    "hash": "edc7d6d41908",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4173019/",
+    "milestone": "m4",
+    "hash": "693fb39c3bd5",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4173019/",
+    "milestone": "completion",
+    "hash": "7eddcb0dc72b",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4579397/",
+    "milestone": "m5",
+    "hash": "e21977c755f3",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4579397/",
+    "milestone": "m1",
+    "hash": "40a1b66548db",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4579397/",
+    "milestone": "m2",
+    "hash": "f4d5ef1b8924",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4579397/",
+    "milestone": "m3",
+    "hash": "edc7d6d41908",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4579397/",
+    "milestone": "m4",
+    "hash": "693fb39c3bd5",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4579397/",
+    "milestone": "completion",
+    "hash": "7eddcb0dc72b",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4854847/",
+    "milestone": "m5",
+    "hash": "e21977c755f3",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4854847/",
+    "milestone": "m1",
+    "hash": "40a1b66548db",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4854847/",
+    "milestone": "m2",
+    "hash": "f4d5ef1b8924",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4854847/",
+    "milestone": "m3",
+    "hash": "edc7d6d41908",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4854847/",
+    "milestone": "m4",
+    "hash": "693fb39c3bd5",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4854847/",
+    "milestone": "completion",
+    "hash": "7eddcb0dc72b",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC1324973/",
+    "milestone": "m5",
+    "hash": "e21977c755f3",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -806,20 +970,93 @@
     "date": "2026-11-14",
     "actor": "atlas.page",
     "action": "result on m1 from reference 1: quote is 339 characters, over its limit of 320; kept."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"Post-translational modifications are chemical changes to proteins after synthesis. They can interact: phosphorylation at one site can promote attachment of the small protein SUMO at another. Existing network maps group modifications that change together after a measured treatment. A predictive model goes further by specifying the direction, magnitude and time course of a cellular network\\u2019s response to an untested combination of modifications or a change in the enzymes that control them.\". Reason: The definition gains a concrete example of crosstalk and distinguishes a map of measured responses from a prediction for an untested intervention."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Testing more than 5,000 pairs of approved cancer drugs across 60 cancer cell lines took 300,000 experiments. A screen at one time point can miss a transient response, and measuring modifications separately can miss cases where one enables another. Knowing how those interactions affect signalling over time could help drug developers choose which untested combinations to examine for effects on tumour cell growth or death. Benefit to patients still requires clinical testing.\". Reason: The melanoma study summary gives way to the scale of combination screening, the decision a prediction would inform and the evidence still needed for patients."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after None: \"Blocking a predicted phosphorylation site reduces SUMO attachment at a neighbouring site.\". Reason: A motif-based prediction tested at two sites on one protein supplies a laboratory milestone for crosstalk between modification classes."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"In the MDA-MB-468 breast cancer cell dataset, train on the 0 and 10 ng epidermal growth factor conditions and withhold the 5 ng condition. Predict the phosphorylation time courses for 20 protein readouts at eight time points, treating the three replicates as separate time courses. The mean root-mean-square error across time points must be lower than the random-prediction baseline averaged over 100 runs.\". Reason: The revised test identifies the withheld stimulus level and random comparator while removing the observed error values from the criterion."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: title = \"Targeted inhibition changes both a substrate phosphopeptide and a cellular response as predicted.\"; criterion = \"Test both predictions of a signalling path against vehicle-treated cells. In the PHONEMeS test of the proposed mTOR\\u2013Akt\\u2013CDK2 path, inhibiting Akt or mTORC1/2 must reduce the abundance of the cyclin-L1 phosphopeptide spanning serines 335 and 338. After 24 hours, each inhibitor must also increase the fraction of MCF7 cells in G1 relative to vehicle, as measured by flow cytometry.\"; threshold_quote = \"verify both the plausibility of this predicted path to CCNL1, and the hypothesis that mTORC1/2 inhibition leads to a perturbation of the activity of CDK2.\"; threshold_ref = 9. Reason: The criterion now states the two predicted readouts and their control without treating observed fold changes as acceptance thresholds."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"Earn an HPN-DREAM SC2A top-performer designation. Submit seven-point phosphoprotein trajectories from 0 to 4 hours for five test kinase inhibitors across four breast cancer cell lines and eight stimuli, excluding each inhibitor\\u2019s direct targets. For withheld mTOR-inhibition data, the organizers ranked submissions by root-mean-square error on log-transformed, replicate-averaged data within each scored block, then averaged the ranks. A robust lead required outranking the other team in at least 75 of 100 iterations under each of two schemes: retaining half the blocks or half the observations within each block.\"; threshold_quote = \"Team A was considered to be robustly ranked above team B if the former outranked the latter in at least 75% of iterations.\"; threshold_ref = 5. Reason: The criterion distinguishes the five requested inhibitor predictions from the scored mTOR intervention and specifies how the organizers ranked eligible submissions."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m4: criterion = \"In one specified cellular context, a fixed model prospectively predicts correct response directions for a prespecified panel of untested combinations involving at least two PTM classes and perturbations of their modifying enzymes. Its root-mean-square trajectory error is lower than both a no-change predictor and a version omitting PTM interactions. Targeted site perturbations support the predicted causal dependencies.\". Reason: The ProteinNexus simulation is a comparison with a published result and does not belong in the prospective cellular test."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "atlas.page",
+    "action": "Applied 7 of 7 proposed operations from BCH-10-revise-20261126T133426217096Z; now version 2."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m5, m1, m2, m3, m4."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 0 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 3 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "atlas.page",
+    "action": "definition is 491 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 5 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 2 candidates returned, 0 dropped as sources already used, 2 to judge."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 1 of 2 new candidates, without search. Skipped: 2 no readable saved copy. Dropped rows: none. Replaced 6 earlier rows. Added 7 results: 6 from sources already used, 1 from newly found sources."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 7 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-14"
- },
- "review": {
-  "state": "published",
-  "note": null,
-  "into": null,
-  "at": "2026-11-14",
-  "log": [
-   {
-    "date": "2026-11-14",
-    "state": "published"
-   }
-  ]
+  "results_run": "2026-11-26"
  }
 }
