@@ -266,14 +266,30 @@
   ],
   "prompt": "5e97d4b8dfc3"
  },
+ "review": {
+  "state": "published",
+  "note": null,
+  "into": null,
+  "at": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "state": "published"
+   }
+  ]
+ },
  "page": {
   "id": "BCH-02",
   "title": "Quantitative prediction of protein function from sequence",
   "definition": "From a protein’s amino-acid sequence and specified surroundings, a method predicts conformational populations (fractions occupying different shapes), binding affinities, association and dissociation rates, and catalytic rates where applicable. Its predictions and uncertainty estimates remain valid for unfamiliar proteins and changes in temperature, pH, ligands and sequence.",
   "goal": {
-   "need": "CASP16 received predictions from 30 research groups for 229 protein–ligand poses and 140 affinities in 2024. Removing 18 previously disclosed affinities left 122 for assessment. Providing experimental complex structures did not improve affinity prediction, showing that structural information alone did not resolve quantitative binding prediction.",
+   "need": "Medicinal chemists need to know how tightly a compound binds its target and other proteins to choose which compounds to test. Even an experimental structure can leave that choice unresolved. In one genome-scale model of baker’s yeast, 48.35% of enzyme turnover numbers came from other organisms. Enzymes with similar reaction mechanisms can differ in activity by orders of magnitude. Rates for the yeast enzymes would give metabolic models better starting values, though rates measured with purified enzymes can differ from those inside cells.",
    "need_refs": [
-    1
+    1,
+    13,
+    14,
+    15,
+    16
    ],
    "figures": {
     "caption": "CASP16 Stage 1 affinity rankings after removal of previously disclosed measurements.",
@@ -312,10 +328,10 @@
      "checked": true
     },
     {
-     "body": "Wellcome Sanger Institute, Google DeepMind Fellowship grand challenges",
+     "body": "Wellcome Sanger Institute, 2026 Google DeepMind Fellowship in Genomics and AI, Grand Challenge 3",
      "year": "2026",
-     "quote": "The goal is to use these uniquely sized\nquantitative data sets to train the next\ngeneration of AI models",
-     "context": "Grand Challenge 3 concerns quantitative prediction of protein stability, binding affinity, specificity, aggregation and allostery from sequence and structure.",
+     "quote": "predict and\ngenerate quantitative protein properties from\nsequence",
+     "context": "The challenge names protein stability, binding affinity, binding specificity and selectivity, and describes measurements of how mutations change folding and binding free energies.",
      "ref": 4,
      "checked": true
     }
@@ -345,7 +361,7 @@
    {
     "id": "m1",
     "title": "A protein–ligand pose is predicted with pocket-aligned ligand RMSD below 2 Å.",
-    "criterion": "From protein sequence and ligand identity, predict a bound ligand’s coordinates with pocket-aligned root mean squared deviation (RMSD) below 2 Å from experiment. The AlphaFold 3 paper of 8 May 2024 evaluated this criterion on the 428-complex PoseBusters benchmark using a model trained with a 30 September 2019 cutoff. Its PORCN–LGK974 example had ligand RMSD 1.00 Å, for one complex.",
+    "criterion": "Given the protein sequence and the identity of the small-molecule ligand, predict the ligand’s bound coordinates. After aligning the predicted and experimental binding pockets, the root mean squared deviation between corresponding ligand atom positions must be less than 2 Å.",
     "set_by": "Google DeepMind and Isomorphic Labs, AlphaFold 3 paper, PoseBusters evaluation; this criterion concerns protein–small-molecule complexes.",
     "set_by_kind": "community_convention",
     "threshold_quote": "pocket-aligned ligand root mean squared deviation (r.m.s.d.) of less than 2 Å.",
@@ -360,14 +376,13 @@
    {
     "id": "m2",
     "title": "Predicted protein conformational populations match thermodynamic ratios within statistical errors.",
-    "criterion": "For a given protein sequence, predict probabilities of multiple conformational intermediates whose ratios match thermodynamic ratios within statistical errors, verified by biophysical or analytical measurements. ESMDynamic, published on 11 August 2026, reported contact-occupancy RMSE of 7.6 percentage points at 320 K for 270 held-out domains, primarily against molecular-dynamics simulations averaging 464 ns. Those contact occupancies do not establish experimental conformational-state populations.",
+    "criterion": "For a given protein sequence, predict the equilibrium probabilities of multiple identified conformational intermediates. Ratios of their predicted probabilities must agree, within statistical errors, with thermodynamic population ratios verified by biophysical or analytical measurements.",
     "set_by": "DARPA, NODES programme solicitation DARPA-PS-25-30, 31 July 2025, section 1.2; the requirement concerns protein ensembles.",
     "set_by_kind": "government_programme",
     "threshold_quote": "Rather, the relative probabilities of the multiple identified intermediates should\nconverge on thermodynamic ratios within statistical errors.",
     "threshold_ref": 5,
     "refs": [
-     5,
-     7
+     5
     ],
     "status": "active",
     "replaced_by": [],
@@ -376,13 +391,14 @@
    {
     "id": "m3",
     "title": "An enzyme reaction’s activation free energy is predicted within 1 kcal/mol of experiment.",
-    "criterion": "Predict an enzyme chemical step’s activation free-energy barrier within 1 kcal/mol of its experimental estimate. A commentary published on 5 July 2007 reports 15.6 ± 1.1 kcal/mol calculated versus 15.4 kcal/mol experimental for chorismate mutase, with entropy corrections evaluated at 300 K; the underlying activation-enthalpy calculation averaged 16 reaction pathways for one enzyme. These calculations used structural models. Agreement for a chemical-step barrier does not establish prediction of overall catalytic turnover.",
+    "criterion": "For a specified chemical step in an enzyme-catalysed reaction, predict the activation free energy. Its absolute difference from the experimental activation free energy for that step at the comparison temperature must be at most 1 kcal/mol. The calculation may use a structural model of the enzyme.",
     "set_by": "Computational enzymology’s chemical-accuracy convention, stated by Mulholland in Chemistry Central Journal in 2007; it concerns reaction barriers rather than a sequence-only input standard.",
     "set_by_kind": "community_convention",
     "threshold_quote": "near chemical accuracy, i.e. to within 1 kcal/mol in the best cases.",
     "threshold_ref": 8,
     "refs": [
-     8
+     8,
+     18
     ],
     "status": "active",
     "replaced_by": [],
@@ -407,6 +423,52 @@
     "status": "active",
     "replaced_by": [],
     "threshold_checked": null
+   },
+   {
+    "id": "m5",
+    "title": "The binding free-energy difference for two ligands of one protein is predicted within 1 kcal/mol.",
+    "criterion": "For two ligands binding to the same protein, predict the difference in their binding free energies and compare it with the difference derived from measurements in the same assay. A ligand pair meets the benchmark window when the absolute error is at most 1 kcal/mol. For a series, report the fraction of pairs in that window. The benchmark permits input structures of the protein and ligands.",
+    "set_by": "Ross and colleagues, pairwise relative binding free-energy benchmark in Communications Chemistry (2023), Figure 2 and error-distribution analysis.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "within 1 kcal mol−1 of the experimental value",
+    "threshold_ref": 14,
+    "refs": [
+     14,
+     17
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m6",
+    "title": "Both binding rate constants for a protein–ligand pair are predicted within a factor of ten.",
+    "criterion": "For the trypsin–benzamidine benchmark, predict the bimolecular association rate constant in M⁻¹ s⁻¹ and the dissociation rate constant in s⁻¹. Compare each with its experimental counterpart. Both predicted-to-measured ratios must lie between 0.1 and 10. The published benchmark uses a structure of the bound complex and simulations at 298.15 K.",
+    "set_by": "Votapka and colleagues, SEEKR2 comparison with experimental association and dissociation rates for trypsin and benzamidine (2022), Table 2.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "within an order of magnitude of the experimentally measured quantities.",
+    "threshold_ref": 19,
+    "refs": [
+     19
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
+   },
+   {
+    "id": "m7",
+    "title": "An enzyme’s turnover number for a specified substrate is predicted within a factor of ten.",
+    "criterion": "From the enzyme sequence and substrate identity, predict the in vitro turnover number, kcat, for a held-out enzyme–substrate pair. This is the maximum number of substrate molecules converted per active site per unit time. Score a prediction within one order of magnitude of the experimental value as a hit and report the fraction of hits on the test set. CatPred retains the largest measured kcat when a pair has multiple measurements.",
+    "set_by": "Boorla and Maranas, CatPred held-out turnover benchmark (2025). Its tenfold window scores individual predictions without prescribing a passing fraction for a model.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "within one order of magnitude error.",
+    "threshold_ref": 15,
+    "refs": [
+     15
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": true
    }
   ],
   "measures": [],
@@ -414,8 +476,7 @@
    "No common numerical acceptance criteria were found for predictive uncertainty calibration, family-level generalization or minimum molecular coverage.",
    "No complete public scoring formula was found for NODES’ 60% and 70% targets for continuous observables.",
    "No corresponding joint completion standard covering non-protein biomolecules was found.",
-   "The CatPred publisher and PMC full texts could not be opened.",
-   "The full text of the 2006 enzyme-barrier paper could not be opened; its coauthor’s 2007 commentary supplies the numerical comparison."
+   "A search of programme statements and scientific-society positions found no institutional statement rejecting quantitative protein-function prediction under specified conditions."
   ],
   "references": [
    {
@@ -585,12 +646,155 @@
     "issue": "2",
     "pages": "389-394",
     "citation_source": "crossref"
+   },
+   {
+    "id": 13,
+    "kind": "journal",
+    "url": "https://backend.orbit.dtu.dk/ws/portalfiles/portal/279698291/s41467_022_31421_1.pdf",
+    "doi": "10.1038/s41467-022-31421-1",
+    "title": "Reconstruction of a catalogue of genome-scale metabolic models with enzymatic constraints using GECKO 2.0",
+    "authors": "Domenzain I, Sánchez B, Anton M, Kerkhoven EJ, Millán-Oropeza A, Henry C, et al.",
+    "container": "Nat Commun",
+    "year": "2022",
+    "volume": "13",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 14,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s42004-023-01019-9.pdf",
+    "doi": "10.1038/s42004-023-01019-9",
+    "title": "The maximal and current accuracy of rigorous protein-ligand binding free energy calculations",
+    "authors": "Ross GA, Lu C, Scarabelli G, Albanese SK, Houang E, Abel R, et al.",
+    "container": "Commun Chem",
+    "year": "2023",
+    "volume": "6",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 15,
+    "kind": "journal",
+    "url": "https://www.nature.com/articles/s41467-025-57215-9.pdf",
+    "doi": "10.1038/s41467-025-57215-9",
+    "title": "CatPred: a comprehensive framework for deep learning in vitro enzyme kinetic parameters",
+    "authors": "Boorla VS, Maranas CD",
+    "container": "Nat Commun",
+    "year": "2025",
+    "volume": "16",
+    "issue": "1",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 16,
+    "kind": "journal",
+    "url": "https://www.pnas.org/content/pnas/118/32/e2108391118.full.pdf",
+    "doi": "10.1073/pnas.2108391118",
+    "title": "In vitro turnover numbers do not reflect in vivo activities of yeast enzymes",
+    "authors": "Chen Y, Nielsen J",
+    "container": "Proc. Natl. Acad. Sci. U.S.A.",
+    "year": "2021",
+    "volume": "118",
+    "issue": "32",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 17,
+    "kind": "journal",
+    "url": "https://www.carlssonlab.org/pdfs/P3.pdf",
+    "doi": "10.1126/science.3810157",
+    "title": "Calculation of the Relative Change in Binding Free Energy of a Protein-Inhibitor Complex",
+    "authors": "Bash PA, Singh UC, Brown FK, Langridge R, Kollman PA",
+    "container": "Science",
+    "year": "1987",
+    "volume": "235",
+    "issue": "4788",
+    "pages": "574-576",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 18,
+    "kind": "journal",
+    "url": "https://www.academia.edu/14443885/High_Accuracy_Computation_of_Reaction_Barriers_in_Enzymes",
+    "doi": "10.1002/anie.200602711",
+    "title": "High-Accuracy Computation of Reaction Barriers in Enzymes",
+    "authors": "Claeyssens F, Harvey JN, Manby FR, Mata RA, Mulholland AJ, Ranaghan KE, et al.",
+    "container": "Angew Chem Int Ed",
+    "year": "2006",
+    "volume": "45",
+    "issue": "41",
+    "pages": "6856-6859",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 19,
+    "kind": "journal",
+    "url": "https://escholarship.org/content/qt71906342/qt71906342.pdf",
+    "doi": "10.1021/acs.jcim.2c00501",
+    "title": "SEEKR2: Versatile Multiscale Milestoning Utilizing the OpenMM Molecular Dynamics Engine",
+    "authors": "Votapka LW, Stokely AM, Ojha AA, Amaro RE",
+    "container": "J. Chem. Inf. Model.",
+    "year": "2022",
+    "volume": "62",
+    "issue": "13",
+    "pages": "3253-3262",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 20,
+    "kind": "web",
+    "url": "https://anewbt.com/news/anewdde-agentic-drug-discovery-engine/",
+    "doi": null,
+    "title": "AnewDDE: An Agentic Drug Discovery Engine",
+    "authors": "",
+    "container": null,
+    "year": "",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
+   },
+   {
+    "id": 21,
+    "kind": "journal",
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10782440/",
+    "doi": "10.1021/acs.jctc.3c01105",
+    "title": "Accurate Computation of Thermodynamic Activation Parameters in the Chorismate Mutase Reaction from Empirical Valence Bond Simulations",
+    "authors": "Wilkins RS, Lund BA, Isaksen GV, Åqvist J, Brandsdal BO",
+    "container": "J. Chem. Theory Comput.",
+    "year": "2024",
+    "volume": "20",
+    "issue": "1",
+    "pages": "451-458",
+    "citation_source": "crossref"
+   },
+   {
+    "id": 22,
+    "kind": "journal",
+    "url": "https://pubs.rsc.org/en/content/articlepdf/2020/sc/c9sc03754c",
+    "doi": "10.1039/c9sc03754c",
+    "title": "Large scale relative protein ligand binding affinities using non-equilibrium alchemy",
+    "authors": "Gapsys V, Pérez-Benito L, Aldeghi M, Seeliger D, van Vlijmen H, Tresadern G, et al.",
+    "container": "Chem. Sci.",
+    "year": "2020",
+    "volume": "11",
+    "issue": "4",
+    "pages": "1140-1152",
+    "citation_source": "crossref"
    }
   ],
   "milestone_order": [
    "m1",
+   "m5",
    "m2",
+   "m6",
    "m3",
+   "m7",
    "m4"
   ],
   "results": [
@@ -598,265 +802,664 @@
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "AlphaFold 3 predicted the ligand pose for one PORCN–LGK974 complex with 1.00 Å RMSD.",
-    "detail": "The example includes a WNT3A peptide. The paper describes pocket-aligned ligand RMSD as its evaluation metric.",
-    "quote": "d\n, LGK974, a clinical-stage inhibitor, bound to PORCN in a complex with the WNT3A peptide (PDB\n7URD\n; ligand r.m.s.d., 1.00 Å).",
+    "finding": "AlphaFold 3 predicted one galectin-3–compound 22 pose with a pocket-aligned ligand RMSD of 0.44 Å.",
+    "detail": "The reported value is for one target in the 428-target benchmark. Each target was scored using its top-ranked prediction.",
+    "quote": "Human Galectin-3 carbohydrate-recognition domain in complex with compound 22 (PDB ID\n7XFA\n, ligand RMSD: 0.44 Å).",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
-    "finding": "For cereblon, 10 overlaid apo predictions were closed despite an experimentally observed open apo state.",
-    "detail": "The model did not predict conformational-state probabilities or thermodynamic ratios. The paper states that multiple random seeds do not approximate the solution ensemble.",
+    "finding": "For one protein, cereblon, 0 of 10 displayed apo predictions reproduced the experimentally observed open conformation.",
+    "detail": "The count describes the displayed diffusion samples. The paper states that sampling across random seeds does not approximate the solution ensemble.",
     "quote": "Predictions (blue) of both apo (with 10 overlaid samples) and holo structures are in the closed conformation.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "AlphaFold 3 predicted the ligand pose for one PORCN–LGK974 complex with 1.00 Å ligand RMSD.",
-    "detail": "The paper evaluates ligand poses using pocket-aligned RMSD. This is one selected example; PoseBusters evaluation used a separate model with a 30 September 2019 training cutoff.",
-    "quote": "LGK974, a clinical-stage inhibitor, bound to PORCN in a complex with the WNT3A peptide (PDB\n7URD\n; ligand r.m.s.d., 1.00 Å).",
+    "finding": "AlphaFold 3 achieved 0.65 Å pocket-aligned ligand RMSD for human Notum–ARUK3004556, one of 428 PoseBusters v1 targets.",
+    "detail": "The benchmark ranked 25 predictions per target and scored the top-ranked pose against the experimental structure.",
+    "quote": "Human Notum bound to inhibitor ARUK3004556 (PDB ID 8BTI, ligand RMSD: 0.65 Å).",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
-    "finding": "For one cereblon protein, 10 overlaid apo samples predicted the closed conformation.",
-    "detail": "The experimental apo structure is open and the ligand-bound structure is closed. The predictions did not establish conformational populations or thermodynamic ratios.",
+    "finding": "For apo cereblon, none of the 10 displayed AlphaFold 3 samples recovered the experimentally observed open state.",
+    "detail": "The authors explicitly state that sampling multiple random seeds does not approximate the solution ensemble.",
     "quote": "Predictions (blue) of both apo (with 10 overlaid samples) and holo structures are in the closed conformation.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 6,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
-    "finding": "ESMDynamic predicted contact occupancy for 270 held-out domains with 7.6 percentage-point RMSE at 320 K.",
-    "detail": "The benchmark compares contact occupancies primarily with molecular-dynamics simulations. Contact occupancies do not establish experimentally verified conformational-state populations or their thermodynamic ratios.",
-    "quote": "In contrast, the regression head predicts contact occupancy with an RMSE of 7.6% at 320 K, and its performance improves with increasing temperature (Supplementary Table\n7\n).",
+    "finding": "Across 3 designed troponin C variants, both state-associated contact occupancy trends agreed with the measured direction of the equilibrium shift.",
+    "detail": "Each predicted occupancy is the marginal probability of a residue pair being in contact. The comparison uses these occupancies as proxies for conformational populations.",
+    "quote": "Consistent with this trend, the predicted occupancy of the state 1 contact (M7–K68) decreases from I89 to S89, whereas the predicted occupancy of the state 2 contact (K44–G75) increases.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "IsoDDE achieved 75.99% success on FoldBench protein–ligand poses; sample size not stated.",
-    "detail": "Success required pocket-aligned RMSD below 2 Å and LDDT-PLI above 0.8. The model used PDB templates available through 1 January 2023 at inference.",
+    "finding": "IsoDDE cofolded two Cereblon ligands, with a reported RMSD of 0.33 Å for SB-405483.",
+    "detail": "The Cereblon comparison was retrospective and used PDB 9SFM as the experimental reference.",
+    "quote": "(SB-405483 RMSD 0.33 Å, lenalidomide RMSD 0.12 Å, no pocket conditioning).",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 9,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "IsoDDE affinity predictions for 87 molecules across four FEP+ 4 targets had a mean Pearson r of 0.85.",
+    "detail": null,
     "quote": null,
     "checked": null,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 9,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
    },
    {
     "milestone": "m1",
     "case": null,
-    "verdict": "partial",
-    "finding": "Pearl predicted a pose for one proMMP-9 inhibitor complex with ligand RMSD 0.96 Å.",
-    "detail": "The case study uses unconditional cofolding from protein sequence and ligand topology. The supplied text does not specify whether the RMSD was calculated after pocket alignment.",
-    "quote": "In fact, while all the baselines predict a ¿ 2.0 Å pose, only\nPearl\npredicts not only a sub 2 Å pose, but also a sub 1 Å pose (0.96 Å).",
-    "checked": true,
+    "verdict": "met",
+    "finding": "Pearl achieved 85.9% best-of-five success at <2 Å pocket-aligned ligand RMSD on 702 Runs N’ Poses complexes.",
+    "detail": "Best@5 estimates the chance of generating at least one successful pose in five draws using experimental RMSD to score candidates. A single randomly drawn pose achieved 79.0% on Runs N’ Poses.",
+    "quote": "For the standard\nRMSD\n¡\n2 Å\nmetric (\nbest@5\n),\nPearl\nattains top-ranking success rates of 85.9% on Runs N’ Poses and 85.1% on PoseBusters",
+    "checked": false,
     "confirmed": false,
     "peer_reviewed": false,
     "ref": 10,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
    },
    {
     "milestone": "m2",
     "case": null,
     "verdict": "partial",
-    "finding": "BioEmu predicted free-energy landscapes for 12 held-out fast-folding proteins with a mean absolute error of 0.74 kcal/mol against MD.",
-    "detail": "The predicted landscapes included folding intermediates, but the comparison was with molecular dynamics simulations, not biophysical measurements. The text does not establish agreement of intermediate population ratios within statistical errors.",
-    "quote": "Quantitatively, the \nmean absolute error between the MD and model 2D free- energy land-\nscapes was only 0.74 kcal/mol, ranging from 0.30 kcal/mol for BBA to \n1.63 kcal/mol for λ- repressor, which is on the order of differences expected \nfrom two different classical MD force fields (30, 31).",
+    "finding": "BioEmu predicted folding free energies for MEGAscale mutants from 95 wild-type proteins with mean absolute error below 0.9 kcal/mol.",
+    "detail": "The experimental benchmark grouped structures into folded and unfolded states by their fraction of native contacts. Its aggregate free-energy error does not establish agreement within statistical errors for individual population ratios.",
+    "quote": "BioEmu achieved a mean absolute error of less than 0.9 kcal/mol \nand a Spearman correlation coefficient of approximately 0.6 for the \nMEGAscale test proteins (Fig. 4B).",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 11,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
    },
    {
     "milestone": "m3",
     "case": null,
-    "verdict": "met",
-    "finding": "DhlA W175Y/E56N, one enzyme variant: predicted chemical-step barrier differed from experiment by 0.2 kcal/mol.",
-    "detail": "The calculated barrier was 15.8 kcal/mol versus 15.6 kcal/mol observed. Calculations used an X-ray structural model at 300 K; experiments were at 37 °C and pH 8.6. The result concerns the SN2 step, not overall turnover.",
+    "verdict": "partial",
+    "finding": "For 1,2-dichloroethane conversion by three DhlA forms, the maximum absolute error in the Sₙ2 activation free energy was 0.9 kcal/mol.",
+    "detail": "Table 4 gives two additional comparisons based on whole-reaction turnover, which does not isolate the Sₙ2 step. A third mutant had no detectable activity.",
     "quote": null,
     "checked": null,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 12,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
+   },
+   {
+    "milestone": "m1",
+    "case": null,
+    "verdict": "partial",
+    "finding": "AnewFold achieved 77.4% top-1 joint success on similarity-filtered FoldBench protein–ligand complexes (sample size unstated).",
+    "detail": null,
+    "quote": "On the similarity-filtered FoldBench protein–ligand benchmark, it reaches a\n77.4%\ntop-1 joint success rate.",
+    "checked": true,
+    "confirmed": false,
+    "peer_reviewed": false,
+    "ref": 20,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
+   },
+   {
+    "milestone": "m3",
+    "case": null,
+    "verdict": "met",
+    "finding": "Bacillus subtilis chorismate mutase (100 simulations at the comparison temperature) had an activation free energy error of 0.4 kcal/mol.",
+    "detail": "The authors calibrated the model on the uncatalysed reaction in water. Table 1 prints a standard error of 12.1 kcal/mol for the Bacillus subtilis estimate, while Figure 3 describes the error bars as smaller than the data point. The verdict uses the reported point estimate.",
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 21,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "partial",
+    "finding": "The pmx consensus predicted relative binding free energies within 1 kcal/mol of experiment for 66 ± 2% of 482 ligand pairs.",
+    "detail": "The methods define the reported window as an absolute error strictly below 1 kcal/mol. Every pair counted by that definition also meets the criterion’s inclusive cutoff.",
+    "quote": "The proportion of estimates falling within 1 kcal mol −1  (4.184 kJ mol −1 ) of experiment is 68 ± 2% and 66 ± 2% for the FEP+ and the pmx-based consensus force field approach respectively.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 22,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
+   },
+   {
+    "milestone": "m5",
+    "case": null,
+    "verdict": "met",
+    "finding": "FEP+ predicted binding free-energy differences within 1 kcal/mol for 57.5% of 13,732 same-protein ligand-pair comparisons.",
+    "detail": "The authors retrospectively curated protein and ligand structures and derived experimental differences from same-assay Kd, Ki, or IC50 measurements at an assumed 300 K. The reported fraction is pooled across ligand series.",
+    "quote": "In all 13,732 FEP + relative binding free energy\npredictions, 57.5% were within 1 kcal mol −1 of the experimental\nvalue",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 14,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
+   },
+   {
+    "milestone": "m6",
+    "case": null,
+    "verdict": "met",
+    "finding": "SEEKR2 predicted both rates for one trypsin–benzamidine pair, with a maximum fold error of 1.65.",
+    "detail": "The largest fold error was for dissociation. The comparison uses the central values reported for SEEKR2 without hydrogen mass repartitioning.",
+    "quote": "SEEKR2 obtains a\nk\noff\nand a\nk\non\nthat are within an order of magnitude of\nthe experimentally measured quantities.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 19,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
+   },
+   {
+    "milestone": "m7",
+    "case": null,
+    "verdict": "met",
+    "finding": "CatPred predicted in vitro kcat within a factor of ten for 75.91% of approximately 2,320 held-out enzyme–reactant-set pairs.",
+    "detail": "The test-set size is estimated from the stated 10% split of 23,197 entries. Table 2 reports a standard error of 0.09 percentage points across ten replicates.",
+    "quote": "Results indicate that approximately 76%, 84% and 68% of held-out test predictions fall within an order of magnitude error (p\n1mag\n) for\nk\ncat\n,\nK\nm\nand\nK\n i\npredictions, respectively.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 15,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
    }
   ],
   "judged": [
    {
     "url": "https://www.nature.com/articles/s41586-024-07487-w",
     "milestone": "m1",
-    "hash": "3c0d371c5b27",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "f388b794040c",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-024-07487-w",
+    "milestone": "m5",
+    "hash": "e4f2263aa90a",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-07487-w",
     "milestone": "m2",
-    "hash": "a83304d9cdef",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "98e3adaca1d1",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-024-07487-w",
+    "milestone": "m6",
+    "hash": "feee34d709e3",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-07487-w",
     "milestone": "m3",
-    "hash": "c9dfaf709762",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "8f94172a05c0",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s41586-024-07487-w",
+    "milestone": "m7",
+    "hash": "b2ef559396d2",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-07487-w",
     "milestone": "m4",
     "hash": "d596783d3f43",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.nature.com/articles/s41586-024-07487-w",
     "milestone": "completion",
     "hash": "de90f2e2bd8a",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pubmed.ncbi.nlm.nih.gov/38718835/",
     "milestone": "m1",
-    "hash": "3c0d371c5b27",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "f388b794040c",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pubmed.ncbi.nlm.nih.gov/38718835/",
+    "milestone": "m5",
+    "hash": "e4f2263aa90a",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pubmed.ncbi.nlm.nih.gov/38718835/",
     "milestone": "m2",
-    "hash": "a83304d9cdef",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "98e3adaca1d1",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pubmed.ncbi.nlm.nih.gov/38718835/",
+    "milestone": "m6",
+    "hash": "feee34d709e3",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pubmed.ncbi.nlm.nih.gov/38718835/",
     "milestone": "m3",
-    "hash": "c9dfaf709762",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "8f94172a05c0",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pubmed.ncbi.nlm.nih.gov/38718835/",
+    "milestone": "m7",
+    "hash": "b2ef559396d2",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pubmed.ncbi.nlm.nih.gov/38718835/",
     "milestone": "m4",
     "hash": "d596783d3f43",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pubmed.ncbi.nlm.nih.gov/38718835/",
     "milestone": "completion",
     "hash": "de90f2e2bd8a",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13554154/",
     "milestone": "m1",
-    "hash": "3c0d371c5b27",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "f388b794040c",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13554154/",
+    "milestone": "m5",
+    "hash": "e4f2263aa90a",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13554154/",
     "milestone": "m2",
-    "hash": "a83304d9cdef",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "98e3adaca1d1",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13554154/",
+    "milestone": "m6",
+    "hash": "feee34d709e3",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13554154/",
     "milestone": "m3",
-    "hash": "c9dfaf709762",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "8f94172a05c0",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13554154/",
+    "milestone": "m7",
+    "hash": "b2ef559396d2",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13554154/",
     "milestone": "m4",
     "hash": "d596783d3f43",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13554154/",
     "milestone": "completion",
     "hash": "de90f2e2bd8a",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://storage.googleapis.com/isomorphiclabs-website-public-artifacts/isodde_technical_report.pdf",
     "milestone": "m1",
-    "hash": "3c0d371c5b27",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "f388b794040c",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://storage.googleapis.com/isomorphiclabs-website-public-artifacts/isodde_technical_report.pdf",
+    "milestone": "m5",
+    "hash": "e4f2263aa90a",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://storage.googleapis.com/isomorphiclabs-website-public-artifacts/isodde_technical_report.pdf",
+    "milestone": "m2",
+    "hash": "98e3adaca1d1",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://storage.googleapis.com/isomorphiclabs-website-public-artifacts/isodde_technical_report.pdf",
+    "milestone": "m6",
+    "hash": "feee34d709e3",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://storage.googleapis.com/isomorphiclabs-website-public-artifacts/isodde_technical_report.pdf",
+    "milestone": "m3",
+    "hash": "8f94172a05c0",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://storage.googleapis.com/isomorphiclabs-website-public-artifacts/isodde_technical_report.pdf",
+    "milestone": "m7",
+    "hash": "b2ef559396d2",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://storage.googleapis.com/isomorphiclabs-website-public-artifacts/isodde_technical_report.pdf",
+    "milestone": "m4",
+    "hash": "d596783d3f43",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://storage.googleapis.com/isomorphiclabs-website-public-artifacts/isodde_technical_report.pdf",
+    "milestone": "completion",
+    "hash": "de90f2e2bd8a",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://arxiv.org/html/2510.24670v1",
     "milestone": "m1",
-    "hash": "3c0d371c5b27",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "f388b794040c",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2510.24670v1",
+    "milestone": "m5",
+    "hash": "e4f2263aa90a",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2510.24670v1",
+    "milestone": "m2",
+    "hash": "98e3adaca1d1",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2510.24670v1",
+    "milestone": "m6",
+    "hash": "feee34d709e3",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2510.24670v1",
+    "milestone": "m3",
+    "hash": "8f94172a05c0",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2510.24670v1",
+    "milestone": "m7",
+    "hash": "b2ef559396d2",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2510.24670v1",
+    "milestone": "m4",
+    "hash": "d596783d3f43",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://arxiv.org/html/2510.24670v1",
+    "milestone": "completion",
+    "hash": "de90f2e2bd8a",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aiichironakano.github.io/cs653/Lewis-BioEmu-Science25.pdf",
+    "milestone": "m1",
+    "hash": "f388b794040c",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aiichironakano.github.io/cs653/Lewis-BioEmu-Science25.pdf",
+    "milestone": "m5",
+    "hash": "e4f2263aa90a",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://aiichironakano.github.io/cs653/Lewis-BioEmu-Science25.pdf",
     "milestone": "m2",
-    "hash": "a83304d9cdef",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "98e3adaca1d1",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aiichironakano.github.io/cs653/Lewis-BioEmu-Science25.pdf",
+    "milestone": "m6",
+    "hash": "feee34d709e3",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aiichironakano.github.io/cs653/Lewis-BioEmu-Science25.pdf",
+    "milestone": "m3",
+    "hash": "8f94172a05c0",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aiichironakano.github.io/cs653/Lewis-BioEmu-Science25.pdf",
+    "milestone": "m7",
+    "hash": "b2ef559396d2",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aiichironakano.github.io/cs653/Lewis-BioEmu-Science25.pdf",
+    "milestone": "m4",
+    "hash": "d596783d3f43",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://aiichironakano.github.io/cs653/Lewis-BioEmu-Science25.pdf",
+    "milestone": "completion",
+    "hash": "de90f2e2bd8a",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6329970/",
+    "milestone": "m1",
+    "hash": "f388b794040c",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6329970/",
+    "milestone": "m5",
+    "hash": "e4f2263aa90a",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6329970/",
+    "milestone": "m2",
+    "hash": "98e3adaca1d1",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6329970/",
+    "milestone": "m6",
+    "hash": "feee34d709e3",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6329970/",
     "milestone": "m3",
-    "hash": "c9dfaf709762",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "8f94172a05c0",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6329970/",
+    "milestone": "m7",
+    "hash": "b2ef559396d2",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6329970/",
+    "milestone": "m4",
+    "hash": "d596783d3f43",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6329970/",
+    "milestone": "completion",
+    "hash": "de90f2e2bd8a",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://anewbt.com/news/anewdde-agentic-drug-discovery-engine/",
+    "milestone": "m1",
+    "hash": "f388b794040c",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10782440/",
+    "milestone": "m3",
+    "hash": "8f94172a05c0",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pubs.rsc.org/en/content/articlepdf/2020/sc/c9sc03754c",
+    "milestone": "m5",
+    "hash": "e4f2263aa90a",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.nature.com/articles/s42004-023-01019-9.pdf",
+    "milestone": "m5",
+    "hash": "e4f2263aa90a",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9277580/",
+    "milestone": "m6",
+    "hash": "feee34d709e3",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11871309/",
+    "milestone": "m7",
+    "hash": "b2ef559396d2",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -898,20 +1501,113 @@
     "date": "2026-11-14",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 7 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Medicinal chemists need to know how tightly a compound binds its target and other proteins to choose which compounds to test. Even an experimental structure can leave that choice unresolved. In one genome-scale model of baker\\u2019s yeast, 48.35% of enzyme turnover numbers came from other organisms. Enzymes with similar reaction mechanisms can differ in activity by orders of magnitude. Rates for the yeast enzymes would give metabolic models better starting values, though rates measured with purified enzymes can differ from those inside cells.\". Reason: The current paragraph counts challenge submissions but does not explain which decisions depend on quantitative binding and turnover estimates."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "add statement by Wellcome Sanger Institute, 2026 Google DeepMind Fellowship in Genomics and AI, Grand Challenge 3, 2026: \"predict and\ngenerate quantitative protein properties from\nsequence\". Reason: The fellowship’s third grand challenge explicitly identifies sequence as an input and names quantitative binding properties as outputs."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Given the protein sequence and the identity of the small-molecule ligand, predict the ligand\\u2019s bound coordinates. After aligning the predicted and experimental binding pockets, the root mean squared deviation between corresponding ligand atom positions must be less than 2 \\u00c5.\". Reason: The benchmark size, training cutoff and PORCN result describe one evaluation and obscure the geometric test that each prediction must pass."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"For a given protein sequence, predict the equilibrium probabilities of multiple identified conformational intermediates. Ratios of their predicted probabilities must agree, within statistical errors, with thermodynamic population ratios verified by biophysical or analytical measurements.\"; refs = [5]. Reason: The ESMDynamic result concerns how often residue contacts occur in simulations, while the NODES test compares experimentally verified ratios of state populations."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"For a specified chemical step in an enzyme-catalysed reaction, predict the activation free energy. Its absolute difference from the experimental activation free energy for that step at the comparison temperature must be at most 1 kcal/mol. The calculation may use a structural model of the enzyme.\"; refs = [8, 18]. Reason: The chorismate mutase calculation belongs with the evidence, and the criterion needs only the observable, its experimental comparator and the error tolerance."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m1: \"The binding free-energy difference for two ligands of one protein is predicted within 1 kcal/mol.\". Reason: A correct pose earns no credit for predicting the size of an affinity difference, an observable with its own experimental benchmark."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m2: \"Both binding rate constants for a protein–ligand pair are predicted within a factor of ten.\". Reason: The existing milestones first require binding rates in the joint family test, although both rates can be checked separately against experiment for a single complex."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m3: \"An enzyme’s turnover number for a specified substrate is predicted within a factor of ten.\". Reason: A chemical-step barrier does not determine overall turnover, and CatPred supplies a separate experimental comparison for turnover predicted from enzyme and substrate inputs."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 4. Reason: The full 2006 paper is available and directly reports the comparison between calculated and experimental enzyme barriers."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 3. Reason: The publisher’s full CatPred article is available as a PDF, including the test-set definitions and turnover scoring rule."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "add not found: \"A search of programme statements and scientific-society positions found no institutional statement rejecting quantitative protein-function prediction under specified conditions.\". Reason: The goal statements identify technical difficulties but leave institutional dissent undocumented."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "remove statement 2. Reason: The Sanger quotation ends at “AI models” before it identifies anything the models should predict."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "atlas.page",
+    "action": "Applied 12 of 12 proposed operations from BCH-02-revise-20261126T131018910955Z; now version 2."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m3, m5, m6, m7."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 7 from Crossref, 0 from PubMed, 0 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 4 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 7 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 7 candidates returned, 0 dropped as sources already used, 7 to judge."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 6 of 7 new candidates, without search. Skipped: 1 no readable saved copy. Dropped rows: none. Replaced 9 earlier rows. Added 16 results: 10 from sources already used, 6 from newly found sources."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 2 from Crossref, 0 from PubMed, 0 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 12 found, 1 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-14"
- },
- "review": {
-  "state": "published",
-  "note": null,
-  "into": null,
-  "at": "2026-11-14",
-  "log": [
-   {
-    "date": "2026-11-14",
-    "state": "published"
-   }
-  ]
+  "results_run": "2026-11-26"
  }
 }
