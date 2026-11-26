@@ -122,15 +122,8 @@ html.paper #halo stop {
   stop-color: #b0680c;
   stop-opacity: 0;
 }
-html.paper .sparkle-spikes {
-  stroke: var(--ink);
-  stroke-width: 1;
-}
-html.paper .sparkle-disc {
+html.paper .star-complete {
   fill: var(--ink);
-  stroke: var(--paper);
-  stroke-width: 0.8;
-  filter: none;
 }
 html.paper .plate-tick {
   stroke: var(--hair-strong);
@@ -209,47 +202,26 @@ html.paper .sa-stage {
   background: var(--paper);
 }
 html.paper .sky-grid line {
-  stroke: rgba(29, 32, 39, 0.05);
+  stroke: rgba(29, 32, 39, 0.04);
 }
-html.paper .sky-grid line.minor {
-  stroke: rgba(29, 32, 39, 0.03);
-}
-html.paper .sky-frame,
-html.paper .sky-ticks line,
-html.paper .sky-ruler line {
+html.paper .sky-frame {
   stroke: rgba(29, 32, 39, 0.35);
 }
 html.paper .sky-bounds,
 html.paper .loc-bounds {
   stroke: rgba(29, 32, 39, 0.18);
 }
-html.paper .sky-ruler text {
-  fill: var(--muted);
-  font-family: var(--sans);
-}
-/* Hand-coloured, as printed atlases were: each region has its own ink (--rc, set from
-   REGION_INK in sky.js) for a pale wash, its constellation figures and its name. Progress keeps
-   its own scale on the stars (grey, ochre, ink), so the two never compete. */
-html.paper .sky-region-wash {
-  fill: var(--rc);
-  fill-opacity: 0.055;
-  transition: fill-opacity 0.4s var(--ease);
-}
-html.paper .sky-world.region-focused .sky-region-wash {
-  fill-opacity: 0.025;
-}
-html.paper .sky-world.region-focused .sky-region-wash.focus {
-  fill-opacity: 0.085;
-}
-/* Region names: italic serif, the cartographer's convention for areas, in the region's ink. */
+/* Colour means progress and nothing else. Regions are told apart by their dashed boundaries
+   and their names, never by a hue. */
+/* Region names: italic serif, the cartographer's convention for areas. */
 html.paper .sky-regions text {
-  fill: var(--rc);
+  fill: var(--muted);
   font-family: var(--display);
   font-style: italic;
 }
 html.paper .sky-region-name:hover text,
 html.paper .sky-region-name.focus text {
-  fill: color-mix(in srgb, var(--rc) 70%, #000);
+  fill: var(--ink);
 }
 html.paper .sky-region-hit:hover {
   fill: rgba(29, 32, 39, 0.02);
@@ -261,20 +233,21 @@ html.paper .sky-region-hit.focus {
 html.paper .sky-con-glow {
   display: none;
 }
+/* Figure lines are a quiet grey hairline: they mean "same field" and must never outweigh the
+   stars they join. */
 html.paper .sky-fig {
-  stroke: color-mix(in srgb, var(--rc) 62%, transparent);
-  stroke-width: calc(1px * var(--ik));
+  stroke: rgba(29, 32, 39, 0.26);
+  stroke-width: calc(0.9px * var(--ik));
 }
 html.paper .sky-con.hover .sky-fig,
 html.paper .sky-con.focus .sky-fig {
-  stroke: var(--rc);
-  stroke-width: calc(1.3px * var(--ik));
+  stroke: rgba(29, 32, 39, 0.5);
 }
 html.paper .sky-con.dim .sky-fig {
-  stroke: color-mix(in srgb, var(--rc) 22%, transparent);
+  stroke: rgba(29, 32, 39, 0.1);
 }
 html.paper .sa-region-head {
-  color: var(--rc);
+  color: var(--soft);
   font-family: var(--display);
   font-style: italic;
 }
@@ -291,7 +264,8 @@ html.paper .sky-star-title {
 }
 html.paper .sky-con.hover .sky-name text,
 html.paper .sky-con.focus .sky-name text,
-html.paper .sky-star.hovered .sky-star-title {
+html.paper .sky-label-lift .sky-star-id,
+html.paper .sky-label-lift .sky-star-title {
   fill: var(--ink);
 }
 html.paper .sky-star-id {
@@ -299,8 +273,20 @@ html.paper .sky-star-id {
   stroke: rgba(251, 250, 247, 0.95);
   font-family: var(--sans);
 }
-html.paper .sky-star-heart {
-  fill: var(--paper);
+html.paper .sky-star-core.none {
+  fill: #a4a8b0;
+  opacity: 1;
+}
+html.paper .sky-star-core.moving {
+  fill: var(--amber);
+}
+html.paper .sky-name text.sky-field-count {
+  fill: var(--muted);
+  font-family: var(--sans);
+  font-weight: 400;
+}
+html.paper .sky-name text.sky-field-count .done {
+  fill: var(--ink);
 }
 html.paper .sky-seg.none {
   stroke: rgba(29, 32, 39, 0.3);
@@ -322,59 +308,17 @@ html.paper .sky-beacon-ring {
 html.paper .sky-beacon-ring.met {
   stroke: var(--ink);
 }
-html.paper #sky-halo stop {
-  stop-opacity: 0;
+/* Complete: the ring filled in with ink, the same ink as a met segment. No halo, no rays. */
+html.paper .sky-beacons circle:not(.sky-complete) {
+  display: none;
 }
-/* A complete star sits on a wash of gold, as hand-coloured charts gilded their brightest
-   stars: it reads from the widest view, where the dark sky used a glow. */
-html.paper #sky-halo-met stop {
-  stop-color: #e0a526;
-}
-html.paper #sky-halo-met stop:nth-child(1) {
-  stop-opacity: 0.6;
-}
-html.paper #sky-halo-met stop:nth-child(2) {
-  stop-opacity: 0.32;
-}
-/* The mark itself: a solid ink disc with a gold heart and four rays, unlike any ring. */
-html.paper .sky-sparkle-disc,
-html.paper .sky-sparkle-disc:not(.sky-sparkle .sky-sparkle-disc) {
+html.paper .sky-complete {
   fill: var(--ink);
+}
+html.paper .sky-complete.far {
   stroke: var(--paper);
-  stroke-width: calc(0.8px * var(--ik));
-  filter: none;
-}
-html.paper .sky-sparkle-disc:not(.sky-sparkle .sky-sparkle-disc) {
   stroke-width: 0.8px;
-}
-html.paper .sky-sparkle-heart {
-  fill: #f2c14e;
-  transform-box: fill-box;
-  transform-origin: center;
-  transform: scale(0.6);
-}
-html.paper .sky-sparkle .sky-sparkle-disc {
-  transform-box: fill-box;
-  transform-origin: center;
-  transform: scale(0.82);
-}
-html.paper .sky-sparkle-spikes {
-  stroke: var(--ink);
-  stroke-width: calc(1px * var(--ik));
-  opacity: 1;
-}
-html.paper .sky-sparkle-spikes.far,
-html.paper .sky-sparkle-spikes.legend {
-  stroke-width: 1.2px;
-}
-html.paper .sky-field-bar rect.none {
-  fill: rgba(29, 32, 39, 0.14);
-}
-html.paper .sky-field-bar rect.met {
-  fill: var(--ink);
-}
-html.paper .sky-field-bar rect.moving {
-  fill: var(--amber);
+  filter: none;
 }
 html.paper .sky-zoom {
   background: rgba(255, 255, 255, 0.92);
@@ -393,17 +337,13 @@ html.paper .loc-frame {
   fill: #fff;
   stroke: var(--hair-strong);
 }
-html.paper .loc-wash {
-  fill: var(--rc);
-  fill-opacity: 0.06;
-}
 html.paper .loc-figures,
 html.paper .sa-phone-sky .loc-figures,
 html.paper .card-sky .loc-figures {
-  stroke: color-mix(in srgb, var(--rc) 60%, transparent);
+  stroke: rgba(29, 32, 39, 0.3);
 }
 html.paper .loc-region {
-  fill: var(--rc);
+  fill: var(--muted);
   font-family: var(--display);
   font-style: italic;
 }
@@ -438,14 +378,12 @@ html.paper .sa-rail {
 }
 html.paper .sa-warm button:hover,
 html.paper .sa-field:hover,
+html.paper .sa-b.lit,
 html.paper .sa-b.selected {
   background: var(--band);
 }
 html.paper .sa-b.selected {
   box-shadow: inset 2px 0 0 var(--ink);
-}
-html.paper .sa-b-id span {
-  color: var(--muted);
 }
 html.paper .sa-moving i {
   box-shadow: none;
@@ -453,9 +391,6 @@ html.paper .sa-moving i {
 html.paper .sa-filter input {
   color: var(--ink);
   border-color: var(--hair-strong);
-}
-html.paper .sa-legend .t-met {
-  color: #c2410c;
 }
 html.paper .sa-card-complete,
 html.paper .sa-card-milestones li.met .status-mark {

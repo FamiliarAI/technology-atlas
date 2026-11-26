@@ -5,7 +5,7 @@ import { STATUS, loadBreakthrough, useAtlas, warm as isWarm } from './data.jsx';
 import { ringSegments, starColor } from './glyphs.jsx';
 import { onPaper } from './style.js';
 import { whenText } from './pages/Page.jsx';
-import { chartCoord, regionInk, starRadius } from './sky.js';
+import { chartCoord, starRadius } from './sky.js';
 import './share.css';
 
 // Share cards: the 1200×630 images that link previews show, drawn by the site itself and
@@ -352,7 +352,6 @@ function Constellation({ atlas, field, w = 500, h = 520 }) {
       width={w}
       height={h}
       viewBox={`0 0 ${w} ${h}`}
-      style={regionInk(field.region)}
       aria-hidden="true"
     >
       <defs>
@@ -374,16 +373,16 @@ function Constellation({ atlas, field, w = 500, h = 520 }) {
           <g key={i.id} transform={`translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})`}>
             <circle r={r + 5} className="con-gap" />
             {i.glow > 0 && <circle r={r * 2.4} fill="url(#card-halo-s)" className="card-halo" />}
-            {ringSegments(i.status, r).map((s, n) => (
-              <path key={n} d={s.d} className={'cseg ' + s.status} strokeWidth={s.status === 'none' ? 1.6 : 4} />
-            ))}
             {i.complete && onPaper() ? (
-              <>
-                <circle r={r * 0.5} fill="#1D2027" />
-                <circle r={r * 0.24} fill="#F2C14E" />
-              </>
+              // As on the chart: a complete star is its ring filled in with ink.
+              <circle r={r} fill="#1D2027" />
             ) : (
-              <circle r={r * 0.34} fill={starColor(i.glow)} />
+              <>
+                {ringSegments(i.status, r).map((s, n) => (
+                  <path key={n} d={s.d} className={'cseg ' + s.status} strokeWidth={s.status === 'none' ? 1.6 : 4} />
+                ))}
+                <circle r={r * 0.34} fill={starColor(i.glow)} />
+              </>
             )}
           </g>
         );

@@ -1,16 +1,15 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { animate, useReducedMotion } from 'framer-motion';
-import { ringSegments, starColor } from './glyphs.jsx';
+import { ringSegments } from './glyphs.jsx';
 import { onPaper } from './style.js';
-import { chartCoord, coreRadius, hash, LABEL, REGION_TYPE, regionInk, starRadius, UNITS_ACROSS } from './sky.js';
+import { chartCoord, CORE, hash, LABEL, REGION_TYPE, starRadius, UNITS_ACROSS } from './sky.js';
 import { EASE } from './motion.js';
 import './sky.css';
 
 // Levels of detail by zoom (k is screen pixels per world unit; the widest desktop view is
-// about 1): far = regions, figures, names and warm stars; nearer = every star with its
-// milestone ring; nearer still = IDs (and short titles in a focused constellation);
-// nearest = titles.
-const LOD = [0, 2.1, 3.6, 6.5];
+// about 1): far = regions, figures, names and stars as points; nearer = every star with its
+// milestone ring; nearer still = IDs.
+const LOD = [0, 2.1, 3.6];
 const lodOf = (k) => LOD.filter((t) => k >= t).length - 1;
 const K_MAX = 14;
 
@@ -22,15 +21,7 @@ function wrap(text, max) {
     if (line && (line + ' ' + w).length > max) lines.push(w);
     else lines[lines.length - 1] = line ? line + ' ' + w : w;
   }
-  return lines.length > 3 ? [...lines.slice(0, 2), lines[2] + '…'] : lines;
-}
-
-function truncate(text, max) {
-  if (text.length <= max) return text;
-  let cut = text.slice(0, max - 1);
-  // Cut at a word's end: drop a word the limit split, and any trailing punctuation.
-  if (/\S/.test(text[max - 1])) cut = cut.replace(/\s+\S*$/, '');
-  return cut.replace(/[\s,;:-]+$/, '') + '…';
+  return lines.length > 4 ? [...lines.slice(0, 3), lines[3] + '…'] : lines;
 }
 
 const fitBox = (box, w, h, pad, kMin, kMax) => {
@@ -38,11 +29,9 @@ const fitBox = (box, w, h, pad, kMin, kMax) => {
   return { cx: box.x + box.w / 2, cy: box.y + box.h / 2, k: Math.max(kMin, Math.min(kMax, k)) };
 };
 
-// A star with nothing met is a cool point of light; more milestones, a little larger and
-// brighter. Amber and white-gold stay reserved for progress.
-const DIM = '#C3CDE2';
-const starFill = (item) => (item.glow > 0 ? starColor(item.glow) : onPaper() ? '#A4A8B0' : DIM);
-const starAlpha = (item) => (item.glow > 0 ? 1 : Math.min(1, 0.5 + 0.09 * item.status.length));
+// A star's point has two states, set in CSS: nothing assessed, or under way. A complete star
+// is drawn as a filled disc instead.
+const tone = (item) => (item.glow > 0 ? 'moving' : 'none');
 
 // Does the segment p–q cross the box?
 function hits(p, q, b) {
@@ -98,38 +87,21 @@ const RegionTargets = memo(function RegionTargets({ regions, focusRegion, onFocu
   );
 });
 
-const Graticule = memo(function Graticule({ world, regions, fine, bare, names, focusRegion, onFocusRegion }) {
+const Graticule = memo(function Graticule({ world, regions, bare, names, focusRegion, onFocusRegion }) {
   const { frame, unit } = world;
   const x1 = world.w - frame;
   const y1 = world.h - frame;
-  const across = UNITS_ACROSS;
   const down = Math.floor((y1 - frame) / unit);
   if (bare) return null;
+  // A faint grid, as texture only: it carries no scale, so it has no ticks or numbers.
   const lines = [];
-  for (let u = 0; u <= across; u++) {
-    const major = u % 4 === 0;
-    if (!major && !fine) continue;
+  for (let u = 4; u < UNITS_ACROSS; u += 4) {
     const x = frame + u * unit;
-    lines.push(<line key={'x' + u} x1={x} x2={x} y1={frame} y2={y1} className={major ? 'major' : 'minor'} />);
+    lines.push(<line key={'x' + u} x1={x} x2={x} y1={frame} y2={y1} />);
   }
-  for (let u = 0; u <= down; u++) {
-    const major = u % 4 === 0;
-    if (!major && !fine) continue;
+  for (let u = 4; u <= down; u += 4) {
     const y = frame + u * unit;
-    lines.push(<line key={'y' + u} x1={frame} x2={x1} y1={y} y2={y} className={major ? 'major' : 'minor'} />);
-  }
-  const ticks = [];
-  for (let u = 0; u <= across; u++) {
-    const x = frame + u * unit;
-    const len = u % 4 === 0 ? 6 : 3;
-    ticks.push(<line key={'t' + u} x1={x} x2={x} y1={frame} y2={frame - len} />);
-    ticks.push(<line key={'b' + u} x1={x} x2={x} y1={y1} y2={y1 + len} />);
-  }
-  for (let u = 0; u <= down; u++) {
-    const y = frame + u * unit;
-    const len = u % 4 === 0 ? 6 : 3;
-    ticks.push(<line key={'l' + u} x1={frame} x2={frame - len} y1={y} y2={y} />);
-    ticks.push(<line key={'r' + u} x1={x1} x2={x1 + len} y1={y} y2={y} />);
+    lines.push(<line key={'y' + u} x1={frame} x2={x1} y1={y} y2={y} />);
   }
   // Boundaries between regions, dashed like the constellation boundaries of a printed chart.
   let bounds = '';
@@ -142,23 +114,9 @@ const Graticule = memo(function Graticule({ world, regions, fine, bare, names, f
   return (
     <g className="sky-structure">
       <g aria-hidden="true">
-        <g className="sky-washes">
-          {regions.map((r) => (
-            <rect
-              key={r.name}
-              x={r.x}
-              y={r.y}
-              width={r.w}
-              height={r.h}
-              style={regionInk(r.name)}
-              className={'sky-region-wash' + (focusRegion === r.name ? ' focus' : '')}
-            />
-          ))}
-        </g>
         <g className="sky-grid">{lines}</g>
         <path d={bounds} className="sky-bounds" />
         <rect x={frame} y={frame} width={x1 - frame} height={y1 - frame} className="sky-frame" />
-        {!fine && <g className="sky-ticks">{ticks}</g>}
       </g>
       {names && (
         <g className="sky-regions" aria-hidden={onFocusRegion ? undefined : 'true'}>
@@ -167,7 +125,6 @@ const Graticule = memo(function Graticule({ world, regions, fine, bare, names, f
               key={r.name}
               transform={`translate(${r.label.x.toFixed(1)} ${r.label.y.toFixed(1)})`}
               className={'sky-region-name' + (focusRegion === r.name ? ' focus' : '')}
-              style={regionInk(r.name)}
               role={onFocusRegion ? 'button' : undefined}
               tabIndex={onFocusRegion ? 0 : undefined}
               aria-label={onFocusRegion ? `${r.name}: zoom in` : undefined}
@@ -211,7 +168,7 @@ const Graticule = memo(function Graticule({ world, regions, fine, bare, names, f
 
 // Label text for a star, drawn in screen pixels from the top-left of its planned box.
 function StarLabel({ item, plan }) {
-  const { kind, end } = plan;
+  const { title, end } = plan;
   const anchor = end ? 'end' : 'start';
   const x = 0;
   return (
@@ -219,12 +176,7 @@ function StarLabel({ item, plan }) {
       <text className="sky-star-id" x={x} y="0" dy="0.8em" textAnchor={anchor}>
         {item.id}
       </text>
-      {kind === 'short' && (
-        <text className="sky-star-title short" x={x} y="13" dy="0.85em" textAnchor={anchor}>
-          {truncate(item.title, 28)}
-        </text>
-      )}
-      {kind === 'title' && (
+      {title && (
         <text className="sky-star-title" x={x} y="13" textAnchor={anchor}>
           {wrap(item.title, 26).map((line, n) => (
             <tspan key={n} x={x} dy={n === 0 ? '0.95em' : '1.2em'}>
@@ -237,22 +189,8 @@ function StarLabel({ item, plan }) {
   );
 }
 
-// A complete breakthrough: a filled disc the size of the ring, and four thin spikes.
-function Sparkle({ r }) {
-  const s = r * 2.6;
-  return (
-    <g className="sky-sparkle">
-      <path d={`M0 ${-s}L0 ${s}M${-s} 0L${s} 0`} className="sky-sparkle-spikes" />
-      <circle r={r * 0.95} className="sky-sparkle-disc" />
-      <circle r={r * 0.4} className="sky-sparkle-heart" />
-    </g>
-  );
-}
-
 const Star = memo(function Star({ item, lod, state, plan, interactive, tabbable, onSelect, onHover }) {
   const r = starRadius(item.status.length);
-  const core = coreRadius(item.status.length);
-  const warm = item.glow > 0;
   const active = state === 'selected' || state === 'hovered';
   const live = interactive && lod >= 1;
   const props = live
@@ -279,29 +217,28 @@ const Star = memo(function Star({ item, lod, state, plan, interactive, tabbable,
     : {};
   return (
     <g
-      className={'sky-star ' + state + (warm ? ' warm' : '') + (live ? ' live' : '')}
+      className={'sky-star ' + state + (live ? ' live' : '')}
       transform={`translate(${item.x.toFixed(2)} ${item.y.toFixed(2)})`}
       {...props}
     >
       {live && <circle r={r + 2.5} className="sky-star-hit" />}
       {item.pulse && <circle r={r + 0.6} className="sky-pulse" />}
-      {lod >= 1 ? (
-        // Close up, a star stays a point of light: its core is sized on screen, not in the sky.
-        <g className="sky-screen">
-          <circle r={1.3 + 0.32 * item.status.length} fill={starFill(item)} opacity={starAlpha(item)} className="sky-star-core" />
-          {warm && <circle r={1.1} className="sky-star-heart" />}
-        </g>
+      {lod === 0 ? (
+        // From afar a star is a point; complete stars are drawn over it by the beacons layer.
+        <circle r={CORE} className={'sky-star-core ' + tone(item)} />
+      ) : item.complete ? (
+        // Complete: the ring filled in. One mark, the same ink as a met segment.
+        <circle r={r} className="sky-complete" />
       ) : (
-        <circle r={core} fill={starFill(item)} opacity={starAlpha(item)} className="sky-star-core" />
+        <>
+          <g className="sky-screen">
+            <circle r="2.2" className={'sky-star-core ' + tone(item)} />
+          </g>
+          {ringSegments(item.status, r).map((seg, n) => (
+            <path key={n} d={seg.d} className={'sky-seg ' + seg.status} />
+          ))}
+        </>
       )}
-      {lod >= 1 &&
-        (item.complete ? (
-          // Complete: a different kind of mark, a solid bright disc with four spikes, so it
-          // reads apart from every ring (all milestones met included) at a glance.
-          <Sparkle r={r} />
-        ) : (
-          ringSegments(item.status, r).map((seg, n) => <path key={n} d={seg.d} className={'sky-seg ' + seg.status} />)
-        ))}
       {active && (
         <g className="sky-reticle">
           <circle r={r + 2.2} />
@@ -326,29 +263,27 @@ const Star = memo(function Star({ item, lod, state, plan, interactive, tabbable,
 
 // ---------- Constellations ----------
 
-// A field's milestones as one bar under its name: met, in progress, none. It lets the whole
-// sky be compared field by field before any star is looked at.
-const BAR_W = 46;
-function FieldBar({ field, y }) {
+// A field's size in words under its name, and how many of its breakthroughs are complete when
+// any are. The milestone counts are in the tooltip.
+function FieldCount({ field, y }) {
   let met = 0;
   let moving = 0;
   let total = 0;
+  let complete = 0;
   for (const i of field.items) {
     met += i.met;
     moving += i.moving;
     total += i.status.length;
+    if (i.complete) complete += 1;
   }
-  if (!total) return null;
-  const wMet = (BAR_W * met) / total;
-  const wMoving = (BAR_W * moving) / total;
-  const x0 = -BAR_W / 2;
+  const n = field.items.length;
+  if (!n) return null;
   return (
-    <g className="sky-field-bar" transform={`translate(0 ${y})`}>
-      <rect x={x0} width={BAR_W} height="2.4" className="none" />
-      <rect x={x0} width={wMet} height="2.4" className="met" />
-      <rect x={x0 + wMet} width={wMoving} height="2.4" className="moving" />
-      <title>{`${field.items.length} breakthroughs; ${met} of ${total} milestones met, ${moving} in progress`}</title>
-    </g>
+    <text className="sky-field-count" textAnchor="middle" y={y} dy="0.8em">
+      {n === 1 ? '1 breakthrough' : `${n} breakthroughs`}
+      {complete > 0 && <tspan className="done">{` · ${complete} complete`}</tspan>}
+      <title>{`${n} breakthroughs, ${complete} complete; ${met} of ${total} milestones met, ${moving} in progress`}</title>
+    </text>
   );
 }
 
@@ -382,10 +317,12 @@ const Constellation = memo(function Constellation({
     return 'rest';
   };
   const box = fig.box;
+  // The label of the star pointed at or selected is drawn last, above every star and name.
+  const lifted = [...new Set([selected, hovered])].filter((id) => id && plan?.get(id));
   return (
     <g
       className={'sky-con ' + state}
-      style={{ '--d': delay.toFixed(2) + 's', ...regionInk(field.region) }}
+      style={{ '--d': delay.toFixed(2) + 's' }}
       onPointerEnter={interactive ? () => onHoverField(field.id) : undefined}
       onPointerLeave={interactive ? () => onHoverField(null) : undefined}
     >
@@ -418,7 +355,7 @@ const Constellation = memo(function Constellation({
             item={item}
             lod={lod}
             state={starState(item)}
-            plan={plan?.get(item.id) || null}
+            plan={lifted.includes(item.id) ? null : plan?.get(item.id) || null}
             interactive={interactive}
             tabbable={interactive && state === 'focus'}
             onSelect={onSelect}
@@ -436,71 +373,29 @@ const Constellation = memo(function Constellation({
                   </tspan>
                 ))}
               </text>
-              <FieldBar field={field} y={fig.label.lines.length * LABEL.line + 3} />
+              <FieldCount field={field} y={fig.label.lines.length * LABEL.line - 1.5} />
             </g>
           </g>
         )}
+        {lifted.map((id) => {
+          const item = field.byId[id];
+          const at = plan.get(id);
+          return (
+            <g
+              key={id}
+              className="sky-label-lift"
+              transform={`translate(${(item.x + at.wx).toFixed(2)} ${(item.y + at.wy).toFixed(2)})`}
+            >
+              <g className="sky-screen">
+                <StarLabel item={item} plan={at} />
+              </g>
+            </g>
+          );
+        })}
       </g>
     </g>
   );
 });
-
-// ---------- Screen-edge rulers ----------
-
-const STEPS = [16, 8, 4, 2, 1, 0.5, 0.25];
-
-function Rulers({ subscribe, inset }) {
-  const [v, setV] = useState(null);
-  useEffect(() => subscribe(setV), [subscribe]);
-  if (!v) return null;
-  const { cx, cy, k, w, h, oy, unit, frame } = v;
-  const ox = (w - inset) / 2;
-  const px = unit * k;
-  const step = [...STEPS].reverse().find((s) => s * px >= 72) || STEPS[0];
-  const toX = (u) => ox + (frame + u * unit - cx) * k;
-  const toY = (u) => oy + (frame + u * unit - cy) * k;
-  const fromX = (sx) => ((sx - ox) / k + cx - frame) / unit;
-  const fromY = (sy) => ((sy - oy) / k + cy - frame) / unit;
-  const fmt = (u) => (step < 1 ? u.toFixed(step < 0.5 ? 2 : 1) : String(u));
-  const ticks = (from, to, axis) => {
-    const out = [];
-    const minor = step / 4;
-    for (let u = Math.ceil(from / minor) * minor; u <= to; u += minor) {
-      const major = Math.abs(u / step - Math.round(u / step)) < 1e-6;
-      const at = axis === 'x' ? toX(u) : toY(u);
-      out.push({ u: Math.round(u * 1000) / 1000, at, major });
-    }
-    return out;
-  };
-  const xs = ticks(fromX(0), fromX(w - inset), 'x');
-  const ys = ticks(fromY(0), fromY(h), 'y');
-  return (
-    <svg className="sky-rulers" width={w} height={h} aria-hidden="true">
-      <g className="sky-ruler">
-        {xs.map((t) => (
-          <g key={'x' + t.u} transform={`translate(${t.at.toFixed(1)} 0)`}>
-            <line y1="0" y2={t.major ? 7 : 3.5} />
-            {t.major && (
-              <text x="3" y="16">
-                {fmt(t.u)}
-              </text>
-            )}
-          </g>
-        ))}
-        {ys.map((t) => (
-          <g key={'y' + t.u} transform={`translate(0 ${t.at.toFixed(1)})`}>
-            <line x1="0" x2={t.major ? 7 : 3.5} />
-            {t.major && t.at > 26 && (
-              <text x="10" y="3.5">
-                {fmt(t.u)}
-              </text>
-            )}
-          </g>
-        ))}
-      </g>
-    </svg>
-  );
-}
 
 // ---------- The chart ----------
 
@@ -530,7 +425,6 @@ export default function Chart({
   const worldRef = useRef(null);
   const view = useRef({ cx: world.w / 2, cy: world.h / 2, k: 1 });
   const glide = useRef(null);
-  const listeners = useRef(new Set());
   const [size, setSize] = useState(null);
   const [lod, setLod] = useState(0);
   const [kq, setKq] = useState(1);
@@ -606,18 +500,8 @@ export default function Chart({
         .join(' ');
       setVisible(ids);
     }
-    for (const fn of listeners.current) fn({ cx, cy, k, w: size.w, h: size.h, oy, unit: world.unit, frame: world.frame });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [size, insetRight, insetTop, insetBottom, atlas, sky, world]);
-
-  const subscribe = useCallback(
-    (fn) => {
-      listeners.current.add(fn);
-      apply();
-      return () => listeners.current.delete(fn);
-    },
-    [apply],
-  );
 
   useLayoutEffect(() => {
     const el = wrapRef.current;
@@ -844,15 +728,18 @@ export default function Chart({
 
   const visibleSet = useMemo(() => new Set(visible.split(' ')), [visible]);
 
-  // Which stars get a label, how much, and on which side: greedily, most important first.
-  // Each label tries the right, left, below and above of its star, and takes the first spot
-  // that covers no other label, star, constellation name or figure line.
+  // Every star in view gets the same label, its ID; the star pointed at or selected gets its
+  // whole title as well (the list beside the chart has every title). Labels are placed
+  // greedily, most important first: each tries the sides and corners of its star and takes the
+  // first spot that covers no other label, star or constellation name, and no figure line; if
+  // there is none, it may cross a line (labels sit on a paper-coloured halo) but nothing else.
   const plans = useMemo(() => {
     if (lod < 2 || !interactive) return {};
     const k = kq;
     const out = {};
     const considered = atlas.fields.filter((f) => visibleSet.has(f.id) && (!focusField || f.id === focusField));
     const items = considered.flatMap((f) => f.items);
+    const isActive = (i) => i.id === selected || i.id === hovered;
     const taken = [];
     const segs = [];
     for (const f of considered) {
@@ -861,45 +748,56 @@ export default function Chart({
       // The constellation's name, at the size it is drawn at this zoom (see --ls).
       const sc = (k >= 0.88 ? Math.min(Math.max(k, 1), 1.1) : k / 0.88) / k;
       const lw = Math.max(...fig.label.lines.map((l) => l.length)) * LABEL.char * sc;
-      taken.push({ x: fig.label.x - lw / 2, y: fig.label.y, w: lw, h: fig.label.lines.length * LABEL.line * sc });
+      taken.push({ x: fig.label.x - lw / 2, y: fig.label.y, w: lw, h: (fig.label.lines.length + 1) * LABEL.line * sc });
       for (const i of f.items) {
-        const r = starRadius(i.status.length);
+        // The active star's box takes in its reticle.
+        const r = starRadius(i.status.length) + (isActive(i) ? 4.6 : 0);
         taken.push({ x: i.x - r, y: i.y - r, w: r * 2, h: r * 2, star: i.id });
       }
     }
-    const priority = (i) =>
-      i.id === selected ? 0 : i.id === hovered ? 1 : i.glow > 0 ? 2 : i.field === focusField ? 3 : 4;
+    const priority = (i) => (i.id === selected ? 0 : i.id === hovered ? 1 : i.field === focusField ? 2 : 3);
     items.sort((a, b) => priority(a) - priority(b) || a.id.localeCompare(b.id));
-    const kinds = lod >= 3 ? ['title', 'short', 'id'] : focusField ? ['short', 'id'] : ['id'];
     for (const i of items) {
-      const gap = starRadius(i.status.length) * k + 6;
+      const title = isActive(i);
+      const gap = (starRadius(i.status.length) + (title ? 4.6 : 0)) * k + 6;
+      const w = title ? 182 : 8 + i.id.length * 6.6;
+      const h = title ? 17 + wrap(i.title, 26).length * 15.4 : 13;
+      const mid = -h / 2 + (title ? 6 : 0);
+      const d = gap * 0.72;
+      const sides = [
+        { ox: gap, oy: mid, end: false },
+        { ox: -gap - w, oy: mid, end: true },
+        { ox: -w / 2 + 20, oy: gap - 2, end: false },
+        { ox: -w / 2 + 20, oy: -gap - h + 2, end: false },
+        { ox: d, oy: -d - h + 3, end: false },
+        { ox: d, oy: d - 3, end: false },
+        { ox: -d - w, oy: -d - h + 3, end: true },
+        { ox: -d - w, oy: d - 3, end: true },
+        // Centred above and below, and a step further out, for a star hemmed in by its figure.
+        { ox: -w / 2, oy: gap - 2, end: false },
+        { ox: -w / 2, oy: -gap - h + 2, end: false },
+        { ox: gap + 9, oy: mid, end: false },
+        { ox: -gap - 9 - w, oy: mid, end: true },
+      ];
       let chosen = null;
-      for (const kind of i.id === selected || i.id === hovered ? ['title', 'short', 'id'] : kinds) {
-        const lines = kind === 'title' ? wrap(i.title, 26).length : 0;
-        const w = kind === 'id' ? 8 + i.id.length * 6.6 : kind === 'short' ? 178 : 182;
-        const h = kind === 'id' ? 13 : kind === 'short' ? 30 : 17 + lines * 15.4;
-        const sides = [
-          { ox: gap, oy: -h / 2 + (kind === 'id' ? 0 : 6), end: false },
-          { ox: -gap - w, oy: -h / 2 + (kind === 'id' ? 0 : 6), end: true },
-          { ox: -w / 2 + 20, oy: gap - 2, end: false },
-          { ox: -w / 2 + 20, oy: -gap - h + 2, end: false },
-        ];
+      for (const strict of [true, false]) {
         for (const side of sides) {
           const box = { x: i.x + side.ox / k, y: i.y + side.oy / k, w: w / k, h: h / k };
           // Glyphs reach a little above the box's top line; keep a margin round the text.
           const room = { x: box.x - 2 / k, y: box.y - 4 / k, w: box.w + 4 / k, h: box.h + 6 / k };
           const clear =
-            taken.every((b) => b.star === i.id || !meets(room, b)) && segs.every(([p, q]) => !hits(p, q, room));
+            taken.every((b) => b.star === i.id || !meets(room, b)) &&
+            (!strict || segs.every(([p, q]) => !hits(p, q, room)));
           if (clear) {
-            chosen = { kind, end: side.end, box, wx: box.x - i.x + (side.end ? box.w : 0), wy: box.y - i.y };
+            chosen = { title, end: side.end, box, wx: box.x - i.x + (side.end ? box.w : 0), wy: box.y - i.y };
             break;
           }
         }
         if (chosen) break;
       }
-      if (!chosen && (i.id === selected || i.id === hovered)) {
-        const w = 182;
-        chosen = { kind: 'title', end: false, box: { x: i.x + gap / k, y: i.y - 10 / k, w: w / k, h: 60 / k }, wx: gap / k, wy: -10 / k };
+      // The active star always shows its title, to its right if nowhere is clear.
+      if (!chosen && title) {
+        chosen = { title, end: false, box: { x: i.x + gap / k, y: i.y + mid / k, w: w / k, h: h / k }, wx: gap / k, wy: mid / k };
       }
       if (!chosen) continue;
       taken.push(chosen.box);
@@ -983,7 +881,6 @@ export default function Chart({
             <Graticule
               world={world}
               regions={sky.regions}
-              fine={lod >= 1}
               bare={bare}
               names={names}
               focusRegion={focusField ? null : focusRegion}
@@ -1027,12 +924,7 @@ export default function Chart({
                 <g key={i.id} transform={`translate(${i.x.toFixed(2)} ${i.y.toFixed(2)})`}>
                   <g className="sky-screen">
                     <circle r={lod >= 1 ? 18 : 9} fill="url(#sky-halo-met)" />
-                    {lod === 0 && (
-                      <>
-                        <path d="M0 -7L0 7M-7 0L7 0" className="sky-sparkle-spikes far" />
-                        <circle r="2.6" className="sky-sparkle-disc" />
-                      </>
-                    )}
+                    {lod === 0 && <circle r="2.8" className="sky-complete far" />}
                   </g>
                 </g>
               ))}
@@ -1040,7 +932,6 @@ export default function Chart({
           </g>
         </g>
       </svg>
-      {interactive && <Rulers subscribe={subscribe} inset={insetRight} />}
     </div>
   );
 }
@@ -1066,19 +957,16 @@ export function Locator({ atlas, field, star, size = 132, width, names = false, 
   const px = width || Math.round(size * 1.5);
   const scale = px / vw;
   const stroke = (n) => n / scale; // n screen pixels in world units
-  // Figure lines, one path per region so each can take its region's ink on paper.
   const all = useMemo(() => {
-    const byRegion = new Map();
+    let figures = '';
     for (const x of atlas.fields) {
-      let figures = byRegion.get(x.region) || '';
       for (const [a, b] of sky.figures[x.id].edges) {
         const p = atlas.items[a];
         const q = atlas.items[b];
         figures += `M${p.x.toFixed(1)} ${p.y.toFixed(1)}L${q.x.toFixed(1)} ${q.y.toFixed(1)}`;
       }
-      byRegion.set(x.region, figures);
     }
-    return [...byRegion];
+    return figures;
   }, [atlas, sky]);
   const mine = useMemo(() => {
     if (!fig) return '';
@@ -1133,18 +1021,13 @@ export function Locator({ atlas, field, star, size = 132, width, names = false, 
         className="loc-bounds"
         style={{ strokeWidth: stroke(0.7), strokeDasharray: `${stroke(2.5)} ${stroke(2.5)}` }}
       />
-      {sky.regions.map((r) => (
-        <rect key={r.name} x={r.x} y={r.y} width={r.w} height={r.h} className="loc-wash" style={regionInk(r.name)} />
-      ))}
-      {all.map(([region, d]) => (
-        <path key={region} d={d} className="loc-figures" style={{ strokeWidth: stroke(0.6), ...regionInk(region) }} />
-      ))}
+      <path d={all} className="loc-figures" style={{ strokeWidth: stroke(0.6) }} />
       {names &&
         sky.regions.map((r) => (
           <text
             key={r.name}
             className="loc-region"
-            style={{ fontSize: stroke(5.6), letterSpacing: stroke(0.6), ...regionInk(r.name) }}
+            style={{ fontSize: stroke(5.6), letterSpacing: stroke(0.6) }}
           >
             {r.label.lines.map((line, n) => (
               <tspan key={n} x={r.label.x} y={r.label.y + stroke(6 + n * 8)}>

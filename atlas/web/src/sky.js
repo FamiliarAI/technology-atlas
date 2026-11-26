@@ -16,20 +16,6 @@ export const REGION_GRID = [
   ['Earth and Space', 'Chemistry and Materials', 'Life Sciences', 'Medicine'],
 ];
 
-// Each region's ink on paper, as on a hand-coloured printed atlas: its wash, its figures and its
-// name. Neighbours differ in hue; none is the ochre that marks progress.
-export const REGION_INK = {
-  'Engineering and Energy': '#3f6c94',
-  'Mathematics and Physics': '#6a56a0',
-  'Computing and Information': '#2b7c74',
-  'Mind and Society': '#4a5596',
-  'Earth and Space': '#6b7b37',
-  'Chemistry and Materials': '#8e4f86',
-  'Life Sciences': '#3d8050',
-  Medicine: '#a63a55',
-};
-export const regionInk = (name) => ({ '--rc': REGION_INK[name] || '#6e737c' });
-
 // Order within a region, read left to right and top to bottom, so fields that border another
 // region sit near it. Fields not listed (new ones) follow in ID order.
 export const FIELD_ORDER = [
@@ -71,10 +57,15 @@ export function random(seed) {
   };
 }
 
-// Radius of a star's milestone ring: more milestones, a larger star.
-export const starRadius = (milestones) => 1.75 + 0.34 * milestones;
-// Radius of the star's point inside the ring.
-export const coreRadius = (milestones) => 0.8 + 0.13 * milestones;
+// Radius of a star's milestone ring. It grows a little with the number of milestones and stops
+// short of half the least distance between two stars (SPACING * 0.88), so no two rings of one
+// figure overlap and every segment can be counted.
+export const starRadius = (milestones) => Math.min(3.1, 2.1 + 0.14 * milestones);
+// Radius of a star seen from afar, before its ring is drawn: the same for every star.
+export const CORE = 1.35;
+// Room kept round a figure for its stars' rings. Fixed, so the sky's layout (and every chart
+// coordinate) stays as it was when rings were larger.
+const REACH = 3.79;
 
 // A field name in at most two balanced lines: capitals in the sky, as written on paper.
 export function wrapName(name) {
@@ -380,9 +371,8 @@ export function layout(fields, items) {
     const mine = (members[id] || []).sort((a, b) => a.id.localeCompare(b.id));
     const lines = wrapName(known.get(id).name);
     const fig = settle(figure(id, mine.length), labelWidth(lines));
-    const reach = starRadius(6);
-    const fw = fig.w + reach * 2;
-    const fh = fig.h + reach * 2;
+    const fw = fig.w + REACH * 2;
+    const fh = fig.h + REACH * 2;
     const w = Math.max(fw, labelWidth(lines)) + CELL.padX;
     const h = fh + LABEL.gap + lines.length * LABEL.line + CELL.padY;
     cells[id] = { id, fig, lines, mine, fw, fh, w, h };

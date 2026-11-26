@@ -1,12 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import Chart, { Locator } from '../Chart.jsx';
 import Starfield from '../Starfield.jsx';
 import { useAtlas, useField, warm as isWarm } from '../data.jsx';
-import { FieldEmblem, StarGlyph, StatusMark, ringSegments, starColor } from '../glyphs.jsx';
-import { onPaper } from '../style.js';
-import { chartCoord, REGION_GRID, regionInk } from '../sky.js';
+import { FieldEmblem, StarGlyph, StatusMark, ringSegments } from '../glyphs.jsx';
+import { REGION_GRID } from '../sky.js';
 import { whenText } from './Page.jsx';
 import { EASE } from '../motion.js';
 import '../sky.css';
@@ -52,7 +51,7 @@ function FieldList({ atlas, regions, filter, onPick, onHover, onRegion }) {
     <div className="sa-regions">
       {shown.map((r) => (
         <section key={r.name} aria-label={r.name} id={regionAnchor(r.name)}>
-          <h2 className="sa-region-head" style={regionInk(r.name)}>
+          <h2 className="sa-region-head">
             {onRegion ? (
               <button type="button" onClick={() => onRegion(r.name)} title={`Zoom to ${r.name}`}>
                 {r.name}
@@ -96,14 +95,20 @@ function FieldList({ atlas, regions, filter, onPick, onHover, onRegion }) {
   );
 }
 
-function BreakthroughList({ atlas, field, selected, onSelect, onHighlight, links = false }) {
+function BreakthroughList({ field, selected, highlight, onSelect, onHighlight, links = false }) {
   const detail = useField(field.id);
+  // A star pointed at on the chart marks its row here and brings it into view.
+  const rows = useRef(null);
+  useEffect(() => {
+    if (!highlight) return;
+    rows.current?.querySelector(`[data-id="${highlight}"]`)?.scrollIntoView({ block: 'nearest' });
+  }, [highlight]);
   const summary = useMemo(
     () => Object.fromEntries((detail?.breakthroughs || []).map((b) => [b.id, b.summary])),
     [detail],
   );
   return (
-    <div className="sa-blist">
+    <div className="sa-blist" ref={rows}>
       <ul>
         {field.items.map((item) => {
           const lit = isWarm(item);
@@ -111,10 +116,7 @@ function BreakthroughList({ atlas, field, selected, onSelect, onHighlight, links
             <>
               <StarGlyph item={item} size={30} />
               <span className="sa-b-text">
-                <span className="sa-b-id mono">
-                  {item.id}
-                  <span>{chartCoord(item, atlas.sky)?.text}</span>
-                </span>
+                <span className="sa-b-id mono">{item.id}</span>
                 <span className="sa-b-title">{item.title}</span>
                 {summary[item.id] && <span className="sa-b-sum">{summary[item.id]}</span>}
               </span>
@@ -137,7 +139,7 @@ function BreakthroughList({ atlas, field, selected, onSelect, onHighlight, links
             onBlur: () => onHighlight?.(null),
           };
           return (
-            <li key={item.id}>
+            <li key={item.id} data-id={item.id}>
               {links ? (
                 <Link to={'/b/' + item.id} className="sa-b" {...hover}>
                   {inner}
@@ -145,7 +147,7 @@ function BreakthroughList({ atlas, field, selected, onSelect, onHighlight, links
               ) : (
                 <button
                   type="button"
-                  className={'sa-b' + (selected === item.id ? ' selected' : '')}
+                  className={'sa-b' + (selected === item.id ? ' selected' : '') + (highlight === item.id ? ' lit' : '')}
                   aria-pressed={selected === item.id}
                   onClick={() => onSelect(item.id)}
                   {...hover}
@@ -167,7 +169,6 @@ function StarCard({ atlas, id, onClose }) {
   const item = atlas.items[id];
   const field = atlas.field[item.field];
   const detail = useField(item.field)?.breakthroughs.find((b) => b.id === id);
-  const coord = chartCoord(item, atlas.sky);
   return (
     <motion.aside
       className="sa-card"
@@ -192,10 +193,11 @@ function StarCard({ atlas, id, onClose }) {
       {item.complete && (
         <p className="sa-card-complete">Complete{item.completed ? ` · ${whenText(item.completed)}` : ''}</p>
       )}
-      <p className="sa-card-coord mono">
-        Chart {coord.text}
-        {item.recent && <span className="sa-card-recent">moved in the last 30 days</span>}
-      </p>
+      {item.recent && (
+        <p className="sa-card-coord mono">
+          <span className="sa-card-recent">moved in the last 30 days</span>
+        </p>
+      )}
       {detail?.summary && <p className="sa-card-sum">{detail.summary}</p>}
       {item.overall > 0 && (
         <p className="sa-card-whole mono">
@@ -221,51 +223,46 @@ function StarCard({ atlas, id, onClose }) {
 
 // ---------- The legend ----------
 
+// Everything the chart draws, in the chart's own marks: the three states of a ring segment, the
+// filled disc of a complete breakthrough, and what a line does and does not mean.
 function Legend() {
-  const segs = ringSegments(['met', 'in_progress', 'none', 'none'], 7);
+  const ring = (status) => ringSegments([status, status, status, status], 6);
+  const sample = (status) => (
+    <svg width="18" height="18" viewBox="-9 -9 18 18" aria-hidden="true">
+      {ring(status).map((s, n) => (
+        <path key={n} d={s.d} className={'sky-seg legend ' + s.status} />
+      ))}
+    </svg>
+  );
   return (
-    <div className="sa-legend" aria-label="How to read the sky" role="note">
+    <div className="sa-legend" aria-label="How to read the chart" role="note">
       <p className="sa-legend-row">
-        <svg width="34" height="16" viewBox="0 0 34 16" aria-hidden="true">
-          <path d="M3 11L15 5L31 9" className="lg-fig" />
+        <b>Ring</b>
+        <span>one segment per milestone:</span>
+        {sample('none')}
+        <span>not assessed</span>
+        {sample('in_progress')}
+        <span>in progress</span>
+        {sample('met')}
+        <span>met</span>
+      </p>
+      <p className="sa-legend-row">
+        <svg width="18" height="18" viewBox="-9 -9 18 18" aria-hidden="true">
+          <circle r="6" className="sky-complete" />
+        </svg>
+        <span>
+          <b>Disc</b> complete: its completion test is met
+        </span>
+      </p>
+      <p className="sa-legend-row">
+        <svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true">
+          <path d="M3 11L14 5L27 9" className="lg-fig" />
           <circle cx="3" cy="11" r="1.6" className="lg-dot" />
-          <circle cx="15" cy="5" r="1.6" className="lg-dot" />
-          <circle cx="31" cy="9" r="1.6" className="lg-dot" />
+          <circle cx="14" cy="5" r="1.6" className="lg-dot" />
+          <circle cx="27" cy="9" r="1.6" className="lg-dot" />
         </svg>
         <span>
-          <b>Figure line</b> one field
-        </span>
-      </p>
-      <p className="sa-legend-row">
-        <svg width="34" height="16" viewBox="0 0 34 16" aria-hidden="true">
-          <circle cx="4" cy="8" r="1.6" fill={onPaper() ? starColor(0) : '#C3CDE2'} opacity="0.85" />
-          <circle cx="17" cy="8" r="2.4" fill={onPaper() ? starColor(0.5) : '#FFB454'} />
-          <circle cx="30" cy="8" r="2.6" fill={onPaper() ? starColor(1) : '#FFF1C9'} />
-        </svg>
-        <span>
-          <b>{onPaper() ? 'Colour' : 'Brightness'}</b> <em className="t-none">not yet assessed</em> · <em className="t-amber">under way</em> ·{' '}
-          <em className="t-met">all met</em>
-        </span>
-      </p>
-      <p className="sa-legend-row">
-        <svg width="34" height="18" viewBox="-17 -9 34 18" aria-hidden="true">
-          <circle r="2" fill="#FFB454" />
-          {segs.map((s, n) => (
-            <path key={n} d={s.d} className={'sky-seg legend ' + s.status} />
-          ))}
-        </svg>
-        <span>
-          <b>Ring</b> one segment per milestone
-        </span>
-      </p>
-      <p className="sa-legend-row">
-        <svg width="34" height="18" viewBox="-17 -9 34 18" aria-hidden="true">
-          <circle r="11" fill="url(#sky-halo-met)" />
-          <path d="M0 -9L0 9M-9 0L9 0" className="sky-sparkle-spikes legend" />
-          <circle r="4.5" className="sky-sparkle-disc" />
-        </svg>
-        <span>
-          <b>Bright star</b> complete: its completion test met
+          <b>Line</b> joins one field’s breakthroughs; it shows no order or dependency
         </span>
       </p>
     </div>
@@ -332,7 +329,7 @@ function DesktopAtlas({ atlas, field, region, star, setParams }) {
                 The constellation’s page
                 <Arrow />
               </Link>
-              <BreakthroughList atlas={atlas} field={f} selected={star} onSelect={select} onHighlight={setHighlight} />
+              <BreakthroughList field={f} selected={star} highlight={highlight} onSelect={select} onHighlight={setHighlight} />
             </motion.div>
           ) : r ? (
             <motion.div
@@ -420,6 +417,7 @@ function DesktopAtlas({ atlas, field, region, star, setParams }) {
           highlight={highlight}
           highlightField={highlightField}
           onSelect={select}
+          onHover={setHighlight}
           onFocusField={pick}
           inset={{ right: star ? 420 : 0, top: 30, bottom: 50 }}
           pad={10}
@@ -498,7 +496,7 @@ function PhoneAtlas({ atlas, field, setParams }) {
             <Arrow back />
             All constellations
           </button>
-          <BreakthroughList atlas={atlas} field={f} links />
+          <BreakthroughList field={f} links />
         </>
       ) : (
         <FieldList atlas={atlas} regions={regions} filter="" onPick={(id) => setParams({ field: id })} />

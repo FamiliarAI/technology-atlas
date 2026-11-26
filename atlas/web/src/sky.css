@@ -121,18 +121,10 @@
   stroke-width: calc(1px * var(--ik));
 }
 
-.sky-grid line.minor {
-  stroke: rgb(127 178 255 / 0.03);
-}
 
 .sky-frame {
   fill: none;
   stroke: rgb(127 178 255 / 0.24);
-  stroke-width: calc(1px * var(--ik));
-}
-
-.sky-ticks line {
-  stroke: rgb(127 178 255 / 0.36);
   stroke-width: calc(1px * var(--ik));
 }
 
@@ -245,8 +237,13 @@
   fill: transparent;
 }
 
-.sky-star-heart {
-  fill: #fff8e6;
+/* A star's point: nothing assessed, or under way. */
+.sky-star-core.none {
+  fill: #c3cde2;
+  opacity: 0.7;
+}
+.sky-star-core.moving {
+  fill: var(--amber);
 }
 
 .sky-star.dim {
@@ -329,10 +326,6 @@
   fill: var(--soft);
 }
 
-.sky-star-title.short {
-  font-size: 12.5px;
-}
-
 .sky-star-id,
 .sky-star-title {
   paint-order: stroke;
@@ -342,10 +335,12 @@
   pointer-events: none;
 }
 
-.sky-star.selected .sky-star-id,
-.sky-star.hovered .sky-star-id,
-.sky-star.selected .sky-star-title,
-.sky-star.hovered .sky-star-title {
+/* The label of the star pointed at or selected (Chart.jsx, drawn above the rest). */
+.sky-label-lift {
+  pointer-events: none;
+}
+.sky-label-lift .sky-star-id,
+.sky-label-lift .sky-star-title {
   fill: var(--text);
 }
 
@@ -363,25 +358,6 @@
 
 .sky-beacon-ring.met {
   stroke: var(--met);
-}
-
-/* Rulers on the stage edges: chart coordinates for whatever is in view */
-
-.sky-rulers {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.sky-ruler line {
-  stroke: rgb(127 178 255 / 0.45);
-  stroke-width: 1;
-}
-
-.sky-ruler text {
-  font: 400 9.5px var(--mono);
-  fill: #77849e;
-  letter-spacing: 0.02em;
 }
 
 /* Zoom */
@@ -729,6 +705,7 @@
 }
 
 .sa-b:hover,
+.sa-b.lit,
 .sa-b.selected {
   background: rgb(17 24 48 / 0.85);
 }
@@ -749,10 +726,6 @@
   gap: 10px;
   color: var(--muted);
   font-size: 11px;
-}
-
-.sa-b-id span {
-  color: #6f7c97;
 }
 
 .sa-b-title {
@@ -861,22 +834,6 @@
   text-transform: uppercase;
   color: var(--soft);
   margin-right: 4px;
-}
-
-.sa-legend em {
-  font-style: normal;
-}
-
-.sa-legend .t-amber {
-  color: var(--amber);
-}
-
-.sa-legend .t-met {
-  color: var(--met);
-}
-
-.sa-legend .t-none {
-  color: var(--muted);
 }
 
 .lg-fig {
@@ -1114,19 +1071,19 @@
   font-size: 11px;
 }
 
-/* A field's milestone bar under its name (Chart.jsx FieldBar). */
-.sky-field-bar rect.none {
-  fill: rgba(160, 190, 255, 0.18);
+/* A field's size in words under its name (Chart.jsx FieldCount). */
+.sky-name text.sky-field-count {
+  font: 400 7.2px var(--sans, var(--mono));
+  letter-spacing: 0;
+  fill: var(--muted);
+  paint-order: stroke;
+  stroke: rgb(5 7 13 / 0.92);
+  stroke-width: 2px;
+  stroke-linejoin: round;
 }
-.sky-field-bar rect.met {
+.sky-name text.sky-field-count .done {
   fill: var(--met);
-}
-.sky-field-bar rect.moving {
-  fill: var(--amber);
-  opacity: 0.85;
-}
-.sky-con.dim .sky-field-bar {
-  opacity: 0.3;
+  font-weight: 600;
 }
 
 /* Regions as zoom targets (Chart.jsx RegionTargets, region names). */
@@ -1162,35 +1119,11 @@
   text-underline-offset: 3px;
 }
 
-/* Complete (completion test met): one unbroken ring, a touch heavier than a met segment. */
-.sky-seg.sky-complete {
-  stroke-width: calc(2.6px * var(--ik));
+/* Complete (completion test met): the ring filled in, in the colour of a met segment. */
+.sky-complete {
+  fill: var(--met);
 }
-.sky-seg.legend.sky-complete {
-  stroke-width: 2.4px;
-}
-
-/* A complete breakthrough (Chart.jsx Sparkle): solid disc, four spikes. */
-.sky-sparkle-disc {
-  fill: #fff4d6;
-  filter: drop-shadow(0 0 calc(3px * var(--ik)) rgba(255, 224, 160, 0.9));
-}
-.sky-sparkle-heart {
-  fill: #ffffff;
-}
-.sky-sparkle-spikes {
-  stroke: #fff4d6;
-  stroke-width: calc(0.9px * var(--ik));
-  stroke-linecap: round;
-  opacity: 0.85;
-}
-.sky-sparkle-spikes.far {
-  stroke-width: 1px;
-}
-.sky-sparkle-spikes.legend {
-  stroke-width: 1px;
-}
-.sky-sparkle-disc:not(.sky-sparkle .sky-sparkle-disc) {
+.sky-complete.far {
   filter: drop-shadow(0 0 2px rgba(255, 224, 160, 0.9));
 }
 
@@ -1204,11 +1137,4 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--met);
-}
-
-/* Region washes are drawn only on paper (paper-site.css). */
-.loc-wash,
-.sky-region-wash {
-  fill: none;
-  pointer-events: none;
 }

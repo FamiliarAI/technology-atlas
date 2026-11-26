@@ -10,15 +10,10 @@ const mix = (a, b, t) => {
 
 // Colour means progress and nothing else: a dim blue-grey point warms to amber as milestones
 // advance and ignites white-gold when all are met.
-// On paper the scale is a printed one: a pale grey point darkens through ochre to ink.
+// On paper a star's point has two states, the same two as a ring segment: grey when nothing is
+// assessed, amber once anything is under way. Ink is kept for met segments and complete stars.
 export function starColor(glow) {
-  // On paper, progress shows as saturation where the dark sky used brightness: grey, then
-  // ochre, then a strong vermilion as the last milestones fall. Ink is kept for complete stars.
-  if (onPaper()) {
-    if (glow <= 0) return '#A4A8B0';
-    if (glow >= 1) return '#C2410C';
-    return glow < 0.5 ? mix('B4A896', 'C98A1B', glow * 2) : mix('C98A1B', 'C2410C', (glow - 0.5) * 2);
-  }
+  if (onPaper()) return glow <= 0 ? '#A4A8B0' : '#A8650A';
   if (glow <= 0) return '#7D89A3';
   if (glow >= 1) return '#FFF1C9';
   return glow < 0.5 ? mix('9AA3B8', 'FFB454', glow * 2) : mix('FFB454', 'FFF1C9', (glow - 0.5) * 2);
@@ -41,20 +36,14 @@ export function ringSegments(status, radius) {
 export function StarMark({ item, r, ring = true, core }) {
   const color = starColor(item.glow);
   const c = core ?? Math.max(1.2, r * 0.36);
+  // Complete: the ring filled in, one disc and nothing else (as on the chart).
+  if (ring && item.complete) return <circle r={r} className="star-complete" />;
   return (
     <>
       {item.glow > 0 && <circle r={r * 1.9} fill="url(#halo)" opacity={0.45 + item.glow * 0.55} />}
       <circle r={c} fill={color} opacity={starOpacity(item.glow)} />
       {item.glow > 0 && <circle r={c * 0.45} fill="#FFF8E6" className="star-heart" />}
-      {ring &&
-        (item.complete ? (
-          <g className="sparkle">
-            <path d={`M0 ${-r * 2.2}L0 ${r * 2.2}M${-r * 2.2} 0L${r * 2.2} 0`} className="sparkle-spikes" />
-            <circle r={r * 0.95} className="sparkle-disc" />
-          </g>
-        ) : (
-          ringSegments(item.status, r).map((seg, n) => <path key={n} d={seg.d} className={'seg ' + seg.status} />)
-        ))}
+      {ring && ringSegments(item.status, r).map((seg, n) => <path key={n} d={seg.d} className={'seg ' + seg.status} />)}
     </>
   );
 }
