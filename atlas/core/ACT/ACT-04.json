@@ -288,14 +288,30 @@
   ],
   "prompt": "5e97d4b8dfc3"
  },
+ "review": {
+  "state": "published",
+  "note": null,
+  "into": null,
+  "at": "2026-11-14",
+  "log": [
+   {
+    "date": "2026-11-14",
+    "state": "published"
+   }
+  ]
+ },
  "page": {
   "id": "ACT-04",
   "title": "Probabilistic mortality forecasting under structural change",
-  "definition": "Population forecasts of age-specific death rates and life expectancy extend 20 years ahead using mortality histories and risk-factor evidence. Their probability intervals cover outcomes at least as often as stated, and responses to detected changes in mortality trends improve forecast scores.",
+  "definition": "A model uses a population’s mortality history and evidence about risk factors such as smoking to forecast age-specific death rates and life expectancy up to 20 years ahead. When it detects a lasting change in the mortality trend, such as a slowdown in the decline of death rates, adjusting the forecast improves its interval score. The score accounts for both interval width and how far observations fall outside the interval. At least 95% of observed outcomes fall within the model’s 95% prediction intervals.",
   "goal": {
-   "need": "Pension valuation depends on how long payments continue. The IMF quantified this exposure with a three-year longevity shock in a pension model; the table gives liability increases at two discount rates. The model assumed entry at age 20, retirement at 60, and inflation-indexed benefits linked to final salary.",
+   "need": "Pension plans and annuity providers must fund payments for as long as members live. In a model defined-benefit plan, three extra years of average life expectancy raised liabilities by 8% at a 6% discount rate and by almost 14% at a 2% rate. Extending a historical trend can misstate payment costs when the pace of mortality improvement changes. Recognising the change would help providers revise how much to set aside, provided the population trend also applies to their members.",
    "need_refs": [
-    1
+    1,
+    2,
+    9,
+    8,
+    10
    ],
    "figures": {
     "caption": "IMF pension-model sensitivity to increased longevity, April 2012",
@@ -367,8 +383,8 @@
    {
     "id": "m1",
     "title": "A risk-factor model forecasts life expectancy with lower mean absolute error than Lee–Carter.",
-    "criterion": "Life-expectancy forecasts have lower mean absolute error than Lee–Carter on the same countries, sexes and withheld periods. Li and Raftery's smoking-adjusted model met this comparison in 67 countries for 2000–2015: errors were 0.962 versus 2.043 years for males and 0.728 versus 1.210 years for females. Training covered 1950–2000; observations were organised in five-year periods.",
-    "set_by": "Mortality-forecast evaluation convention: lower out-of-sample error than an established benchmark, applied by Li and Raftery (2021), section 4, and Schnürch and Korn (2022), section 4.2. These comparisons specify no universal minimum effect size.",
+    "criterion": "Forecast life expectancy at birth with a risk-factor model and with Lee–Carter for the same countries, sexes and withheld periods. Compare each forecast with the observed life expectancy in years. The risk-factor model has the lower mean absolute error.",
+    "set_by": "Out-of-sample comparison with an established mortality benchmark, applied by Li and Raftery in section 3, Table 2, and by Schnürch and Korn in section 4.2. Neither specifies a universal minimum improvement.",
     "set_by_kind": "community_convention",
     "threshold_quote": "Our method had the smallest MAE for both sexes and both choices of test period among the five methods.",
     "threshold_ref": 7,
@@ -383,7 +399,7 @@
    {
     "id": "m2",
     "title": "Nominal 95% mortality prediction intervals attain at least 95% empirical coverage.",
-    "criterion": "Observed death rates fall inside nominal 95% prediction intervals at least 95% of the time; interval width is assessed separately. Schnürch and Korn evaluated 54 sex-specific national populations, ages 60–89, over 2007–2016, training through 2006. Feedforward and convolutional neural networks achieved pooled coverage of 97.0% and 98.0%, respectively. Pooled coverage does not establish coverage within every population or horizon.",
+    "criterion": "For each withheld combination of age, year and population, check whether the observed death rate falls inside its nominal 95% prediction interval. At least 95% of those observations fall inside. Report mean interval width over the same observations. The coverage threshold applies to the pooled observations.",
     "set_by": "Nominal-coverage evaluation convention, applied at 95% by Schnürch and Korn (2022), section 4.3. The at-least-95% cutoff is their study-specific implementation; coverage and width are also evaluated by Li and Raftery (2021).",
     "set_by_kind": "community_convention",
     "threshold_quote": "Good prediction intervals should minimize MPIW under the constraint that PICP is at or above the specified threshold a.",
@@ -399,7 +415,7 @@
    {
     "id": "m3",
     "title": "One mortality model combines 20-year forecast gains, 95% coverage and improved scores after warnings.",
-    "criterion": "A developer demonstrates one risk-factor mortality model on withheld 20-year periods spanning changes in mortality trends. Using only forecast-origin information, it beats Lee–Carter on life-expectancy mean absolute error and mean 95% interval score, attains at least 95% coverage for nominal 95% intervals, and lowers mean interval score when its warning response is enabled rather than disabled. The interval score penalizes width and missed observations. Fu et al. reported retrospective structural-change analysis in six countries and 5- and 10-year forecast comparisons; those results do not establish this combined test.",
+    "criterion": "A developer tests one risk-factor mortality model on withheld 20-year periods spanning changes in mortality trends, using only information available at each forecast origin. The model has lower mean absolute error for life expectancy and a lower mean 95% interval score than Lee–Carter. Its nominal 95% intervals cover at least 95% of observations. On the same withheld observations, enabling the model’s response to a trend warning lowers its mean interval score compared with disabling that response.",
     "set_by": "Atlas fallback: searches of OECD guidance, SOA research calls and mortality-validation papers found no external criterion for a combined developer demonstration. The 20-year horizon follows Duerst et al.'s published example, not a field-wide requirement.",
     "set_by_kind": "atlas",
     "threshold_quote": null,
@@ -414,6 +430,22 @@
     "status": "active",
     "replaced_by": [],
     "threshold_checked": null
+   },
+   {
+    "id": "m4",
+    "title": "Refitting after a mortality trend change lowers mean squared forecast error for a withheld year.",
+    "criterion": "Identify a change in the training period and fit the same mortality model twice, first to the full period and then with the early years containing the change removed. For the same population and forecast year, compare both sets of age-specific mortality forecasts with the observed values. The refit has lower mean squared error across ages. In the published comparison, the first ten training years are removed and each of the next ten forecast years is scored separately.",
+    "set_by": "Within-model forecast comparison used by Fu and colleagues in section 3.4, Table 10. O’Hare and Li also compare forecasts with and without allowance for a structural break.",
+    "set_by_kind": "community_convention",
+    "threshold_quote": "the forecast error using the truncated training set had decreased compared to the error when using the full dataset.",
+    "threshold_ref": 8,
+    "refs": [
+     8,
+     9
+    ],
+    "status": "active",
+    "replaced_by": [],
+    "threshold_checked": null
    }
   ],
   "measures": [],
@@ -421,8 +453,7 @@
    "No regulator, actuarial standard, government programme or prize acceptance test was found for the combined capability.",
    "No published independent validation was located that satisfies the combined completion test.",
    "No external numerical acceptance thresholds were found for warning lead time, false alarms or transfer to pension and insured populations.",
-   "No published validation was located establishing the combined capability over a 50-year horizon.",
-   "The SOA-hosted 2023 Living to 100 mortality-methodology PDF returned HTTP 404."
+   "No published validation was located establishing the combined capability over a 50-year horizon."
   ],
   "references": [
    {
@@ -536,11 +567,40 @@
     "issue": "8",
     "pages": "161",
     "citation_source": "crossref"
+   },
+   {
+    "id": 9,
+    "kind": "journal",
+    "url": "https://hull-repository.worktribe.com/output/1389673/identifying-structural-breaks-in-stochastic-mortality-models",
+    "doi": "10.1115/1.4029740",
+    "title": "Identifying structural breaks in stochastic mortality models",
+    "authors": "O’Hare C, Li Y",
+    "container": "ASCE-ASME Journal of Risk and Uncertainty in Engineering Systems Part B: Mechanical Engineering",
+    "year": "2015",
+    "volume": "1",
+    "issue": "2",
+    "pages": null,
+    "citation_source": "crossref"
+   },
+   {
+    "id": 10,
+    "kind": "report",
+    "url": "https://www.soa.org/globalassets/assets/files/resources/essays-monographs/2023-living-to-100-compendium/2023-living-to-100-comp-gutterman-method.pdf",
+    "doi": null,
+    "title": "A Method for Mortality Rate Projection: A Five-Step Approach",
+    "authors": "Sam Gutterman",
+    "container": "2023 Living to 100 Compendium",
+    "year": "2023",
+    "volume": null,
+    "issue": null,
+    "pages": null,
+    "citation_source": "model"
    }
   ],
   "milestone_order": [
    "m1",
    "m2",
+   "m4",
    "m3"
   ],
   "results": [
@@ -548,111 +608,181 @@
     "milestone": "m2",
     "case": null,
     "verdict": "met",
-    "finding": "Across 54 populations, the CNN attained 98.0% pooled coverage for nominal 95% death-rate prediction intervals.",
-    "detail": "Ages 60–89 were evaluated over 2007–2016, with training through 2006. Pooled coverage does not establish coverage for every population or horizon; the intervals were wider on average than the FFNN’s.",
+    "finding": "CNN mortality prediction intervals achieved 98.0% pooled coverage across 16,200 withheld death rates.",
+    "detail": "The supplied excerpt describes the mean interval widths and their ordering. The numerical width values from Table 3 are absent from the excerpt.",
     "quote": "Both the FFNN (\n$97.0\\%$\n) and the CNN (\n$98.0\\%$\n) fulfil the requirement that\n$\\textrm{PICP} \\geq 0.95$\n.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 5,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
+   },
+   {
+    "milestone": "m4",
+    "case": null,
+    "verdict": "partial",
+    "finding": "Across 54 populations, removing the first 10 training years from Poisson Lee–Carter yielded slightly lower out-of-sample errors.",
+    "detail": null,
+    "quote": "In fact, we will see that the LC10 model produces slightly lower out-of-sample errors than the LC20 model, and we have found that it even achieves slightly superior out-of-sample performance compared to an LC model calibrated on 30 years of data.",
+    "checked": true,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 5,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
    },
    {
     "milestone": "m3",
     "case": null,
     "verdict": "partial",
-    "finding": "For 50 populations, the CNN outperformed Lee–Carter on death-rate error measures in a 20-year robustness check.",
-    "detail": "The check used some information from the test period to select hyperparameters. It did not demonstrate the required risk-factor model, life-expectancy MAE, interval-score comparison or warning response; the coverage result was from a separate 10-year evaluation.",
+    "finding": "The CNN beat Lee–Carter on death-rate MAE in a 20-year check across 50 populations.",
+    "detail": "The 1997–2016 robustness check used hyperparameters selected with data through 2006, ten years beyond the forecast origin.",
     "quote": "We find that the RNN still performs worst, while the CNN is the best model with respect to all error measures except for the Poisson deviance (Dev).",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 5,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
    },
    {
     "milestone": "m1",
     "case": null,
     "verdict": "met",
-    "finding": "Smoking-adjusted life-expectancy forecasts across 67 countries reduced male MAE by 53% versus Lee–Carter.",
-    "detail": "For 2000–2015, male MAE was 0.962 versus 2.043 years and female MAE was 0.728 versus 1.210 years. Models were trained on 1950–2000 data, with observations in five-year periods.",
-    "quote": "For predicting three five-year periods ahead, the new method improved accuracy over the Lee-Carter method by 53% (40%), and over the bayesLife method by 24% (17%) for males (females).",
+    "finding": "Across 68 countries, smokeLife reduced male life expectancy at birth MAE by 70% versus Lee–Carter in the five-year holdout.",
+    "detail": null,
+    "quote": "Our method had the smallest MAE for both sexes and both choices of test period among the five methods.",
     "checked": true,
     "confirmed": true,
     "peer_reviewed": true,
     "ref": 7,
-    "judged_by": "gpt-6.1-terra",
-    "judged_on": "2026-11-14"
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
+   },
+   {
+    "milestone": "m2",
+    "case": null,
+    "verdict": "partial",
+    "finding": "In the 67-country holdout, smokeLife's nominal 95% intervals covered 89.6% of observed male life expectancy values.",
+    "detail": null,
+    "quote": null,
+    "checked": null,
+    "confirmed": true,
+    "peer_reviewed": true,
+    "ref": 7,
+    "judged_by": "gpt-6.2-sol",
+    "judged_on": "2026-11-26"
    }
   ],
   "judged": [
    {
     "url": "https://www.demogr.mpg.de/papers/working/wp-2023-020.pdf",
     "milestone": "m1",
-    "hash": "1ba5cead6aa0",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "f90942aaab66",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.demogr.mpg.de/papers/working/wp-2023-020.pdf",
     "milestone": "m2",
-    "hash": "ce11c4cfdf07",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "6201f9b5e9b7",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.demogr.mpg.de/papers/working/wp-2023-020.pdf",
+    "milestone": "m4",
+    "hash": "5ee61879bb36",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.demogr.mpg.de/papers/working/wp-2023-020.pdf",
     "milestone": "m3",
-    "hash": "81119f9d639d",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "d2903ecbd4ca",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.demogr.mpg.de/papers/working/wp-2023-020.pdf",
     "milestone": "completion",
     "hash": "54dd58c19ade",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cambridge.org/core/journals/astin-bulletin-journal-of-the-iaa/article/point-and-interval-forecasts-of-death-rates-using-neural-networks/62F3A5B07463E5257E20B4FBD9115C6A",
     "milestone": "m1",
-    "hash": "1ba5cead6aa0",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "f90942aaab66",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cambridge.org/core/journals/astin-bulletin-journal-of-the-iaa/article/point-and-interval-forecasts-of-death-rates-using-neural-networks/62F3A5B07463E5257E20B4FBD9115C6A",
     "milestone": "m2",
-    "hash": "ce11c4cfdf07",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "6201f9b5e9b7",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://www.cambridge.org/core/journals/astin-bulletin-journal-of-the-iaa/article/point-and-interval-forecasts-of-death-rates-using-neural-networks/62F3A5B07463E5257E20B4FBD9115C6A",
+    "milestone": "m4",
+    "hash": "5ee61879bb36",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cambridge.org/core/journals/astin-bulletin-journal-of-the-iaa/article/point-and-interval-forecasts-of-death-rates-using-neural-networks/62F3A5B07463E5257E20B4FBD9115C6A",
     "milestone": "m3",
-    "hash": "81119f9d639d",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "d2903ecbd4ca",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://www.cambridge.org/core/journals/astin-bulletin-journal-of-the-iaa/article/point-and-interval-forecasts-of-death-rates-using-neural-networks/62F3A5B07463E5257E20B4FBD9115C6A",
     "milestone": "completion",
     "hash": "54dd58c19ade",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    },
    {
     "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8048146/",
     "milestone": "m1",
-    "hash": "1ba5cead6aa0",
-    "date": "2026-11-14",
-    "by": "gpt-6.1-terra"
+    "hash": "f90942aaab66",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8048146/",
+    "milestone": "m2",
+    "hash": "6201f9b5e9b7",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8048146/",
+    "milestone": "m4",
+    "hash": "5ee61879bb36",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8048146/",
+    "milestone": "m3",
+    "hash": "d2903ecbd4ca",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
+   },
+   {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8048146/",
+    "milestone": "completion",
+    "hash": "54dd58c19ade",
+    "date": "2026-11-26",
+    "by": "gpt-6.2-sol"
    }
   ],
-  "version": 1,
+  "version": 2,
   "accessed": "2026-11-14",
   "log": [
    {
@@ -694,20 +824,93 @@
     "date": "2026-11-14",
     "actor": "atlas.page",
     "action": "Checked result quotations against saved copies: 3 found, 0 not found, 0 with no readable copy."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "definition = \"A model uses a population\\u2019s mortality history and evidence about risk factors such as smoking to forecast age-specific death rates and life expectancy up to 20 years ahead. When it detects a lasting change in the mortality trend, such as a slowdown in the decline of death rates, adjusting the forecast improves its interval score. The score accounts for both interval width and how far observations fall outside the interval. At least 95% of observed outcomes fall within the model\\u2019s 95% prediction intervals.\". Reason: The definition leaves structural change unexplained and describes coverage without explaining why interval width matters."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "goal.need = \"Pension plans and annuity providers must fund payments for as long as members live. In a model defined-benefit plan, three extra years of average life expectancy raised liabilities by 8% at a 6% discount rate and by almost 14% at a 2% rate. Extending a historical trend can misstate payment costs when the pace of mortality improvement changes. Recognising the change would help providers revise how much to set aside, provided the population trend also applies to their members.\". Reason: The current text points readers to a table without giving the liability increases or explaining how a forecast would inform funding decisions."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m1: criterion = \"Forecast life expectancy at birth with a risk-factor model and with Lee\\u2013Carter for the same countries, sexes and withheld periods. Compare each forecast with the observed life expectancy in years. The risk-factor model has the lower mean absolute error.\"; set_by = \"Out-of-sample comparison with an established mortality benchmark, applied by Li and Raftery in section 3, Table 2, and by Schn\\u00fcrch and Korn in section 4.2. Neither specifies a universal minimum improvement.\". Reason: The criterion embeds one study’s results, and the attribution points to section 4 although Li and Raftery report the comparison in section 3, Table 2."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m2: criterion = \"For each withheld combination of age, year and population, check whether the observed death rate falls inside its nominal 95% prediction interval. At least 95% of those observations fall inside. Report mean interval width over the same observations. The coverage threshold applies to the pooled observations.\". Reason: The criterion mixes the coverage test with two networks’ results and leaves the denominator of the pooled coverage measure implicit."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "add milestone after m2: \"Refitting after a mortality trend change lowers mean squared forecast error for a withheld year.\". Reason: A published comparison isolates the value of responding to a trend change before the integrated 20-year test."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "edit m3: criterion = \"A developer tests one risk-factor mortality model on withheld 20-year periods spanning changes in mortality trends, using only information available at each forecast origin. The model has lower mean absolute error for life expectancy and a lower mean 95% interval score than Lee\\u2013Carter. Its nominal 95% intervals cover at least 95% of observations. On the same withheld observations, enabling the model\\u2019s response to a trend warning lowers its mean interval score compared with disabling that response.\". Reason: The final sentence describes a shorter study’s results inside the criterion for the combined 20-year demonstration."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-astra",
+    "action": "remove not found 4. Reason: The Society of Actuaries now serves the full 2023 Living to 100 mortality projection paper at the address in reference 10."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "atlas.page",
+    "action": "Applied 7 of 7 proposed operations from ACT-04-revise-20261126T121036802996Z; now version 2."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "atlas.page",
+    "action": "Criteria new or changed, to be judged by the next results run: m1, m2, m4, m3."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 1 from Crossref, 0 from PubMed, 0 from arXiv, 1 as the model gave them."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "atlas.page",
+    "action": "Checked new or changed quotations against saved copies: 0 found, 0 not found, 1 with no readable copy."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "atlas.page",
+    "action": "definition is 510 characters, over its limit of 420; kept."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 3 sources the entry already uses against the milestones they had not been judged against (all, --all), without search."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-sol",
+    "action": "Searched for results on the open cells: 1 candidates returned, 0 dropped as sources already used, 1 to judge."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "gpt-6.2-sol",
+    "action": "Judged 0 of 1 new candidates, without search. Skipped: 1 no readable saved copy. Dropped rows: none. Replaced 3 earlier rows. Added 5 results: 5 from sources already used, 0 from newly found sources."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "atlas.page",
+    "action": "Filled citations from registries: 0 from Crossref, 0 from PubMed, 0 from arXiv, 0 as the model gave them."
+   },
+   {
+    "date": "2026-11-26",
+    "actor": "atlas.page",
+    "action": "Checked result quotations against saved copies: 4 found, 0 not found, 0 with no readable copy."
    }
   ],
-  "results_run": "2026-11-14"
- },
- "review": {
-  "state": "published",
-  "note": null,
-  "into": null,
-  "at": "2026-11-14",
-  "log": [
-   {
-    "date": "2026-11-14",
-    "state": "published"
-   }
-  ]
+  "results_run": "2026-11-26"
  }
 }
