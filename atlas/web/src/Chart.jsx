@@ -2,13 +2,13 @@ import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useStat
 import { animate, useReducedMotion } from 'framer-motion';
 import { ringSegments } from './glyphs.jsx';
 import { onPaper } from './style.js';
-import { chartCoord, CORE, hash, LABEL, REGION_TYPE, starRadius, UNITS_ACROSS } from './sky.js';
+import { chartCoord, hash, LABEL, REGION_TYPE, starRadius, UNITS_ACROSS } from './sky.js';
 import { EASE } from './motion.js';
 import './sky.css';
 
 // Levels of detail by zoom (k is screen pixels per world unit; the widest desktop view is
-// about 1): far = regions, figures, names and stars as points; nearer = every star with its
-// milestone ring; nearer still = IDs.
+// about 1): far = regions, figures, names and each star as a point shaded by its milestones;
+// nearer = every star with its milestone ring; nearer still = IDs.
 const LOD = [0, 2.1, 3.6];
 const lodOf = (k) => LOD.filter((t) => k >= t).length - 1;
 const K_MAX = 14;
@@ -32,6 +32,36 @@ const fitBox = (box, w, h, pad, kMin, kMax) => {
 // A star's point has two states, set in CSS: nothing assessed, or under way. A complete star
 // is drawn as a filled disc instead.
 const tone = (item) => (item.glow > 0 ? 'moving' : 'none');
+
+// From afar a star is its ring closed into a point: a small disc shaded by the share of its
+// milestones met, then the share in progress, clockwise from the top; the rest is not yet
+// assessed. A complete star is a larger, solid disc.
+const FAR = { r: 2.4, complete: 3.1 };
+function wedge(from, to, r) {
+  const a0 = -Math.PI / 2 + from * Math.PI * 2;
+  const a1 = -Math.PI / 2 + to * Math.PI * 2;
+  const p = (a) => `${(Math.cos(a) * r).toFixed(2)} ${(Math.sin(a) * r).toFixed(2)}`;
+  return `M0 0L${p(a0)}A${r} ${r} 0 ${to - from > 0.5 ? 1 : 0} 1 ${p(a1)}Z`;
+}
+export function FarPoint({ item, r = FAR.r }) {
+  if (item.complete) return <circle r={(r * FAR.complete) / FAR.r} className="sky-complete far" />;
+  const n = item.status.length || 1;
+  const met = item.met / n;
+  const moving = item.moving / n;
+  return (
+    <>
+      <circle r={r} className="sky-far none" />
+      {moving > 0 &&
+        (met + moving > 0.999 && met === 0 ? (
+          <circle r={r} className="sky-far in_progress" />
+        ) : (
+          <path d={wedge(met, Math.min(met + moving, 0.9999), r)} className="sky-far in_progress" />
+        ))}
+      {met > 0 &&
+        (met > 0.999 ? <circle r={r} className="sky-far met" /> : <path d={wedge(0, met, r)} className="sky-far met" />)}
+    </>
+  );
+}
 
 // Does the segment p–q cross the box?
 function hits(p, q, b) {
@@ -167,12 +197,24 @@ const Graticule = memo(function Graticule({ world, regions, bare, names, focusRe
 // ---------- Stars ----------
 
 // Label text for a star, drawn in screen pixels from the top-left of its planned box.
-function StarLabel({ item, plan }) {
+function StarLabel({ item, plan, plate = false }) {
   const { title, end } = plan;
   const anchor = end ? 'end' : 'start';
   const x = 0;
   return (
     <g>
+      {plate && (
+        // The label of the star pointed at sits on a plate, so whatever lies under it is hidden
+        // rather than mixed with its text.
+        <rect
+          className="sky-label-plate"
+          x={(end ? -plan.sw : 0) - 7}
+          y={-6}
+          width={plan.sw + 14}
+          height={plan.sh + 10}
+          rx="2"
+        />
+      )}
       <text className="sky-star-id" x={x} y="0" dy="0.8em" textAnchor={anchor}>
         {item.id}
       </text>
@@ -224,8 +266,7 @@ const Star = memo(function Star({ item, lod, state, plan, interactive, tabbable,
       {live && <circle r={r + 2.5} className="sky-star-hit" />}
       {item.pulse && <circle r={r + 0.6} className="sky-pulse" />}
       {lod === 0 ? (
-        // From afar a star is a point; complete stars are drawn over it by the beacons layer.
-        <circle r={CORE} className={'sky-star-core ' + tone(item)} />
+        <FarPoint item={item} />
       ) : item.complete ? (
         // Complete: the ring filled in. One mark, the same ink as a met segment.
         <circle r={r} className="sky-complete" />
@@ -247,6 +288,10 @@ const Star = memo(function Star({ item, lod, state, plan, interactive, tabbable,
           <line x1={-(r + 2.2)} x2={-(r + 4.6)} />
           <line x1={r + 2.2} x2={r + 4.6} />
         </g>
+      )}
+      {plan?.lead && (
+        // A label set a step away from a hemmed-in star is tied to it by a short hairline.
+        <line className="sky-leader" x1={plan.lead[0]} y1={plan.lead[1]} x2={plan.lead[2]} y2={plan.lead[3]} />
       )}
       {plan && (
         // Placed in the sky, sized on screen: as the view closes in the label shrinks within
@@ -362,7 +407,8 @@ const Constellation = memo(function Constellation({
             onHover={onHoverStar}
           />
         ))}
-        {labels && (
+        {labels && !(state === 'focus' && lod >= 2) && (
+          // Close in on one field, its name is in the panel and the breadcrumb, not on the sky.
           <g transform={`translate(${fig.label.x.toFixed(2)} ${fig.label.y.toFixed(2)})`} className="sky-name">
             <g className="sky-label-scale">
               <text textAnchor="middle" style={{ fontSize: LABEL.size }}>
@@ -387,7 +433,7 @@ const Constellation = memo(function Constellation({
               transform={`translate(${(item.x + at.wx).toFixed(2)} ${(item.y + at.wy).toFixed(2)})`}
             >
               <g className="sky-screen">
-                <StarLabel item={item} plan={at} />
+                <StarLabel item={item} plan={at} plate />
               </g>
             </g>
           );
@@ -411,6 +457,7 @@ export default function Chart({
   onFocusField = () => {},
   onFocusRegion = null,
   onHover = () => {},
+  onLevel = null,
   intro = false,
   inset = { right: 0 },
   pad = 24,
@@ -440,6 +487,10 @@ export default function Chart({
     const t = setTimeout(() => setIntroOn(false), 2600);
     return () => clearTimeout(t);
   }, [introOn]);
+  // The page's legend describes the marks drawn at this level of detail.
+  useEffect(() => {
+    onLevel?.(lod);
+  }, [lod, onLevel]);
   const drag = useRef(null);
   const insetRight = inset?.right || 0;
   const insetTop = inset?.top || 0;
@@ -532,7 +583,20 @@ export default function Chart({
       return { cx: s.x, cy: s.y, k: Math.max(6.8, Math.min(view.current.k, K_MAX)) };
     }
     if (focusField && sky.figures[focusField]) {
-      return fitBox(sky.figures[focusField].box, w, size.h - insetTop - insetBottom, Math.max(pad, 120), whole.k, 6.4);
+      // One field fills the view: its stars and their rings, with room at the sides for labels.
+      const stars = atlas.field[focusField].items;
+      const xs = stars.map((i) => i.x);
+      const ys = stars.map((i) => i.y);
+      const reach = 3.4;
+      const box = stars.length
+        ? {
+            x: Math.min(...xs) - reach,
+            y: Math.min(...ys) - reach,
+            w: Math.max(...xs) - Math.min(...xs) + reach * 2,
+            h: Math.max(...ys) - Math.min(...ys) + reach * 2,
+          }
+        : sky.figures[focusField].box;
+      return fitBox(box, w, size.h - insetTop - insetBottom, Math.max(pad, 96), whole.k, 9);
     }
     const region = focusRegion && sky.regions.find((r) => r.name === focusRegion);
     if (region) {
@@ -745,10 +809,13 @@ export default function Chart({
     for (const f of considered) {
       const fig = sky.figures[f.id];
       for (const [a, b] of fig.edges) segs.push([atlas.items[a], atlas.items[b]]);
-      // The constellation's name, at the size it is drawn at this zoom (see --ls).
-      const sc = (k >= 0.88 ? Math.min(Math.max(k, 1), 1.1) : k / 0.88) / k;
-      const lw = Math.max(...fig.label.lines.map((l) => l.length)) * LABEL.char * sc;
-      taken.push({ x: fig.label.x - lw / 2, y: fig.label.y, w: lw, h: (fig.label.lines.length + 1) * LABEL.line * sc });
+      // The constellation's name, at the size it is drawn at this zoom (see --ls). The field in
+      // focus has no name on the sky.
+      if (f.id !== focusField) {
+        const sc = (k >= 0.88 ? Math.min(Math.max(k, 1), 1.1) : k / 0.88) / k;
+        const lw = Math.max(...fig.label.lines.map((l) => l.length)) * LABEL.char * sc;
+        taken.push({ x: fig.label.x - lw / 2, y: fig.label.y, w: lw, h: (fig.label.lines.length + 1) * LABEL.line * sc });
+      }
       for (const i of f.items) {
         // The active star's box takes in its reticle.
         const r = starRadius(i.status.length) + (isActive(i) ? 4.6 : 0);
@@ -759,9 +826,11 @@ export default function Chart({
     items.sort((a, b) => priority(a) - priority(b) || a.id.localeCompare(b.id));
     for (const i of items) {
       const title = isActive(i);
-      const gap = (starRadius(i.status.length) + (title ? 4.6 : 0)) * k + 6;
-      const w = title ? 182 : 8 + i.id.length * 6.6;
-      const h = title ? 17 + wrap(i.title, 26).length * 15.4 : 13;
+      const ring = starRadius(i.status.length);
+      const gap = (ring + (title ? 4.6 : 0)) * k + 6;
+      const lines = title ? wrap(i.title, 26) : [];
+      const w = title ? Math.max(8 + i.id.length * 6.6, ...lines.map((l) => 6 + l.length * 6.5)) : 8 + i.id.length * 6.6;
+      const h = title ? 17 + lines.length * 15.4 : 13;
       const mid = -h / 2 + (title ? 6 : 0);
       const d = gap * 0.72;
       const sides = [
@@ -779,25 +848,60 @@ export default function Chart({
         { ox: gap + 9, oy: mid, end: false },
         { ox: -gap - 9 - w, oy: mid, end: true },
       ];
+      // The same spots a step or two further out, for a star hemmed in on every side: such a
+      // label is tied back to its star by a hairline.
+      const further = [14, 28, 44].flatMap((m) =>
+        sides.slice(0, 8).map((side) => {
+          const cx = side.ox + w / 2;
+          const cy = side.oy + h / 2;
+          const d0 = Math.hypot(cx, cy) || 1;
+          return { ox: side.ox + (m * cx) / d0, oy: side.oy + (m * cy) / d0, end: side.end, lead: true };
+        }),
+      );
+      const place = (side) => {
+        const box = { x: i.x + side.ox / k, y: i.y + side.oy / k, w: w / k, h: h / k };
+        // Glyphs reach a little above the box's top line; keep a margin round the text.
+        const room = { x: box.x - 2 / k, y: box.y - 4 / k, w: box.w + 4 / k, h: box.h + 6 / k };
+        const plan = { title, end: side.end, box, sw: w, sh: h, wx: box.x - i.x + (side.end ? box.w : 0), wy: box.y - i.y };
+        if (side.lead) {
+          // From the ring's edge to the nearest point of the label.
+          const qx = Math.min(Math.max(0, box.x - i.x), box.x - i.x + box.w);
+          const qy = Math.min(Math.max(0, box.y - i.y), box.y - i.y + box.h);
+          const len = Math.hypot(qx, qy) || 1;
+          const from = ring + 1.5 / k;
+          const to = len - 2 / k;
+          if (to > from) plan.lead = [(qx / len) * from, (qy / len) * from, (qx / len) * to, (qy / len) * to].map((v) => +v.toFixed(2));
+        }
+        return { plan, room };
+      };
+      const covered = (room) => taken.filter((b) => b.star !== i.id && meets(room, b));
       let chosen = null;
-      for (const strict of [true, false]) {
-        for (const side of sides) {
-          const box = { x: i.x + side.ox / k, y: i.y + side.oy / k, w: w / k, h: h / k };
-          // Glyphs reach a little above the box's top line; keep a margin round the text.
-          const room = { x: box.x - 2 / k, y: box.y - 4 / k, w: box.w + 4 / k, h: box.h + 6 / k };
-          const clear =
-            taken.every((b) => b.star === i.id || !meets(room, b)) &&
-            (!strict || segs.every(([p, q]) => !hits(p, q, room)));
-          if (clear) {
-            chosen = { title, end: side.end, box, wx: box.x - i.x + (side.end ? box.w : 0), wy: box.y - i.y };
+      const passes = [
+        [sides, true],
+        [sides, false],
+        [further, false],
+      ];
+      for (const [spots, strict] of passes) {
+        for (const side of spots) {
+          const { plan, room } = place(side);
+          if (covered(room).length === 0 && (!strict || segs.every(([p, q]) => !hits(p, q, room)))) {
+            chosen = plan;
             break;
           }
         }
         if (chosen) break;
       }
-      // The active star always shows its title, to its right if nowhere is clear.
+      // The active star always shows its title: where it covers least, stars counting most.
       if (!chosen && title) {
-        chosen = { title, end: false, box: { x: i.x + gap / k, y: i.y + mid / k, w: w / k, h: h / k }, wx: gap / k, wy: mid / k };
+        let least = Infinity;
+        for (const side of [...sides, ...further]) {
+          const { plan, room } = place(side);
+          const cost = covered(room).reduce((n, b) => n + (b.star ? 3 : 1), 0);
+          if (cost < least) {
+            least = cost;
+            chosen = plan;
+          }
+        }
       }
       if (!chosen) continue;
       taken.push(chosen.box);
@@ -924,7 +1028,6 @@ export default function Chart({
                 <g key={i.id} transform={`translate(${i.x.toFixed(2)} ${i.y.toFixed(2)})`}>
                   <g className="sky-screen">
                     <circle r={lod >= 1 ? 18 : 9} fill="url(#sky-halo-met)" />
-                    {lod === 0 && <circle r="2.8" className="sky-complete far" />}
                   </g>
                 </g>
               ))}

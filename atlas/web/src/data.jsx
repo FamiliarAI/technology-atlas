@@ -87,11 +87,20 @@ export async function loadAtlas() {
     const list = Object.values(items)
       .filter((i) => i.field === id)
       .sort((a, b) => a.id.localeCompare(b.id));
+    // A breakthrough is complete, in progress (anything judged to move it) or not yet assessed.
+    const complete = list.filter((i) => i.complete).length;
+    const inProgress = list.filter((i) => !i.complete && warm(i)).length;
     return {
       ...field,
       sector: sky.sectors[id],
       items: list,
-      moving: list.filter(warm).length,
+      complete,
+      inProgress,
+      milestones: {
+        total: list.reduce((n, i) => n + i.status.length, 0),
+        met: list.reduce((n, i) => n + i.met, 0),
+        inProgress: list.reduce((n, i) => n + i.moving, 0),
+      },
     };
   });
   const all = Object.values(items);
@@ -114,6 +123,8 @@ export async function loadAtlas() {
       moving: all.reduce((n, i) => n + i.moving, 0),
       overall: all.reduce((n, i) => n + i.overall, 0),
       warm: all.filter(warm).length,
+      complete: all.filter((i) => i.complete).length,
+      inProgress: all.filter((i) => !i.complete && warm(i)).length,
     },
   };
 }

@@ -61,8 +61,6 @@ export function random(seed) {
 // short of half the least distance between two stars (SPACING * 0.88), so no two rings of one
 // figure overlap and every segment can be counted.
 export const starRadius = (milestones) => Math.min(3.1, 2.1 + 0.14 * milestones);
-// Radius of a star seen from afar, before its ring is drawn: the same for every star.
-export const CORE = 1.35;
 // Room kept round a figure for its stars' rings. Fixed, so the sky's layout (and every chart
 // coordinate) stays as it was when rings were larger.
 const REACH = 3.79;
@@ -386,18 +384,20 @@ export function layout(fields, items) {
   }
 
   // Shelf-packs a region's cells into a given width: its name first, then the constellations,
-  // tallest first so each shelf holds cells of similar height. Returns the height it needs.
-  const shelves = (region, w) => {
-    const ids = [
-      '@' + region,
-      ...[...byRegion[region]].sort((a, b) => cells[b].h - cells[a].h || rank(a) - rank(b)),
-    ];
+  // tallest first so each shelf holds cells of similar height. The shelves are then evened out
+  // (the narrowest width that still takes the same number of shelves), so no shelf is left
+  // half empty beside full ones. Returns the shelves and the height they need.
+  const sorted = {};
+  for (const r of regionNames) {
+    sorted[r] = ['@' + r, ...[...byRegion[r]].sort((a, b) => cells[b].h - cells[a].h || rank(a) - rank(b))];
+  }
+  const fill = (ids, cap) => {
     const rows = [];
     let row = [];
     let used = 0;
     for (const id of ids) {
       const cw = cells[id].w;
-      if (row.length && used + cw > w) {
+      if (row.length && used + cw > cap) {
         rows.push(row);
         row = [];
         used = 0;
@@ -406,6 +406,21 @@ export function layout(fields, items) {
       used += cw;
     }
     if (row.length) rows.push(row);
+    return rows;
+  };
+  const shelves = (region, w) => {
+    const ids = sorted[region];
+    let rows = fill(ids, w);
+    if (rows.length > 1) {
+      let lo = Math.max(...ids.map((id) => cells[id].w));
+      let hi = w;
+      for (let i = 0; i < 9 && hi - lo > 1; i++) {
+        const mid = (lo + hi) / 2;
+        if (fill(ids, mid).length <= rows.length) hi = mid;
+        else lo = mid;
+      }
+      rows = fill(ids, hi);
+    }
     const height = rows.reduce((n, r) => n + Math.max(...r.map((id) => cells[id].h)), 0);
     return { rows, height };
   };

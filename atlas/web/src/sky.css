@@ -246,8 +246,33 @@
   fill: var(--amber);
 }
 
+/* From afar: a point shaded by the share of its milestones (Chart.jsx FarPoint). */
+.sky-far.none {
+  fill: rgb(170 198 255 / 0.32);
+}
+.sky-far.in_progress {
+  fill: var(--amber);
+}
+.sky-far.met {
+  fill: var(--met);
+}
+
 .sky-star.dim {
   opacity: 0.25;
+}
+
+/* A label set a step away from its star is tied to it by a hairline. */
+.sky-leader {
+  stroke: rgb(170 198 255 / 0.5);
+  stroke-width: calc(0.8px * var(--ik));
+  pointer-events: none;
+}
+
+/* The plate under the label of the star pointed at or selected. */
+.sky-label-plate {
+  fill: rgb(11 16 32 / 0.94);
+  stroke: var(--hair-strong);
+  stroke-width: 1px;
 }
 
 .sky-seg {
@@ -362,21 +387,21 @@
 
 /* Zoom */
 
+/* A row at the chart's top right, in the band kept clear above the sky's frame. */
 .sky-zoom {
   position: absolute;
   z-index: 2;
   right: 20px;
-  bottom: 20px;
+  top: 12px;
   display: flex;
-  flex-direction: column;
   border: 1px solid var(--hair-strong);
   background: rgb(11 16 32 / 0.8);
   backdrop-filter: blur(8px);
 }
 
 .sky-zoom button {
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 32px;
   display: grid;
   place-items: center;
   padding: 0;
@@ -386,7 +411,7 @@
 }
 
 .sky-zoom button + button {
-  border-top: 1px solid var(--hair);
+  border-left: 1px solid var(--hair);
 }
 
 .sky-zoom button:hover {
@@ -459,7 +484,7 @@
 
 .sa-desk {
   display: grid;
-  grid-template-columns: 344px minmax(0, 1fr);
+  grid-template-columns: 376px minmax(0, 1fr);
   height: 100svh;
   padding-top: var(--header);
 }
@@ -474,18 +499,24 @@
 }
 
 .sa-rail-inner {
-  padding: 28px 26px 56px;
+  padding: 24px 22px 56px;
 }
 
 .sa-rail h1 {
-  margin: 10px 0 14px;
-  font-size: 29px;
+  margin: 8px 0 10px;
+  font-size: 27px;
   line-height: 1.1;
 }
 
+.sa-rail .eyebrow .mono {
+  font-size: 11px;
+  margin-left: 6px;
+  color: var(--soft);
+}
+
 .sa-rail-meta {
-  font-size: 16.5px;
-  line-height: 1.5;
+  font-size: 15px;
+  line-height: 1.45;
   color: var(--soft);
   text-wrap: pretty;
 }
@@ -512,57 +543,9 @@
   stroke-width: 1.5;
 }
 
-.sa-warm {
-  margin-top: 22px;
-  padding: 12px 0 4px;
-  border-top: 1px solid var(--hair);
-}
-
-.sa-warm-head {
-  font: 400 11.5px/1.4 var(--display);
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--amber);
-}
-
-.sa-warm ul {
-  list-style: none;
-  margin: 6px 0 0;
-  padding: 0;
-}
-
-.sa-warm button {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 24px auto minmax(0, 1fr);
-  gap: 10px;
-  align-items: center;
-  padding: 7px 4px;
-  background: none;
-  border: 0;
-  text-align: left;
-  font-size: 15px;
-  line-height: 1.3;
-}
-
-.sa-warm button:hover {
-  background: rgb(17 24 48 / 0.8);
-}
-
-.sa-warm .mono {
-  color: var(--muted);
-  font-size: 11px;
-}
-
-.sa-warm-title {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .sa-filter input {
   width: 100%;
-  margin: 20px 0 4px;
+  margin: 12px 0 4px;
   height: 40px;
   padding: 0 2px;
   background: none;
@@ -581,8 +564,8 @@
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin: 26px 0 2px;
-  padding-bottom: 8px;
+  margin: 20px 0 0;
+  padding-bottom: 6px;
   font: 400 11.5px/1.4 var(--display);
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -602,13 +585,14 @@
   padding: 0;
 }
 
+/* One line per field: its name, its milestones as a bar, its number of breakthroughs. */
 .sa-field {
   width: 100%;
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) 56px 22px;
   align-items: center;
-  gap: 13px;
-  padding: 8px 6px;
+  gap: 12px;
+  padding: 5px 6px;
   background: none;
   border: 0;
   border-bottom: 1px solid var(--hair);
@@ -621,25 +605,57 @@
 }
 
 .sa-field-name {
-  font-size: 16.5px;
+  font-size: 14.5px;
   line-height: 1.3;
 }
 
 .sa-field-meta {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 11.5px;
+  text-align: right;
 }
 
-.sa-moving i {
+.sa-bar {
   display: block;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
+}
+.sa-bar .none,
+.sa-key i.none {
+  fill: rgb(170 198 255 / 0.22);
+  background: rgb(170 198 255 / 0.22);
+}
+.sa-bar .in_progress,
+.sa-key i.in_progress {
+  fill: var(--amber);
   background: var(--amber);
-  box-shadow: 0 0 8px rgb(255 180 84 / 0.7);
+}
+.sa-bar .met,
+.sa-key i.met {
+  fill: var(--met);
+  background: var(--met);
+}
+
+/* What a row's bar and number mean, once, above the list. */
+.sa-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  margin: 14px 0 0;
+  font: 400 11.5px/1.5 var(--sans, var(--mono));
+  color: var(--muted);
+}
+.sa-key span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.sa-key i {
+  display: block;
+  width: 10px;
+  height: 6px;
+}
+.sa-key-n {
+  margin-left: auto;
 }
 
 .sa-empty {
@@ -664,23 +680,6 @@
 
 .sa-back:hover {
   color: var(--text);
-}
-
-.sa-rail-field {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.sa-rail-field .eyebrow .mono {
-  font-size: 11px;
-  margin-left: 6px;
-  color: var(--soft);
-}
-
-.sa-rail-field h1 {
-  margin: 6px 0 0;
 }
 
 .sa-blist ul {
@@ -747,10 +746,40 @@
   color: var(--muted);
   font-size: 11px;
   padding-top: 2px;
+  white-space: nowrap;
 }
 
-.sa-b-count.warm {
-  color: var(--amber);
+/* Complete is the colour of a met segment, never amber. */
+.sa-b-count.complete {
+  color: var(--met);
+  font-weight: 500;
+}
+
+/* Beside the chart the list is dense: ID and whole title on one run of text, no summary. */
+.sa-blist.dense {
+  margin-top: 14px;
+  border-top: 1px solid var(--hair-strong);
+}
+.sa-blist.dense .sa-b {
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  gap: 10px;
+  padding: 7px 6px;
+}
+.sa-blist.dense .sa-b-text {
+  display: block;
+  font-size: 15px;
+  line-height: 1.32;
+}
+.sa-blist.dense .sa-b-id {
+  display: inline;
+  margin-right: 8px;
+}
+.sa-blist.dense .sa-b-title {
+  font-size: 15px;
+  line-height: 1.32;
+}
+.sa-blist.dense .star-glyph {
+  margin-top: -1px;
 }
 
 .sa-stage {
@@ -770,11 +799,14 @@
 
 .sa-crumb {
   position: absolute;
-  top: 26px;
-  left: 30px;
+  top: 12px;
+  left: 20px;
   display: flex;
   align-items: center;
   gap: 10px;
+  min-height: 34px;
+  padding: 0 10px;
+  background: rgb(5 7 13 / 0.85);
   font: 400 12px/1 var(--display);
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -801,26 +833,40 @@
   color: var(--text);
 }
 
+/* A bar along the chart's foot, on its own ground so the sky never runs under its text. */
 .sa-legend {
   position: absolute;
   left: 0;
-  right: 80px;
+  right: 0;
   bottom: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 30px;
-  padding: 14px 30px 16px;
+  gap: 4px 18px;
+  padding: 9px 20px 10px;
+  background: rgb(5 7 13 / 0.92);
+  border-top: 1px solid var(--hair);
   pointer-events: none;
+}
+
+.sa-stage:has(.sa-card) .sa-legend {
+  right: 424px;
 }
 
 .sa-legend-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 14px;
+  gap: 8px;
+  margin: 0;
+  font-size: 12px;
   line-height: 1.3;
   color: var(--muted);
   white-space: nowrap;
+}
+
+.sa-legend-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .sa-legend-row svg {
@@ -1060,11 +1106,6 @@
   stroke: rgb(127 178 255 / 0.3);
 }
 
-/* Papers judged toward the breakthrough as a whole, beside the milestone count. */
-.sa-b-whole {
-  margin-left: 4px;
-}
-
 .sa-card-whole {
   margin: -4px 0 12px;
   color: var(--amber);
@@ -1124,7 +1165,7 @@
   fill: var(--met);
 }
 .sky-complete.far {
-  filter: drop-shadow(0 0 2px rgba(255, 224, 160, 0.9));
+  filter: drop-shadow(0 0 1.5px rgba(255, 224, 160, 0.9));
 }
 
 /* From afar only complete stars stand out; the latest-movement pulse shows once zoomed in. */

@@ -400,7 +400,7 @@ export function FieldCard() {
   const field = atlas.field[id];
   if (!field) return <Failed reason={'No field ' + id} />;
   const milestones = field.items.reduce((n, i) => n + i.status.length, 0);
-  const warm = field.items.filter(isWarm).length;
+  const warm = field.items.filter((i) => isWarm(i) && !i.complete).length;
   return (
     <Card kind="field" ready>
       <div className="card-main">
@@ -445,8 +445,8 @@ export function DefaultCard() {
   if (error) return <Failed reason={'Data: ' + error} />;
   if (!atlas || !loaded) return null;
   const { totals } = atlas;
-  // Breakthroughs with any judged progress, as on the field cards.
-  const warm = Object.values(atlas.items).filter(isWarm).length;
+  // Breakthroughs with any judged progress and not yet complete, as on the field cards.
+  const warm = Object.values(atlas.items).filter((i) => isWarm(i) && !i.complete).length;
   return (
     <Card kind="default" ready>
       <div className="card-intro">

@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import Chart, { Locator } from '../Chart.jsx';
 import Starfield from '../Starfield.jsx';
-import { useAtlas, useField, warm as isWarm } from '../data.jsx';
-import { FieldEmblem, StarGlyph, StatusMark, ringSegments } from '../glyphs.jsx';
+import Chart, { FarPoint, Locator } from '../Chart.jsx';
+import { STATUS, useAtlas, useField } from '../data.jsx';
+import { StarGlyph, StatusMark, ringSegments } from '../glyphs.jsx';
 import { REGION_GRID } from '../sky.js';
 import { whenText } from './Page.jsx';
 import { EASE } from '../motion.js';
@@ -43,12 +43,66 @@ function Arrow({ back = false }) {
 
 const regionAnchor = (name) => 'region-' + name.toLowerCase().replace(/[^a-z]+/g, '-');
 
-function FieldList({ atlas, regions, filter, onPick, onHover, onRegion }) {
+const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+
+// One sentence, one vocabulary: a breakthrough is complete, in progress or not yet assessed.
+function tally(fields) {
+  const total = fields.reduce((n, f) => n + f.items.length, 0);
+  const complete = fields.reduce((n, f) => n + f.complete, 0);
+  const inProgress = fields.reduce((n, f) => n + f.inProgress, 0);
+  const rest = total - complete - inProgress;
+  const parts = [];
+  if (complete) parts.push(`${complete} complete`);
+  if (inProgress) parts.push(`${inProgress} in progress`);
+  if (rest) parts.push(`${rest} not yet assessed`);
+  return { total, text: parts.join(', ') };
+}
+
+// A field's milestones as one bar: met, then in progress, then not yet assessed. Set in a
+// column, the bars of neighbouring fields can be compared at a glance.
+function MilestoneBar({ milestones }) {
+  const { total, met, inProgress } = milestones;
+  const w = 56;
+  const a = total ? (met / total) * w : 0;
+  const b = total ? (inProgress / total) * w : 0;
+  const label = `${met} of ${total} milestones met, ${inProgress} in progress`;
+  return (
+    <svg className="sa-bar" width={w} height="6" viewBox={`0 0 ${w} 6`} role="img" aria-label={label}>
+      <title>{label}</title>
+      <rect width={w} height="6" className="none" />
+      <rect width={a} height="6" className="met" />
+      <rect x={a} width={b} height="6" className="in_progress" />
+    </svg>
+  );
+}
+
+function BarKey() {
+  return (
+    <p className="sa-key">
+      <span>
+        <i className="met" />
+        milestones met
+      </span>
+      <span>
+        <i className="in_progress" />
+        in progress
+      </span>
+      <span>
+        <i className="none" />
+        not yet assessed
+      </span>
+      <span className="sa-key-n">no. of breakthroughs</span>
+    </p>
+  );
+}
+
+function FieldList({ regions, filter, onPick, onHover, onRegion }) {
   const q = filter.trim().toLowerCase();
   const match = (f) => !q || f.name.toLowerCase().includes(q) || f.id.toLowerCase().includes(q);
   const shown = regions.map((r) => ({ ...r, fields: r.fields.filter(match) })).filter((r) => r.fields.length);
   return (
     <div className="sa-regions">
+      <BarKey />
       {shown.map((r) => (
         <section key={r.name} aria-label={r.name} id={regionAnchor(r.name)}>
           <h2 className="sa-region-head">
@@ -59,7 +113,9 @@ function FieldList({ atlas, regions, filter, onPick, onHover, onRegion }) {
             ) : (
               r.name
             )}
-            <span className="mono">{r.fields.length}</span>
+            <span className="mono" title={plural(r.fields.reduce((n, f) => n + f.items.length, 0), 'breakthrough')}>
+              {r.fields.reduce((n, f) => n + f.items.length, 0)}
+            </span>
           </h2>
           <ul className="sa-fields">
             {r.fields.map((f) => (
@@ -73,16 +129,11 @@ function FieldList({ atlas, regions, filter, onPick, onHover, onRegion }) {
                   onFocus={() => onHover?.(f.id)}
                   onBlur={() => onHover?.(null)}
                 >
-                  <FieldEmblem field={f} atlas={atlas} size={28} />
                   <span className="sa-field-name">{f.name}</span>
-                  <span className="sa-field-meta mono">
-                    {f.moving > 0 && (
-                      <span className="sa-moving" title={`${f.moving} moving`}>
-                        <i aria-hidden="true" />
-                        <span className="visually-hidden">{f.moving} moving, </span>
-                      </span>
-                    )}
+                  <MilestoneBar milestones={f.milestones} />
+                  <span className="sa-field-meta mono" title={plural(f.items.length, 'breakthrough')}>
                     {f.items.length}
+                    <span className="visually-hidden"> breakthroughs</span>
                   </span>
                 </button>
               </li>
@@ -95,8 +146,28 @@ function FieldList({ atlas, regions, filter, onPick, onHover, onRegion }) {
   );
 }
 
-function BreakthroughList({ field, selected, highlight, onSelect, onHighlight, links = false }) {
-  const detail = useField(field.id);
+// A breakthrough's count, in words that say what is counted.
+function Count({ item }) {
+  const n = item.status.length;
+  return (
+    <span
+      className={'sa-b-count mono' + (item.complete ? ' complete' : '')}
+      aria-label={
+        (item.complete ? 'Complete; ' : '') +
+        `${item.met} of ${n} milestones met, ${item.moving} in progress` +
+        (item.overall ? `; ${plural(item.overall, 'paper')} toward the whole` : '')
+      }
+    >
+      {item.complete ? 'Complete' : `${item.met}/${n} met`}
+    </span>
+  );
+}
+
+// `dense` is the list beside the chart: one compact row per breakthrough, whole title, no
+// summary (the star's card has it). Without it (the phone) each row links to its page and
+// carries the summary.
+function BreakthroughList({ field, selected, highlight, onSelect, onHighlight, dense = false }) {
+  const detail = useField(dense ? null : field.id);
   // A star pointed at on the chart marks its row here and brings it into view.
   const rows = useRef(null);
   useEffect(() => {
@@ -108,28 +179,18 @@ function BreakthroughList({ field, selected, highlight, onSelect, onHighlight, l
     [detail],
   );
   return (
-    <div className="sa-blist" ref={rows}>
+    <div className={'sa-blist' + (dense ? ' dense' : '')} ref={rows}>
       <ul>
         {field.items.map((item) => {
-          const lit = isWarm(item);
           const inner = (
             <>
-              <StarGlyph item={item} size={30} />
+              <StarGlyph item={item} size={dense ? 24 : 30} />
               <span className="sa-b-text">
                 <span className="sa-b-id mono">{item.id}</span>
                 <span className="sa-b-title">{item.title}</span>
                 {summary[item.id] && <span className="sa-b-sum">{summary[item.id]}</span>}
               </span>
-              <span
-                className={'sa-b-count mono' + (lit ? ' warm' : '')}
-                aria-label={
-                  `${item.met} met and ${item.moving} in progress of ${item.status.length} milestones` +
-                  (item.overall ? `; ${item.overall} toward the whole` : '')
-                }
-              >
-                {item.complete ? 'Done' : `${item.met + item.moving}/${item.status.length}`}
-                {item.overall > 0 && <span className="sa-b-whole">+{item.overall}</span>}
-              </span>
+              <Count item={item} />
             </>
           );
           const hover = {
@@ -140,11 +201,7 @@ function BreakthroughList({ field, selected, highlight, onSelect, onHighlight, l
           };
           return (
             <li key={item.id} data-id={item.id}>
-              {links ? (
-                <Link to={'/b/' + item.id} className="sa-b" {...hover}>
-                  {inner}
-                </Link>
-              ) : (
+              {dense ? (
                 <button
                   type="button"
                   className={'sa-b' + (selected === item.id ? ' selected' : '') + (highlight === item.id ? ' lit' : '')}
@@ -154,6 +211,10 @@ function BreakthroughList({ field, selected, highlight, onSelect, onHighlight, l
                 >
                   {inner}
                 </button>
+              ) : (
+                <Link to={'/b/' + item.id} className="sa-b" {...hover}>
+                  {inner}
+                </Link>
               )}
             </li>
           );
@@ -195,7 +256,7 @@ function StarCard({ atlas, id, onClose }) {
       )}
       {item.recent && (
         <p className="sa-card-coord mono">
-          <span className="sa-card-recent">moved in the last 30 days</span>
+          <span className="sa-card-recent">a milestone changed status in the last 30 days</span>
         </p>
       )}
       {detail?.summary && <p className="sa-card-sum">{detail.summary}</p>}
@@ -223,46 +284,59 @@ function StarCard({ atlas, id, onClose }) {
 
 // ---------- The legend ----------
 
-// Everything the chart draws, in the chart's own marks: the three states of a ring segment, the
-// filled disc of a complete breakthrough, and what a line does and does not mean.
-function Legend() {
+// Everything the chart draws at the zoom in view, in the chart's own marks: from afar a point
+// shaded by its milestones, close in a ring with one segment per milestone; the filled disc of
+// a complete breakthrough; and what a line does and does not mean.
+function Legend({ far }) {
   const ring = (status) => ringSegments([status, status, status, status], 6);
   const sample = (status) => (
-    <svg width="18" height="18" viewBox="-9 -9 18 18" aria-hidden="true">
-      {ring(status).map((s, n) => (
-        <path key={n} d={s.d} className={'sky-seg legend ' + s.status} />
-      ))}
+    <svg width="16" height="16" viewBox="-8 -8 16 16" aria-hidden="true">
+      {far ? (
+        <circle r="4.5" className={'sky-far ' + status} />
+      ) : (
+        ring(status).map((s, n) => <path key={n} d={s.d} className={'sky-seg legend ' + s.status} />)
+      )}
     </svg>
   );
+  const states = ['none', 'in_progress', 'met'];
   return (
     <div className="sa-legend" aria-label="How to read the chart" role="note">
       <p className="sa-legend-row">
-        <b>Ring</b>
-        <span>one segment per milestone:</span>
-        {sample('none')}
-        <span>not assessed</span>
-        {sample('in_progress')}
-        <span>in progress</span>
-        {sample('met')}
-        <span>met</span>
+        {far ? (
+          <>
+            <svg width="16" height="16" viewBox="-8 -8 16 16" aria-hidden="true">
+              <FarPoint item={{ status: [1, 2, 3, 4], met: 2, moving: 1 }} r={5.5} />
+            </svg>
+            <span>
+              <b>Point</b> a breakthrough, shaded by its milestones
+            </span>
+          </>
+        ) : (
+          <span>
+            <b>Ring</b> one segment per milestone
+          </span>
+        )}
+        {states.map((status) => (
+          <span key={status} className="sa-legend-state">
+            {sample(status)}
+            {STATUS[status].toLowerCase()}
+          </span>
+        ))}
       </p>
       <p className="sa-legend-row">
-        <svg width="18" height="18" viewBox="-9 -9 18 18" aria-hidden="true">
+        <svg width="16" height="16" viewBox="-8 -8 16 16" aria-hidden="true">
           <circle r="6" className="sky-complete" />
         </svg>
         <span>
-          <b>Disc</b> complete: its completion test is met
+          <b>Disc</b> complete: completion test met
         </span>
       </p>
       <p className="sa-legend-row">
-        <svg width="30" height="16" viewBox="0 0 30 16" aria-hidden="true">
-          <path d="M3 11L14 5L27 9" className="lg-fig" />
-          <circle cx="3" cy="11" r="1.6" className="lg-dot" />
-          <circle cx="14" cy="5" r="1.6" className="lg-dot" />
-          <circle cx="27" cy="9" r="1.6" className="lg-dot" />
+        <svg width="28" height="16" viewBox="0 0 28 16" aria-hidden="true">
+          <path d="M3 11L13 5L25 9" className="lg-fig" />
         </svg>
         <span>
-          <b>Line</b> joins one field’s breakthroughs; it shows no order or dependency
+          <b>Line</b> same field; no order or dependency
         </span>
       </p>
     </div>
@@ -294,95 +368,53 @@ function DesktopAtlas({ atlas, field, region, star, setParams }) {
     setParams({ field: atlas.items[id].field, star: id });
   };
   useEffect(() => setHighlight(null), [field]);
-  const warm = Object.values(atlas.items).filter(isWarm);
+  const [far, setFar] = useState(true);
+  const onLevel = useCallback((level) => setFar(level === 0), []);
+  const fade = { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.25 } };
   return (
     <div className="atlas-desk sa-desk">
       <aside className="sa-rail" aria-label="Constellations">
         <AnimatePresence mode="wait" initial={false}>
           {f ? (
-            <motion.div
-              key={f.id}
-              className="sa-rail-inner"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
-            >
-              <button type="button" className="sa-back" onClick={() => pick(null)}>
-                <Arrow back />
-                {f.region}
-              </button>
-              <div className="sa-rail-field">
-                <FieldEmblem field={f} atlas={atlas} size={46} />
-                <div>
-                  <p className="eyebrow">
-                    {f.region} <span className="mono">{f.id}</span>
-                  </p>
-                  <h1>{f.name}</h1>
-                </div>
-              </div>
+            <motion.div key={f.id} className="sa-rail-inner" {...fade}>
+              <p className="eyebrow">
+                {f.region} <span className="mono">{f.id}</span>
+              </p>
+              <h1>{f.name}</h1>
               <p className="sa-rail-meta">
-                {f.items.length} breakthroughs.{' '}
-                {f.moving ? `${f.moving} moving.` : 'None has moved yet.'}
+                {plural(f.items.length, 'breakthrough')}: {tally([f]).text}.
               </p>
               <Link to={'/field/' + f.id} className="sa-text-link">
                 The constellation’s page
                 <Arrow />
               </Link>
-              <BreakthroughList field={f} selected={star} highlight={highlight} onSelect={select} onHighlight={setHighlight} />
+              <BreakthroughList
+                field={f}
+                dense
+                selected={star}
+                highlight={highlight}
+                onSelect={select}
+                onHighlight={setHighlight}
+              />
             </motion.div>
           ) : r ? (
-            <motion.div
-              key={'region:' + r.name}
-              className="sa-rail-inner"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
-            >
-              <button type="button" className="sa-back" onClick={() => zoomRegion(null)}>
-                <Arrow back />
-                All regions
-              </button>
+            <motion.div key={'region:' + r.name} className="sa-rail-inner" {...fade}>
               <p className="eyebrow">Region</p>
               <h1>{r.name}</h1>
               <p className="sa-rail-meta">
-                {r.fields.reduce((n, x) => n + x.items.length, 0)} breakthroughs in {r.fields.length}{' '}
-                constellations. Pick one to see its breakthroughs.
+                {plural(tally(r.fields).total, 'breakthrough')} in {r.fields.length} constellations:{' '}
+                {tally(r.fields).text}.
               </p>
-              <FieldList atlas={atlas} regions={[r]} filter="" onPick={pick} onHover={setHighlightField} />
+              <FieldList regions={[r]} filter="" onPick={pick} onHover={setHighlightField} />
             </motion.div>
           ) : (
-            <motion.div
-              key="all"
-              className="sa-rail-inner"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.25 }}
-            >
+            <motion.div key="all" className="sa-rail-inner" {...fade}>
               <p className="eyebrow">The atlas</p>
               <h1>The breakthroughs, field by field</h1>
               <p className="sa-rail-meta">
                 {atlas.totals.breakthroughs} breakthroughs in {atlas.fields.length} constellations, across
-                eight regions of neighbouring disciplines.
+                eight regions of neighbouring disciplines: {tally(atlas.fields).text}.
               </p>
-              {warm.length > 0 && (
-                <div className="sa-warm">
-                  <p className="sa-warm-head">Moving now</p>
-                  <ul>
-                    {warm.map((i) => (
-                      <li key={i.id}>
-                        <button type="button" onClick={() => select(i.id)}>
-                          <StarGlyph item={i} size={24} />
-                          <span className="mono">{i.id}</span>
-                          <span className="sa-warm-title">{i.title}</span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
               <label className="sa-filter">
                 <span className="visually-hidden">Filter constellations</span>
                 <input
@@ -393,7 +425,6 @@ function DesktopAtlas({ atlas, field, region, star, setParams }) {
                 />
               </label>
               <FieldList
-                atlas={atlas}
                 regions={regions}
                 filter={filter}
                 onPick={pick}
@@ -418,8 +449,9 @@ function DesktopAtlas({ atlas, field, region, star, setParams }) {
           highlightField={highlightField}
           onSelect={select}
           onHover={setHighlight}
+          onLevel={onLevel}
           onFocusField={pick}
-          inset={{ right: star ? 420 : 0, top: 30, bottom: 50 }}
+          inset={{ right: star ? 420 : 0, top: 30, bottom: 40 }}
           pad={10}
         />
         <nav className="sa-crumb" aria-label="Chart position">
@@ -449,7 +481,7 @@ function DesktopAtlas({ atlas, field, region, star, setParams }) {
             </>
           )}
         </nav>
-        <Legend />
+        <Legend far={far} />
         <AnimatePresence>
           {star && atlas.items[star] && <StarCard key={star} atlas={atlas} id={star} onClose={() => select(null)} />}
         </AnimatePresence>
@@ -470,8 +502,8 @@ function PhoneAtlas({ atlas, field, setParams }) {
         <h1>{f ? f.name : 'The breakthroughs, field by field'}</h1>
         <p className="sa-phone-intro">
           {f
-            ? `${f.items.length} breakthroughs. ${f.moving ? `${f.moving} moving.` : 'None has moved yet.'}`
-            : `${atlas.totals.breakthroughs} breakthroughs in ${atlas.fields.length} constellations, across eight regions of neighbouring disciplines.`}
+            ? `${plural(f.items.length, 'breakthrough')}: ${tally([f]).text}.`
+            : `${atlas.totals.breakthroughs} breakthroughs in ${atlas.fields.length} constellations, across eight regions of neighbouring disciplines: ${tally(atlas.fields).text}.`}
         </p>
       </header>
       <figure className="sa-phone-sky">
@@ -496,10 +528,10 @@ function PhoneAtlas({ atlas, field, setParams }) {
             <Arrow back />
             All constellations
           </button>
-          <BreakthroughList field={f} links />
+          <BreakthroughList field={f} />
         </>
       ) : (
-        <FieldList atlas={atlas} regions={regions} filter="" onPick={(id) => setParams({ field: id })} />
+        <FieldList regions={regions} filter="" onPick={(id) => setParams({ field: id })} />
       )}
     </div>
   );

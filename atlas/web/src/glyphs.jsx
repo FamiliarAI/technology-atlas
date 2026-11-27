@@ -89,7 +89,7 @@ export function StarGlyph({ item, size = 40, title = true }) {
           : undefined
       }
     >
-      <StarMark item={item} r={r} core={r * 0.34} />
+      <StarMark item={item} r={r} core={r * 0.2} />
     </svg>
   );
 }
